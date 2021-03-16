@@ -1,0 +1,329 @@
+﻿
+axel.thobaben@siemens.com
+
+
+TODOS:
+
+BASSA PRIORITA':
+- per chi ha più monitor possibilità di dividere la finestra e ogni monitor può vedere una linea diversa o anche tutti la stessa linea ma in punti diversi, inoltre aggiungere slider zoom per il grafico servizi
+- Funzione nuova: stazioni spunta presenziata/non presenziata: (default true, presenziata), se non è presenziata un treno non può partire/terminare da quella stazione e nei fogli stazione non compare nelle colonne 'Arriva da'/'Parte per' bensì mostra quella prima e quella dopo
+- Aggiungi logo nella copertina dei turni
+- Aggiungi testo impostabile nella copertina turni
+- Files: esetensione personalizzata, icona, file associations
+- Fogli Esportati: Fai scegliere lingua direttamente all'utente (di default è la stessa scelta per il programma)
+
+-------------------------------------
+fare PER ULTIMO
+- Concetto di treno successivo/precedente
+  Aggiungi nel database le relative colonne in 'jobs'
+  Quando si crea un treno in JobPathEditor l'utente può specificare un treno precedente
+  (Quello corrente diventa il suo successivo)
+  - Devono essere della stessa categoria
+  - Deve partire dalla stessa stazione dove finisce il precedente
+
+  Chiedi all'utente se vuole importare i rotabili del treno precedente (Tutto/solo carri/solo loco)
+  es: regionale che fa navetta ha sempre la stessa composizione che viene ricopiata
+
+  I rotabili sono occupati anche da quando finisce un servizio all' inizio del successivo
+  quindi non possono essere agganciati da altri treni
+
+  COUPLING OPERATION:
+  - 0 = Sgancia rotabile
+  - 1 = Aggancia rotabile
+  - 2 = Importato da treno precedente (il rotabile è già in composizione)
+  - 3 = Lascia in composizione per treno successivo
+
+  Queste distizioni servono per capire se alla fine di un servizio un rotabile è libero (op = 0 sganciato)
+  o è occupato in attesa del treno successivo (op = 3)
+
+  Inoltre sono utili per annullare azioni precedenti (Undo)
+  cioè se l'utente aveva impostato un treno precedente e poi lo toglie i rotabili che erano stati importati
+  vengono tolti automaticamente e sul treno precedente segni che i rotabili vengono liberati (op = 0 sganciato)
+
+  Di default sgancia tutti i rotabili alla fine servizio
+  viene campbiato da solo quando si specifica un treno precedente e quindi quello precedente setta i rs a op = 3
+
+  Nel JobPathEditor e nelle Stampe:
+  La prima stazione indica eventuale treno precedente
+  L'ultima stazione indica eventuale treno successivo
+------------------------------------------------------------------------------------------
+
+PRIORITA' MEDIA:
+- Usare QString::simplified() per inserire dati (es. nome stazioni, turni, linee, ecc)
+- Linee: mettere opzione binario singolo e impedisce incroci in linea, FIND_INCROCI_1.sql, FIND_PRECEDENZE_IN_LINEA.sql, però limitare solo a linee contrassegnate come binario singolo e anche ricalcolare quando un servizio viene modificato
+- Categorie Treno: ogni categoria IMPOSTABILE un range NUMERI TRENO massimo/minimo, (Default nelle impostazioni per nuove sessioni, precedenza a valori specifici database)
+                   JobPathEditor: quando cambio categoria dalla combobox -> cambia anche il numero treno in base ai range impostati, quando cambio manualmente numero trno fuori dal range avverti e l'utente sceglie se mantenere o annullare la modifica
+- Fogli esportati: inoltre grandezza font impostabile
+- Sgancio avviene con orario di arrivo e Aggancio avviene con orario di partenza, eventualmente avvisa se si aggancia un carro sganciato da un altro treno solo un minuto prima: potrebbe ritardare anche solo se il macchinista non sgancia il carro proprio subito arrivato in stazione ma aspetta un po'
+- Tempo fermata default diverso per ogni categoria impostabile e si salva nel database
+- JobPathEditor: mostra numero progressivo della fermata a partire da 1 sul bordo sinistro dello StopDelegate
+
+------------------------------------------------------------------------------------------
+
+PRIORITA' ALTA:
+- VirtualBox: IE8 in lingua inglese prende male gli orari nei QTimeEdit: 00:00 viene visto come 12:00 AM
+- BIG TODO: cambiando turno se si sta editando fermata non si chiude da sola
+- Ricalcola tempi SEMPRE quando cambiano i rotabili (non chiedere)
+- BIG BIG TODO: quando da EditStopDialog si agganciano rotabili occupati si viene chiesto se rimuovere eventuali altre operazioni anche su altri treni, se poi si annullano le modifiche al servizio queste operzioni non vengono ricostruite perchè non facevano parte di old_couplings, INSERIRLE PRIMA DI RIMUOVERLE o PERMETTERE DI RIMUOVERE OPERAZIONI SOLO DEL PROPRIO SERVIZIO???
+- Quando si tenta di eliminare una stazione o un rotabile che sono utilizzati avvisa l'utente con un messaggio altrimenti sembra che il programma non prenda il comando.
+- Se su una stazione transitano solo senza fermarsi allora può essere tolta da una linea (avvisa, chiedi conferma -> elimina automaticamente tutti i transiti a meno che non siano TransitLineChange e infine toglie stazione dalla linea) -> così una volta tolta la stazione da tutte le linee si può eliminare
+- Piano Giornaliero Stazione: cambia nome pulsante da 'Foglio' in 'Salva Foglio'
+- PDF scegli se pagina unica grande o più fogli A4 (Metti la voce in impostazioni)
+- Precedenze le vede solo il treno che si ferma non quello che supera
+
+- Aggiungi pulsante 'Elimina tutti i rotabili' con conferma e 'Elimina tutti i servizi' e 'Importa layout (stazioni/linee)' e 'Importa Modelli'
+
+- DOXYGEN: generate documentation for every function
+
+
+- Use libsodium for public key license encrypt
+
+
+-------------------------------------------------------------------------------------------
+RISOLTI:
+
+FIXED - ODT export scrivi in grassetto -Ag e +Sg, togli + e - rimane solo Ag: e Sg: inoltre a volte -Sg: non va a capo dopo rotabili agganciati
+
+FIXED - Importa Rotabili: fai scegliere Carro/Locomotiva, e velocità di default per quando non trova il modello e lo deve creare da zero
+
+DONE - QFileDialog opens on Program Files Folder - which is read-only so change default to standard paths documents
+
+DONE - QFileDialog opens on Program Files Folder - which is read-only so change default to standard paths documents
+
+DONE - RSCoupleDialog: aggiungi in basso legenda dei colori
+
+FIXED - La prima fermata la mette sempre che parte da binario 1 dep, perche??? forse perche appena si crea il treno viene impostato a MERCI
+
+FIXED - Categorie treni non tradotte
+
+FIXED - StopEditor, se si imposta manualmente la partenza può essere anche precedente o uguale all'arrivo
+
+DONE - Performance: rendere disattivabile l'avvio automatico del RS Error Checker e il lancio selettivo automatico quando viene modificato un servizio
+
+DONE - Rs Error: lanciare in automatico all'apertura del database
+
+DONE - Fogli esportati: imposta scritte pie pagina e intestazione (Default nelle impostazioni usate per nuove sessioni e sessioni dove non è impostato, precedenza ad impostazioni specifica nel database)
+
+DONE - Rotabili Sessione: rendi ordinabile per propprietario o stazione (sempre ordine alfabetico), rendi stampabile (Foglio odt)
+
+FIXED - BUG: rimuovendo tutte le fermate da un job non elimina il segmento, questo porta a segmenti duplicati
+
+DONE - Stazioni: binario di default arrivo per A (Merci, Postale, LIS) e un altro per B (tutte le altre categorie), quando aggiung una nuova fermata, in base alla categoria sceglie il binario di default (se non impostato sceglie 1) COSA succede quando cambio categoria???
+
+DONE - Grafico Turno: cliccando su un treno esce finestra per cambiare turno senza uscire dalla finestra del grafico (cioè senza passare per JobEditor)
+
+DONE - Linee elettrificate/non elettrificate nel JobPathEditor mettere icona fulmine
+DONE - Errore rotabili da aprire dalla toolbar
+
+DONE - Rimuovere windowTitle dai file del designer perchè occupano solo memoria nelle stringhe del programma
+
+ULTIMI:
+DONE - JobPathEditor: non permettere context menu o EditStopDialog mentre sta editando stop con item delegate
+DONE - Foglio stazioni: scritte in grasetto anche piu grandi
+DONE - EditStopDialog: agganciati devono vedersi solo rotabili liberi in quella stazione
+FIXED - EditStopDialog: BUG applicare orari senza Ricalcola riesce a mettere arrivo a 00:00 che è prima della fermata precedente!
+
+FIXED - file 1.db servizio 40000 fermata Castel di Piave tra gli sganciati non dovrebbe mostrare carro G
+---------------------
+
+DONE - StationsManager: colonna colore stazione metti nome.
+
+DONE - Carri vanno con trattino anche nei fogli stazione e turni.
+- Berlin Sans fb demi-> nome stazione, intestazione e piè pagina
+- Adobe Heiti -> parola Stazione sottolineato (vedi file CASTEL_DI_PIAVE_orario_stazione per i font e le misure esatte)
+
+
+DONE - Rotabili: da StationsManager interrogare una stazione e vedere che rotabili ci sono in quell'orario (e magari ti suggerisce anche il prossimo orario in cui succede una manovra)
+DONE - Aggancio Rotabili: ti permette di agganciare solo rotabili liberi in quella stazione.
+
+DONE - 1) Completare foreign keys per eliminare EditPermission system
+DONE - 2) Completare importazione rotabili
+DONE - 3) Stazioni colore binari principali impostabile diverso per stazione
+DONE - 5) Quando elimini la linea corrente che succede? GraphManager non viene informato!!!
+DONE - 6) Quando agganci locomotiva elettrica in linea non elettrificata mostra avviso
+DONE - 9) Eliminato EditPermission, permetti di eliminare job da JobManager
+FIXED - 11) Ricaica grafico turni sposta linee -> controlla
+
+FIXED - 17) StationsManager: stazioni e linee modificate -> non si aggiorna il grafico
+FIXED - 18) StopModel: transiti devono avere 0 minuti di fermata, le altre almeno 1 minuto
+FIXED - 19) JobPathEditor: non funziona scegli stazione in AddStop quando trasforma in transito la stazione precedente perde il focus tastiera
+FIXED - 21) EditStopDialog: le modifiche al campo stazione non hanno effetto
+
+FIXED - 22) Errore: non elimina segmento se fai VE - Mestre - Mira - Padova e poi da EditStopDialog cambi padova in Mestre
+
+Cambiamenti da fare:
+
+DONE - Nome colonne JobEditor sparisce (?), controllare
+
+DONE - No colonna 'Modello' su tabella Vagoni; si modifica solo nome e numero
+
+DONE - Foglio Job: Mostra assi iniziali del treno SOPRA la Tabella
+
+DONE - Togli prima colonna ("A1") vuota dai fogli
+
+DONE - Bordi celle fogli spessore/colore impostabile
+
+DONE - Controlla 'Opzioni': sembra che non legga i valori di default e quindi mette zero su tutto :-(
+
+DONE - Tasto 'Modifica' RSManager diventa 'Vedi Servizi'
+
+
+DONE - Traduci UI 'Settings'
+
+DONE - Regola spessore linee dei binari e ore del grafico
+
+DONE - Arrivo/Partenza foglio Job sopra tabella
+
+DONE - Più finestre in contemporanea per visualizzare il piano stazione e i rotabili liberi
+
+DONE - Dividere servizi in turni: Un turno equivale ad un libretto macchinista ovvero
+       più servizi a scelta ma che non siano in contemporanea (Si guida un treno alla volta)
+
+DONE - Un grafico separato per ogni linea
+
+
+NUOVI
+
+DONE - TURNO: vedere il grafico con solo treni del turno vedi file:///C:/Filippo/Qt_project/fremo_db_3/files/esempio_grafico_turno.odg
+
+DONE - Migliora pagina orari su EditStopDialog
+
+DONE - JobEditor: Modifica a cascata gli orari
+
+
+NUOVISSIMI
+
+DONE - Elimina categorie 'Alta Velocità' e 'Rapido', inserisci categori 'Postale' e 'Locomotiva in spostamento (LIS)'(Sarebbero i rimandi)
+DONE - Treno che ferma in stazione si vede la fermata su tutti i grafici
+    esempio: treno da Adria ferma a Mestre, anche dal grafico linea Mestre-Padova_AV si vede il binario occupato dal treno da Adria con relativo nome treno
+
+DONE - Di default treno ferma su binario 1 (principale, non deposito)
+
+
+
+DONE - Tempo di fermata di default del treno: non dipende ne da linea ne da stazone, esclusivamente dalla categoria del servizio
+  Quando aggiungi una fermata su JobPathEditor inserisce già il tempo di fermata impostato (poi eventualmente correggi a mano gli orari, ma si modificano a cascata)
+  Tempi (Impostabili): -Merci/Postale:     10min
+                       -Tutti i passegeri:  2min
+                       -Diretto:        transito
+
+- Migliora gestione transiti
+
+DONE - Quando aggiungi fermata su JobPathEditor la considera come LastStop quindi non ti fa impostare direttamente la partenza
+  Possibile soluz: le considera tutte come NormalStop e quando dai l'Ok finale tramuta l'ultima in LastStop
+
+DONE - JobPathEditor calcola già tempo di arrivo in base alla distanza e velocità, poi eventualmente correggi a mano gli orari, ma si modificano a cascata
+
+DONE (FIXED) - Settings non applica spessori linea
+
+----------
+  TASKs
+----------
+
+DONE - Finestra Impostazioni ingrandibile
+
+DONE - Numero treni nel Job Graph Font più piccolo per ridurre sovrapposizioni
+
+DONE PRIORITA' MASSIMA (blocca tutte le atre modifice riguardanti rs)
+- Rotabili separa modello/numero di serie/proprietario:
+  Tabella: rs_models
+  Colonne: ID, Name(String), MaxSpeed, Axes, Engine/Wagon (Nome è composto da lettere e numeri)
+  Contiene le informazioni sui modelli dei rotabili, va riportata in RollingStockManager in un QTabWidget
+
+  Tabella: rs_owners
+  Colonne: owner_id, name(String)
+  Vengono aggiunti da soli quando inseriti dalla pagina 'rollingstock'
+
+  Tabella: rollingstock
+  COLONNE ID, model_id, numero_di_serie(INT), owner_id
+  Su colonna 'owner' propone suggerimenti da 'rs_owners'
+  Il numero di serie è soggetto a formattazione in gruppi sui carri/carrozze (viene applicato in una funzione es getRSName(fremo_id rsId)
+  (Di solito 5 o 4 cifre separate in 3/4 + trattino + ultima cifra)
+
+
+DONE - Le linee delle ore devono finire un po' oltre (più a sinistra) del primo binario della prima stazione
+       Altrimenti il primo binario sembra una linea di separazione
+
+PRIORITA' (BUG)
+DONE - A volte non va menù modifica su JobPathEditor, probabilmente collegato a setReadOnly e il sistema requestEditing
+
+
+DONE - Stazioni Nome abbreviati per grafico servizio e grafico turni, sulle stampe e JobPathEditor nome intero
+  Aggiungere una colonna nel database e nel StationsModel (l'utente inserisce sia nome intero che abbrev quando crea la stazione)
+
+
+PRIORITA' ALTA
+DONE - Stampa Fogli Stazione
+  Colonne: Arrivo, Proviene da, Num Treno, Binario, Partenza, Parte per, Incrocia, Precedenza, Rotabili, Note
+  Colonne più larghe, tutti le celle vanno centrate
+  Transiti e fermate < 1 minuto hanno 1 sola riga; tutto il resto 2 righe separate
+  -Riga di arrivo: colonna partenza vuota
+  -Riga di partenza: colonna arrivo vuota (Così il foglio è più ordinato)
+
+PRIORITA' MEDIA - BASSA
+DONE - Stampa Turno
+  La prima pagina è una copertina (vedi file)
+  Contiene le date Inizio/Fine del fremo meeting, un testo arbitrario, la località dove si svolge il meeting
+  e un logo dell'associazione - infine in basso c'è il nome del turno
+  Questi dati sono comuni a tutti i turni,
+  L'utente le deve inserire in una finestra apposita e vanno salvati nel database
+  Immagine va convertita in un formato stabilito (es PNG, perchè ha alpha) e diventa SQL BINARY BLOB
+  Così se il file viene aperto in un altro pc l'immagine c'è comunque
+
+PRIORITA' ALTA
+- Stampa Servizio (che occupa una pagina intera nella stampa turno)
+  Traduci 'Job' in 'Treno' anzichè 'Servizio' - va centrato in alto (riga 1)
+  Partenza/Arrivo sulla stessa riga (Destra e sinistra)             (riga 2)
+  Locomotiva/Assi sulla stessa riga                                 (riga 3)
+  Riga vuota per separare                                           (riga 4)
+  Header Tabella                                                    (riga 5)
+
+  Il campo Locomotiva contiene i nomi di tutte le locomotive agganciate nella prima stazione
+  Attenzione: forse è necessario unire celle (span) perchè la tabella sotto ha tante colonne
+
+  Colonna Rotabili: non usare +/-, Scrivi 'Ag' una volta sola e a seguire tutti i rotabili da agganciare
+  poi a capo 'Sg' e tutti i rotabili da sganciare (ovviamente solo se ce ne sono)
+
+  Vedi file: foglio servizio c'è seconda tabella composizione treno (solo colonne 'Da' e 'Rotabili')
+  in sostanza ripete le info Rotabili della prima tabella
+
+  Nell'ultima riga (Stazione di destinazione) la colonna Rotabili mostra un resoconto di ciò che è rimasto in composizione
+  cioè anzichè Ag/Sg mostra tutti i rotabili agganciati, stessa cosa nella seconda tabella
+
+
+
+DONE - Controlla 'StationLinesModel' e 'LineStationsModel' approfonditamente sembrano buggati
+  soprattutto non si salva, i km automatici quando si aggiunge un a stazione sono sballati
+DONE - 'LineStationsModel' non controlla se una stazione è già nella linea prima di aggiungerla
+
+- DONE Rifare da capo il sistema del requestEditing, magari:
+
+  EditingPass p = mgr->requestEditing(JobEditing, AddOrRemove)
+  if(p.canEdit())
+  {
+  ...
+  }
+
+//Quando va fuori scope chiama da solo 'endEditing()' altrimenti lo fai manualmente
+
+------------
+  MODELLI
+------------
+
+***** IMPORTANTE ******
+
+----------------------------------------
+
+DONE - Grafico Turni: nome turno centrato e scritto per esteso 'Turno A' (Aggiunge da solo  'Turno %1' anche nei fogli turno)
+
+DONE - Foglio stazioni: arrivo e partenza in grassetto
+
+DONE - Carri utilizza ultimi 4 numeri 'XXX-X' e fa il padding degli zeri (li aggiunge da solo) es 95 -> 009-5    585 -> 058-5   4458 -> 445-8
+
+FIXED - Crash: Versione 5.8.0: apri desktop/1.db; M40000 aggancia D343 e carro S su Fabiago, sganciali a Cornuda; Stampa piano giornaliero Cornuda -> crashare
+
+DONE - Foglio servizio: tabella composizione ultima stazione mostra prima di sganciare i rotabili (in futuro cambierà il meccanismo con treni successivi/precedenti)
+
+DONE - Colonna Binario su foglio -> 'Bin' per recuperare spazio
+
+DONE - nomi stazioni barra fissa quando si scrolla in basso coe per le ore

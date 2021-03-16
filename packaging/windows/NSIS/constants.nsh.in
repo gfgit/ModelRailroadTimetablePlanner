@@ -1,0 +1,28 @@
+;Definitions
+
+!define APP_NAME "@APP_DISPLAY_NAME@"
+!define APP_PRODUCT "@TRAINTIMETABLE_TARGET@"
+!define COMPANY_NAME "@APP_COMPANY_NAME@"
+!define DESCRIPTION "@PROJECT_DESCRIPTION@"
+
+# These three must be integers
+!define VERSIONMAJOR @PROJECT_VERSION_MAJOR@
+!define VERSIONMINOR @PROJECT_VERSION_MINOR@
+!define VERSIONBUILD @PROJECT_VERSION_PATCH@
+
+# These will be displayed by the "Click here for support information" link in "Add/Remove Programs"
+# It is possible to use "mailto:" links in here to open the email client
+!define HELPURL "@APP_HELP_URL@" # "Support Information" link
+!define UPDATEURL "@APP_UPDATE_URL@" # "Product Updates" link
+!define ABOUTURL "@PROJECT_HOMEPAGE_URL@" # "Publisher" link
+
+# This is the size (in kB) of all the files copied into "Program Files"
+!define INSTALLSIZE 8000
+
+!define TRAIN_TIMETABLE_PATH "@CMAKE_BINARY_DIR@\debug\"
+!define TRAIN_TIMETABLE_EXTRA "@CMAKE_SOURCE_DIR@\files"
+!define TRAIN_TIMETABLE_EXE "@TRAINTIMETABLE_TARGET@.exe"
+!define TRAIN_TIMETABLE_SETTINGS "traintimetable_settings.ini"
+
+!define TRAIN_TIMETABLE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt" ;TODO
+!define TRAIN_TIMETABLE_README "${NSISDIR}\Docs\Modern UI\License.txt" ;TODO

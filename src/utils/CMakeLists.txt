@@ -1,0 +1,30 @@
+add_subdirectory(spinbox)
+add_subdirectory(sqldelegate)
+add_subdirectory(thread)
+
+set(TRAINTIMETABLE_SOURCES
+  ${TRAINTIMETABLE_SOURCES}
+  utils/colorview.h
+  utils/directiontype.h
+  utils/file_format_names.h
+  utils/imageviewer.h
+  utils/jobcategorystrings.h
+  utils/kmutils.h
+  utils/rs_types_names.h
+  utils/rs_utils.h
+  utils/session_rs_modes.h
+  utils/types.h
+  utils/checkproxymodel.h
+  utils/combodelegate.h
+  utils/model_roles.h
+  utils/platform_utils.h
+  utils/worker_event_types.h
+
+  utils/checkproxymodel.cpp
+  utils/colorview.cpp
+  utils/combodelegate.cpp
+  utils/imageviewer.cpp
+  utils/kmutils.cpp
+  utils/rs_utils.cpp
+  PARENT_SCOPE
+)

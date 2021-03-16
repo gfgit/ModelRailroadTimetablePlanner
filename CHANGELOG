@@ -1,0 +1,682 @@
+Current: (***STILL IN PROGRESS***) future 5.25.0
+
+- Removed Lua scripting feature
+
+ROLLINGSTOCK
+- RS Import: show sheet index as 1-based
+- RS Import: FixDuplicatesDlg fix not showing remaining item count in messagebox
+- RS Import: FixDuplicatesDlg do not close if user selects Hide Fixed Items
+- SessionStartEndRSViewer: new title Rollingstock Summary
+- RollingstockManager: added toolbar action to show SessionStartEndRSViewer
+
+ODT EXPORT:
+- SessionRSExport: new P5 style, table contents are non-bold and sans serif now, except header row
+- JobWriter: writeJob() fixed query not reset after use, now reset before binding again
+
+STATIONS:
+- LinesMatchModel: can free query after timer expires
+- LinesSQLModel: on-demand model replacing old LinesMatchModel, LineObj live now inside LineStorage class, member of MeetingSession
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.24.0:
+
+GENERAL
+- Changed cmdline parameter 'test' to '--test' so in case a file is named 'test' we don't interpret it as cmdline parameter
+- QFileDialog: set initial directory to Documents or Pictures
+
+JOBS:
+- EditStopDialog: fixed warning electrical engine on non electricfied line, wrong logic
+
+ROLLINGSTOCK
+- Fixed RS Import: tolerate office version 1.3 and fixed ods keys settings
+- Rs Import: added default type and speed selection for model created from scratch
+- RollingstockSQLModel: UTILS format right justify with '0' engine numbers to at least 3 digits
+
+ODT EXPORT:
+- changed '-Sg:' and '+Ag:' to translatable 'Cp:' and 'Unc:' removed +/- sign, made bold with new T1 text style
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.23.1:
+
+ODT EXPORT:
+- SessionRSExport: prevent overlapping border between table cells
+- StationSheetExport: fixed wrong table-row termination and prevent overlapping borders
+
+JOBS:
+- fixed categories not translated because MeetingSession constructor is called before translations are loaded
+  now categories are loaded on-demand instead of cached in MeetingSession constructor
+- StopModel: prevent setting departure = arrival on normal stops (at least 1 minute stop)
+- StopModel: fixed wrong query always using default freight platform even for passengers
+- StopEditor: prevent setting departure < arrival and on normal stops at least 1 minute
+- StopEditor: holding shift while changing arrival doesn't update departure, without shift deparure follows arrival (stop duration is preserved)
+- JobCategory: added HIGH_SPEED catecory (HSP)
+- JobCategory: FAST_REGIONAL is abbreviated RF (instead of RV) and FREIGHT is abbreviated FRG (instead of FR)
+- JobEditor: warn if user tries to set jobId to an already existent number
+
+SETTINGS:
+- Changed default JobCategory colors
+- Default auto inster transit to true
+- Bigger SettingsDialog size
+
+SEARCHBOX:
+- fixed weird bug sometimes not showing results, turns out that when re-using task we must mReceiver again
+  otherwise we don't receive result (thus results are not shown to the user) and the task deletes himself
+  while SearchResultModel still holds a reference to it causing memory corruption and sometimes also forever hanging on held-lock when stopping all task
+
+MAINWINDOW:
+- Renamed 'Save As' action to 'Save Copy As' because when saving a copy we keep editing original file, while with 'Save As' the user would expect to edit the new file
+- Added warning label that tells user to create at least 1 line in session if there aren't lines and prevents showing QGraphicsView until 1 line is created
+- New managing that goes through setCentralWidgetMode() and checkLineNumber(), tooltips and action are enabled/disabled in a central place
+
+BACKGROUND_MANAGER
+- Added new subfolder backgroundmanager
+- New generic class BackgroundManager which is a central place to manage tasks
+- RsChackerManager: new class to manage Rs Error Checking, tied to BackgroundManager
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.20.1:
+
+DOXYGEN
+- Added Doxygen documentation system to project. Now function must be documented!
+
+METADATA:
+- Added option key to hide/show dates in sheet export
+- Ensure end date is not before start date
+- MeetingInformationDialog: use QTextEdit instead of QPlainTextEdit in order to align text to center and use bold 18pt font to mimic ODT output
+- MetadataManager: new function hasKey() to check presence without retriving value
+
+JOBS:
+- StopModel: uncoupleStillCoupledAtLastStop() fixed uncoupling in all stops instead of just the last one
+- TrainAssetModel: fixed query wrong bind placeholders and table name
+- EditStopDialog: removed redundant refreshData() calls after setStop() calls which internally already refreshes model
+- EditStopDialog: refresh TrainAssetModel after retriving originalArrival from StopModel, otherwise it doesn't load properly
+
+ODT EXPORT:
+- JobWriter: fixed wrong styles in job asset table and rollingstock column
+- JobWriter: new styles to fix overlapping borders in job asset table
+- StationWriter: show also station short name if present
+- ODF compliance: mimetype file must be the first in the zip archive
+- OdtDocument: zip also images
+- OdtDocument: added meta.xml metadata file with some informations and description of the session
+- OdtDocument: added possibility to specify a title which will be stored in meta.xml
+- OdtDocument: use Liberation Sans font for header/footer
+- ShiftSheetExport: added logo picture and other meeting information in the cover page
+- ShiftSheetExport: use Liberation Sand for shift name and meeting location
+- removed function 'writeCellList()' from odtutils.h (use only writeCellListStart/End)
+
+SETTINGS:
+- Added option: SheetStoreLocationDateInMeta, default true, store meeting location and dates in sheets metadata
+
+STATIONS:
+- StationsMatchModel: fixed wrong parenthesis precedence in query leading to duplicates item shown if a station has multiple lines
+
+UTILS
+- ImageViewer: added info lablel showing text saved into image and size in px and cm
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.20.1:
+
+JOBS:
+- StopModel: removed some queries, now they are prepared only when needed
+- StopModel: do not depend on StationsModel and validate platform (ex. platform 6 but station has only 5 platforms)
+- Removed ShiftCombo class in favour of generic CustomCompletionLineEdit
+- RSCoupleDialog: added legend box, explaining the meanings of RS colors
+
+ROLLINGSTOCK:
+- RS Import: allow custom importation like import only RS Models but no owners or viceversa. (Still to import RS you have to import also both Models and Owners)
+- RS Import: custom options per Import Source (Currently ODS and TrainTimetable Session)
+- ImportTask: fixed wrong suffix imported
+- Duplicates: allow not to import one to avoid having to fake its name/number to only then pass and unselect
+- RSImportedOwnersModel::clearDatabeseData(): removed in favour of MeetingSession equivalent function
+- RSImportedRollingstockModel: format number according to RS type
+- FixDuplicatesDlg: allow to go back to previous page
+- RollingStockManager: removed UI file, all UI is now C++ based
+- RollingStockManager: added 'Delete All Models' and 'Delete All Owners'
+- RollingStockManager: allow to search for a RS and view it's plan instead of having to scroll and find it in the list
+- RSJobViewer: fixed wrong owner name displayed
+
+STATIONS:
+- KmSpinBox: better focus on single sections, pressing '+' switches sections
+- RailwayNodeModel: add at 1000 m (1 km) after highest km in line when adding new station
+- StationsModel: prevent invalid default platform (like out of bound)
+
+
+SESSION:
+- rs_list.number NOT NULL, rs_models.suffix NOT NULL, rs_models.type NOT NULL, rs_models.sub_type NOT NULL
+
+METADATA:
+- Fixed memory leak, not deleting ImageMetaData::ImageBlobDevice, QPointer is weak, use std::unique_pointer
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.19.0:
+
+UTILS:
+- IQuittableTask: unified base class for QThreadPool worker tasks
+
+SEARCHBOX:
+- SearchEngine: moved to ISqlFKMatchModel, and use unified CustomCompletionLineEdit
+
+SESSION:
+- removed unused 'rs_view' sql view
+- 'railways' table: renamed column 'km' to 'pos_meters', now position is expressed in meters to achieve a better precision
+
+SQL CONSOLE:
+- Moved files to /sqlconsole/ sub directory and splitted in multiple files
+
+JOBS:
+- StopModel: when propagating time shift, first shift all subsequent stops by 24 hours to avoid hitting UNIQUE constraint, then manually reset one by one
+- StopModel: auto uncouple RS at end of job, and move uncoupled in last stop when adding a new stop after.
+- JobPathEditor: allow multiple stops contiguous selection.
+- StopModel: allow to toggle/set/unset transit on multiple stops at once
+- StopEditor: use CustomCompletionLineEdit to choose station, restrict items to all stations of current line except from previous station
+- JobManager: added 'Remove all Jobs' button
+
+ROLLINGSTOCK:
+- RS Import: IRsImportModel common base class now is a IPagedItemModel
+- RS Import: allow to not import duplicates directly instead of having to choose a fake number and the set not to import.
+- RS Import: allow to import from anothe session
+- RS Import: use custom spinbox delegate for NewNumber column
+- RollingstockManager: added 'Remove all rollingstock' button
+
+STATIONS:
+- Moved railway managing to sub directory /stations/manager/railwanode
+- railwanode: new KmSpinBox delegate to edit station position with format like '12+186'
+- StationManager: use custom spinbox delegate for platform/depots, do not allow negative values
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.18.0:
+
+UTILS:
+- CustomCompletionLineEdit: generic class to complete typing with a ISqlFKMatchModel
+
+SESSION:
+- MeetingSession: enable extended error codes in database for API return values
+- Metadata: added centralized getter/setters
+- MeetingInformationDialog: created dialog to fill metadata about location/days/associations etc
+- MeetingSession: use QStandardPaths to locate settings file path
+
+SHIFTS:
+- ShiftsModel: removed in favour of on-demand ShiftSQLModel
+- Shifts: jobshifts name NOT NULL
+- ShiftBusyDlg: move query into ShiftBusyModel, do not depend on JobsModel
+- ShiftGraph: change job shift by double clicking job line uses now ShiftCombo.
+
+ROLLINGSTOCK:
+- RollingstockModel: removed in favour of on-demand RollingstockSQLModel
+- RSModelsModel: removed in favour of on-demand RSModelsSQLModel
+- RSOwnersModel: removed in favour of on-demand RSOwnersSQLModel
+- RS models: added 'suffix' column, UNIQUE(name,suffix)
+- RSCouplingInterface: do not depend on RollingstockModel and do not manage coupled/uncoupled models
+
+- MergeModelsDialog/MergeOwnersDialog: do not depend on external models
+
+ERROR CHECKER:
+- RsErrorTreeModel: do not depend on external models
+
+JOBS:
+- jobsegmets: added UNIQUE(jobId,num)
+- stops: added UNIQUE(jobId, arrival) and UNIQUE(jobId, departure)
+
+- JobPathEditor: removed Shift QComboBox in favour of CustomCompletionLineEdit with ShiftComboModel
+- TrainGraphics: jobName() utility moved to JobCategoryName (in utils)
+- JobPassesModel: store JobCategory to avoid using JobsModel
+- RSListOnDemandModel: added on-demand model for EditStopDialog to list coupled/uncoupled rs
+- RSProxyModel: do not depend on JobsModel
+- TrainAssetModel: made on-demand
+
+GRAPH:
+- GraphManager: handle settings change internally
+
+ODT EXPORT:
+- ODT Export: give precedence to database metadata for header/footer
+- JobWriter, SessionRSWriter, StationWriter: use less lists, instead write data directly into QXmlStreamWriter as soon as it is selected
+
+STATIONS:
+- StationsModel: used simplified() QString for user input, emit error messagebox if name already exist or station cannot be removed.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.17.0:
+
+- Started replacing QOds and QuaZip libs with bare libzip
+- OdtDocument: use libzip instead of QuaZip
+- OdtDocument: instead of creating the mimetype file in the temp directory now it's added directly to the zip archive
+
+- SessionRSExport: export ODT sheet for session rs position at start/end
+- SessionStartEndRSViewer: new window to view all RS position at start or end of session order by station/owner, managed by ViewManager
+- Mainwindow: deleted unused action JobPlanner and added RsErrorsWidget action to toolbar and also SessionStartEndRSViewer
+
+- SettingsDialog: added Sheet Export page, with header and footer settings, in future they will be session-specific
+- ShiftGraph: added option to change job shift by double clicking job line and a dialog shows.
+- JobPathEditor: (StopDelegate) replaced line type simbols with lightning svg icon (Electric: normal icon, Diesel lines: lightning with a diaglonal red bar), loading icon "app_path/icons/lightning.svg"
+- Removed unused UI fine app/importrsdialog.ui replaced by RSImportWizard
+
+- StationsModel: added columns DefaulPlatformFreight and DefaulPlatformPassenger, with DefaulPlatformDelegate that uses PlatformSpinBox (simple subclass)
+- StopModel: when setting stop's station the platform resets to station's default platform for that job category
+
+- TrainGraphics: removed enum Category replaced by JobCategory enum in utils headers
+- MeetingSession: use new class JobCategoryName as context for translating categories
+- Settings: job category colors are now accessed by index instead of one getter/setters for each category
+- SettingsDialog: job category colors are now loop-based and grouped in Passenger/Non Passenger in a scroll area
+- StopModel: fixed bug when deleting all job stops it didn't delete last remained segment causing errors and hiding the job in graph (it was trying to delete segment before deleting stop, failing)
+
+- RS Error Checker: from settings now you can choose to start it when opening a file and when a job is edited
+
+- Added common FileFormats class in 'utils/file_format_names.h' to translate file formats in file dialogs
+- New Experimental RS Importer
+- NSIS installer -> new registered file format *.ttt
+
+- RS import: deleted old models and pages, created new ondemand models (data is loaded in small chunks),
+             it can import from ODS and in future also from other sessions,
+             you can filter out owners and models, assign custom names and numbers and match existing models/owners,
+             additionally it detects duplicates in models/owners/RS and impose user to fix them by setting a custom name
+- MeetingSession: check if imported_rs_* tables are empty when opening database, if not give user chance to recover data (probably app crashed) and resume RS importation
+- MeetingSession: new metadata table, now stores FormatVersion when creating a new session and checks it when opening
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.16.0:
+
+NAME CHANGE: removed all occurences on the word FREMO because it might be covered by copyright:
+- App NAME: FremoTimeTable -> TrainTimetable
+- Project TARTGET: fremo_db_5 -> TrainTimetable
+- class FremoSession -> MeetingSession
+- class FremoAppSettings -> TrainTimetableSettings
+- singleton getter macro FremoSettings -> AppSettings
+- typedef for 'fremo_id' -> 'db_id'
+- Removed the 'Fremo' alternative format in Save/Open/New dialogs (extension .fremo)
+- Translations: fremo5_it.ts -> traintimetable_it.ts
+- Changed strings when exporting (printing/printworker.cpp, shifts/shiftgraph/shiftgrapheditor.cpp)
+
+Other Changes;
+- REMOVED INCOMPLETE 'de' AND 'es' translations for now, they will be reintroduced when needed
+
+- StationFreeRSViewer: added sort by 'Job A' and 'Job B' column to model,
+                       it can be useful if searching for all RS uncoupled by the same job if multiple jobs uncouple at same time
+
+- Mainwindow: changed title behaviour, now we explicitly set 'applicationDisplayName' and it is shown automatically in the title bar,
+              We don't set the title explicitly (otherwise we end with double 'Train Timetable', one set by us and one by Qt)
+              Removed 'Mainwindow' title from designer mainwindow.ui file.
+              We just set the 'windowFilePath' and reset it in 'closeSession()', this way it shows the stripped filename
+- Mainwindow: removed member QString curFile and added to MeetingSession a member QString fileName
+- Mainwindow: added menu File -> Properties to show file properties, in particular the full file path (not shown anymore in the title bar)
+- info.h added build date constant
+- Mainwindow: about dialog shows build date
+- Started using string constants in info.h instead of repeating app display name
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.15.0:
+
+- RSProxyModel: not anymore subclassing QSortFilterProxyModel with RollingstockModel as source
+- RSProxyModel: loaded by RSCoupleDialog, detect Free RS in station, Unused RS, First used RS, possible wrong operations to remove.
+- RSProxyModel: use background colors to immidiately recognize errors or informations
+- RSCouplingInterface: when checking for a possible next couple operation to delete check only operations of current job
+- EditStopDialog: don't ask for leaving an Engine coupled right after closing uncoupled dialog, instead ask only when Accepting EditStopDialog
+- EditStopDialog: temp remove possibility to Cancel dialog
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.15.0:
+
+- JobPathEditor: prevent context menu while editing stop
+- RollingstockModel: experimental use of cached iterators
+- RSModelsModel: shifted RS SubType by one: Now Electric is 1 (previously zero) and Zero is Invalid
+- RSCouplingInterface: warn if coupling an Electric engine in a non-electric line
+- StationSheetExport: bigger font point size in P4 style for highlighted Arrival/Departure
+- EditStopDialog: FIXED BUG, wrong query for selecting max train speed, was removing uncoupled rollingstock of all jobs and stops instead of considering only stops before the current one and of course only of the current job
+- StopsModel, EditStopDialog: check Arrival, set minimum accepted value to previous departure plus 1 minute
+- EditStopDialog: use originalArrival for getting train speed instead of UI QTimeEdit value because the latter may be changed by the user and might be after the next stop
+- EditStopDialog: renamed onAccepted() slot to normal function saveDataToModel(), directly called in done() instead of connecting to slot
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.14.0:
+
+- StopModel: removed hack aboutToEditCoupling(), startStopEditing() now is called directly from RSCouplingInterface whit bonus thath if from EditStopDialog user opens coupling dialog but doesn't modify couplings, the JobPathEditor is not marked as edited
+- StopModel: reload of stops on revertChanged() is now done internally
+- StopModel: when editing arrival/departure/platform/transit/description now station is also marked for update
+- StopModel: removed q_fixPlatform, more correct platform fix in setStation_intenal and just reusing q_setPlatform
+- EditStopDialog: recalculate platform on station change
+- StationsModel: don't allow negative numberf for platform/depot count. Ensure station has at least 1 platform (main or depot but at least 1)
+- SearchEngine: more efficent, store also JobCategory instead of asking twice per row the category from JobsModel (which involves a QHash lookup)
+- StationFreeRSViewer: added widget/model to view free RS at a given time in a given station
+- StationFreeRSViewer: model can sort by column (but only ascending order)
+- ViewManager: fix bug, didn't connect RS removed signal
+- StationsModel: fixed possible memory leak, when removing line from all stations it didn't delete JobStops. (Luckily they should be already deleted by then because of FK constraint)
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.13.1:
+
+- StopsModel: fix BUG last station not setting rw_node in 'setStation()' (q_getRwNode query called before setting s.stationId -> now uses 'stId' function argument directly)
+- StopModel: warn if Last stop is set Transit or TransitLineChange in the database
+- StopModel: fix BUG if removing Last stop of job and the previous one was transit now becoming the new Last stop it also unsets the 'transit' flag
+- FremoSession: if disconnecting from database returns SQLITE_BUSY (db is still used somewhere) re-prepare queries and abort closing
+- FremoSession: new enum DB_Error to get spcific open/new/close db errors
+- Mainwindow: show messagebox when try to close database while busy
+- Main: wait 10 secs for threapool to finish before closing
+- SearchEngine: new experimental Async Mode
+- Rs Errors Checker: ported from raw QThread to QThreadPool
+- Rs Errors: deprecated and removed RsErrorsModel in favor of RsErrorTreeModel
+- Rs Errors: fixed and update translations
+- Rs Errors: added check for 'Rs not uncoupled at the end of the job' also when coupling twice.
+- Rs error check: added possibility to check only specific RS instead of check all of them
+- JobPathEditor: moved rsToUpdate to StopModel
+- JobPathEditor: when saving or discarding send rsToUpdate to ViewManager and to background error checker for specific check.
+- RSJobViewer: removed call to adjustSize() in updatePlan()
+- RSJobViewer: moved data to new model RsPlanModel
+- RSJobViewer: do not update plan if only info (model, number, owner) changed ('updateInfo()')
+- RSJobViewer: added context menu with 'Show in JobEditor' action
+- RsErrorsWidget: fixed context menu coordinates (mapToGlobal() must be called from viewport)
+- Added file utils/worker_event_types.h as a centralized place for custom QEvent::Type enumeration
+- rs_models: added 'sub_type' column for engine type (Steam, Diesel, Electric)
+- RSModelsModel: added SubType column with delegate
+- ShiftGraph: removed QGraphicsSimpleText items for hour labels. Now they are drawn directly in scene 'drawBackground()', more efficent
+- ShiftGraph: removed hack to manually update the view on graph option change. It's enough to call QGraphicsScene::invalidate(sceneRect) passing the whole scene rect.
+- myMessageHandler: custom message handler now guard QTextStream with a QMutexLocker, seems to fix crashes in QDebug destructor
+- JobPathEditor: moved stationToUpdate logic to StopModel; Now involved StationJobView are updated when saving/discarding job changes
+- StationJobView: using new StationPlanModel, added possibility to show JobEditor selecting the stop.
+- ShiftViewer: using new model ShiftJobModel, added possibility to show job in JobEditor.
+- SearchEngine: fixed bug not resetting query results in only partial result shown
+- JobPathEditor: fixed in Mainwindow that JobPathEditor was enabled when opening a file
+- JobPathEditor: fixed still enabled after current job was removed
+- JobPathEditor: when Job has less than 2 stops but user doesn't want to remove it we give a second chance, not closing still editing
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.13.0:
+
+- StopModel: auto insert transit is now faster because instead of calling 'begingInsertRows()' and 'setStation()' for each transit
+  we now do a single cumulative insert and then use 'setStation_intenal()' that skips dataChanged() and other stuff
+- FremoSession: use database::enable_foreign_keys() instead of executing PRAGMA in openDB() and createNewDB()
+- New Feature: initial experimental implementation of background checker for rollingstock
+- Fix: workaround QT-BUG, QDockWidget doesn't dock anymore if closed whie floating, install event filter and re-dock it manually when closed. See mainwindow.cpp
+- Mainwindow: added RS Errors dock in Top/Bottom areas, allow Job Dock to use all vertical space when RS Errors dock is docked at bottom.
+- BUG FIX ShiftModel: setData() and data() checked idx.column() >= 0 -> return false (Always executed). Changed to idx.column() > 0 (without equal)
+- ShiftModel: print warning when query returns error code
+- SQLite: print warning if library is not thread-safe
+- RSCouplingInterface: fix QMessageBox No/Yes inverted actions
+- RSCouplingInterface: fix query select only one next RS operation and of the same job
+- ViewManager: possible to highlight a specific stop on JobPathEditor (both on current or on newly opened)
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.12.1:
+
+- StopModel: prevent setting transit if there are coupling operations, inform user with QMessageBox
+- Moded ColorView from Settings to Utils subdirectory
+- Updated translations
+- Changed all models to use enum NCols in columnCount
+- StationManager: size 550x500
+- StationsModel: user can choose color for main platforms per each station, chosing white (#FFFFFF) gets back to defult color, added ColorDelegate
+- FremoSettings: auto insert transits defaults to false (disabled)
+- JobSheetExport, StationSheetExport: transit are in italic
+- StopModel: removes old transits before adding new ones
+- StationSheetExport: use 'Dep' instead of 'Depot' because it's shorter
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.11.0:
+
+- ShiftSheetExport: added header with {text \tab \tab Page Number}, mirrored for left pages {Page Number \tab \tab text}
+- ShiftSheetExport: added footer with text
+- StopModel: fix transit was always set to TransitLineChange when using context menu
+- ViewManager: fix Show Next/Prev Segment when there are 2 segment in the same line
+- StopModel: added backup/restore with new tables (old_jobsegments, old_stops, old_coupling)
+- JobPathEditor: moved category/jobId/shiftId logic to StopModel
+- JobPathEditor: is now EditPermission free
+- StationManager: is now EditPermission free
+- ShiftManager: is now EditPermission free
+- ViewManager: is now EditPermission free
+- Deleted EditPermission and EditorManager
+- RollingstockManager: smaller margins, removed button box
+- RollingstockModel: fix bug, not able to create first rollingstock
+- Fix Crash on closing: JobPathEditor tried to check a shift after database was closed
+- Fix JobPathEditor: if job has less than 2 stops (+ AddHere) and chooses to save changes but not to delete job now changes are committed to db
+- Feature: now is possible to edit multiple things at the same time, like adding rollingstock while editing a job
+- JobManager: can now create new job and delete selected job
+- JobPathEditor: translate 'Line %1'
+- Moved TrainGraphics::Category enum to independent JobCategory enum in utils/types.h so there is no need to include the whole traingraphics.h (removed include from fremosession.h)
+- StopModel: default stop time is now category specific, if it's 0 minutes the stop is trasformed into Transit
+- EditStopDialog: fixed bug not changing station if edited from there
+- TrainGraphics: removed unused query q_selectStops
+- ViewManager: removed slot onStAdded, when a station is created it isn't in any line so no need to redraw jobs
+- StationsModel: new signal 'stationNameChanged()' to separate name/short name changes from platform/depots changed, updated ViewManager, JobsModel, ShiftGraphHolder and StationLayer to use this signal instead of 'stationModified()'
+- GraphManager: redraw names in StationLayer if current line is modified
+- StationObj: JobStop stores stopId to avoid duplicates in shadow stops
+- LinesModel: update line when station is added or removed
+- LineStationsModel, StationLinesModel: update line if user changed station km
+- LinesModel: stations platform now have z value of -1 so they stay below jobs and labels
+- TrainGraphics, StationObj::JobStop: labels now have z value of +1 so they stay above jobs and platforms
+- SQLViewer: replaced QStandardItemModel with custom SQLResultModel.
+- SQLConsole: new feature, timed query execute every interval and results blink in red to notify update
+- StopModel: transit are set to 0 minutes stop time, and when switching back from transit stop time becomes default for that job category but at least 1 minute
+- StopModel: fixed bug trying to destroy segment before setting to NULL references to it -> Foreign Key prevented deletion.
+- StopModel: fixed bug resetting otherSegment without resetting also other_rw_node -> removed query q_resetStopNextSeg in favour of setNextSeg()
+- StopModel: fixed bug resetting next line may cause two separate segment adjacent of the same line because it break the loop too early.
+- StopModel: fixed bug transit type was inverted on saving
+- JobPathEditor: rename slot 'onViewMenu' to 'onContextMenu'
+- StopEditor/StopDelegate: now transit are editable too, only arrival box is shown
+- EditStopDialog: on transits disable Departure box and Edit Coupled/uncoupled RS.
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.10.0:
+
+- Changed data() function on many item models to return also on Qt::EditRole so when user edits a cell it's previous value is shown instead of clearing cell contents
+- RSImportWizard: experimental import wizard for rollingstock, almost working
+- JobSheetExport: smaller font on job_stops and wider column A of job_summary
+- Fixed crash: when no line selected in graph StationLayer tried to retrive station names of a null LineObj* pointer. This prevented the creation of new files because new files have no line yet
+- StationLayer: ensure stations names are update when changing line by explicitly calling update()
+- LinesModel: now lines can be non-electric or electric
+- LinesModel: prevent line removal only if there are jobs on that line
+- JobsModel: fix job removal, must delete stops before segments not after
+- DB: added UNIQUE constraint to railways table on (lineId, stationId)
+- DB, StopsModel: now stops table registers also curent and next railway node to prevent user removing railway nodes (uses foreign key restrict)
+- SQLite version 3.29
+- JobsModel: fix foreign key preventing changing jobId -> added ON UPDATE CASCADE to stops and jobsegmets
+- StationLinesModel, LineStationsModel: use query error codes to check if there is already that station in that line to avoid duplicates instead of a separate query
+- TrainGraphics: fixed bug, when setting a new id old stop labels in stations weren't erased so you ended up with multiple labels
+- ShiftGraph: center job name, fix job line height not constant
+- Removed old RSImportDialog in favour of the new RSImportWizard
+- Updated translations
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.9.1:
+
+- EditStopDialog: Major refactor of coupling/uncoupling
+- EditStopDialog: Added logic to remove errors of RS coupld/uncoupled twice
+- EditStopDialog: Removed queries but not q_GetTrainSpeed
+- EditStopDialog: removed button to show all RS, now it updates automatically
+- Sheets: Now odt sheets are translatable
+- StationLayer: fixed bug not refreshing on when station name changed
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.9.0:
+
+- ShiftGraph: shift name labels centered horizontally and automatically add the word Shift -> 'Shift %name%' in ShiftGraph and Shift Sheet
+
+- Job Sheet, Station Sheet, ShiftSheet: column Binario -> Bin, to save space
+
+- Station Sheet: arrival column in bold for Arrival row, Departure in bold for Departure row
+
+- Removed files 'rsnumber.h' and '.cpp', now RS numbers are fixed to XXX-X
+- Added new RsNumberDelegate with custom spinbox (it is enabled only for non Engines)
+
+- Rs delgates moved to /rollingstock/manager/delegates/
+- Rs Dialogs moved to /rollingstock/manager/dialogs/ (MergeOwners and MergeModels)
+
+- Job Sheet: in last stop show asset before stop so reapeat previous row. This is because last stop should uncouple all rollingstock so asset after stop is always empty
+
+- Removed Fremosession::getLineId and FremoSession::getLineName, use LinesModel directly (removed also query from FremoSession)
+
+- Fixed BUG: when chosing to delete a job (because it has less than 2 stop, First + Last) it crashed because of recursion in JobPathEditor::clearJob()
+
+- Job Graph: stations label locked on top like HourPane
+
+- RS: added new types 'Freight Wagon' and 'Coach' instead of generic 'Wagon'. Warning: Engine type was changed from '1' to '0'
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.8.1:
+
+- Transit are now stored and loaded correctly
+- Fix BUG: StationJobView and Station Sheet used iterator even after erase()
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.8.0:
+
+- EditStopDialog: now Passes/Crosses views have label on top.
+- EditStopDialog: removed q_getLineSpeed (now LinesModel from StopsModel is used instead) and q_selectPasses
+- EditStopDialog: moved passes/crosses to a custom model
+
+- GraphManager: fixed bug, if a job was selected and user selected another job with searchbox bot jobs get selected, now only the one from searchbox is selected
+
+- StationJobView: prevent cell editing
+- StationJobView: fixed platform column was skipped on repeated Departure rows
+- StationJobView: don't repeat Arrival on Departure rows
+- StationJobView: reuse 'insertStop()' also for the first time a stop is  inserted (removes duplicate code)
+
+- Station Sheet ODT: fixed, it was putting '0' in description column
+- Station Sheet ODT: fixed extension is now ODT instead of ODS
+
+- Station Sheet ODT and StationJobView: fixed BUG, sort repeated rows by Departure
+
+- Job Sheet ODT: don't duplicate Arrival/Departure on first and last stops
+
+- RollingstockModel, RSModelsModel, RSOwnersModel: 'removeRS' and 'removeRSAtRow' now based on 'removeRS_internal' (removed duplicate code)
+
+- RSJobViewer: fixed arrival and departure displayed in minutes (internal integer) instead of 'HH:mm'
+
+- Removed action JobPlanner (deprecated) and added separator before View->Editor toggle
+
+- Updated translations
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.7.2:
+
+- SearchEngine: can search multiple job categories that start with user input
+
+- SearchEngine: fixed error when searching by both category and number
+
+- Forward decleared ViewManager, EditorManager, SearchEngine in fremosession.h
+
+- StationJobView: removed unimplemented Station Graph page and unused PixViewer class, rearranged the layout
+
+- StationJobView: moved in StationManager (/stations/manager) subfolder
+
+- Merge Models: new functionality, with settings options to remove by default the merged model
+
+- Merge Owners: new functionality, with settings options to remove by default the merged owner
+
+- SettingsDialog: better layout
+
+- RS Type: now properly editable through 'Engine/Wagon' combo delegate
+
+- JobPathEditor: when saving (Commit changes pressing 'Ok') resets JobId to the old value if the new one is already in use
+
+- FremoSession: removed 'removeJob' function, use JobsModel directly instead
+
+- DB Fix: 'jobsegmets' table, added FK 'jobId' to jobs(id)
+
+- Logging: log current date and time at start with format 'dd/MM/yyyy HH:mm' instead of day names
+
+- FremoSession: moved some functions and queries to RollingstockModel (like RS_lastKnownPos)
+
+- FremoSession: removed 'getStID' (with q_getStId query) and 'getStName' functions, use StationsModel directly instead
+
+- FremoSettings: added 'HourLineStartOffset' so that hour line start a bit before the first platform of the first station
+
+- FremoSettings: added ShiftGraph options to SettingsDialog
+
+- FremoSettings: removed sheets border settings (unused since switching to ODT instead of ODS)
+
+- Fixed BUG: bug that prevented adding a station to a line if the station had the same ID as a line ID to which it was already added
+             (for instance St 1 in Line 1, cannot add St to other lines)
+
+- Fixed BUG: updating Job Id could lead to crash because JobsModel::lookupTable was not updated with the new iterator from JobsModel::m_data
+
+- Fixed BUG: adding a new stop to job on the same line caused the call to 'resetStopsLine' but there wasn't no 'nextLine' so a warning was printed
+
+- Fixed BUG: TrainAssetModel spelling error table 'rs_model' instead of 'rs_models'
+
+- Fixed BUG: changing shift graph settings while shift graph was open caused glitches (now explicitly call QGraphicsView::update)
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.7.1:
+
+- Removed old FremoSession API for printing/exporting sheets
+
+- Removed unused FlowLayout class (app/flowLayout.cpp)
+
+- Implemented searchbox: SearchEngine can match by category, number or both
+
+- JobPathEditor: trainIdSpin color works also when the widget is not in focus
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.7.0:
+
+- Moved 'platformName()' from FremoSession to utils/platform_utils.h in 'utils' namespace
+
+- Commented 'GraphicsScene::mousePressEvent' in graph/graphicsScene.cpp
+
+- Initial job selection refactor (not finished yet)
+
+- Fixed crash: JobPathEditor read-only mode when clicking job number spinbox and then clicking out, anywhere else
+
+- JobPathEditor in editing mode hides 'Save Job Sheet' button. It doesn't make sense while editing
+
+- JobSheetExport and ShiftSheetExport and StationSheetExport, new API and implementation to write sheets in ODT format rather then ODS format used previously
+  ODT is better for formatting and table columns when there are more tables in the same page. Also better page break handling
+
+- ShiftViewer: minimum width to 600 so user doesn't need to resize
+
+- JobManager: minimum width to 750 and height to 300 so user doesn't need to resize
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.6.0:
+
+- Removed old unused files (mydelegate, importrsdialog, linespage2, jobwizard) -> Smaller executable
+
+- New Feature: (toggable in settings) When adding a stop in JobPathEditor before editing the newly added stop,
+               the editor goes back to the second-last stop (penultima fermata) (former Last stop but user added another)
+               and lets the user choose which line is taken.
+
+- New Experimental feature (not finished yet): StopModel auto adds transits between two stops
+
+- New Experimental feature: 'Show Next/Prev Job Segment' allows to easily navigate between railway lines
+  keeping the job path selected
+
+- Line ComboBox in mainwindow toolbar now changes if current line is programmatically changed
+  (bidirectional connection with GraphManager)
+
+- Fix EditPermission: don't allow multiple 'endEditing()' calls
+
+- Fix JobPathEditor: endEditing() not called in the right place caused infinite loop and read-only mode errors
+
+- Fix LinesModel and StationsModel: it was impossible to change name (it was ignored)
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.4.0:
+
+- EditStopDialog2 renamed to EditStopDialog
+
+- LinesModel moved to QMap-based implementation. Lines are now automatically sorted by name
+
+- StationsModel moved to QMap-based implementation. Stations are now automatically sorted by name
+
+- Fix RollingstockModel: switch case in 'setData()' added break
+
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.3.1:
+
+- New RS Import Dialog: not yet implemented, deprecate old importrsdialog
+
+- New searchbox module: not yet implemented
+
+- Implemented TrainAssetModel
+
+- EditStopDialog2: use TrainAssetModel instead of direct query to show train asset in 'Info' page.
+  also distinguish before/after stop. Hides 'Before' on First and hides 'After' on Last
+
+- Fix SelectionPage: in printing sub module added a break in format switch case
+
+- Fix JobsModel: removing a job now also remove couplings
+
+- JobPathEditor: in read-only mode show context menu but disable actions that are not permitted
+
+- RollingstockModel: when removing a model or owner, it removes all associated RS.
+
+- ShiftGraphHolder: auto refresh station names when edited, use short-name, fallback to full name

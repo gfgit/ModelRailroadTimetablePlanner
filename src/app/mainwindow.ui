@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string/>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout"/>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>400</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionNew"/>
+    <addaction name="actionOpen"/>
+    <addaction name="actionOpen_Recent"/>
+    <addaction name="actionSave"/>
+    <addaction name="actionSaveCopy_As"/>
+    <addaction name="actionClose"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrint"/>
+    <addaction name="actionExport_PDF"/>
+    <addaction name="actionExport_Svg"/>
+    <addaction name="separator"/>
+    <addaction name="actionProperties"/>
+    <addaction name="separator"/>
+    <addaction name="actionExit"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionStations"/>
+    <addaction name="actionRollingstockManager"/>
+    <addaction name="action_JobsMgr"/>
+    <addaction name="actionJob_Shifts"/>
+    <addaction name="actionQuery"/>
+    <addaction name="separator"/>
+    <addaction name="actionMeeting_Information"/>
+    <addaction name="separator"/>
+    <addaction name="actionSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAbout_Qt"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="actionNext_Job_Segment"/>
+    <addaction name="actionPrev_Job_Segment"/>
+    <addaction name="separator"/>
+    <addaction name="actionRS_Session_Viewer"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuView"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionAddJob"/>
+   <addaction name="actionRemoveJob"/>
+   <addaction name="actionPrev_Job_Segment"/>
+   <addaction name="actionNext_Job_Segment"/>
+   <addaction name="separator"/>
+   <addaction name="actionRS_Session_Viewer"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+  </action>
+  <action name="actionExit">
+   <property name="text">
+    <string>Exit</string>
+   </property>
+  </action>
+  <action name="actionAddJob">
+   <property name="text">
+    <string>New Job</string>
+   </property>
+  </action>
+  <action name="actionRemoveJob">
+   <property name="text">
+    <string>Remove Job</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove selected train job</string>
+   </property>
+  </action>
+  <action name="actionStations">
+   <property name="text">
+    <string>Stations</string>
+   </property>
+  </action>
+  <action name="actionRollingstockManager">
+   <property name="text">
+    <string>Rollingstock</string>
+   </property>
+  </action>
+  <action name="actionNew">
+   <property name="text">
+    <string>New</string>
+   </property>
+  </action>
+  <action name="actionClose">
+   <property name="text">
+    <string>Close</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionAbout_Qt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionPrint">
+   <property name="text">
+    <string>Print</string>
+   </property>
+  </action>
+  <action name="actionExport_PDF">
+   <property name="text">
+    <string>Export PDF</string>
+   </property>
+  </action>
+  <action name="actionOpen_Recent">
+   <property name="text">
+    <string>Open Recent</string>
+   </property>
+  </action>
+  <action name="actionQuery">
+   <property name="text">
+    <string>Query</string>
+   </property>
+  </action>
+  <action name="actionSaveCopy_As">
+   <property name="text">
+    <string>Save Copy As</string>
+   </property>
+   <property name="toolTip">
+    <string>Save a backup copy of the current session</string>
+   </property>
+  </action>
+  <action name="actionJob_Shifts">
+   <property name="text">
+    <string>Job Shifts</string>
+   </property>
+  </action>
+  <action name="actionExport_Svg">
+   <property name="text">
+    <string>Export Svg</string>
+   </property>
+  </action>
+  <action name="action_JobsMgr">
+   <property name="text">
+    <string>Jobs</string>
+   </property>
+  </action>
+  <action name="actionSettings">
+   <property name="text">
+    <string>Settings</string>
+   </property>
+  </action>
+  <action name="actionNext_Job_Segment">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Next Job Segment</string>
+   </property>
+  </action>
+  <action name="actionPrev_Job_Segment">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Prev Job Segment</string>
+   </property>
+  </action>
+  <action name="actionProperties">
+   <property name="text">
+    <string>Properties</string>
+   </property>
+  </action>
+  <action name="actionRS_Session_Viewer">
+   <property name="text">
+    <string>Session Rollingstock Summary</string>
+   </property>
+   <property name="toolTip">
+    <string>Show rollingstock position at start or end of session</string>
+   </property>
+  </action>
+  <action name="actionMeeting_Information">
+   <property name="text">
+    <string>Meeting Information</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

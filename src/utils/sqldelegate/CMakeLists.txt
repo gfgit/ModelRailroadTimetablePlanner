@@ -1,0 +1,21 @@
+set(TRAINTIMETABLE_SOURCES
+  ${TRAINTIMETABLE_SOURCES}
+  utils/sqldelegate/IFKField.h
+  utils/sqldelegate/chooseitemdlg.h
+  utils/sqldelegate/customcompletionlineedit.h
+  utils/sqldelegate/imatchmodelfactory.h
+  utils/sqldelegate/isqlfkmatchmodel.h
+  utils/sqldelegate/modelpageswitcher.h
+  utils/sqldelegate/pageditemmodel.h
+  utils/sqldelegate/sqlfkfielddelegate.h
+
+  utils/sqldelegate/IFKField.cpp
+  utils/sqldelegate/chooseitemdlg.cpp
+  utils/sqldelegate/customcompletionlineedit.cpp
+  utils/sqldelegate/imatchmodelfactory.cpp
+  utils/sqldelegate/isqlfkmatchmodel.cpp
+  utils/sqldelegate/modelpageswitcher.cpp
+  utils/sqldelegate/pageditemmodel.cpp
+  utils/sqldelegate/sqlfkfielddelegate.cpp
+  PARENT_SCOPE
+)

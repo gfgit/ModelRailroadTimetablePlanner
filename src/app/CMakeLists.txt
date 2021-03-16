@@ -1,0 +1,19 @@
+set(TRAINTIMETABLE_SOURCES
+  ${TRAINTIMETABLE_SOURCES}
+  app/main.cpp
+  app/mainwindow.h
+  app/mainwindow.cpp
+  app/propertiesdialog.h
+  app/propertiesdialog.cpp
+  app/scopedebug.h
+  app/scopedebug.cpp
+  app/session.h
+  app/session.cpp
+  PARENT_SCOPE
+)
+
+set(TRAINTIMETABLE_UI_FILES
+  ${TRAINTIMETABLE_UI_FILES}
+  app/mainwindow.ui
+  PARENT_SCOPE
+)

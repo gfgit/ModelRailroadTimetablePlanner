@@ -1,0 +1,16 @@
+set(TRAINTIMETABLE_SOURCES
+  ${TRAINTIMETABLE_SOURCES}
+  graph/backgroundhelper.h
+  graph/backgroundhelper.cpp
+  graph/graphicsscene.h
+  graph/graphicsscene.cpp
+  graph/graphicsview.h
+  graph/graphicsview.cpp
+  graph/graphmanager.h
+  graph/graphmanager.cpp
+  graph/hourpane.h
+  graph/hourpane.cpp
+  graph/stationlayer.h
+  graph/stationlayer.cpp
+  PARENT_SCOPE
+)
