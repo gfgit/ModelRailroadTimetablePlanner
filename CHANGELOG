@@ -1,5 +1,8 @@
 Current: (***STILL IN PROGRESS***) future 5.25.0
 
+- SWITCHED BUILD SYSTEM to CMake (removed QMake files)
+- Initial Git repository setup (local)
+
 - Removed Lua scripting feature
 
 ROLLINGSTOCK
