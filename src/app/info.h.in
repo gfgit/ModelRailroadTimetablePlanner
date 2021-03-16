@@ -1,0 +1,17 @@
+#ifndef INFO_H
+#define INFO_H
+
+#include <QString>
+
+static const QString AppVersion = QStringLiteral("${PROJECT_VERSION}");
+static const QString AppCompany = QStringLiteral("${APP_COMPANY_NAME}");
+static const QString AppProduct = QStringLiteral("${APP_PRODUCT_NAME}");
+static const QString AppDisplayName = QStringLiteral("${APP_DISPLAY_NAME}");
+
+static const QString FormatVersionStr = QStringLiteral("${DB_FORMAT_VERSION}");
+
+static const int FormatVersion = ${DB_FORMAT_VERSION};
+
+static const QString AppBuildDate = QStringLiteral(__DATE__);
+
+#endif // INFO_H
