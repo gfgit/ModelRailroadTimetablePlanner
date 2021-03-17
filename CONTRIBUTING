@@ -1,2 +1,7 @@
-This is the 'develop' branch
-It contains ustable or not yet tested changes
+Usage of branches:
+
+master: stable code ready to be released
+
+develop: unstable code or code that needs further testing
+
+To develop new features please create new branches and finally merge to develop
