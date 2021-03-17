@@ -1,4 +1,7 @@
-Current: (***STILL IN PROGRESS***) future 5.25.0
+Master brach: use other branches to develop new features
+
+----------------------------------------------------------------------------------------------------------------------------------------
+Version 5.25.0:
 
 - SWITCHED BUILD SYSTEM to CMake (removed QMake files)
 - Initial Git repository setup (local)
