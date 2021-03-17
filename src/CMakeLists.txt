@@ -188,14 +188,17 @@ endif()
 # Set compiler definitions
 target_compile_definitions(${TRAINTIMETABLE_TARGET} PRIVATE ${TRAINTIMETABLE_DEFINITIONS})
 
+## Doxygen documentation ##
 if(DOXYGEN_FOUND)
     set(DOXYGEN_PROJECT_NAME ${APP_DISPLAY_NAME})
     set(DOXYGEN_PROJECT_LOGO ${APP_ICON})
     set(DOXYGEN_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/docs")
     set(DOXYGEN_EXTRACT_ALL "YES")
     set(DOXYGEN_EXTRACT_PRIVATE "YES")
+    set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)
     doxygen_add_docs(docs ALL ${TRAINTIMETABLE_SOURCES})
 endif()
+## Doxygen end ##
 
 ## Update/Release translations ##
 
