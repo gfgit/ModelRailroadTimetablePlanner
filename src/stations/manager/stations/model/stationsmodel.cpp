@@ -139,7 +139,11 @@ QVariant StationsModel::data(const QModelIndex &idx, int role) const
         case TypeCol:
             return utils::StationUtils::name(item.type);
         case PhoneCol:
+        {
+            if(item.phone_number == -1)
+                return QVariant(); //Null
             return item.phone_number;
+        }
         }
         break;
     }
@@ -199,7 +203,9 @@ bool StationsModel::setData(const QModelIndex &idx, const QVariant &value, int r
     {
         bool ok = false;
         qint64 val = value.toLongLong(&ok);
-        if(!ok || !setPhoneNumber(item, val))
+        if(!ok)
+            val = -1;
+        if(!setPhoneNumber(item, val))
             return false;
         break;
     }
@@ -470,7 +476,10 @@ void StationsModel::internalFetch(int first, int sortCol, int valRow, const QVar
             item.name = r.get<QString>(1);
             item.shortName = r.get<QString>(2);
             item.type = utils::StationType(r.get<int>(3));
-            item.phone_number = r.get<int>(4);
+            if(r.column_type(4) == SQLITE_NULL)
+                item.phone_number = -1;
+            else
+                item.phone_number = r.get<int>(4);
             i--;
         }
         if(i > -1)
@@ -488,7 +497,10 @@ void StationsModel::internalFetch(int first, int sortCol, int valRow, const QVar
             item.name = r.get<QString>(1);
             item.shortName = r.get<QString>(2);
             item.type = utils::StationType(r.get<int>(3));
-            item.phone_number = r.get<int>(4);
+            if(r.column_type(4) == SQLITE_NULL)
+                item.phone_number = -1;
+            else
+                item.phone_number = r.get<int>(4);
             i++;
         }
         if(i < BatchSize)
@@ -615,7 +627,7 @@ bool StationsModel::setName(StationsModel::StationItem &item, const QString &val
 bool StationsModel::setShortName(StationsModel::StationItem &item, const QString &val)
 {
     const QString shortName = val.simplified();
-    if(item.name == shortName)
+    if(item.shortName == shortName)
         return false;
 
     //TODO: check non allowed characters
@@ -703,7 +715,7 @@ bool StationsModel::setPhoneNumber(StationsModel::StationItem &item, qint64 val)
         val = -1;
 
     query q(mDb, "UPDATE stations SET phone_number=? WHERE id=?");
-    if(val < 0)
+    if(val == -1)
         q.bind(1); //Bind NULL
     else
         q.bind(1, val);
