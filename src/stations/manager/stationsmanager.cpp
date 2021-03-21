@@ -14,17 +14,19 @@
 
 #include <QWindow>
 
-#include "stations/stationssqlmodel.h"
+#include "stations/manager/stations/model/stationsmodel.h"
 #include "lines/linessqlmodel.h"
 
-#include "colordelegate.h"
-#include "defaultplatfdelegate.h"
-#include "utils/spinbox/spinboxeditorfactory.h"
+#include "utils/combodelegate.h"
+#include "stations/station_name_utils.h"
+
 #include "utils/sqldelegate/modelpageswitcher.h"
 
 #include "stations/manager/free_rs_viewer/stationfreersviewer.h" //TODO: move to ViewManager
 
 #include "railwaynode/railwaynodeeditor.h"
+
+#include <QInputDialog>
 
 StationsManager::StationsManager(QWidget *parent) :
     QWidget(parent),
@@ -38,7 +40,7 @@ StationsManager::StationsManager(QWidget *parent) :
     setup_StPage();
     setup_LinePage();
 
-    connect(stationsModel, &StationsSQLModel::modelError, this, &StationsManager::onModelError);
+    connect(stationsModel, &StationsModel::modelError, this, &StationsManager::onModelError);
     connect(linesModel, &LinesSQLModel::modelError, this, &StationsManager::onModelError);
 
     setReadOnly(false);
@@ -52,8 +54,6 @@ StationsManager::StationsManager(QWidget *parent) :
 StationsManager::~StationsManager()
 {
     delete ui;
-    delete stationPlatfCountFactory;
-    delete lineSpeedSpinFactory;
 
     for(int i = 0; i < NTabs; i++)
     {
@@ -74,7 +74,7 @@ void StationsManager::setup_StPage()
     stationView = new QTableView(ui->stationsTab);
     vboxLayout->addWidget(stationView);
 
-    stationsModel = new StationsSQLModel(Session->m_Db, this);
+    stationsModel = new StationsModel(Session->m_Db, this);
     stationView->setModel(stationsModel);
 
     auto ps = new ModelPageSwitcher(false, this);
@@ -86,26 +86,19 @@ void StationsManager::setup_StPage()
     disconnect(header, SIGNAL(sectionPressed(int)), stationView, SLOT(selectColumn(int)));
     disconnect(header, SIGNAL(sectionEntered(int)), stationView, SLOT(_q_selectColumn(int)));
     connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-    {
-        stationsModel->setSortingColumn(section);
-        header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
-    });
+            {
+                stationsModel->setSortingColumn(section);
+                header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
+            });
     header->setSortIndicatorShown(true);
     header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
 
-    QStyledItemDelegate *platfCountDelegate = new QStyledItemDelegate(this);
-    stationPlatfCountFactory = new SpinBoxEditorFactory;
-    stationPlatfCountFactory->setRange(0, 99);
-    platfCountDelegate->setItemEditorFactory(stationPlatfCountFactory);
-    stationView->setItemDelegateForColumn(StationsSQLModel::Platforms, platfCountDelegate);
-    stationView->setItemDelegateForColumn(StationsSQLModel::Depots, platfCountDelegate);
-
-    stationView->setItemDelegateForColumn(StationsSQLModel::PlatformColor, new ColorDelegate(this));
-
-    DefaultPlatfDelegate *defPlatfDelegate = new DefaultPlatfDelegate(this);
-    stationView->setItemDelegateForColumn(StationsSQLModel::DefaultFreightPlatf, defPlatfDelegate);
-    stationView->setItemDelegateForColumn(StationsSQLModel::DefaultPassengerPlatf, defPlatfDelegate);
-
+    //Station Type Delegate
+    QStringList types;
+    types.reserve(int(utils::StationType::NTypes));
+    for(int i = 0; i < int(utils::StationType::NTypes); i++)
+        types.append(utils::StationUtils::name(utils::StationType(i)));
+    stationView->setItemDelegateForColumn(StationsModel::TypeCol, new ComboDelegate(types, Qt::EditRole, this));
 
     act_addSt = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
     act_remSt = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
@@ -135,20 +128,20 @@ void StationsManager::setup_LinePage()
     disconnect(header, SIGNAL(sectionPressed(int)), linesView, SLOT(selectColumn(int)));
     disconnect(header, SIGNAL(sectionEntered(int)), linesView, SLOT(_q_selectColumn(int)));
     connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-    {
-        linesModel->setSortingColumn(section);
-        header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
-    });
+            {
+                linesModel->setSortingColumn(section);
+                header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
+            });
     header->setSortIndicatorShown(true);
     header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
 
-    QStyledItemDelegate *lineSpeedDelegate = new QStyledItemDelegate(this);
-    lineSpeedSpinFactory = new SpinBoxEditorFactory;
-    lineSpeedSpinFactory->setRange(1, 999);
-    lineSpeedSpinFactory->setSuffix(" km/h");
-    lineSpeedSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    lineSpeedDelegate->setItemEditorFactory(lineSpeedSpinFactory);
-    linesView->setItemDelegateForColumn(LinesSQLModel::LineMaxSpeedKmHCol, lineSpeedDelegate);
+    //    QStyledItemDelegate *lineSpeedDelegate = new QStyledItemDelegate(this);
+    //    lineSpeedSpinFactory = new SpinBoxEditorFactory;
+    //    lineSpeedSpinFactory->setRange(1, 999);
+    //    lineSpeedSpinFactory->setSuffix(" km/h");
+    //    lineSpeedSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    //    lineSpeedDelegate->setItemEditorFactory(lineSpeedSpinFactory);
+    //    linesView->setItemDelegateForColumn(LinesSQLModel::LineMaxSpeedKmHCol, lineSpeedDelegate);
 
     linesToolBar->addAction(tr("Add"), this, &StationsManager::onNewLine);
     linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
@@ -260,25 +253,42 @@ void StationsManager::onNewStation()
 {
     DEBUG_ENTRY;
 
-    int row = 0;
-    if(!stationsModel->addStation())
-    {
-        QMessageBox::warning(this,
-                             tr("Error Adding Station"),
-                             tr("An error occurred while adding a new station:\n%1")
-                             .arg(Session->m_Db.error_msg()));
-        return;
-    }
+    QInputDialog dlg(this);
+    dlg.setWindowTitle(tr("Add Station"));
+    dlg.setLabelText(tr("Please choose a name for the new station."));
+    dlg.setTextValue(QString());
 
-    QModelIndex idx = stationsModel->index(row, 0);
-    stationView->setCurrentIndex(idx);
-    stationView->scrollTo(idx);
-    stationView->edit(idx);
+    do{
+        int ret = dlg.exec();
+        if(ret != QDialog::Accepted)
+        {
+            break; //User canceled
+        }
+
+        const QString name = dlg.textValue();
+        if(name.isEmpty())
+        {
+            QMessageBox::warning(this, tr("Error"), tr("Station name cannot be empty."));
+            continue; //Second chance
+        }
+
+        if(stationsModel->addStation(dlg.textValue()))
+        {
+            break; //Done!
+        }
+    }
+    while (true);
+
+    //TODO
+    //    QModelIndex idx = stationsModel->index(row, 0);
+    //    stationView->setCurrentIndex(idx);
+    //    stationView->scrollTo(idx);
+    //    stationView->edit(idx);
 }
 
 void StationsManager::onModelError(const QString& msg)
 {
-    QMessageBox::warning(this, tr("Station error"), msg);
+    QMessageBox::warning(this, tr("Station Error"), msg);
 }
 
 void StationsManager::onEditStation()
@@ -335,7 +345,7 @@ void StationsManager::onNewLine()
         QMessageBox::warning(this,
                              tr("Error Adding Line"),
                              tr("An error occurred while adding a new line:\n%1")
-                             .arg(Session->m_Db.error_msg()));
+                                 .arg(Session->m_Db.error_msg()));
         return;
     }
 

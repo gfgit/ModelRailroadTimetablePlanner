@@ -11,14 +11,12 @@ class QToolBar;
 class QToolButton;
 class QTableView;
 
-class StationsSQLModel;
+class StationsModel;
 class LinesSQLModel;
 
 namespace Ui {
 class StationsManager;
 }
-
-class SpinBoxEditorFactory;
 
 class StationsManager : public QWidget
 {
@@ -81,11 +79,8 @@ private:
     QTableView *stationView;
     QTableView *linesView;
 
-    StationsSQLModel *stationsModel;
+    StationsModel *stationsModel;
     LinesSQLModel *linesModel;
-
-    SpinBoxEditorFactory *stationPlatfCountFactory;
-    SpinBoxEditorFactory *lineSpeedSpinFactory;
 
     QAction *act_addSt;
     QAction *act_remSt;
