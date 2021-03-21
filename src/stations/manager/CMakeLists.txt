@@ -1,5 +1,6 @@
 add_subdirectory(free_rs_viewer)
 add_subdirectory(railwaynode)
+add_subdirectory(stations)
 
 set(TRAINTIMETABLE_SOURCES
   ${TRAINTIMETABLE_SOURCES}

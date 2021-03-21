@@ -1,0 +1,31 @@
+#ifndef STATION_NAME_UTILS_H
+#define STATION_NAME_UTILS_H
+
+#include <QCoreApplication>
+
+#include "station_utils.h"
+
+namespace utils {
+
+static const char* StationTypeNamesTable[] = {
+    QT_TRANSLATE_NOOP("StationUtils", "Normal"),
+    QT_TRANSLATE_NOOP("StationUtils", "Simple Stop"),
+    QT_TRANSLATE_NOOP("StationUtils", "Junction")
+};
+
+class StationUtils
+{
+    Q_DECLARE_TR_FUNCTIONS(RsTypeNames)
+
+public:
+    static inline QString name(StationType t)
+    {
+        if(t >= StationType::NTypes)
+            return QString();
+        return tr(StationTypeNamesTable[int(t)]);
+    }
+};
+
+} // namespace utils
+
+#endif // STATION_NAME_UTILS_H

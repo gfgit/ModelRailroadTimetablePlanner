@@ -10,7 +10,8 @@ enum class StationType : qint8
 {
     Normal = 0, //Normal station
     SimpleStop = 1, //Trains can stop but cannot be origin or destination
-    Junction = 2 //This is not a real station but instead a junction between 2 lines
+    Junction = 2, //This is not a real station but instead a junction between 2 lines
+    NTypes
 };
 
 enum class GateType : qint8

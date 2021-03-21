@@ -276,7 +276,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
 
     result = m_Db.execute("CREATE TABLE stations ("
                           "id INTEGER PRIMARY KEY,"
-                          "name TEXT UNIQUE,"
+                          "name TEXT NOT NULL UNIQUE,"
                           "short_name TEXT UNIQUE,"
                           "type INTEGER NOT NULL,"
                           "phone_number INTEGER UNIQUE,"
@@ -593,32 +593,33 @@ void MeetingSession::prepareQueryes()
 {
     DEBUG_COLOR_ENTRY(SHELL_YELLOW);
 
-    if(q_getPrevStop.prepare("SELECT MAX(prev.departure),"
-                              "prev.stationId,"
-                              "seg.lineId"
-                              " FROM stops prev"
-                              " JOIN stops s ON s.jobId=prev.jobId AND prev.departure<s.arrival"
-                              " JOIN jobsegments seg ON seg.id=s.segmentId"
-                              " WHERE s.id=?") != SQLITE_OK)
-    {
-        throw database_error(m_Db);
-    }
+    //FIXME: remove queries from MeetingSession
+//    if(q_getPrevStop.prepare("SELECT MAX(prev.departure),"
+//                              "prev.stationId,"
+//                              "seg.lineId"
+//                              " FROM stops prev"
+//                              " JOIN stops s ON s.jobId=prev.jobId AND prev.departure<s.arrival"
+//                              " JOIN jobsegments seg ON seg.id=s.segmentId"
+//                              " WHERE s.id=?") != SQLITE_OK)
+//    {
+//        throw database_error(m_Db);
+//    }
 
-    if(q_getNextStop.prepare("SELECT MIN(nextS.arrival),"
-                              "nextS.stationId,"
-                              "seg.lineId"
-                              " FROM stops nextS"
-                              " JOIN stops s ON s.jobId=nextS.jobId AND nextS.arrival>s.departure"
-                              " JOIN jobsegments seg ON seg.id=nextS.segmentId"
-                              " WHERE s.id=?") != SQLITE_OK)
-    {
-        throw database_error(m_Db);
-    }
+//    if(q_getNextStop.prepare("SELECT MIN(nextS.arrival),"
+//                              "nextS.stationId,"
+//                              "seg.lineId"
+//                              " FROM stops nextS"
+//                              " JOIN stops s ON s.jobId=nextS.jobId AND nextS.arrival>s.departure"
+//                              " JOIN jobsegments seg ON seg.id=nextS.segmentId"
+//                              " WHERE s.id=?") != SQLITE_OK)
+//    {
+//        throw database_error(m_Db);
+//    }
 
-    if(q_getKmDirection.prepare("SELECT pos_meters, direction FROM railways WHERE lineId=? AND stationId=?") != SQLITE_OK)
-    {
-        throw database_error(m_Db);
-    }
+//    if(q_getKmDirection.prepare("SELECT pos_meters, direction FROM railways WHERE lineId=? AND stationId=?") != SQLITE_OK)
+//    {
+//        throw database_error(m_Db);
+//    }
 
     viewManager->prepareQueries();
 }

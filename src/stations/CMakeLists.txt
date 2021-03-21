@@ -5,6 +5,7 @@ set(TRAINTIMETABLE_SOURCES
   stations/stationsmatchmodel.h
   stations/stationssqlmodel.h
   stations/station_utils.h
+  stations/station_name_utils.h
 
   stations/stationsmatchmodel.cpp
   stations/stationssqlmodel.cpp
