@@ -281,6 +281,9 @@ void StationsModel::setSortingColumn(int col)
 
 bool StationsModel::addStation(const QString &name, db_id *outStationId)
 {
+    if(name.isEmpty())
+        return false;
+
     command q_newStation(mDb, "INSERT INTO stations(id,name,short_name,type,phone_number,svg_data)"
                               " VALUES (NULL, ?, NULL, 0, NULL, NULL)");
     q_newStation.bind(1, name);
@@ -347,6 +350,8 @@ bool StationsModel::removeStation(db_id stationId)
 
         return false;
     }
+
+    refreshData(); //Recalc row count
 
     return true;
 }
