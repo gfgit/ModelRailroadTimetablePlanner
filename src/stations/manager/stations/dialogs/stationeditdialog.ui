@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
+ <author>Filippo</author>
  <class>StationEditDialog</class>
  <widget class="QDialog" name="StationEditDialog">
   <property name="geometry">
@@ -29,7 +30,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="stationTab">
       <attribute name="title">
@@ -214,7 +215,91 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="gatesView"/>
+        <widget class="QTableWidget" name="gatesView">
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Type</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Default In Track</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Out track count</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>A</string>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="textAlignment">
+           <set>AlignCenter</set>
+          </property>
+         </item>
+         <item row="0" column="1">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="0" column="2">
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+         <item row="0" column="3">
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>B</string>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="textAlignment">
+           <set>AlignCenter</set>
+          </property>
+         </item>
+         <item row="1" column="2">
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+         <item row="1" column="3">
+          <property name="text">
+           <string>1</string>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -240,6 +325,20 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="moveTrackUpBut">
+           <property name="text">
+            <string>Move Up</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="moveTrackDownBut">
+           <property name="text">
+            <string>Move Down</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -255,7 +354,227 @@
         </layout>
        </item>
        <item>
-        <widget class="QTableView" name="trackView"/>
+        <widget class="QTableWidget" name="trackView">
+         <row>
+          <property name="text">
+           <string>1</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>2</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>3</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>Name</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Color</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Length</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Platform Length</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Freight Length</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Max Axes</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Electrified</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Trough</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>1</string>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="textAlignment">
+           <set>AlignCenter</set>
+          </property>
+         </item>
+         <item row="0" column="1">
+          <property name="text">
+           <string>Orange</string>
+          </property>
+          <property name="background">
+           <brush brushstyle="NoBrush">
+            <color alpha="255">
+             <red>255</red>
+             <green>170</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </property>
+         </item>
+         <item row="0" column="2">
+          <property name="text">
+           <string>80 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+         </item>
+         <item row="0" column="3">
+          <property name="text">
+           <string>70 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+          <property name="checkState">
+           <enum>Checked</enum>
+          </property>
+         </item>
+         <item row="0" column="4">
+          <property name="text">
+           <string>75 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+          <property name="checkState">
+           <enum>Checked</enum>
+          </property>
+         </item>
+         <item row="0" column="5">
+          <property name="text">
+           <string>120</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+         </item>
+         <item row="0" column="6">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checkState">
+           <enum>Checked</enum>
+          </property>
+         </item>
+         <item row="0" column="7">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checkState">
+           <enum>Checked</enum>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>2</string>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="textAlignment">
+           <set>AlignCenter</set>
+          </property>
+         </item>
+         <item row="1" column="2">
+          <property name="text">
+           <string>60 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+         </item>
+         <item row="1" column="4">
+          <property name="text">
+           <string>58 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+          <property name="checkState">
+           <enum>Checked</enum>
+          </property>
+         </item>
+         <item row="1" column="5">
+          <property name="text">
+           <string>80</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>3</string>
+          </property>
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="textAlignment">
+           <set>AlignCenter</set>
+          </property>
+         </item>
+         <item row="2" column="2">
+          <property name="text">
+           <string>50 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+         </item>
+         <item row="2" column="4">
+          <property name="text">
+           <string>48 cm</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+          <property name="checkState">
+           <enum>Checked</enum>
+          </property>
+         </item>
+         <item row="2" column="5">
+          <property name="text">
+           <string>70</string>
+          </property>
+          <property name="textAlignment">
+           <set>AlignTrailing|AlignVCenter</set>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </widget>
