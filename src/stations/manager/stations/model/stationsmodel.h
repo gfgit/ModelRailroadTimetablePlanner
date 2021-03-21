@@ -93,7 +93,7 @@ private:
 
     bool setName(StationItem &item, const QString &val);
     bool setShortName(StationItem &item, const QString &val);
-    bool setType(StationsModel::StationItem &item, int val);
+    bool setType(StationItem &item, int val);
     bool setPhoneNumber(StationsModel::StationItem &item, qint64 val);
 
 private:
