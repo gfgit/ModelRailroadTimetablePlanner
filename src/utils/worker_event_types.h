@@ -37,6 +37,8 @@ enum class CustomEvents
     LinesModelResult,
     RailwayNodeModelResult,
 
+    StationGatesListResult,
+
     //Jobs
     JobsModelResult
 };
