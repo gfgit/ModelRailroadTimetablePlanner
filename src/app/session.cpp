@@ -128,8 +128,6 @@ DB_Error MeetingSession::openDB(const QString &str, bool ignoreVersion)
 
     prepareQueryes();
 
-    mJobStorage->fixJobs();
-
     //    }catch(const char *msg)
     //    {
     //        QMessageBox::warning(nullptr,

@@ -20,7 +20,6 @@ public:
     JobStorage(sqlite3pp::database& db, QObject *parent = nullptr);
     ~JobStorage();
 
-    void fixJobs();
     void clear();
 
     bool addJob(db_id *outJobId = nullptr);
