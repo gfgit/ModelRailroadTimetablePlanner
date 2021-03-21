@@ -243,6 +243,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
 
     fileName = file;
 
+    //Tables
     result = m_Db.execute("CREATE TABLE rs_models ("
                           "id INTEGER,"
                           "name TEXT,"
@@ -303,10 +304,10 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "platf_length_cm INTEGET NOT NULL,"
                           "freight_length_cm INTEGER NOT NULL,"
                           "max_axes INTEGER NOT NULL,"
-                          "color_rgb INTEGER"
+                          "color_rgb INTEGER,"
                           "name TEXT,"
                           "UNIQUE(station_id, pos),"
-                          "UNIQUE(station_id, name)"
+                          "UNIQUE(station_id, name),"
                           "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE )");
     CHECK(result);
 
@@ -342,7 +343,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "in_track INTEGER NOT NULL,"
                           "out_track INTEGER NOT NULL,"
                           "UNIQUE(seg_id,in_track,out_track),"
-                          "UNIQUE(out_gate_id),"
+                          "UNIQUE(in_track),"
+                          "UNIQUE(out_track),"
                           "FOREIGN KEY(seg_id) REFERENCES railway_segments(id) ON UPDATE CASCADE ON DELETE RESTRICT )");
     CHECK(result);
 
@@ -407,7 +409,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
 
                           "FOREIGN KEY(stop_id) REFERENCES stops(id) ON DELETE CASCADE,"
                           "FOREIGN KEY(rs_id) REFERENCES rs_list(id) ON DELETE RESTRICT,"
-                          "UNIQUE(stopId,rsId))");
+                          "UNIQUE(stop_id,rs_id))");
     CHECK(result);
 
     //Create also backup tables to save old jobsegments stops and couplings before editing a job and restore them if user cancels the edits.
@@ -444,7 +446,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
 
                           "FOREIGN KEY(stop_id) REFERENCES old_stops(id) ON DELETE CASCADE," //Old stops
                           "FOREIGN KEY(rs_id) REFERENCES rs_list(id) ON DELETE RESTRICT,"
-                          "UNIQUE(stopId,rsId))");
+                          "UNIQUE(stop_id,rs_id))");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE imported_rs_owners ("
@@ -489,6 +491,49 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "name TEXT PRIMARY KEY,"
                           "val BLOB)");
     CHECK(result);
+
+    //Triggers
+
+    //Prevent multiple segments on same station gate
+    result = m_Db.execute("CREATE TRIGGER multiple_gate_segments\n"
+                          "BEFORE INSERT ON railway_segments\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE in_gate_id=NEW.out_gate_id OR out_gate_id=NEW.in_gate_id;"
+                          "END");
+    CHECK(result);
+    result = m_Db.execute("CREATE TRIGGER multiple_gate_segments_update_in\n"
+                          "BEFORE  UPDATE OF in_gate_id ON railway_segments\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE out_gate_id=NEW.in_gate_id;"
+                          "END");
+    CHECK(result);
+    result = m_Db.execute("CREATE TRIGGER multiple_gate_segments_update_out\n"
+                          "BEFORE  UPDATE OF out_gate_id ON railway_segments\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE in_node_id=NEW.out_node_id;"
+                          "END");
+    CHECK(result);
+
+    //Prevent multiple connections of same gate segment track
+    result = m_Db.execute("CREATE TRIGGER multiple_railway_conn\n"
+                          "BEFORE INSERT ON railway_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE in_track=NEW.out_track OR out_track=NEW.in_track;"
+                          "END");
+    CHECK(result);
+    result = m_Db.execute("CREATE TRIGGER multiple_railway_conn_update_in\n"
+                          "BEFORE  UPDATE OF in_track ON railway_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE out_track=NEW.in_track;"
+                          "END");
+    CHECK(result);
+    result = m_Db.execute("CREATE TRIGGER multiple_railway_conn_update_out\n"
+                          "BEFORE  UPDATE OF out_track ON railway_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE in_track=NEW.out_track;"
+                          "END");
+    CHECK(result);
+
 #undef CHECK
 
     metaDataMgr->setInt64(FormatVersion, false, MetaDataKey::FormatVersionKey);
