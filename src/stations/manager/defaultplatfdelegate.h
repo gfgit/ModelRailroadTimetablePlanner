@@ -4,6 +4,7 @@
 #include <QStyledItemDelegate>
 #include <QSpinBox>
 
+//FIXME: remove or convert to platf_id foreign key
 class PlatformSpinBox : public QSpinBox
 {
 public:
@@ -14,6 +15,7 @@ protected:
     int valueFromText(const QString &text) const override;
 };
 
+//FIXME: remove or convert to platf_id foreign key
 class DefaultPlatfDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
