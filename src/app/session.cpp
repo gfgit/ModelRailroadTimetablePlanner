@@ -277,31 +277,91 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "id INTEGER PRIMARY KEY,"
                           "name TEXT UNIQUE,"
                           "short_name TEXT UNIQUE,"
-                          "platforms INTEGER NOT NULL,"
-                          "depot_platf INTEGER,"  //depot can be 0
-                          "platf_color INTEGER,"
-                          "defplatf_freight INTEGER,"
-                          "defplatf_passenger INTEGER )");
+                          "type INTEGER NOT NULL,"
+                          "phone_number INTEGER UNIQUE,"
+                          "svg_data BLOB )");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TABLE station_gates ("
+                          "id INTEGER PRIMARY KEY,"
+                          "station_id INTEGER NOT NULL,"
+                          "out_track_count INTEGER NOT NULL,"
+                          "type INTEGER NOT NULL,"
+                          "def_in_platf_id INTEGER,"
+                          "name TEXT NOT NULL,"
+                          "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                          "FOREIGN KEY(def_in_platf_id) REFERENCES platforms(id) ON UPDATE CASCADE ON DELETE SET NULL,"
+                          "UNIQUE(station_id,name) )");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TABLE station_tracks ("
+                          "id INTEGER PRIMARY KEY,"
+                          "station_id INTEGER NOT NULL,"
+                          "pos INTEGER NOT NULL,"
+                          "type INTEGER NOT NULL,"
+                          "track_length_cm INTEGER NOT NULL,"
+                          "platf_length_cm INTEGET NOT NULL,"
+                          "freight_length_cm INTEGER NOT NULL,"
+                          "max_axes INTEGER NOT NULL,"
+                          "color_rgb INTEGER"
+                          "name TEXT,"
+                          "UNIQUE(station_id, pos),"
+                          "UNIQUE(station_id, name)"
+                          "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE )");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TABLE station_gate_connections ("
+                          "id INTEGER PRIMARY KEY,"
+                          "track_id INTEGER NOT NULL,"
+                          "track_side INTEGER NOT NULL,"
+                          "gate_id INTEGER NOT NULL,"
+                          "gate_track INTEGER NOT NULL,"
+                          "UNIQUE(id,gate_id,track_id,track_side,gate_track),"
+                          "FOREIGN KEY (track_id) REFERENCES station_tracks(id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                          "FOREIGN KEY (gate_id) REFERENCES station_gates(id) ON UPDATE CASCADE ON DELETE CASCADE )");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TABLE railway_segments ("
+                          "id INTEGER PRIMARY KEY,"
+                          "in_gate_id INTEGER NOT NULL,"
+                          "out_gate_id INTEGER NOT NULL,"
+                          "name TEXT,"
+                          "max_speed_kmh INTEGER NOT NULL,"
+                          "type INTEGER NOT NULL,"
+                          "distance_meters INTEGER NOT NULL,"
+                          "UNIQUE(in_gate_id),"
+                          "UNIQUE(out_gate_id),"
+                          "FOREIGN KEY(in_gate_id) REFERENCES station_gates(id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                          "FOREIGN KEY(out_gate_id) REFERENCES station_gates(id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                          "CHECK(in_gate_id<>out_gate_id) )");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TABLE railway_connections ("
+                          "id INTEGER PRIMARY KEY,"
+                          "seg_id INTEGER NOT NULL,"
+                          "in_track INTEGER NOT NULL,"
+                          "out_track INTEGER NOT NULL,"
+                          "UNIQUE(seg_id,in_track,out_track),"
+                          "UNIQUE(out_gate_id),"
+                          "FOREIGN KEY(seg_id) REFERENCES railway_segments(id) ON UPDATE CASCADE ON DELETE RESTRICT )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE lines ("
                           "id INTEGER PRIMARY KEY,"
                           "name TEXT NOT NULL UNIQUE,"
-                          "max_speed INTEGER DEFAULT 120,"
-                          "type INTEGER )");
+                          "start_meters INTEGER NOT NULL DEFAULT 0 )");
     CHECK(result);
 
-    result =  m_Db.execute("CREATE TABLE railways ("
-                           "id INTEGER PRIMARY KEY,"
-                           "lineId INTEGER NOT NULL,"
-                           "stationId INTEGER NOT NULL,"
-                           "pos_meters INTEGER,"
-                           "direction INTEGER DEFAULT 0,"
-
-                           "UNIQUE(lineId, stationId)"
-                           "UNIQUE(lineId, pos_meters)"
-                           "FOREIGN KEY(lineId) REFERENCES lines(id) ON DELETE CASCADE,"
-                           "FOREIGN KEY(stationId) REFERENCES stations(id) ON DELETE RESTRICT)"); //Delete lines but block when deleting stations registered in line
+    result =  m_Db.execute("CREATE TABLE line_segments ("
+                          "id INTEGER PRIMARY KEY,"
+                          "line_id INTEGER NOT NULL,"
+                          "seg_id INTEGER NOT NULL,"
+                          "direction INTEGER NOT NULL,"
+                          "pos INTEGER NOT NULL,"
+                          "FOREIGN KEY(line_id) REFERENCES lines(id) ON UPDATE CASCADE ON DELETE CASCADE,"
+                          "FOREIGN KEY(seg_id) REFERENCES railway_segments(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+                          "UNIQUE(line_id, seg_id)"
+                          "UNIQUE(line_id, pos) )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE jobshifts ("
@@ -310,109 +370,80 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE jobs ("
-                          "id INTEGER NOT NULL,"
+                          "id INTEGER PRIMARY KEY,"
                           "category INTEGER NOT NULL DEFAULT 0,"
-                          "firstStop INTEGER,"
-                          "lastStop INTEGER,"
-                          "shiftId INTEGER,"
-                          "PRIMARY KEY(id),"
-
-                          "FOREIGN KEY(firstStop) REFERENCES stops(id) ON DELETE SET NULL,"
-                          "FOREIGN KEY(lastStop) REFERENCES stops(id) ON DELETE SET NULL,"
-                          "FOREIGN KEY(shiftId) REFERENCES jobshifts(id) )");
-    CHECK(result);
-
-    result = m_Db.execute("CREATE TABLE jobsegments ("
-                          "id INTEGER,"
-                          "jobId INTEGER,"
-                          "lineId INTEGER,"
-                          "num INTEGER,"
-                          "PRIMARY KEY(id),"
-                          "FOREIGN KEY(jobId) REFERENCES jobs(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
-                          "FOREIGN KEY(lineId) REFERENCES lines(id) ON DELETE RESTRICT,"
-                          "UNIQUE(jobId,num))");
+                          "shift_id INTEGER,"
+                          "FOREIGN KEY(shift_id) REFERENCES jobshifts(id) )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE stops ("
                           "id INTEGER PRIMARY KEY,"
-                          "jobId INTEGER,"
-                          "stationId INTEGER,"
-                          "arrival INTEGER,"
-                          "departure INTEGER,"
-                          "platform INTEGER NOT NULL DEFAULT 1,"
-                          "transit INTEGER DEFAULT 0,"
+                          "job_id INTEGER NOT NULL,"
+                          "station_id INTEGER,"
+                          "arrival INTEGER NOT NULL,"
+                          "departure INTEGER NOT NULL,"
+                          "type INTEGER NOT NULL,"
                           "description TEXT,"
-                          "segmentId INTEGER,"
-                          "otherSegment INTEGER,"
-                          "rw_node INTEGER,"
-                          "other_rw_node INTEGER,"
 
-                          "FOREIGN KEY(otherSegment) REFERENCES jobsegments(id) ON DELETE RESTRICT,"
-                          "FOREIGN KEY(segmentId) REFERENCES jobsegments(id) ON DELETE RESTRICT,"
-                          "FOREIGN KEY(jobId) REFERENCES jobs(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
-                          "FOREIGN KEY(stationId) REFERENCES stations(id) ON DELETE RESTRICT,"
-                          "FOREIGN KEY(rw_node) REFERENCES railways(id) ON DELETE RESTRICT,"
-                          "FOREIGN KEY(other_rw_node) REFERENCES railways(id) ON DELETE RESTRICT,"
-                          "UNIQUE(jobId,arrival),"
-                          "UNIQUE(jobId,departure))");
+                          "in_gate_conn INTEGER,"
+                          "out_gate_conn INTEGER,"
+                          "next_segment_conn_id INTEGER,"
+
+                          "CHECK(arrival<=departure),"
+                          "UNIQUE(job_id,arrival),"
+                          "UNIQUE(job_id,departure),"
+                          "FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
+                          "FOREIGN KEY(station_id) REFERENCES stations(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
+                          "FOREIGN KEY(in_gate_conn) REFERENCES station_gate_connections(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+                          "FOREIGN KEY(out_gate_conn) REFERENCES station_gate_connections(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+                          "FOREIGN KEY(next_segment_conn_id) REFERENCES railway_connections(id) ON UPDATE CASCADE ON DELETE RESTRICT )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE coupling ("
                           "id INTEGER PRIMARY KEY,"
-                          "stopId INTEGER,"
-                          "rsId INTEGER,"
-                          "operation INTEGER DEFAULT 0,"
+                          "stop_id INTEGER,"
+                          "rs_id INTEGER,"
+                          "operation INTEGER NOT NULL DEFAULT 0,"
 
-                          "FOREIGN KEY(stopId) REFERENCES stops(id) ON DELETE CASCADE,"
-                          "FOREIGN KEY(rsId) REFERENCES rs_list(id) ON DELETE RESTRICT,"
+                          "FOREIGN KEY(stop_id) REFERENCES stops(id) ON DELETE CASCADE,"
+                          "FOREIGN KEY(rs_id) REFERENCES rs_list(id) ON DELETE RESTRICT,"
                           "UNIQUE(stopId,rsId))");
     CHECK(result);
 
     //Create also backup tables to save old jobsegments stops and couplings before editing a job and restore them if user cancels the edits.
-    //NOTE: the structure of the table must be the same, remember to update theese if updating jobsegments stops or coupling
-    result = m_Db.execute("CREATE TABLE old_jobsegments ("
-                          "id INTEGER,"
-                          "jobId INTEGER,"
-                          "lineId INTEGER,"
-                          "num INTEGER,"
-                          "PRIMARY KEY(id),"
-                          "FOREIGN KEY(jobId) REFERENCES jobs(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
-                          "FOREIGN KEY(lineId) REFERENCES lines(id) ON DELETE RESTRICT,"
-                          "UNIQUE(jobId,num) )");
-    CHECK(result);
+    //NOTE: the structure of the table must be the same, remember to update theese if updating stops or couplings
 
     result = m_Db.execute("CREATE TABLE old_stops ("
                           "id INTEGER PRIMARY KEY,"
-                          "jobId INTEGER,"
-                          "stationId INTEGER,"
-                          "arrival INTEGER,"
-                          "departure INTEGER,"
-                          "platform INTEGER NOT NULL DEFAULT 1,"
-                          "transit INTEGER DEFAULT 0,"
+                          "job_id INTEGER NOT NULL,"
+                          "station_id INTEGER,"
+                          "arrival INTEGER NOT NULL,"
+                          "departure INTEGER NOT NULL,"
+                          "type INTEGER NOT NULL,"
                           "description TEXT,"
-                          "segmentId INTEGER,"
-                          "otherSegment INTEGER,"
-                          "rw_node INTEGER,"
-                          "other_rw_node INTEGER,"
 
-                          "FOREIGN KEY(otherSegment) REFERENCES old_jobsegments(id) ON DELETE RESTRICT," //NOTE: this must refer to 'old_jobsegments' instead of 'jobsegments'
-                          "FOREIGN KEY(segmentId) REFERENCES old_jobsegments(id) ON DELETE RESTRICT,"    //NOTE: this must refer to 'old_jobsegments' instead of 'jobsegments'
-                          "FOREIGN KEY(jobId) REFERENCES jobs(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
-                          "FOREIGN KEY(stationId) REFERENCES stations(id) ON DELETE RESTRICT,"
-                          "FOREIGN KEY(rw_node) REFERENCES railways(id) ON DELETE RESTRICT,"
-                          "FOREIGN KEY(other_rw_node) REFERENCES railways(id) ON DELETE RESTRICT,"
-                          "UNIQUE(jobId,arrival),"
-                          "UNIQUE(jobId,departure) )");
+                          "in_gate_conn INTEGER,"
+                          "out_gate_conn INTEGER,"
+                          "next_segment_conn_id INTEGER,"
+
+                          "CHECK(arrival<=departure),"
+                          "UNIQUE(job_id,arrival),"
+                          "UNIQUE(job_id,departure),"
+                          "FOREIGN KEY(job_id) REFERENCES jobs(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
+                          "FOREIGN KEY(station_id) REFERENCES stations(id) ON DELETE RESTRICT ON UPDATE CASCADE,"
+                          "FOREIGN KEY(in_gate_conn) REFERENCES station_gate_connections(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+                          "FOREIGN KEY(out_gate_conn) REFERENCES station_gate_connections(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
+                          "FOREIGN KEY(next_segment_conn_id) REFERENCES railway_connections(id) ON UPDATE CASCADE ON DELETE RESTRICT )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE old_coupling ("
                           "id INTEGER PRIMARY KEY,"
-                          "stopId INTEGER,"
-                          "rsId INTEGER,"
-                          "operation INTEGER DEFAULT 0,"
+                          "stop_id INTEGER,"
+                          "rs_id INTEGER,"
+                          "operation INTEGER NOT NULL DEFAULT 0,"
 
-                          "FOREIGN KEY(stopId) REFERENCES old_stops(id) ON DELETE CASCADE," //NOTE: this must refer to 'old_stops' instead of 'stops'
-                          "FOREIGN KEY(rsId) REFERENCES rs_list(id) ON DELETE RESTRICT,"
+                          "FOREIGN KEY(stop_id) REFERENCES old_stops(id) ON DELETE CASCADE," //Old stops
+                          "FOREIGN KEY(rs_id) REFERENCES rs_list(id) ON DELETE RESTRICT,"
                           "UNIQUE(stopId,rsId))");
     CHECK(result);
 
@@ -518,23 +549,23 @@ void MeetingSession::prepareQueryes()
     DEBUG_COLOR_ENTRY(SHELL_YELLOW);
 
     if(q_getPrevStop.prepare("SELECT MAX(prev.departure),"
-                             "prev.stationId,"
-                             "seg.lineId"
-                             " FROM stops prev"
-                             " JOIN stops s ON s.jobId=prev.jobId AND prev.departure<s.arrival"
-                             " JOIN jobsegments seg ON seg.id=s.segmentId"
-                             " WHERE s.id=?") != SQLITE_OK)
+                              "prev.stationId,"
+                              "seg.lineId"
+                              " FROM stops prev"
+                              " JOIN stops s ON s.jobId=prev.jobId AND prev.departure<s.arrival"
+                              " JOIN jobsegments seg ON seg.id=s.segmentId"
+                              " WHERE s.id=?") != SQLITE_OK)
     {
         throw database_error(m_Db);
     }
 
     if(q_getNextStop.prepare("SELECT MIN(nextS.arrival),"
-                             "nextS.stationId,"
-                             "seg.lineId"
-                             " FROM stops nextS"
-                             " JOIN stops s ON s.jobId=nextS.jobId AND nextS.arrival>s.departure"
-                             " JOIN jobsegments seg ON seg.id=nextS.segmentId"
-                             " WHERE s.id=?") != SQLITE_OK)
+                              "nextS.stationId,"
+                              "seg.lineId"
+                              " FROM stops nextS"
+                              " JOIN stops s ON s.jobId=nextS.jobId AND nextS.arrival>s.departure"
+                              " JOIN jobsegments seg ON seg.id=nextS.segmentId"
+                              " WHERE s.id=?") != SQLITE_OK)
     {
         throw database_error(m_Db);
     }
@@ -792,9 +823,9 @@ Direction MeetingSession::getStopDirection(db_id stopId, db_id stId)
 void MeetingSession::locateAppdata()
 {
     appDataPath = QDir::cleanPath(QStringLiteral("%1/%2/%3"))
-            .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-            .arg(AppCompany)
-            .arg(AppDisplayName);
+                      .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
+                      .arg(AppCompany)
+                      .arg(AppDisplayName);
     qDebug() << appDataPath;
 }
 
