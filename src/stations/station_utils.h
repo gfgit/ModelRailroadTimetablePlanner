@@ -14,6 +14,7 @@ enum class StationType : qint8
     NTypes
 };
 
+//TODO: is this useful???
 enum class GateType : qint8
 {
     Unknown = 0,
@@ -24,6 +25,12 @@ enum class GateType : qint8
     LeftHandTraffic = 1 << 2,
     RightHandTraffic = 1 << 3,
     MultipleTraffic = (LeftHandTraffic | RightHandTraffic)
+};
+
+enum class GateSide : qint8
+{
+    East = 0,
+    West = 1
 };
 
 //NOTE: a track can be for passenger and freight traffic at the same time or none of them

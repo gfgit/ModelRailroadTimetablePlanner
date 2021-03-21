@@ -24,6 +24,11 @@ public:
             return QString();
         return tr(StationTypeNamesTable[int(t)]);
     }
+
+    static inline QString name(GateSide s)
+    {
+        return s == East ? tr("East") : tr("West");
+    }
 };
 
 } // namespace utils
