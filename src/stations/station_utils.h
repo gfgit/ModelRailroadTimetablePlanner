@@ -18,7 +18,7 @@ enum class StationType : qint8
 enum class GateType : qint8
 {
     Unknown = 0,
-    Entrance = 1 << 0,
+    Entrance = 1 << 0, //NOTE: at least Entrance or Exit
     Exit     = 1 << 1,
     Bidirectional = (Entrance | Exit),
 
