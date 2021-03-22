@@ -63,6 +63,9 @@ StationEditDialog::~StationEditDialog()
 
 bool StationEditDialog::setStation(db_id stationId)
 {
+    if(!gatesModel->setStation(stationId))
+        return false;
+
     QString stationName;
     QString shortName;
     utils::StationType type = utils::StationType::Normal;
@@ -75,7 +78,6 @@ bool StationEditDialog::setStation(db_id stationId)
     ui->stationTypeCombo->setCurrentIndex(int(type));
     ui->phoneEdit->setText(QString::number(phoneNumber));
 
-    gatesModel->setStation(stationId);
     setWindowTitle(stationName.isEmpty() ? tr("New Station") : stationName);
 
     return true;
