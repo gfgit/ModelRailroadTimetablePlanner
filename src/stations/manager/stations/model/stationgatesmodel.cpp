@@ -176,6 +176,18 @@ QVariant StationGatesModel::data(const QModelIndex &idx, int role) const
         }
         break;
     }
+    case Qt::TextAlignmentRole:
+    {
+        switch (idx.column())
+        {
+        case LetterCol:
+            return Qt::AlignCenter;
+        case OutTrackCountCol:
+        case DefaultInPlatfCol:
+            return Qt::AlignRight + Qt::AlignVCenter;
+        }
+        break;
+    }
     case Qt::CheckStateRole:
     {
         switch (idx.column())
@@ -223,6 +235,14 @@ bool StationGatesModel::setData(const QModelIndex &idx, const QVariant &value, i
             bool ok = false;
             int val = value.toInt(&ok);
             if(!ok || !setSide(item, val))
+                return false;
+            break;
+        }
+        case OutTrackCountCol:
+        {
+            bool ok = false;
+            int val = value.toInt(&ok);
+            if(!ok || !setOutTrackCount(item, val))
                 return false;
             break;
         }
@@ -334,6 +354,42 @@ void StationGatesModel::setSortingColumn(int col)
     QModelIndex first = index(0, 0);
     QModelIndex last = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
+}
+
+bool StationGatesModel::getFieldData(int row, int col, db_id &idOut, QString &nameOut) const
+{
+    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size() || col != DefaultInPlatfCol)
+        return false;
+
+    const GateItem& item = cache[row - cacheFirstRow];
+    idOut = item.defaultInPlatfId;
+    nameOut = item.defPlatfName;
+
+    return true;
+}
+
+bool StationGatesModel::validateData(int row, int col, db_id id, const QString &name)
+{
+    Q_UNUSED(row)
+    Q_UNUSED(col)
+    Q_UNUSED(id)
+    Q_UNUSED(name)
+    return true;
+}
+
+bool StationGatesModel::setFieldData(int row, int col, db_id id, const QString &name)
+{
+    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size() || col != DefaultInPlatfCol)
+        return false;
+
+    GateItem& item = cache[row - cacheFirstRow];
+    if(setDefaultPlatf(item, id, name))
+    {
+        QModelIndex idx = index(row, DefaultInPlatfCol);
+        emit dataChanged(idx, idx);
+        return true;
+    }
+    return false;
 }
 
 bool StationGatesModel::setStation(db_id stationId)
@@ -806,6 +862,30 @@ bool StationGatesModel::setOutTrackCount(StationGatesModel::GateItem &item, int 
     }
 
     item.outTrackCount = count;
+
+    return true;
+}
+
+bool StationGatesModel::setDefaultPlatf(StationGatesModel::GateItem &item, db_id trackId, const QString& trackName)
+{
+    if(item.defaultInPlatfId == trackId)
+        return false;
+
+    //FIXME: check if it is of same station and connected to this gate
+    //TODO: maybe implement a TRIGGER
+
+    command q(mDb, "UPDATE station_gates SET def_in_platf_id=? WHERE id=?");
+    q.bind(1, trackId);
+    q.bind(2, item.gateId);
+    int ret = q.step();
+    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    {
+        emit modelError(tr("Error: %1").arg(mDb.error_msg()));
+        return false;
+    }
+
+    item.defaultInPlatfId = trackId;
+    item.defPlatfName = trackName;
 
     return true;
 }

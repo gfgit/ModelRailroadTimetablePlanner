@@ -2,10 +2,11 @@
 #define STATIONGATESMODEL_H
 
 #include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/sqldelegate/IFKField.h"
 
 #include "stations/station_utils.h"
 
-class StationGatesModel : public IPagedItemModel
+class StationGatesModel : public IPagedItemModel, public IFKField
 {
     Q_OBJECT
 
@@ -64,6 +65,12 @@ public:
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
 
+    // IFKField
+
+    virtual bool getFieldData(int row, int col, db_id &idOut, QString& nameOut) const override;
+    virtual bool validateData(int row, int col, db_id id, const QString& name) override;
+    virtual bool setFieldData(int row, int col, db_id id, const QString& name) override;
+
     // StationGatesModel
 
     bool setStation(db_id stationId);
@@ -117,6 +124,7 @@ private:
     bool setSide(GateItem &item, int val);
     bool setType(GateItem &item, QFlags<utils::GateType> type);
     bool setOutTrackCount(GateItem &item, int count);
+    bool setDefaultPlatf(StationGatesModel::GateItem &item, db_id trackId, const QString &trackName);
 
 private:
     db_id m_stationId;
