@@ -479,7 +479,7 @@ void StationsModel::internalFetch(int first, int sortCol, int valRow, const QVar
             if(r.column_type(4) == SQLITE_NULL)
                 item.phone_number = -1;
             else
-                item.phone_number = r.get<int>(4);
+                item.phone_number = r.get<qint64>(4);
             i--;
         }
         if(i > -1)
@@ -500,7 +500,7 @@ void StationsModel::internalFetch(int first, int sortCol, int valRow, const QVar
             if(r.column_type(4) == SQLITE_NULL)
                 item.phone_number = -1;
             else
-                item.phone_number = r.get<int>(4);
+                item.phone_number = r.get<qint64>(4);
             i++;
         }
         if(i < BatchSize)
