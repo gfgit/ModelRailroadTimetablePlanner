@@ -34,11 +34,10 @@ enum class GateSide : qint8
 };
 
 //NOTE: a track can be for passenger and freight traffic at the same time or none of them
+//      just set platf_length_cm TO non-zero, same for freight_length_cm
 enum class StationTrackType : qint8
 {
     Electrified = 1 << 0, //Electric engines are allowed
-    Passenger   = 1 << 1, //For passenger traffic
-    Freight     = 1 << 2, //For freight traffic
     Through     = 1 << 3 //For non-stopping trains
 };
 
