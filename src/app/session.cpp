@@ -305,7 +305,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "def_in_platf_id INTEGER,"
                           "name TEXT NOT NULL,"
                           "side INTEGER NOT NULL,"
-                          "CHECK((type&(1<<0) OR (type&(1<<1))" //NOTE: see utils::GateType
+                          "CHECK(type&(1<<0) OR type&(1<<1))," //NOTE: see utils::GateType
                           "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE,"
                           "FOREIGN KEY(def_in_platf_id) REFERENCES station_tracks(id) ON UPDATE CASCADE ON DELETE SET NULL,"
                           "UNIQUE(station_id,name) )");
