@@ -311,7 +311,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "name TEXT NOT NULL,"
                           "side INTEGER NOT NULL,"
                           "CHECK("
-                          " (type&(1<<0) OR type&(1<<1))"
+                          " out_track_count>0 AND (type&(1<<0) OR type&(1<<1))"
                           " AND (length(name)=1 AND name BETWEEN 'A' AND 'Z')"
                           ")," //NOTE: see utils::GateType
                           "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE,"
