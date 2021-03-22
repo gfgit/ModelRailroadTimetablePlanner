@@ -24,7 +24,9 @@
 
 #include "stations/manager/free_rs_viewer/stationfreersviewer.h" //TODO: move to ViewManager
 
-#include "railwaynode/railwaynodeeditor.h"
+#include "railwaynode/railwaynodeeditor.h" //TODO: remove and delete
+
+#include "stations/manager/stations/dialogs/stationeditdialog.h"
 
 #include <QInputDialog>
 
@@ -301,11 +303,19 @@ void StationsManager::onEditStation()
     db_id stId = stationsModel->getIdAtRow(idx.row());
     if(!stId)
         return;
-    QString stName = stationsModel->getNameAtRow(idx.row());
+//    QString stName = stationsModel->getNameAtRow(idx.row());
 
-    RailwayNodeEditor ed(Session->m_Db, this);
-    ed.setMode(stName, stId, RailwayNodeMode::StationLinesMode);
-    ed.exec();
+//    RailwayNodeEditor ed(Session->m_Db, this);
+//    ed.setMode(stName, stId, RailwayNodeMode::StationLinesMode);
+//    ed.exec();
+
+    StationEditDialog dlg(Session->m_Db, this);
+    dlg.setStation(stId);
+    if(dlg.exec() == QDialog::Accepted)
+    {
+        //Refresh model
+        stationsModel->clearCache();
+    }
 }
 
 void StationsManager::showStPlan()
