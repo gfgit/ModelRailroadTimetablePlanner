@@ -335,6 +335,7 @@ bool StationGatesModel::setStation(db_id stationId)
     m_stationId = stationId;
     clearCache();
     refreshData();
+    return true;
 }
 
 bool StationGatesModel::addGate(const QChar &name, db_id *outGateId)

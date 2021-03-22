@@ -27,7 +27,7 @@ public:
 
     static inline QString name(GateSide s)
     {
-        return s == East ? tr("East") : tr("West");
+        return s == GateSide::East ? tr("East") : tr("West");
     }
 };
 
