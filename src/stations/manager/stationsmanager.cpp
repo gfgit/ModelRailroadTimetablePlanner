@@ -267,14 +267,14 @@ void StationsManager::onNewStation()
             break; //User canceled
         }
 
-        const QString name = dlg.textValue();
+        const QString name = dlg.textValue().simplified();
         if(name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Station name cannot be empty."));
             continue; //Second chance
         }
 
-        if(stationsModel->addStation(dlg.textValue()))
+        if(stationsModel->addStation(name))
         {
             break; //Done!
         }
