@@ -36,6 +36,11 @@ static constexpr char
                         "This gate is still referenced.\n"
                         "Please remove all references before deleting it.");
 
+static constexpr char
+    errorGateEntranceOrExitText[] = QT_TRANSLATE_NOOP("StationGatesModel",
+                        "The gate must be at least Entrance or Exit.\n"
+                        "It can also be both (Bidirectional) but cannot be neither.");
+
 
 StationGatesModel::StationGatesModel(sqlite3pp::database &db, QObject *parent) :
     IPagedItemModel(BatchSize, db, parent),
@@ -754,6 +759,14 @@ bool StationGatesModel::setType(StationGatesModel::GateItem &item, QFlags<utils:
 {
     if(item.type == type)
         return false;
+
+    if((type & utils::GateType::Bidirectional) == 0)
+    {
+        //Gate is neither Entrance nor Exit
+        //This is also checked by SQL CHECK() but this error message is better
+        emit modelError(tr(errorGateEntranceOrExitText));
+        return false;
+    }
 
     command q(mDb, "UPDATE station_gates SET type=? WHERE id=?");
     q.bind(1, type);
