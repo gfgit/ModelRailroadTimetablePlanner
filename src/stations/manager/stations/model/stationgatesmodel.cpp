@@ -396,11 +396,11 @@ bool StationGatesModel::addGate(const QChar &name, db_id *outGateId)
     return true;
 }
 
-bool StationGatesModel::removeGate(db_id stationId)
+bool StationGatesModel::removeGate(db_id gateId)
 {
     command q_removeStation(mDb, "DELETE FROM station_gatess WHERE id=?");
 
-    q_removeStation.bind(1, stationId);
+    q_removeStation.bind(1, gateId);
     int ret = q_removeStation.execute();
     q_removeStation.reset();
 
@@ -420,6 +420,8 @@ bool StationGatesModel::removeGate(db_id stationId)
     }
 
     refreshData(); //Recalc row count
+
+    emit gateRemoved(gateId);
 
     return true;
 }

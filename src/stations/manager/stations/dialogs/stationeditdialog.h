@@ -36,7 +36,7 @@ private slots:
     void modelError(const QString& msg);
     void currentTabChanged(int idx);
 
-    void onGateNameChanged();
+    void onGatesChanged();
     void addGate();
     void removeSelectedGate();
 

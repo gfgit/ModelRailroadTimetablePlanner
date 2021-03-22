@@ -65,11 +65,12 @@ public:
     virtual void setSortingColumn(int col) override;
 
     // StationGatesModel
+
     bool setStation(db_id stationId);
     inline db_id getStation() const { return m_stationId; }
 
     bool addGate(const QChar& name, db_id *outGateId = nullptr);
-    bool removeGate(db_id stationId);
+    bool removeGate(db_id gateId);
 
     // Convinience
     inline db_id getIdAtRow(int row) const
@@ -105,6 +106,7 @@ public:
 
 signals:
     void gateNameChanged(db_id gateId, const QString& name);
+    void gateRemoved(db_id gateId);
 
 private:
     void fetchRow(int row);

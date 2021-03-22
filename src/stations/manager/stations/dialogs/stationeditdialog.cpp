@@ -47,7 +47,8 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     //Gates Tab
     gatesModel = new StationGatesModel(db, this);
     connect(gatesModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
-    connect(gatesModel, &StationGatesModel::gateNameChanged, this, &StationEditDialog::onGateNameChanged);
+    connect(gatesModel, &StationGatesModel::gateNameChanged, this, &StationEditDialog::onGatesChanged);
+    connect(gatesModel, &StationGatesModel::gateRemoved, this, &StationEditDialog::onGatesChanged);
 
     ModelPageSwitcher *ps = new ModelPageSwitcher(false, this);
     ui->gatesLayout->addWidget(ps);
@@ -186,9 +187,10 @@ void StationEditDialog::currentTabChanged(int idx)
     }
 }
 
-void StationEditDialog::onGateNameChanged()
+void StationEditDialog::onGatesChanged()
 {
-
+    //A gate was removed or changed name
+    //Update platform connections and gate connections
 }
 
 void StationEditDialog::addGate()
