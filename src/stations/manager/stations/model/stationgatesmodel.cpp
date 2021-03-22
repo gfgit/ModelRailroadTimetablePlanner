@@ -207,7 +207,7 @@ bool StationGatesModel::setData(const QModelIndex &idx, const QVariant &value, i
         {
         case LetterCol:
         {
-            QString str = value.toString();
+            QString str = value.toString().simplified();
             if(str.isEmpty() || !setName(item, str.at(0)))
                 return false;
             break;
@@ -340,17 +340,17 @@ bool StationGatesModel::setStation(db_id stationId)
 
 bool StationGatesModel::addGate(const QChar &name, db_id *outGateId)
 {
-    if(!name.isLetter())
+    char ch = name.toUpper().toLatin1();
+    if(ch < 'A' || ch > 'Z')
     {
         emit modelError(tr(errorNameNotLetterText));
         return false;
     }
 
-    const QChar letter = name.toUpper();
-    char tmp[2] = { letter.toLatin1(), '\0'};
+    char tmp[2] = { ch, '\0'};
     const utils::GateType type = utils::GateType::Bidirectional;
 
-    command q_newGate(mDb, "INSERT INTO station_gatess"
+    command q_newGate(mDb, "INSERT INTO station_gates"
                            "(id, station_id, out_track_count, type, def_in_platf_id, name, side)"
                            " VALUES (NULL, ?, 1, ?, NULL, ?, 0)");
     q_newGate.bind(1, m_stationId);
@@ -372,7 +372,7 @@ bool StationGatesModel::addGate(const QChar &name, db_id *outGateId)
 
         if(ret == SQLITE_CONSTRAINT_UNIQUE)
         {
-            emit modelError(tr(errorNameAlreadyUsedText).arg(letter));
+            emit modelError(tr(errorNameAlreadyUsedText).arg(ch));
         }
         else
         {
@@ -438,7 +438,12 @@ bool StationGatesModel::getStationInfo(QString& name, QString &shortName, utils:
     name = r.get<QString>(0);
     shortName = r.get<QString>(1);
     type = utils::StationType(r.get<int>(2));
-    phoneNumber = r.get<qint64>(3);
+
+    if(r.column_type(3) == SQLITE_NULL)
+        phoneNumber = -1;
+    else
+        phoneNumber = r.get<qint64>(3);
+
     return true;
 }
 
@@ -672,17 +677,17 @@ void StationGatesModel::handleResult(const QVector<StationGatesModel::GateItem> 
 
 bool StationGatesModel::setName(StationGatesModel::GateItem &item, const QChar &val)
 {
-    if(!val.isLetter())
+    char ch = val.toUpper().toLatin1();
+    if(ch < 'A' || ch > 'Z')
     {
         emit modelError(tr(errorNameNotLetterText));
         return false;
     }
 
-    const QChar letter = val.toUpper();
-    if(item.letter == letter)
+    if(item.letter == ch)
         return false;
 
-    char tmp[2] = { letter.toLatin1(), '\0'};
+    char tmp[2] = { ch, '\0'};
 
     command q(mDb, "UPDATE station_gates SET name=? WHERE id=?");
     q.bind(1, tmp, sqlite3pp::copy_semantic::nocopy);
@@ -692,7 +697,7 @@ bool StationGatesModel::setName(StationGatesModel::GateItem &item, const QChar &
     {
         if(ret == SQLITE_CONSTRAINT_UNIQUE)
         {
-            emit modelError(tr(errorNameAlreadyUsedText).arg(letter));
+            emit modelError(tr(errorNameAlreadyUsedText).arg(ch));
         }
         else
         {
@@ -701,7 +706,7 @@ bool StationGatesModel::setName(StationGatesModel::GateItem &item, const QChar &
         return false;
     }
 
-    item.letter = letter;
+    item.letter = ch;
     emit gateNameChanged(item.gateId, item.letter);
 
     //This row has now changed position so we need to invalidate cache
