@@ -39,7 +39,7 @@ enum class GateSide : qint8
 enum class StationTrackType : qint8
 {
     Electrified = 1 << 0, //Electric engines are allowed
-    Through     = 1 << 3 //For non-stopping trains
+    Through     = 1 << 1 //For non-stopping trains
 };
 
 enum class RailwaySegmentType : qint8
