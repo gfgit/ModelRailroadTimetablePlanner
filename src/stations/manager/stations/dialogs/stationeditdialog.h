@@ -34,6 +34,8 @@ private slots:
     void currentTabChanged(int idx);
 
     void onGateNameChanged();
+    void addGate();
+    void removeSelectedGate();
 
 private:
     enum Tabs
