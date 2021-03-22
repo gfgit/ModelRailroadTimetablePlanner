@@ -175,9 +175,9 @@ QVariant StationGatesModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case IsEntranceCol:
-            return item.type.testFlag(utils::GateType::Entrance);
+            return item.type.testFlag(utils::GateType::Entrance) ? Qt::Checked : Qt::Unchecked;
         case IsExitCol:
-            return item.type.testFlag(utils::GateType::Exit);
+            return item.type.testFlag(utils::GateType::Exit) ? Qt::Checked : Qt::Unchecked;
         }
         break;
     }
@@ -534,7 +534,7 @@ void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const 
 //        else
 //            sql += ">?3";
 //    }
-    sql += "WHERE g.station_id=?";
+    sql += " WHERE g.station_id=?4";
 
     sql += " ORDER BY ";
     sql += whereCol;
@@ -550,6 +550,8 @@ void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const 
     q.bind(1, BatchSize);
     if(offset)
         q.bind(2, offset);
+
+    q.bind(4, m_stationId);
 
     //    if(val.isValid())
     //    {
