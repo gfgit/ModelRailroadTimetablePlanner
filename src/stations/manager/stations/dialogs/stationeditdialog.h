@@ -26,6 +26,9 @@ public:
     bool setStation(db_id stationId);
     db_id getStation() const;
 
+    void setStationInternalEditingEnabled(bool enable);
+    void setStationExternalEditingEnabled(bool enable);
+
 public slots:
     void done(int res) override;
 

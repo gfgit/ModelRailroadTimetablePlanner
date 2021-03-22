@@ -97,6 +97,21 @@ db_id StationEditDialog::getStation() const
     return gatesModel->getStation();
 }
 
+void StationEditDialog::setStationInternalEditingEnabled(bool enable)
+{
+    gatesModel->setEditable(enable);
+    ui->stationNameEdit->setEnabled(enable);
+    ui->shortNameEdit->setEnabled(enable);
+    ui->stationTypeCombo->setEnabled(enable);
+
+    //TODO: also SVG
+}
+
+void StationEditDialog::setStationExternalEditingEnabled(bool enable)
+{
+    ui->phoneEdit->setEnabled(enable);
+}
+
 void StationEditDialog::done(int res)
 {
     if(res == QDialog::Accepted)

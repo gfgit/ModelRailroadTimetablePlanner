@@ -310,6 +310,8 @@ void StationsManager::onEditStation()
 //    ed.exec();
 
     StationEditDialog dlg(Session->m_Db, this);
+    dlg.setStationInternalEditingEnabled(true);
+    dlg.setStationExternalEditingEnabled(true);
     dlg.setStation(stId);
     if(dlg.exec() == QDialog::Accepted)
     {
