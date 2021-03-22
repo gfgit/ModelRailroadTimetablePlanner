@@ -30,7 +30,8 @@ enum class GateType : qint8
 enum class GateSide : qint8
 {
     East = 0,
-    West = 1
+    West = 1,
+    NSides
 };
 
 //NOTE: a track can be for passenger and freight traffic at the same time or none of them
