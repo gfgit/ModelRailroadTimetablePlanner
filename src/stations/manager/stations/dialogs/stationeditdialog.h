@@ -9,11 +9,15 @@ namespace sqlite3pp {
 class database;
 } // namespace sqlite3pp
 
+class SpinBoxEditorFactory;
+class StationTracksMatchFactory;
+
+class StationGatesModel;
+class StationTracksModel;
+
 namespace Ui {
 class StationEditDialog;
 }
-
-class StationGatesModel;
 
 class StationEditDialog : public QDialog
 {
@@ -34,11 +38,16 @@ public slots:
 
 private slots:
     void modelError(const QString& msg);
-    void currentTabChanged(int idx);
 
     void onGatesChanged();
     void addGate();
     void removeSelectedGate();
+
+    void onTracksChanged();
+    void addTrack();
+    void removeSelectedTrack();
+    void moveTrackUp();
+    void moveTrackDown();
 
 private:
     enum Tabs
@@ -53,7 +62,11 @@ private:
 
     Ui::StationEditDialog *ui;
 
+    SpinBoxEditorFactory *trackLengthSpinFactory;
+    StationTracksMatchFactory *trackFactory;
+
     StationGatesModel *gatesModel;
+    StationTracksModel *tracksModel;
 };
 
 #endif // STATIONEDITDIALOG_H

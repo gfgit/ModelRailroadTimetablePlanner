@@ -4,9 +4,17 @@
 #include "stations/station_name_utils.h"
 
 #include "stations/manager/stations/model/stationgatesmodel.h"
+#include "stations/manager/stations/model/stationtracksmodel.h"
 
 #include <QHeaderView>
 #include "utils/sqldelegate/modelpageswitcher.h"
+
+#include "utils/combodelegate.h"
+#include "utils/colordelegate.h"
+#include "utils/spinbox/spinboxeditorfactory.h"
+
+#include "utils/sqldelegate/sqlfkfielddelegate.h"
+#include "stations/stationtracksmatchmodel.h"
 
 #include <QMessageBox>
 
@@ -55,22 +63,64 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ps->setModel(gatesModel);
     setupView(ui->gatesView, gatesModel);
 
+    types.clear();
+    types.reserve(int(utils::GateSide::NSides));
+    for(int i = 0; i < int(utils::GateSide::NSides); i++)
+        types.append(utils::StationUtils::name(utils::GateSide(i)));
+    ui->gatesView->setItemDelegateForColumn(StationGatesModel::SideCol,
+                                            new ComboDelegate(types, Qt::EditRole, this));
+
+    trackFactory = new StationTracksMatchFactory(db, this);
+    ui->gatesView->setItemDelegateForColumn(StationGatesModel::DefaultInPlatfCol,
+                                            new SqlFKFieldDelegate(trackFactory, gatesModel, this));
+
     connect(ui->addGateButton, &QToolButton::clicked, this, &StationEditDialog::addGate);
     connect(ui->removeGateButton, &QToolButton::clicked, this, &StationEditDialog::removeSelectedGate);
 
-    //Update models when current tab changes
-    connect(ui->tabWidget, &QTabWidget::currentChanged, this, &StationEditDialog::currentTabChanged);
+    //Tracks Tab
+    tracksModel = new StationTracksModel(db, this);
+    connect(tracksModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
+    connect(tracksModel, &StationTracksModel::trackNameChanged, this, &StationEditDialog::onTracksChanged);
+    connect(tracksModel, &StationTracksModel::trackRemoved, this, &StationEditDialog::onTracksChanged);
+
+    ps = new ModelPageSwitcher(false, this);
+    ui->tracksLayout->addWidget(ps);
+    ps->setModel(tracksModel);
+    setupView(ui->trackView, tracksModel);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::ColorCol, new ColorDelegate(this));
+
+    auto trackLengthDelegate = new QStyledItemDelegate(this);
+    trackLengthSpinFactory = new SpinBoxEditorFactory;
+    trackLengthSpinFactory->setRange(1, 9999);
+    trackLengthSpinFactory->setSuffix(" cm");
+    trackLengthSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    trackLengthDelegate->setItemEditorFactory(trackLengthSpinFactory);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::TrackLengthCol, trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::PassengerLegthCol, trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::FreightLengthCol, trackLengthDelegate);
+
+    connect(ui->addTrackButton, &QToolButton::clicked, this, &StationEditDialog::addTrack);
+    connect(ui->removeTrackButton, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrack);
+
+    ui->moveTrackUpBut->setToolTip(tr("Hold shift to move selected track to the top."));
+    ui->moveTrackDownBut->setToolTip(tr("Hold shift to move selected track to the bottom."));
+    connect(ui->moveTrackUpBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackUp);
+    connect(ui->moveTrackDownBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackDown);
 }
 
 StationEditDialog::~StationEditDialog()
 {
     delete ui;
+    delete trackLengthSpinFactory;
 }
 
 bool StationEditDialog::setStation(db_id stationId)
 {
     if(!gatesModel->setStation(stationId))
         return false;
+
+    tracksModel->setStation(stationId);
+    trackFactory->setStationId(stationId);
 
     QString stationName;
     QString shortName;
@@ -101,6 +151,7 @@ db_id StationEditDialog::getStation() const
 void StationEditDialog::setStationInternalEditingEnabled(bool enable)
 {
     gatesModel->setEditable(enable);
+    tracksModel->setEditable(enable);
     ui->stationNameEdit->setEnabled(enable);
     ui->shortNameEdit->setEnabled(enable);
     ui->stationTypeCombo->setEnabled(enable);
@@ -152,7 +203,13 @@ void StationEditDialog::done(int res)
         if(!gatesModel->hasAtLeastOneGate())
         {
             //TODO: provide a way to delete the station to exit dialog
-            modelError(tr("A station should at least have a gate"));
+            modelError(tr("A station should at least have 1 gate"));
+            return;
+        }
+
+        if(!tracksModel->hasAtLeastOneTrack())
+        {
+            modelError(tr("A station should at least have 1 track"));
             return;
         }
     }
@@ -174,22 +231,10 @@ void StationEditDialog::modelError(const QString &msg)
     QMessageBox::warning(this, tr("Station Error"), msg);
 }
 
-void StationEditDialog::currentTabChanged(int idx)
-{
-    switch (idx)
-    {
-    case GatesTab:
-        if(gatesModel->getTotalItemsCount() == 0)
-            gatesModel->refreshData();
-        break;
-    default:
-        break;
-    }
-}
-
 void StationEditDialog::onGatesChanged()
 {
     //A gate was removed or changed name
+
     //Update platform connections and gate connections
 }
 
@@ -233,4 +278,94 @@ void StationEditDialog::removeSelectedGate()
         return;
 
     gatesModel->removeGate(gateId);
+}
+
+void StationEditDialog::onTracksChanged()
+{
+    //A track was removed or changed name
+
+    //Update gates (has a Default Platform column)
+    gatesModel->clearCache();
+
+    //Update platform connections
+}
+
+void StationEditDialog::addTrack()
+{
+    QInputDialog dlg(this);
+    dlg.setWindowTitle(tr("Add Track"));
+    dlg.setLabelText(tr("Please choose a name for the new station track."));
+    dlg.setTextValue(QString());
+
+    do{
+        int ret = dlg.exec();
+        if(ret != QDialog::Accepted)
+        {
+            break; //User canceled
+        }
+
+        const QString name = dlg.textValue().simplified();
+        if(name.isEmpty())
+        {
+            QMessageBox::warning(this, tr("Error"), tr("Track name cannot be empty."));
+            continue; //Second chance
+        }
+
+
+        if(tracksModel->addTrack(-1, name))
+        {
+            break; //Done!
+        }
+    }
+    while (true);
+}
+
+void StationEditDialog::removeSelectedTrack()
+{
+    if(!ui->trackView->selectionModel()->hasSelection())
+        return;
+
+    db_id trackId = tracksModel->getIdAtRow(ui->trackView->currentIndex().row());
+    if(!trackId)
+        return;
+
+    tracksModel->removeTrack(trackId);
+}
+
+void StationEditDialog::moveTrackUp()
+{
+    if(!ui->trackView->selectionModel()->hasSelection())
+        return;
+
+    QModelIndex idx = ui->trackView->currentIndex();
+
+    db_id trackId = tracksModel->getIdAtRow(idx.row());
+    if(!trackId)
+        return;
+
+    bool top = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
+    if(!tracksModel->moveTrackUpDown(trackId, true, top))
+        return;
+
+    idx = idx.siblingAtRow(top ? 0 : idx.row() - 1);
+    ui->trackView->setCurrentIndex(idx);
+}
+
+void StationEditDialog::moveTrackDown()
+{
+    if(!ui->trackView->selectionModel()->hasSelection())
+        return;
+
+    QModelIndex idx = ui->trackView->currentIndex();
+
+    db_id trackId = tracksModel->getIdAtRow(idx.row());
+    if(!trackId)
+        return;
+
+    bool bottom = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
+    if(!tracksModel->moveTrackUpDown(trackId, false, bottom))
+        return;
+
+    idx = idx.siblingAtRow(bottom ? tracksModel->rowCount() - 1 : idx.row() + 1);
+    ui->trackView->setCurrentIndex(idx);
 }
