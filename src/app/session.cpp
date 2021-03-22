@@ -292,6 +292,11 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "max_axes INTEGER NOT NULL,"
                           "color_rgb INTEGER,"
                           "name TEXT NOT NULL,"
+                          "CHECK("
+                          " max_axes>=2 AND track_length_cm>0"
+                          " AND (platf_length_cm BETWEEN 0 AND track_length_cm)"
+                          " AND (freight_length_cm BETWEEN 0 AND track_length_cm)"
+                          "),"
                           "UNIQUE(station_id, pos),"
                           "UNIQUE(station_id, name),"
                           "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE )");
@@ -305,7 +310,10 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "def_in_platf_id INTEGER,"
                           "name TEXT NOT NULL,"
                           "side INTEGER NOT NULL,"
-                          "CHECK(type&(1<<0) OR type&(1<<1))," //NOTE: see utils::GateType
+                          "CHECK("
+                          " (type&(1<<0) OR type&(1<<1))"
+                          " AND (length(name)=1 AND name BETWEEN 'A' AND 'Z')"
+                          ")," //NOTE: see utils::GateType
                           "FOREIGN KEY (station_id) REFERENCES stations(id) ON UPDATE CASCADE ON DELETE CASCADE,"
                           "FOREIGN KEY(def_in_platf_id) REFERENCES station_tracks(id) ON UPDATE CASCADE ON DELETE SET NULL,"
                           "UNIQUE(station_id,name) )");
