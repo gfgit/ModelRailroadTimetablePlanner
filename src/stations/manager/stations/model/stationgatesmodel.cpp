@@ -418,6 +418,46 @@ bool StationGatesModel::removeGate(db_id stationId)
     return true;
 }
 
+QString StationGatesModel::getStationName() const
+{
+    query q(mDb, "SELECT name FROM stations WHERE id=?");
+    q.bind(1, m_stationId);
+    if(q.step() != SQLITE_ROW)
+        return QString();
+    return q.getRows().get<QString>(0);
+}
+
+bool StationGatesModel::getStationInfo(QString& name, QString &shortName, utils::StationType &type, qint64 &phoneNumber) const
+{
+    query q(mDb, "SELECT name,short_name,type,phone_number FROM stations WHERE id=?");
+    q.bind(1, m_stationId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+    auto r = q.getRows();
+    name = r.get<QString>(0);
+    shortName = r.get<QString>(1);
+    type = utils::StationType(r.get<int>(2));
+    phoneNumber = r.get<qint64>(3);
+    return true;
+}
+
+bool StationGatesModel::setStationInfo(const QString &name, const QString &shortName, utils::StationType type, qint64 phoneNumber)
+{
+    command q(mDb, "UPDATE stations SET name=?,short_name=?,type=?,phone_number=? WHERE id=?");
+    q.bind(1, name);
+    if(shortName.isEmpty())
+        q.bind(2); //Bind NULL
+    else
+        q.bind(2, shortName);
+    q.bind(3, int(type));
+    if(phoneNumber == -1)
+        q.bind(4); //Bind NULL
+    else
+        q.bind(4, phoneNumber);
+    q.bind(5, m_stationId);
+    return q.execute() == SQLITE_OK;
+}
+
 void StationGatesModel::fetchRow(int row)
 {
     if(firstPendingRow != -BatchSize)
@@ -661,6 +701,7 @@ bool StationGatesModel::setName(StationGatesModel::GateItem &item, const QChar &
     }
 
     item.letter = letter;
+    emit gateNameChanged(item.gateId, item.letter);
 
     //This row has now changed position so we need to invalidate cache
     //HACK: we emit dataChanged for this index (that doesn't exist anymore)

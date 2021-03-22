@@ -66,6 +66,8 @@ public:
 
     // StationGatesModel
     bool setStation(db_id stationId);
+    inline db_id getStation() const { return m_stationId; }
+
     bool addGate(const QChar& name, db_id *outGateId = nullptr);
     bool removeGate(db_id stationId);
 
@@ -90,6 +92,19 @@ public:
 
     inline bool isEditable() const { return editable; }
     inline void setEditable(bool val) { editable = val; }
+
+    inline bool hasAtLeastOneGate()
+    {
+        refreshData(); //Recalc count
+        return getTotalItemsCount() > 0;
+    }
+
+    QString getStationName() const;
+    bool getStationInfo(QString &name, QString& shortName, utils::StationType& type, qint64& phoneNumber) const;
+    bool setStationInfo(const QString &name, const QString& shortName, utils::StationType type, qint64 phoneNumber);
+
+signals:
+    void gateNameChanged(db_id gateId, const QString& name);
 
 private:
     void fetchRow(int row);
