@@ -46,7 +46,8 @@ StationGatesModel::StationGatesModel(sqlite3pp::database &db, QObject *parent) :
     IPagedItemModel(BatchSize, db, parent),
     m_stationId(0),
     cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    firstPendingRow(-BatchSize),
+    editable(false)
 {
     sortColumn = LetterCol;
 }
@@ -220,7 +221,7 @@ bool StationGatesModel::setData(const QModelIndex &idx, const QVariant &value, i
         case SideCol:
         {
             bool ok = false;
-            int val = value.toInt();
+            int val = value.toInt(&ok);
             if(!ok || !setSide(item, val))
                 return false;
             break;
@@ -398,11 +399,11 @@ bool StationGatesModel::addGate(const QChar &name, db_id *outGateId)
 
 bool StationGatesModel::removeGate(db_id gateId)
 {
-    command q_removeStation(mDb, "DELETE FROM station_gatess WHERE id=?");
+    command q(mDb, "DELETE FROM station_gates WHERE id=?");
 
-    q_removeStation.bind(1, gateId);
-    int ret = q_removeStation.execute();
-    q_removeStation.reset();
+    q.bind(1, gateId);
+    int ret = q.execute();
+    q.reset();
 
     if(ret != SQLITE_OK)
     {
