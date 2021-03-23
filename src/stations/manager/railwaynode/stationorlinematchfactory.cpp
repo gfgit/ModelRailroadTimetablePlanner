@@ -22,7 +22,7 @@ ISqlFKMatchModel *StationOrLineMatchFactory::createModel()
     case RailwayNodeMode::LineStationsMode:
     {
         StationsMatchModel *m = new StationsMatchModel(mDb);
-        m->setFilter(0, 0);
+        m->setFilter(0);
         return m;
     }
     }

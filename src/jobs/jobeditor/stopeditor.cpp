@@ -173,9 +173,9 @@ void StopEditor::calcInfo()
     }
 
     if(stopType == First)
-        stationsMatchModel->setFilter(0, 0);
+        stationsMatchModel->setFilter(0);
     else
-        stationsMatchModel->setFilter(curLineId, mPrevSt);
+        stationsMatchModel->setFilter(mPrevSt);
 
     if(row < 0)
         row = 0;

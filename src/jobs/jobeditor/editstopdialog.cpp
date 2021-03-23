@@ -215,7 +215,7 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     curSegment = idx.data(SEGMENT_ROLE).toLongLong();
     curLine = idx.data(CUR_LINE_ROLE).toLongLong();
 
-    stationsMatchModel->setFilter(curLine, m_prevStId);
+    stationsMatchModel->setFilter(m_prevStId);
 
     coupledModel->setStop(m_stopId, RsOp::Coupled);
     uncoupledModel->setStop(m_stopId, RsOp::Uncoupled);
