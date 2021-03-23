@@ -236,7 +236,8 @@ void StationTrackConnectionsModel::refreshData()
     emit itemsReady(-1, -1); //Notify we are about to refresh
 
     //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM station_gate_connections WHERE station_id=?");
+    query q(mDb, "SELECT COUNT(1) FROM station_gate_connections c"
+                 " JOIN station_gates g ON g.id=c.gate_id WHERE g.station_id=?");
     q.bind(1, m_stationId);
     q.step();
     const int count = q.getRows().get<int>(0);
@@ -493,7 +494,7 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
     //        else
     //            sql += ">?3";
     //    }
-    sql += " WHERE station_id=?4";
+    sql += " WHERE g.station_id=?4";
 
     sql += " ORDER BY ";
     sql += whereCol;
