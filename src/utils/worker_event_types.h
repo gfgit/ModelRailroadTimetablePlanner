@@ -39,6 +39,7 @@ enum class CustomEvents
 
     StationGatesListResult,
     StationTracksListResult,
+    StationTrackConnListResult,
 
     //Jobs
     JobsModelResult
