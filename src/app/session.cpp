@@ -547,7 +547,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     result = m_Db.execute("CREATE TRIGGER gate_conn_different_station\n"
                           "BEFORE INSERT ON station_gate_connections\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station') FROM station_tracks t"
+                          "SELECT RAISE(ABORT, 'Cannot connect platform of a different station') FROM station_tracks t"
                           " JOIN station_gates g ON g.id=NEW.gate_id"
                           " WHERE t.id=NEW.track_id AND t.station_id<>g.station_id;"
                           "END");
@@ -556,7 +556,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     result = m_Db.execute("CREATE TRIGGER gate_conn_different_station_update\n"
                           "BEFORE UPDATE OF track_id,gate_id ON station_gate_connections\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station') FROM station_tracks t"
+                          "SELECT RAISE(ABORT, 'Cannot connect platform of a different station') FROM station_tracks t"
                           " JOIN station_gates g ON g.id=NEW.gate_id"
                           " WHERE t.id=NEW.track_id AND t.station_id<>g.station_id;"
                           "END");
@@ -609,6 +609,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           ");"
                           "END");
     CHECK(result);
+
+    //FIXME: if setting default gate track but then delete track connection -> invalid state
 
 
 #undef CHECK
