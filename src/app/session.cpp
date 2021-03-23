@@ -543,31 +543,71 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "END");
     CHECK(result);
 
-    //Prevent setting a default track of different station than gate station
-    result = m_Db.execute("CREATE TRIGGER gate_def_platf_different_station\n"
+    //Prevent connecting a track to a gate of a different station
+    result = m_Db.execute("CREATE TRIGGER gate_conn_different_station\n"
+                          "BEFORE INSERT ON station_gate_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station') FROM station_tracks t"
+                          " JOIN station_gates g ON g.id=NEW.gate_id"
+                          " WHERE t.id=NEW.track_id AND t.station_id<>g.station_id;"
+                          "END");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TRIGGER gate_conn_different_station_update\n"
+                          "BEFORE UPDATE OF track_id,gate_id ON station_gate_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station') FROM station_tracks t"
+                          " JOIN station_gates g ON g.id=NEW.gate_id"
+                          " WHERE t.id=NEW.track_id AND t.station_id<>g.station_id;"
+                          "END");
+    CHECK(result);
+
+    //FIXME: Remote possibility of updating 'station_id' of track or gate.
+
+    //Prevent connecting gate track out of bound
+    result = m_Db.execute("CREATE TRIGGER gate_conn_gate_track_bound\n"
+                          "BEFORE INSERT ON station_gate_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Gate track out of bound') FROM station_gates g"
+                          " WHERE g.id=NEW.gate_id AND g.out_track_count<=NEW.gate_track;"
+                          "END");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TRIGGER gate_conn_gate_track_bound_update\n"
+                          "BEFORE UPDATE OF gate_id,gate_track ON station_gate_connections\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Gate track out of bound') FROM station_gates g"
+                          " WHERE g.id=NEW.gate_id AND g.out_track_count<=NEW.gate_track;"
+                          "END");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TRIGGER gate_out_track_bound_update\n"
+                          "BEFORE UPDATE out_track_count ON station_gates\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot remove gate tracks. Platforms connected.') FROM station_gate_connections c"
+                          " WHERE c.gate_id=NEW.id AND NEW.out_track_count<=NEW.gate_track;"
+                          "END");
+    CHECK(result);
+
+    //Prevent setting gate default track to a track which is not connected to it
+    result = m_Db.execute("CREATE TRIGGER gate_def_platf_not_connected\n"
                           "BEFORE INSERT ON station_gates\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station')"
-                          " FROM station_tracks t WHERE t.id=NEW.def_in_platf_id AND t.station_id<>NEW.station_id;"
+                          "SELECT RAISE(ABORT, 'Platform not connected to this gate') WHERE NOT EXISTS ("
+                          " SELECT 1 FROM station_gate_connections WHERE track_id=NEW.def_in_platf_id AND gate_id=NEW.id"
+                          ");"
                           "END");
     CHECK(result);
 
-    result = m_Db.execute("CREATE TRIGGER gate_def_platf_different_station_update\n"
-                          "BEFORE  UPDATE OF station_id,def_in_platf_id ON station_gates\n"
+    result = m_Db.execute("CREATE TRIGGER gate_def_platf_not_connected_update\n"
+                          "BEFORE UPDATE OF def_in_platf_id ON station_gates\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station')"
-                          " FROM station_tracks t WHERE t.id=NEW.def_in_platf_id AND t.station_id<>NEW.station_id;"
+                          "SELECT RAISE(ABORT, 'Platform not connected to this gate') WHERE NOT EXISTS ("
+                          " SELECT 1 FROM station_gate_connections WHERE track_id=NEW.def_in_platf_id AND gate_id=NEW.id"
+                          ");"
                           "END");
     CHECK(result);
 
-    //Remote possibility of updating 'station_id' of track. (To do so first check it is not default of any gate)
-    result = m_Db.execute("CREATE TRIGGER gate_def_platf_different_station_update_track\n"
-                          "BEFORE  UPDATE OF station_id ON station_tracks\n"
-                          "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station')"
-                          " FROM station_gates g WHERE g.def_in_platf_id=NEW.id AND g.station_id<>NEW.station_id;"
-                          "END");
-    CHECK(result);
 
 #undef CHECK
 
