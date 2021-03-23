@@ -1,8 +1,9 @@
 #include "newtrackconndlg.h"
 
 #include <QMessageBox>
+#include <QDialogButtonBox>
 
-#include <QHBoxLayout>
+#include <QGridLayout>
 #include <QFormLayout>
 
 #include <QGroupBox>
@@ -31,7 +32,7 @@ NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
     trackMatchModel->setHasEmptyRow(false);
     gatesMatchModel->setHasEmptyRow(false);
 
-    QHBoxLayout *mainLay = new QHBoxLayout(this);
+    QGridLayout *mainLay = new QGridLayout(this);
 
     QGroupBox *trackBox = new QGroupBox(tr("Track"));
     QFormLayout *trackLay = new QFormLayout(trackBox);
@@ -46,7 +47,7 @@ NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
     trackLay->addRow(tr("Track Side:"), trackSideCombo);
 
     QGroupBox *gateBox = new QGroupBox(tr("Gate"));
-    QFormLayout *gateLay = new QFormLayout(trackBox);
+    QFormLayout *gateLay = new QFormLayout(gateBox);
 
     gateEdit = new CustomCompletionLineEdit(gatesMatchModel);
     gateEdit->setPlaceholderText(tr("Gate..."));
@@ -56,8 +57,14 @@ NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
     gateTrackSpin->setRange(0, 9999); //FIXME: set actual gate out track count
     gateLay->addRow(tr("Gate Track:"), gateTrackSpin);
 
-    mainLay->addWidget(trackBox);
-    mainLay->addWidget(gateBox);
+    mainLay->addWidget(trackBox, 0, 0);
+    mainLay->addWidget(gateBox, 0, 1);
+
+    QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                                                 Qt::Horizontal);
+    connect(box, &QDialogButtonBox::accepted, this, &NewTrackConnDlg::accept);
+    connect(box, &QDialogButtonBox::rejected, this, &NewTrackConnDlg::reject);
+    mainLay->addWidget(box, 1, 0, 1, 2);
 
     setMinimumSize(200, 100);
     setWindowTitle(tr("New Station Track Connection"));
