@@ -12,7 +12,7 @@ class CustomCompletionLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    explicit CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget *parent = nullptr);
+    CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget *parent = nullptr);
     ~CustomCompletionLineEdit();
 
     void showPopup();
