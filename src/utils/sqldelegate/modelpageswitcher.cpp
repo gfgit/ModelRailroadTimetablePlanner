@@ -167,7 +167,7 @@ void ModelPageSwitcher::refreshModel()
 {
     if(model)
     {
-        model->clearCache();
         model->refreshData();
+        model->clearCache();
     }
 }
