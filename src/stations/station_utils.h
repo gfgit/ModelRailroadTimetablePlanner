@@ -27,7 +27,7 @@ enum class GateType : qint8
     MultipleTraffic = (LeftHandTraffic | RightHandTraffic)
 };
 
-enum class GateSide : qint8
+enum class Side : qint8
 {
     East = 0,
     West = 1,

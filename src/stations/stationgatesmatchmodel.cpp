@@ -73,7 +73,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     {
         if(!emptyRow && !ellipsesRow)
         {
-            if(items[idx.row()].side.testFlag(utils::GateSide::West))
+            if(items[idx.row()].side.testFlag(utils::Side::West))
                 return QColor(Qt::blue);
         }
         break;
@@ -123,7 +123,7 @@ void StationGatesMatchModel::refreshData()
         items[i].gateId = track.get<db_id>(0);
         items[i].type = utils::GateType(track.get<int>(1));
         items[i].name = track.get<QString>(2);
-        items[i].side = utils::GateSide(track.get<int>(3));
+        items[i].side = utils::Side(track.get<int>(3));
         ++it;
     }
 

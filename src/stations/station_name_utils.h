@@ -25,9 +25,9 @@ public:
         return tr(StationTypeNamesTable[int(t)]);
     }
 
-    static inline QString name(GateSide s)
+    static inline QString name(Side s)
     {
-        return s == GateSide::East ? tr("East") : tr("West");
+        return s == Side::East ? tr("East") : tr("West");
     }
 };
 

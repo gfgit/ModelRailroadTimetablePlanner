@@ -31,7 +31,7 @@ public:
         int outTrackCount;
         QChar letter;
         QString defPlatfName;
-        utils::GateSide side;
+        utils::Side side;
         QFlags<utils::GateType> type;
     } GateItem;
 

@@ -647,7 +647,7 @@ void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const 
             item.type = utils::GateType(r.get<int>(2));
             item.defaultInPlatfId = r.get<db_id>(3);
             item.letter = r.get<const char *>(4)[0];
-            item.side = utils::GateSide(r.get<int>(5));
+            item.side = utils::Side(r.get<int>(5));
             if(r.column_type(6) != SQLITE_NULL)
                 item.defPlatfName = r.get<QString>(6);
             i--;
@@ -668,7 +668,7 @@ void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const 
             item.type = utils::GateType(r.get<int>(2));
             item.defaultInPlatfId = r.get<db_id>(3);
             item.letter = r.get<const char *>(4)[0];
-            item.side = utils::GateSide(r.get<int>(5));
+            item.side = utils::Side(r.get<int>(5));
             if(r.column_type(6) != SQLITE_NULL)
                 item.defPlatfName = r.get<QString>(6);
             i++;
@@ -786,7 +786,7 @@ bool StationGatesModel::setName(StationGatesModel::GateItem &item, const QChar &
 
 bool StationGatesModel::setSide(StationGatesModel::GateItem &item, int val)
 {
-    utils::GateSide side = utils::GateSide(val);
+    utils::Side side = utils::Side(val);
     if(item.side == side)
         return false;
 

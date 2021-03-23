@@ -64,9 +64,9 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     setupView(ui->gatesView, gatesModel);
 
     types.clear();
-    types.reserve(int(utils::GateSide::NSides));
-    for(int i = 0; i < int(utils::GateSide::NSides); i++)
-        types.append(utils::StationUtils::name(utils::GateSide(i)));
+    types.reserve(int(utils::Side::NSides));
+    for(int i = 0; i < int(utils::Side::NSides); i++)
+        types.append(utils::StationUtils::name(utils::Side(i)));
     ui->gatesView->setItemDelegateForColumn(StationGatesModel::SideCol,
                                             new ComboDelegate(types, Qt::EditRole, this));
 
