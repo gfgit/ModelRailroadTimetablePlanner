@@ -11,9 +11,11 @@ class database;
 
 class SpinBoxEditorFactory;
 class StationTracksMatchFactory;
+class StationGatesMatchFactory;
 
 class StationGatesModel;
 class StationTracksModel;
+class StationTrackConnectionsModel;
 
 namespace Ui {
 class StationEditDialog;
@@ -39,15 +41,22 @@ public slots:
 private slots:
     void modelError(const QString& msg);
 
+    //Gates
     void onGatesChanged();
     void addGate();
     void removeSelectedGate();
 
+    //Tracks
     void onTracksChanged();
     void addTrack();
     void removeSelectedTrack();
     void moveTrackUp();
     void moveTrackDown();
+
+    //Track Connections
+    void onTrackConnRemoved();
+    void addTrackConn();
+    void removeSelectedTrackConn();
 
 private:
     enum Tabs
@@ -64,9 +73,11 @@ private:
 
     SpinBoxEditorFactory *trackLengthSpinFactory;
     StationTracksMatchFactory *trackFactory;
+    StationGatesMatchFactory *gatesFactory;
 
     StationGatesModel *gatesModel;
     StationTracksModel *tracksModel;
+    StationTrackConnectionsModel *trackConnModel;
 };
 
 #endif // STATIONEDITDIALOG_H

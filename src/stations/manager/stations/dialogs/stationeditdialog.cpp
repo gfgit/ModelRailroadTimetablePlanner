@@ -5,6 +5,7 @@
 
 #include "stations/manager/stations/model/stationgatesmodel.h"
 #include "stations/manager/stations/model/stationtracksmodel.h"
+#include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
 
 #include <QHeaderView>
 #include "utils/sqldelegate/modelpageswitcher.h"
@@ -15,10 +16,14 @@
 
 #include "utils/sqldelegate/sqlfkfielddelegate.h"
 #include "stations/stationtracksmatchmodel.h"
+#include "stations/stationgatesmatchmodel.h"
 
 #include <QMessageBox>
 
 #include <QInputDialog>
+#include "newtrackconndlg.h"
+
+#include <QPointer>
 
 void setupView(QTableView *view, IPagedItemModel *model)
 {
@@ -43,14 +48,28 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //Station Tab
-
-    //Station Type Combo
-    QStringList types;
-    types.reserve(int(utils::StationType::NTypes));
+    //Enum names
+    QStringList stationTypeEnum;
+    stationTypeEnum.reserve(int(utils::StationType::NTypes));
     for(int i = 0; i < int(utils::StationType::NTypes); i++)
-        types.append(utils::StationUtils::name(utils::StationType(i)));
-    ui->stationTypeCombo->addItems(types);
+        stationTypeEnum.append(utils::StationUtils::name(utils::StationType(i)));
+
+    QStringList sideTypeEnum;
+    sideTypeEnum.reserve(int(utils::Side::NSides));
+    for(int i = 0; i < int(utils::Side::NSides); i++)
+        sideTypeEnum.append(utils::StationUtils::name(utils::Side(i)));
+
+    //Delegate Factories
+    trackLengthSpinFactory = new SpinBoxEditorFactory;
+    trackLengthSpinFactory->setRange(1, 9999);
+    trackLengthSpinFactory->setSuffix(" cm");
+    trackLengthSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+    trackFactory = new StationTracksMatchFactory(db, this);
+    gatesFactory = new StationGatesMatchFactory(db, this);
+
+    //Station Tab
+    ui->stationTypeCombo->addItems(stationTypeEnum);
 
     //Gates Tab
     gatesModel = new StationGatesModel(db, this);
@@ -63,14 +82,8 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ps->setModel(gatesModel);
     setupView(ui->gatesView, gatesModel);
 
-    types.clear();
-    types.reserve(int(utils::Side::NSides));
-    for(int i = 0; i < int(utils::Side::NSides); i++)
-        types.append(utils::StationUtils::name(utils::Side(i)));
     ui->gatesView->setItemDelegateForColumn(StationGatesModel::SideCol,
-                                            new ComboDelegate(types, Qt::EditRole, this));
-
-    trackFactory = new StationTracksMatchFactory(db, this);
+                                            new ComboDelegate(sideTypeEnum, Qt::EditRole, this));
     ui->gatesView->setItemDelegateForColumn(StationGatesModel::DefaultInPlatfCol,
                                             new SqlFKFieldDelegate(trackFactory, gatesModel, this));
 
@@ -90,14 +103,10 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ui->trackView->setItemDelegateForColumn(StationTracksModel::ColorCol, new ColorDelegate(this));
 
     auto trackLengthDelegate = new QStyledItemDelegate(this);
-    trackLengthSpinFactory = new SpinBoxEditorFactory;
-    trackLengthSpinFactory->setRange(1, 9999);
-    trackLengthSpinFactory->setSuffix(" cm");
-    trackLengthSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     trackLengthDelegate->setItemEditorFactory(trackLengthSpinFactory);
-    ui->trackView->setItemDelegateForColumn(StationTracksModel::TrackLengthCol, trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::TrackLengthCol,    trackLengthDelegate);
     ui->trackView->setItemDelegateForColumn(StationTracksModel::PassengerLegthCol, trackLengthDelegate);
-    ui->trackView->setItemDelegateForColumn(StationTracksModel::FreightLengthCol, trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::FreightLengthCol,  trackLengthDelegate);
 
     connect(ui->addTrackButton, &QToolButton::clicked, this, &StationEditDialog::addTrack);
     connect(ui->removeTrackButton, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrack);
@@ -106,6 +115,27 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ui->moveTrackDownBut->setToolTip(tr("Hold shift to move selected track to the bottom."));
     connect(ui->moveTrackUpBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackUp);
     connect(ui->moveTrackDownBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackDown);
+
+    //Track Connections Tab
+    trackConnModel = new StationTrackConnectionsModel(db, this);
+    connect(trackConnModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
+    connect(trackConnModel, &StationTrackConnectionsModel::trackConnRemoved,
+            this, &StationEditDialog::onTrackConnRemoved);
+
+    ps = new ModelPageSwitcher(false, this);
+    ui->trackConnLayout->addWidget(ps);
+    ps->setModel(trackConnModel);
+    setupView(ui->trackConnView, trackConnModel);
+
+    ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::TrackSideCol,
+                                                new ComboDelegate(sideTypeEnum, Qt::EditRole, this));
+    ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::TrackCol,
+                                                new SqlFKFieldDelegate(trackFactory, trackConnModel, this));
+    ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::GateCol,
+                                                new SqlFKFieldDelegate(gatesFactory, trackConnModel, this));
+
+    connect(ui->addTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::addTrackConn);
+    connect(ui->removeTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrackConn);
 }
 
 StationEditDialog::~StationEditDialog()
@@ -116,12 +146,17 @@ StationEditDialog::~StationEditDialog()
 
 bool StationEditDialog::setStation(db_id stationId)
 {
+    //Update models
     if(!gatesModel->setStation(stationId))
         return false;
-
     tracksModel->setStation(stationId);
-    trackFactory->setStationId(stationId);
+    trackConnModel->setStation(stationId);
 
+    //Update factories
+    trackFactory->setStationId(stationId);
+    gatesFactory->setStationId(stationId);
+
+    //Update station details
     QString stationName;
     QString shortName;
     utils::StationType type = utils::StationType::Normal;
@@ -138,6 +173,7 @@ bool StationEditDialog::setStation(db_id stationId)
     else
         ui->phoneEdit->setText(QString::number(phoneNumber));
 
+    //Update title
     setWindowTitle(stationName.isEmpty() ? tr("New Station") : stationName);
 
     return true;
@@ -150,8 +186,12 @@ db_id StationEditDialog::getStation() const
 
 void StationEditDialog::setStationInternalEditingEnabled(bool enable)
 {
+    //Gates, Tracks, Track connections
     gatesModel->setEditable(enable);
     tracksModel->setEditable(enable);
+    trackConnModel->setEditable(enable);
+
+    //Station Details (but not phone)
     ui->stationNameEdit->setEnabled(enable);
     ui->shortNameEdit->setEnabled(enable);
     ui->stationTypeCombo->setEnabled(enable);
@@ -161,6 +201,9 @@ void StationEditDialog::setStationInternalEditingEnabled(bool enable)
 
 void StationEditDialog::setStationExternalEditingEnabled(bool enable)
 {
+    //TODO: Gate connections
+
+    //Phone number
     ui->phoneEdit->setEnabled(enable);
 }
 
@@ -235,24 +278,27 @@ void StationEditDialog::onGatesChanged()
 {
     //A gate was removed or changed name
 
-    //Update platform connections and gate connections
+    //Update platform connections
+    trackConnModel->clearCache();
+
+    //Update gate connections
 }
 
 void StationEditDialog::addGate()
 {
-    QInputDialog dlg(this);
-    dlg.setWindowTitle(tr("Add Gate"));
-    dlg.setLabelText(tr("Please choose a letter for the new station gate."));
-    dlg.setTextValue(QString());
+    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    dlg->setWindowTitle(tr("Add Gate"));
+    dlg->setLabelText(tr("Please choose a letter for the new station gate."));
+    dlg->setTextValue(QString());
 
     do{
-        int ret = dlg.exec();
-        if(ret != QDialog::Accepted)
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
         {
             break; //User canceled
         }
 
-        const QString name = dlg.textValue().simplified();
+        const QString name = dlg->textValue().simplified();
         if(name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Gate name cannot be empty."));
@@ -288,23 +334,24 @@ void StationEditDialog::onTracksChanged()
     gatesModel->clearCache();
 
     //Update platform connections
+    trackConnModel->clearCache();
 }
 
 void StationEditDialog::addTrack()
 {
-    QInputDialog dlg(this);
-    dlg.setWindowTitle(tr("Add Track"));
-    dlg.setLabelText(tr("Please choose a name for the new station track."));
-    dlg.setTextValue(QString());
+    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    dlg->setWindowTitle(tr("Add Track"));
+    dlg->setLabelText(tr("Please choose a name for the new station track."));
+    dlg->setTextValue(QString());
 
     do{
-        int ret = dlg.exec();
-        if(ret != QDialog::Accepted)
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
         {
             break; //User canceled
         }
 
-        const QString name = dlg.textValue().simplified();
+        const QString name = dlg->textValue().simplified();
         if(name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Track name cannot be empty."));
@@ -368,4 +415,52 @@ void StationEditDialog::moveTrackDown()
 
     idx = idx.siblingAtRow(bottom ? tracksModel->rowCount() - 1 : idx.row() + 1);
     ui->trackView->setCurrentIndex(idx);
+}
+
+void StationEditDialog::onTrackConnRemoved()
+{
+    //A track connection was removed
+
+    //Update gates (has a Default Platform column)
+    gatesModel->clearCache();
+}
+
+void StationEditDialog::addTrackConn()
+{
+    QScopedPointer<ISqlFKMatchModel> tracks(trackFactory->createModel());
+    QScopedPointer<ISqlFKMatchModel> gates(gatesFactory->createModel());
+
+    QPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(), gates.get(), this);
+
+    do{
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
+        {
+            break; //User canceled
+        }
+
+        db_id trackId = 0;
+        utils::Side trackSide = utils::Side::East;
+        db_id gateId = 0;
+        int gateTrack = 0;
+        dlg->getData(trackId, trackSide, gateId, gateTrack);
+
+        if(trackConnModel->addTrackConnection(trackId, trackSide, gateId, gateTrack))
+        {
+            break; //Done!
+        }
+    }
+    while (true);
+}
+
+void StationEditDialog::removeSelectedTrackConn()
+{
+    if(!ui->trackConnView->selectionModel()->hasSelection())
+        return;
+
+    db_id connId = trackConnModel->getIdAtRow(ui->trackConnView->currentIndex().row());
+    if(!connId)
+        return;
+
+    trackConnModel->removeTrackConnection(connId);
 }
