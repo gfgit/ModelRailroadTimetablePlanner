@@ -31,6 +31,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+#include <QPointer>
+
 RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     QWizard (parent),
     loadTask(nullptr),
@@ -93,16 +95,16 @@ void RSImportWizard::done(int result)
         {
             if(result == QDialog::Rejected) //RejectWithoutAsking skips this
             {
-                QMessageBox msgBox(this);
-                msgBox.setIcon(QMessageBox::Question);
-                msgBox.setWindowTitle(RsImportStrings::tr("Abort import?"));
-                msgBox.setText(RsImportStrings::tr("Do you want to import process? No data will be imported"));
-                QPushButton *abortBut = msgBox.addButton(QMessageBox::Abort);
-                QPushButton *noBut = msgBox.addButton(QMessageBox::No);
-                msgBox.setDefaultButton(noBut);
-                msgBox.setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
-                msgBox.exec();
-                if(msgBox.clickedButton() != abortBut)
+                QPointer<QMessageBox> msgBox = new QMessageBox(this);
+                msgBox->setIcon(QMessageBox::Question);
+                msgBox->setWindowTitle(RsImportStrings::tr("Abort import?"));
+                msgBox->setText(RsImportStrings::tr("Do you want to import process? No data will be imported"));
+                QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
+                QPushButton *noBut = msgBox->addButton(QMessageBox::No);
+                msgBox->setDefaultButton(noBut);
+                msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
+                msgBox->exec();
+                if(msgBox && msgBox->clickedButton() != abortBut)
                     return;
             }
 

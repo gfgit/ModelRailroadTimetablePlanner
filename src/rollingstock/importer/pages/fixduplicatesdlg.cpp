@@ -8,6 +8,7 @@
 
 #include <QProgressDialog>
 #include <QMessageBox>
+#include <QPointer>
 
 #include "../intefaces/iduplicatesitemmodel.h"
 
@@ -105,20 +106,19 @@ void FixDuplicatesDlg::done(int res)
         int count = model->getItemCount();
         if(count)
         {
-            QMessageBox msgBox(this);
-            msgBox.setIcon(QMessageBox::Warning);
-            msgBox.setWindowTitle(RsImportStrings::tr("Not yet!"));
-            msgBox.setText(RsImportStrings::tr("There are still %1 items to be fixed").arg(count));
-            QPushButton *okBut = msgBox.addButton(QMessageBox::Ok);
+            QPointer<QMessageBox> msgBox = new QMessageBox(this);
+            msgBox->setIcon(QMessageBox::Warning);
+            msgBox->setWindowTitle(RsImportStrings::tr("Not yet!"));
+            msgBox->setText(RsImportStrings::tr("There are still %1 items to be fixed").arg(count));
+            QPushButton *okBut = msgBox->addButton(QMessageBox::Ok);
             QPushButton *backToPrevPage = nullptr;
             if(canGoBack)
-                backToPrevPage = msgBox.addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
-            msgBox.setDefaultButton(okBut);
-            msgBox.setEscapeButton(okBut); //If dialog gets closed of Esc is pressed act ad if Ok was pressed
-            msgBox.exec();
+                backToPrevPage = msgBox->addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
+            msgBox->setDefaultButton(okBut);
+            msgBox->setEscapeButton(okBut); //If dialog gets closed of Esc is pressed act ad if Ok was pressed
+            msgBox->exec();
 
-            QAbstractButton *but = msgBox.clickedButton();
-            if(but == backToPrevPage && backToPrevPage)
+            if(msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage)
             {
                 res = GoBackToPrevPage;
             }
@@ -187,24 +187,27 @@ int FixDuplicatesDlg::blockingReloadCount(int mode)
 int FixDuplicatesDlg::warnCancel(QWidget *w)
 {
     //Warn user
-    QMessageBox msgBox(w);
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setWindowTitle(RsImportStrings::tr("Aborting RS Import"));
-    msgBox.setText(RsImportStrings::tr("If you don't fix duplicated items you cannot proceed.\n"
-                                       "Do you wish to Abort the process?"));
-    QPushButton *abortBut = msgBox.addButton(QMessageBox::Abort);
-    QPushButton *noBut = msgBox.addButton(QMessageBox::No);
+    QPointer<QMessageBox> msgBox = new QMessageBox(w);
+    msgBox->setIcon(QMessageBox::Warning);
+    msgBox->setWindowTitle(RsImportStrings::tr("Aborting RS Import"));
+    msgBox->setText(RsImportStrings::tr("If you don't fix duplicated items you cannot proceed.\n"
+                                        "Do you wish to Abort the process?"));
+    QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
+    QPushButton *noBut = msgBox->addButton(QMessageBox::No);
     QPushButton *backToPrevPage = nullptr;
     if(canGoBack)
-        backToPrevPage = msgBox.addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
-    msgBox.setDefaultButton(noBut);
-    msgBox.setEscapeButton(noBut);
+        backToPrevPage = msgBox->addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
+    msgBox->setDefaultButton(noBut);
+    msgBox->setEscapeButton(noBut);
 
-    connect(model, &IDuplicatesItemModel::progressFinished, &msgBox, &QMessageBox::accept);
-    connect(model, &IDuplicatesItemModel::processAborted, &msgBox, &QMessageBox::accept);
-    msgBox.exec();
+    connect(model, &IDuplicatesItemModel::progressFinished, msgBox, &QMessageBox::accept);
+    connect(model, &IDuplicatesItemModel::processAborted, msgBox, &QMessageBox::accept);
+    msgBox->exec();
 
-    QAbstractButton *but = msgBox.clickedButton();
+    if(!msgBox)
+        return QDialog::Rejected;
+
+    QAbstractButton *but = msgBox->clickedButton();
     if(but == abortBut)
     {
         return QDialog::Rejected;

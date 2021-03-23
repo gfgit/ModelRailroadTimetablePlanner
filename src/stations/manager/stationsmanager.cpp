@@ -29,6 +29,7 @@
 #include "stations/manager/stations/dialogs/stationeditdialog.h"
 
 #include <QInputDialog>
+#include <QPointer>
 
 StationsManager::StationsManager(QWidget *parent) :
     QWidget(parent),
@@ -255,19 +256,19 @@ void StationsManager::onNewStation()
 {
     DEBUG_ENTRY;
 
-    QInputDialog dlg(this);
-    dlg.setWindowTitle(tr("Add Station"));
-    dlg.setLabelText(tr("Please choose a name for the new station."));
-    dlg.setTextValue(QString());
+    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    dlg->setWindowTitle(tr("Add Station"));
+    dlg->setLabelText(tr("Please choose a name for the new station."));
+    dlg->setTextValue(QString());
 
     do{
-        int ret = dlg.exec();
-        if(ret != QDialog::Accepted)
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
         {
             break; //User canceled
         }
 
-        const QString name = dlg.textValue().simplified();
+        const QString name = dlg->textValue().simplified();
         if(name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Station name cannot be empty."));

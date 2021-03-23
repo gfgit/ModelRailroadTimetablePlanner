@@ -12,6 +12,7 @@
 #include "jobs/jobeditor/jobpatheditor.h"
 #include <QDockWidget>
 
+#include <QPointer>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QLabel>
@@ -61,10 +62,10 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     jobEditor(nullptr),
-    #ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_RS_CHECKER
     rsErrorsWidget(nullptr),
     rsErrDock(nullptr),
-    #endif
+#endif
     view(nullptr),
     jobDock(nullptr),
     searchEdit(nullptr),
@@ -246,13 +247,13 @@ void MainWindow::setup_actions()
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
     connect(ui->actionNext_Job_Segment, &QAction::triggered, this, []()
-    {
-        Session->getViewManager()->requestJobShowPrevNextSegment(false);
-    });
+            {
+                Session->getViewManager()->requestJobShowPrevNextSegment(false);
+            });
     connect(ui->actionPrev_Job_Segment, &QAction::triggered, this, []()
-    {
-        Session->getViewManager()->requestJobShowPrevNextSegment(true);
-    });
+            {
+                Session->getViewManager()->requestJobShowPrevNextSegment(true);
+            });
 }
 
 void MainWindow::about()
@@ -262,9 +263,9 @@ void MainWindow::about()
                              tr("%1 application makes easier to deal with timetables and trains\n"
                                 "Beta version: %2\n"
                                 "Built: %3")
-                             .arg(qApp->applicationDisplayName())
-                             .arg(qApp->applicationVersion())
-                             .arg(QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy")));
+                                 .arg(qApp->applicationDisplayName())
+                                 .arg(qApp->applicationVersion())
+                                 .arg(QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy")));
 }
 
 void MainWindow::onOpen()
@@ -384,26 +385,32 @@ void MainWindow::loadFile(const QString& fileName)
         //Probably the application crashed before finishing RS importation
         //Give user choice to resume it or discard
 
-        QMessageBox msgBox(QMessageBox::Warning,
-                           tr("RS Import"),
-                           tr("There is some rollingstock import data left in this file. "
-                              "Probably the application has crashed!<br>"
-                              "Before deleting it would you like to resume importation?<br>"
-                              "<i>(Sorry for the crash, would you like to contact me and share information about it?)</i>"),
-                           QMessageBox::NoButton, this);
-        auto resumeBut = msgBox.addButton(tr("Resume importation"), QMessageBox::YesRole);
-        msgBox.addButton(tr("Just delete it"), QMessageBox::NoRole);
-        msgBox.setDefaultButton(resumeBut);
-        msgBox.setTextFormat(Qt::RichText);
+        QPointer<QMessageBox> msgBox = new QMessageBox(
+            QMessageBox::Warning,
+            tr("RS Import"),
+            tr("There is some rollingstock import data left in this file. "
+               "Probably the application has crashed!<br>"
+               "Before deleting it would you like to resume importation?<br>"
+               "<i>(Sorry for the crash, would you like to contact me and share information about it?)</i>"),
+            QMessageBox::NoButton, this);
+        auto resumeBut = msgBox->addButton(tr("Resume importation"), QMessageBox::YesRole);
+        msgBox->addButton(tr("Just delete it"), QMessageBox::NoRole);
+        msgBox->setDefaultButton(resumeBut);
+        msgBox->setTextFormat(Qt::RichText);
 
-        msgBox.exec();
+        msgBox->exec();
 
-        if(msgBox.clickedButton() == resumeBut)
+        if(msgBox)
         {
-            Session->getViewManager()->resumeRSImportation();
-        }else{
-            Session->clearImportRSTables();
+            if(msgBox->clickedButton() == resumeBut)
+            {
+                Session->getViewManager()->resumeRSImportation();
+            }else{
+                Session->clearImportRSTables();
+            }
         }
+
+
     }
 }
 
@@ -594,10 +601,10 @@ void MainWindow::onSaveCopyAs()
     database backupDB(fileName.toUtf8(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
     int rc = Session->m_Db.backup(backupDB, [](int pageCount, int remaining, int res)
-    {
-        Q_UNUSED(res)
-        qDebug() << pageCount << "/" << remaining;
-    });
+                                  {
+                                      Q_UNUSED(res)
+                                      qDebug() << pageCount << "/" << remaining;
+                                  });
 
     if(rc != SQLITE_OK && rc != SQLITE_DONE)
     {
@@ -646,36 +653,36 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
         rsErrDock->hide();
 #endif
         welcomeLabel->setText(
-                    tr("<p><b>There are no lines in this session</b></p>"
-                       "<p>"
-                        "<table align=\"center\">"
-                            "<tr>"
-                                "<td>Start by creating the railway layout for this session:</td>"
-                            "</tr>"
-                            "<tr>"
-                                "<td>"
-                                    "<table>"
-                                        "<tr>"
-                                            "<td>1.</td>"
-                                            "<td>Create stations (<b>Edit</b> > <b>Stations</b>)</td>"
-                                        "</tr>"
-                                        "<tr>"
-                                            "<td>2.</td>"
-                                            "<td>Create railway lines (<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b>)</td>"
-                                        "</tr>"
-                                        "<tr>"
-                                            "<td>3.</td>"
-                                            "<td>Add stations to railway lines</td>"
-                                        "</tr>"
-                                        "<tr>"
-                                            "<td></td>"
-                                            "<td>(<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b> > <b>Edit Line</b>)</td>"
-                                        "</tr>"
-                                    "</table>"
-                                "</td>"
-                            "</tr>"
-                        "</table>"
-                       "</p>"));
+            tr("<p><b>There are no lines in this session</b></p>"
+               "<p>"
+               "<table align=\"center\">"
+               "<tr>"
+               "<td>Start by creating the railway layout for this session:</td>"
+               "</tr>"
+               "<tr>"
+               "<td>"
+               "<table>"
+               "<tr>"
+               "<td>1.</td>"
+               "<td>Create stations (<b>Edit</b> > <b>Stations</b>)</td>"
+               "</tr>"
+               "<tr>"
+               "<td>2.</td>"
+               "<td>Create railway lines (<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b>)</td>"
+               "</tr>"
+               "<tr>"
+               "<td>3.</td>"
+               "<td>Add stations to railway lines</td>"
+               "</tr>"
+               "<tr>"
+               "<td></td>"
+               "<td>(<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b> > <b>Edit Line</b>)</td>"
+               "</tr>"
+               "</table>"
+               "</td>"
+               "</tr>"
+               "</table>"
+               "</p>"));
         break;
     }
     case CentralWidgetMode::ViewSessionMode:
@@ -881,9 +888,9 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         if(jobDock->isFloating())
         {
             QTimer::singleShot(0, jobDock, [this]()
-            {
-                jobDock->setFloating(false);
-            });
+                               {
+                                   jobDock->setFloating(false);
+                               });
         }
     }
 #ifdef ENABLE_RS_CHECKER
@@ -892,9 +899,9 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         if(rsErrDock->isFloating())
         {
             QTimer::singleShot(0, rsErrDock, [this]()
-            {
-                rsErrDock->setFloating(false);
-            });
+                               {
+                                   rsErrDock->setFloating(false);
+                               });
         }
     }
 #endif
