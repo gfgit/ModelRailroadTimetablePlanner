@@ -481,7 +481,7 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
         whereCol = "c.track_side,t.pos";
         break;
     case GateCol:
-        whereCol = "g.name,t.pos.c.track_side";
+        whereCol = "g.name,t.pos,c.track_side";
         break;
     }
 
@@ -689,7 +689,10 @@ bool StationTrackConnectionsModel::setTrack(StationTrackConnectionsModel::TrackC
         return false;
 
     command q(mDb, "UPDATE station_gate_connections SET track_id=? WHERE id=?");
-    q.bind(1, trackId);
+    if(trackId)
+        q.bind(1, trackId);
+    else
+        q.bind(1); //Bind NULL
     q.bind(2, item.connId);
     int ret = q.step();
     if(ret != SQLITE_OK && ret != SQLITE_DONE)
@@ -719,7 +722,10 @@ bool StationTrackConnectionsModel::setGate(StationTrackConnectionsModel::TrackCo
         return false;
 
     command q(mDb, "UPDATE station_gate_connections SET gate_id=? WHERE id=?");
-    q.bind(1, gateId);
+    if(gateId)
+        q.bind(1, gateId);
+    else
+        q.bind(1); //Bind NULL
     q.bind(2, item.connId);
     int ret = q.step();
     if(ret != SQLITE_OK && ret != SQLITE_DONE)
