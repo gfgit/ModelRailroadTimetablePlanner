@@ -344,8 +344,12 @@ Qt::ItemFlags StationTracksModel::flags(const QModelIndex &idx) const
     if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
         return f; //Not fetched yet
 
-    if(idx.column() == IsElectrifiedCol || idx.column() == IsThroughCol
-        || idx.column() == PassengerLegthCol || idx.column() == FreightLengthCol)
+    if(idx.column() == PassengerLegthCol || idx.column() == FreightLengthCol)
+    {
+        f.setFlag(Qt::ItemIsUserCheckable);
+    }
+
+    if(idx.column() == IsElectrifiedCol || idx.column() == IsThroughCol)
     {
         f.setFlag(Qt::ItemIsUserCheckable);
     }
