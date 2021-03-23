@@ -547,8 +547,6 @@ bool StationTracksModel::moveTrackUpDown(db_id trackId, bool up, bool topOrBotto
         return false; //Already in position
 
     int pos = r.get<int>(0);
-    if(!up)
-        pos++; //Add 1 when going down to go after next item
     q.finish();
 
     moveTrack(trackId, pos);
@@ -927,27 +925,58 @@ bool StationTracksModel::setColor(StationTracksModel::TrackItem &item, QRgb colo
 void StationTracksModel::moveTrack(db_id trackId, int pos)
 {
     command q_setPos(mDb, "UPDATE station_tracks SET pos=? WHERE id=?");
+    query q(mDb);
 
-    query q(mDb, "SELECT id FROM station_tracks WHERE station_id=? AND pos=?");
+    //Get max pos
+    q.prepare("SELECT MAX(pos) FROM station_tracks WHERE station_id=?");
     q.bind(1, m_stationId);
-    q.bind(2, pos);
-    if(q.step() == SQLITE_ROW)
-    {
-        if(q.getRows().get<db_id>(0) == trackId)
-            return; //Already in position
+    q.step();
+    const int max = q.getRows().get<int>(0);
 
-        //Count tracks which need to be shifted
-        q.prepare("SELECT COUNT(1) FROM station_tracks WHERE station_id=? AND pos>=?");
-        q.bind(1, m_stationId);
-        q.bind(2, pos);
-        q.step();
-        const int count = q.getRows().get<int>(0);
-        int otherPos = pos + count;
+    //Save old pos
+    q.prepare("SELECT pos FROM station_tracks WHERE id=?");
+    q.bind(1, trackId);
+    q.step();
+    const int oldPos = q.getRows().get<int>(0);
+
+    //Move our track to max+1
+    q_setPos.bind(1, max + 1);
+    q_setPos.bind(2, trackId);
+    q_setPos.execute();
+    q_setPos.reset();
+
+    if(pos > oldPos)
+    {
+        //Moving down (towards higher pos number)
+
+        int otherPos = oldPos;
 
         //Shift tracks by one (caution: there is UNIQUE constraint on pos)
-        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos>=? ORDER BY pos DESC");
+        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos BETWEEN ? AND ? ORDER BY pos ASC");
+        q.bind(1, m_stationId);
+        q.bind(2, oldPos);
+        q.bind(3, pos);
+        for(auto track : q)
+        {
+            db_id otherId = track.get<db_id>(0);
+            q_setPos.bind(1, otherPos);
+            q_setPos.bind(2, otherId);
+            q_setPos.execute();
+            q_setPos.reset();
+            otherPos++;
+        }
+    }
+    else if(oldPos > pos)
+    {
+        //Moving up (towards lower pos number)
+
+        int otherPos = oldPos;
+
+        //Shift tracks by one (caution: there is UNIQUE constraint on pos)
+        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos BETWEEN ? AND ? ORDER BY pos DESC");
         q.bind(1, m_stationId);
         q.bind(2, pos);
+        q.bind(3, oldPos);
         for(auto track : q)
         {
             db_id otherId = track.get<db_id>(0);
@@ -959,7 +988,7 @@ void StationTracksModel::moveTrack(db_id trackId, int pos)
         }
     }
 
-    //Set position
+    //Move our track to pos
     q_setPos.bind(1, pos);
     q_setPos.bind(2, trackId);
     q_setPos.execute();
