@@ -4,7 +4,6 @@ StationsMatchModel::StationsMatchModel(database &db, QObject *parent) :
     ISqlFKMatchModel(parent),
     mDb(db),
     q_getMatches(mDb),
-    m_lineId(0),
     m_exceptStId(0)
 {
 
@@ -74,8 +73,6 @@ void StationsMatchModel::refreshData()
 
     if(m_exceptStId)
         q_getMatches.bind(2, m_exceptStId);
-    if(m_lineId)
-        q_getMatches.bind(3, m_lineId);
 
     auto end = q_getMatches.end();
     auto it = q_getMatches.begin();
@@ -123,27 +120,13 @@ QString StationsMatchModel::getNameAtRow(int row) const
     return items[row].name;
 }
 
-void StationsMatchModel::setFilter(db_id lineId, db_id exceptStId)
+void StationsMatchModel::setFilter(db_id exceptStId)
 {
-    m_lineId = lineId;
     m_exceptStId = exceptStId;
 
-    QByteArray sql;
-
-    if(m_lineId)
-    {
-        sql = "SELECT railways.stationId,"
-              " stations.name"
-              " FROM railways"
-              " JOIN stations ON stations.id=railways.stationId"
-              " WHERE railways.lineId=?3 AND ";
-        if(m_exceptStId)
-            sql.append("railways.stationId<>?2 AND ");
-    }else{
-        sql = "SELECT stations.id,stations.name FROM stations WHERE ";
-        if(m_exceptStId)
-            sql.append("stations.id<>?2 AND ");
-    }
+    QByteArray sql = "SELECT stations.id,stations.name FROM stations WHERE ";
+    if(m_exceptStId)
+        sql.append("stations.id<>?2 AND ");
 
     sql.append("(stations.name LIKE ?1 OR stations.short_name LIKE ?1) LIMIT " QT_STRINGIFY(MaxMatchItems + 1));
 

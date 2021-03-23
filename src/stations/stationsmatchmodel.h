@@ -26,7 +26,7 @@ public:
     QString getNameAtRow(int row) const override;
 
     // StationsMatchModel:
-    void setFilter(db_id lineId, db_id exceptStId);
+    void setFilter(db_id exceptStId);
 
 private:
     struct StationItem
@@ -40,7 +40,6 @@ private:
     database &mDb;
     query q_getMatches;
 
-    db_id m_lineId;
     db_id m_exceptStId;
 
     QByteArray mQuery;
