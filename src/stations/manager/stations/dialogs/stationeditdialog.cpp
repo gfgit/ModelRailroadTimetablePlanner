@@ -279,7 +279,9 @@ void StationEditDialog::onGatesChanged()
     //A gate was removed or changed name
 
     //Update platform connections
+    //(refresh because some may be deleted)
     trackConnModel->clearCache();
+    trackConnModel->refreshData();
 
     //Update gate connections
 }
@@ -334,7 +336,9 @@ void StationEditDialog::onTracksChanged()
     gatesModel->clearCache();
 
     //Update platform connections
+    //(refresh because some may be deleted)
     trackConnModel->clearCache();
+    trackConnModel->refreshData();
 }
 
 void StationEditDialog::addTrack()
