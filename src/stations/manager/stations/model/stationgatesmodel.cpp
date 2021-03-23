@@ -871,8 +871,7 @@ bool StationGatesModel::setDefaultPlatf(StationGatesModel::GateItem &item, db_id
     if(item.defaultInPlatfId == trackId)
         return false;
 
-    //FIXME: check if it is of same station and connected to this gate
-    //TODO: maybe implement a TRIGGER
+    //FIXME: restrict popup suggestions to tracks connected to this gate and not all station's tracks
 
     command q(mDb, "UPDATE station_gates SET def_in_platf_id=? WHERE id=?");
     q.bind(1, trackId);
