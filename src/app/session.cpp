@@ -582,10 +582,10 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     CHECK(result);
 
     result = m_Db.execute("CREATE TRIGGER gate_out_track_bound_update\n"
-                          "BEFORE UPDATE out_track_count ON station_gates\n"
+                          "BEFORE UPDATE OF out_track_count ON station_gates\n"
                           "BEGIN\n"
                           "SELECT RAISE(ABORT, 'Cannot remove gate tracks. Platforms connected.') FROM station_gate_connections c"
-                          " WHERE c.gate_id=NEW.id AND NEW.out_track_count<=NEW.gate_track;"
+                          " WHERE c.gate_id=NEW.id AND NEW.out_track_count<=c.gate_track;"
                           "END");
     CHECK(result);
 
@@ -593,7 +593,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     result = m_Db.execute("CREATE TRIGGER gate_def_platf_not_connected\n"
                           "BEFORE INSERT ON station_gates\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Platform not connected to this gate') WHERE NOT EXISTS ("
+                          "SELECT RAISE(ABORT, 'Platform not connected to this gate') WHERE"
+                          " NEW.def_in_platf_id NOT NULL AND NOT EXISTS ("
                           " SELECT 1 FROM station_gate_connections WHERE track_id=NEW.def_in_platf_id AND gate_id=NEW.id"
                           ");"
                           "END");
@@ -602,7 +603,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     result = m_Db.execute("CREATE TRIGGER gate_def_platf_not_connected_update\n"
                           "BEFORE UPDATE OF def_in_platf_id ON station_gates\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Platform not connected to this gate') WHERE NOT EXISTS ("
+                          "SELECT RAISE(ABORT, 'Platform not connected to this gate') WHERE"
+                          " NEW.def_in_platf_id NOT NULL AND NOT EXISTS ("
                           " SELECT 1 FROM station_gate_connections WHERE track_id=NEW.def_in_platf_id AND gate_id=NEW.id"
                           ");"
                           "END");
