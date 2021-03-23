@@ -38,7 +38,7 @@ private:
         db_id gateId;
         QString name;
         QFlags<utils::GateType> type;
-        QFlags<utils::Side> side;
+        utils::Side side;
     };
     static const int ItemCount = 30;
     GateItem items[ItemCount];

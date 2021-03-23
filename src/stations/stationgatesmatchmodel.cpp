@@ -73,7 +73,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     {
         if(!emptyRow && !ellipsesRow)
         {
-            if(items[idx.row()].side.testFlag(utils::Side::West))
+            if(items[idx.row()].side == utils::Side::West)
                 return QColor(Qt::blue);
         }
         break;
