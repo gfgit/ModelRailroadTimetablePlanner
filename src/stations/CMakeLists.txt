@@ -6,10 +6,12 @@ set(TRAINTIMETABLE_SOURCES
   stations/stationssqlmodel.h
   stations/station_utils.h
   stations/station_name_utils.h
+  stations/stationgatesmatchmodel.h
   stations/stationtracksmatchmodel.h
 
   stations/stationsmatchmodel.cpp
   stations/stationssqlmodel.cpp
+  stations/stationgatesmatchmodel.cpp
   stations/stationtracksmatchmodel.cpp
   PARENT_SCOPE
 )
