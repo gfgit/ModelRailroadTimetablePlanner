@@ -278,7 +278,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "short_name TEXT UNIQUE,"
                           "type INTEGER NOT NULL,"
                           "phone_number INTEGER UNIQUE,"
-                          "svg_data BLOB )");
+                          "svg_data BLOB,"
+                          "CHECK(length(name)>0) )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE station_tracks ("
@@ -293,7 +294,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "color_rgb INTEGER,"
                           "name TEXT NOT NULL,"
                           "CHECK("
-                          " max_axes>=2 AND track_length_cm>0"
+                          " length(name)>0 AND max_axes>=2 AND track_length_cm>0"
                           " AND (platf_length_cm BETWEEN 0 AND track_length_cm)"
                           " AND (freight_length_cm BETWEEN 0 AND track_length_cm)"
                           "),"
@@ -510,13 +511,13 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "END");
     CHECK(result);
     result = m_Db.execute("CREATE TRIGGER multiple_gate_segments_update_in\n"
-                          "BEFORE  UPDATE OF in_gate_id ON railway_segments\n"
+                          "BEFORE UPDATE OF in_gate_id ON railway_segments\n"
                           "BEGIN\n"
                           "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE out_gate_id=NEW.in_gate_id;"
                           "END");
     CHECK(result);
     result = m_Db.execute("CREATE TRIGGER multiple_gate_segments_update_out\n"
-                          "BEFORE  UPDATE OF out_gate_id ON railway_segments\n"
+                          "BEFORE UPDATE OF out_gate_id ON railway_segments\n"
                           "BEGIN\n"
                           "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE in_node_id=NEW.out_node_id;"
                           "END");
@@ -530,15 +531,41 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "END");
     CHECK(result);
     result = m_Db.execute("CREATE TRIGGER multiple_railway_conn_update_in\n"
-                          "BEFORE  UPDATE OF in_track ON railway_connections\n"
+                          "BEFORE UPDATE OF in_track ON railway_connections\n"
                           "BEGIN\n"
                           "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE out_track=NEW.in_track;"
                           "END");
     CHECK(result);
     result = m_Db.execute("CREATE TRIGGER multiple_railway_conn_update_out\n"
-                          "BEFORE  UPDATE OF out_track ON railway_connections\n"
+                          "BEFORE UPDATE OF out_track ON railway_connections\n"
                           "BEGIN\n"
                           "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE in_track=NEW.out_track;"
+                          "END");
+    CHECK(result);
+
+    //Prevent setting a default track of different station than gate station
+    result = m_Db.execute("CREATE TRIGGER gate_def_platf_different_station\n"
+                          "BEFORE INSERT ON station_gates\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station')"
+                          " FROM station_tracks t WHERE t.id=NEW.def_in_platf_id AND t.station_id<>NEW.station_id;"
+                          "END");
+    CHECK(result);
+
+    result = m_Db.execute("CREATE TRIGGER gate_def_platf_different_station_update\n"
+                          "BEFORE  UPDATE OF station_id,def_in_platf_id ON station_gates\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station')"
+                          " FROM station_tracks t WHERE t.id=NEW.def_in_platf_id AND t.station_id<>NEW.station_id;"
+                          "END");
+    CHECK(result);
+
+    //Remote possibility of updating 'station_id' of track. (To do so first check it is not default of any gate)
+    result = m_Db.execute("CREATE TRIGGER gate_def_platf_different_station_update_track\n"
+                          "BEFORE  UPDATE OF station_id ON station_tracks\n"
+                          "BEGIN\n"
+                          "SELECT RAISE(ABORT, 'Cannot set default platform of a different station')"
+                          " FROM station_gates g WHERE g.def_in_platf_id=NEW.id AND g.station_id<>NEW.station_id;"
                           "END");
     CHECK(result);
 
