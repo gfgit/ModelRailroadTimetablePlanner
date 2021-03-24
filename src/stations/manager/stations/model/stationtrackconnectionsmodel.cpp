@@ -267,7 +267,7 @@ void StationTrackConnectionsModel::refreshData()
 
 void StationTrackConnectionsModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col == GateTrackCol || col >= NCols)
+    if(sortColumn == col || col >= NCols)
         return;
 
     clearCache();
@@ -475,13 +475,16 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
     switch (sortCol)
     {
     case TrackCol:
-        whereCol = "t.pos,c.track_side";
+        whereCol = "t.pos,c.track_side,g.name,c.gate_track";
         break;
     case TrackSideCol:
-        whereCol = "c.track_side,t.pos";
+        whereCol = "c.track_side,t.pos,g.name,c.gate_track";
         break;
     case GateCol:
-        whereCol = "g.name,t.pos,c.track_side";
+        whereCol = "g.name,t.pos,c.track_side,c.gate_track";
+        break;
+    case GateTrackCol:
+        whereCol = "g.name,c.gate_track,t.pos,c.track_side";
         break;
     }
 
@@ -679,6 +682,12 @@ bool StationTrackConnectionsModel::setGateTrack(StationTrackConnectionsModel::Tr
 
     item.gateTrack = track;
 
+    //This row has now changed position so we need to invalidate cache
+    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    //but the view will trigger fetching at same scroll position so it is enough
+    cache.clear();
+    cacheFirstRow = 0;
+
     return true;
 }
 
@@ -740,14 +749,11 @@ bool StationTrackConnectionsModel::setGate(StationTrackConnectionsModel::TrackCo
     item.gateId = gateId;
     item.gateName = gateName;
 
-    if(sortColumn == GateCol)
-    {
-        //This row has now changed position so we need to invalidate cache
-        //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-        //but the view will trigger fetching at same scroll position so it is enough
-        cache.clear();
-        cacheFirstRow = 0;
-    }
+    //This row has now changed position so we need to invalidate cache
+    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    //but the view will trigger fetching at same scroll position so it is enough
+    cache.clear();
+    cacheFirstRow = 0;
 
     return true;
 }
