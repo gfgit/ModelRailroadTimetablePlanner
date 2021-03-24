@@ -118,7 +118,10 @@ void FixDuplicatesDlg::done(int res)
             msgBox->setEscapeButton(okBut); //If dialog gets closed of Esc is pressed act ad if Ok was pressed
             msgBox->exec();
 
-            if(msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage)
+            const bool goBack = msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage;
+            delete  msgBox;
+
+            if(goBack)
             {
                 res = GoBackToPrevPage;
             }
@@ -208,15 +211,17 @@ int FixDuplicatesDlg::warnCancel(QWidget *w)
         return QDialog::Rejected;
 
     QAbstractButton *but = msgBox->clickedButton();
+    int ret = QDialog::Accepted; //Default give second chance
     if(but == abortBut)
     {
-        return QDialog::Rejected;
+        ret = QDialog::Rejected;
     }
     else if(but == backToPrevPage && backToPrevPage)
     {
-        return FixDuplicatesDlg::GoBackToPrevPage;
+        ret = FixDuplicatesDlg::GoBackToPrevPage;
     }
 
-    //Give user a second chance
-    return QDialog::Accepted;
+    delete msgBox;
+
+    return ret;
 }

@@ -314,6 +314,8 @@ void StationEditDialog::addGate()
         }
     }
     while (true);
+
+    delete dlg;
 }
 
 void StationEditDialog::removeSelectedGate()
@@ -369,6 +371,8 @@ void StationEditDialog::addTrack()
         }
     }
     while (true);
+
+    delete dlg;
 }
 
 void StationEditDialog::removeSelectedTrack()
@@ -455,6 +459,8 @@ void StationEditDialog::addTrackConn()
         }
     }
     while (true);
+
+    delete dlg;
 }
 
 void StationEditDialog::removeSelectedTrackConn()

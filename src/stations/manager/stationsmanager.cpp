@@ -282,6 +282,8 @@ void StationsManager::onNewStation()
     }
     while (true);
 
+    delete dlg;
+
     //TODO
     //    QModelIndex idx = stationsModel->index(row, 0);
     //    stationView->setCurrentIndex(idx);

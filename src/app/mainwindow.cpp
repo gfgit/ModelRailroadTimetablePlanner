@@ -410,7 +410,7 @@ void MainWindow::loadFile(const QString& fileName)
             }
         }
 
-
+        delete msgBox;
     }
 }
 

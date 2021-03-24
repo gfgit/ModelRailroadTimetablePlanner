@@ -362,10 +362,12 @@ void RollingStockManager::onViewRSPlanSearch()
     dlg->setDescription(tr("Please choose a rollingstock item"));
     dlg->setPlaceholder(tr("[model][.][number][:owner]"));
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
-        return;
+    int ret = dlg->exec();
 
-    Session->getViewManager()->requestRSInfo(dlg->getItemId());
+    if(ret == QDialog::Accepted && dlg)
+        Session->getViewManager()->requestRSInfo(dlg->getItemId());
+
+    delete dlg;
 }
 
 void RollingStockManager::onNewRs()
@@ -493,9 +495,13 @@ bool RollingStockManager::createRsModelWithDifferentSuffix(db_id sourceModelId, 
     dlg->setWindowTitle(tr("Choose Suffix"));
     dlg->setInputMode(QInputDialog::TextInput);
 
+    bool ret = true; //Default: Abort without errors
+
     if(dlg->exec() == QDialog::Accepted && dlg)
-        return modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg->textValue(), &errMsg);
-    return true; //Abort without errors
+        ret = modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg->textValue(), &errMsg);
+
+    delete dlg;
+    return ret;
 }
 
 void RollingStockManager::onRemoveRsModel()

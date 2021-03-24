@@ -104,7 +104,9 @@ void RSImportWizard::done(int result)
                 msgBox->setDefaultButton(noBut);
                 msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
                 msgBox->exec();
-                if(msgBox && msgBox->clickedButton() != abortBut)
+                bool abortClicked = msgBox && msgBox->clickedButton() != abortBut;
+                delete msgBox;
+                if(!abortClicked)
                     return;
             }
 
