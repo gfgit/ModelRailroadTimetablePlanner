@@ -9,6 +9,7 @@ namespace sqlite3pp
 class database;
 }
 
+//FIXME: remove
 class StationOrLineMatchFactory : public IMatchModelFactory
 {
 public:

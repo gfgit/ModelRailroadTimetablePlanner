@@ -2,6 +2,7 @@
 #define STATIONSMATCHMODEL_H
 
 #include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/sqldelegate/imatchmodelfactory.h"
 
 #include "utils/types.h"
 
@@ -43,6 +44,19 @@ private:
     db_id m_exceptStId;
 
     QByteArray mQuery;
+};
+
+class StationMatchFactory : public IMatchModelFactory
+{
+    StationMatchFactory(sqlite3pp::database &db, QObject *parent);
+
+    ISqlFKMatchModel *createModel() override;
+
+    inline void setExceptStation(db_id stationId) { exceptStId = stationId; }
+
+private:
+    db_id exceptStId;
+    sqlite3pp::database &mDb;
 };
 
 #endif // STATIONSMATCHMODEL_H

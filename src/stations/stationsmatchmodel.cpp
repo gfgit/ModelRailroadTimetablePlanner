@@ -132,3 +132,18 @@ void StationsMatchModel::setFilter(db_id exceptStId)
 
     q_getMatches.prepare(sql.constData());
 }
+
+StationMatchFactory::StationMatchFactory(database &db, QObject *parent) :
+    IMatchModelFactory(parent),
+    exceptStId(0),
+    mDb(db)
+{
+
+}
+
+ISqlFKMatchModel *StationMatchFactory::createModel()
+{
+    StationsMatchModel *m = new StationsMatchModel(mDb);
+    m->setFilter(exceptStId);
+    return m;
+}
