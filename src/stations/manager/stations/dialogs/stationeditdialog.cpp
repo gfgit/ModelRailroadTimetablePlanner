@@ -6,6 +6,7 @@
 #include "stations/manager/stations/model/stationgatesmodel.h"
 #include "stations/manager/stations/model/stationtracksmodel.h"
 #include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
+#include "stations/manager/stations/model/railwaysegmentsmodel.h"
 
 #include <QHeaderView>
 #include "utils/sqldelegate/modelpageswitcher.h"
@@ -136,6 +137,18 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
 
     connect(ui->addTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::addTrackConn);
     connect(ui->removeTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrackConn);
+
+    //Gate Connections Tab
+    gateConnModel = new RailwaySegmentsModel(db, this);
+    connect(gateConnModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
+
+    ps = new ModelPageSwitcher(false, this);
+    ui->gateConnLayout->addWidget(ps);
+    ps->setModel(gateConnModel);
+    setupView(ui->gateConnView, gateConnModel);
+
+    connect(ui->addGateConnBut, &QToolButton::clicked, this, &StationEditDialog::addGateConnection);
+    connect(ui->removeGateConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedGateConnection);
 }
 
 StationEditDialog::~StationEditDialog()
@@ -151,6 +164,7 @@ bool StationEditDialog::setStation(db_id stationId)
         return false;
     tracksModel->setStation(stationId);
     trackConnModel->setStation(stationId);
+    gateConnModel->setFilterFromStationId(stationId);
 
     //Update factories
     trackFactory->setStationId(stationId);
@@ -284,6 +298,7 @@ void StationEditDialog::onGatesChanged()
     trackConnModel->refreshData();
 
     //Update gate connections
+    gateConnModel->clearCache();
 }
 
 void StationEditDialog::addGate()
@@ -473,4 +488,14 @@ void StationEditDialog::removeSelectedTrackConn()
         return;
 
     trackConnModel->removeTrackConnection(connId);
+}
+
+void StationEditDialog::addGateConnection()
+{
+
+}
+
+void StationEditDialog::removeSelectedGateConnection()
+{
+
 }

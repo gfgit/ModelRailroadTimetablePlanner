@@ -12,6 +12,7 @@ class database;
 class SpinBoxEditorFactory;
 class StationTracksMatchFactory;
 class StationGatesMatchFactory;
+class RailwaySegmentsModel;
 
 class StationGatesModel;
 class StationTracksModel;
@@ -58,6 +59,10 @@ private slots:
     void addTrackConn();
     void removeSelectedTrackConn();
 
+    //Gate Connections
+    void addGateConnection();
+    void removeSelectedGateConnection();
+
 private:
     enum Tabs
     {
@@ -78,6 +83,7 @@ private:
     StationGatesModel *gatesModel;
     StationTracksModel *tracksModel;
     StationTrackConnectionsModel *trackConnModel;
+    RailwaySegmentsModel *gateConnModel;
 };
 
 #endif // STATIONEDITDIALOG_H
