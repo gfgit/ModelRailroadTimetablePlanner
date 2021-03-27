@@ -8,6 +8,7 @@
 
 #include <QVector>
 
+//TODO: emit signals
 class StationsModel : public IPagedItemModel
 {
     Q_OBJECT
