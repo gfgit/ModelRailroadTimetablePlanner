@@ -10,7 +10,8 @@ StationGatesMatchModel::StationGatesMatchModel(sqlite3pp::database &db, QObject 
     q_getMatches(mDb, "SELECT id,type,name,side"
                       " FROM station_gates WHERE station_id=?2 AND name LIKE ?1"
                       " ORDER BY side,name"),
-    m_stationId(0)
+    m_stationId(0),
+    hideConnectedGates(false)
 {
 }
 
@@ -165,15 +166,30 @@ QString StationGatesMatchModel::getNameAtRow(int row) const
     return items[row].name;
 }
 
-void StationGatesMatchModel::setFilter(db_id stationId)
+void StationGatesMatchModel::setFilter(db_id stationId, bool hideAlreadyConnected)
 {
     m_stationId = stationId;
+    hideConnectedGates = hideAlreadyConnected;
+
+    QByteArray sql = "SELECT g.id,g.type,g.name,g.side"
+                     " FROM station_gates g WHERE g.station_id=?2 AND g.name LIKE ?1";
+
+    if(hideAlreadyConnected)
+    {
+        sql += " AND NOT EXISTS (SELECT 1 FROM railway_segments s WHERE s.in_gate_id=g.id OR s.out_gate_id=g.id)";
+    }
+
+    sql += " ORDER BY g.side,g.name";
+
+    q_getMatches.prepare(sql);
+
     refreshData();
 }
 
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :
     IMatchModelFactory(parent),
     m_stationId(0),
+    hideConnectedGates(false),
     mDb(db)
 {
 
@@ -182,6 +198,6 @@ StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent
 ISqlFKMatchModel *StationGatesMatchFactory::createModel()
 {
     StationGatesMatchModel *m = new StationGatesMatchModel(mDb);
-    m->setFilter(m_stationId);
+    m->setFilter(m_stationId, hideConnectedGates);
     return m;
 }
