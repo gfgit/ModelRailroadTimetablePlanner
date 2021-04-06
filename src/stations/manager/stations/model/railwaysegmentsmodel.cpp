@@ -68,7 +68,7 @@ QVariant RailwaySegmentsModel::headerData(int section, Qt::Orientation orientati
             case ToStationCol:
                 return tr("To");
             case ToGateCol:
-                return tr("Gate");
+                return tr("To Gate");
             case MaxSpeedCol:
                 return tr("Max. Speed");
             case DistanceCol:
@@ -149,6 +149,19 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
                 return tr("Segment <b>%1</b> is shown reversed.").arg(item.segmentName);
             break;
         }
+        }
+        break;
+    }
+    case Qt::TextAlignmentRole:
+    {
+        switch (idx.column())
+        {
+        case FromGateCol:
+        case ToGateCol:
+            return Qt::AlignCenter;
+        case MaxSpeedCol:
+        case DistanceCol:
+            return Qt::AlignRight + Qt::AlignVCenter;
         }
         break;
     }
@@ -259,7 +272,7 @@ void RailwaySegmentsModel::refreshData()
 
 void RailwaySegmentsModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || (col != FromGateCol && col != ToGateCol && col != IsElectrifiedCol))
+    if(sortColumn == col || col == FromGateCol || col == ToGateCol || col == IsElectrifiedCol)
         return;
 
     clearCache();
