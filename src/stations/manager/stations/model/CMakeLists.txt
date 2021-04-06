@@ -6,6 +6,7 @@ set(TRAINTIMETABLE_SOURCES
   stations/manager/stations/model/stationtrackconnectionsmodel.h
   stations/manager/stations/model/railwaysegmenthelper.h
   stations/manager/stations/model/railwaysegmentsmodel.h
+  stations/manager/stations/model/railwaysegmentconnectionsmodel.h
 
   stations/manager/stations/model/stationgatesmodel.cpp
   stations/manager/stations/model/stationsmodel.cpp
@@ -13,5 +14,6 @@ set(TRAINTIMETABLE_SOURCES
   stations/manager/stations/model/stationtrackconnectionsmodel.cpp
   stations/manager/stations/model/railwaysegmenthelper.cpp
   stations/manager/stations/model/railwaysegmentsmodel.cpp
+  stations/manager/stations/model/railwaysegmentconnectionsmodel.cpp
   PARENT_SCOPE
 )
