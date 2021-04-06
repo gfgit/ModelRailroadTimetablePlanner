@@ -354,9 +354,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "seg_id INTEGER NOT NULL,"
                           "in_track INTEGER NOT NULL,"
                           "out_track INTEGER NOT NULL,"
-                          "UNIQUE(seg_id,in_track,out_track),"
-                          "UNIQUE(in_track),"
-                          "UNIQUE(out_track),"
+                          "UNIQUE(seg_id,in_track),"
+                          "UNIQUE(seg_id,out_track),"
                           "FOREIGN KEY(seg_id) REFERENCES railway_segments(id) ON UPDATE CASCADE ON DELETE RESTRICT )");
     CHECK(result);
 
@@ -523,26 +522,6 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "BEFORE UPDATE OF out_gate_id ON railway_segments\n"
                           "BEGIN\n"
                           "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE in_gate_id=NEW.out_gate_id;"
-                          "END");
-    CHECK(result);
-
-    //Prevent multiple connections of same gate segment track
-    result = m_Db.execute("CREATE TRIGGER multiple_railway_conn\n"
-                          "BEFORE INSERT ON railway_connections\n"
-                          "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE in_track=NEW.out_track OR out_track=NEW.in_track;"
-                          "END");
-    CHECK(result);
-    result = m_Db.execute("CREATE TRIGGER multiple_railway_conn_update_in\n"
-                          "BEFORE UPDATE OF in_track ON railway_connections\n"
-                          "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE out_track=NEW.in_track;"
-                          "END");
-    CHECK(result);
-    result = m_Db.execute("CREATE TRIGGER multiple_railway_conn_update_out\n"
-                          "BEFORE UPDATE OF out_track ON railway_connections\n"
-                          "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot connect same track twice') FROM railway_connections WHERE in_track=NEW.out_track;"
                           "END");
     CHECK(result);
 
