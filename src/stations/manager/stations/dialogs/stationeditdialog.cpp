@@ -149,6 +149,8 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ui->gateConnLayout->addWidget(ps);
     ps->setModel(gateConnModel);
     setupView(ui->gateConnView, gateConnModel);
+    //From station column shows always our station, because of filetering, so hide it
+    ui->gateConnView->hideColumn(RailwaySegmentsModel::FromStationCol);
 
     connect(ui->addGateConnBut, &QToolButton::clicked, this, &StationEditDialog::addGateConnection);
     connect(ui->editGateConnBut, &QToolButton::clicked, this, &StationEditDialog::editGateConnection);
@@ -502,7 +504,7 @@ void StationEditDialog::addGateConnection()
     if(ret != QDialog::Accepted || !dlg)
         return;
 
-    gateConnModel->refreshData();
+    gateConnModel->refreshData(); //Recalc row count
     delete dlg;
 }
 
@@ -521,7 +523,7 @@ void StationEditDialog::editGateConnection()
     if(ret != QDialog::Accepted || !dlg)
         return;
 
-    gateConnModel->refreshData();
+    gateConnModel->clearCache(); //Refresh fields
     delete dlg;
 }
 
@@ -543,5 +545,5 @@ void StationEditDialog::removeSelectedGateConnection()
         return;
     }
 
-    gateConnModel->refreshData();
+    gateConnModel->refreshData(); //Recalc row count
 }
