@@ -522,7 +522,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     result = m_Db.execute("CREATE TRIGGER multiple_gate_segments_update_out\n"
                           "BEFORE UPDATE OF out_gate_id ON railway_segments\n"
                           "BEGIN\n"
-                          "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE in_node_id=NEW.out_node_id;"
+                          "SELECT RAISE(ABORT, 'Cannot connect same gate twice') FROM railway_segments WHERE in_gate_id=NEW.out_gate_id;"
                           "END");
     CHECK(result);
 
