@@ -55,7 +55,7 @@ CustomCompletionLineEdit::~CustomCompletionLineEdit()
 
 void CustomCompletionLineEdit::showPopup()
 {
-    if(popup->isVisible())
+    if(isReadOnly() || popup->isVisible())
         return;
 
     popup->move(mapToGlobal(QPoint(0, height())));
