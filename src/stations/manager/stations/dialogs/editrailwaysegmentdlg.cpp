@@ -274,12 +274,12 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
 void EditRailwaySegmentDlg::onFromStationChanged(db_id stationId)
 {
-    fromGateMatch->setFilter(stationId, true);
+    fromGateMatch->setFilter(stationId, true, m_segmentId);
     fromGateEdit->setData(0); //Clear gate
 }
 
 void EditRailwaySegmentDlg::onToStationChanged(db_id stationId)
 {
-    toGateMatch->setFilter(stationId, true);
+    toGateMatch->setFilter(stationId, true, m_segmentId);
     toGateEdit->setData(0); //Clear gate
 }
