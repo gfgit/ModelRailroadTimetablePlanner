@@ -13,6 +13,7 @@ class StationsMatchModel;
 class StationGatesMatchModel;
 class RailwaySegmentHelper;
 
+class QGroupBox;
 class CustomCompletionLineEdit;
 class QSpinBox;
 class QCheckBox;
@@ -48,6 +49,9 @@ private:
     StationGatesMatchModel *toGateMatch;
 
     RailwaySegmentHelper *helper;
+
+    QGroupBox *fromBox;
+    QGroupBox *toBox;
 
     CustomCompletionLineEdit *fromStationEdit;
     CustomCompletionLineEdit *fromGateEdit;

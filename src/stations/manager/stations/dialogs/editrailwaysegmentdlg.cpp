@@ -54,12 +54,12 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
 
     electifiedCheck = new QCheckBox;
 
-    QGroupBox *fromBox = new QGroupBox(tr("From"));
+    fromBox = new QGroupBox;
     QFormLayout *fromLay = new QFormLayout(fromBox);
     fromLay->addRow(tr("Station:"), fromStationEdit);
     fromLay->addRow(tr("Gate:"), fromGateEdit);
 
-    QGroupBox *toBox = new QGroupBox(tr("To"));
+    toBox = new QGroupBox;
     QFormLayout *toLay = new QFormLayout(toBox);
     toLay->addRow(tr("Station:"), toStationEdit);
     toLay->addRow(tr("Gate:"), toGateEdit);
@@ -178,6 +178,8 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
         //Because we need to know if segment is reversed
         m_lockStationId = DoNotLock;
     }
+    if(m_lockStationId == DoNotLock)
+        m_lockGateId = DoNotLock; //Cannot lock gate without locking station
 
     QString segName;
     QFlags<utils::RailwaySegmentType> type;
@@ -265,6 +267,9 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     //If origin is locked prevent editing
     fromStationEdit->setReadOnly(m_lockStationId != DoNotLock);
     fromGateEdit->setReadOnly(m_lockGateId != DoNotLock);
+
+    fromBox->setTitle(m_lockGateId == DoNotLock ? tr("From") : tr("From (Locked)"));
+    toBox->setTitle(reversed ? tr("To") : tr("To (Reversed)"));
 }
 
 void EditRailwaySegmentDlg::onFromStationChanged(db_id stationId)
