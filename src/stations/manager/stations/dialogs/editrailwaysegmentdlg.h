@@ -12,6 +12,7 @@ class database;
 class StationsMatchModel;
 class StationGatesMatchModel;
 class RailwaySegmentHelper;
+class RailwaySegmentConnectionsModel;
 
 class QGroupBox;
 class CustomCompletionLineEdit;
@@ -40,6 +41,8 @@ public:
 private slots:
     void onFromStationChanged(db_id stationId);
     void onToStationChanged(db_id stationId);
+    void updateTrackConnectionModel();
+    void editSegmentTrackConnections();
 
 private:
     StationsMatchModel *fromStationMatch;
@@ -49,6 +52,7 @@ private:
     StationGatesMatchModel *toGateMatch;
 
     RailwaySegmentHelper *helper;
+    RailwaySegmentConnectionsModel *connModel;
 
     QGroupBox *fromBox;
     QGroupBox *toBox;

@@ -9,12 +9,17 @@
 #include <QSpinBox>
 #include <QCheckBox>
 #include <QDialogButtonBox>
+#include <QPushButton>
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
 #include "stations/stationsmatchmodel.h"
 #include "stations/stationgatesmatchmodel.h"
 
 #include "stations/manager/stations/model/railwaysegmenthelper.h"
+#include "stations/manager/stations/model/railwaysegmentconnectionsmodel.h"
+
+#include "stations/manager/stations/dialogs/editrailwayconnectiondlg.h"
+#include <QPointer>
 
 EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
@@ -33,13 +38,18 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     fromGateEdit = new CustomCompletionLineEdit(fromGateMatch);
     connect(fromStationEdit, &CustomCompletionLineEdit::dataIdChanged,
             this,            &EditRailwaySegmentDlg::onFromStationChanged);
+    connect(fromGateEdit, &CustomCompletionLineEdit::dataIdChanged,
+            this,          &EditRailwaySegmentDlg::updateTrackConnectionModel);
 
     toStationEdit = new CustomCompletionLineEdit(toStationMatch);
     toGateEdit = new CustomCompletionLineEdit(toGateMatch);
     connect(toStationEdit, &CustomCompletionLineEdit::dataIdChanged,
             this,          &EditRailwaySegmentDlg::onToStationChanged);
+    connect(toGateEdit, &CustomCompletionLineEdit::dataIdChanged,
+            this,          &EditRailwaySegmentDlg::updateTrackConnectionModel);
 
     helper = new RailwaySegmentHelper(db);
+    connModel = new RailwaySegmentConnectionsModel(db, this);
 
     segmentNameEdit = new QLineEdit;
     segmentNameEdit->setPlaceholderText(tr("Segment name..."));
@@ -71,6 +81,10 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     segmentLay->addRow(tr("Max. Speed:"), maxSpeedSpin);
     segmentLay->addRow(tr("Electrified:"), electifiedCheck);
 
+    QPushButton *editConnBut = new QPushButton(tr("Edit"));
+    connect(editConnBut, &QPushButton::clicked, this, &EditRailwaySegmentDlg::editSegmentTrackConnections);
+    segmentLay->addRow(tr("Track connections:"), editConnBut);
+
     QGridLayout *lay = new QGridLayout(this);
     lay->addWidget(fromBox, 0, 0);
     lay->addWidget(toBox, 0, 1);
@@ -81,6 +95,8 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     connect(box, &QDialogButtonBox::rejected, this, &QDialog::reject);
     connect(box, &QDialogButtonBox::accepted, this, &QDialog::accept);
     lay->addWidget(box, 2, 0, 1, 2);
+
+    setMinimumSize(200, 200);
 }
 
 EditRailwaySegmentDlg::~EditRailwaySegmentDlg()
@@ -156,6 +172,8 @@ void EditRailwaySegmentDlg::done(int res)
                                  tr("Database error: %1").arg(errMsg));
             return;
         }
+
+        connModel->applyChanges(m_segmentId);
     }
     else
     {
@@ -282,4 +300,33 @@ void EditRailwaySegmentDlg::onToStationChanged(db_id stationId)
 {
     toGateMatch->setFilter(stationId, true, m_segmentId);
     toGateEdit->setData(0); //Clear gate
+}
+
+void EditRailwaySegmentDlg::updateTrackConnectionModel()
+{
+    QString tmp;
+    db_id fromGateId = 0;
+    db_id toGateId = 0;
+
+    fromGateEdit->getData(fromGateId, tmp);
+    toGateEdit->getData(toGateId, tmp);
+
+    if(!fromGateId || !toGateId)
+    {
+        connModel->clear();
+        return;
+    }
+
+    connModel->setSegment(m_segmentId, fromGateId, toGateId, reversed);
+    connModel->resetData();
+    if(connModel->getActualCount() == 0)
+        connModel->createDefaultConnections();
+}
+
+void EditRailwaySegmentDlg::editSegmentTrackConnections()
+{
+    QPointer<EditRailwayConnectionDlg> dlg(new EditRailwayConnectionDlg(connModel, this));
+    dlg->exec();
+    if(dlg)
+        delete dlg;
 }
