@@ -269,7 +269,7 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     fromGateEdit->setReadOnly(m_lockGateId != DoNotLock);
 
     fromBox->setTitle(m_lockGateId == DoNotLock ? tr("From") : tr("From (Locked)"));
-    toBox->setTitle(reversed ? tr("To") : tr("To (Reversed)"));
+    toBox->setTitle(reversed ? tr("To (Reversed)") : tr("To"));
 }
 
 void EditRailwaySegmentDlg::onFromStationChanged(db_id stationId)
