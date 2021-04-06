@@ -174,10 +174,6 @@ void EditRailwaySegmentDlg::done(int res)
 
         connModel->applyChanges(m_segmentId);
     }
-    else
-    {
-        //FIXME: cannot cancel railway connections
-    }
 
     QDialog::done(res);
 }
