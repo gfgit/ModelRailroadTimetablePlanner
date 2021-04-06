@@ -65,7 +65,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
                 }
 
                 //New line, then append
-                tip.append('<br>');
+                tip.append("<br>");
                 tip.append(state);
             }
             return tip;
