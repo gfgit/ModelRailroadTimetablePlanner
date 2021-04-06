@@ -42,7 +42,8 @@ bool RailwaySegmentHelper::getSegmentInfo(db_id segmentId,
 bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
                                           const QString &name, utils::RailwaySegmentType type,
                                           int distance, int speed,
-                                          db_id fromGateId, db_id toGateId)
+                                          db_id fromGateId, db_id toGateId,
+                                          QString *outErrMsg)
 {
     command cmd(mDb);
     if(create)
@@ -66,7 +67,11 @@ bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
 
     int ret = cmd.execute();
     if(ret != SQLITE_OK)
+    {
+        if(outErrMsg)
+            *outErrMsg = mDb.error_msg();
         return false; //FIXME: show error to user
+    }
 
     if(create)
         segmentId = mDb.last_insert_rowid();

@@ -146,14 +146,14 @@ void EditRailwaySegmentDlg::done(int res)
             qSwap(fromGateId, toGateId);
         }
 
+        QString errMsg;
         if(!helper->setSegmentInfo(m_segmentId, m_segmentId == 0,
                                     segName, utils::RailwaySegmentType(int(type)),
                                     distanceMeters, speedKmH,
-                                    fromGateId, toGateId))
+                                    fromGateId, toGateId, &errMsg))
         {
-            //FIXME: show error message from helper
             QMessageBox::warning(this, tr("Error"),
-                                 tr("Database error."));
+                                 tr("Database error: %1").arg(errMsg));
             return;
         }
     }

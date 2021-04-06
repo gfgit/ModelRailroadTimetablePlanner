@@ -22,7 +22,8 @@ public:
     bool setSegmentInfo(db_id& segmentId, bool create,
                         const QString &name, utils::RailwaySegmentType type,
                         int distance, int speed,
-                        db_id fromGateId, db_id toGateId);
+                        db_id fromGateId, db_id toGateId,
+                        QString *outErrMsg);
 
     bool removeSegment(db_id segmentId, QString *outErrMsg);
 
