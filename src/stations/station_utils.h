@@ -29,8 +29,8 @@ enum class GateType : qint8
 
 enum class Side : qint8
 {
-    East = 0,
-    West = 1,
+    West = 0,
+    East = 1,
     NSides
 };
 
