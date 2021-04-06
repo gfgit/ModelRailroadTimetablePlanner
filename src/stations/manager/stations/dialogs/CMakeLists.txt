@@ -1,8 +1,10 @@
 set(TRAINTIMETABLE_SOURCES
   ${TRAINTIMETABLE_SOURCES}
+  stations/manager/stations/dialogs/editrailwaysegmentdlg.h
   stations/manager/stations/dialogs/newtrackconndlg.h
   stations/manager/stations/dialogs/stationeditdialog.h
 
+  stations/manager/stations/dialogs/editrailwaysegmentdlg.cpp
   stations/manager/stations/dialogs/newtrackconndlg.cpp
   stations/manager/stations/dialogs/stationeditdialog.cpp
   PARENT_SCOPE
