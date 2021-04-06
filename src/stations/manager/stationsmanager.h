@@ -12,6 +12,7 @@ class QToolButton;
 class QTableView;
 
 class StationsModel;
+class RailwaySegmentsModel;
 class LinesSQLModel;
 
 namespace Ui {
@@ -27,6 +28,7 @@ public:
     typedef enum
     {
         StationsTab = 0,
+        RailwaySegmentsTab,
         LinesTab,
         NTabs
     } Tabs;
@@ -56,14 +58,20 @@ private slots:
     void onNewStation();
     void onEditStation();
 
-    void onNewLine();
-    void onRemoveLine();
-    void onEditLine();
     void showStPlan();
     void onShowFreeRS();
 
+    void onRemoveSegment();
+    void onNewSegment();
+    void onEditSegment();
+
+    void onNewLine();
+    void onRemoveLine();
+    void onEditLine();
+
 private:
-    void setup_StPage();
+    void setup_StationPage();
+    void setup_SegmentPage();
     void setup_LinePage();
 
 protected:
@@ -74,12 +82,15 @@ private:
     Ui::StationsManager *ui;
 
     QToolBar *stationToolBar;
+    QToolBar *segmentsToolBar;
     QToolBar *linesToolBar;
 
     QTableView *stationView;
+    QTableView *segmentsView;
     QTableView *linesView;
 
     StationsModel *stationsModel;
+    RailwaySegmentsModel *segmentsModel;
     LinesSQLModel *linesModel;
 
     QAction *act_addSt;

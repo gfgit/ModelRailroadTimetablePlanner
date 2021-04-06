@@ -15,6 +15,8 @@
 #include <QWindow>
 
 #include "stations/manager/stations/model/stationsmodel.h"
+#include "stations/manager/stations/model/railwaysegmentsmodel.h"
+#include "stations/manager/stations/model/railwaysegmenthelper.h"
 #include "lines/linessqlmodel.h"
 
 #include "utils/combodelegate.h"
@@ -27,6 +29,7 @@
 #include "railwaynode/railwaynodeeditor.h" //TODO: remove and delete
 
 #include "stations/manager/stations/dialogs/stationeditdialog.h"
+#include "stations/manager/stations/dialogs/editrailwaysegmentdlg.h"
 
 #include <QInputDialog>
 #include <QPointer>
@@ -40,10 +43,12 @@ StationsManager::StationsManager(QWidget *parent) :
     windowConnected(false)
 {
     ui->setupUi(this);
-    setup_StPage();
+    setup_StationPage();
+    setup_SegmentPage();
     setup_LinePage();
 
     connect(stationsModel, &StationsModel::modelError, this, &StationsManager::onModelError);
+    connect(segmentsModel, &RailwaySegmentsModel::modelError, this, &StationsManager::onModelError);
     connect(linesModel, &LinesSQLModel::modelError, this, &StationsManager::onModelError);
 
     setReadOnly(false);
@@ -68,7 +73,7 @@ StationsManager::~StationsManager()
     }
 }
 
-void StationsManager::setup_StPage()
+void StationsManager::setup_StationPage()
 {
     QVBoxLayout *vboxLayout = new QVBoxLayout(ui->stationsTab);
     stationToolBar = new QToolBar(ui->stationsTab);
@@ -108,6 +113,39 @@ void StationsManager::setup_StPage()
     act_planSt = stationToolBar->addAction(tr("Plan"), this, &StationsManager::showStPlan);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
     act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
+}
+
+void StationsManager::setup_SegmentPage()
+{
+    QVBoxLayout *vboxLayout = new QVBoxLayout(ui->segmentsTab);
+    segmentsToolBar = new QToolBar;
+    vboxLayout->addWidget(segmentsToolBar);
+
+    segmentsView = new QTableView;
+    vboxLayout->addWidget(segmentsView);
+
+    segmentsModel = new RailwaySegmentsModel(Session->m_Db, this);
+    segmentsView->setModel(segmentsModel);
+
+    auto ps = new ModelPageSwitcher(false, this);
+    vboxLayout->addWidget(ps);
+    ps->setModel(segmentsModel);
+    //Custom colun sorting
+    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
+    QHeaderView *header = segmentsView->horizontalHeader();
+    disconnect(header, SIGNAL(sectionPressed(int)), segmentsView, SLOT(selectColumn(int)));
+    disconnect(header, SIGNAL(sectionEntered(int)), segmentsView, SLOT(_q_selectColumn(int)));
+    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
+            {
+                segmentsModel->setSortingColumn(section);
+                header->setSortIndicator(segmentsModel->getSortingColumn(), Qt::AscendingOrder);
+            });
+    header->setSortIndicatorShown(true);
+    header->setSortIndicator(segmentsModel->getSortingColumn(), Qt::AscendingOrder);
+
+    segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
+    segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
+    segmentsToolBar->addAction(tr("Edit"), this, &StationsManager::onEditSegment);
 }
 
 void StationsManager::setup_LinePage()
@@ -175,6 +213,13 @@ void StationsManager::timerEvent(QTimerEvent *e)
         clearModelTimers[StationsTab] = ModelCleared;
         return;
     }
+    else if(e->timerId() == clearModelTimers[RailwaySegmentsTab])
+    {
+        segmentsModel->clearCache();
+        killTimer(e->timerId());
+        clearModelTimers[RailwaySegmentsTab] = ModelCleared;
+        return;
+    }
     else if(e->timerId() == clearModelTimers[LinesTab])
     {
         linesModel->clearCache();
@@ -218,6 +263,11 @@ void StationsManager::updateModels()
         case StationsTab:
         {
             stationsModel->refreshData();
+            break;
+        }
+        case RailwaySegmentsTab:
+        {
+            segmentsModel->refreshData();
             break;
         }
         case LinesTab:
@@ -306,20 +356,34 @@ void StationsManager::onEditStation()
     db_id stId = stationsModel->getIdAtRow(idx.row());
     if(!stId)
         return;
-//    QString stName = stationsModel->getNameAtRow(idx.row());
 
-//    RailwayNodeEditor ed(Session->m_Db, this);
-//    ed.setMode(stName, stId, RailwayNodeMode::StationLinesMode);
-//    ed.exec();
+    QPointer<StationEditDialog> dlg(new StationEditDialog(Session->m_Db, this));
+    dlg->setStationInternalEditingEnabled(true);
+    dlg->setStationExternalEditingEnabled(true);
+    dlg->setStation(stId);
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return;
 
-    StationEditDialog dlg(Session->m_Db, this);
-    dlg.setStationInternalEditingEnabled(true);
-    dlg.setStationExternalEditingEnabled(true);
-    dlg.setStation(stId);
-    if(dlg.exec() == QDialog::Accepted)
+    //Refresh stations model
+    stationsModel->clearCache();
+
+    //Refresh segments
+    int &segmentsTimer = clearModelTimers[RailwaySegmentsTab];
+    if(segmentsTimer != ModelCleared)
     {
-        //Refresh model
-        stationsModel->clearCache();
+        //If model was loaded clear cache
+        segmentsModel->clearCache();
+
+        if(segmentsTimer == ModelLoaded)
+        {
+            segmentsModel->refreshData();
+        }
+        else
+        {
+            //Mark as cleared so it recalculates row count with 'refreshData()'
+            killTimer(segmentsTimer);
+            segmentsTimer = ModelCleared;
+        }
     }
 }
 
@@ -347,6 +411,60 @@ void StationsManager::onShowFreeRS()
     if(!stId)
         return;
     Session->getViewManager()->requestStFreeRSViewer(stId);
+}
+
+void StationsManager::onRemoveSegment()
+{
+    if(!segmentsView->selectionModel()->hasSelection())
+        return;
+
+    QModelIndex idx = segmentsView->currentIndex();
+    db_id segmentId = segmentsModel->getIdAtRow(idx.row());
+    if(!segmentId)
+        return;
+
+    QString errMsg;
+    RailwaySegmentHelper helper(Session->m_Db);
+    if(!helper.removeSegment(segmentId, &errMsg))
+    {
+        onModelError(tr("Cannot remove segment:\n%1").arg(errMsg));
+        return;
+    }
+
+    //Re-calc row count
+    segmentsModel->refreshData();
+}
+
+void StationsManager::onNewSegment()
+{
+    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
+    dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
+    int ret = dlg->exec();
+    if(ret != QDialog::Accepted || !dlg)
+        return;
+
+    //Re-calc row count
+    segmentsModel->refreshData();
+}
+
+void StationsManager::onEditSegment()
+{
+    if(!segmentsView->selectionModel()->hasSelection())
+        return;
+
+    QModelIndex idx = segmentsView->currentIndex();
+    db_id segmentId = segmentsModel->getIdAtRow(idx.row());
+    if(!segmentId)
+        return;
+
+    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
+    dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
+    int ret = dlg->exec();
+    if(ret != QDialog::Accepted || !dlg)
+        return;
+
+    //Refresh fields
+    segmentsModel->clearCache();
 }
 
 void StationsManager::onNewLine()
@@ -408,6 +526,7 @@ void StationsManager::setReadOnly(bool readOnly)
 
     m_readOnly = readOnly;
 
+    segmentsToolBar->setDisabled(m_readOnly);
     linesToolBar->setDisabled(m_readOnly);
 
     act_addSt->setDisabled(m_readOnly);
@@ -417,11 +536,13 @@ void StationsManager::setReadOnly(bool readOnly)
     if(m_readOnly)
     {
         stationView->setEditTriggers(QTableView::NoEditTriggers);
+        segmentsView->setEditTriggers(QTableView::NoEditTriggers);
         linesView->setEditTriggers(QTableView::NoEditTriggers);
     }
     else
     {
         stationView->setEditTriggers(QTableView::DoubleClicked);
+        segmentsView->setEditTriggers(QTableView::DoubleClicked);
         linesView->setEditTriggers(QTableView::DoubleClicked);
     }
 }
