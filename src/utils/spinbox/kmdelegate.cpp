@@ -2,7 +2,8 @@
 #include "kmspinbox.h"
 
 KmDelegate::KmDelegate(QObject *parent) :
-    QStyledItemDelegate(parent)
+    QStyledItemDelegate(parent),
+    minimum(0)
 {
 
 }
@@ -10,6 +11,8 @@ KmDelegate::KmDelegate(QObject *parent) :
 QWidget *KmDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/, const QModelIndex &/*index*/) const
 {
     KmSpinBox *spin = new KmSpinBox(parent);
+    spin->setMinimum(minimum);
+    spin->setPrefix(prefix);
     return spin;
 }
 
@@ -28,4 +31,10 @@ void KmDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const 
 void KmDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
 {
     editor->setGeometry(option.rect);
+}
+
+void KmDelegate::setMinAndPrefix(int min, const QString &pref)
+{
+    minimum = min;
+    prefix = pref;
 }

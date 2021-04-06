@@ -18,6 +18,12 @@ public:
 
     void updateEditorGeometry(QWidget *editor,
                               const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+    void setMinAndPrefix(int min, const QString& pref);
+
+private:
+    int minimum;
+    QString prefix;
 };
 
 #endif // KMDELEGATE_H
