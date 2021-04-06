@@ -8,6 +8,7 @@
 #include <QGroupBox>
 #include <QSpinBox>
 #include <QCheckBox>
+#include <QDialogButtonBox>
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
 #include "stations/stationsmatchmodel.h"
@@ -74,6 +75,12 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     lay->addWidget(fromBox, 0, 0);
     lay->addWidget(toBox, 0, 1);
     lay->addWidget(segmentBox, 1, 0, 1, 2);
+
+    QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
+                                                 Qt::Horizontal);
+    connect(box, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(box, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    lay->addWidget(box, 2, 0, 1, 2);
 }
 
 EditRailwaySegmentDlg::~EditRailwaySegmentDlg()
