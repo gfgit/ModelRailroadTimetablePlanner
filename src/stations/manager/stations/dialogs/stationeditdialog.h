@@ -61,6 +61,7 @@ private slots:
 
     //Gate Connections
     void addGateConnection();
+    void editGateConnection();
     void removeSelectedGateConnection();
 
 private:
@@ -75,6 +76,8 @@ private:
     };
 
     Ui::StationEditDialog *ui;
+
+    sqlite3pp::database &mDb;
 
     SpinBoxEditorFactory *trackLengthSpinFactory;
     StationTracksMatchFactory *trackFactory;

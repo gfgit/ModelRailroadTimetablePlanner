@@ -7,6 +7,7 @@
 #include "stations/manager/stations/model/stationtracksmodel.h"
 #include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
 #include "stations/manager/stations/model/railwaysegmentsmodel.h"
+#include "stations/manager/stations/model/railwaysegmenthelper.h"
 
 #include <QHeaderView>
 #include "utils/sqldelegate/modelpageswitcher.h"
@@ -23,6 +24,7 @@
 
 #include <QInputDialog>
 #include "newtrackconndlg.h"
+#include "editrailwaysegmentdlg.h"
 
 #include <QPointer>
 
@@ -45,7 +47,8 @@ void setupView(QTableView *view, IPagedItemModel *model)
 
 StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::StationEditDialog)
+    ui(new Ui::StationEditDialog),
+    mDb(db)
 {
     ui->setupUi(this);
 
@@ -66,14 +69,14 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     trackLengthSpinFactory->setSuffix(" cm");
     trackLengthSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    trackFactory = new StationTracksMatchFactory(db, this);
-    gatesFactory = new StationGatesMatchFactory(db, this);
+    trackFactory = new StationTracksMatchFactory(mDb, this);
+    gatesFactory = new StationGatesMatchFactory(mDb, this);
 
     //Station Tab
     ui->stationTypeCombo->addItems(stationTypeEnum);
 
     //Gates Tab
-    gatesModel = new StationGatesModel(db, this);
+    gatesModel = new StationGatesModel(mDb, this);
     connect(gatesModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
     connect(gatesModel, &StationGatesModel::gateNameChanged, this, &StationEditDialog::onGatesChanged);
     connect(gatesModel, &StationGatesModel::gateRemoved, this, &StationEditDialog::onGatesChanged);
@@ -92,7 +95,7 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->removeGateButton, &QToolButton::clicked, this, &StationEditDialog::removeSelectedGate);
 
     //Tracks Tab
-    tracksModel = new StationTracksModel(db, this);
+    tracksModel = new StationTracksModel(mDb, this);
     connect(tracksModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
     connect(tracksModel, &StationTracksModel::trackNameChanged, this, &StationEditDialog::onTracksChanged);
     connect(tracksModel, &StationTracksModel::trackRemoved, this, &StationEditDialog::onTracksChanged);
@@ -118,7 +121,7 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->moveTrackDownBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackDown);
 
     //Track Connections Tab
-    trackConnModel = new StationTrackConnectionsModel(db, this);
+    trackConnModel = new StationTrackConnectionsModel(mDb, this);
     connect(trackConnModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
     connect(trackConnModel, &StationTrackConnectionsModel::trackConnRemoved,
             this, &StationEditDialog::onTrackConnRemoved);
@@ -139,7 +142,7 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->removeTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrackConn);
 
     //Gate Connections Tab
-    gateConnModel = new RailwaySegmentsModel(db, this);
+    gateConnModel = new RailwaySegmentsModel(mDb, this);
     connect(gateConnModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
 
     ps = new ModelPageSwitcher(false, this);
@@ -492,10 +495,52 @@ void StationEditDialog::removeSelectedTrackConn()
 
 void StationEditDialog::addGateConnection()
 {
+    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
+    dlg->setSegment(0, getStation(), EditRailwaySegmentDlg::DoNotLock);
+    int ret = dlg->exec();
+    if(ret != QDialog::Accepted || !dlg)
+        return;
 
+    gateConnModel->refreshData();
+    delete dlg;
+}
+
+void StationEditDialog::editGateConnection()
+{
+    if(!ui->gateConnView->selectionModel()->hasSelection())
+        return;
+
+    db_id segId = gateConnModel->getIdAtRow(ui->gateConnView->currentIndex().row());
+    if(!segId)
+        return;
+
+    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
+    dlg->setSegment(segId, getStation(), EditRailwaySegmentDlg::LockToCurrentValue);
+    int ret = dlg->exec();
+    if(ret != QDialog::Accepted || !dlg)
+        return;
+
+    gateConnModel->refreshData();
+    delete dlg;
 }
 
 void StationEditDialog::removeSelectedGateConnection()
 {
+    if(!ui->gateConnView->selectionModel()->hasSelection())
+        return;
 
+    db_id segId = gateConnModel->getIdAtRow(ui->gateConnView->currentIndex().row());
+    if(!segId)
+        return;
+
+    QString errMsg;
+    RailwaySegmentHelper helper(mDb);
+    if(!helper.removeSegment(segId, &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Cannot remove segment:\n%1").arg(errMsg));
+        return;
+    }
+
+    gateConnModel->refreshData();
 }
