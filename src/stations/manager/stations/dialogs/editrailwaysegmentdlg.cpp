@@ -7,6 +7,7 @@
 
 #include <QGroupBox>
 #include <QSpinBox>
+#include "utils/spinbox/kmspinbox.h"
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -54,9 +55,7 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     segmentNameEdit = new QLineEdit;
     segmentNameEdit->setPlaceholderText(tr("Segment name..."));
 
-    distanceSpin = new QSpinBox;
-    distanceSpin->setRange(100, 999999);
-    distanceSpin->setSuffix(tr(" meters"));
+    distanceSpin = new KmSpinBox;
 
     maxSpeedSpin = new QSpinBox;
     maxSpeedSpin->setRange(10, 999);
@@ -77,7 +76,7 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     QGroupBox *segmentBox = new QGroupBox(tr("Segment"));
     QFormLayout *segmentLay = new QFormLayout(segmentBox);
     segmentLay->addRow(tr("Name:"), segmentNameEdit);
-    segmentLay->addRow(tr("Distance:"), distanceSpin);
+    segmentLay->addRow(tr("Distance Km:"), distanceSpin);
     segmentLay->addRow(tr("Max. Speed:"), maxSpeedSpin);
     segmentLay->addRow(tr("Electrified:"), electifiedCheck);
 

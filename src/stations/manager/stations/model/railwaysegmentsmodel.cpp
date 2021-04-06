@@ -8,6 +8,8 @@ using namespace sqlite3pp;
 
 #include "utils/worker_event_types.h"
 
+#include "utils/kmutils.h"
+
 #include "stations/station_name_utils.h"
 
 #include <QBrush>
@@ -72,7 +74,7 @@ QVariant RailwaySegmentsModel::headerData(int section, Qt::Orientation orientati
             case MaxSpeedCol:
                 return tr("Max. Speed");
             case DistanceCol:
-                return tr("Distance");
+                return tr("Distance Km");
             case IsElectrifiedCol:
                 return tr("Electrified");
             }
@@ -134,7 +136,7 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
         case MaxSpeedCol:
             return QStringLiteral("%1 km/h").arg(item.maxSpeedKmH);
         case DistanceCol:
-            return item.distanceMeters; //TODO: better format
+            return utils::kmNumToText(item.distanceMeters);
         }
         break;
     }
