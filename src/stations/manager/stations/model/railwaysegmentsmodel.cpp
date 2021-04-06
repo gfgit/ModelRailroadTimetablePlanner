@@ -10,6 +10,8 @@ using namespace sqlite3pp;
 
 #include "stations/station_name_utils.h"
 
+#include <QBrush>
+
 #include <QDebug>
 
 class RailwaySegmentsResultEvent : public QEvent
@@ -133,6 +135,38 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
             return QStringLiteral("%1 km/h").arg(item.maxSpeedKmH);
         case DistanceCol:
             return item.distanceMeters; //TODO: better format
+        }
+        break;
+    }
+    case Qt::ToolTipRole:
+    {
+        switch (idx.column())
+        {
+        case FromStationCol:
+        case ToStationCol:
+        {
+            if(item.reversed)
+                return tr("Segment <b>%1</b> is shown reversed.").arg(item.segmentName);
+            break;
+        }
+        }
+        break;
+    }
+    case Qt::BackgroundRole:
+    {
+        switch (idx.column())
+        {
+        case FromStationCol:
+        case ToStationCol:
+        {
+            if(item.reversed)
+            {
+                //Light red
+                QBrush b(qRgb(255, 110, 110));
+                return b;
+            }
+            break;
+        }
         }
         break;
     }
