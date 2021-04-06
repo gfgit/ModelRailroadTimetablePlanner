@@ -151,6 +151,7 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     setupView(ui->gateConnView, gateConnModel);
 
     connect(ui->addGateConnBut, &QToolButton::clicked, this, &StationEditDialog::addGateConnection);
+    connect(ui->editGateConnBut, &QToolButton::clicked, this, &StationEditDialog::editGateConnection);
     connect(ui->removeGateConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedGateConnection);
 }
 
