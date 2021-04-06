@@ -1,5 +1,7 @@
 #include "stationgatesmatchmodel.h"
 
+#include "station_name_utils.h"
+
 #include <QBrush>
 
 using namespace sqlite3pp;
@@ -38,6 +40,16 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
         }
 
         return items[idx.row()].name;
+    }
+    case Qt::ToolTipRole:
+    {
+        if(!emptyRow && !ellipsesRow)
+        {
+            return tr("Gate <b>%1</b> is %2.")
+                .arg(items[idx.row()].name,
+                     utils::StationUtils::name(items[idx.row()].side));
+        }
+        break;
     }
     case Qt::FontRole:
     {
