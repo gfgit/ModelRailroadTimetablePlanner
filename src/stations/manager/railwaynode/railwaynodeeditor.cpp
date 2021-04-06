@@ -3,7 +3,7 @@
 #include "railwaynodemodel.h"
 
 #include "utils/combodelegate.h"
-#include "kmdelegate.h"
+#include "utils/spinbox/kmdelegate.h"
 
 #include "utils/sqldelegate/isqlfkmatchmodel.h"
 #include "utils/sqldelegate/sqlfkfielddelegate.h"
