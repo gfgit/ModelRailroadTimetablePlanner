@@ -343,7 +343,10 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "UNIQUE(out_gate_id),"
                           "FOREIGN KEY(in_gate_id) REFERENCES station_gates(id) ON UPDATE CASCADE ON DELETE CASCADE,"
                           "FOREIGN KEY(out_gate_id) REFERENCES station_gates(id) ON UPDATE CASCADE ON DELETE CASCADE,"
-                          "CHECK(in_gate_id<>out_gate_id) )");
+                          "CHECK(in_gate_id<>out_gate_id AND"
+                          "      max_speed_kmh>=10 AND"
+                          "      distance_meters>=100 AND"
+                          "      length(name)>0) )");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE railway_connections ("
