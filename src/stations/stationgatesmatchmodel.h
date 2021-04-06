@@ -30,13 +30,15 @@ public:
     QString getNameAtRow(int row) const override;
 
     // StationsMatchModel:
-    void setFilter(db_id stationId, bool hideAlreadyConnected);
+    void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId);
 
 private:
     struct GateItem
     {
         db_id gateId;
-        QString name;
+        db_id segmentId;
+        QChar gateLetter;
+        QString segmentName;
         QFlags<utils::GateType> type;
         utils::Side side;
     };
@@ -47,7 +49,8 @@ private:
     sqlite3pp::query q_getMatches;
 
     db_id m_stationId;
-    bool hideConnectedGates;
+    db_id m_excludeSegmentId;
+    bool m_markConnectedGates;
     QByteArray mQuery;
 };
 
@@ -59,11 +62,16 @@ public:
     virtual ISqlFKMatchModel *createModel() override;
 
     inline void setStationId(db_id stationId) { m_stationId = stationId; }
-    inline void setHideConnectedGates(bool val) { hideConnectedGates = val; }
+    inline void setMarkConnectedGates(bool val, db_id excludeSegId)
+    {
+        markConnectedGates = val;
+        m_excludeSegmentId = excludeSegId;
+    }
 
 private:
     db_id m_stationId;
-    bool hideConnectedGates;
+    db_id m_excludeSegmentId;
+    bool markConnectedGates;
     sqlite3pp::database &mDb;
 };
 
