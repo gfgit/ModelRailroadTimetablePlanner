@@ -139,6 +139,13 @@ void EditRailwaySegmentDlg::done(int res)
         const int distanceMeters = distanceSpin->value();
         const int speedKmH = maxSpeedSpin->value();
 
+        if(reversed)
+        {
+            //Revert to original
+            qSwap(fromStId, toStId);
+            qSwap(fromGateId, toGateId);
+        }
+
         if(!helper->setSegmentInfo(m_segmentId, m_segmentId == 0,
                                     segName, utils::RailwaySegmentType(int(type)),
                                     distanceMeters, speedKmH,
