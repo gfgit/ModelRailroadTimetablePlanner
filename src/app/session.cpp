@@ -326,7 +326,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "track_side INTEGER NOT NULL,"
                           "gate_id INTEGER NOT NULL,"
                           "gate_track INTEGER NOT NULL,"
-                          "UNIQUE(id,gate_id,track_id,track_side,gate_track),"
+                          "UNIQUE(gate_id,track_id,track_side,gate_track),"
                           "FOREIGN KEY (track_id) REFERENCES station_tracks(id) ON UPDATE CASCADE ON DELETE CASCADE,"
                           "FOREIGN KEY (gate_id) REFERENCES station_gates(id) ON UPDATE CASCADE ON DELETE CASCADE )");
     CHECK(result);
