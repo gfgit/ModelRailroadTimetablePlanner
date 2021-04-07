@@ -1,5 +1,8 @@
 set(TRAINTIMETABLE_SOURCES
   ${TRAINTIMETABLE_SOURCES}
+  stations/manager/lines/dialogs/editlinedlg.h
+
+  stations/manager/lines/dialogs/editlinedlg.cpp
   PARENT_SCOPE
 )
 
