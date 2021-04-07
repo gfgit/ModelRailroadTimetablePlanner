@@ -13,7 +13,7 @@ class QTableView;
 
 class StationsModel;
 class RailwaySegmentsModel;
-class LinesSQLModel;
+class LinesModel;
 
 namespace Ui {
 class StationsManager;
@@ -91,7 +91,7 @@ private:
 
     StationsModel *stationsModel;
     RailwaySegmentsModel *segmentsModel;
-    LinesSQLModel *linesModel;
+    LinesModel *linesModel;
 
     QAction *act_addSt;
     QAction *act_remSt;

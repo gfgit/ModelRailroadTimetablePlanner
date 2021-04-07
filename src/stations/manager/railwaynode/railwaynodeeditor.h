@@ -17,6 +17,7 @@ namespace sqlite3pp {
 class database;
 }
 
+//TODO: deprecated remove
 class RailwayNodeEditor : public QDialog
 {
     Q_OBJECT

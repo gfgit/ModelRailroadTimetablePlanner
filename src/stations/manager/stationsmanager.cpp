@@ -19,7 +19,7 @@
 #include "stations/manager/segments/model/railwaysegmentsmodel.h"
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
 
-#include "lines/linessqlmodel.h"
+#include "stations/manager/lines/model/linesmodel.h"
 
 #include "utils/combodelegate.h"
 #include "stations/station_name_utils.h"
@@ -28,11 +28,11 @@
 
 #include "stations/manager/free_rs_viewer/stationfreersviewer.h" //TODO: move to ViewManager
 
-#include "railwaynode/railwaynodeeditor.h" //TODO: remove and delete
-
 #include "stations/manager/stations/dialogs/stationeditdialog.h"
 
 #include "stations/manager/segments/dialogs/editrailwaysegmentdlg.h"
+
+#include "stations/manager/lines/dialogs/editlinedlg.h"
 
 #include <QInputDialog>
 #include <QPointer>
@@ -52,7 +52,7 @@ StationsManager::StationsManager(QWidget *parent) :
 
     connect(stationsModel, &StationsModel::modelError, this, &StationsManager::onModelError);
     connect(segmentsModel, &RailwaySegmentsModel::modelError, this, &StationsManager::onModelError);
-    connect(linesModel, &LinesSQLModel::modelError, this, &StationsManager::onModelError);
+    connect(linesModel, &LinesModel::modelError, this, &StationsManager::onModelError);
 
     setReadOnly(false);
 
@@ -160,7 +160,7 @@ void StationsManager::setup_LinePage()
     linesView = new QTableView(ui->linesTab);
     vboxLayout->addWidget(linesView);
 
-    linesModel = new LinesSQLModel(Session->m_Db, this);
+    linesModel = new LinesModel(Session->m_Db, this);
     linesView->setModel(linesModel);
 
     auto ps = new ModelPageSwitcher(false, this);
@@ -178,14 +178,6 @@ void StationsManager::setup_LinePage()
             });
     header->setSortIndicatorShown(true);
     header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
-
-    //    QStyledItemDelegate *lineSpeedDelegate = new QStyledItemDelegate(this);
-    //    lineSpeedSpinFactory = new SpinBoxEditorFactory;
-    //    lineSpeedSpinFactory->setRange(1, 999);
-    //    lineSpeedSpinFactory->setSuffix(" km/h");
-    //    lineSpeedSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    //    lineSpeedDelegate->setItemEditorFactory(lineSpeedSpinFactory);
-    //    linesView->setItemDelegateForColumn(LinesSQLModel::LineMaxSpeedKmHCol, lineSpeedDelegate);
 
     linesToolBar->addAction(tr("Add"), this, &StationsManager::onNewLine);
     linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
@@ -474,21 +466,39 @@ void StationsManager::onNewLine()
 {
     DEBUG_ENTRY;
 
-    int row = 0;
+    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    dlg->setWindowTitle(tr("Add Line"));
+    dlg->setLabelText(tr("Please choose a name for the new railway line."));
+    dlg->setTextValue(QString());
 
-    if(!linesModel->addLine(&row) || row == -1)
-    {
-        QMessageBox::warning(this,
-                             tr("Error Adding Line"),
-                             tr("An error occurred while adding a new line:\n%1")
-                                 .arg(Session->m_Db.error_msg()));
-        return;
+    do{
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
+        {
+            break; //User canceled
+        }
+
+        const QString name = dlg->textValue().simplified();
+        if(name.isEmpty())
+        {
+            QMessageBox::warning(this, tr("Error"), tr("Line name cannot be empty."));
+            continue; //Second chance
+        }
+
+        if(linesModel->addLine(name))
+        {
+            break; //Done!
+        }
     }
+    while (true);
 
-    QModelIndex idx = linesModel->index(row, 0);
-    linesView->setCurrentIndex(idx);
-    linesView->scrollTo(idx);
-    linesView->edit(idx);
+    delete dlg;
+
+    //TODO
+    //    QModelIndex idx = linesModel->index(row, 0);
+    //    linesView->setCurrentIndex(idx);
+    //    linesView->scrollTo(idx);
+    //    linesView->edit(idx);
 }
 
 void StationsManager::onRemoveLine()
@@ -515,11 +525,14 @@ void StationsManager::onEditLine()
     if(!lineId)
         return;
 
-    const QString lineName = linesModel->getNameAtRow(row);
+    QPointer<EditLineDlg> dlg(new EditLineDlg(Session->m_Db, this));
+    dlg->setLineId(lineId);
+    int ret = dlg->exec();
+    if(ret != QDialog::Accepted || !dlg)
+        return;
 
-    RailwayNodeEditor ed(Session->m_Db, this);
-    ed.setMode(lineName, lineId, RailwayNodeMode::LineStationsMode);
-    ed.exec();
+    //Refresh fields
+    linesModel->clearCache();
 }
 
 void StationsManager::setReadOnly(bool readOnly)
