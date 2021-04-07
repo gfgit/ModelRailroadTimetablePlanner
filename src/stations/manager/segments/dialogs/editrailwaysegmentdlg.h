@@ -20,7 +20,7 @@ class QSpinBox;
 class QCheckBox;
 class QLineEdit;
 
-//TODO: handle railway connections too!
+
 class EditRailwaySegmentDlg : public QDialog
 {
     Q_OBJECT
