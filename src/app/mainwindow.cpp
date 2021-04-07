@@ -846,8 +846,8 @@ void MainWindow::onOpenSettings()
 void MainWindow::checkLineNumber()
 {
     auto graphMgr = Session->getViewManager()->getGraphMgr();
-    db_id firstLineId = graphMgr->getFirstLineId();
-
+    //db_id firstLineId = graphMgr->getFirstLineId();
+    db_id firstLineId = 0; //FIXME
     if(firstLineId && m_mode != CentralWidgetMode::ViewSessionMode)
     {
         //First line was added or newly opened file -> Session has at least one line
