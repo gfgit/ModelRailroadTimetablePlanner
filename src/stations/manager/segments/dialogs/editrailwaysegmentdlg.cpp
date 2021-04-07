@@ -16,10 +16,10 @@
 #include "stations/stationsmatchmodel.h"
 #include "stations/stationgatesmatchmodel.h"
 
-#include "stations/manager/stations/model/railwaysegmenthelper.h"
-#include "stations/manager/stations/model/railwaysegmentconnectionsmodel.h"
+#include "stations/manager/segments/model/railwaysegmenthelper.h"
+#include "stations/manager/segments/model/railwaysegmentconnectionsmodel.h"
 
-#include "stations/manager/stations/dialogs/editrailwayconnectiondlg.h"
+#include "stations/manager/segments/dialogs/editrailwayconnectiondlg.h"
 #include <QPointer>
 
 EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *parent) :

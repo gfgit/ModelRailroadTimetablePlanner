@@ -6,8 +6,9 @@
 #include "stations/manager/stations/model/stationgatesmodel.h"
 #include "stations/manager/stations/model/stationtracksmodel.h"
 #include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
-#include "stations/manager/stations/model/railwaysegmentsmodel.h"
-#include "stations/manager/stations/model/railwaysegmenthelper.h"
+
+#include "stations/manager/segments/model/railwaysegmentsmodel.h"
+#include "stations/manager/segments/model/railwaysegmenthelper.h"
 
 #include <QHeaderView>
 #include "utils/sqldelegate/modelpageswitcher.h"
@@ -24,7 +25,7 @@
 
 #include <QInputDialog>
 #include "newtrackconndlg.h"
-#include "editrailwaysegmentdlg.h"
+#include "stations/manager/segments/dialogs/editrailwaysegmentdlg.h"
 
 #include <QPointer>
 

@@ -1,6 +1,6 @@
 #include "editrailwayconnectiondlg.h"
 
-#include "stations/manager/stations/model/railwaysegmentconnectionsmodel.h"
+#include "stations/manager/segments/model/railwaysegmentconnectionsmodel.h"
 
 #include <QBoxLayout>
 #include <QTableView>

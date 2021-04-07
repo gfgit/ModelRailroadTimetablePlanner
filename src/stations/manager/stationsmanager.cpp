@@ -15,8 +15,10 @@
 #include <QWindow>
 
 #include "stations/manager/stations/model/stationsmodel.h"
-#include "stations/manager/stations/model/railwaysegmentsmodel.h"
-#include "stations/manager/stations/model/railwaysegmenthelper.h"
+
+#include "stations/manager/segments/model/railwaysegmentsmodel.h"
+#include "stations/manager/segments/model/railwaysegmenthelper.h"
+
 #include "lines/linessqlmodel.h"
 
 #include "utils/combodelegate.h"
@@ -29,7 +31,8 @@
 #include "railwaynode/railwaynodeeditor.h" //TODO: remove and delete
 
 #include "stations/manager/stations/dialogs/stationeditdialog.h"
-#include "stations/manager/stations/dialogs/editrailwaysegmentdlg.h"
+
+#include "stations/manager/segments/dialogs/editrailwaysegmentdlg.h"
 
 #include <QInputDialog>
 #include <QPointer>
