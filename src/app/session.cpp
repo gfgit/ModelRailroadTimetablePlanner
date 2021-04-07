@@ -374,7 +374,8 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "FOREIGN KEY(line_id) REFERENCES lines(id) ON UPDATE CASCADE ON DELETE CASCADE,"
                           "FOREIGN KEY(seg_id) REFERENCES railway_segments(id) ON UPDATE CASCADE ON DELETE RESTRICT,"
                           "UNIQUE(line_id, seg_id)"
-                          "UNIQUE(line_id, pos) )");
+                          "UNIQUE(line_id, pos)"
+                          "CHECK(pos<100) )"); //Allow up to 100 segments for each line
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE jobshifts ("
