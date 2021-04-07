@@ -53,6 +53,8 @@ public:
     virtual void setSortingColumn(int col) override;
 
     // LinesModel
+    bool addLine(const QString& name, db_id *outLineId = nullptr);
+    bool removeLine(db_id lineId);
 
     // Convinience
     inline db_id getIdAtRow(int row) const

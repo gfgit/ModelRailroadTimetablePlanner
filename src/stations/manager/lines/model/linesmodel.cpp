@@ -22,6 +22,16 @@ public:
     int firstRow;
 };
 
+//Error messages
+static constexpr char errorNameAlreadyUsedText[] =
+    QT_TRANSLATE_NOOP("LinesModel",
+                      "The name <b>%1</b> is already used by another line.<br>"
+                      "Please choose a different name for each railway line.");
+
+static constexpr char errorLineInUseText[] =
+    QT_TRANSLATE_NOOP("LinesModel",
+                      "Cannot delete <b>%1</b> line because it is stille referenced.");
+
 LinesModel::LinesModel(sqlite3pp::database &db, QObject *parent) :
     IPagedItemModel(500, db, parent),
     cacheFirstRow(0),
@@ -183,6 +193,83 @@ void LinesModel::setSortingColumn(int col)
 {
     //Sort only by name
     Q_UNUSED(col)
+}
+
+bool LinesModel::addLine(const QString &name, db_id *outLineId)
+{
+    if(name.isEmpty())
+        return false;
+
+    command q_newStation(mDb, "INSERT INTO lines(id,name,start_meters)"
+                              " VALUES (NULL, ?, 0)");
+    q_newStation.bind(1, name);
+
+    sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
+    sqlite3_mutex_enter(mutex);
+    int ret = q_newStation.execute();
+    db_id stationId = mDb.last_insert_rowid();
+    sqlite3_mutex_leave(mutex);
+    q_newStation.reset();
+
+    if((ret != SQLITE_OK && ret != SQLITE_DONE) || stationId == 0)
+    {
+        //Error
+        if(outLineId)
+            *outLineId = 0;
+
+        if(ret == SQLITE_CONSTRAINT_UNIQUE)
+        {
+            emit modelError(tr(errorNameAlreadyUsedText).arg(name));
+        }
+        else
+        {
+            emit modelError(tr("Error: %1").arg(mDb.error_msg()));
+        }
+        return false;
+    }
+
+    if(outLineId)
+        *outLineId = stationId;
+
+    refreshData(); //Recalc row count
+    setSortingColumn(NameCol);
+    switchToPage(0); //Reset to first page and so it is shown as first row
+
+    return true;
+}
+
+bool LinesModel::removeLine(db_id lineId)
+{
+    command q_removeStation(mDb, "DELETE FROM lines WHERE id=?");
+
+    q_removeStation.bind(1, lineId);
+    int ret = q_removeStation.execute();
+    q_removeStation.reset();
+
+    if(ret != SQLITE_OK)
+    {
+        if(ret == SQLITE_CONSTRAINT_TRIGGER)
+        {
+            //TODO: show more information to the user, like where it's still referenced
+            query q(mDb, "SELECT name FROM lines WHERE id=?");
+            q.bind(1, lineId);
+            if(q.step() == SQLITE_ROW)
+            {
+                const QString name = q.getRows().get<QString>(0);
+                emit modelError(tr(errorLineInUseText).arg(name));
+            }
+        }
+        else
+        {
+            emit modelError(tr("Error: %1").arg(mDb.error_msg()));
+        }
+
+        return false;
+    }
+
+    refreshData(); //Recalc row count
+
+    return true;
 }
 
 void LinesModel::fetchRow(int row)
