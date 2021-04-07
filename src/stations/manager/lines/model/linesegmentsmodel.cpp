@@ -7,7 +7,7 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include <QColor>
+#include <QBrush>
 #include <QFont>
 
 #include "utils/kmutils.h"
@@ -154,6 +154,11 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
             }
             break;
         }
+        case Qt::BackgroundRole:
+        {
+            //Light cyan background for stations
+            return QBrush(qRgb(158, 226, 255)); //#9EE2FF
+        }
         }
         break;
     }
@@ -176,25 +181,32 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
         }
         case Qt::DecorationRole:
         {
-            //Draw a small blue square to distinguish it's a segment
+            //Draw a small blue square for electified segments
             switch (idx.column())
             {
             case StationOrSegmentNameCol:
-                return item.reversed ? QColor(Qt::red) : QColor(Qt::blue);
+            {
+                if(item.segmentType.testFlag(utils::RailwaySegmentType::Electrified))
+                    return QColor(Qt::blue);
+            }
             }
             break;
         }
         case Qt::ToolTipRole:
         {
-            switch (idx.column())
-            {
-            case StationOrSegmentNameCol:
-            {
-                if(item.reversed)
-                    return tr("Segment <b>%1</b> is reversed.").arg(item.segmentName);
-            }
-            }
-            break;
+            QStringList tips;
+
+            //Electrification
+            if(item.segmentType.testFlag(utils::RailwaySegmentType::Electrified))
+                tips.append(tr("Electrified"));
+            else
+                tips.append(tr("Non electrified"));
+
+            //Direction
+            if(item.reversed)
+                tips.append(tr("Segment is reversed."));
+
+            return tr("Segment <b>%1</b><br>%2").arg(item.segmentName, tips.join("<br>"));
         }
         case Qt::TextAlignmentRole:
         {
@@ -310,7 +322,7 @@ void LineSegmentsModel::fetchRows()
 
     isFetching = true;
 
-    //FIXME: consider also segment and station types
+    //FIXME: consider also station types
     //and gate names and rail track connections count
 
     query q(mDb, "SELECT start_meters FROM lines WHERE id=?");
@@ -324,7 +336,7 @@ void LineSegmentsModel::fetchRows()
     int currentPosMeters = q.getRows().get<int>(0);
 
     q.prepare("SELECT ls.id, ls.seg_id, ls.direction,"
-              "seg.name, seg.max_speed_kmh, seg.distance_meters,"
+              "seg.name, seg.max_speed_kmh, seg.type, seg.distance_meters,"
               "s1.id, s1.name, s2.id, s2.name"
               " FROM line_segments ls"
               " JOIN railway_segments seg ON seg.id=ls.seg_id"
@@ -355,15 +367,16 @@ void LineSegmentsModel::fetchRows()
 
         item.segmentName = seg.get<QString>(3);
         item.maxSpeedKmH = seg.get<int>(4);
-        item.distanceMeters = seg.get<int>(5);
+        item.segmentType = utils::RailwaySegmentType(seg.get<int>(5));
+        item.distanceMeters = seg.get<int>(6);
 
         //Store first segment end
-        item.fromStationId = seg.get<db_id>(6);
-        item.fromStationName = seg.get<QString>(7);
+        item.fromStationId = seg.get<db_id>(7);
+        item.fromStationName = seg.get<QString>(8);
 
         //Store also the other end of segment for last item
-        db_id otherStationId = seg.get<db_id>(8);
-        QString otherStationName = seg.get<QString>(9);
+        db_id otherStationId = seg.get<db_id>(9);
+        QString otherStationName = seg.get<QString>(10);
 
         if(item.reversed)
         {

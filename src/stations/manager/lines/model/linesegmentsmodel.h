@@ -3,11 +3,15 @@
 
 #include "utils/sqldelegate/pageditemmodel.h"
 
-#include "utils/types.h"
-
 #include <QVector>
 
-/* FIXME: LineSegmentsModel should be loaded in signle batch
+#include <QFlags>
+
+#include "utils/types.h"
+
+#include "stations/station_utils.h"
+
+/* NOTE: LineSegmentsModel should be loaded in signle batch
  *
  * Loading on demand has problems:
  * - You must be careful on row counting like exclude/include last row which is a station without next segment
@@ -48,6 +52,7 @@ public:
         int distanceMeters;
         int fromPosMeters;
         int maxSpeedKmH;
+        QFlags<utils::RailwaySegmentType> segmentType;
         bool reversed;
     } LineSegmentItem;
 
