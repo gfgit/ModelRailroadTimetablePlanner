@@ -4,8 +4,8 @@
 #include "utils/sqldelegate/customcompletionlineedit.h"
 #include <QDialogButtonBox>
 
-#include "stations/stationsmatchmodel.h"
-#include "stations/railwaysegmentmatchmodel.h"
+#include "stations/match_models/stationsmatchmodel.h"
+#include "stations/match_models/railwaysegmentmatchmodel.h"
 
 #include <QMessageBox>
 

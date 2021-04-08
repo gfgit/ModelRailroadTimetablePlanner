@@ -28,7 +28,7 @@
 #include "db_metadata/meetinginformationdialog.h"
 
 #include "lines/linestorage.h"
-#include "lines/linesmatchmodel.h"
+#include "stations/match_models/linesmatchmodel.h"
 
 #include "printing/printwizard.h"
 

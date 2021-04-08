@@ -18,8 +18,8 @@
 #include "utils/spinbox/spinboxeditorfactory.h"
 
 #include "utils/sqldelegate/sqlfkfielddelegate.h"
-#include "stations/stationtracksmatchmodel.h"
-#include "stations/stationgatesmatchmodel.h"
+#include "stations/match_models/stationtracksmatchmodel.h"
+#include "stations/match_models/stationgatesmatchmodel.h"
 
 #include <QMessageBox>
 

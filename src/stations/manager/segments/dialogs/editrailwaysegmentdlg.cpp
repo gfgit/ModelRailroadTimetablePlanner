@@ -13,8 +13,8 @@
 #include <QPushButton>
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
-#include "stations/stationsmatchmodel.h"
-#include "stations/stationgatesmatchmodel.h"
+#include "stations/match_models/stationsmatchmodel.h"
+#include "stations/match_models/stationgatesmatchmodel.h"
 
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
 #include "stations/manager/segments/model/railwaysegmentconnectionsmodel.h"
