@@ -50,6 +50,18 @@ QValidator::State KmSpinBox::validate(QString &input, int &pos) const
     int firstNonBlank = 0;
     int i = 0;
     bool empty = true;
+
+    //Cut any prefix
+    for(; i < input.size(); i++)
+    {
+        QChar ch = input.at(i);
+        if(ch.isDigit() || ch == '+')
+        {
+            break;
+        }
+    }
+
+    firstNonBlank = i;
     for(; i < input.size(); i++)
     {
         QChar ch = input.at(i);
@@ -86,6 +98,9 @@ QValidator::State KmSpinBox::validate(QString &input, int &pos) const
         input.prepend('0'); //Add leading zero
     else if(input.size() > 1 && input.at(1) == '+' && !input.at(0).isDigit())
         input[0] = '0';
+
+    //FIXME: prefix creates problems parsing
+    input.prepend(prefix());
 
     return QValidator::Acceptable;
 }
