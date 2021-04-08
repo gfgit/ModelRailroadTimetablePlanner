@@ -5,6 +5,7 @@
 
 namespace utils {
 
+//FIXME: remove once new platform scheme is added
 inline QString platformName(int platf)
 {
     if(platf < 0) //Depot
