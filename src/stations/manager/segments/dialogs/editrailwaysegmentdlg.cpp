@@ -56,6 +56,7 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     segmentNameEdit->setPlaceholderText(tr("Segment name..."));
 
     distanceSpin = new KmSpinBox;
+    distanceSpin->setPrefix(tr("Km: "));
 
     maxSpeedSpin = new QSpinBox;
     maxSpeedSpin->setRange(10, 999);
@@ -76,7 +77,7 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     QGroupBox *segmentBox = new QGroupBox(tr("Segment"));
     QFormLayout *segmentLay = new QFormLayout(segmentBox);
     segmentLay->addRow(tr("Name:"), segmentNameEdit);
-    segmentLay->addRow(tr("Distance Km:"), distanceSpin);
+    segmentLay->addRow(tr("Distance:"), distanceSpin);
     segmentLay->addRow(tr("Max. Speed:"), maxSpeedSpin);
     segmentLay->addRow(tr("Electrified:"), electifiedCheck);
 

@@ -34,7 +34,8 @@ EditLineDlg::EditLineDlg(sqlite3pp::database &db, QWidget *parent) :
     detailsTabLay->addRow(tr("Name:"), lineNameEdit);
 
     lineStartKmSpin = new KmSpinBox;
-    detailsTabLay->addRow(tr("Start at Km:"), lineStartKmSpin);
+    lineStartKmSpin->setPrefix(tr("Km "));
+    detailsTabLay->addRow(tr("Start at:"), lineStartKmSpin);
 
     //Path Tab
     QWidget *pathTab = new QWidget;
