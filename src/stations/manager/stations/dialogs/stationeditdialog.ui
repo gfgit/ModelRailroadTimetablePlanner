@@ -280,6 +280,20 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="trackToAllGatesBut">
+           <property name="text">
+            <string>Track To All Gates</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="gateToAllTracksBut">
+           <property name="text">
+            <string>Gate To All Tracks</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_3">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>

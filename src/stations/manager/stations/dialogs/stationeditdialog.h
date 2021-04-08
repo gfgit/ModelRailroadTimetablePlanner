@@ -56,13 +56,15 @@ private slots:
 
     //Track Connections
     void onTrackConnRemoved();
-    void addTrackConn();
     void removeSelectedTrackConn();
 
     //Gate Connections
     void addGateConnection();
     void editGateConnection();
     void removeSelectedGateConnection();
+
+private:
+    void addTrackConnInternal(int mode);
 
 private:
     enum Tabs

@@ -139,8 +139,19 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::GateCol,
                                                 new SqlFKFieldDelegate(gatesFactory, trackConnModel, this));
 
-    connect(ui->addTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::addTrackConn);
     connect(ui->removeTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrackConn);
+    connect(ui->addTrackConnBut, &QToolButton::clicked, this, [this]()
+            {
+                addTrackConnInternal(NewTrackConnDlg::SingleConnection);
+            });
+    connect(ui->trackToAllGatesBut, &QToolButton::clicked, this, [this]()
+            {
+                addTrackConnInternal(NewTrackConnDlg::TrackToAllGates);
+            });
+    connect(ui->gateToAllTracksBut, &QToolButton::clicked, this, [this]()
+            {
+                addTrackConnInternal(NewTrackConnDlg::GateToAllTracks);
+            });
 
     //Gate Connections Tab
     gateConnModel = new RailwaySegmentsModel(mDb, this);
@@ -453,14 +464,17 @@ void StationEditDialog::onTrackConnRemoved()
     gatesModel->refreshData(true);
 }
 
-void StationEditDialog::addTrackConn()
+void StationEditDialog::addTrackConnInternal(int mode)
 {
+    NewTrackConnDlg::Mode dlgMode = NewTrackConnDlg::Mode(mode);
+
     QScopedPointer<ISqlFKMatchModel> tracks(trackFactory->createModel());
     QScopedPointer<ISqlFKMatchModel> gates(gatesFactory->createModel());
 
     QPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(),
                                                         static_cast<StationGatesMatchModel *>(gates.get()),
                                                         this);
+    dlg->setMode(dlgMode);
 
     do{
         int ret = dlg->exec();
@@ -475,7 +489,21 @@ void StationEditDialog::addTrackConn()
         int gateTrack = 0;
         dlg->getData(trackId, trackSide, gateId, gateTrack);
 
-        if(trackConnModel->addTrackConnection(trackId, trackSide, gateId, gateTrack))
+        bool success = false;
+        switch (dlgMode)
+        {
+        case NewTrackConnDlg::SingleConnection:
+            success = trackConnModel->addTrackConnection(trackId, trackSide, gateId, gateTrack);
+            break;
+        case NewTrackConnDlg::TrackToAllGates:
+            success = trackConnModel->addTrackToAllGatesOnSide(trackId, trackSide, gateTrack);
+            break;
+        case NewTrackConnDlg::GateToAllTracks:
+            success = trackConnModel->addGateToAllTracks(gateId, gateTrack);
+            break;
+        }
+
+        if(success)
         {
             break; //Done!
         }
