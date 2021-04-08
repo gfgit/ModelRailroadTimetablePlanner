@@ -33,6 +33,7 @@ public:
     void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId);
 
     int getOutTrackCount(db_id gateId) const;
+    utils::Side getGateSide(db_id gateId) const;
 
 private:
     struct GateItem

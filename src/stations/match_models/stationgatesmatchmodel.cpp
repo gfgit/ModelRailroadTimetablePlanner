@@ -249,6 +249,16 @@ int StationGatesMatchModel::getOutTrackCount(db_id gateId) const
     return 0;
 }
 
+utils::Side StationGatesMatchModel::getGateSide(db_id gateId) const
+{
+    for(const GateItem& item : items)
+    {
+        if(item.gateId == gateId)
+            return item.side;
+    }
+    return utils::Side::West;
+}
+
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :
     IMatchModelFactory(parent),
     m_stationId(0),
