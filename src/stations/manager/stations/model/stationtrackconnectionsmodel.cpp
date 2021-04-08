@@ -33,6 +33,19 @@ static constexpr char
     errorConnAlreadyExistsText[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
                         "This track is already connected to this gade track by this side.");
 
+static constexpr char
+    errorInvalidGateId[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
+                        "Please select a valid Gate.");
+
+static constexpr char
+    errorGateOnDifferentStation[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
+                        "The selected Gate belongs to a different station.");
+
+static constexpr char
+    errorGateTrackOutOfBound[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
+                        "Gate track is out of bound.<br>"
+                        "The selected Gate has only <b>%1</b> tracks.");
+
 StationTrackConnectionsModel::StationTrackConnectionsModel(sqlite3pp::database &db, QObject *parent) :
     IPagedItemModel(500, db, parent),
     m_stationId(0),
@@ -331,19 +344,19 @@ bool StationTrackConnectionsModel::addTrackConnection(db_id trackId, utils::Side
     if(!trackId || !gateId || gateTrack < 0)
         return false;
 
-    command q_newTrack(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
-                            " VALUES(NULL,?,?,?,?)");
-    q_newTrack.bind(1, trackId);
-    q_newTrack.bind(2, int(trackSide));
-    q_newTrack.bind(3, gateId);
-    q_newTrack.bind(4, gateTrack);
+    command q_newTrackConn(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+                                " VALUES(NULL,?,?,?,?)");
+    q_newTrackConn.bind(1, trackId);
+    q_newTrackConn.bind(2, int(trackSide));
+    q_newTrackConn.bind(3, gateId);
+    q_newTrackConn.bind(4, gateTrack);
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
-    int ret = q_newTrack.execute();
+    int ret = q_newTrackConn.execute();
     db_id connId = mDb.last_insert_rowid();
     sqlite3_mutex_leave(mutex);
-    q_newTrack.reset();
+    q_newTrackConn.reset();
 
     if((ret != SQLITE_OK && ret != SQLITE_DONE) || connId == 0)
     {
@@ -392,6 +405,114 @@ bool StationTrackConnectionsModel::removeTrackConnection(db_id connId)
     refreshData(); //Recalc row count
 
     emit trackConnRemoved(connId, 0, 0);
+
+    return true;
+}
+
+bool StationTrackConnectionsModel::addTrackToAllGatesOnSide(db_id trackId, utils::Side side, int preferredGateTrack)
+{
+    if(!trackId)
+        return false;
+
+    if(preferredGateTrack < 0)
+        preferredGateTrack = 0;
+
+    command q_newTrackConn(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+                                " VALUES(NULL,?,?,?,?)");
+
+    //Select all gates on requested side
+    query q_selectGates(mDb, "SELECT id,out_track_count FROM station_gates WHERE station_id=? AND side=?");
+    q_selectGates.bind(1, m_stationId);
+    q_selectGates.bind(2, int(side));
+
+    for(auto gate : q_selectGates)
+    {
+        db_id gateId = gate.get<db_id>(0);
+        int outTrackCount = gate.get<int>(1);
+
+        //If gate track is out of bound chose the highest
+        int gateTrack = preferredGateTrack;
+        if(gateTrack >= outTrackCount)
+            gateTrack = outTrackCount - 1;
+
+        //Ignore return codes
+        //Some connections may already exist
+        //Skip them by ignoring failed inserts
+        q_newTrackConn.bind(1, trackId);
+        q_newTrackConn.bind(2, int(side));
+        q_newTrackConn.bind(3, gateId);
+        q_newTrackConn.bind(4, gateTrack);
+        q_newTrackConn.execute();
+        q_newTrackConn.reset();
+    }
+
+    refreshData(); //Recalc row count
+    switchToPage(0); //Reset to first page and so it is shown as first row
+
+    return true;
+}
+
+bool StationTrackConnectionsModel::addGateToAllTracks(db_id gateId, int gateTrack)
+{
+    if(!gateId)
+        return false;
+
+    if(gateTrack < 0)
+        gateTrack = 0;
+
+    command q_newTrackConn(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+                                " VALUES(NULL,?,?,?,?)");
+
+    //Select gate side and track count
+    query q(mDb, "SELECT station_id,out_track_count,side FROM station_gates WHERE id=?");
+    q.bind(1, gateId);
+    int ret = q.step();
+    if(ret != SQLITE_ROW)
+    {
+        //Invalid Id
+        emit modelError(tr(errorInvalidGateId));
+        return false;
+    }
+
+    db_id gateStationId = q.getRows().get<db_id>(0);
+    if(gateStationId != m_stationId)
+    {
+        //Gate belongs to a different station.
+        emit modelError(tr(errorGateOnDifferentStation));
+        return false;
+    }
+
+    int outTrackCount = q.getRows().get<int>(1);
+    utils::Side trackSide = utils::Side(q.getRows().get<int>(2));
+
+    if(gateTrack >= outTrackCount)
+    {
+        //Gate track out of bound
+        emit modelError(tr(errorGateTrackOutOfBound).arg(outTrackCount));
+        return false;
+    }
+
+    //Select all tracks
+    q.prepare("SELECT id FROM station_gates WHERE station_id=?");
+    q.bind(1, m_stationId);
+
+    for(auto track : q)
+    {
+        db_id trackId = track.get<db_id>(0);
+
+        //Ignore return codes
+        //Some connections may already exist
+        //Skip them by ignoring failed inserts
+        q_newTrackConn.bind(1, trackId);
+        q_newTrackConn.bind(2, int(trackSide));
+        q_newTrackConn.bind(3, gateId);
+        q_newTrackConn.bind(4, gateTrack);
+        q_newTrackConn.execute();
+        q_newTrackConn.reset();
+    }
+
+    refreshData(); //Recalc row count
+    switchToPage(0); //Reset to first page and so it is shown as first row
 
     return true;
 }

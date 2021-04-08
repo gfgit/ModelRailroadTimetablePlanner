@@ -75,6 +75,9 @@ public:
                             db_id gateId, int gateTrack);
     bool removeTrackConnection(db_id connId);
 
+    bool addTrackToAllGatesOnSide(db_id trackId, utils::Side side, int preferredGateTrack);
+    bool addGateToAllTracks(db_id gateId, int gateTrack);
+
     // Convinience
     inline db_id getIdAtRow(int row) const
     {
