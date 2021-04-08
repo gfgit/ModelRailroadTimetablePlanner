@@ -493,7 +493,7 @@ bool StationTrackConnectionsModel::addGateToAllTracks(db_id gateId, int gateTrac
     }
 
     //Select all tracks
-    q.prepare("SELECT id FROM station_gates WHERE station_id=?");
+    q.prepare("SELECT id FROM station_tracks WHERE station_id=?");
     q.bind(1, m_stationId);
 
     for(auto track : q)
