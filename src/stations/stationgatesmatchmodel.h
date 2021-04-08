@@ -18,7 +18,7 @@ class StationGatesMatchModel : public ISqlFKMatchModel
 public:
     StationGatesMatchModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    // Header:
+    // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // ISqlFKMatchModel:
