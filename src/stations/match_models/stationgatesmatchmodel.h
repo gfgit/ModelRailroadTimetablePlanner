@@ -32,6 +32,8 @@ public:
     // StationsMatchModel:
     void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId);
 
+    int getOutTrackCount(db_id gateId) const;
+
 private:
     struct GateItem
     {
@@ -39,6 +41,7 @@ private:
         db_id segmentId;
         QChar gateLetter;
         QString segmentName;
+        int outTrackCount;
         QFlags<utils::GateType> type;
         utils::Side side;
     };

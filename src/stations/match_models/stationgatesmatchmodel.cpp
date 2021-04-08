@@ -158,14 +158,15 @@ void StationGatesMatchModel::refreshData()
     {
         auto track = *it;
         items[i].gateId = track.get<db_id>(0);
-        items[i].type = utils::GateType(track.get<int>(1));
-        items[i].gateLetter = sqlite3_column_text(q_getMatches.stmt(), 2)[0];
-        items[i].side = utils::Side(track.get<int>(3));
+        items[i].outTrackCount = track.get<int>(1);
+        items[i].type = utils::GateType(track.get<int>(2));
+        items[i].gateLetter = sqlite3_column_text(q_getMatches.stmt(), 3)[0];
+        items[i].side = utils::Side(track.get<int>(4));
 
         if(m_markConnectedGates)
         {
-            items[i].segmentId = track.get<db_id>(4);
-            items[i].segmentName = track.get<QString>(5);
+            items[i].segmentId = track.get<db_id>(5);
+            items[i].segmentName = track.get<QString>(6);
         }else{
             items[i].segmentId = 0;
             items[i].segmentName.clear();
@@ -218,7 +219,7 @@ void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates,
     m_markConnectedGates = markConnectedGates;
     m_excludeSegmentId = m_markConnectedGates ? excludeSegmentId : 0;
 
-    QByteArray sql = "SELECT g.id,g.type,g.name,g.side";
+    QByteArray sql = "SELECT g.id,g.out_track_count,g.type,g.name,g.side";
     if(m_markConnectedGates)
     {
         sql += ",s.id,s.name";
@@ -236,6 +237,16 @@ void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates,
     q_getMatches.prepare(sql);
 
     refreshData();
+}
+
+int StationGatesMatchModel::getOutTrackCount(db_id gateId) const
+{
+    for(const GateItem& item : items)
+    {
+        if(item.gateId == gateId)
+            return item.outTrackCount;
+    }
+    return 0;
 }
 
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :
