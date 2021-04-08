@@ -3353,16 +3353,6 @@ Per importare i rotabili devi importare anche Modelli anche Proprietari.</transl
         <source>Subtype</source>
         <translation>Sottotipo</translation>
     </message>
-    <message>
-        <location filename="../stations/station_name_utils.h" line="30"/>
-        <source>East</source>
-        <translation>Est</translation>
-    </message>
-    <message>
-        <location filename="../stations/station_name_utils.h" line="30"/>
-        <source>West</source>
-        <translation>Ovest</translation>
-    </message>
 </context>
 <context>
     <name>SQLViewer</name>
@@ -4637,6 +4627,16 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
         <location filename="../stations/station_name_utils.h" line="13"/>
         <source>Junction</source>
         <translation>Bivio</translation>
+    </message>
+    <message>
+        <location filename="../stations/station_name_utils.h" line="30"/>
+        <source>East</source>
+        <translation>Est</translation>
+    </message>
+    <message>
+        <location filename="../stations/station_name_utils.h" line="30"/>
+        <source>West</source>
+        <translation>Ovest</translation>
     </message>
 </context>
 <context>

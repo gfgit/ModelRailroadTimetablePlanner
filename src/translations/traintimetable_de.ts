@@ -3305,16 +3305,6 @@ In order to import rollingstock pieces you must also import models and owners.</
         <source>Steam</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="../stations/station_name_utils.h" line="30"/>
-        <source>East</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../stations/station_name_utils.h" line="30"/>
-        <source>West</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>SQLViewer</name>
@@ -4576,6 +4566,16 @@ Can be used instead of track length but is less precise.</source>
     <message>
         <location filename="../stations/station_name_utils.h" line="13"/>
         <source>Junction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/station_name_utils.h" line="30"/>
+        <source>East</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/station_name_utils.h" line="30"/>
+        <source>West</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
