@@ -1,6 +1,6 @@
 #include "stationgatesmatchmodel.h"
 
-#include "station_name_utils.h"
+#include "stations/station_name_utils.h"
 
 #include <QBrush>
 

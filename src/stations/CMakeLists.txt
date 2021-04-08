@@ -1,18 +1,11 @@
 add_subdirectory(manager)
+add_subdirectory(match_models)
 
 set(TRAINTIMETABLE_SOURCES
   ${TRAINTIMETABLE_SOURCES}
-  stations/railwaysegmentmatchmodel.h
-  stations/stationsmatchmodel.h
   stations/station_utils.h
   stations/station_name_utils.h
-  stations/stationgatesmatchmodel.h
-  stations/stationtracksmatchmodel.h
 
-  stations/railwaysegmentmatchmodel.cpp
-  stations/stationsmatchmodel.cpp
-  stations/stationgatesmatchmodel.cpp
-  stations/stationtracksmatchmodel.cpp
   PARENT_SCOPE
 )
 
