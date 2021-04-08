@@ -15,7 +15,7 @@ static const char* StationTypeNamesTable[] = {
 
 class StationUtils
 {
-    Q_DECLARE_TR_FUNCTIONS(RsTypeNames)
+    Q_DECLARE_TR_FUNCTIONS(StationUtils)
 
 public:
     static inline QString name(StationType t)
