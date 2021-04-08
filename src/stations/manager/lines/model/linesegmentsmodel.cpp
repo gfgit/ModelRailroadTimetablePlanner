@@ -249,8 +249,10 @@ void LineSegmentsModel::refreshData()
     //Store segment count
     curItemCount = q.getRows().get<int>(0);
 
-    //Each segment has 2 row + last station row
-    const int actualRowCount = curItemCount * 2 + 1;
+    //Each segment has 2 row + 1 extra row for last station
+    int actualRowCount = curItemCount * 2 + 1;
+    if(curItemCount == 0)
+        actualRowCount = 0; //No segments -> Line is Empty
 
     if(actualRowCount != totalItemsCount)
     {
@@ -307,6 +309,50 @@ bool LineSegmentsModel::setLineInfo(const QString &name, int startMeters)
     }
 
     //Update model
+    refreshData();
+    return true;
+}
+
+bool LineSegmentsModel::removeSegmentsAfterPosInclusive(int pos)
+{
+    command cmd(mDb, "DELETE FROM line_segments WHERE line_id=? AND pos>=?");
+    cmd.bind(1, m_lineId);
+    cmd.bind(2, pos);
+    if(cmd.execute() != SQLITE_OK)
+    {
+        emit modelError(mDb.error_msg());
+        return false;
+    }
+
+    refreshData();
+    return true;
+}
+
+bool LineSegmentsModel::addStation(db_id railwaySegmentId, bool reverse)
+{
+    //FIXME: check if valid (if adjacent to previous, if should be reversed or not)
+
+    query q(mDb, "SELECT MAX(pos) FROM line_segments WHERE line_id=?");
+    q.bind(1, m_lineId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+
+    int nextPos = 0; //If it's the first segment
+    if(q.getRows().column_type(0) != SQLITE_NULL)
+        nextPos = q.getRows().get<int>(0) + 1;
+
+    command cmd(mDb, "INSERT INTO line_segments(id,line_id,seg_id,direction,pos) VALUES(NULL, ?, ?, ?, ?)");
+    cmd.bind(1, m_lineId);
+    cmd.bind(2, railwaySegmentId);
+    cmd.bind(3, reverse ? 1 : 0);
+    cmd.bind(4, nextPos);
+
+    if(cmd.execute() != SQLITE_OK)
+    {
+        emit modelError(mDb.error_msg());
+        return false;
+    }
+
     refreshData();
     return true;
 }
@@ -400,19 +446,22 @@ void LineSegmentsModel::fetchRows()
         vec.append(item);
     }
 
-    //Add a fake item to show last station (other end of last segment)
-    //This item is shown without a SegmentRow
-    LineSegmentItem lastItem;
-    lastItem.fromStationId = lastStationId;
-    lastItem.fromStationName = lastStationName;
-    lastItem.fromPosMeters = currentPosMeters;
-    //Fields relevant only for SegmentRow so we don't use them
-    lastItem.lineSegmentId = 0;
-    lastItem.railwaySegmentId = 0;
-    lastItem.distanceMeters = 0;
-    lastItem.maxSpeedKmH = 0;
-    lastItem.reversed = false;
-    vec.append(lastItem);
+    if(lastStationId)
+    {
+        //Add a fake item to show last station (other end of last segment)
+        //This item is shown without a SegmentRow
+        LineSegmentItem lastItem;
+        lastItem.fromStationId = lastStationId;
+        lastItem.fromStationName = lastStationName;
+        lastItem.fromPosMeters = currentPosMeters;
+        //Fields relevant only for SegmentRow so we don't use them
+        lastItem.lineSegmentId = 0;
+        lastItem.railwaySegmentId = 0;
+        lastItem.distanceMeters = 0;
+        lastItem.maxSpeedKmH = 0;
+        lastItem.reversed = false;
+        vec.append(lastItem);
+    }
 
     //NOTE: Send items in queued event
     //We are called from inside data()

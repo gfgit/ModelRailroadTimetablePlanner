@@ -25,13 +25,16 @@
  * CHECK(pos<100) and UNIQUE(id, pos) on 'lines' table
  * This ensures line have at maximum 100 segments (So 101 stations)
  */
+
+static constexpr const int MaxSegmentsPerLine = 100;
+
 class LineSegmentsModel : public IPagedItemModel
 {
     Q_OBJECT
 
 public:
 
-    enum { BatchSize = 100 };
+    enum { BatchSize = MaxSegmentsPerLine };
 
     typedef enum {
         SegmentPosCol = -1, //Invisible (Vertical header)
@@ -83,6 +86,32 @@ public:
 
     bool getLineInfo(QString &nameOut, int &startMetersOut) const;
     bool setLineInfo(const QString &name, int startMeters);
+
+    inline int getSegmentCount() const { return curItemCount; }
+    inline db_id getLastStation() const
+    {
+        //Use fake last segment which contains last station
+        if(segments.size() < 1)
+            return 0;
+        return segments.last().fromStationId;
+    }
+    inline db_id getLastRailwaySegment() const
+    {
+        //Use ONE BUT LAST segment which contains last railway segment
+        if(segments.size() < 2)
+            return 0;
+        return segments[segments.size() - 2].railwaySegmentId;
+    }
+    inline QString getStationNameAt(int itemPos) const
+    {
+        //Use ONE BUT LAST segment which contains last railway segment
+        if(itemPos >= segments.size())
+            return QString();
+        return segments[itemPos].fromStationName;
+    }
+
+    bool removeSegmentsAfterPosInclusive(int pos);
+    bool addStation(db_id railwaySegmentId, bool reverse);
 
     //Row Type
     //Event: stations
