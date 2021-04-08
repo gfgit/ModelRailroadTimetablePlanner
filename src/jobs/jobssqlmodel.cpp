@@ -190,7 +190,7 @@ void JobsSQLModel::clearCache_slot()
 {
     clearCache();
     QModelIndex start = index(0, 0);
-    QModelIndex end = index(curItemCount, NCols);
+    QModelIndex end = index(curItemCount - 1, NCols - 1);
     emit dataChanged(start, end);
 }
 

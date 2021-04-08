@@ -526,6 +526,7 @@ bool StationTracksModel::moveTrackUpDown(db_id trackId, bool up, bool topOrBotto
 
     //Refresh model
     clearCache();
+    emit dataChanged(index(0, 0), index(curItemCount - 1, NCols - 1));
 
     return true;
 }
