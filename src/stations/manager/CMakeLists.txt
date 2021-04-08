@@ -1,6 +1,5 @@
 add_subdirectory(free_rs_viewer)
 add_subdirectory(lines)
-add_subdirectory(railwaynode)
 add_subdirectory(segments)
 add_subdirectory(stations)
 
