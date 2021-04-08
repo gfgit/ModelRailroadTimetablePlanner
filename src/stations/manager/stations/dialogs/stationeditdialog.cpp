@@ -458,7 +458,9 @@ void StationEditDialog::addTrackConn()
     QScopedPointer<ISqlFKMatchModel> tracks(trackFactory->createModel());
     QScopedPointer<ISqlFKMatchModel> gates(gatesFactory->createModel());
 
-    QPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(), gates.get(), this);
+    QPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(),
+                                                        static_cast<StationGatesMatchModel *>(gates.get()),
+                                                        this);
 
     do{
         int ret = dlg->exec();

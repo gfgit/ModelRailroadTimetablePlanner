@@ -7,6 +7,7 @@
 #include "stations/station_utils.h"
 
 class ISqlFKMatchModel;
+class StationGatesMatchModel;
 
 class CustomCompletionLineEdit;
 class QComboBox;
@@ -17,7 +18,7 @@ class NewTrackConnDlg : public QDialog
     Q_OBJECT
 public:
     NewTrackConnDlg(ISqlFKMatchModel *tracks,
-                    ISqlFKMatchModel *gates,
+                    StationGatesMatchModel *gates,
                     QWidget *parent = nullptr);
 
     virtual void done(int res) override;
@@ -25,9 +26,12 @@ public:
     void getData(db_id &trackOut, utils::Side &trackSideOut,
                  db_id &gateOut, int &gateTrackOut);
 
+private slots:
+    void onGateChanged(db_id gateId);
+
 private:
     ISqlFKMatchModel *trackMatchModel;
-    ISqlFKMatchModel *gatesMatchModel;
+    StationGatesMatchModel *gatesMatchModel;
 
     CustomCompletionLineEdit *trackEdit;
     QComboBox *trackSideCombo;

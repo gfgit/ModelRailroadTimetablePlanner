@@ -14,11 +14,13 @@
 #include "utils/sqldelegate/customcompletionlineedit.h"
 #include "utils/sqldelegate/isqlfkmatchmodel.h"
 
+#include "stations/match_models/stationgatesmatchmodel.h"
+
 #include "stations/station_name_utils.h"
 
 
 NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
-                                 ISqlFKMatchModel *gates,
+                                 StationGatesMatchModel *gates,
                                  QWidget *parent) :
     QDialog(parent),
     trackMatchModel(tracks),
@@ -51,10 +53,11 @@ NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
 
     gateEdit = new CustomCompletionLineEdit(gatesMatchModel);
     gateEdit->setPlaceholderText(tr("Gate..."));
+    connect(gateEdit, &CustomCompletionLineEdit::dataIdChanged, this, &NewTrackConnDlg::onGateChanged);
     gateLay->addRow(gateEdit);
 
     gateTrackSpin = new QSpinBox;
-    gateTrackSpin->setRange(0, 9999); //FIXME: set actual gate out track count
+    gateTrackSpin->setRange(0, 999);
     gateLay->addRow(tr("Gate Track:"), gateTrackSpin);
 
     mainLay->addWidget(trackBox, 0, 0);
@@ -102,4 +105,15 @@ void NewTrackConnDlg::getData(db_id &trackOut, utils::Side &trackSideOut, db_id 
     trackSideOut = utils::Side(trackSideCombo->currentIndex());
     gateEdit->getData(gateOut, tmp);
     gateTrackOut = gateTrackSpin->value();
+}
+
+void NewTrackConnDlg::onGateChanged(db_id gateId)
+{
+    //NOTE HACK:
+    //CustomCompletionLineEdit doesn't allow getting custom data
+    //Ask model directly before it's cleared by CustomCompletionLineEdit
+    int outTrackCount = gatesMatchModel->getOutTrackCount(gateId);
+    if(outTrackCount == 0)
+        outTrackCount = 1000; //Set to some value
+    gateTrackSpin->setMaximum(outTrackCount - 1);
 }
