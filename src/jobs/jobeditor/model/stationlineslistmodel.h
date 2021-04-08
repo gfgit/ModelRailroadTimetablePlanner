@@ -7,7 +7,7 @@
 
 #include <QVector>
 
-
+//FIXME remove and use instad RailwaySegmentMatchModel
 class StationLinesListModel : public IPagedItemModel
 {
     Q_OBJECT
