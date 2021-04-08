@@ -356,12 +356,11 @@ void StationEditDialog::onTracksChanged()
     //A track was removed or changed name
 
     //Update gates (has a Default Platform column)
-    gatesModel->clearCache();
+    gatesModel->refreshData(true);
 
     //Update platform connections
     //(refresh because some may be deleted)
-    trackConnModel->clearCache();
-    trackConnModel->refreshData();
+    trackConnModel->refreshData(true);
 }
 
 void StationEditDialog::addTrack()
@@ -451,7 +450,7 @@ void StationEditDialog::onTrackConnRemoved()
     //A track connection was removed
 
     //Update gates (has a Default Platform column)
-    gatesModel->clearCache();
+    gatesModel->refreshData(true);
 }
 
 void StationEditDialog::addTrackConn()

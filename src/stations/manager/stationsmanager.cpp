@@ -528,7 +528,7 @@ void StationsManager::onEditLine()
         return;
 
     //Refresh fields
-    linesModel->clearCache();
+    linesModel->refreshData(true);
 }
 
 void StationsManager::setReadOnly(bool readOnly)
