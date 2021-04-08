@@ -19,7 +19,7 @@ using namespace sqlite3pp;
 class RailwaySegmentsResultEvent : public QEvent
 {
 public:
-    static constexpr Type _Type = Type(CustomEvents::RailwayNodeModelResult);
+    static constexpr Type _Type = Type(CustomEvents::RailwaySegmentsModelResult);
     inline RailwaySegmentsResultEvent() : QEvent(_Type) {}
 
     QVector<RailwaySegmentsModel::RailwaySegmentItem> items;
