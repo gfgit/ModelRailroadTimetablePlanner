@@ -237,7 +237,7 @@ void StationsModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void StationsModel::refreshData()
+void StationsModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -248,7 +248,7 @@ void StationsModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM stations");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 

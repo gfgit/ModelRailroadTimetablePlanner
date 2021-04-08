@@ -374,7 +374,7 @@ void StationTracksModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void StationTracksModel::refreshData()
+void StationTracksModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -386,7 +386,7 @@ void StationTracksModel::refreshData()
     q.bind(1, m_stationId);
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -419,8 +419,7 @@ void StationTracksModel::setSortingColumn(int col)
 bool StationTracksModel::setStation(db_id stationId)
 {
     m_stationId = stationId;
-    clearCache();
-    refreshData();
+    refreshData(true);
     return true;
 }
 

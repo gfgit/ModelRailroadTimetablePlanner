@@ -234,7 +234,7 @@ void LineSegmentsModel::clearCache()
     segments.squeeze();
 }
 
-void LineSegmentsModel::refreshData()
+void LineSegmentsModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -254,7 +254,7 @@ void LineSegmentsModel::refreshData()
     if(curItemCount == 0)
         actualRowCount = 0; //No segments -> Line is Empty
 
-    if(actualRowCount != totalItemsCount)
+    if(actualRowCount != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -280,8 +280,7 @@ void LineSegmentsModel::setSortingColumn(int col)
 void LineSegmentsModel::setLine(db_id lineId)
 {
     m_lineId = lineId;
-    clearCache();
-    refreshData();
+    refreshData(true);
 }
 
 bool LineSegmentsModel::getLineInfo(QString &nameOut, int &startMetersOut) const
@@ -308,8 +307,8 @@ bool LineSegmentsModel::setLineInfo(const QString &name, int startMeters)
         return false;
     }
 
-    //Update model
-    refreshData();
+    //Update model km field
+    refreshData(true);
     return true;
 }
 

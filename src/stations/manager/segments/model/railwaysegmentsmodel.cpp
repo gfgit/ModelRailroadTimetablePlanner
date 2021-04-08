@@ -227,7 +227,7 @@ void RailwaySegmentsModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RailwaySegmentsModel::refreshData()
+void RailwaySegmentsModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -248,7 +248,7 @@ void RailwaySegmentsModel::refreshData()
 
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -579,6 +579,5 @@ db_id RailwaySegmentsModel::getFilterFromStationId() const
 void RailwaySegmentsModel::setFilterFromStationId(const db_id &value)
 {
     filterFromStationId = value;
-    clearCache();
-    refreshData();
+    refreshData(true);
 }

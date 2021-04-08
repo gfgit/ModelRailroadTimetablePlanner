@@ -161,7 +161,7 @@ void ShiftSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void ShiftSQLModel::refreshData()
+void ShiftSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -177,7 +177,7 @@ void ShiftSQLModel::refreshData()
     q.step();
     const int count = q.getRows().get<int>(0);
 
-    if(count != totalItemsCount) //Invalidate cache and reset model
+    if(count != totalItemsCount || forceUpdate) //Invalidate cache and reset model
     {
         beginResetModel();
 
@@ -422,7 +422,7 @@ void ShiftSQLModel::setQuery(const QString &text)
         return;
     mQuery = tmp;
 
-    refreshData();
+    refreshData(true);
 }
 
 bool ShiftSQLModel::removeShift(db_id shiftId)
@@ -441,7 +441,7 @@ bool ShiftSQLModel::removeShift(db_id shiftId)
 
     emit Session->shiftRemoved(shiftId);
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 

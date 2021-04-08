@@ -554,7 +554,7 @@ void RSImportedModelsModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RSImportedModelsModel::refreshData()
+void RSImportedModelsModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -562,7 +562,7 @@ void RSImportedModelsModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM imported_rs_models");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount) //Invalidate cache and reset model
+    if(count != totalItemsCount || forceUpdate) //Invalidate cache and reset model
     {
         beginResetModel();
 

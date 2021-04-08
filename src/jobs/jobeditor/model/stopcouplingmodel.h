@@ -13,7 +13,7 @@ public:
 
     // IPagedItemModel
     // Cached rows management
-    virtual void refreshData() override;
+    virtual void refreshData(bool forceUpdate = false) override;
 
     // StopCouplingModel
     void setStop(db_id stopId, RsOp op);

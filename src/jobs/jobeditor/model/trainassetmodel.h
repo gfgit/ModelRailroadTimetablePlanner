@@ -17,7 +17,7 @@ public:
 
     // IPagedItemModel
     // Cached rows management
-    virtual void refreshData() override;
+    virtual void refreshData(bool forceUpdate = false) override;
 
     // TrainAssetModel
     void setStop(db_id jobId, QTime arrival, Mode mode);

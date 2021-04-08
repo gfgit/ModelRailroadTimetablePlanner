@@ -257,17 +257,17 @@ void StationsManager::updateModels()
         {
         case StationsTab:
         {
-            stationsModel->refreshData();
+            stationsModel->refreshData(true);
             break;
         }
         case RailwaySegmentsTab:
         {
-            segmentsModel->refreshData();
+            segmentsModel->refreshData(true);
             break;
         }
         case LinesTab:
         {
-            linesModel->refreshData();
+            linesModel->refreshData(true);
             break;
         }
         }
@@ -360,22 +360,18 @@ void StationsManager::onEditStation()
         return;
 
     //Refresh stations model
-    stationsModel->clearCache();
+    stationsModel->refreshData(true);
 
     //Refresh segments
     int &segmentsTimer = clearModelTimers[RailwaySegmentsTab];
     if(segmentsTimer != ModelCleared)
     {
-        //If model was loaded clear cache
-        segmentsModel->clearCache();
+        //If model was loaded clear cache and refresh row count
+        segmentsModel->refreshData(true);
 
-        if(segmentsTimer == ModelLoaded)
+        if(segmentsTimer != ModelLoaded)
         {
-            segmentsModel->refreshData();
-        }
-        else
-        {
-            //Mark as cleared so it recalculates row count with 'refreshData()'
+            //Mark as cleared
             killTimer(segmentsTimer);
             segmentsTimer = ModelCleared;
         }
@@ -459,7 +455,7 @@ void StationsManager::onEditSegment()
         return;
 
     //Refresh fields
-    segmentsModel->clearCache();
+    segmentsModel->refreshData(true);
 }
 
 void StationsManager::onNewLine()

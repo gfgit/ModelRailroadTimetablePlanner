@@ -290,17 +290,17 @@ void RollingStockManager::updateModels()
         {
         case RollingstockTab:
         {
-            rsSQLModel->refreshData();
+            rsSQLModel->refreshData(true);
             break;
         }
         case ModelsTab:
         {
-            modelsSQLModel->refreshData();
+            modelsSQLModel->refreshData(true);
             break;
         }
         case OwnersTab:
         {
-            ownersSQLModel->refreshData();
+            ownersSQLModel->refreshData(true);
             break;
         }
         }
@@ -601,8 +601,7 @@ void RollingStockManager::onMergeModels()
     }
     if(clearModelTimers[RollingstockTab] == ModelLoaded)
     {
-        rsSQLModel->refreshData();
-        rsSQLModel->clearCache();
+        rsSQLModel->refreshData(true);
     }
 }
 
@@ -620,8 +619,7 @@ void RollingStockManager::onMergeOwners()
     }
     if(clearModelTimers[RollingstockTab] == ModelLoaded)
     {
-        rsSQLModel->refreshData();
-        rsSQLModel->clearCache();
+        rsSQLModel->refreshData(true);
     }
 }
 

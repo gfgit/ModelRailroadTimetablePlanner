@@ -228,7 +228,7 @@ void StationTrackConnectionsModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void StationTrackConnectionsModel::refreshData()
+void StationTrackConnectionsModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -241,7 +241,7 @@ void StationTrackConnectionsModel::refreshData()
     q.bind(1, m_stationId);
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -348,8 +348,7 @@ bool StationTrackConnectionsModel::setFieldData(int row, int col, db_id id, cons
 bool StationTrackConnectionsModel::setStation(db_id stationId)
 {
     m_stationId = stationId;
-    clearCache();
-    refreshData();
+    refreshData(true);
     return true;
 }
 

@@ -533,7 +533,7 @@ void RSImportedOwnersModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RSImportedOwnersModel::refreshData()
+void RSImportedOwnersModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -541,7 +541,7 @@ void RSImportedOwnersModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM imported_rs_owners");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount) //Invalidate cache and reset model
+    if(count != totalItemsCount || forceUpdate) //Invalidate cache and reset model
     {
         beginResetModel();
 

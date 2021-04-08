@@ -226,7 +226,7 @@ void LinesSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void LinesSQLModel::refreshData()
+void LinesSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -237,7 +237,7 @@ void LinesSQLModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM lines");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 

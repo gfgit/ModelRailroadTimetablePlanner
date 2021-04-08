@@ -194,7 +194,7 @@ void RollingstockSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RollingstockSQLModel::refreshData()
+void RollingstockSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -205,7 +205,7 @@ void RollingstockSQLModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM rs_list");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -737,7 +737,7 @@ bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
 
     emit Session->rollingstockRemoved(rsId);
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 
@@ -799,6 +799,6 @@ bool RollingstockSQLModel::removeAllRS()
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }

@@ -301,11 +301,10 @@ void StationEditDialog::onGatesChanged()
 
     //Update platform connections
     //(refresh because some may be deleted)
-    trackConnModel->clearCache();
-    trackConnModel->refreshData();
+    trackConnModel->refreshData(true);
 
     //Update gate connections
-    gateConnModel->clearCache();
+    gateConnModel->refreshData(true);
 }
 
 void StationEditDialog::addGate()
@@ -524,7 +523,7 @@ void StationEditDialog::editGateConnection()
     if(ret != QDialog::Accepted || !dlg)
         return;
 
-    gateConnModel->clearCache(); //Refresh fields
+    gateConnModel->refreshData(true); //Refresh fields
     delete dlg;
 }
 

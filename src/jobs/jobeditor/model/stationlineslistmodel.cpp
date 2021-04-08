@@ -121,7 +121,7 @@ void StationLinesListModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void StationLinesListModel::refreshData()
+void StationLinesListModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -134,7 +134,7 @@ void StationLinesListModel::refreshData()
         q.step();
         count = q.getRows().get<int>(0);
     }
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -389,8 +389,7 @@ void StationLinesListModel::setSortingColumn(int /*col*/)
 void StationLinesListModel::setStationId(db_id stationId)
 {
     m_stationId = stationId;
-    clearCache();
-    refreshData();
+    refreshData(true);
 }
 
 int StationLinesListModel::getLineRow(db_id lineId)

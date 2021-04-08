@@ -164,7 +164,7 @@ void JobsSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void JobsSQLModel::refreshData()
+void JobsSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -175,7 +175,7 @@ void JobsSQLModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM jobs");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 

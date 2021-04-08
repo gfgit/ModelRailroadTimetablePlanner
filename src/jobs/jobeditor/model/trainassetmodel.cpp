@@ -17,7 +17,7 @@ TrainAssetModel::TrainAssetModel(database& db, QObject *parent) :
 {
 }
 
-void TrainAssetModel::refreshData()
+void TrainAssetModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -41,7 +41,7 @@ void TrainAssetModel::refreshData()
         qWarning() << "TrainAssetModel: " << mDb.error_msg() << mDb.error_code();
 
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -217,6 +217,5 @@ void TrainAssetModel::setStop(db_id jobId, QTime arrival, Mode mode)
     m_arrival = arrival;
     m_mode = mode;
 
-    refreshData();
-    clearCache();
+    refreshData(true);
 }

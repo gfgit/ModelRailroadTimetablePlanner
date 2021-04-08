@@ -206,7 +206,7 @@ void RSOwnersSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RSOwnersSQLModel::refreshData()
+void RSOwnersSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -215,7 +215,7 @@ void RSOwnersSQLModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM rs_owners");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -491,7 +491,7 @@ bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 
@@ -552,6 +552,6 @@ bool RSOwnersSQLModel::removeAllRSOwners()
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }

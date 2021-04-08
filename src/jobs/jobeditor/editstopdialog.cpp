@@ -442,8 +442,8 @@ void EditStopDialog::editCoupled()
 
     dlg.exec();
 
-    coupledModel->refreshData();
-    trainAssetModelAfter->refreshData();
+    coupledModel->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
     updateSpeedAfterStop();
 }
 
@@ -459,8 +459,8 @@ void EditStopDialog::editUncoupled()
 
     dlg.exec();
 
-    uncoupledModel->refreshData();
-    trainAssetModelAfter->refreshData();
+    uncoupledModel->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
     updateSpeedAfterStop();
 }
 
@@ -530,17 +530,10 @@ void EditStopDialog::couplingCustomContextMenuRequested(const QPoint& pos)
         return; //User didn't select 'Refresh' action
 
     //Refresh data
-    coupledModel->refreshData();
-    coupledModel->clearCache();
-
-    uncoupledModel->refreshData();
-    uncoupledModel->clearCache();
-
-    trainAssetModelBefore->refreshData();
-    trainAssetModelBefore->clearCache();
-
-    trainAssetModelAfter->refreshData();
-    trainAssetModelAfter->clearCache();
+    coupledModel->refreshData(true);
+    uncoupledModel->refreshData(true);
+    trainAssetModelBefore->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
 }
 
 QSet<db_id> EditStopDialog::getRsToUpdate() const

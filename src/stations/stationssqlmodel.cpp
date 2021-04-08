@@ -291,7 +291,7 @@ void StationsSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void StationsSQLModel::refreshData()
+void StationsSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;

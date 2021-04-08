@@ -16,7 +16,7 @@ StopCouplingModel::StopCouplingModel(sqlite3pp::database &db, QObject *parent) :
 {
 }
 
-void StopCouplingModel::refreshData()
+void StopCouplingModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -26,7 +26,7 @@ void StopCouplingModel::refreshData()
     q.bind(2, m_operation);
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -55,8 +55,7 @@ void StopCouplingModel::setStop(db_id stopId, RsOp op)
     m_stopId = stopId;
     m_operation = op;
 
-    refreshData();
-    clearCache();
+    refreshData(true);
 }
 
 void StopCouplingModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)

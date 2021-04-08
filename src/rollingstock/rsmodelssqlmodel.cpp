@@ -316,7 +316,7 @@ void RSModelsSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RSModelsSQLModel::refreshData()
+void RSModelsSQLModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;
@@ -325,7 +325,7 @@ void RSModelsSQLModel::refreshData()
     query q(mDb, "SELECT COUNT(1) FROM rs_models");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
+    if(count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -694,7 +694,7 @@ bool RSModelsSQLModel::removeRSModel(db_id modelId, const QString& name)
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 
@@ -786,6 +786,6 @@ bool RSModelsSQLModel::removeAllRSModels()
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }

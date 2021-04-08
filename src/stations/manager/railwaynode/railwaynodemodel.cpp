@@ -220,7 +220,7 @@ void RailwayNodeModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RailwayNodeModel::refreshData()
+void RailwayNodeModel::refreshData(bool forceUpdate)
 {
     if(!mDb.db())
         return;

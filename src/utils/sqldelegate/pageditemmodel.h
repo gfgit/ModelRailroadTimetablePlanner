@@ -24,7 +24,7 @@ public:
 
     // Cached rows management
     virtual void clearCache() = 0;
-    virtual void refreshData() = 0;
+    virtual void refreshData(bool forceUpdate = false) = 0;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) = 0;

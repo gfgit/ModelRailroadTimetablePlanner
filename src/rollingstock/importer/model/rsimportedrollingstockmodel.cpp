@@ -597,7 +597,7 @@ void RSImportedRollingstockModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void RSImportedRollingstockModel::refreshData()
+void RSImportedRollingstockModel::refreshData(bool forceUpdate)
 {
     query q(mDb, "SELECT COUNT(1) FROM imported_rs_list imp"
                  " JOIN imported_rs_models m ON m.id=imp.model_id"
@@ -605,7 +605,7 @@ void RSImportedRollingstockModel::refreshData()
                  " WHERE o.import=1 AND m.import=1");
     q.step();
     const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount) //Invalidate cache and reset model
+    if(count != totalItemsCount || forceUpdate) //Invalidate cache and reset model
     {
         beginResetModel();
 
