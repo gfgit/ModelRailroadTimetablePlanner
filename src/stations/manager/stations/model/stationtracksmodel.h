@@ -66,7 +66,6 @@ public:
 
     // Cached rows management
     virtual void clearCache() override;
-    virtual void refreshData(bool forceUpdate = false) override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -111,6 +110,9 @@ public:
 signals:
     void trackNameChanged(db_id trackId, const QString& name);
     void trackRemoved(db_id trackId);
+
+protected:
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     void fetchRow(int row);

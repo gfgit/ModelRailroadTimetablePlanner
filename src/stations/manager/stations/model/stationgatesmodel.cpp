@@ -300,47 +300,21 @@ Qt::ItemFlags StationGatesModel::flags(const QModelIndex &idx) const
     return f;
 }
 
+qint64 StationGatesModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM station_gates WHERE station_id=?");
+    q.bind(1, m_stationId);
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
 void StationGatesModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
-}
-
-void StationGatesModel::refreshData(bool forceUpdate)
-{
-    if(!mDb.db())
-        return;
-
-    emit itemsReady(-1, -1); //Notify we are about to refresh
-
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM station_gates WHERE station_id=?");
-    q.bind(1, m_stationId);
-    q.step();
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount || forceUpdate)
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
 }
 
 void StationGatesModel::setSortingColumn(int col)

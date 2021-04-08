@@ -24,7 +24,7 @@ public:
 
     // Cached rows management
     virtual void clearCache() = 0;
-    virtual void refreshData(bool forceUpdate = false) = 0;
+    virtual void refreshData(bool forceUpdate = false);
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) = 0;
@@ -48,6 +48,9 @@ signals:
     // Page signals
     void pageCountChanged(int count);
     void currentPageChanged(int page);
+
+protected:
+    virtual qint64 recalcTotalItemCount();
 
 protected:
     sqlite3pp::database &mDb;

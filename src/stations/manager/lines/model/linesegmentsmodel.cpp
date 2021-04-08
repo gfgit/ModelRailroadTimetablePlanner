@@ -236,6 +236,7 @@ void LineSegmentsModel::clearCache()
 
 void LineSegmentsModel::refreshData(bool forceUpdate)
 {
+    //NOTE: custom implementation
     if(!mDb.db())
         return;
 

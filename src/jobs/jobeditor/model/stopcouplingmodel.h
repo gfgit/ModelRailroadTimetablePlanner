@@ -11,12 +11,13 @@ class StopCouplingModel : public RSListOnDemandModel
 public:
     StopCouplingModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    // IPagedItemModel
-    // Cached rows management
-    virtual void refreshData(bool forceUpdate = false) override;
-
     // StopCouplingModel
     void setStop(db_id stopId, RsOp op);
+
+protected:
+    // IPagedItemModel
+    // Cached rows management
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     virtual void internalFetch(int first, int sortColumn, int valRow, const QVariant &val) override;

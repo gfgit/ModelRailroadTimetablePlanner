@@ -526,43 +526,19 @@ Qt::ItemFlags RSImportedOwnersModel::flags(const QModelIndex &idx) const
 
 /* ISqlOnDemandModel */
 
+qint64 RSImportedOwnersModel::recalcTotalItemCount()
+{
+    query q(mDb, "SELECT COUNT(1) FROM imported_rs_owners");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
 void RSImportedOwnersModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
-}
-
-void RSImportedOwnersModel::refreshData(bool forceUpdate)
-{
-    if(!mDb.db())
-        return;
-
-    query q(mDb, "SELECT COUNT(1) FROM imported_rs_owners");
-    q.step();
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount || forceUpdate) //Invalidate cache and reset model
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
 }
 
 void RSImportedOwnersModel::setSortingColumn(int col)

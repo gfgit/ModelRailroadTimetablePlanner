@@ -17,11 +17,8 @@ TrainAssetModel::TrainAssetModel(database& db, QObject *parent) :
 {
 }
 
-void TrainAssetModel::refreshData(bool forceUpdate)
+qint64 TrainAssetModel::recalcTotalItemCount()
 {
-    if(!mDb.db())
-        return;
-
     query q(mDb, "SELECT COUNT(1) FROM("
                  "SELECT coupling.rsId,MAX(stops.arrival)"
                  " FROM stops"
@@ -40,29 +37,8 @@ void TrainAssetModel::refreshData(bool forceUpdate)
     if(ret != SQLITE_ROW)
         qWarning() << "TrainAssetModel: " << mDb.error_msg() << mDb.error_code();
 
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount || forceUpdate)
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
+    const qint64 count = q.getRows().get<int>(0);
+    return count;
 }
 
 void TrainAssetModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)

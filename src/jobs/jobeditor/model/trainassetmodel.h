@@ -15,12 +15,13 @@ public:
 
     TrainAssetModel(sqlite3pp::database& db, QObject *parent = nullptr);
 
-    // IPagedItemModel
-    // Cached rows management
-    virtual void refreshData(bool forceUpdate = false) override;
-
     // TrainAssetModel
     void setStop(db_id jobId, QTime arrival, Mode mode);
+
+protected:
+    // IPagedItemModel
+    // Cached rows management
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     virtual void internalFetch(int first, int sortCol, int valRow, const QVariant &val) override;

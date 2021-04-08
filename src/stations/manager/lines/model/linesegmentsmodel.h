@@ -75,6 +75,7 @@ public:
     // IPagedItemModel
 
     // Cached rows management
+    //NOTE: custom implementation
     virtual void clearCache() override;
     virtual void refreshData(bool forceUpdate = false) override;
 

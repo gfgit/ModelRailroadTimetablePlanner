@@ -63,7 +63,6 @@ public:
 
     // Cached rows management
     virtual void clearCache() override;
-    virtual void refreshData(bool forceUpdate = false) override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -81,6 +80,9 @@ public:
     bool getFieldData(int row, int col, db_id &ownerIdOut, QString &ownerNameOut) const override;
     bool validateData(int row, int col, db_id ownerId, const QString &ownerName) override;
     bool setFieldData(int row, int col, db_id ownerId, const QString &ownerName) override;
+
+protected:
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     void fetchRow(int row);

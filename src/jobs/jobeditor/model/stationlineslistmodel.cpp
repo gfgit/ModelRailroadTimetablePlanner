@@ -114,48 +114,24 @@ QVariant StationLinesListModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-void StationLinesListModel::clearCache()
+qint64 StationLinesListModel::recalcTotalItemCount()
 {
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
-void StationLinesListModel::refreshData(bool forceUpdate)
-{
-    if(!mDb.db())
-        return;
-
-    int count = 0;
+    qint64 count = 0;
     if(m_stationId)
     {
         query q(mDb, "SELECT COUNT(1) FROM railways WHERE stationId=?");
         q.bind(1, m_stationId);
         q.step();
-        count = q.getRows().get<int>(0);
+        count = q.getRows().get<qint64>(0);
     }
-    if(count != totalItemsCount || forceUpdate)
-    {
-        beginResetModel();
+    return count;
+}
 
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
+void StationLinesListModel::clearCache()
+{
+    cache.clear();
+    cache.squeeze();
+    cacheFirstRow = 0;
 }
 
 void StationLinesListModel::fetchRow(int row)
