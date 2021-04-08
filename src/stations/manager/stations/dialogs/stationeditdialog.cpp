@@ -248,7 +248,7 @@ void StationEditDialog::done(int res)
 
         if(stationName.isEmpty())
         {
-            modelError(tr("Station name cannot be empty"));
+            modelError(tr("Station name cannot be empty."));
             return;
         }
         if(stationName == shortName)
