@@ -40,20 +40,21 @@ NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
     QFormLayout *trackLay = new QFormLayout(trackBox);
 
     trackEdit = new CustomCompletionLineEdit(trackMatchModel);
-    trackEdit->setPlaceholderText(tr("Track..."));
     trackLay->addRow(trackEdit);
 
     trackSideCombo = new QComboBox;
     trackSideCombo->addItems(sideTypeEnum);
     trackSideCombo->setCurrentIndex(0);
+    connect(trackSideCombo, QOverload<int>::of(&QComboBox::activated),
+            this, &NewTrackConnDlg::onTrackSideChanged);
     trackLay->addRow(tr("Track Side:"), trackSideCombo);
 
     QGroupBox *gateBox = new QGroupBox(tr("Gate"));
     QFormLayout *gateLay = new QFormLayout(gateBox);
 
     gateEdit = new CustomCompletionLineEdit(gatesMatchModel);
-    gateEdit->setPlaceholderText(tr("Gate..."));
-    connect(gateEdit, &CustomCompletionLineEdit::dataIdChanged, this, &NewTrackConnDlg::onGateChanged);
+    connect(gateEdit, &CustomCompletionLineEdit::dataIdChanged,
+            this, &NewTrackConnDlg::onGateChanged);
     gateLay->addRow(gateEdit);
 
     gateTrackSpin = new QSpinBox;
@@ -69,8 +70,9 @@ NewTrackConnDlg::NewTrackConnDlg(ISqlFKMatchModel *tracks,
     connect(box, &QDialogButtonBox::rejected, this, &NewTrackConnDlg::reject);
     mainLay->addWidget(box, 1, 0, 1, 2);
 
+    setMode(SingleConnection);
+
     setMinimumSize(200, 100);
-    setWindowTitle(tr("New Station Track Connection"));
 }
 
 void NewTrackConnDlg::done(int res)
@@ -81,13 +83,13 @@ void NewTrackConnDlg::done(int res)
         db_id tmpId;
         QString tmpName;
 
-        if(!trackEdit->getData(tmpId, tmpName))
+        if(m_mode != GateToAllTracks && !trackEdit->getData(tmpId, tmpName))
         {
             QMessageBox::warning(this, tr("Track Connection Error"),
                                  tr("Please set a valid track."));
             return;
         }
-        if(!gateEdit->getData(tmpId, tmpName))
+        if(m_mode != TrackToAllGates && !gateEdit->getData(tmpId, tmpName))
         {
             QMessageBox::warning(this, tr("Track Connection Error"),
                                  tr("Please set a valid gate."));
@@ -107,13 +109,82 @@ void NewTrackConnDlg::getData(db_id &trackOut, utils::Side &trackSideOut, db_id 
     gateTrackOut = gateTrackSpin->value();
 }
 
+void NewTrackConnDlg::setMode(NewTrackConnDlg::Mode mode)
+{
+    m_mode = mode;
+
+    if(m_mode == GateToAllTracks)
+    {
+        trackEdit->setPlaceholderText(tr("All Tracks"));
+        trackEdit->setData(0);
+        trackEdit->setReadOnly(true);
+        //Gate decides which side
+        trackSideCombo->setEnabled(false);
+    }
+    else
+    {
+        trackEdit->setPlaceholderText(tr("Track..."));
+        trackEdit->setReadOnly(false);
+        trackSideCombo->setEnabled(true);
+    }
+
+    if(m_mode == TrackToAllGates)
+    {
+        gateEdit->setData(0);
+        gateEdit->setReadOnly(true);
+        //Force update placeholder text
+        onTrackSideChanged();
+    }
+    else
+    {
+        gateEdit->setPlaceholderText(tr("Gate..."));
+        gateEdit->setReadOnly(false);
+    }
+
+    switch (m_mode)
+    {
+    case SingleConnection:
+        setWindowTitle(tr("New Station Track Connection"));
+        break;
+    case TrackToAllGates:
+        setWindowTitle(tr("Station Track To All Gates"));
+        break;
+    case GateToAllTracks:
+        setWindowTitle(tr("Gate To All Station Tracks"));
+        break;
+    }
+}
+
 void NewTrackConnDlg::onGateChanged(db_id gateId)
 {
     //NOTE HACK:
     //CustomCompletionLineEdit doesn't allow getting custom data
     //Ask model directly before it's cleared by CustomCompletionLineEdit
-    int outTrackCount = gatesMatchModel->getOutTrackCount(gateId);
+
+    int outTrackCount = 0;
+    if(gateId)
+        outTrackCount = gatesMatchModel->getOutTrackCount(gateId);
+
     if(outTrackCount == 0)
         outTrackCount = 1000; //Set to some value
     gateTrackSpin->setMaximum(outTrackCount - 1);
+
+    if(m_mode == GateToAllTracks)
+    {
+        //The side is deduced by gate side
+        utils::Side gateSide = gatesMatchModel->getGateSide(gateId);
+        trackSideCombo->setCurrentIndex(int(gateSide));
+    }
+}
+
+void NewTrackConnDlg::onTrackSideChanged()
+{
+    if(m_mode == TrackToAllGates)
+    {
+        //Will connect to all gates on this side
+        int idx = trackSideCombo->currentIndex();
+        utils::Side side = utils::Side(idx);
+        gateEdit->setPlaceholderText(tr("All Gates %1 Side")
+                                         .arg(utils::StationUtils::name(side)));
+    }
 }

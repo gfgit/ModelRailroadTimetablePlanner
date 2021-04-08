@@ -13,10 +13,20 @@ class CustomCompletionLineEdit;
 class QComboBox;
 class QSpinBox;
 
+//FIXME: add feature Add Track to All West/East gates
+//       and Add Gate To all tracks (West/East side)
 class NewTrackConnDlg : public QDialog
 {
     Q_OBJECT
 public:
+
+    enum Mode
+    {
+        SingleConnection,
+        TrackToAllGates,
+        GateToAllTracks
+    };
+
     NewTrackConnDlg(ISqlFKMatchModel *tracks,
                     StationGatesMatchModel *gates,
                     QWidget *parent = nullptr);
@@ -26,8 +36,11 @@ public:
     void getData(db_id &trackOut, utils::Side &trackSideOut,
                  db_id &gateOut, int &gateTrackOut);
 
+    void setMode(Mode mode);
+
 private slots:
     void onGateChanged(db_id gateId);
+    void onTrackSideChanged();
 
 private:
     ISqlFKMatchModel *trackMatchModel;
@@ -38,6 +51,8 @@ private:
 
     CustomCompletionLineEdit *gateEdit;
     QSpinBox *gateTrackSpin;
+
+    Mode m_mode;
 };
 
 #endif // NEWTRACKCONNDLG_H
