@@ -51,20 +51,11 @@ QValidator::State KmSpinBox::validate(QString &input, int &pos) const
     int i = 0;
     bool empty = true;
 
-    //Cut any prefix
-    for(; i < input.size(); i++)
-    {
-        QChar ch = input.at(i);
-        if(ch.isDigit() || ch == '+')
-        {
-            break;
-        }
-    }
+    QString copy = stripped(input, &pos);
 
-    firstNonBlank = i;
-    for(; i < input.size(); i++)
+    for(; i < copy.size(); i++)
     {
-        QChar ch = input.at(i);
+        QChar ch = copy.at(i);
         if(ch.isSpace())
         {
             if(!empty)
@@ -90,17 +81,23 @@ QValidator::State KmSpinBox::validate(QString &input, int &pos) const
     if(plusPos != i - 4)
         return QValidator::Intermediate; //+ is not 3 chars from last
 
-    if(firstNonBlank > 0 && input.at(firstNonBlank) == '+')
+    if(firstNonBlank > 0 && copy.at(firstNonBlank) == '+')
         firstNonBlank--;
-    pos -= input.size() - i - firstNonBlank;
-    input = input.mid(firstNonBlank, i - firstNonBlank);
-    if(input.at(0) == '+')
-        input.prepend('0'); //Add leading zero
-    else if(input.size() > 1 && input.at(1) == '+' && !input.at(0).isDigit())
-        input[0] = '0';
+
+    pos -= copy.size() - i - firstNonBlank;
+    copy = copy.mid(firstNonBlank, i - firstNonBlank);
+
+    if(copy.at(0) == '+')
+    {
+        copy.prepend('0'); //Add leading zero
+    }
+    else if(copy.size() > 1 && copy.at(1) == '+' && !copy.at(0).isDigit())
+    {
+        copy[0] = '0'; //Replace first char with leading zero
+    }
 
     //FIXME: prefix creates problems parsing
-    input.prepend(prefix());
+    input = prefix() + copy + suffix();
 
     return QValidator::Acceptable;
 }
@@ -182,7 +179,9 @@ void KmSpinBox::setCurrentSection(int section)
 {
     QLineEdit *edit = lineEdit();
     QString text = edit->text();
-    int plusPos = text.indexOf('+');
+    const int plusPos = text.indexOf('+');
+    const int prefixSize = prefix().size();
+    const int suffixSize = suffix().size();
     if(plusPos < 0)
     {
         currentSection = KmSection;
@@ -191,7 +190,45 @@ void KmSpinBox::setCurrentSection(int section)
     edit->deselect();
     currentSection = section;
     if(currentSection == KmSection)
-        edit->setSelection(0, plusPos);
+    {
+        //Select after prefix, before '+'
+        const int length = plusPos - prefixSize;
+        edit->setSelection(prefixSize, length);
+    }
     else
-        edit->setSelection(plusPos + 1, text.size() - plusPos - 1);
+    {
+        //Select after '+', before suffix
+        const int length = text.size() - suffixSize - plusPos - 1;
+        edit->setSelection(plusPos + 1, length);
+    }
+}
+
+QString KmSpinBox::stripped(const QString &t, int *pos) const
+{
+    QStringRef text(&t);
+    if (specialValueText().size() == 0 || text != specialValueText())
+    {
+        int from = 0;
+        int size = text.size();
+        bool changed = false;
+
+        if(prefix().size() && text.startsWith(prefix()))
+        {
+            from += prefix().size();
+            size -= from;
+            changed = true;
+        }
+        if(suffix().size() && text.endsWith(suffix()))
+        {
+            size -= suffix().size();
+            changed = true;
+        }
+        if (changed)
+            text = text.mid(from, size);
+    }
+    const int s = text.size();
+    text = text.trimmed();
+    if (pos)
+        (*pos) -= (s - text.size());
+    return text.toString();
 }

@@ -32,6 +32,7 @@ private slots:
 
 private:
     void setCurrentSection(int section);
+    QString stripped(const QString &t, int *pos) const;
 
 private:
     int currentSection;
