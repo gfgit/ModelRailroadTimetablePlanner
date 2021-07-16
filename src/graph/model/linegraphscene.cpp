@@ -155,6 +155,7 @@ bool LineGraphScene::loadStation(StationGraphObject& st)
 bool LineGraphScene::loadFullLine(db_id lineId)
 {
     //TODO: maybe show also station gates
+    //TODO: load only visible stations, other will be loaded when scrolling graph
     sqlite3pp::query q(mDb, "SELECT name FROM lines WHERE id=?");
     q.bind(1, lineId);
     if(q.step() != SQLITE_ROW)
