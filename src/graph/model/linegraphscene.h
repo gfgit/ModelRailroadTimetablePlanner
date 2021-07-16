@@ -3,7 +3,10 @@
 
 #include <QObject>
 #include <QVector>
+<<<<<<< HEAD
 #include <QHash>
+=======
+>>>>>>> 9981b07f0d414c83a475b7b4a6a36337bd99d54e
 
 #include "utils/types.h"
 
@@ -31,7 +34,11 @@ public:
     bool loadGraph(db_id objectId, LineGraphType type);
 
 private:
+<<<<<<< HEAD
     bool loadStation(StationGraphObject &st);
+=======
+    bool loadStation(db_id stationId, StationGraphObject &st);
+>>>>>>> 9981b07f0d414c83a475b7b4a6a36337bd99d54e
 
 private:
     sqlite3pp::database& mDb;
