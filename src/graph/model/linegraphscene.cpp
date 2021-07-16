@@ -56,6 +56,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
     }
     else if(type == LineGraphType::RailwaySegment)
     {
+        //TODO: maybe show also station gates
         StationGraphObject stA, stB;
 
         sqlite3pp::query q(mDb,
@@ -97,6 +98,15 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
         stationPositions = {{stA.stationId, stA.xPos},
                             {stB.stationId, stB.xPos}};
     }
+    else if(type == LineGraphType::RailwayLine)
+    {
+        if(!loadFullLine(objectId))
+        {
+            stations.clear();
+            stationPositions.clear();
+            return false;
+        }
+    }
 
     graphObjectId = objectId;
     graphType = type;
@@ -137,6 +147,93 @@ bool LineGraphScene::loadStation(StationGraphObject& st)
         platf.color = QRgb(r.get<int>(2)); //TODO: get default color if NULL or white
         platf.platformName = r.get<QString>(3);
         st.platforms.append(platf);
+    }
+
+    return true;
+}
+
+bool LineGraphScene::loadFullLine(db_id lineId)
+{
+    //TODO: maybe show also station gates
+    sqlite3pp::query q(mDb, "SELECT name FROM lines WHERE id=?");
+    q.bind(1, lineId);
+    if(q.step() != SQLITE_ROW)
+    {
+        qWarning() << "Graph: invalid line ID" << lineId;
+        return false;
+    }
+
+    //Store line name
+    graphObjectName = q.getRows().get<QString>(0);
+
+    //Get segments
+    q.prepare("SELECT ls.id, ls.seg_id, ls.direction,"
+              "seg.name, seg.max_speed_kmh, seg.type, seg.distance_meters,"
+              "g1.station_id, g2.station_id"
+              " FROM line_segments ls"
+              " JOIN railway_segments seg ON seg.id=ls.seg_id"
+              " JOIN station_gates g1 ON g1.id=seg.in_gate_id"
+              " JOIN station_gates g2 ON g2.id=seg.out_gate_id"
+              " WHERE ls.line_id=?"
+              " ORDER BY ls.pos");
+    q.bind(1, lineId);
+
+    db_id lastStationId = 0;
+    double curPos = 0.0;
+
+    for(auto seg : q)
+    {
+        db_id lineSegmentId = seg.get<db_id>(0);
+        //item.railwaySegmentId = seg.get<db_id>(1);
+        bool reversed = seg.get<int>(2) != 0;
+
+        //item.segmentName = seg.get<QString>(3);
+        //item.maxSpeedKmH = seg.get<int>(4);
+        //item.segmentType = utils::RailwaySegmentType(seg.get<int>(5));
+        //item.distanceMeters = seg.get<int>(6);
+
+        //Store first segment end
+        db_id fromStationId = seg.get<db_id>(7);
+
+        //Store also the other end of segment for last item
+        db_id otherStationId = seg.get<db_id>(8);
+
+        if(reversed)
+        {
+            //Swap segments ends
+            qSwap(fromStationId, otherStationId);
+        }
+
+        if(!lastStationId)
+        {
+            StationGraphObject st;
+            st.stationId = fromStationId;
+            if(!loadStation(st))
+                return false;
+
+            st.xPos = 0.0;
+            stations.insert(st.stationId, st);
+            stationPositions.append({st.stationId, st.xPos});
+            curPos = st.platforms.count() * Session->platformOffset + Session->stationOffset;
+        }
+        else if(fromStationId != lastStationId)
+        {
+            qWarning() << "Line segments are not adjacent, ID:" << lineSegmentId
+                       << "LINE:" << lineId;
+            return false;
+        }
+
+        StationGraphObject stB;
+        stB.stationId = otherStationId;
+        if(!loadStation(stB))
+            return false;
+
+        stB.xPos = curPos;
+        stations.insert(stB.stationId, stB);
+        stationPositions.append({stB.stationId, stB.xPos});
+
+        curPos += stB.platforms.count() * Session->platformOffset + Session->stationOffset;
+        lastStationId = stB.stationId;
     }
 
     return true;

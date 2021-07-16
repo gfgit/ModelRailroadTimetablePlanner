@@ -35,6 +35,7 @@ public:
 
 private:
     bool loadStation(StationGraphObject &st);
+    bool loadFullLine(db_id lineId);
 
 private:
     sqlite3pp::database& mDb;
