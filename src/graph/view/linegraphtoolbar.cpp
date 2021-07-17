@@ -110,7 +110,7 @@ void LineGraphToolbar::onCompletionDone()
 void LineGraphToolbar::onSceneDestroyed()
 {
     m_scene = nullptr;
-    onGraphChanged(int(LineGraphType::NoGraph), 0); //Clear UI
+    resetToolbarToScene(); //Clear UI
 }
 
 void LineGraphToolbar::setupModel(int type)
