@@ -17,6 +17,21 @@ LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
 
 bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
 {
+    //Initial state is invalid
+    graphType = LineGraphType::NoGraph;
+    graphObjectId = 0;
+    graphObjectName.clear();
+    stations.clear();
+    stationPositions.clear();
+
+    if(type == LineGraphType::NoGraph)
+    {
+        //Nothing to load
+        emit graphChanged(int(graphType), graphObjectId);
+        emit redrawGraph();
+        return true;
+    }
+
     if(!mDb.db())
     {
         qWarning() << "Database not open on graph loading!";
@@ -28,13 +43,6 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
         qWarning() << "Invalid object ID on graph loading!";
         return false;
     }
-
-    //Initial state is invalid
-    graphType = LineGraphType::NoGraph;
-    graphObjectId = 0;
-    graphObjectName.clear();
-    stations.clear();
-    stationPositions.clear();
 
     if(type == LineGraphType::SingleStation)
     {

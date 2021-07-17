@@ -108,8 +108,11 @@ void LineGraphToolbar::setupModel(int type)
         case LineGraphType::NoGraph:
         default:
         {
-            //Clear line edit
-            objectCombo->setData(0, QString());
+            //Clear graph
+            if(m_scene)
+                m_scene->loadGraph(0, LineGraphType::NoGraph);
+            else
+                objectCombo->setData(0, QString()); //Manually clear line edit
             break;
         }
         case LineGraphType::SingleStation:
