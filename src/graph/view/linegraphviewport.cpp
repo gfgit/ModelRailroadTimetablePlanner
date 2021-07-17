@@ -22,13 +22,13 @@ void LineGraphViewport::setScene(LineGraphScene *newScene)
 {
     if(m_scene)
     {
-        disconnect(m_scene, &LineGraphScene::redrawGraph, this, qOverload<>(&LineGraphViewport::update));
+        disconnect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphViewport::redrawGraph);
         disconnect(m_scene, &QObject::destroyed, this, &LineGraphViewport::onSceneDestroyed);
     }
     m_scene = newScene;
     if(m_scene)
     {
-        connect(m_scene, &LineGraphScene::redrawGraph, this, qOverload<>(&LineGraphViewport::update));
+        connect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphViewport::redrawGraph);
         connect(m_scene, &QObject::destroyed, this, &LineGraphViewport::onSceneDestroyed);
     }
     update();
@@ -47,7 +47,10 @@ void LineGraphViewport::redrawGraph()
 
     const int maxWidth = Session->horizOffset + entry.xPos + platfCount * Session->platformOffset;
     if(maxWidth != width())
-        resize(25 * Session->hourOffset + Session->vertOffset, maxWidth);
+    {
+        const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
+        resize(maxWidth, lastY);
+    }
 
     update();
 }
@@ -84,8 +87,8 @@ void LineGraphViewport::paintStations(QPainter *painter)
 
     QPen platfPen (mainPlatfColor,  width);
 
-    QPointF top(vertOffset, rect().top());
-    QPointF bottom(lastY, rect().bottom());
+    QPointF top(0, vertOffset);
+    QPointF bottom(0, lastY);
 
     for(const StationGraphObject &st : qAsConst(m_scene->stations))
     {
