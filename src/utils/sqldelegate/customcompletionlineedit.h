@@ -21,6 +21,8 @@ public:
 
     void setData(db_id id, const QString& name = QString());
 
+    void setModel(ISqlFKMatchModel *m);
+
     void resizeColumnToContents();
     void selectFirstIndexOrNone(bool forceFirst);
 
