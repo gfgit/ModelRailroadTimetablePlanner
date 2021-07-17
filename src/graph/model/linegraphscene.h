@@ -15,8 +15,8 @@ class database;
 
 enum class LineGraphType
 {
-    NoGraph = -1,
-    SingleStation = 0,
+    NoGraph = 0,
+    SingleStation,
     RailwaySegment,
     RailwayLine
 };
