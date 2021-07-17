@@ -3,16 +3,20 @@
 #include "graph/model/linegraphscene.h"
 
 #include "linegraphviewport.h"
+#include "linegraphtoolbar.h"
 #include "linegraphscrollarea.h"
 
 #include "app/session.h"
 
-#include <QBoxLayout>
+#include <QVBoxLayout>
 
 LineGraphWidget::LineGraphWidget(QWidget *parent) :
     QWidget(parent)
 {
-    QHBoxLayout *lay = new QHBoxLayout(this);
+    QVBoxLayout *lay = new QVBoxLayout(this);
+
+    toolBar = new LineGraphToolbar(this);
+    lay->addWidget(toolBar);
 
     scrollArea = new LineGraphScrollArea(this);
     lay->addWidget(scrollArea);
@@ -23,4 +27,5 @@ LineGraphWidget::LineGraphWidget(QWidget *parent) :
     m_scene = new LineGraphScene(Session->m_Db, this);
     viewport->setScene(m_scene);
     scrollArea->setScene(m_scene);
+    toolBar->setScene(m_scene);
 }

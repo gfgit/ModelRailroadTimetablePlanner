@@ -3,8 +3,11 @@
 
 #include <QWidget>
 
+#include "utils/types.h"
+
 class LineGraphScene;
 class LineGraphViewport;
+class LineGraphToolbar;
 class LineGraphScrollArea;
 
 class LineGraphWidget : public QWidget
@@ -18,6 +21,7 @@ private:
 
     LineGraphScrollArea *scrollArea;
     LineGraphViewport *viewport;
+    LineGraphToolbar *toolBar;
 };
 
 #endif // LINEGRAPHWIDGET_H
