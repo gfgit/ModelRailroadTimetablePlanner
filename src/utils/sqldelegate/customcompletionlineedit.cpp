@@ -12,7 +12,7 @@
 CustomCompletionLineEdit::CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget *parent) :
     QLineEdit(parent),
     popup(nullptr),
-    model(m),
+    model(nullptr),
     dataId(0),
     suggestionsTimerId(0)
 {
@@ -36,11 +36,11 @@ CustomCompletionLineEdit::CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget 
     popup->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     popup->installEventFilter(this);
-    popup->setModel(model);
 
     connect(popup, &QAbstractItemView::clicked, this, &CustomCompletionLineEdit::doneCompletion);
     connect(this, &QLineEdit::textEdited, this, &CustomCompletionLineEdit::startSuggestionsTimer);
-    connect(model, &ISqlFKMatchModel::resultsReady, this, &CustomCompletionLineEdit::resultsReady);
+
+    setModel(m);
 }
 
 CustomCompletionLineEdit::~CustomCompletionLineEdit()
@@ -62,7 +62,8 @@ void CustomCompletionLineEdit::showPopup()
     popup->resize(width(), height() * 4);
     popup->setFocus();
     popup->show();
-    model->refreshData();
+    if(model)
+        model->refreshData();
 }
 
 bool CustomCompletionLineEdit::getData(db_id &idOut, QString& nameOut) const
@@ -75,7 +76,7 @@ bool CustomCompletionLineEdit::getData(db_id &idOut, QString& nameOut) const
 
 void CustomCompletionLineEdit::setData(db_id id, const QString &name)
 {
-    if(id && name.isEmpty())
+    if(model && id && name.isEmpty())
         setText(model->getName(id));
     else
         setText(name);
@@ -87,6 +88,25 @@ void CustomCompletionLineEdit::setData(db_id id, const QString &name)
     emit dataIdChanged(dataId);
 }
 
+void CustomCompletionLineEdit::setModel(ISqlFKMatchModel *m)
+{
+    if(model)
+        disconnect(model, &ISqlFKMatchModel::resultsReady, this, &CustomCompletionLineEdit::resultsReady);
+
+    model = m;
+    popup->setModel(model);
+    connect(model, &ISqlFKMatchModel::resultsReady, this, &CustomCompletionLineEdit::resultsReady);
+
+    //Force reloading of current entry
+    setData(dataId, QString());
+
+    if(popup->isVisible())
+    {
+        model->autoSuggest(text());
+        model->refreshData();
+    }
+}
+
 void CustomCompletionLineEdit::timerEvent(QTimerEvent *e)
 {
     if(suggestionsTimerId && e->timerId() == suggestionsTimerId)
@@ -94,9 +114,11 @@ void CustomCompletionLineEdit::timerEvent(QTimerEvent *e)
         killTimer(suggestionsTimerId);
         suggestionsTimerId = 0;
 
-        model->autoSuggest(text());
-
-        showPopup();
+        if(model)
+        {
+            model->autoSuggest(text());
+            showPopup();
+        }
 
         return;
     }
@@ -118,7 +140,8 @@ bool CustomCompletionLineEdit::eventFilter(QObject *obj, QEvent *ev)
     if (ev->type() == QEvent::MouseButtonPress)
     {
         popup->hide();
-        model->clearCache();
+        if(model)
+            model->clearCache();
         setFocus();
         return true;
     }
@@ -138,7 +161,8 @@ bool CustomCompletionLineEdit::eventFilter(QObject *obj, QEvent *ev)
         case Qt::Key_Escape:
             setFocus();
             popup->hide();
-            model->clearCache();
+            if(model)
+                model->clearCache();
             consumed = true;
             break;
 
@@ -154,7 +178,8 @@ bool CustomCompletionLineEdit::eventFilter(QObject *obj, QEvent *ev)
             setFocus();
             event(ev);
             popup->hide();
-            model->clearCache();
+            if(model)
+                model->clearCache();
             break;
         }
 
@@ -172,17 +197,21 @@ void CustomCompletionLineEdit::doneCompletion(const QModelIndex& idx)
         suggestionsTimerId = 0;
     }
 
-    if(idx.row() >= 0 && !model->isEmptyRow(idx.row()) && !model->isEllipsesRow(idx.row()))
+    if(model)
     {
-        setData(model->getIdAtRow(idx.row()), model->getNameAtRow(idx.row()));
-    }
-    else
-    {
-        setData(0, QString());
+        if(idx.row() >= 0 && !model->isEmptyRow(idx.row()) && !model->isEllipsesRow(idx.row()))
+        {
+            setData(model->getIdAtRow(idx.row()), model->getNameAtRow(idx.row()));
+        }
+        else
+        {
+            setData(0, QString());
+        }
+
+        model->clearCache();
     }
 
     popup->hide();
-    model->clearCache();
     clearFocus();
 
     emit completionDone(this);
@@ -203,6 +232,9 @@ void CustomCompletionLineEdit::resultsReady(bool forceFirst)
 
 void CustomCompletionLineEdit::resizeColumnToContents()
 {
+    if(!model)
+        return;
+
     const int colCount = model->columnCount();
     for(int i = 0; i < colCount; i++)
         popup->resizeColumnToContents(i);
@@ -211,7 +243,7 @@ void CustomCompletionLineEdit::resizeColumnToContents()
 void CustomCompletionLineEdit::selectFirstIndexOrNone(bool forceFirst)
 {
     QModelIndex idx; //Invalid index (no item chosen, empty text)
-    if(dataId || forceFirst)
+    if(model && (dataId || forceFirst))
         idx = model->index(0, 0); //Select the chosen item
     popup->setCurrentIndex(idx);
 }
