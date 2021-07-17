@@ -47,7 +47,7 @@ void LineGraphViewport::redrawGraph()
 
     const int maxWidth = Session->horizOffset + entry.xPos + platfCount * Session->platformOffset;
     if(maxWidth != width())
-        resize(height(), maxWidth);
+        resize(25 * Session->hourOffset + Session->vertOffset, maxWidth);
 
     update();
 }
