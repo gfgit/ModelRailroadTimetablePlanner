@@ -17,7 +17,7 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     QWidget(parent),
     m_scene(nullptr),
     matchModel(nullptr),
-    oldGraphType(-1)
+    oldGraphType(0)
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
 
@@ -28,10 +28,10 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     lay->addWidget(objectCombo);
 
     QStringList items;
-    items.reserve(3);
-    items << tr("Station") << tr("Segment") << tr("Line");
+    items.reserve(4);
+    items << tr("No Graph") << tr("Station") << tr("Segment") << tr("Line");
     graphTypeCombo->addItems(items);
-    graphTypeCombo->setCurrentIndex(-1);
+    graphTypeCombo->setCurrentIndex(0);
 
     connect(graphTypeCombo, qOverload<int>(&QComboBox::activated), this, &LineGraphToolbar::onTypeComboActivated);
     connect(objectCombo, &CustomCompletionLineEdit::completionDone, this, &LineGraphToolbar::onCompletionDone);
@@ -95,14 +95,21 @@ void LineGraphToolbar::setupModel(int type)
 {
     if(type != oldGraphType)
     {
+        //Clear old model
+        if(matchModel)
+        {
+            objectCombo->setModel(nullptr);
+            delete matchModel;
+            matchModel = nullptr;
+        }
+
         switch (LineGraphType(type))
         {
         case LineGraphType::NoGraph:
         default:
         {
-            objectCombo->setModel(nullptr);
-            delete matchModel;
-            matchModel = nullptr;
+            //Clear line edit
+            objectCombo->setData(0, QString());
             break;
         }
         case LineGraphType::SingleStation:
