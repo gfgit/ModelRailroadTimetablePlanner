@@ -22,8 +22,10 @@
 #include "settings/settingsdialog.h"
 
 #include "graph/graphmanager.h"
-#include "graph/graphicsview.h"
+#include "graph/graphicsview.h" //FIXME: remove
 #include <QGraphicsItem>
+
+#include "graph/view/linegraphwidget.h"
 
 #include "db_metadata/meetinginformationdialog.h"
 
@@ -83,9 +85,9 @@ MainWindow::MainWindow(QWidget *parent) :
     auto graphMgr = viewMgr->getGraphMgr();
     connect(graphMgr, &GraphManager::jobSelected, this, &MainWindow::onJobSelected);
 
-    view = graphMgr->getView();
+    //view = graphMgr->getView();
+    view = new LineGraphWidget(this);
     view->setObjectName("GraphicsView");
-    view->setParent(this);
 
     auto linesMatchModel = new LinesMatchModel(Session->m_Db, true, this);
     linesMatchModel->setHasEmptyRow(false); //Do not allow empty view (no line selected)
@@ -847,17 +849,17 @@ void MainWindow::checkLineNumber()
 {
     auto graphMgr = Session->getViewManager()->getGraphMgr();
     //db_id firstLineId = graphMgr->getFirstLineId();
+
+    //FIXME: lines are now optional, you can work using only segments
+    //Segments are now more important than lines, check segments
     db_id firstLineId = 0; //FIXME
-    if(firstLineId && m_mode != CentralWidgetMode::ViewSessionMode)
+    if(/*firstLineId &&*/ m_mode != CentralWidgetMode::ViewSessionMode)
     {
         //First line was added or newly opened file -> Session has at least one line
         ui->actionAddJob->setEnabled(true);
         ui->actionAddJob->setToolTip(tr("Add train job"));
         ui->actionRemoveJob->setEnabled(true);
         setCentralWidgetMode(CentralWidgetMode::ViewSessionMode);
-
-        //Show first line (Alphabetically)
-        graphMgr->setCurrentLine(firstLineId);
     }
     else if(firstLineId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
     {
