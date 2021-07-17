@@ -29,15 +29,10 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
         return false;
     }
 
-    if(type != LineGraphType::SingleStation)
-    {
-        qWarning() << "FIXME: only station graph supported now!";
-        //FIXME: add support for other types
-        return false;
-    }
-
     //Initial state is invalid
     graphType = LineGraphType::NoGraph;
+    graphObjectId = 0;
+    graphObjectName.clear();
     stations.clear();
     stationPositions.clear();
 
@@ -111,6 +106,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
     graphObjectId = objectId;
     graphType = type;
 
+    emit redrawGraph();
+
     return true;
 }
 
@@ -138,13 +135,17 @@ bool LineGraphScene::loadStation(StationGraphObject& st)
     st.stationType = utils::StationType(row.get<int>(2));
 
     //Load platforms
+    const QRgb white = qRgb(255, 255, 255);
     q.prepare("SELECT id, type, color_rgb, name FROM station_tracks WHERE station_id=? ORDER BY pos");
     for(auto r : q)
     {
         StationGraphObject::PlatformGraph platf;
         platf.platformId = r.get<db_id>(0);
         platf.platformType = utils::StationTrackType(r.get<int>(1));
-        platf.color = QRgb(r.get<int>(2)); //TODO: get default color if NULL or white
+        if(r.column_type(2) == SQLITE_NULL) //NULL is white (#FFFFFF) -> default value
+            platf.color = white;
+        else
+            platf.color = QRgb(r.get<int>(2));
         platf.platformName = r.get<QString>(3);
         st.platforms.append(platf);
     }

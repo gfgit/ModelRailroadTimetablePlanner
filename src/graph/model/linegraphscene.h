@@ -30,14 +30,24 @@ class LineGraphScene : public QObject
 public:
     LineGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
 
-public:
     bool loadGraph(db_id objectId, LineGraphType type);
+
+    inline LineGraphType getGraphType() const
+    {
+        return graphType;
+    }
+
+signals:
+    void redrawGraph();
 
 private:
     bool loadStation(StationGraphObject &st);
     bool loadFullLine(db_id lineId);
 
 private:
+    friend class LineGraphViewport;
+    friend class StationLabelsHeader;
+
     sqlite3pp::database& mDb;
 
     /* Can be station/segment/line ID depending on graph type */
