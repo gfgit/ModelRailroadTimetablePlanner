@@ -30,6 +30,9 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     items << tr("Station") << tr("Segment") << tr("Line");
     graphTypeCombo->addItems(items);
     graphTypeCombo->setCurrentIndex(-1);
+
+    connect(graphTypeCombo, qOverload<int>(&QComboBox::activated), this, &LineGraphToolbar::onTypeComboActivated);
+    connect(objectCombo, &CustomCompletionLineEdit::completionDone, this, &LineGraphToolbar::onCompletionDone);
 }
 
 LineGraphToolbar::~LineGraphToolbar()
