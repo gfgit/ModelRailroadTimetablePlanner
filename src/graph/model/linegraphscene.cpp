@@ -106,6 +106,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
     graphObjectId = objectId;
     graphType = type;
 
+    emit graphChanged(int(graphType), graphObjectId);
     emit redrawGraph();
 
     return true;

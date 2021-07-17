@@ -18,8 +18,8 @@ class database;
 
 enum class LineGraphType
 {
-    NoGraph = 0,
-    SingleStation,
+    NoGraph = -1,
+    SingleStation = 0,
     RailwaySegment,
     RailwayLine
 };
@@ -38,6 +38,7 @@ public:
     }
 
 signals:
+    void graphChanged(int type, db_id objectId);
     void redrawGraph();
 
 private:
