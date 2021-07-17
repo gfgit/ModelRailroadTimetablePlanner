@@ -5,9 +5,7 @@
 
 class LineGraphScene;
 class LineGraphViewport;
-class StationLabelsHeader;
-class HourPanel;
-class QScrollArea;
+class LineGraphScrollArea;
 
 class LineGraphWidget : public QWidget
 {
@@ -15,16 +13,11 @@ class LineGraphWidget : public QWidget
 public:
     explicit LineGraphWidget(QWidget *parent = nullptr);
 
-private slots:
-    void resizeHeaders();
-
 private:
     LineGraphScene *m_scene;
 
-    QScrollArea *scrollArea;
+    LineGraphScrollArea *scrollArea;
     LineGraphViewport *viewport;
-    StationLabelsHeader *stationHeader;
-    HourPanel *hourPanel;
 };
 
 #endif // LINEGRAPHWIDGET_H
