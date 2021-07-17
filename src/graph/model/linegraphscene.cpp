@@ -138,6 +138,7 @@ bool LineGraphScene::loadStation(StationGraphObject& st)
     //Load platforms
     const QRgb white = qRgb(255, 255, 255);
     q.prepare("SELECT id, type, color_rgb, name FROM station_tracks WHERE station_id=? ORDER BY pos");
+    q.bind(1, st.stationId);
     for(auto r : q)
     {
         StationGraphObject::PlatformGraph platf;
