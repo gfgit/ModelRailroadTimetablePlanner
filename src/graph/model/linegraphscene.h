@@ -58,6 +58,7 @@ private:
 private:
     friend class LineGraphViewport;
     friend class StationLabelsHeader;
+    friend class LineGraphManager;
 
     sqlite3pp::database& mDb;
 
