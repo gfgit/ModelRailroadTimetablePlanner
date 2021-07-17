@@ -55,7 +55,7 @@ void LineGraphToolbar::setScene(LineGraphScene *scene)
     m_scene = scene;
     if(m_scene)
     {
-        connect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphToolbar::onGraphChanged);
+        connect(m_scene, &LineGraphScene::graphChanged, this, &LineGraphToolbar::onGraphChanged);
         connect(m_scene, &QObject::destroyed, this, &LineGraphToolbar::onSceneDestroyed);
     }
 }
