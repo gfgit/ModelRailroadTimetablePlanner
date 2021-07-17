@@ -10,6 +10,8 @@ using namespace sqlite3pp;
 
 #include "stations/station_name_utils.h"
 
+#include "app/session.h"
+
 #include <QDebug>
 
 class StationsSQLModelResultEvent : public QEvent
@@ -588,6 +590,8 @@ bool StationsModel::setName(StationsModel::StationItem &item, const QString &val
     }
 
     item.name = name;
+
+    emit Session->stationNameChanged(item.stationId);
 
     //This row has now changed position so we need to invalidate cache
     //HACK: we emit dataChanged for this index (that doesn't exist anymore)
