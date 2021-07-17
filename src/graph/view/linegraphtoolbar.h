@@ -20,6 +20,9 @@ public:
 
     void setScene(LineGraphScene *scene);
 
+public slots:
+    void resetToolbarToScene();
+
 private slots:
     void onGraphChanged(int type, db_id objectId);
     void onTypeComboActivated(int index);

@@ -62,11 +62,33 @@ void LineGraphToolbar::setScene(LineGraphScene *scene)
     }
 }
 
+void LineGraphToolbar::resetToolbarToScene()
+{
+    LineGraphType type = LineGraphType::NoGraph;
+    db_id objectId = 0;
+    QString name;
+
+    if(m_scene)
+    {
+        type = m_scene->getGraphType();
+        objectId = m_scene->getGraphObjectId();
+        name = m_scene->getGraphObjectName();
+    }
+
+    graphTypeCombo->setCurrentIndex(int(type));
+    objectCombo->setData(objectId, name);
+    oldGraphType = int(type);
+}
+
 void LineGraphToolbar::onGraphChanged(int type, db_id objectId)
 {
     setupModel(type);
     graphTypeCombo->setCurrentIndex(type);
-    objectCombo->setData(objectId, QString());
+
+    QString name;
+    if(m_scene && m_scene->getGraphObjectId() == objectId)
+        name = m_scene->getGraphObjectName();
+    objectCombo->setData(objectId, name);
 }
 
 void LineGraphToolbar::onTypeComboActivated(int index)
@@ -103,16 +125,28 @@ void LineGraphToolbar::setupModel(int type)
             matchModel = nullptr;
         }
 
+        db_id objectId = 0; //Manually clear line edit
+        QString name;
+        if(m_scene && type == int(m_scene->getGraphType()))
+        {
+            //Suggest current graph object
+            objectId = m_scene->getGraphObjectId();
+            name = m_scene->getGraphObjectName();
+        }
+
+        objectCombo->setData(objectId, name);
+
         switch (LineGraphType(type))
         {
         case LineGraphType::NoGraph:
         default:
         {
+            //Prevent recursion on loadGraph() calling back to us
+            oldGraphType = type;
+
             //Clear graph
             if(m_scene)
                 m_scene->loadGraph(0, LineGraphType::NoGraph);
-            else
-                objectCombo->setData(0, QString()); //Manually clear line edit
             break;
         }
         case LineGraphType::SingleStation:
