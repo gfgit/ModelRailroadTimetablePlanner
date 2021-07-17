@@ -28,4 +28,6 @@ LineGraphWidget::LineGraphWidget(QWidget *parent) :
     viewport->setScene(m_scene);
     scrollArea->setScene(m_scene);
     toolBar->setScene(m_scene);
+
+    connect(scrollArea, &LineGraphScrollArea::syncToolbarToScene, toolBar, &LineGraphToolbar::resetToolbarToScene);
 }
