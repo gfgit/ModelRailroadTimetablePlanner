@@ -6,6 +6,7 @@
 #include "utils/types.h"
 
 class QComboBox;
+class QPushButton;
 class CustomCompletionLineEdit;
 
 class LineGraphScene;
@@ -19,6 +20,9 @@ public:
     ~LineGraphToolbar();
 
     void setScene(LineGraphScene *scene);
+
+signals:
+    void requestRedraw();
 
 public slots:
     void resetToolbarToScene();
@@ -37,6 +41,7 @@ private:
 
     QComboBox *graphTypeCombo;
     CustomCompletionLineEdit *objectCombo;
+    QPushButton *redrawBut;
 
     ISqlFKMatchModel *matchModel;
 

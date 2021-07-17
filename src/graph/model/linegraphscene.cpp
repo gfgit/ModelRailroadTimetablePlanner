@@ -15,8 +15,11 @@ LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
 
 }
 
-bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type)
+bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 {
+    if(!force && objectId == graphObjectId && type == graphType)
+        return true; //Already loaded
+
     //Initial state is invalid
     graphType = LineGraphType::NoGraph;
     graphObjectId = 0;
@@ -249,4 +252,9 @@ bool LineGraphScene::loadFullLine(db_id lineId)
     }
 
     return true;
+}
+
+void LineGraphScene::reload()
+{
+    loadGraph(graphObjectId, graphType, true);
 }

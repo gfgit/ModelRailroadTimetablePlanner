@@ -27,7 +27,7 @@ class LineGraphScene : public QObject
 public:
     LineGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    bool loadGraph(db_id objectId, LineGraphType type);
+    bool loadGraph(db_id objectId, LineGraphType type, bool force = false);
 
     inline LineGraphType getGraphType() const
     {
@@ -47,6 +47,9 @@ public:
 signals:
     void graphChanged(int type, db_id objectId);
     void redrawGraph();
+
+public slots:
+    void reload();
 
 private:
     bool loadStation(StationGraphObject &st);

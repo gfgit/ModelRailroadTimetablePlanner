@@ -3,6 +3,8 @@
 #include "graph/model/linegraphscene.h"
 
 #include <QComboBox>
+#include <QPushButton>
+
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
 #include "stations/match_models/stationsmatchmodel.h"
@@ -26,6 +28,10 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
 
     objectCombo = new CustomCompletionLineEdit(nullptr, this);
     lay->addWidget(objectCombo);
+
+    redrawBut = new QPushButton(tr("Redraw"));
+    connect(redrawBut, &QPushButton::clicked, this, &LineGraphToolbar::requestRedraw);
+    lay->addWidget(redrawBut);
 
     QStringList items;
     items.reserve(4);
