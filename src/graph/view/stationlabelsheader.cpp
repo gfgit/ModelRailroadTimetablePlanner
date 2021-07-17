@@ -37,11 +37,20 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    QFont f;
-    f.setBold(true);
-    f.setPointSize(15);
-    painter.setFont(f);
-    painter.setPen(AppSettings.getStationTextColor());
+    QFont stationFont;
+    stationFont.setBold(true);
+    stationFont.setPointSize(12);
+
+    QPen stationPen(AppSettings.getStationTextColor());
+
+    QFont platfBoldFont = stationFont;
+    platfBoldFont.setPointSize(10);
+
+    QFont platfNormalFont = platfBoldFont;
+    platfNormalFont.setBold(false);
+
+    QPen electricPlatfPen(Qt::blue);
+    QPen nonElectricPlatfPen(Qt::black);
 
     const qreal platformOffset = Session->platformOffset;
     const int stationOffset = Session->stationOffset;
@@ -52,7 +61,7 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
     for(auto st : qAsConst(m_scene->stations))
     {
         double left = st.xPos + horizOffset - horizontalScroll;
-        double right = left + st.platforms.count() * platformOffset;
+        double right = left + st.platforms.count() * platformOffset + stationOffset * 0.8;
 
         if(right <= 0 || left >= r.width())
             continue; //Skip station, it's not visible
@@ -61,19 +70,27 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
         labelRect.setLeft(left);
         labelRect.setRight(right);
         labelRect.setBottom(r.bottom() - r.height() / 3);
-        painter.drawText(labelRect, Qt::AlignCenter, st.stationName);
+
+        painter.setPen(stationPen);
+        painter.setFont(stationFont);
+        painter.drawText(labelRect, Qt::AlignVCenter | Qt::AlignLeft, st.stationName);
 
         labelRect = r;
         labelRect.setTop(r.top() + r.height() * 2/3);
 
         double xPos = left - platformOffset/2;
         labelRect.setWidth(platformOffset);
-        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+        for(const StationGraphObject::PlatformGraph& platf : qAsConst(st.platforms))
         {
             if(platf.platformType.testFlag(utils::StationTrackType::Electrified))
-                painter.setPen(Qt::blue);
+                painter.setPen(electricPlatfPen);
             else
-                painter.setPen(Qt::black);
+                painter.setPen(nonElectricPlatfPen);
+
+            if(platf.platformType.testFlag(utils::StationTrackType::Through))
+                painter.setFont(platfBoldFont);
+            else
+                painter.setFont(platfNormalFont);
 
             labelRect.moveLeft(xPos);
 
