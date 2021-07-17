@@ -34,6 +34,16 @@ public:
         return graphType;
     }
 
+    inline db_id getGraphObjectId() const
+    {
+        return graphObjectId;
+    }
+
+    inline QString getGraphObjectName() const
+    {
+        return graphObjectName;
+    }
+
 signals:
     void graphChanged(int type, db_id objectId);
     void redrawGraph();
