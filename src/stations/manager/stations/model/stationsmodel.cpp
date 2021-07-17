@@ -648,6 +648,7 @@ bool StationsModel::setShortName(StationsModel::StationItem &item, const QString
     }
 
     item.shortName = shortName;
+    emit Session->stationNameChanged(item.stationId);
 
     return true;
 }
