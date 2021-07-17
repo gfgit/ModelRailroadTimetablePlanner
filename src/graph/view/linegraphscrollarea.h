@@ -17,11 +17,15 @@ public:
 
     void setScene(LineGraphScene *scene);
 
+signals:
+    void syncToolbarToScene();
+
 private slots:
     void resizeHeaders();
 
 protected:
     bool viewportEvent(QEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
 
 private:
     StationLabelsHeader *stationHeader;

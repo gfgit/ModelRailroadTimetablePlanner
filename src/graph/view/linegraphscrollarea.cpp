@@ -55,3 +55,8 @@ bool LineGraphScrollArea::viewportEvent(QEvent *e)
 
     return QScrollArea::viewportEvent(e);
 }
+
+void LineGraphScrollArea::mousePressEvent(QMouseEvent *e)
+{
+    emit syncToolbarToScene();
+}
