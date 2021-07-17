@@ -17,6 +17,9 @@ public:
 public slots:
     void setScroll(int value);
 
+private slots:
+    void onSceneDestroyed();
+
 protected:
     void paintEvent(QPaintEvent *) override;
 

@@ -20,11 +20,39 @@ LineGraphScene *LineGraphViewport::scene() const
 
 void LineGraphViewport::setScene(LineGraphScene *newScene)
 {
+    if(m_scene)
+    {
+        disconnect(m_scene, &LineGraphScene::redrawGraph, this, qOverload<>(&LineGraphViewport::update));
+        disconnect(m_scene, &QObject::destroyed, this, &LineGraphViewport::onSceneDestroyed);
+    }
     m_scene = newScene;
+    if(m_scene)
+    {
+        connect(m_scene, &LineGraphScene::redrawGraph, this, qOverload<>(&LineGraphViewport::update));
+        connect(m_scene, &QObject::destroyed, this, &LineGraphViewport::onSceneDestroyed);
+    }
     update();
 }
 
-void LineGraphViewport::paintEvent(QPaintEvent *event)
+void LineGraphViewport::redrawGraph()
+{
+    if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
+        return; //Nothing to draw
+
+    if(m_scene->stationPositions.isEmpty())
+        return;
+
+    const auto entry = m_scene->stationPositions.last();
+    const int platfCount = m_scene->stations.value(entry.stationId).platforms.count();
+
+    const int maxWidth = Session->horizOffset + entry.xPos + platfCount * Session->platformOffset;
+    if(maxWidth != width())
+        resize(height(), maxWidth);
+
+    update();
+}
+
+void LineGraphViewport::paintEvent(QPaintEvent *e)
 {
     //TODO: repaint only new regions, not all
 
@@ -33,6 +61,12 @@ void LineGraphViewport::paintEvent(QPaintEvent *event)
 
     QPainter painter(this);
     paintStations(&painter);
+}
+
+void LineGraphViewport::onSceneDestroyed()
+{
+    m_scene = nullptr;
+    update();
 }
 
 void LineGraphViewport::paintStations(QPainter *painter)

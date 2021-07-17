@@ -14,8 +14,14 @@ public:
     LineGraphScene *scene() const;
     void setScene(LineGraphScene *newScene);
 
+public slots:
+    void redrawGraph();
+
 protected:
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent *e) override;
+
+private slots:
+    void onSceneDestroyed();
 
 private:
     void paintStations(QPainter *painter);

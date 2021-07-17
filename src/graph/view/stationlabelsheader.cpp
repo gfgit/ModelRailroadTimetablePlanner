@@ -20,6 +20,12 @@ void StationLabelsHeader::setScroll(int value)
     update();
 }
 
+void StationLabelsHeader::onSceneDestroyed()
+{
+    m_scene = nullptr;
+    update();
+}
+
 void StationLabelsHeader::paintEvent(QPaintEvent *)
 {
     //TODO: repaint only new regions, not all
@@ -85,6 +91,16 @@ LineGraphScene *StationLabelsHeader::scene() const
 
 void StationLabelsHeader::setScene(LineGraphScene *newScene)
 {
+    if(m_scene)
+    {
+        disconnect(m_scene, &LineGraphScene::redrawGraph, this, qOverload<>(&StationLabelsHeader::update));
+        disconnect(m_scene, &QObject::destroyed, this, &StationLabelsHeader::onSceneDestroyed);
+    }
     m_scene = newScene;
+    if(m_scene)
+    {
+        connect(m_scene, &LineGraphScene::redrawGraph, this, qOverload<>(&StationLabelsHeader::update));
+        connect(m_scene, &QObject::destroyed, this, &StationLabelsHeader::onSceneDestroyed);
+    }
     update();
 }
