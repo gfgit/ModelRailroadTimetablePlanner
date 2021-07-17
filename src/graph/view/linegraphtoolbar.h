@@ -36,6 +36,8 @@ private:
     CustomCompletionLineEdit *objectCombo;
 
     ISqlFKMatchModel *matchModel;
+
+    int oldGraphType;
 };
 
 #endif // LINEGRAPHTOOLBAR_H

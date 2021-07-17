@@ -15,7 +15,9 @@
 
 LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     QWidget(parent),
-    matchModel(nullptr)
+    m_scene(nullptr),
+    matchModel(nullptr),
+    oldGraphType(-1)
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
 
@@ -91,8 +93,7 @@ void LineGraphToolbar::onSceneDestroyed()
 
 void LineGraphToolbar::setupModel(int type)
 {
-    int oldType = graphTypeCombo->currentIndex();
-    if(type != oldType)
+    if(type != oldGraphType)
     {
         switch (LineGraphType(type))
         {
@@ -129,4 +130,5 @@ void LineGraphToolbar::setupModel(int type)
         if(matchModel)
             objectCombo->setModel(matchModel);
     }
+    oldGraphType = type;
 }
