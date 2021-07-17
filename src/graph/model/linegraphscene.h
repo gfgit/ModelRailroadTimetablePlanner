@@ -3,10 +3,7 @@
 
 #include <QObject>
 #include <QVector>
-<<<<<<< HEAD
 #include <QHash>
-=======
->>>>>>> 9981b07f0d414c83a475b7b4a6a36337bd99d54e
 
 #include "utils/types.h"
 
