@@ -95,15 +95,19 @@ void CustomCompletionLineEdit::setModel(ISqlFKMatchModel *m)
 
     model = m;
     popup->setModel(model);
-    connect(model, &ISqlFKMatchModel::resultsReady, this, &CustomCompletionLineEdit::resultsReady);
 
-    //Force reloading of current entry
-    setData(dataId, QString());
-
-    if(popup->isVisible())
+    if(model)
     {
-        model->autoSuggest(text());
-        model->refreshData();
+        connect(model, &ISqlFKMatchModel::resultsReady, this, &CustomCompletionLineEdit::resultsReady);
+
+        //Force reloading of current entry
+        setData(dataId, QString());
+
+        if(popup->isVisible())
+        {
+            model->autoSuggest(text());
+            model->refreshData();
+        }
     }
 }
 
