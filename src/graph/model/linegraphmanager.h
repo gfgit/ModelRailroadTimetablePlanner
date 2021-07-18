@@ -30,6 +30,8 @@ private slots:
     void onLineNameChanged(db_id lineId);
     void onLineSegmentsChanged(db_id lineId);
 
+    void updateGraphOptions();
+
 private:
     QVector<LineGraphScene *> scenes;
 };

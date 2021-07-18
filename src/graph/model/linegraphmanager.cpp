@@ -14,6 +14,8 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     connect(session, &MeetingSession::segmentStationsChanged, this, &LineGraphManager::onSegmentStationsChanged);
     connect(session, &MeetingSession::lineNameChanged, this, &LineGraphManager::onLineNameChanged);
     connect(session, &MeetingSession::lineSegmentsChanged, this, &LineGraphManager::onLineSegmentsChanged);
+
+    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
 }
 
 void LineGraphManager::registerScene(LineGraphScene *scene)
@@ -93,5 +95,13 @@ void LineGraphManager::onLineSegmentsChanged(db_id lineId)
     {
         if(scene->graphType == LineGraphType::RailwayLine && scene->graphObjectId == lineId)
             scene->reload();
+    }
+}
+
+void LineGraphManager::updateGraphOptions()
+{
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        scene->reload();
     }
 }
