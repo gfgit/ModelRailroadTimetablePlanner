@@ -9,7 +9,7 @@ HourPanel::HourPanel(QWidget *parent) :
     QWidget(parent),
     verticalScroll(0)
 {
-
+    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, qOverload<>(&HourPanel::update));
 }
 
 void HourPanel::setScroll(int value)
@@ -26,7 +26,7 @@ void HourPanel::paintEvent(QPaintEvent *)
 
     //TODO: settings
     QFont hourTextFont;
-    QPen hourTextPen;
+    QPen hourTextPen(AppSettings.getHourTextColor());
 
     const int vertOffset = Session->vertOffset;
     const int hourOffset = Session->hourOffset;

@@ -77,6 +77,8 @@ void LineGraphView::paintEvent(QPaintEvent *e)
 {
     //TODO: repaint only new regions, not all
 
+    //FIXME: paint hour lines
+
     QPainter painter(viewport());
 
     //Scroll contents
