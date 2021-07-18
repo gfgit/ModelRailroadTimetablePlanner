@@ -26,6 +26,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     graphObjectName.clear();
     stations.clear();
     stationPositions.clear();
+    contentSize = QSize();
 
     if(type == LineGraphType::NoGraph)
     {
@@ -116,6 +117,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     graphObjectId = objectId;
     graphType = type;
+
+    recalcContentSize();
 
     emit graphChanged(int(graphType), graphObjectId);
     emit redrawGraph();
@@ -257,4 +260,24 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 void LineGraphScene::reload()
 {
     loadGraph(graphObjectId, graphType, true);
+}
+
+void LineGraphScene::recalcContentSize()
+{
+    contentSize = QSize();
+
+    if(graphType == LineGraphType::NoGraph)
+        return; //Nothing to draw
+
+    if(stationPositions.isEmpty())
+        return;
+
+    const auto entry = stationPositions.last();
+    const int platfCount = stations.value(entry.stationId).platforms.count();
+
+    //Add an additional station offset half before forst station, half at end
+    const int maxWidth = Session->horizOffset + entry.xPos + platfCount * Session->platformOffset + Session->stationOffset;
+    const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
+
+    contentSize = QSize(maxWidth, lastY);
 }

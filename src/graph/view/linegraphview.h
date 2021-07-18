@@ -36,7 +36,6 @@ private slots:
     void resizeHeaders();
 
 private:
-    void recalcContentSize();
     void updateScrollBars();
 
     void paintStations(QPainter *painter);
@@ -46,7 +45,6 @@ private:
     HourPanel *hourPanel;
 
     LineGraphScene *m_scene;
-    QSize contentSize; //TODO: maybe move to scene?
 };
 
 #endif // LINEGRAPHVIEW_H

@@ -28,6 +28,8 @@ LineGraphView::LineGraphView(QWidget *parent) :
     connect(verticalScrollBar(), &QScrollBar::valueChanged, hourPanel, &HourPanel::setScroll);
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, stationHeader, &StationLabelsHeader::setScroll);
     connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &LineGraphView::resizeHeaders);
+
+    resizeHeaders();
 }
 
 LineGraphScene *LineGraphView::scene() const
@@ -55,7 +57,6 @@ void LineGraphView::setScene(LineGraphScene *newScene)
 
 void LineGraphView::redrawGraph()
 {
-    recalcContentSize();
     updateScrollBars();
 
     viewport()->update();
@@ -66,6 +67,7 @@ bool LineGraphView::event(QEvent *e)
     if (e->type() == QEvent::StyleChange || e->type() == QEvent::LayoutRequest)
     {
         updateScrollBars();
+        resizeHeaders();
     }
 
     return QAbstractScrollArea::event(e);
@@ -120,27 +122,12 @@ void LineGraphView::resizeHeaders()
     stationHeader->setScroll(horizontalScrollBar()->value());
 }
 
-void LineGraphView::recalcContentSize()
-{
-    contentSize = QSize();
-
-    if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
-        return; //Nothing to draw
-
-    if(m_scene->stationPositions.isEmpty())
-        return;
-
-    const auto entry = m_scene->stationPositions.last();
-    const int platfCount = m_scene->stations.value(entry.stationId).platforms.count();
-
-    const int maxWidth = Session->horizOffset + entry.xPos + platfCount * Session->platformOffset;
-    const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
-
-    contentSize = QSize(maxWidth, lastY);
-}
-
 void LineGraphView::updateScrollBars()
 {
+    if(!m_scene)
+        return;
+
+    const QSize contentSize = m_scene->getContentSize();
     if(contentSize.isEmpty())
         return;
 
@@ -157,8 +144,6 @@ void LineGraphView::updateScrollBars()
     auto vbar = verticalScrollBar();
     vbar->setRange(0, contentSize.height() - p.height());
     vbar->setPageStep(p.height());
-
-    resizeHeaders();
 }
 
 void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)

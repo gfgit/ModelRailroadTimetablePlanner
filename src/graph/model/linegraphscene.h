@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QVector>
 #include <QHash>
+#include <QSize>
 
 #include "utils/types.h"
 
@@ -44,6 +45,11 @@ public:
         return graphObjectName;
     }
 
+    inline QSize getContentSize() const
+    {
+        return contentSize;
+    }
+
 signals:
     void graphChanged(int type, db_id objectId);
     void redrawGraph();
@@ -52,6 +58,7 @@ public slots:
     void reload();
 
 private:
+    void recalcContentSize();
     bool loadStation(StationGraphObject &st);
     bool loadFullLine(db_id lineId);
 
@@ -76,6 +83,8 @@ private:
 
     QVector<StationPosEntry> stationPositions;
     QHash<db_id, StationGraphObject> stations;
+
+    QSize contentSize;
 };
 
 #endif // LINEGRAPHSCENE_H
