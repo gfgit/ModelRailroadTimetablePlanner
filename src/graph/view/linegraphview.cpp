@@ -109,10 +109,14 @@ void LineGraphView::resizeHeaders()
     const int horizOffset = Session->horizOffset;
     const int vertOffset = Session->vertOffset;
 
-    hourPanel->resize(horizOffset - 5, viewport()->height());
+    const QRect vg = viewport()->geometry();
+
+    hourPanel->move(vg.topLeft());
+    hourPanel->resize(horizOffset - 5, vg.height());
     hourPanel->setScroll(verticalScrollBar()->value());
 
-    stationHeader->resize(viewport()->width(), vertOffset - 5);
+    stationHeader->move(vg.topLeft());
+    stationHeader->resize(vg.width(), vertOffset - 5);
     stationHeader->setScroll(horizontalScrollBar()->value());
 }
 
