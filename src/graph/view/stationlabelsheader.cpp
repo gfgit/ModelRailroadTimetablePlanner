@@ -54,31 +54,37 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
 
     const qreal platformOffset = Session->platformOffset;
     const int stationOffset = Session->stationOffset;
-    const int horizOffset = Session->horizOffset;
+
+    //On left leave space for HourPanel (horizOffset)
+    //but center platform label by going a back of half platformOffset
+    const int leftOffset = Session->horizOffset - platformOffset /2;
+
+    const double margin = stationOffset * 0.1;
 
     QRectF r = rect();
 
     for(auto st : qAsConst(m_scene->stations))
     {
-        double left = st.xPos + horizOffset - horizontalScroll;
-        double right = left + st.platforms.count() * platformOffset + stationOffset * 0.8;
+        const double left = st.xPos + leftOffset - horizontalScroll;
+        const double right = left + st.platforms.count() * platformOffset + stationOffset;
 
         if(right <= 0 || left >= r.width())
             continue; //Skip station, it's not visible
 
         QRectF labelRect = r;
-        labelRect.setLeft(left);
-        labelRect.setRight(right);
+        labelRect.setLeft(left + margin);
+        labelRect.setRight(right - margin);
         labelRect.setBottom(r.bottom() - r.height() / 3);
 
         painter.setPen(stationPen);
         painter.setFont(stationFont);
-        painter.drawText(labelRect, Qt::AlignVCenter | Qt::AlignLeft, st.stationName);
+        painter.drawText(labelRect, Qt::AlignVCenter | Qt::AlignCenter, st.stationName);
 
         labelRect = r;
         labelRect.setTop(r.top() + r.height() * 2/3);
 
-        double xPos = left - platformOffset/2;
+        //Go to start of station (xPos + stationOffset)
+        double xPos = left + stationOffset/2;
         labelRect.setWidth(platformOffset);
         for(const StationGraphObject::PlatformGraph& platf : qAsConst(st.platforms))
         {

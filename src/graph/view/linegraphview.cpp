@@ -185,7 +185,9 @@ void LineGraphView::paintStations(QPainter *painter)
 
     for(const StationGraphObject &st : qAsConst(m_scene->stations))
     {
-        top.rx() = bottom.rx() = st.xPos + horizOffset;
+        //Center start of station on middle of stationOffset
+        //This way we leave half of stationOffset on left and labels are centered
+        top.rx() = bottom.rx() = st.xPos + stationOffset/2 + horizOffset;
 
         for(const StationGraphObject::PlatformGraph& platf : st.platforms)
         {
