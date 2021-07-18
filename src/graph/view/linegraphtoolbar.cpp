@@ -22,6 +22,7 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     oldGraphType(0)
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
+    lay->setContentsMargins(0, 0, 0, 0);
 
     graphTypeCombo = new QComboBox;
     lay->addWidget(graphTypeCombo);
@@ -41,6 +42,8 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
 
     connect(graphTypeCombo, qOverload<int>(&QComboBox::activated), this, &LineGraphToolbar::onTypeComboActivated);
     connect(objectCombo, &CustomCompletionLineEdit::completionDone, this, &LineGraphToolbar::onCompletionDone);
+
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 }
 
 LineGraphToolbar::~LineGraphToolbar()
