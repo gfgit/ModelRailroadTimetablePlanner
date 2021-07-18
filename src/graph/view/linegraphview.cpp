@@ -15,6 +15,10 @@
 LineGraphView::LineGraphView(QWidget *parent) :
     QAbstractScrollArea(parent)
 {
+    QPalette pal = palette();
+    pal.setColor(backgroundRole(), Qt::white);
+    setPalette(pal);
+
     horizontalScrollBar()->setSingleStep(20);
     verticalScrollBar()->setSingleStep(20);
 
@@ -54,7 +58,7 @@ void LineGraphView::redrawGraph()
     recalcContentSize();
     updateScrollBars();
 
-    update();
+    viewport()->update();
 }
 
 bool LineGraphView::event(QEvent *e)
@@ -72,10 +76,6 @@ void LineGraphView::paintEvent(QPaintEvent *e)
     //TODO: repaint only new regions, not all
 
     QPainter painter(viewport());
-
-    //FIXME: when setting NoGraph it doesn't clear, you have to scroll a bit
-    //painter.fillRect(e->rect(), palette().window());
-    painter.fillRect(viewport()->rect(), palette().window());
 
     //Scroll contents
     painter.translate(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
