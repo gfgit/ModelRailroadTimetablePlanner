@@ -38,6 +38,7 @@ private slots:
 private:
     void updateScrollBars();
 
+    void drawBackgroundHourLines(QPainter *painter, const QRectF &rect);
     void paintStations(QPainter *painter);
 
 private:
