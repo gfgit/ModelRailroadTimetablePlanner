@@ -18,7 +18,7 @@ public:
 private:
     LineGraphScene *m_scene;
 
-    LineGraphView *viewport;
+    LineGraphView *view;
     LineGraphToolbar *toolBar;
 };
 
