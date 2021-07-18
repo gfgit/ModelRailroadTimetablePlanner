@@ -6,9 +6,8 @@
 #include "utils/types.h"
 
 class LineGraphScene;
-class LineGraphViewport;
+class LineGraphView;
 class LineGraphToolbar;
-class LineGraphScrollArea;
 
 class LineGraphWidget : public QWidget
 {
@@ -19,8 +18,7 @@ public:
 private:
     LineGraphScene *m_scene;
 
-    LineGraphScrollArea *scrollArea;
-    LineGraphViewport *viewport;
+    LineGraphView *viewport;
     LineGraphToolbar *toolBar;
 };
 

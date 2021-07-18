@@ -56,7 +56,7 @@ private:
     bool loadFullLine(db_id lineId);
 
 private:
-    friend class LineGraphViewport;
+    friend class LineGraphView;
     friend class StationLabelsHeader;
     friend class LineGraphManager;
 
