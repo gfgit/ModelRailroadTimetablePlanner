@@ -12,8 +12,6 @@
 
 #include <QScrollBar>
 
-#include <QtMath>
-
 LineGraphView::LineGraphView(QWidget *parent) :
     QAbstractScrollArea(parent)
 {
@@ -89,7 +87,6 @@ void LineGraphView::paintEvent(QPaintEvent *e)
     if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
         return; //Nothing to draw
 
-    drawBackgroundHourLines(&painter, e->rect());
     paintStations(&painter);
 }
 
@@ -168,47 +165,6 @@ void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)
     } else if (y > vbar->value() + vp->height() - ymargin) {
         vbar->setValue(qMin(y - vp->height() + ymargin, vbar->maximum()));
     }
-}
-
-void LineGraphView::drawBackgroundHourLines(QPainter *painter, const QRectF &rect)
-{
-    //FIXME: not working
-    const double vertOffset = Session->vertOffset;
-    const double hourOffset = Session->hourOffset;
-    const double hourHorizOffset = AppSettings.getHourLineOffset();
-
-    QPen hourLinePen(AppSettings.getHourLineColor(), AppSettings.getHourLineWidth());
-
-    const qreal x1 = qMax(qreal(hourHorizOffset), rect.left());
-    const qreal x2 = rect.right();
-    const qreal t = qMax(rect.top(), vertOffset);
-    const qreal b = rect.bottom();
-
-    if(x1 > x2 || b < vertOffset || t > b)
-        return;
-
-    qreal f = std::remainder(t - vertOffset, hourOffset);
-
-    if(f < 0)
-        f += hourOffset;
-    qreal f1 = qFuzzyIsNull(f) ? vertOffset : qMax(t - f + hourOffset, vertOffset);
-
-
-    const qreal l = std::remainder(b - vertOffset, hourOffset);
-    const qreal l1 = b - l;
-
-    std::size_t n = std::size_t((l1 - f1)/hourOffset) + 1;
-
-    QLineF *arr = new QLineF[n];
-    for(std::size_t i = 0; i < n; i++)
-    {
-        arr[i] = QLineF(x1, f1, x2, f1);
-        f1 += hourOffset;
-    }
-
-    painter->setPen(hourLinePen);
-    painter->drawLines(arr, int(n));
-    delete [] arr;
 }
 
 void LineGraphView::paintStations(QPainter *painter)
