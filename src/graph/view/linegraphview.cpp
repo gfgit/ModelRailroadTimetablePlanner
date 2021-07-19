@@ -219,9 +219,9 @@ void LineGraphView::paintStations(QPainter *painter)
 {
     const QRgb white = qRgb(255, 255, 255);
 
-    const int horizOffset = Session->horizOffset;
+    //const int horizOffset = Session->horizOffset;
     const int vertOffset = Session->vertOffset;
-    const int stationOffset = Session->stationOffset;
+    //const int stationOffset = Session->stationOffset;
     const double platfOffset = Session->platformOffset;
     const int lastY = vertOffset + Session->hourOffset * 24 + 10;
 
@@ -235,9 +235,7 @@ void LineGraphView::paintStations(QPainter *painter)
 
     for(const StationGraphObject &st : qAsConst(m_scene->stations))
     {
-        //Center start of station on middle of stationOffset
-        //This way we leave half of stationOffset on left and labels are centered
-        top.rx() = bottom.rx() = st.xPos + stationOffset/2 + horizOffset;
+        top.rx() = bottom.rx() = st.xPos;
 
         for(const StationGraphObject::PlatformGraph& platf : st.platforms)
         {

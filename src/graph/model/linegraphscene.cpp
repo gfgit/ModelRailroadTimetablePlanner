@@ -48,6 +48,10 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         return false;
     }
 
+    //Leave on left horizOffset plus half station offset to separate first station from HourPanel
+    //and to give more space to station label.
+    const double curPos = Session->horizOffset + Session->stationOffset / 2;
+
     if(type == LineGraphType::SingleStation)
     {
         StationGraphObject st;
@@ -55,8 +59,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         if(!loadStation(st))
             return false;
 
-        //Register a single station at position x = 0.0
-        st.xPos = 0;
+        //Register a single station at start position
+        st.xPos = curPos;
         stations.insert(st.stationId, st);
         stationPositions = {{st.stationId, st.xPos}};
         graphObjectName = st.stationName;
@@ -96,8 +100,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         if(!loadStation(stA) || !loadStation(stB))
             return false;
 
-        stA.xPos = 0.0;
-        stB.xPos = stA.platforms.count() * Session->platformOffset + Session->stationOffset;
+        stA.xPos = curPos;
+        stB.xPos = stA.xPos + stA.platforms.count() * Session->platformOffset + Session->stationOffset;
 
         stations.insert(stA.stationId, stA);
         stations.insert(stB.stationId, stB);
@@ -197,7 +201,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
     q.bind(1, lineId);
 
     db_id lastStationId = 0;
-    double curPos = 0.0;
+    double curPos = Session->horizOffset + Session->stationOffset / 2;
 
     for(auto seg : q)
     {
@@ -224,15 +228,16 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 
         if(!lastStationId)
         {
+            //First line station
             StationGraphObject st;
             st.stationId = fromStationId;
             if(!loadStation(st))
                 return false;
 
-            st.xPos = 0.0;
+            st.xPos = curPos;
             stations.insert(st.stationId, st);
             stationPositions.append({st.stationId, st.xPos});
-            curPos = st.platforms.count() * Session->platformOffset + Session->stationOffset;
+            curPos += st.platforms.count() * Session->platformOffset + Session->stationOffset;
         }
         else if(fromStationId != lastStationId)
         {
@@ -275,8 +280,9 @@ void LineGraphScene::recalcContentSize()
     const auto entry = stationPositions.last();
     const int platfCount = stations.value(entry.stationId).platforms.count();
 
-    //Add an additional station offset half before forst station, half at end
-    const int maxWidth = Session->horizOffset + entry.xPos + platfCount * Session->platformOffset + Session->stationOffset;
+    //Add an additional half station offset after last station
+    //This gives extra space to center station label
+    const int maxWidth = entry.xPos + platfCount * Session->platformOffset + Session->stationOffset / 2;
     const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
 
     contentSize = QSize(maxWidth, lastY);

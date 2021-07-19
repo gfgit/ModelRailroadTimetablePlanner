@@ -55,9 +55,9 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
     const qreal platformOffset = Session->platformOffset;
     const int stationOffset = Session->stationOffset;
 
-    //On left leave space for HourPanel (horizOffset)
-    //but center platform label by going a back of half platformOffset
-    const int leftOffset = Session->horizOffset - platformOffset /2;
+    //On left go back by half station offset to center station label
+    //and center platform label by going a back of half platformOffset
+    const int leftOffset = -stationOffset/2 - platformOffset /2;
 
     const double margin = stationOffset * 0.1;
 
@@ -83,7 +83,8 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
         labelRect = r;
         labelRect.setTop(r.top() + r.height() * 2/3);
 
-        //Go to start of station (xPos + stationOffset)
+        //Go to start of station (first platform)
+        //We need to compensate the half stationOffset used to center station label
         double xPos = left + stationOffset/2;
         labelRect.setWidth(platformOffset);
         for(const StationGraphObject::PlatformGraph& platf : qAsConst(st.platforms))
