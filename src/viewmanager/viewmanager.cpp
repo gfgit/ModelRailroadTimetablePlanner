@@ -22,6 +22,7 @@
 #include "jobs/jobsmanager.h"
 
 #include "graph/graphmanager.h"
+#include "graph/model/linegraphmanager.h"
 
 #include "sessionstartendrsviewer.h"
 
@@ -38,6 +39,7 @@ ViewManager::ViewManager(QObject *parent) :
     sessionRSViewer(nullptr)
 {
     mGraphMgr = new GraphManager(this);
+    lineGraphManager = new LineGraphManager(this);
 
     //RollingStock
     connect(Session, &MeetingSession::rollingstockRemoved, this, &ViewManager::onRSRemoved);
@@ -498,6 +500,11 @@ bool ViewManager::closeEditors()
     shiftHash.clear();
 
     return true;
+}
+
+void ViewManager::clearAllLineGraphs()
+{
+    lineGraphManager->clearAllGraphs();
 }
 
 bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisible) const

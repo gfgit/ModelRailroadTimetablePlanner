@@ -15,7 +15,8 @@ class database;
 
 using namespace sqlite3pp;
 
-class QGraphicsView;
+class LineGraphWidget;
+class QGraphicsView; //FIXME: remove
 class QGraphicsScene;
 class JobPathEditor;
 class QDockWidget;
@@ -115,7 +116,7 @@ private:
     QDockWidget *rsErrDock;
 #endif
 
-    QGraphicsView *view;
+    LineGraphWidget *view;
     QDockWidget *jobDock;
 
     CustomCompletionLineEdit *searchEdit;

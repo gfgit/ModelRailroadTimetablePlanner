@@ -74,6 +74,14 @@ signals:
     //Jobs
     void jobChanged(db_id jobId, db_id oldJobId); //Updated id/category/stops
 
+    //Stations
+    void stationNameChanged(db_id stationId);
+    void stationPlanChanged(db_id stationId);
+    void segmentNameChanged(db_id segmentId);
+    void segmentStationsChanged(db_id segmentId);
+    void lineNameChanged(db_id lineId);
+    void lineSegmentsChanged(db_id lineId);
+
 //TODO: old methods, remove them
 public:
     qreal getStationGraphPos(db_id lineId, db_id stId, int platf = 0);

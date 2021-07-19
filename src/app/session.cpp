@@ -184,6 +184,8 @@ DB_Error MeetingSession::closeDB()
     if(!viewManager->closeEditors())
         return DB_Error::EditorsStillOpened; //User wants to continue editing
 
+    viewManager->clearAllLineGraphs();
+
     releaseAllSavepoints();
 
     finalizeStatements();

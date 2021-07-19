@@ -362,6 +362,10 @@ void StationsManager::onEditStation()
     //Refresh stations model
     stationsModel->refreshData(true);
 
+    //FIXME: check if actually changed
+    emit Session->stationNameChanged(stId);
+    emit Session->stationPlanChanged(stId);
+
     //Refresh segments
     int &segmentsTimer = clearModelTimers[RailwaySegmentsTab];
     if(segmentsTimer != ModelCleared)
@@ -454,6 +458,10 @@ void StationsManager::onEditSegment()
     if(ret != QDialog::Accepted || !dlg)
         return;
 
+    //FIXME: check if actually changed
+    emit Session->segmentNameChanged(segmentId);
+    emit Session->segmentStationsChanged(segmentId);
+
     //Refresh fields
     segmentsModel->refreshData(true);
 }
@@ -526,6 +534,10 @@ void StationsManager::onEditLine()
     int ret = dlg->exec();
     if(ret != QDialog::Accepted || !dlg)
         return;
+
+    //FIXME: check if actually changed
+    emit Session->lineNameChanged(lineId);
+    emit Session->lineSegmentsChanged(lineId);
 
     //Refresh fields
     linesModel->refreshData(true);
