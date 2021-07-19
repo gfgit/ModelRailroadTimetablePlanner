@@ -15,6 +15,32 @@ LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
 
 }
 
+void LineGraphScene::recalcContentSize()
+{
+    contentSize = QSize();
+
+    if(graphType == LineGraphType::NoGraph)
+        return; //Nothing to draw
+
+    if(stationPositions.isEmpty())
+        return;
+
+    const auto entry = stationPositions.last();
+    const int platfCount = stations.value(entry.stationId).platforms.count();
+
+    //Add an additional half station offset after last station
+    //This gives extra space to center station label
+    const int maxWidth = entry.xPos + platfCount * Session->platformOffset + Session->stationOffset / 2;
+    const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
+
+    contentSize = QSize(maxWidth, lastY);
+}
+
+void LineGraphScene::reload()
+{
+    loadGraph(graphObjectId, graphType, true);
+}
+
 bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 {
     if(!force && objectId == graphObjectId && type == graphType)
@@ -260,30 +286,4 @@ bool LineGraphScene::loadFullLine(db_id lineId)
     }
 
     return true;
-}
-
-void LineGraphScene::reload()
-{
-    loadGraph(graphObjectId, graphType, true);
-}
-
-void LineGraphScene::recalcContentSize()
-{
-    contentSize = QSize();
-
-    if(graphType == LineGraphType::NoGraph)
-        return; //Nothing to draw
-
-    if(stationPositions.isEmpty())
-        return;
-
-    const auto entry = stationPositions.last();
-    const int platfCount = stations.value(entry.stationId).platforms.count();
-
-    //Add an additional half station offset after last station
-    //This gives extra space to center station label
-    const int maxWidth = entry.xPos + platfCount * Session->platformOffset + Session->stationOffset / 2;
-    const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
-
-    contentSize = QSize(maxWidth, lastY);
 }
