@@ -12,7 +12,8 @@
 #include <QVBoxLayout>
 
 LineGraphWidget::LineGraphWidget(QWidget *parent) :
-    QWidget(parent)
+    QWidget(parent),
+    m_scene(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 

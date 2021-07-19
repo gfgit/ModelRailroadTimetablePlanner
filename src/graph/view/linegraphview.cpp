@@ -15,7 +15,8 @@
 #include <QtMath>
 
 LineGraphView::LineGraphView(QWidget *parent) :
-    QAbstractScrollArea(parent)
+    QAbstractScrollArea(parent),
+    m_scene(nullptr)
 {
     QPalette pal = palette();
     pal.setColor(backgroundRole(), Qt::white);
