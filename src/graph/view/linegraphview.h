@@ -27,6 +27,7 @@ public slots:
 
 protected:
     bool event(QEvent *e) override;
+    bool viewportEvent(QEvent *e) override;
     void paintEvent(QPaintEvent *e) override;
     void resizeEvent(QResizeEvent *) override;
     void mousePressEvent(QMouseEvent *e) override;

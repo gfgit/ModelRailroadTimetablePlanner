@@ -184,6 +184,126 @@ bool LineGraphScene::reloadJobs()
     return true;
 }
 
+JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+{
+    const double platformOffset = Session->platformOffset;
+
+    JobEntry job;
+    job.jobId = 0;
+    job.category = JobCategory::FREIGHT;
+
+    if(stationPositions.isEmpty())
+        return job;
+
+    db_id prevStId = 0;
+    db_id nextStId = 0;
+
+    for(const StationPosEntry& stPos : stationPositions)
+    {
+        if(stPos.xPos <= pos.x())
+            prevStId = stPos.stationId;
+
+        if(stPos.xPos >= pos.x())
+        {
+            //We went past the requested position
+            nextStId = stPos.stationId;
+            break;
+        }
+    }
+
+    auto prevSt = stations.constFind(prevStId);
+    if(prevSt == stations.constEnd())
+        return job; //Error
+
+    auto nextSt = stations.constFind(nextStId);
+    if(nextSt == stations.constEnd())
+        return job; //Error
+
+    const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
+    const StationGraphObject::PlatformGraph *nextPlatf = nullptr;
+    double prevPos = 0;
+    double nextPos = 0;
+
+    double xPos = prevSt->xPos;
+    for(const StationGraphObject::PlatformGraph& platf : prevSt->platforms)
+    {
+        if(xPos <= pos.x())
+        {
+            prevPlatf = &platf;
+            prevPos = xPos;
+        }
+        if(xPos >= pos.x())
+        {
+            //We went past the requested position
+            nextPlatf = &platf;
+            nextPos = xPos;
+            break;
+        }
+
+        xPos += platformOffset;
+    }
+
+    const double prevDistance = qAbs(prevPos - pos.x());
+    if(prevPlatf && prevDistance > tolerance)
+    {
+        //Discard because too distant
+        prevPlatf = nullptr;
+    }
+
+    if(!nextPlatf)
+    {
+        //Use second station
+        xPos = nextSt->xPos;
+        for(const StationGraphObject::PlatformGraph& platf : nextSt->platforms)
+        {
+            if(xPos <= pos.x())
+            {
+                prevPlatf = &platf;
+                prevPos = xPos;
+                break;
+            }
+
+            xPos += platformOffset;
+        }
+    }
+
+    const double nextDistance = qAbs(nextPos - pos.x());
+    if(nextPlatf && nextDistance > tolerance)
+    {
+        //Discard because too distant
+        nextPlatf = nullptr;
+    }
+
+    const StationGraphObject::PlatformGraph *resultPlatf = nullptr;
+    if(!prevPlatf)
+        resultPlatf = nextPlatf;
+    else if(!nextPlatf)
+        resultPlatf = prevPlatf;
+    else
+    {
+        if(prevDistance < nextDistance)
+            resultPlatf = prevPlatf;
+        else
+            resultPlatf = nextPlatf;
+    }
+
+    if(!resultPlatf)
+        return job; //No match
+
+    for(const StationGraphObject::JobGraph& jobStop : resultPlatf->jobStops)
+    {
+        if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
+        {
+            //Found match
+            job.jobId = jobStop.jobId;
+            job.category = jobStop.category;
+            break;
+        }
+    }
+
+    return job;
+}
+
 bool LineGraphScene::loadStation(StationGraphObject& st)
 {
     sqlite3pp::query q(mDb);

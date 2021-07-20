@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QVector>
 #include <QHash>
+
+#include <QPointF>
 #include <QSize>
 
 #include "utils/types.h"
@@ -31,6 +33,8 @@ public:
     bool loadGraph(db_id objectId, LineGraphType type, bool force = false);
 
     bool reloadJobs();
+
+    JobEntry getJobAt(const QPointF& pos, const double tolerance);
 
     inline LineGraphType getGraphType() const
     {
