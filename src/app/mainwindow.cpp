@@ -686,7 +686,7 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
     {
         if(centralWidget() != welcomeLabel)
         {
-            takeCentralWidget(); //Remove ownership from QGraphicsView
+            takeCentralWidget(); //Remove ownership from LineGraphWidget
             setCentralWidget(welcomeLabel);
             view->hide();
             welcomeLabel->show();
