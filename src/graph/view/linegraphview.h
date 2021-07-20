@@ -38,8 +38,6 @@ private slots:
 private:
     void updateScrollBars();
 
-    void paintStations(QPainter *painter);
-
 private:
     StationLabelsHeader *stationHeader;
     HourPanel *hourPanel;

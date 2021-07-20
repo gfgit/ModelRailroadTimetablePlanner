@@ -77,24 +77,29 @@ bool LineGraphView::event(QEvent *e)
 
 void LineGraphView::paintEvent(QPaintEvent *e)
 {
-    //TODO: repaint only new regions, not all
+    const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
 
-    //FIXME: paint hour lines
+    QRect exposedRect = e->rect();
+    const QRect vp = viewport()->rect();
+
+    //Map to viewport
+    exposedRect.moveTopLeft(exposedRect.topLeft() - vp.topLeft());
+    exposedRect = exposedRect.intersected(vp);
+
+    //Map to scene
+    exposedRect.moveTopLeft(exposedRect.topLeft() - origin);
 
     QPainter painter(viewport());
 
     //Scroll contents
-    const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
-
     painter.translate(origin);
 
-    QRect visibleRect(-origin, viewport()->size());
-    BackgroundHelper::drawBackgroundHourLines(&painter, visibleRect);
+    BackgroundHelper::drawBackgroundHourLines(&painter, exposedRect);
 
     if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
         return; //Nothing to draw
 
-    paintStations(&painter);
+    BackgroundHelper::drawStations(&painter, m_scene, exposedRect);
 }
 
 void LineGraphView::resizeEvent(QResizeEvent *)
@@ -171,44 +176,5 @@ void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)
         vbar->setValue(qMax(0, y - ymargin));
     } else if (y > vbar->value() + vp->height() - ymargin) {
         vbar->setValue(qMin(y - vp->height() + ymargin, vbar->maximum()));
-    }
-}
-
-void LineGraphView::paintStations(QPainter *painter)
-{
-    const QRgb white = qRgb(255, 255, 255);
-
-    //const int horizOffset = Session->horizOffset;
-    const int vertOffset = Session->vertOffset;
-    //const int stationOffset = Session->stationOffset;
-    const double platfOffset = Session->platformOffset;
-    const int lastY = vertOffset + Session->hourOffset * 24 + 10;
-
-    const int width = AppSettings.getPlatformLineWidth();
-    const QColor mainPlatfColor = AppSettings.getMainPlatfColor();
-
-    QPen platfPen (mainPlatfColor,  width);
-
-    QPointF top(0, vertOffset);
-    QPointF bottom(0, lastY);
-
-    for(const StationGraphObject &st : qAsConst(m_scene->stations))
-    {
-        top.rx() = bottom.rx() = st.xPos;
-
-        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
-        {
-            if(platf.color == white)
-                platfPen.setColor(mainPlatfColor);
-            else
-                platfPen.setColor(platf.color);
-
-            painter->setPen(platfPen);
-
-            painter->drawLine(top, bottom);
-
-            top.rx() += platfOffset;
-            bottom.rx() += platfOffset;
-        }
     }
 }

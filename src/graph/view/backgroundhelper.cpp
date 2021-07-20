@@ -150,3 +150,48 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
         }
     }
 }
+
+void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+{
+    const QRgb white = qRgb(255, 255, 255);
+
+    //const int horizOffset = Session->horizOffset;
+    const int vertOffset = Session->vertOffset;
+    //const int stationOffset = Session->stationOffset;
+    const double platfOffset = Session->platformOffset;
+    const int lastY = vertOffset + Session->hourOffset * 24 + 10;
+
+    const int width = AppSettings.getPlatformLineWidth();
+    const QColor mainPlatfColor = AppSettings.getMainPlatfColor();
+
+    QPen platfPen (mainPlatfColor,  width);
+
+    QPointF top(0, vertOffset);
+    QPointF bottom(0, lastY);
+
+    for(const StationGraphObject &st : qAsConst(scene->stations))
+    {
+        const double left = st.xPos;
+        const double right = left + st.platforms.count() * platfOffset;
+
+        if(left > rect.right() || right < rect.left())
+            continue; //Skip station, it's not visible
+
+        top.rx() = bottom.rx() = st.xPos;
+
+        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+        {
+            if(platf.color == white)
+                platfPen.setColor(mainPlatfColor);
+            else
+                platfPen.setColor(platf.color);
+
+            painter->setPen(platfPen);
+
+            painter->drawLine(top, bottom);
+
+            top.rx() += platfOffset;
+            bottom.rx() += platfOffset;
+        }
+    }
+}
