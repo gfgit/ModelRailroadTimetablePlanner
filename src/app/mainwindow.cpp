@@ -21,16 +21,11 @@
 
 #include "settings/settingsdialog.h"
 
-#include "graph/graphmanager.h"
-#include "graph/graphicsview.h" //FIXME: remove
-#include <QGraphicsItem>
+#include "graph/graphmanager.h" //FIXME: remove
 
 #include "graph/view/linegraphwidget.h"
 
 #include "db_metadata/meetinginformationdialog.h"
-
-#include "lines/linestorage.h"
-#include "stations/match_models/linesmatchmodel.h"
 
 #include "printing/printwizard.h"
 
@@ -71,7 +66,6 @@ MainWindow::MainWindow(QWidget *parent) :
     view(nullptr),
     jobDock(nullptr),
     searchEdit(nullptr),
-    lineComboSearch(nullptr),
     welcomeLabel(nullptr),
     recentFileActs{nullptr},
     m_mode(CentralWidgetMode::StartPageMode)
@@ -87,26 +81,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //view = graphMgr->getView();
     view = new LineGraphWidget(this);
-    view->setObjectName("GraphicsView");
-
-    auto linesMatchModel = new LinesMatchModel(Session->m_Db, true, this);
-    linesMatchModel->setHasEmptyRow(false); //Do not allow empty view (no line selected)
-    lineComboSearch = new CustomCompletionLineEdit(linesMatchModel, this);
-    lineComboSearch->setPlaceholderText(tr("Choose line"));
-    lineComboSearch->setToolTip(tr("Choose a railway line"));
-    lineComboSearch->setMinimumWidth(200);
-    lineComboSearch->setMinimumHeight(25);
-    lineComboSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    QAction *sep = ui->mainToolBar->insertSeparator(ui->actionPrev_Job_Segment);
-    ui->mainToolBar->insertWidget(sep, lineComboSearch);
-
-    connect(lineComboSearch, &CustomCompletionLineEdit::dataIdChanged, graphMgr, &GraphManager::setCurrentLine);
-    connect(graphMgr, &GraphManager::currentLineChanged, lineComboSearch, &CustomCompletionLineEdit::setData_slot);
-
-    auto lineStorage = Session->mLineStorage;
-    connect(lineStorage, &LineStorage::lineAdded, this, &MainWindow::checkLineNumber);
-    connect(lineStorage, &LineStorage::lineRemoved, this, &MainWindow::checkLineNumber);
 
     //Welcome label
     welcomeLabel = new QLabel(this);
@@ -494,7 +468,7 @@ void MainWindow::onNew()
     DEBUG_ENTRY;
 
 #ifdef SEARCHBOX_MODE_ASYNC
-    Session->getBackgroundManager()->abortTrivialTasks();
+    emit Session->getBackgroundManager()->abortTrivialTasks();
 #endif
 
 #ifdef ENABLE_RS_CHECKER
@@ -757,8 +731,6 @@ bool MainWindow::closeSession()
     //Reset filePath to refresh title
     setCurrentFile(QString());
 
-    lineComboSearch->setData(0);
-
     return true;
 }
 
@@ -766,7 +738,6 @@ void MainWindow::enableDBActions(bool enable)
 {
     databaseActionGroup->setEnabled(enable);
     searchEdit->setEnabled(enable);
-    lineComboSearch->setEnabled(enable);
     if(!enable)
         jobEditor->setEnabled(false);
 
@@ -847,9 +818,6 @@ void MainWindow::onOpenSettings()
 
 void MainWindow::checkLineNumber()
 {
-    auto graphMgr = Session->getViewManager()->getGraphMgr();
-    //db_id firstLineId = graphMgr->getFirstLineId();
-
     //FIXME: lines are now optional, you can work using only segments
     //Segments are now more important than lines, check segments
     db_id firstLineId = 0; //FIXME

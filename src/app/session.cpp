@@ -184,6 +184,7 @@ DB_Error MeetingSession::closeDB()
     if(!viewManager->closeEditors())
         return DB_Error::EditorsStillOpened; //User wants to continue editing
 
+    //Close all graphs
     viewManager->clearAllLineGraphs();
 
     releaseAllSavepoints();
@@ -209,9 +210,6 @@ DB_Error MeetingSession::closeDB()
 
     mJobStorage->clear();
     mLineStorage->clear();
-
-    //Clear current line
-    getViewManager()->getGraphMgr()->setCurrentLine(0);
 
 #ifdef ENABLE_RS_CHECKER
     backgroundManager->getRsChecker()->clearModel();

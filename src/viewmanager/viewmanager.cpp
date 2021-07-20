@@ -543,12 +543,13 @@ bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisib
     //Clear previous selection to avoid multiple selection
     mGraphMgr->clearSelection();
 
-    if(curLineId != lineId)
-    {
-        //Change current line
-        if(!mGraphMgr->setCurrentLine(lineId))
-            return false;
-    }
+    //FIXME: adapt to new graph system
+//    if(curLineId != lineId)
+//    {
+//        //Change current line
+//        if(!mGraphMgr->setCurrentLine(lineId))
+//            return false;
+//    }
 
     return Session->mJobStorage->selectSegment(jobId, segmentId, select, ensureVisible);
 }
@@ -580,8 +581,9 @@ bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool select, bool ens
     db_id lineId = r.get<db_id>(1);
 
     //Change current line
-    if(!mGraphMgr->setCurrentLine(lineId))
-        return false;
+    //FIXME: adapt to new graph system
+    //if(!mGraphMgr->setCurrentLine(lineId))
+    //    return false;
 
     return Session->mJobStorage->selectSegment(sel.jobId, segmentId, select, ensureVisible);
 }
