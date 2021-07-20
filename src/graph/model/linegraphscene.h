@@ -64,11 +64,21 @@ public slots:
     void reload();
 
 private:
+
+    typedef struct
+    {
+        db_id stationId;
+        db_id segmentId;
+        double xPos;
+    } StationPosEntry;
+
+private:
     void recalcContentSize();
     bool loadStation(StationGraphObject &st);
     bool loadFullLine(db_id lineId);
 
     bool loadStationJobStops(StationGraphObject &st);
+    bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromStm, const StationGraphObject &toSt);
 
 private:
     friend class BackgroundHelper;
@@ -81,12 +91,6 @@ private:
     LineGraphType graphType;
 
     QString graphObjectName;
-
-    typedef struct
-    {
-        db_id stationId;
-        double xPos;
-    } StationPosEntry;
 
     QVector<StationPosEntry> stationPositions;
     QHash<db_id, StationGraphObject> stations;
