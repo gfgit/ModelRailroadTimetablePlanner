@@ -1,12 +1,14 @@
 set(TRAINTIMETABLE_SOURCES
   ${TRAINTIMETABLE_SOURCES}
 
+  graph/view/backgroundhelper.h
   graph/view/hourpanel.h
   graph/view/linegraphtoolbar.h
   graph/view/linegraphview.h
   graph/view/linegraphwidget.h
   graph/view/stationlabelsheader.h
 
+  graph/view/backgroundhelper.cpp
   graph/view/hourpanel.cpp
   graph/view/linegraphtoolbar.cpp
   graph/view/linegraphview.cpp

@@ -64,7 +64,7 @@ private:
 
 private:
     friend class LineGraphView;
-    friend class StationLabelsHeader;
+    friend class BackgroundHelper;
     friend class LineGraphManager;
 
     sqlite3pp::database& mDb;

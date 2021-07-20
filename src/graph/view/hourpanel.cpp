@@ -2,8 +2,9 @@
 
 #include "app/session.h"
 
+#include "backgroundhelper.h"
+
 #include <QPainter>
-#include <QtMath>
 
 HourPanel::HourPanel(QWidget *parent) :
     QWidget(parent),
@@ -24,29 +25,5 @@ void HourPanel::paintEvent(QPaintEvent *)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    //TODO: settings
-    QFont hourTextFont;
-    QPen hourTextPen(AppSettings.getHourTextColor());
-
-    const int vertOffset = Session->vertOffset;
-    const int hourOffset = Session->hourOffset;
-
-    painter.setFont(hourTextFont);
-    painter.setPen(hourTextPen);
-
-    //qDebug() << "Drawing hours..." << rect << scroll;
-    const QString fmt(QStringLiteral("%1:00"));
-
-    const qreal top = verticalScroll;
-    const qreal bottom = rect().bottom();
-
-    int h = qFloor(top / hourOffset);
-    qreal y = h * hourOffset - verticalScroll + vertOffset;
-
-    for(; h <= 24 && y <= bottom; h++)
-    {
-        //qDebug() << "Y:" << y << fmt.arg(h);
-        painter.drawText(QPointF(5, y + 8), fmt.arg(h)); //y + 8 to center text vertically
-        y += hourOffset;
-    }
+    BackgroundHelper::drawHourPanel(&painter, rect(), verticalScroll);
 }
