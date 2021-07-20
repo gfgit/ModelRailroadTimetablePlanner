@@ -7,6 +7,7 @@
 #include "app/session.h"
 
 #include <QPainter>
+#include <QPaintEvent>
 
 StationLabelsHeader::StationLabelsHeader(QWidget *parent) :
     QWidget(parent),
@@ -28,10 +29,8 @@ void StationLabelsHeader::onSceneDestroyed()
     update();
 }
 
-void StationLabelsHeader::paintEvent(QPaintEvent *)
+void StationLabelsHeader::paintEvent(QPaintEvent *e)
 {
-    //TODO: repaint only new regions, not all
-
     if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
         return; //Nothing to draw
 
@@ -39,7 +38,7 @@ void StationLabelsHeader::paintEvent(QPaintEvent *)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    BackgroundHelper::drawStationHeader(&painter, m_scene, rect(), horizontalScroll);
+    BackgroundHelper::drawStationHeader(&painter, m_scene, e->rect(), horizontalScroll);
 }
 
 LineGraphScene *StationLabelsHeader::scene() const

@@ -21,7 +21,7 @@ private slots:
     void onSceneDestroyed();
 
 protected:
-    void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *e) override;
 
 private:
     LineGraphScene *m_scene;
