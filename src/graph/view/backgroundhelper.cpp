@@ -195,3 +195,45 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
         }
     }
 }
+
+void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+{
+    const double platfOffset = Session->platformOffset;
+
+    QPen jobPen;
+    jobPen.setWidth(AppSettings.getJobLineWidth());
+
+    QPointF top;
+    QPointF bottom;
+
+    for(const StationGraphObject &st : qAsConst(scene->stations))
+    {
+        const double left = st.xPos;
+        const double right = left + st.platforms.count() * platfOffset;
+
+        if(left > rect.right() || right < rect.left())
+            continue; //Skip station, it's not visible
+
+        top.rx() = bottom.rx() = st.xPos;
+
+        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+        {
+            for(const StationGraphObject::JobGraph& jobStop : platf.jobStops)
+            {
+                if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
+                    continue; //Skip, job not visible
+
+                jobPen.setColor(Session->colorForCat(jobStop.category));
+                painter->setPen(jobPen);
+
+                top.setY(jobStop.arrivalY);
+                bottom.setY(jobStop.departureY);
+
+                painter->drawLine(top, bottom);
+            }
+
+            top.rx() += platfOffset;
+            bottom.rx() += platfOffset;
+        }
+    }
+}

@@ -30,6 +30,8 @@ public:
 
     bool loadGraph(db_id objectId, LineGraphType type, bool force = false);
 
+    bool reloadJobs();
+
     inline LineGraphType getGraphType() const
     {
         return graphType;
@@ -62,8 +64,9 @@ private:
     bool loadStation(StationGraphObject &st);
     bool loadFullLine(db_id lineId);
 
+    bool loadStationJobStops(StationGraphObject &st);
+
 private:
-    friend class LineGraphView;
     friend class BackgroundHelper;
     friend class LineGraphManager;
 

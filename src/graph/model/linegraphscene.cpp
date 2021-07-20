@@ -6,6 +6,15 @@
 
 #include <QDebug>
 
+//TODO: maybe move to utils?
+constexpr qreal MSEC_PER_HOUR = 1000 * 60 * 60;
+
+static inline qreal timeToHourFraction(const QTime &t)
+{
+    qreal ret = t.msecsSinceStartOfDay() / MSEC_PER_HOUR;
+    return ret;
+}
+
 LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
     mDb(db),
@@ -112,13 +121,13 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         }
 
         auto r = q.getRows();
-//        TODO useful?
-//        outFromGateId = r.get<db_id>(0);
-//        outToGateId = r.get<db_id>(1);
+        //        TODO useful?
+        //        outFromGateId = r.get<db_id>(0);
+        //        outToGateId = r.get<db_id>(1);
         graphObjectName = r.get<QString>(2);
-//        outSpeed = r.get<int>(3);
-//        outType = utils::RailwaySegmentType(r.get<db_id>(4));
-//        outDistance = r.get<int>(5);
+        //        outSpeed = r.get<int>(3);
+        //        outType = utils::RailwaySegmentType(r.get<db_id>(4));
+        //        outDistance = r.get<int>(5);
 
         stA.stationId = r.get<db_id>(6);
         stB.stationId = r.get<db_id>(7);
@@ -150,8 +159,27 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     recalcContentSize();
 
+    reloadJobs();
+
     emit graphChanged(int(graphType), graphObjectId);
     emit redrawGraph();
+
+    return true;
+}
+
+bool LineGraphScene::reloadJobs()
+{
+    if(graphType == LineGraphType::NoGraph)
+        return false;
+
+    //TODO: maybe only load visible
+    //FIXME: also load job graph lines between stations
+
+    for(StationGraphObject& st : stations)
+    {
+        if(!loadStationJobStops(st))
+            return false;
+    }
 
     return true;
 }
@@ -283,6 +311,83 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 
         curPos += stB.platforms.count() * Session->platformOffset + Session->stationOffset;
         lastStationId = stB.stationId;
+    }
+
+    return true;
+}
+
+bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
+{
+    //Reset previous job graphs
+    for(StationGraphObject::PlatformGraph& platf : st.platforms)
+    {
+        platf.jobStops.clear();
+    }
+
+    sqlite3pp::query q(mDb, "SELECT stops.id, stops.job_id, jobs.category,"
+                            "stops.arrival, stops.departure,"
+                            "g_in.track_id, g_out.track_id"
+                            " FROM stops"
+                            " JOIN jobs ON stops.job_id=jobs.id"
+                            " JOIN station_gate_connections g_in ON g_in.id=stops.in_gate_conn"
+                            " JOIN station_gate_connections g_out ON g_out.id=stops.out_gate_conn"
+                            " WHERE stops.station_id=?"
+                            " ORDER BY stops.arrival");
+    q.bind(1, st.stationId);
+
+    const double vertOffset = Session->vertOffset;
+    const double hourOffset = Session->hourOffset;
+
+    for(auto stop : q)
+    {
+        StationGraphObject::JobGraph jobStop;
+        jobStop.stopId = stop.get<db_id>(0);
+        jobStop.jobId = stop.get<db_id>(1);
+        jobStop.category = JobCategory(stop.get<int>(2));
+        QTime arrival = stop.get<QTime>(3);
+        QTime departure = stop.get<QTime>(4);
+        db_id trackId = stop.get<db_id>(5);
+        db_id outTrackId = stop.get<db_id>(6);
+
+        if(trackId && trackId != outTrackId)
+        {
+            qWarning() << "Stop:" << jobStop.stopId << "Track not corresponding, using in";
+        }
+        else if(!trackId)
+        {
+            if(outTrackId)
+                trackId = outTrackId; //First stop, use out gate connection
+            else
+            {
+                qWarning() << "Stop:" << jobStop.stopId << "Both in/out track NULL, skipping";
+                continue; //Skip this stop
+            }
+        }
+
+        StationGraphObject::PlatformGraph *platf = nullptr;
+
+        //Find platform
+        for(StationGraphObject::PlatformGraph& p : st.platforms)
+        {
+            if(p.platformId == trackId)
+            {
+                platf = &p;
+                break;
+            }
+        }
+
+        if(!platf)
+        {
+            //Requested platform is not in this station
+            qWarning() << "Stop:" << jobStop.stopId << "Track is not in this station";
+            continue; //Skip this stop
+        }
+
+        //Calculate coordinates
+        jobStop.arrivalY = vertOffset + timeToHourFraction(arrival) * hourOffset;
+        jobStop.departureY = vertOffset + timeToHourFraction(departure) * hourOffset;
+
+        platf->jobStops.append(jobStop);
     }
 
     return true;

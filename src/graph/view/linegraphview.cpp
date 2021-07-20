@@ -100,6 +100,7 @@ void LineGraphView::paintEvent(QPaintEvent *e)
         return; //Nothing to draw
 
     BackgroundHelper::drawStations(&painter, m_scene, exposedRect);
+    BackgroundHelper::drawJobStops(&painter, m_scene, exposedRect);
 }
 
 void LineGraphView::resizeEvent(QResizeEvent *)
