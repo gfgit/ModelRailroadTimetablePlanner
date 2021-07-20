@@ -329,8 +329,8 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
                             "g_in.track_id, g_out.track_id"
                             " FROM stops"
                             " JOIN jobs ON stops.job_id=jobs.id"
-                            " JOIN station_gate_connections g_in ON g_in.id=stops.in_gate_conn"
-                            " JOIN station_gate_connections g_out ON g_out.id=stops.out_gate_conn"
+                            " LEFT JOIN station_gate_connections g_in ON g_in.id=stops.in_gate_conn"
+                            " LEFT JOIN station_gate_connections g_out ON g_out.id=stops.out_gate_conn"
                             " WHERE stops.station_id=?"
                             " ORDER BY stops.arrival");
     q.bind(1, st.stationId);
