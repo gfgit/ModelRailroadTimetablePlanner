@@ -1,3 +1,11 @@
-Train Timetable
+ModelRailroadTimetablePlanner
 A C++ software with Qt GUI for model railway timetable scheduling
 By Filippo Gentile
+
+The goal of the project is to implement
+automatic mechanism which prevent invalid
+operations and suggest user with useful action
+in order to speed up the creation of timetables.
+
+Less time spent on the computer,
+more time to ha e fun on your railway Layout!!!
