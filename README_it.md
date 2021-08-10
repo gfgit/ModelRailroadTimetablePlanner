@@ -1,5 +1,7 @@
 # ModelRailroadTimetablePlanner
 
+[English version](README.md)
+
 Precedenteme noto come **TrainTimetable**
 
 Un software C++ con GUI Qt (interfaccia grafica) per creare orari di treni per plastici ferroviari
