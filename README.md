@@ -1,5 +1,7 @@
 # ModelRailroadTimetablePlanner
 
+[Versione in italiano](README_it.md)
+
 Formely **TrainTimetable**
 
 A C++ software with Qt GUI for model railway timetable scheduling
