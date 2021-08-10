@@ -16,24 +16,24 @@ Il programma si prefigge di produrre tutta la documentazione
 per condurre e gestire i treni su grandi tracciati come nei FREMO Meetings.
 
 # Principali funzioni
-- Railway timetable graph per each line in SVG, PDF or printed
-- Group jobs (trains) in work shift
-- Export booklets in ODT (Libreoffice Writer) for shifts and stations
-- Importation of rollingstock pieces from other sessions or ODS Spreadsheet
+- Grafico orario ferroviario per ogni linea in SVG, PDF o stampato
+- Raggruppa servizi (treni) in turni lavorativi 
+- Esporta libretti in ODT (Libreoffice Writer) per turni e stazioni
+- Importazione del materiale rotabile da altre sessioni o fogli di calcolo ODS Spreadsheet
 
-# Project history
-The development started as a small hobby project back in 2016,
-in collaboration with italian FREMO organizations.
-It was rewritten from scratch due to core instsbilities and limitations.
-Since then it has grown to the point I cannot manage it alone anymore.
-So I published it on Github hoping to keep it alive.
+# Storia del progetto
+Lo sviluppo è partito come piccolo progetto hobbystico nel 2016,
+in collaborazione con organizzazioni FREMO italiane.
+È stato completamente riscritto a causa di instabilità e limitazioni nella struttura interna.
+Da allora è cresciuto al punto da non riuscire più a seguirlo da solo.
+Perciò l'ho pubblicato su Github nella speranza di tenerlo in vita.
 
 
-# Project motto
+# Motto del progetto
 
-Less time spent on the computer,
-more time to have fun on your railway Layout!!!
+Meno tempo passato al computer, più tempo
+per divertirsi sul proprio tracciato ferroviario!!!
 
-# Contributing to the project
+# Partecipare al progetto
 
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) file.
+Per favore vedere il file [CONTRIBUTING.md](CONTRIBUTING.md).
