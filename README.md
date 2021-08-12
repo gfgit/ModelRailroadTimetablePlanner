@@ -4,7 +4,9 @@
 
 Formely **TrainTimetable**
 
-A C++ software with Qt GUI for model railway timetable scheduling
+A cross-platform C++ application with Qt GUI for model railway timetable scheduling.
+*Currently tested on Windows and Ubuntu.*
+
 By Filippo Gentile
 
 # Goals
@@ -18,6 +20,7 @@ The programs aims to provide all documents useful
 for driving and dispatching trains on big layouts like in FREMO Meetings.
 
 # Main features
+- Available UI languages: English, Italian
 - Railway timetable graph per each line in SVG, PDF or printed
 - Group jobs (trains) in work shift
 - Export booklets in ODT (Libreoffice Writer) for shifts and stations
@@ -27,14 +30,14 @@ for driving and dispatching trains on big layouts like in FREMO Meetings.
 The development started as a small hobby project back in 2016,
 in collaboration with italian FREMO organizations.
 It was rewritten from scratch due to core instsbilities and limitations.
-Since then it has grown to the point I cannot manage it alone anymore.
-So I published it on Github hoping to keep it alive.
+Since then it has grown unexpectedly.
+So I'd like it to become a comunity project!
 
 
 # Project motto
 
 Less time spent on the computer,
-more time to have fun on your railway Layout!!!
+more time to have fun on your railway layout!!!
 
 # Contributing to the project
 
