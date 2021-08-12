@@ -4,7 +4,9 @@
 
 Precedenteme noto come **TrainTimetable**
 
-Un software C++ con GUI Qt (interfaccia grafica) per creare orari di treni per plastici ferroviari
+Un programma multipiattaforma C++ con GUI Qt (interfaccia grafica) per creare orari di treni per plastici ferroviari.
+*Attualmente testato su Windows e Ubuntu.*
+
 By Filippo Gentile
 
 # Obiettivi
@@ -18,6 +20,7 @@ Il programma si prefigge di produrre tutta la documentazione
 per condurre e gestire i treni su grandi tracciati come nei FREMO Meetings.
 
 # Principali funzioni
+- Interfaccia disponibile in: Inglese, Italiano
 - Grafico orario ferroviario per ogni linea in SVG, PDF o stampato
 - Raggruppa servizi (treni) in turni lavorativi 
 - Esporta libretti in ODT (Libreoffice Writer) per turni e stazioni
@@ -27,8 +30,8 @@ per condurre e gestire i treni su grandi tracciati come nei FREMO Meetings.
 Lo sviluppo è partito come piccolo progetto hobbystico nel 2016,
 in collaborazione con organizzazioni FREMO italiane.
 È stato completamente riscritto a causa di instabilità e limitazioni nella struttura interna.
-Da allora è cresciuto al punto da non riuscire più a seguirlo da solo.
-Perciò l'ho pubblicato su Github nella speranza di tenerlo in vita.
+Da allora è cresciuto inaspettatamente.
+Quindi mi piacerebbe che diventasse un progetto condiviso con la comunità!
 
 
 # Motto del progetto
