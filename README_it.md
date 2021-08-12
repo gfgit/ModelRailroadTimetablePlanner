@@ -9,7 +9,7 @@ Un programma multipiattaforma C++ con GUI Qt (interfaccia grafica) per creare or
 
 By Filippo Gentile
 
-# Obiettivi
+## Obiettivi
 
 L'obiettivo del progetto è implementare meccanismi
 automatici che impediscano operazioni non valide e
@@ -19,14 +19,14 @@ velocizzare la creazione di tabelle orarie.
 Il programma si prefigge di produrre tutta la documentazione
 per condurre e gestire i treni su grandi tracciati come nei FREMO Meetings.
 
-# Principali funzioni
+## Principali funzioni
 - Interfaccia disponibile in: Inglese, Italiano
 - Grafico orario ferroviario per ogni linea in SVG, PDF o stampato
 - Raggruppa servizi (treni) in turni lavorativi 
 - Esporta libretti in ODT (Libreoffice Writer) per turni e stazioni
 - Importazione del materiale rotabile da altre sessioni o fogli di calcolo ODS Spreadsheet
 
-# Storia del progetto
+## Storia del progetto
 Lo sviluppo è partito come piccolo progetto hobbystico nel 2016,
 in collaborazione con organizzazioni FREMO italiane.
 È stato completamente riscritto a causa di instabilità e limitazioni nella struttura interna.
@@ -34,11 +34,11 @@ Da allora è cresciuto inaspettatamente.
 Quindi mi piacerebbe che diventasse un progetto condiviso con la comunità!
 
 
-# Motto del progetto
+## Motto del progetto
 
 Meno tempo passato al computer, più tempo
 per divertirsi sul proprio tracciato ferroviario!!!
 
-# Partecipare al progetto
+## Partecipare al progetto
 
 Per favore vedere il file [CONTRIBUTING.md](CONTRIBUTING.md).
