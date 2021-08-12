@@ -5,7 +5,7 @@ I'm New to Git and Github so I don't know yet how to manage repositories and con
 The model should be creating pull requests with topic branches and merging on master or `master` or `develop`.
 
 
-# Usage of branches
+## Usage of branches
 
 - `master`: stable code ready to be released
 
@@ -13,13 +13,13 @@ The model should be creating pull requests with topic branches and merging on ma
 
 To develop new features please create new branches and finally merge to develop
 
-# Translations
+## Translations
 
 UI is localized with Qt Linguist.
 Translation files live in [`src/translations`](src/translations) folder.
 For more information see [Qt Documentation](https://doc.qt.io/qt-5/linguist-overview.html).
 
-## Adding a new language
+### Adding a new language
 
 1. Create a file named `traintimetable_*.ts` in translation folder.
 Replace placeholder with language code (i.e. `it`, `de`, `fr`, etc).
@@ -30,7 +30,7 @@ Add the file name with path in `TRAINTIMETABLE_TS_FILES` variabile.
 
 Then follow next paragraph.
 
-## Update translations to match new UI elements
+### Update translations to match new UI elements
 
 3. Run `lupdate` to fill with text to be traslated.
 This is done by enabling `UPDATE_TS` option in CMake and
@@ -39,5 +39,5 @@ running `RELEASE_TRANSLATIONS` target.
 4. Use Qt Linguist or other software to translate text.
 
 
-# Do you have suggestions?
+## Do you have suggestions?
 If you think this workflow model is not efficient please let me know!
