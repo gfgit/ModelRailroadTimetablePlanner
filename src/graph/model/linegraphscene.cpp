@@ -315,7 +315,7 @@ JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
     if(!resultPlatf)
         return job; //No match
 
-    for(const StationGraphObject::JobGraph& jobStop : resultPlatf->jobStops)
+    for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
     {
         if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
         {
@@ -487,7 +487,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
 
     for(auto stop : q)
     {
-        StationGraphObject::JobGraph jobStop;
+        StationGraphObject::JobStopGraph jobStop;
         jobStop.stopId = stop.get<db_id>(0);
         jobStop.jobId = stop.get<db_id>(1);
         jobStop.category = JobCategory(stop.get<int>(2));

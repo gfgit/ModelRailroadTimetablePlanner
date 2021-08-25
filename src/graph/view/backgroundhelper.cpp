@@ -218,7 +218,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
 
         for(const StationGraphObject::PlatformGraph& platf : st.platforms)
         {
-            for(const StationGraphObject::JobGraph& jobStop : platf.jobStops)
+            for(const StationGraphObject::JobStopGraph& jobStop : platf.jobStops)
             {
                 if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
                     continue; //Skip, job not visible
