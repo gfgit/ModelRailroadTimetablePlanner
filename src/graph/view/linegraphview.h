@@ -8,6 +8,15 @@ class LineGraphScene;
 class StationLabelsHeader;
 class HourPanel;
 
+/*!
+ * \brief Widget to display a LineGraphScene
+ *
+ * A scrollable widget which renders LineGraphScene contents
+ * Moving the mouse cursor on the contents, tooltips will show
+ *
+ * \sa LineGraphWidget
+ * \sa BackgroundHelper
+ */
 class LineGraphView : public QAbstractScrollArea
 {
     Q_OBJECT

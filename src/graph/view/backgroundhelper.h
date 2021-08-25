@@ -7,6 +7,15 @@ class QPainter;
 
 class LineGraphScene;
 
+/*!
+ * \brief Helper class to render LineGraphView contents
+ *
+ * Contains static helper functions to draw each part of the view
+ *
+ * \sa LineGraphView
+ * \sa HourPanel
+ * \sa StationLabelsHeader
+ */
 class BackgroundHelper
 {
 public:

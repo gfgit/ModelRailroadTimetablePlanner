@@ -9,9 +9,10 @@
 #include <QRgb>
 
 /*!
- * Graph of a railway station
+ * \brief Graph of a railway station
  *
  * Contains informations to draw station name, platforms and jobs
+ * \sa PlatformGraph
  */
 class StationGraphObject
 {
@@ -23,7 +24,7 @@ public:
     utils::StationType stationType;
 
     /*!
-     * Graph of the job while is stopping
+     * \brief Graph of the job while is stopping
      *
      * Contains informations to draw job line on top of the PlatformGraph
      */
@@ -38,7 +39,7 @@ public:
     } JobStopGraph;
 
     /*!
-     * Graph of the job while is moving
+     * \brief Graph of the job while is moving
      *
      * Contains informations to draw job line between two adjacent stations
      */
@@ -57,9 +58,11 @@ public:
     } JobLineGraph;
 
     /*!
-     * Graph of a station track (platform)
+     * \brief Graph of a station track (platform)
      *
      * Contains informations to draw platform line and header name
+     * \sa JobStopGraph
+     * \sa JobLineGraph
      */
     typedef struct
     {

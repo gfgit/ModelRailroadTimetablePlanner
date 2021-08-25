@@ -12,6 +12,14 @@ class CustomCompletionLineEdit;
 class LineGraphScene;
 class ISqlFKMatchModel;
 
+/*!
+ * \brief Toolbar to select railway stations or lines
+ *
+ * Consist of a combobox and a line edit
+ * The combo box selects the content type (\sa LineGraphType)
+ * The line edit allows to choose which item of selected type
+ * should be shown.
+ */
 class LineGraphToolbar : public QWidget
 {
     Q_OBJECT

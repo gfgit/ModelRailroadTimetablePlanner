@@ -16,14 +16,25 @@ namespace sqlite3pp {
 class database;
 }
 
+/*!
+ * \brief Enum to describe view content type
+ */
 enum class LineGraphType
 {
-    NoGraph = 0,
-    SingleStation,
-    RailwaySegment,
-    RailwayLine
+    NoGraph = 0, //!< No content displayed
+    SingleStation, //!< Show a single station
+    RailwaySegment, //!< Show two adjacent stations and the segment in between
+    RailwayLine //!< Show a complete railway line (multiple adjacent segments)
 };
 
+/*!
+ * \brief Class to store line information
+ *
+ * Stores information to draw railway content in a LineGraphView
+ *
+ * \sa LineGraphManager
+ * \sa LineGraphView
+ */
 class LineGraphScene : public QObject
 {
     Q_OBJECT

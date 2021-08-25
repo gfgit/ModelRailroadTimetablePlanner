@@ -5,6 +5,16 @@
 
 class LineGraphScene;
 
+/*!
+ * \brief Helper widget to draw station labels
+ *
+ * Draws station labels (with platform numbers below) on
+ * the view horizontal header
+ *
+ * \sa LineGraphScene
+ * \sa LineGraphView
+ * \sa BackgroundHelper
+ */
 class StationLabelsHeader : public QWidget
 {
     Q_OBJECT
