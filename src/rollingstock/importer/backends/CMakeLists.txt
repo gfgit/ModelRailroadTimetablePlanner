@@ -1,8 +1,8 @@
 add_subdirectory(ods)
 add_subdirectory(sqlite)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/importer/backends/importmodes.h
   rollingstock/importer/backends/importtask.h
   rollingstock/importer/backends/ioptionswidget.h

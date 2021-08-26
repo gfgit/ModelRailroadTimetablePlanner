@@ -3,8 +3,8 @@ add_subdirectory(intefaces)
 add_subdirectory(model)
 add_subdirectory(pages)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/importer/rsimportstrings.h
   rollingstock/importer/rsimportwizard.h
 

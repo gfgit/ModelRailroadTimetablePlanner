@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   db_metadata/imagemetadata.h
   db_metadata/imagemetadata.cpp
   db_metadata/meetinginformationdialog.h
@@ -9,8 +9,8 @@ set(TRAINTIMETABLE_SOURCES
   PARENT_SCOPE
 )
 
-set(TRAINTIMETABLE_UI_FILES
-  ${TRAINTIMETABLE_UI_FILES}
+set(MR_TIMETABLE_PLANNER_UI_FILES
+  ${MR_TIMETABLE_PLANNER_UI_FILES}
   db_metadata/meetinginformationdialog.ui
   PARENT_SCOPE
 )

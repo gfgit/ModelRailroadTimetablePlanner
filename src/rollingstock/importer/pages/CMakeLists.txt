@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/importer/pages/choosefilepage.h
   rollingstock/importer/pages/fixduplicatesdlg.h
   rollingstock/importer/pages/itemselectionpage.h

@@ -2,8 +2,8 @@
 #Set Win32 resources
 if (WIN32)
     configure_file(../packaging/windows/resources.rc.in ${CMAKE_BINARY_DIR}/resources/resources.rc)
-    set(TRAINTIMETABLE_RESOURCES
-        ${TRAINTIMETABLE_RESOURCES}
+    set(MR_TIMETABLE_PLANNER_RESOURCES
+        ${MR_TIMETABLE_PLANNER_RESOURCES}
         ${CMAKE_BINARY_DIR}/resources/resources.rc
         )
 endif()
@@ -27,24 +27,24 @@ add_subdirectory(translations)
 add_subdirectory(utils)
 add_subdirectory(viewmanager)
 
-# Set TrainTimetable info template file
-set(TRAINTIMETABLE_SOURCES
-    ${TRAINTIMETABLE_SOURCES}
+# Set ModelRailroadTimetablePlanner info template file
+set(MR_TIMETABLE_PLANNER_SOURCES
+    ${MR_TIMETABLE_PLANNER_SOURCES}
     app/info.h.in
     )
 configure_file(app/info.h.in ${CMAKE_BINARY_DIR}/include/info.h)
 
 # Add executable
-add_executable(${TRAINTIMETABLE_TARGET} WIN32
-    ${TRAINTIMETABLE_SOURCES}
-    ${TRAINTIMETABLE_UI_FILES}
-    ${TRAINTIMETABLE_RESOURCES}
+add_executable(${MR_TIMETABLE_PLANNER_TARGET} WIN32
+    ${MR_TIMETABLE_PLANNER_SOURCES}
+    ${MR_TIMETABLE_PLANNER_UI_FILES}
+    ${MR_TIMETABLE_PLANNER_RESOURCES}
     )
 
 # Set compiler options
 if(MSVC)
     target_compile_options(
-        ${TRAINTIMETABLE_TARGET}
+        ${MR_TIMETABLE_PLANNER_TARGET}
         PRIVATE
         /WX
         /wd4267
@@ -57,7 +57,7 @@ if(MSVC)
         )
 else()
     target_compile_options(
-        ${TRAINTIMETABLE_TARGET}
+        ${MR_TIMETABLE_PLANNER_TARGET}
         PRIVATE
         "$<$<CONFIG:RELEASE>:-O2>"
         #-Werror
@@ -72,7 +72,7 @@ endif()
 
 if(UNIX AND NOT APPLE)
     target_link_options(
-        ${TRAINTIMETABLE_TARGET}
+        ${MR_TIMETABLE_PLANNER_TARGET}
         PRIVATE
         -rdynamic
         )
@@ -80,7 +80,7 @@ endif()
 
 # Set include directories
 target_include_directories(
-    ${TRAINTIMETABLE_TARGET}
+    ${MR_TIMETABLE_PLANNER_TARGET}
     PRIVATE
     ${SQLite3_INCLUDE_DIRS}
     ${ZIP_INCLUDE_DIR}
@@ -89,7 +89,7 @@ target_include_directories(
 
 # Set link libraries
 target_link_libraries(
-    ${TRAINTIMETABLE_TARGET}
+    ${MR_TIMETABLE_PLANNER_TARGET}
     PRIVATE
     Qt5::Core
     Qt5::Gui
@@ -103,14 +103,14 @@ target_link_libraries(
 
 if (WIN32)
     target_link_libraries(
-        ${TRAINTIMETABLE_TARGET}
+        ${MR_TIMETABLE_PLANNER_TARGET}
         PRIVATE
         DbgHelp
         )
 endif()
 
 if(UNIX AND NOT APPLE)
-    install(TARGETS ${TRAINTIMETABLE_TARGET} RUNTIME DESTINATION bin)
+    install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET} RUNTIME DESTINATION bin)
 endif()
 
 ## Enable Crashpad if found
@@ -186,7 +186,7 @@ endif()
 #endif()
 
 # Set compiler definitions
-target_compile_definitions(${TRAINTIMETABLE_TARGET} PRIVATE ${TRAINTIMETABLE_DEFINITIONS})
+target_compile_definitions(${MR_TIMETABLE_PLANNER_TARGET} PRIVATE ${MR_TIMETABLE_PLANNER_DEFINITIONS})
 
 ## Doxygen documentation ##
 if(DOXYGEN_FOUND)
@@ -196,7 +196,7 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_EXTRACT_ALL "YES")
     set(DOXYGEN_EXTRACT_PRIVATE "YES")
     set(DOXYGEN_DOT_GRAPH_MAX_NODES 100)
-    doxygen_add_docs(docs ALL ${TRAINTIMETABLE_SOURCES})
+    doxygen_add_docs(docs ALL ${MR_TIMETABLE_PLANNER_SOURCES})
 endif()
 ## Doxygen end ##
 
@@ -211,14 +211,14 @@ if(UPDATE_TS)
     if(UPDATE_TS_KEEP_OBSOLETE)
         add_custom_command(TARGET RELEASE_TRANSLATIONS
             POST_BUILD
-            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ARGS ${CMAKE_SOURCE_DIR}/src -ts ${TRAINTIMETABLE_TS_FILES}
+            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ARGS ${CMAKE_SOURCE_DIR}/src -ts ${MR_TIMETABLE_PLANNER_TS_FILES}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
             COMMENT "Updating translations"
             VERBATIM)
     else()
         add_custom_command(TARGET RELEASE_TRANSLATIONS
             POST_BUILD
-            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ARGS ${CMAKE_SOURCE_DIR}/src -ts ${TRAINTIMETABLE_TS_FILES} -no-obsolete
+            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ARGS ${CMAKE_SOURCE_DIR}/src -ts ${MR_TIMETABLE_PLANNER_TS_FILES} -no-obsolete
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
             COMMENT "Updating translations"
             VERBATIM)
@@ -227,7 +227,7 @@ if(UPDATE_TS)
 endif()
 
 # For each .ts file release a .qm file
-foreach(TS_FILE ${TRAINTIMETABLE_TS_FILES})
+foreach(TS_FILE ${MR_TIMETABLE_PLANNER_TS_FILES})
     get_filename_component(QM_FILE_NAME ${TS_FILE} NAME_WLE)
     set(QM_FILE "${CMAKE_BINARY_DIR}/src/translations/${QM_FILE_NAME}.qm")
     message("Generating translation: ${QM_FILE}")
@@ -243,7 +243,7 @@ endforeach()
 ## Install and Deploy ##
 
 # Copy executable
-install(TARGETS ${TRAINTIMETABLE_TARGET}
+install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET}
     RUNTIME
     DESTINATION ${CMAKE_INSTALL_PREFIX})
 
@@ -252,7 +252,7 @@ install(FILES ${CMAKE_SOURCE_DIR}/files/icons/lightning/lightning.svg
     DESTINATION ${CMAKE_INSTALL_PREFIX}/icons)
 
 # For each .ts file install corrensponding .qm file
-foreach(TS_FILE ${TRAINTIMETABLE_TS_FILES})
+foreach(TS_FILE ${MR_TIMETABLE_PLANNER_TS_FILES})
     get_filename_component(QM_FILE_NAME ${TS_FILE} NAME_WLE)
     install(FILES
         "${CMAKE_BINARY_DIR}/src/translations/${QM_FILE_NAME}.qm"

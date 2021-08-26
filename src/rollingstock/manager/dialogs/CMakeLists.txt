@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/manager/dialogs/mergemodelsdialog.h
   rollingstock/manager/dialogs/mergeownersdialog.h
 
@@ -8,8 +8,8 @@ set(TRAINTIMETABLE_SOURCES
   PARENT_SCOPE
 )
 
-set(TRAINTIMETABLE_UI_FILES
-  ${TRAINTIMETABLE_UI_FILES}
+set(MR_TIMETABLE_PLANNER_UI_FILES
+  ${MR_TIMETABLE_PLANNER_UI_FILES}
   rollingstock/manager/dialogs/mergemodelsdialog.ui
   rollingstock/manager/dialogs/mergeownersdialog.ui
   PARENT_SCOPE

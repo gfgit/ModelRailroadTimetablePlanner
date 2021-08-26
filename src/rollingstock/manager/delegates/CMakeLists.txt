@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/manager/delegates/rsnumberdelegate.h
   rollingstock/manager/delegates/rsnumspinbox.h
   rollingstock/manager/delegates/rstypedelegate.h

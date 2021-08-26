@@ -1,7 +1,7 @@
 add_subdirectory(common)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   odt_export/jobsheetexport.h
   odt_export/sessionrsexport.h
   odt_export/shiftsheetexport.h

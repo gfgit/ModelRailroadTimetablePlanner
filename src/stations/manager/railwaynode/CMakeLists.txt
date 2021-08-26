@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   stations/manager/railwaynode/kmdelegate.h
   stations/manager/railwaynode/kmspinbox.h
   stations/manager/railwaynode/railwaynodeeditor.h
