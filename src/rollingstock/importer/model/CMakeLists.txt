@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/importer/model/duplicatesimporteditemsmodel.h
   rollingstock/importer/model/duplicatesimportedrsmodel.h
   rollingstock/importer/model/rsimportedmodelsmodel.h

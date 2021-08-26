@@ -24,7 +24,7 @@ JobStorage::JobStorage(sqlite3pp::database &db, QObject *parent) :
     mDb(db)
 {
     impl = new JobStoragePrivate;
-    connect(&AppSettings, &TrainTimetableSettings::jobColorsChanged, this, &JobStorage::updateJobColors);
+    connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobStorage::updateJobColors);
     connect(Session, &MeetingSession::jobChanged, this, &JobStorage::updateJob);
 }
 

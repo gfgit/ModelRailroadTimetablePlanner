@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/rs_checker/error_data.h
   rollingstock/rs_checker/rscheckermanager.h
   rollingstock/rs_checker/rserrorswidget.h

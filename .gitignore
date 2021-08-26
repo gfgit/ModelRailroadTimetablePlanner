@@ -2,6 +2,7 @@
 
 # CMake artifacts
 /build*/
+CMakeUserPresets.json
 
 # Doxygen
 /docs/

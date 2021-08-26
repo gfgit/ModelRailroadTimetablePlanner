@@ -97,7 +97,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     connect(this, &JobPathEditor::stationChange, Session->mLineStorage, &LineStorage::stationPlanChanged, Qt::QueuedConnection);
 
     connect(Session->mJobStorage, &JobStorage::aboutToRemoveJob, this, &JobPathEditor::onJobRemoved);
-    connect(&AppSettings, &TrainTimetableSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
+    connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
 
     setReadOnly(false);
     setEdited(false);

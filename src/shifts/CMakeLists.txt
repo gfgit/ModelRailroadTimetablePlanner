@@ -1,7 +1,7 @@
 add_subdirectory(shiftgraph)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   shifts/shiftcombomodel.h
   shifts/shiftitem.h
   shifts/shiftjobsmodel.h

@@ -1,4 +1,4 @@
-; Setup TrainTimetable and register variables for .ttt file associations
+; Setup ModelRailroadTimetablePlanner and register variables for .ttt file associations
 
 ;--------------------------------
 ;Include Modern UI and FileFunc and LogicLib
@@ -53,7 +53,7 @@ ManifestDPIAware True
 #!define MUI_WELCOMEPAGE_TEXT "$(welcome_text)"
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE ${TRAIN_TIMETABLE_LICENSE}
+!insertmacro MUI_PAGE_LICENSE ${MR_TIMETABLE_PLANNER_LICENSE}
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -61,10 +61,10 @@ ManifestDPIAware True
 !define MUI_FINISHPAGE_LINK "$(visit_site)"
 !define MUI_FINISHPAGE_LINK_LOCATION ${ABOUTURL}
 
-!define MUI_FINISHPAGE_RUN "$INSTDIR\${TRAIN_TIMETABLE_EXE}"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 
-!define MUI_FINISHPAGE_SHOWREADME ${TRAIN_TIMETABLE_README}
+!define MUI_FINISHPAGE_SHOWREADME ${MR_TIMETABLE_PLANNER_README}
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "$(show_readme_label)"
 
 !insertmacro MUI_PAGE_FINISH
@@ -97,7 +97,7 @@ LangString show_readme_label ${LANG_ITALIAN} "Mostra note di rilascio"
 LangString DESC_MainProgram ${LANG_ENGLISH} "Main application and settings files"
 LangString DESC_MainProgram ${LANG_ITALIAN} "Applicazione principale e file di configurazione"
 
-LangString DESC_SM_Shortcut ${LANG_ENGLISH} "Create shortcuts to Start Menu. This makes easier to start Train Timetable"
+LangString DESC_SM_Shortcut ${LANG_ENGLISH} "Create shortcuts to Start Menu. This makes easier to start Model Railroad Timetable Planner"
 LangString DESC_SM_Shortcut ${LANG_ITALIAN} "Crea collegamenti al Menu Start. Questo rende pi${U+00FA} facile l'avvio dell'applicazione" #${U+00FA} = ù (U accentata minuscola)
 
 LangString DESC_FileAss ${LANG_ENGLISH} "Setup file associations to display an icon for Train Timetable Session files and be able to open the application by just double clicking on the file"
@@ -151,32 +151,32 @@ Section "Application" main_program
   
 	SetOutPath $INSTDIR
 
-	File ${TRAIN_TIMETABLE_PATH}\${TRAIN_TIMETABLE_EXE}
-	File ${TRAIN_TIMETABLE_EXTRA}\icons\icon.ico
+        File ${MR_TIMETABLE_PLANNER_PATH}\${MR_TIMETABLE_PLANNER_EXE}
+        File ${MR_TIMETABLE_PLANNER_EXTRA}\icons\icon.ico
 
-	File ${TRAIN_TIMETABLE_PATH}\*.dll
+        File ${MR_TIMETABLE_PLANNER_PATH}\*.dll
 
 	SetOutPath $INSTDIR\platforms
-	File ${TRAIN_TIMETABLE_PATH}\platforms\*.dll
+        File ${MR_TIMETABLE_PLANNER_PATH}\platforms\*.dll
 
 	SetOutPath $INSTDIR\printsupport
-	File ${TRAIN_TIMETABLE_PATH}\printsupport\*.dll
+        File ${MR_TIMETABLE_PLANNER_PATH}\printsupport\*.dll
 
 	SetOutPath $INSTDIR\styles
-	File ${TRAIN_TIMETABLE_PATH}\styles\*.dll
+        File ${MR_TIMETABLE_PLANNER_PATH}\styles\*.dll
 
 	SetOutPath $INSTDIR\imageformats
-	File ${TRAIN_TIMETABLE_PATH}\imageformats\*.dll
+        File ${MR_TIMETABLE_PLANNER_PATH}\imageformats\*.dll
   
 	SetOutPath $INSTDIR\icons
-	File ${TRAIN_TIMETABLE_EXTRA}\icons\lightning\lightning.svg
+        File ${MR_TIMETABLE_PLANNER_EXTRA}\icons\lightning\lightning.svg
   
 	SetOutPath $INSTDIR\translations
-	File ${TRAIN_TIMETABLE_PATH}\translations\*.qm
+        File ${MR_TIMETABLE_PLANNER_PATH}\translations\*.qm
   
         SetOutPath "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}"
 	; Create empty settings file
-	FileOpen $0 $OUTDIR\${TRAIN_TIMETABLE_SETTINGS} w
+        FileOpen $0 $OUTDIR\${MR_TIMETABLE_PLANNER_SETTINGS} w
 	FileClose $0
 	
 	; Set application language to the language chosen int the installer (default English)
@@ -189,7 +189,7 @@ Section "Application" main_program
 		${Default}
 			${Break}
 	${EndSwitch}
-	WriteINIStr $OUTDIR\${TRAIN_TIMETABLE_SETTINGS} "General" "language" $0
+        WriteINIStr $OUTDIR\${MR_TIMETABLE_PLANNER_SETTINGS} "General" "language" $0
 
 	# Uninstaller - See function un.onInit and section "uninstall" for configuration
 	WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -226,7 +226,7 @@ Section "Start Menu Shortcuts" sm_shorcuts
 	# Start Menu
 	SetShellVarContext current
         CreateDirectory "$SMPROGRAMS\${COMPANY_NAME}"
-        CreateShortCut "$SMPROGRAMS\${COMPANY_NAME}\${APP_NAME}.lnk" "$INSTDIR\${TRAIN_TIMETABLE_EXE}" "" "$INSTDIR\icon.ico"
+        CreateShortCut "$SMPROGRAMS\${COMPANY_NAME}\${APP_NAME}.lnk" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}" "" "$INSTDIR\icon.ico"
 SectionEnd
 
 ; Open a section to register file type
@@ -234,11 +234,11 @@ Section "File associations" file_ass
 	SetShellVarContext current
 	SetOutPath $INSTDIR
   
-	WriteRegStr HKCU "Software\Classes\.ttt" "" "Train_Timetable.session"
+        WriteRegStr HKCU "Software\Classes\.ttt" "" "MR_TIMETABLE_PLANNER.session"
         WriteRegStr HKCU "Software\Classes\.ttt" "PerceivedType" "document"
-	WriteRegStr HKCU "Software\Classes\Train_Timetable.session" "" "Train Timetable Session File"
-	WriteRegStr HKCU "Software\Classes\Train_Timetable.session\DefaultIcon" "" "$INSTDIR\${TRAIN_TIMETABLE_EXE},0"
-	WriteRegStr HKCU "Software\Classes\Train_Timetable.session\shell\open\command" "" '$INSTDIR\${TRAIN_TIMETABLE_EXE} "%1"'
+        WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session" "" "Train Timetable Session File"
+        WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session\DefaultIcon" "" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE},0"
+        WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session\shell\open\command" "" '$INSTDIR\${MR_TIMETABLE_PLANNER_EXE} "%1"'
   
 	DetailPrint $INSTDIR
   
@@ -326,7 +326,7 @@ Section un.main_program
         RMDir "$SMPROGRAMS\${COMPANY_NAME}"
  
 	# Remove files
-	Delete $INSTDIR\${TRAIN_TIMETABLE_EXE}
+        Delete $INSTDIR\${MR_TIMETABLE_PLANNER_EXE}
 	Delete $INSTDIR\icon.ico
 	
 	Delete $INSTDIR\icons\lightning.svg
@@ -340,7 +340,7 @@ Section un.main_program
                 RMDir /r "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}\logs"
 	
 delete_settings:	
-        Delete "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}\${TRAIN_TIMETABLE_SETTINGS}"
+        Delete "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}\${MR_TIMETABLE_PLANNER_SETTINGS}"
         RMDir "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}"
         RMDir "$LOCALAPPDATA\${COMPANY_NAME}"
 
@@ -373,7 +373,7 @@ delete_settings:
 	DeleteRegKey ${_hkey} "Software\Classes\${_pid}"
 	!macroend
 
-	!insertmacro AssocDeleteFileExtAndProgId HKCU ".ttt" "Train_Timetable.session"
+        !insertmacro AssocDeleteFileExtAndProgId HKCU ".ttt" "MR_TIMETABLE_PLANNER.session"
 	
 	DetailPrint $INSTDIR
 	DetailPrint $OUTDIR

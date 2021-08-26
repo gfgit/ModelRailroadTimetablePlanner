@@ -2,8 +2,8 @@ add_subdirectory(spinbox)
 add_subdirectory(sqldelegate)
 add_subdirectory(thread)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   utils/colorview.h
   utils/directiontype.h
   utils/file_format_names.h

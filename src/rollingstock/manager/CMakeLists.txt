@@ -1,8 +1,8 @@
 add_subdirectory(delegates)
 add_subdirectory(dialogs)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/rollingstockmatchmodel.h
   rollingstock/manager/rollingstockmanager.h
 
@@ -10,7 +10,7 @@ set(TRAINTIMETABLE_SOURCES
   PARENT_SCOPE
 )
 
-set(TRAINTIMETABLE_UI_FILES
-  ${TRAINTIMETABLE_UI_FILES}
+set(MR_TIMETABLE_PLANNER_UI_FILES
+  ${MR_TIMETABLE_PLANNER_UI_FILES}
   PARENT_SCOPE
 )
