@@ -321,9 +321,9 @@ void MainWindow::loadFile(const QString& fileName)
     if(err == DB_Error::FormatTooOld)
     {
         int but = QMessageBox::warning(this, tr("Version is old"),
-                                       tr("This file was created by an older version of Train Timetable.\n"
+                                       tr("This file was created by an older version of %1.\n"
                                           "Opening it without conversion might not work and even crash the application.\n"
-                                          "Do you want to open it anyway?"),
+                                          "Do you want to open it anyway?").arg(qApp->applicationDisplayName()),
                                        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if(but == QMessageBox::Yes)
             err = Session->openDB(fileName, true);
@@ -333,9 +333,9 @@ void MainWindow::loadFile(const QString& fileName)
         if(err == DB_Error::FormatTooOld)
         {
             int but = QMessageBox::warning(this, tr("Version is too new"),
-                                           tr("This file was created by a newer version of Train Timetable.\n"
+                                           tr("This file was created by a newer version of %1.\n"
                                               "You should update the application first. Opening this file might not work or even crash.\n"
-                                              "Do you want to open it anyway?"),
+                                              "Do you want to open it anyway?").arg(qApp->applicationDisplayName()),
                                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
             if(but == QMessageBox::Yes)
                 err = Session->openDB(fileName, true);

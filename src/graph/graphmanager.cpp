@@ -19,7 +19,7 @@ GraphManager::GraphManager(QObject *parent) :
 
     lineStorage = Session->mLineStorage;
 
-    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &GraphManager::updateGraphOptions);
+    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &GraphManager::updateGraphOptions);
     updateGraphOptions();
 
     connect(lineStorage, &LineStorage::lineNameChanged, this, &GraphManager::onLineNameChanged);

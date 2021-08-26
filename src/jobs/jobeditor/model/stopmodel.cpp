@@ -40,7 +40,7 @@ StopModel::StopModel(database &db, QObject *parent) :
     autoUncoupleAtLast(true)
 {
     reloadSettings();
-    connect(&AppSettings, &TrainTimetableSettings::stopOptionsChanged, this, &StopModel::reloadSettings);
+    connect(&AppSettings, &MRTPSettings::stopOptionsChanged, this, &StopModel::reloadSettings);
     connect(Session, &MeetingSession::shiftJobsChanged, this, &StopModel::onExternalShiftChange);
     connect(Session, &MeetingSession::shiftNameChanged, this, &StopModel::onShiftNameChanged);
 

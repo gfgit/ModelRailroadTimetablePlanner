@@ -55,7 +55,7 @@ MeetingSession::MeetingSession() :
     if(qApp->arguments().contains("test"))
     {
         //If testing use exe folder instead of AppData
-        settings_file = QCoreApplication::applicationDirPath() + QStringLiteral("/traintimetable_settings.ini");
+        settings_file = QCoreApplication::applicationDirPath() + QStringLiteral("/mrtp_settings.ini");
     }
 
     loadSettings(settings_file);
@@ -942,7 +942,7 @@ void MeetingSession::loadSettings(const QString& settings_file)
     DEBUG_ENTRY;
 
     if(settings_file.isEmpty())
-        settings.loadSettings(appDataPath + QStringLiteral("/traintimetable_settings.ini"));
+        settings.loadSettings(appDataPath + QStringLiteral("/mrtp_settings.ini"));
     else
         settings.loadSettings(settings_file);
 

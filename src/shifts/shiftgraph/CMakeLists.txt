@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   shifts/shiftgraph/graphoptions.h
   shifts/shiftgraph/jobchangeshiftdlg.h
   shifts/shiftgraph/shiftgrapheditor.h

@@ -107,7 +107,7 @@ public:
 public:
     void loadSettings(const QString &settings_file);
 
-    TrainTimetableSettings settings;
+    MRTPSettings settings;
 
     int    hourOffset;
     int    stationOffset;

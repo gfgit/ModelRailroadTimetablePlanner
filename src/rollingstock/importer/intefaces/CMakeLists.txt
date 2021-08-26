@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/importer/intefaces/icheckname.h
   rollingstock/importer/intefaces/iduplicatesitemevent.h
   rollingstock/importer/intefaces/iduplicatesitemmodel.h

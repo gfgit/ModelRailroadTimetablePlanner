@@ -32,10 +32,10 @@ ShiftGraphHolder::ShiftGraphHolder(database& db, QObject *parent) :
 {
     updateShiftGraphOptions();
 
-    connect(&AppSettings, &TrainTimetableSettings::jobColorsChanged,
+    connect(&AppSettings, &MRTPSettings::jobColorsChanged,
             this, &ShiftGraphHolder::updateJobColors);
 
-    connect(&AppSettings, &TrainTimetableSettings::shiftGraphOptionsChanged,
+    connect(&AppSettings, &MRTPSettings::shiftGraphOptionsChanged,
             this, &ShiftGraphHolder::updateShiftGraphOptions);
 
     connect(Session->mLineStorage, &LineStorage::stationNameChanged, this, &ShiftGraphHolder::stationNameChanged);

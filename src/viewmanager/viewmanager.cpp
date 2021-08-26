@@ -57,7 +57,7 @@ ViewManager::ViewManager(QObject *parent) :
     connect(Session, &MeetingSession::shiftRemoved, this, &ViewManager::onShiftRemoved);
     connect(Session, &MeetingSession::shiftJobsChanged, this, &ViewManager::onShiftJobsChanged);
 
-    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &ViewManager::onGraphOptionsChanged);
+    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &ViewManager::onGraphOptionsChanged);
 }
 
 void ViewManager::requestRSInfo(db_id rsId)

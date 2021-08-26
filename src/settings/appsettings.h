@@ -43,11 +43,11 @@
         return setFontHelper(str, f);\
     }
 
-class TrainTimetableSettings : public QObject
+class MRTPSettings : public QObject
 {
     Q_OBJECT
 public:
-    explicit TrainTimetableSettings(QObject *parent = nullptr);
+    explicit MRTPSettings(QObject *parent = nullptr);
 
     void loadSettings(const QString &fileName);
 

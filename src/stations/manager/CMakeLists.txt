@@ -3,8 +3,8 @@ add_subdirectory(lines)
 add_subdirectory(segments)
 add_subdirectory(stations)
 
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   stations/manager/stationplanmodel.h
   stations/manager/stationsmanager.h
   stations/manager/stationjobview.h
@@ -15,8 +15,8 @@ set(TRAINTIMETABLE_SOURCES
   PARENT_SCOPE
 )
 
-set(TRAINTIMETABLE_UI_FILES
-  ${TRAINTIMETABLE_UI_FILES}
+set(MR_TIMETABLE_PLANNER_UI_FILES
+  ${MR_TIMETABLE_PLANNER_UI_FILES}
   stations/manager/stationsmanager.ui
   stations/manager/stationjobview.ui
   PARENT_SCOPE

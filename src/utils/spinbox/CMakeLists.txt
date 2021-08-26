@@ -1,7 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
-  utils/spinbox/kmdelegate.h
-  utils/spinbox/kmspinbox.h
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   utils/spinbox/spinboxeditorfactory.h
 
   utils/spinbox/kmdelegate.cpp

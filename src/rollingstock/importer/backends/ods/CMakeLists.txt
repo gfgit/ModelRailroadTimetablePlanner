@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   rollingstock/importer/backends/ods/loadodstask.h
   rollingstock/importer/backends/ods/odsimporter.h
   rollingstock/importer/backends/ods/odsoptionswidget.h

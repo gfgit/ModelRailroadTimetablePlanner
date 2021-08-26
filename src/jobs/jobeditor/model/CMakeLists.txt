@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
 
   jobs/jobeditor/model/jobpassingsmodel.h
   jobs/jobeditor/model/rscouplinginterface.h
