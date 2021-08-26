@@ -76,11 +76,41 @@ public slots:
 
 private:
 
+    /*!
+     * \brief Graph of the job while is moving
+     *
+     * Contains informations to draw job line between two adjacent stations
+     */
+    typedef struct
+    {
+        db_id jobId;
+        JobCategory category;
+
+        db_id fromStopId;
+        db_id fromPlatfId;
+        QPointF fromDeparture;
+
+        db_id toStopId;
+        db_id toPlatfId;
+        QPointF toArrival;
+    } JobSegmentGraph;
+
+    /*!
+     * \brief Station entry on scene
+     *
+     * Represents a station item placeholder in an ordered list of scene
+     */
     typedef struct
     {
         db_id stationId;
         db_id segmentId;
         double xPos;
+
+        QVector<JobSegmentGraph> nextSegmentJobGraphs;
+        /*!<
+         * Stores job graph of the next segment
+         * Which means jobs departing from this staation and going to next one
+         */
     } StationPosEntry;
 
 private:
@@ -89,7 +119,7 @@ private:
     bool loadFullLine(db_id lineId);
 
     bool loadStationJobStops(StationGraphObject &st);
-    bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromStm, const StationGraphObject &toSt);
+    bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromSt, const StationGraphObject &toSt);
 
 private:
     friend class BackgroundHelper;

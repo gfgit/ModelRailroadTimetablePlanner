@@ -12,6 +12,7 @@
  * \brief Graph of a railway station
  *
  * Contains informations to draw station name, platforms and jobs
+ *
  * \sa PlatformGraph
  */
 class StationGraphObject
@@ -39,30 +40,10 @@ public:
     } JobStopGraph;
 
     /*!
-     * \brief Graph of the job while is moving
-     *
-     * Contains informations to draw job line between two adjacent stations
-     */
-    typedef struct
-    {
-        db_id jobId;
-        JobCategory category;
-
-        db_id fromStopId;
-        db_id fromPlatfId;
-        double fromDepartureY;
-
-        db_id toStopId;
-        db_id toPlatfId;
-        double toArrivalY;
-    } JobLineGraph;
-
-    /*!
      * \brief Graph of a station track (platform)
      *
      * Contains informations to draw platform line and header name
      * \sa JobStopGraph
-     * \sa JobLineGraph
      */
     typedef struct
     {

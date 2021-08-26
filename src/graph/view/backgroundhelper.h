@@ -28,6 +28,8 @@ public:
     static void drawStations(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
 
     static void drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
+
+    static void drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect);
 };
 
 #endif // BACKGROUNDHELPER_H
