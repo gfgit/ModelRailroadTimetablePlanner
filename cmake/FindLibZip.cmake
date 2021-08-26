@@ -2,65 +2,67 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 #[=======================================================================[.rst:
-FindSQLite3
+FindLibZip
 -----------
 
-Find the SQLite libraries, v3
+.. versionadded:: 3.14
+
+Find the Zip libraries, v3
 
 IMPORTED targets
 ^^^^^^^^^^^^^^^^
 
 This module defines the following :prop_tgt:`IMPORTED` target:
 
-``SQLite::SQLite3``
+``LibZip::LibZip``
 
 Result variables
 ^^^^^^^^^^^^^^^^
 
 This module will set the following variables if found:
 
-``SQLite3_INCLUDE_DIRS``
-  where to find sqlite3.h, etc.
-``SQLite3_LIBRARIES``
+``LibZip_INCLUDE_DIRS``
+  where to find zip.h, etc.
+``LibZip_LIBRARIES``
   the libraries to link against to use SQLite3.
-``SQLite3_VERSION``
-  version of the SQLite3 library found
-``SQLite3_FOUND``
+``LibZip_VERSION``
+  version of the LibZip library found
+``LibZip_FOUND``
   TRUE if found
 
 #]=======================================================================]
 
 # Look for the necessary header
-find_path(SQLite3_INCLUDE_DIR NAMES sqlite3.h)
-mark_as_advanced(SQLite3_INCLUDE_DIR)
+find_path(LibZip_INCLUDE_DIR NAMES zip.h)
+mark_as_advanced(LibZip_INCLUDE_DIR)
 
 # Look for the necessary library
-find_library(SQLite3_LIBRARY NAMES sqlite3 sqlite)
-mark_as_advanced(SQLite3_LIBRARY)
+find_library(LibZip_LIBRARY NAMES libzip)
+mark_as_advanced(LibZip_LIBRARY)
 
 # Extract version information from the header file
-if(SQLite3_INCLUDE_DIR)
-    file(STRINGS ${SQLite3_INCLUDE_DIR}/sqlite3.h _ver_line
-         REGEX "^#define SQLITE_VERSION  *\"[0-9]+\\.[0-9]+\\.[0-9]+\""
+if(LibZip_INCLUDE_DIR)
+    file(STRINGS ${LibZip_INCLUDE_DIR}/zipconf.h _ver_line
+         REGEX "^#define LIBZIP_VERSION  *\"[0-9]+\\.[0-9]+\\.[0-9]+\""
          LIMIT_COUNT 1)
     string(REGEX MATCH "[0-9]+\\.[0-9]+\\.[0-9]+"
-           SQLite3_VERSION "${_ver_line}")
+           LibZip_VERSION "${_ver_line}")
     unset(_ver_line)
 endif()
 
-include(${CMAKE_ROOT}/Modules/FindPackageHandleStandardArgs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(SQLite3
-    REQUIRED_VARS SQLite3_INCLUDE_DIR SQLite3_LIBRARY
-    VERSION_VAR SQLite3_VERSION)
+    REQUIRED_VARS LibZip_INCLUDE_DIR LibZip_LIBRARY
+    VERSION_VAR LibZip_VERSION)
 
 # Create the imported target
-if(SQLite3_FOUND)
-    set(SQLite3_INCLUDE_DIRS ${SQLite3_INCLUDE_DIR})
-    set(SQLite3_LIBRARIES ${SQLite3_LIBRARY})
+if(LibZip_FOUND)
+    set(LibZip_INCLUDE_DIRS ${LibZip_INCLUDE_DIR})
+    set(LibZip_LIBRARIES ${LibZip_LIBRARY})
     if(NOT TARGET SQLite::SQLite3)
         add_library(SQLite::SQLite3 UNKNOWN IMPORTED)
         set_target_properties(SQLite::SQLite3 PROPERTIES
-            IMPORTED_LOCATION             "${SQLite3_LIBRARY}"
-            INTERFACE_INCLUDE_DIRECTORIES "${SQLite3_INCLUDE_DIR}")
+            IMPORTED_LOCATION             "${LibZip_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${LibZip_INCLUDE_DIR}")
     endif()
 endif()
