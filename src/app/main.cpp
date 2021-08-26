@@ -78,7 +78,7 @@ void loadTranslations()
 
     QTranslator *translator = new QTranslator(qApp);
     if(translator->load(locale,
-                        QStringLiteral("traintimetable"), QStringLiteral("_"),
+                        QStringLiteral("mrtp"), QStringLiteral("_"),
                         path))
     {
         qDebug() << "Loading UI translations";
@@ -95,7 +95,7 @@ void setupLogger()
 
     QFile *logFile = gLogFile();
 
-    logFile->setFileName(path + QStringLiteral("/logs/traintimetable_log.log"));
+    logFile->setFileName(path + QStringLiteral("/logs/mrtp_log.log"));
     logFile->open(QFile::WriteOnly | QFile::Append | QFile::Text);
     if(!logFile->isOpen()) //FIXME: if logFile gets too big, ask user to truncate it
     {
