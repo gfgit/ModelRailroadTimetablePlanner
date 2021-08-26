@@ -261,11 +261,9 @@ JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
     }
 
     auto prevSt = stations.constFind(prevStId);
-    if(prevSt == stations.constEnd())
-        return job; //Error
-
     auto nextSt = stations.constFind(nextStId);
-    if(nextSt == stations.constEnd())
+
+    if(prevSt == stations.constEnd() && nextSt == stations.constEnd())
         return job; //Error
 
     const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
@@ -273,23 +271,27 @@ JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
     double prevPos = 0;
     double nextPos = 0;
 
-    double xPos = prevSt->xPos;
-    for(const StationGraphObject::PlatformGraph& platf : prevSt->platforms)
+    double xPos = 0;
+    if(prevSt != stations.constEnd())
     {
-        if(xPos <= pos.x())
+        xPos = prevSt->xPos;
+        for(const StationGraphObject::PlatformGraph& platf : prevSt->platforms)
         {
-            prevPlatf = &platf;
-            prevPos = xPos;
-        }
-        if(xPos >= pos.x())
-        {
-            //We went past the requested position
-            nextPlatf = &platf;
-            nextPos = xPos;
-            break;
-        }
+            if(xPos <= pos.x())
+            {
+                prevPlatf = &platf;
+                prevPos = xPos;
+            }
+            if(xPos >= pos.x())
+            {
+                //We went past the requested position
+                nextPlatf = &platf;
+                nextPos = xPos;
+                break;
+            }
 
-        xPos += platformOffset;
+            xPos += platformOffset;
+        }
     }
 
     const double prevDistance = qAbs(prevPos - pos.x());
@@ -299,13 +301,13 @@ JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
         prevPlatf = nullptr;
     }
 
-    if(!nextPlatf)
+    if(!nextPlatf && nextSt != stations.constEnd())
     {
         //Use second station
         xPos = nextSt->xPos;
         for(const StationGraphObject::PlatformGraph& platf : nextSt->platforms)
         {
-            if(xPos <= pos.x())
+            if(xPos >= pos.x())
             {
                 nextPlatf = &platf;
                 nextPos = xPos;
