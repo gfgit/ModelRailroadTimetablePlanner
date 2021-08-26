@@ -24,7 +24,7 @@ GraphManager::GraphManager(QObject *parent) :
 
     lineStorage = Session->mLineStorage;
 
-    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &GraphManager::updateGraphOptions);
+    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &GraphManager::updateGraphOptions);
     updateGraphOptions();
 
     view = new GraphicsView(this);

@@ -8,25 +8,25 @@
 
 #include <QDebug>
 
-TrainTimetableSettings::TrainTimetableSettings(QObject *parent) :
+MRTPSettings::MRTPSettings(QObject *parent) :
     QObject(parent)
 {
 
 }
 
-void TrainTimetableSettings::loadSettings(const QString& fileName)
+void MRTPSettings::loadSettings(const QString& fileName)
 {
     m_settings.reset(new QSettings(fileName, QSettings::IniFormat));
     qDebug() << "SETTINGS:" << m_settings->fileName() << m_settings->isWritable();
 }
 
-void TrainTimetableSettings::saveSettings()
+void MRTPSettings::saveSettings()
 {
     if(m_settings)
         m_settings->sync();
 }
 
-void TrainTimetableSettings::restoreDefaultSettings()
+void MRTPSettings::restoreDefaultSettings()
 {
     if(!m_settings)
         return;
@@ -34,7 +34,7 @@ void TrainTimetableSettings::restoreDefaultSettings()
     m_settings->clear();
 }
 
-QColor TrainTimetableSettings::getCategoryColor(int category)
+QColor MRTPSettings::getCategoryColor(int category)
 {
     if(!m_settings || category >= int(JobCategory::NCategories) || category < 0)
         return QColor(); //Invalid Category
@@ -59,7 +59,7 @@ QColor TrainTimetableSettings::getCategoryColor(int category)
     return utils::fromVariant<QColor>(m_settings->value(key, QColor(defaultColors[category])));
 }
 
-void TrainTimetableSettings::setCategoryColor(int category, const QColor &color)
+void MRTPSettings::setCategoryColor(int category, const QColor &color)
 {
     if(!m_settings || category >= int(JobCategory::NCategories) || category < 0 || !color.isValid())
         return; //Invalid Category
@@ -70,7 +70,7 @@ void TrainTimetableSettings::setCategoryColor(int category, const QColor &color)
     m_settings->setValue(key, utils::toVariant<QColor>(color));
 }
 
-int TrainTimetableSettings::getDefaultStopMins(int category)
+int MRTPSettings::getDefaultStopMins(int category)
 {
     if(!m_settings || category >= int(JobCategory::NCategories) || category < 0)
         return -1; //Invalid Category
@@ -96,7 +96,7 @@ int TrainTimetableSettings::getDefaultStopMins(int category)
     return m_settings->value(key, defaultTimesArr[category]).toInt();
 }
 
-void TrainTimetableSettings::setDefaultStopMins(int category, int mins)
+void MRTPSettings::setDefaultStopMins(int category, int mins)
 {
     if(!m_settings || category >= int(JobCategory::NCategories) || category < 0 || mins < 0)
         return; //Invalid Category
@@ -106,7 +106,7 @@ void TrainTimetableSettings::setDefaultStopMins(int category, int mins)
     m_settings->setValue(key, mins);
 }
 
-QFont TrainTimetableSettings::getFontHelper(const QString &baseKey, QFont defFont)
+QFont MRTPSettings::getFontHelper(const QString &baseKey, QFont defFont)
 {
     //NOTE: split into 2 keys: family, pt
     if(!m_settings)
@@ -122,7 +122,7 @@ QFont TrainTimetableSettings::getFontHelper(const QString &baseKey, QFont defFon
     return defFont;
 }
 
-void TrainTimetableSettings::setFontHelper(const QString &baseKey, const QFont &f)
+void MRTPSettings::setFontHelper(const QString &baseKey, const QFont &f)
 {
     if(!m_settings)
         return;
