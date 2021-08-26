@@ -34,7 +34,7 @@ LineGraphView::LineGraphView(QWidget *parent) :
 
     connect(verticalScrollBar(), &QScrollBar::valueChanged, hourPanel, &HourPanel::setScroll);
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, stationHeader, &StationLabelsHeader::setScroll);
-    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &LineGraphView::resizeHeaders);
+    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphView::resizeHeaders);
 
     resizeHeaders();
 }

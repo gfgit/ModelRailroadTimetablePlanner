@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   graph/model/linegraphmanager.h
   graph/model/linegraphscene.h
   graph/model/stationgraphobject.h

@@ -1,5 +1,5 @@
-set(TRAINTIMETABLE_SOURCES
-  ${TRAINTIMETABLE_SOURCES}
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
   stations/manager/segments/model/railwaysegmenthelper.h
   stations/manager/segments/model/railwaysegmentsmodel.h
   stations/manager/segments/model/railwaysegmentconnectionsmodel.h

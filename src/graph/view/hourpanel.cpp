@@ -10,7 +10,7 @@ HourPanel::HourPanel(QWidget *parent) :
     QWidget(parent),
     verticalScroll(0)
 {
-    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, qOverload<>(&HourPanel::update));
+    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, qOverload<>(&HourPanel::update));
 }
 
 void HourPanel::setScroll(int value)

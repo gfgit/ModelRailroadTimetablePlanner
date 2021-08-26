@@ -5,8 +5,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
   stations/station_utils.h
   stations/station_name_utils.h
-  stations/stationsmatchmodel.h
-  stations/stationssqlmodel.h
 
   PARENT_SCOPE
 )

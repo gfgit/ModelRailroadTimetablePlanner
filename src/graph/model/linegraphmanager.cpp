@@ -15,7 +15,7 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     connect(session, &MeetingSession::lineNameChanged, this, &LineGraphManager::onLineNameChanged);
     connect(session, &MeetingSession::lineSegmentsChanged, this, &LineGraphManager::onLineSegmentsChanged);
 
-    connect(&AppSettings, &TrainTimetableSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
+    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
 }
 
 void LineGraphManager::registerScene(LineGraphScene *scene)
