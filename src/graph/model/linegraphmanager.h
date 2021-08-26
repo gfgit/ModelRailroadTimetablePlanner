@@ -9,6 +9,15 @@
 
 class LineGraphScene;
 
+/*!
+ * \brief Class for managing LineGraphScene instances
+ *
+ * The manager listens for changes on railway plan and
+ * decides which of the registered LineGraphScene needs
+ * to be updated.
+ *
+ * \sa LineGraphScene
+ */
 class LineGraphManager : public QObject
 {
     Q_OBJECT

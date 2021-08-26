@@ -6,12 +6,17 @@
 #include "stationlabelsheader.h"
 #include "hourpanel.h"
 
+#include "utils/jobcategorystrings.h"
+
 #include "app/session.h"
 
 #include <QPainter>
 #include <QPaintEvent>
 
 #include <QScrollBar>
+
+#include <QToolTip>
+#include <QHelpEvent>
 
 LineGraphView::LineGraphView(QWidget *parent) :
     QAbstractScrollArea(parent),
@@ -75,6 +80,42 @@ bool LineGraphView::event(QEvent *e)
     return QAbstractScrollArea::event(e);
 }
 
+bool LineGraphView::viewportEvent(QEvent *e)
+{
+    if(e->type() == QEvent::ToolTip)
+    {
+        QHelpEvent *ev = static_cast<QHelpEvent *>(e);
+
+        const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
+
+        QPoint pos = ev->pos();
+        const QRect vp = viewport()->rect();
+
+        //Map to viewport
+        pos -= vp.topLeft();
+        if(pos.x() < 0 || pos.y() < 0)
+            return false;
+
+        //Map to scene
+        pos -= origin;
+
+        JobEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
+
+        if(job.jobId)
+        {
+            QToolTip::showText(ev->globalPos(),
+                               JobCategoryName::jobName(job.jobId, job.category),
+                               viewport());
+        }else{
+            QToolTip::hideText();
+        }
+
+        return true;
+    }
+
+    return QAbstractScrollArea::viewportEvent(e);
+}
+
 void LineGraphView::paintEvent(QPaintEvent *e)
 {
     const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
@@ -100,6 +141,8 @@ void LineGraphView::paintEvent(QPaintEvent *e)
         return; //Nothing to draw
 
     BackgroundHelper::drawStations(&painter, m_scene, exposedRect);
+    BackgroundHelper::drawJobStops(&painter, m_scene, exposedRect);
+    BackgroundHelper::drawJobSegments(&painter, m_scene, exposedRect);
 }
 
 void LineGraphView::resizeEvent(QResizeEvent *)

@@ -195,3 +195,89 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
         }
     }
 }
+
+void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+{
+    const double platfOffset = Session->platformOffset;
+
+    QPen jobPen;
+    jobPen.setWidth(AppSettings.getJobLineWidth());
+
+    QPointF top;
+    QPointF bottom;
+
+    for(const StationGraphObject &st : qAsConst(scene->stations))
+    {
+        const double left = st.xPos;
+        const double right = left + st.platforms.count() * platfOffset;
+
+        if(left > rect.right() || right < rect.left())
+            continue; //Skip station, it's not visible
+
+        top.rx() = bottom.rx() = st.xPos;
+
+        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+        {
+            for(const StationGraphObject::JobStopGraph& jobStop : platf.jobStops)
+            {
+                //NOTE: departure comes AFTER arrival in time, opposite than job segment
+                if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
+                    continue; //Skip, job not visible
+
+                jobPen.setColor(Session->colorForCat(jobStop.category));
+                painter->setPen(jobPen);
+
+                top.setY(jobStop.arrivalY);
+                bottom.setY(jobStop.departureY);
+
+                painter->drawLine(top, bottom);
+            }
+
+            top.rx() += platfOffset;
+            bottom.rx() += platfOffset;
+        }
+    }
+}
+
+void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+{
+    const double stationOffset = Session->stationOffset;
+
+    QPen jobPen;
+    jobPen.setWidth(AppSettings.getJobLineWidth());
+
+    //Iterate until one but last
+    //This way we can always acces next station
+    for(int i = 0; i < scene->stationPositions.size() - 1; i++)
+    {
+        const LineGraphScene::StationPosEntry& stPos = scene->stationPositions.at(i);
+
+        const double left = stPos.xPos;
+        double right = 0;
+
+        if(i < scene->stationPositions.size() - 2)
+        {
+            const LineGraphScene::StationPosEntry& afterNextPos = scene->stationPositions.at(i + 2);
+            right = afterNextPos.xPos - stationOffset;
+        }
+        else
+        {
+            right = rect.right(); //Last station, use all space on right side
+        }
+
+        if(left > rect.right() || right < rect.left())
+            continue; //Skip station, it's not visible
+
+        for(const LineGraphScene::JobSegmentGraph& job : stPos.nextSegmentJobGraphs)
+        {
+            //NOTE: departure comes BEFORE arrival in time, opposite than job stop
+            if(job.fromDeparture.y() > rect.bottom() || job.toArrival.y() < rect.top())
+                continue; //Skip, job not visible
+
+            jobPen.setColor(Session->colorForCat(job.category));
+            painter->setPen(jobPen);
+
+            painter->drawLine(job.fromDeparture, job.toArrival);
+        }
+    }
+}

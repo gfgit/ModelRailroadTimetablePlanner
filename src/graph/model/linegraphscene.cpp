@@ -6,6 +6,27 @@
 
 #include <QDebug>
 
+//TODO: maybe move to utils?
+constexpr qreal MSEC_PER_HOUR = 1000 * 60 * 60;
+
+static inline qreal timeToHourFraction(const QTime &t)
+{
+    qreal ret = t.msecsSinceStartOfDay() / MSEC_PER_HOUR;
+    return ret;
+}
+
+static inline double stationPlatformPosition(const StationGraphObject& st, const db_id platfId, const double platfOffset)
+{
+    double x = st.xPos;
+    for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+    {
+        if(platf.platformId == platfId)
+            return x;
+        x += platfOffset;
+    }
+    return -1;
+}
+
 LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
     mDb(db),
@@ -88,7 +109,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         //Register a single station at start position
         st.xPos = curPos;
         stations.insert(st.stationId, st);
-        stationPositions = {{st.stationId, st.xPos}};
+        stationPositions = {{st.stationId, 0, st.xPos, {}}};
         graphObjectName = st.stationName;
     }
     else if(type == LineGraphType::RailwaySegment)
@@ -112,13 +133,13 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         }
 
         auto r = q.getRows();
-//        TODO useful?
-//        outFromGateId = r.get<db_id>(0);
-//        outToGateId = r.get<db_id>(1);
+        //        TODO useful?
+        //        outFromGateId = r.get<db_id>(0);
+        //        outToGateId = r.get<db_id>(1);
         graphObjectName = r.get<QString>(2);
-//        outSpeed = r.get<int>(3);
-//        outType = utils::RailwaySegmentType(r.get<db_id>(4));
-//        outDistance = r.get<int>(5);
+        //        outSpeed = r.get<int>(3);
+        //        outType = utils::RailwaySegmentType(r.get<db_id>(4));
+        //        outDistance = r.get<int>(5);
 
         stA.stationId = r.get<db_id>(6);
         stB.stationId = r.get<db_id>(7);
@@ -132,8 +153,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         stations.insert(stA.stationId, stA);
         stations.insert(stB.stationId, stB);
 
-        stationPositions = {{stA.stationId, stA.xPos},
-                            {stB.stationId, stB.xPos}};
+        stationPositions = {{stA.stationId, objectId, stA.xPos, {}},
+                            {stB.stationId, 0, stB.xPos, {}}};
     }
     else if(type == LineGraphType::RailwayLine)
     {
@@ -150,10 +171,188 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     recalcContentSize();
 
+    reloadJobs();
+
     emit graphChanged(int(graphType), graphObjectId);
     emit redrawGraph();
 
     return true;
+}
+
+bool LineGraphScene::reloadJobs()
+{
+    if(graphType == LineGraphType::NoGraph)
+        return false;
+
+    //TODO: maybe only load visible
+
+    for(StationGraphObject& st : stations)
+    {
+        if(!loadStationJobStops(st))
+            return false;
+    }
+
+    //Save last station from previous iteration
+    auto lastSt = stations.constEnd();
+
+    for(int i = 0; i < stationPositions.size(); i++)
+    {
+        StationPosEntry& stPos = stationPositions[i];
+        if(!stPos.segmentId)
+            continue; //No segment, skip
+
+        db_id fromStId = stPos.stationId;
+        db_id toStId = 0;
+        if(i <= stationPositions.size() - 1)
+            toStId = stationPositions.at(i + 1).stationId;
+
+        if(!toStId)
+            break; //No next station
+
+        auto fromSt = lastSt;
+        if(fromSt == stations.constEnd() || fromSt->stationId != fromStId)
+        {
+            fromSt = stations.constFind(fromStId);
+            if(fromSt == stations.constEnd())
+            {
+                continue;
+            }
+        }
+
+        auto toSt = stations.constFind(toStId);
+        if(toSt == stations.constEnd())
+            continue;
+
+        if(!loadSegmentJobs(stPos, fromSt.value(), toSt.value()))
+            return false;
+
+        //Store last station
+        lastSt = toSt;
+    }
+
+    return true;
+}
+
+JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+{
+    const double platformOffset = Session->platformOffset;
+
+    JobEntry job;
+    job.jobId = 0;
+    job.category = JobCategory::FREIGHT;
+
+    if(stationPositions.isEmpty())
+        return job;
+
+    db_id prevStId = 0;
+    db_id nextStId = 0;
+
+    for(const StationPosEntry& stPos : qAsConst(stationPositions))
+    {
+        if(stPos.xPos <= pos.x())
+            prevStId = stPos.stationId;
+
+        if(stPos.xPos >= pos.x())
+        {
+            //We went past the requested position
+            nextStId = stPos.stationId;
+            break;
+        }
+    }
+
+    auto prevSt = stations.constFind(prevStId);
+    auto nextSt = stations.constFind(nextStId);
+
+    if(prevSt == stations.constEnd() && nextSt == stations.constEnd())
+        return job; //Error
+
+    const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
+    const StationGraphObject::PlatformGraph *nextPlatf = nullptr;
+    double prevPos = 0;
+    double nextPos = 0;
+
+    double xPos = 0;
+    if(prevSt != stations.constEnd())
+    {
+        xPos = prevSt->xPos;
+        for(const StationGraphObject::PlatformGraph& platf : prevSt->platforms)
+        {
+            if(xPos <= pos.x())
+            {
+                prevPlatf = &platf;
+                prevPos = xPos;
+            }
+            if(xPos >= pos.x())
+            {
+                //We went past the requested position
+                nextPlatf = &platf;
+                nextPos = xPos;
+                break;
+            }
+
+            xPos += platformOffset;
+        }
+    }
+
+    const double prevDistance = qAbs(prevPos - pos.x());
+    if(prevPlatf && prevDistance > tolerance)
+    {
+        //Discard because too distant
+        prevPlatf = nullptr;
+    }
+
+    if(!nextPlatf && nextSt != stations.constEnd())
+    {
+        //Use second station
+        xPos = nextSt->xPos;
+        for(const StationGraphObject::PlatformGraph& platf : nextSt->platforms)
+        {
+            if(xPos >= pos.x())
+            {
+                nextPlatf = &platf;
+                nextPos = xPos;
+                break;
+            }
+
+            xPos += platformOffset;
+        }
+    }
+
+    const double nextDistance = qAbs(nextPos - pos.x());
+    if(nextPlatf && nextDistance > tolerance)
+    {
+        //Discard because too distant
+        nextPlatf = nullptr;
+    }
+
+    const StationGraphObject::PlatformGraph *resultPlatf = nullptr;
+    if(!prevPlatf)
+        resultPlatf = nextPlatf;
+    else if(!nextPlatf)
+        resultPlatf = prevPlatf;
+    else
+    {
+        if(prevDistance < nextDistance)
+            resultPlatf = prevPlatf;
+        else
+            resultPlatf = nextPlatf;
+    }
+
+    if(!resultPlatf)
+        return job; //No match
+
+    for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
+    {
+        if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
+        {
+            //Found match
+            job.jobId = jobStop.jobId;
+            job.category = jobStop.category;
+            break;
+        }
+    }
+
+    return job;
 }
 
 bool LineGraphScene::loadStation(StationGraphObject& st)
@@ -232,7 +431,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
     for(auto seg : q)
     {
         db_id lineSegmentId = seg.get<db_id>(0);
-        //item.railwaySegmentId = seg.get<db_id>(1);
+        db_id railwaySegmentId = seg.get<db_id>(1);
         bool reversed = seg.get<int>(2) != 0;
 
         //item.segmentName = seg.get<QString>(3);
@@ -262,7 +461,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 
             st.xPos = curPos;
             stations.insert(st.stationId, st);
-            stationPositions.append({st.stationId, st.xPos});
+            stationPositions.append({st.stationId, railwaySegmentId, st.xPos, {}});
             curPos += st.platforms.count() * Session->platformOffset + Session->stationOffset;
         }
         else if(fromStationId != lastStationId)
@@ -279,10 +478,157 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 
         stB.xPos = curPos;
         stations.insert(stB.stationId, stB);
-        stationPositions.append({stB.stationId, stB.xPos});
+
+        stationPositions.last().segmentId = railwaySegmentId;
+        stationPositions.append({stB.stationId, 0, stB.xPos, {}});
 
         curPos += stB.platforms.count() * Session->platformOffset + Session->stationOffset;
         lastStationId = stB.stationId;
+    }
+
+    return true;
+}
+
+bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
+{
+    //Reset previous job graphs
+    for(StationGraphObject::PlatformGraph& platf : st.platforms)
+    {
+        platf.jobStops.clear();
+    }
+
+    sqlite3pp::query q(mDb, "SELECT stops.id, stops.job_id, jobs.category,"
+                            "stops.arrival, stops.departure,"
+                            "g_in.track_id, g_out.track_id"
+                            " FROM stops"
+                            " JOIN jobs ON stops.job_id=jobs.id"
+                            " LEFT JOIN station_gate_connections g_in ON g_in.id=stops.in_gate_conn"
+                            " LEFT JOIN station_gate_connections g_out ON g_out.id=stops.out_gate_conn"
+                            " WHERE stops.station_id=?"
+                            " ORDER BY stops.arrival");
+    q.bind(1, st.stationId);
+
+    const double vertOffset = Session->vertOffset;
+    const double hourOffset = Session->hourOffset;
+
+    for(auto stop : q)
+    {
+        StationGraphObject::JobStopGraph jobStop;
+        jobStop.stopId = stop.get<db_id>(0);
+        jobStop.jobId = stop.get<db_id>(1);
+        jobStop.category = JobCategory(stop.get<int>(2));
+        QTime arrival = stop.get<QTime>(3);
+        QTime departure = stop.get<QTime>(4);
+        db_id trackId = stop.get<db_id>(5);
+        db_id outTrackId = stop.get<db_id>(6);
+
+        if(trackId && outTrackId && trackId != outTrackId)
+        {
+            //Not last stop, neither first stop. Tracks must correspond
+            qWarning() << "Stop:" << jobStop.stopId << "Track not corresponding, using in";
+        }
+        else if(!trackId)
+        {
+            if(outTrackId)
+                trackId = outTrackId; //First stop, use out gate connection
+            else
+            {
+                qWarning() << "Stop:" << jobStop.stopId << "Both in/out track NULL, skipping";
+                continue; //Skip this stop
+            }
+        }
+
+        StationGraphObject::PlatformGraph *platf = nullptr;
+
+        //Find platform
+        for(StationGraphObject::PlatformGraph& p : st.platforms)
+        {
+            if(p.platformId == trackId)
+            {
+                platf = &p;
+                break;
+            }
+        }
+
+        if(!platf)
+        {
+            //Requested platform is not in this station
+            qWarning() << "Stop:" << jobStop.stopId << "Track is not in this station";
+            continue; //Skip this stop
+        }
+
+        //Calculate coordinates
+        jobStop.arrivalY = vertOffset + timeToHourFraction(arrival) * hourOffset;
+        jobStop.departureY = vertOffset + timeToHourFraction(departure) * hourOffset;
+
+        platf->jobStops.append(jobStop);
+    }
+
+    return true;
+}
+
+bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, const StationGraphObject& fromSt, const StationGraphObject& toSt)
+{
+    //Reset previous job segment graph
+    stPos.nextSegmentJobGraphs.clear();
+
+    const double vertOffset = Session->vertOffset;
+    const double hourOffset = Session->hourOffset;
+    const double platfOffset = Session->platformOffset;
+
+    sqlite3pp::query q(mDb, "SELECT sub.*, jobs.category, g_out.track_id, g_in.track_id FROM ("
+                            " SELECT stops.id AS cur_stop_id, lead(stops.id, 1) OVER win AS next_stop_id,"
+                            " stops.station_id,"
+                            " stops.job_id,"
+                            " stops.departure, lead(stops.arrival, 1) OVER win AS next_stop_arrival,"
+                            " stops.out_gate_conn,"
+                            " lead(stops.in_gate_conn, 1) OVER win AS next_stop_g_in,"
+                            " seg_conn.seg_id"
+                            " FROM stops"
+                            " LEFT JOIN railway_connections seg_conn ON seg_conn.id=stops.next_segment_conn_id"
+                            " WINDOW win AS (PARTITION BY stops.job_id ORDER BY stops.arrival)"
+                            ") AS sub"
+                            " JOIN station_gate_connections g_out ON g_out.id=sub.out_gate_conn"
+                            " JOIN station_gate_connections g_in ON g_in.id=sub.next_stop_g_in"
+                            " JOIN jobs ON jobs.id=sub.job_id"
+                            " WHERE sub.seg_id=?");
+
+    q.bind(1, stPos.segmentId);
+    for(auto stop : q)
+    {
+        JobSegmentGraph job;
+        job.fromStopId = stop.get<db_id>(0);
+        job.toStopId = stop.get<db_id>(1);
+        db_id stId = stop.get<db_id>(2);
+        job.jobId = stop.get<db_id>(3);
+        QTime departure = stop.get<QTime>(4);
+        QTime arrival = stop.get<QTime>(5);
+        //6 - out gate connection
+        //7 - in gate connection
+        //8 - segment_id
+        job.category = JobCategory(stop.get<int>(9));
+        job.fromPlatfId = stop.get<db_id>(10);
+        job.toPlatfId = stop.get<db_id>(11);
+
+        if(toSt.stationId == stId)
+        {
+            //Job goes in opposite direction, reverse stops
+            qSwap(job.fromStopId, job.toStopId);
+            qSwap(job.fromPlatfId, job.toPlatfId);
+            qSwap(departure, arrival);
+        }
+
+        //Calculate coordinates
+        job.fromDeparture.rx() = stationPlatformPosition(fromSt, job.fromPlatfId, platfOffset);
+        job.fromDeparture.ry() = vertOffset + timeToHourFraction(departure) * hourOffset;
+
+        job.toArrival.rx() = stationPlatformPosition(toSt, job.toPlatfId, platfOffset);
+        job.toArrival.ry() = vertOffset + timeToHourFraction(arrival) * hourOffset;
+
+        if(job.fromDeparture.x() < 0 || job.toArrival.x() < 0)
+            continue; //Skip, couldn't find platform
+
+        stPos.nextSegmentJobGraphs.append(job);
     }
 
     return true;
