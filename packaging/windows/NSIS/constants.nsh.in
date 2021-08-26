@@ -1,7 +1,7 @@
 ;Definitions
 
 !define APP_NAME "@APP_DISPLAY_NAME@"
-!define APP_PRODUCT "@TRAINTIMETABLE_TARGET@"
+!define APP_PRODUCT "@MR_TIMETABLE_PLANNER_TARGET@"
 !define COMPANY_NAME "@APP_COMPANY_NAME@"
 !define DESCRIPTION "@PROJECT_DESCRIPTION@"
 
@@ -19,10 +19,10 @@
 # This is the size (in kB) of all the files copied into "Program Files"
 !define INSTALLSIZE 8000
 
-!define TRAIN_TIMETABLE_PATH "@CMAKE_BINARY_DIR@\debug\"
-!define TRAIN_TIMETABLE_EXTRA "@CMAKE_SOURCE_DIR@\files"
-!define TRAIN_TIMETABLE_EXE "@TRAINTIMETABLE_TARGET@.exe"
-!define TRAIN_TIMETABLE_SETTINGS "traintimetable_settings.ini"
+!define MR_TIMETABLE_PLANNER_PATH "@CMAKE_BINARY_DIR@\debug\"
+!define MR_TIMETABLE_PLANNER_EXTRA "@CMAKE_SOURCE_DIR@\files"
+!define MR_TIMETABLE_PLANNER_EXE "@MR_TIMETABLE_PLANNER_TARGET@.exe"
+!define MR_TIMETABLE_PLANNER_SETTINGS "mrtp_settings.ini"
 
-!define TRAIN_TIMETABLE_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt" ;TODO
-!define TRAIN_TIMETABLE_README "${NSISDIR}\Docs\Modern UI\License.txt" ;TODO
+!define MR_TIMETABLE_PLANNER_LICENSE "${NSISDIR}\Docs\Modern UI\License.txt" ;TODO
+!define MR_TIMETABLE_PLANNER_README "${NSISDIR}\Docs\Modern UI\License.txt" ;TODO
