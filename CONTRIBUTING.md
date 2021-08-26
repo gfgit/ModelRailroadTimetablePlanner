@@ -13,6 +13,10 @@ The model should be creating pull requests with topic branches and merging on ma
 
 To develop new features please create new branches and finally merge to develop
 
+## Building
+
+See [BUILDING.md](BUILDING.md)
+
 ## Translations
 
 UI is localized with Qt Linguist.
