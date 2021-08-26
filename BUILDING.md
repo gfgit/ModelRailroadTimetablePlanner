@@ -77,6 +77,11 @@ CMake Minimun Version: **3.5**
 - Install
   > 'cmake --build . -t install`
 
+- Run
+  > `mrtplanner`
+  
+  > NOTE: the location depends on where you installed the program
+
 ## Doxygen
 
 Enable `BUILD_DOXYGEN` in CMake configuration
