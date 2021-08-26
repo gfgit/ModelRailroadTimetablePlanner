@@ -83,7 +83,7 @@ target_include_directories(
     ${MR_TIMETABLE_PLANNER_TARGET}
     PRIVATE
     ${SQLite3_INCLUDE_DIRS}
-    ${ZIP_INCLUDE_DIR}
+    ${LibZip_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/include #For template files
     )
 
@@ -98,7 +98,7 @@ target_link_libraries(
     Qt5::PrintSupport
     ${SQLite3_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${ZIP_LIBRARY}
+    ${LibZip_LIBRARIES}
     )
 
 if (WIN32)
@@ -267,7 +267,7 @@ if(WIN32)
     install(PROGRAMS ${ZLIB_LIBRARIES} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
     # Copy libzip DLL
-    install(PROGRAMS ${ZIP_LIBRARY} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${LibZip_LIBRARIES} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
     if(RUN_WINDEPLOYQT)
         if(NOT WINDEPLOYQT_EXE)

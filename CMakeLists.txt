@@ -115,13 +115,7 @@ find_package(Qt5 REQUIRED
 
 find_package(SQLite3)
 find_package(ZLIB)
-
-# Locate libzip
-if(NOT ZIP_INCLUDE_DIR OR NOT ZIP_LIBRARY)
-    set(ZIP_INCLUDE_DIR NOTFOUND CACHE PATH "Path to libzip include directory, contains 'zip.h' file.")
-    set(ZIP_LIBRARY NOTFOUND CACHE FILEPATH "Path to libzip library (shared DLL usually libzip.dll).")
-    message(FATAL_ERROR "libzip NOT FOUND (set ZIP_INCLUDE_DIR and ZIP_LIBRARY)")
-endif()
+find_package(LibZip)
 
 if(BUILD_DOXYGEN)
     find_package(Doxygen)

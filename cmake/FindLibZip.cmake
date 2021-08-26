@@ -50,8 +50,8 @@ if(LibZip_INCLUDE_DIR)
     unset(_ver_line)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(SQLite3
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(LibZip
     REQUIRED_VARS LibZip_INCLUDE_DIR LibZip_LIBRARY
     VERSION_VAR LibZip_VERSION)
 
@@ -59,9 +59,9 @@ find_package_handle_standard_args(SQLite3
 if(LibZip_FOUND)
     set(LibZip_INCLUDE_DIRS ${LibZip_INCLUDE_DIR})
     set(LibZip_LIBRARIES ${LibZip_LIBRARY})
-    if(NOT TARGET SQLite::SQLite3)
-        add_library(SQLite::SQLite3 UNKNOWN IMPORTED)
-        set_target_properties(SQLite::SQLite3 PROPERTIES
+    if(NOT TARGET LibZip::LibZip)
+        add_library(LibZip::LibZip UNKNOWN IMPORTED)
+        set_target_properties(LibZip::LibZip PROPERTIES
             IMPORTED_LOCATION             "${LibZip_LIBRARY}"
             INTERFACE_INCLUDE_DIRECTORIES "${LibZip_INCLUDE_DIR}")
     endif()
