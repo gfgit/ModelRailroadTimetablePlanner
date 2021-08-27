@@ -7,6 +7,7 @@ static const QString AppVersion = QStringLiteral("${PROJECT_VERSION}");
 static const QString AppCompany = QStringLiteral("${APP_COMPANY_NAME}");
 static const QString AppProduct = QStringLiteral("${APP_PRODUCT_NAME}");
 static const QString AppDisplayName = QStringLiteral("${APP_DISPLAY_NAME}");
+static const QString AppProjectWebSite = QStringLiteral("${PROJECT_HOMEPAGE_URL}");
 
 static const QString FormatVersionStr = QStringLiteral("${DB_FORMAT_VERSION}");
 
