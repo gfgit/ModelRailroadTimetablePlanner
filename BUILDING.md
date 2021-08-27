@@ -50,6 +50,17 @@ CMake Minimun Version: **3.5**
 > Set `QT5_DIR` CMake variable:  
 > Example: `C:/Qt/5.15.2/mingw81_64/lib/cmake/Qt5`
 
+## Troubleshooting
+
+## Windows CMake Doesn't Find DLL
+
+MinGW can link directly to `*.dll` dynamic libraries but CMake is set to look for
+import libraries `*.dll.a`.
+
+**SQLite 3** does not provide an import library so CMake will NOT find it.
+To manually create an import library from a `*.dll` and associated `*.def` file, go to libraary directory and run:
+> `dlltool --dllname sqlite3.dll --def sqlite3.def --output-lib sqlite3.dll.a`  
+For more informations see [DLL Import Library Tool](https://www.willus.com/mingw/colinp/win32/tools/dlltool.html)
 
 ## Compile
 
