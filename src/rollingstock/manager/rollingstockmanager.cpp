@@ -38,6 +38,8 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
+#include <QPointer>
+
 RollingStockManager::RollingStockManager(QWidget *parent) :
     QWidget(parent),
     oldCurrentTab(RollingstockTab),
@@ -288,17 +290,17 @@ void RollingStockManager::updateModels()
         {
         case RollingstockTab:
         {
-            rsSQLModel->refreshData();
+            rsSQLModel->refreshData(true);
             break;
         }
         case ModelsTab:
         {
-            modelsSQLModel->refreshData();
+            modelsSQLModel->refreshData(true);
             break;
         }
         case OwnersTab:
         {
-            ownersSQLModel->refreshData();
+            ownersSQLModel->refreshData(true);
             break;
         }
         }
@@ -355,14 +357,17 @@ void RollingStockManager::onViewRSPlanSearch()
     RSMatchModelFactory factory(ModelModes::Rollingstock, Session->m_Db, this);
     std::unique_ptr<ISqlFKMatchModel> matchModel;
     matchModel.reset(factory.createModel());
-    ChooseItemDlg dlg(matchModel.get(), this);
-    dlg.setDescription(tr("Please choose a rollingstock item"));
-    dlg.setPlaceholder(tr("[model][.][number][:owner]"));
 
-    if(dlg.exec() != QDialog::Accepted)
-        return;
+    QPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
+    dlg->setDescription(tr("Please choose a rollingstock item"));
+    dlg->setPlaceholder(tr("[model][.][number][:owner]"));
 
-    Session->getViewManager()->requestRSInfo(dlg.getItemId());
+    int ret = dlg->exec();
+
+    if(ret == QDialog::Accepted && dlg)
+        Session->getViewManager()->requestRSInfo(dlg->getItemId());
+
+    delete dlg;
 }
 
 void RollingStockManager::onNewRs()
@@ -485,14 +490,18 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
 
 bool RollingStockManager::createRsModelWithDifferentSuffix(db_id sourceModelId, QString &errMsg, QWidget *w)
 {
-    QInputDialog dlg(w);
-    dlg.setLabelText(tr("Please choose an unique suffix for this model, or leave empty"));
-    dlg.setWindowTitle(tr("Choose Suffix"));
-    dlg.setInputMode(QInputDialog::TextInput);
+    QPointer<QInputDialog> dlg = new QInputDialog(w);
+    dlg->setLabelText(tr("Please choose an unique suffix for this model, or leave empty"));
+    dlg->setWindowTitle(tr("Choose Suffix"));
+    dlg->setInputMode(QInputDialog::TextInput);
 
-    if(dlg.exec() == QDialog::Accepted)
-        return modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg.textValue(), &errMsg);
-    return true; //Abort without errors
+    bool ret = true; //Default: Abort without errors
+
+    if(dlg->exec() == QDialog::Accepted && dlg)
+        ret = modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg->textValue(), &errMsg);
+
+    delete dlg;
+    return ret;
 }
 
 void RollingStockManager::onRemoveRsModel()
@@ -592,8 +601,7 @@ void RollingStockManager::onMergeModels()
     }
     if(clearModelTimers[RollingstockTab] == ModelLoaded)
     {
-        rsSQLModel->refreshData();
-        rsSQLModel->clearCache();
+        rsSQLModel->refreshData(true);
     }
 }
 
@@ -611,8 +619,7 @@ void RollingStockManager::onMergeOwners()
     }
     if(clearModelTimers[RollingstockTab] == ModelLoaded)
     {
-        rsSQLModel->refreshData();
-        rsSQLModel->clearCache();
+        rsSQLModel->refreshData(true);
     }
 }
 

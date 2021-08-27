@@ -5,7 +5,6 @@
 #include <QPen>
 
 #include "lineobj.h"
-#include "graph/graphicsscene.h"
 #include <QGraphicsLineItem>
 
 #include "jobs/jobstorage.h"
@@ -182,8 +181,8 @@ LineStoragePrivate::LineLookup::iterator LineStoragePrivate::unloadLine(LineLook
         delete g;
     }
     line.stations.clear();
-    delete line.scene;
-    line.scene = nullptr;
+    //delete line.scene;
+    //line.scene = nullptr;
 
     return lines.erase(it);
 }
@@ -203,7 +202,7 @@ void LineStoragePrivate::drawStations(LineObj &line)
     const QPen depotPlatfPen(AppSettings.getDepotPlatfColor(), width); //For depots
 
     const db_id lineId = line.lineId;
-    QGraphicsScene *scene = line.scene;
+    //QGraphicsScene *scene = line.scene;
 
     line.stations.clear();
 
@@ -271,11 +270,11 @@ void LineStoragePrivate::drawStations(LineObj &line)
 
         for(int i = oldSize; i < size; i++)
         {
-            auto l = scene->addLine(x, vertOffset,
-                                    x, lastY);
-            l->setZValue(-1); //Platform must be below jobs and labels
-            vec.append(l);
-            x += platfOffset;
+//            auto l = scene->addLine(x, vertOffset,
+//                                    x, lastY);
+//            l->setZValue(-1); //Platform must be below jobs and labels
+//            vec.append(l);
+//            x += platfOffset;
         }
 
 
@@ -316,11 +315,11 @@ void LineStoragePrivate::drawStations(LineObj &line)
     f.setPointSize(15);
     int nameWidth = QFontMetrics(f).horizontalAdvance(lastName);
 
-    QRectF r = scene->itemsBoundingRect();
-    r.setRight(x - stationOffset + nameWidth);
-    r.adjust(0, 0, 0, 10);
-    r.setTopLeft(QPointF(0.0, 0.0));
-    scene->setSceneRect(r);
+    //QRectF r = scene->itemsBoundingRect();
+    //r.setRight(x - stationOffset + nameWidth);
+    //r.adjust(0, 0, 0, 10);
+    //r.setTopLeft(QPointF(0.0, 0.0));
+    //scene->setSceneRect(r);
 }
 
 void LineStoragePrivate::drawJobs(db_id lineId)
@@ -551,10 +550,10 @@ bool LineStorage::increfLine(db_id lineId)
 
 QGraphicsScene *LineStorage::sceneForLine(db_id lineId)
 {
-    auto it = impl->lines.constFind(lineId);
-    if(it == impl->lines.constEnd())
-        return nullptr;
-    return it.value().scene;
+//    auto it = impl->lines.constFind(lineId);
+//    if(it == impl->lines.constEnd())
+//        return nullptr;
+//    return it.value().scene;
 }
 
 void LineStorage::redrawAllLines()

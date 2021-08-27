@@ -12,7 +12,7 @@ class CustomCompletionLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    explicit CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget *parent = nullptr);
+    CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget *parent = nullptr);
     ~CustomCompletionLineEdit();
 
     void showPopup();
@@ -20,6 +20,8 @@ public:
     bool getData(db_id &idOut, QString &nameOut) const;
 
     void setData(db_id id, const QString& name = QString());
+
+    void setModel(ISqlFKMatchModel *m);
 
     void resizeColumnToContents();
     void selectFirstIndexOrNone(bool forceFirst);

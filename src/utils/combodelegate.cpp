@@ -3,7 +3,7 @@
 
 #include <QComboBox>
 
-ComboDelegate::ComboDelegate(QStringList list, int role, QObject *parent) :
+ComboDelegate::ComboDelegate(const QStringList &list, int role, QObject *parent) :
     QStyledItemDelegate(parent),
     mList(list),
     mRole(role)

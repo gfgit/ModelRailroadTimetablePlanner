@@ -154,18 +154,8 @@ Qt::ItemFlags ShiftSQLModel::flags(const QModelIndex &idx) const
     return f | Qt::ItemIsEditable;
 }
 
-void ShiftSQLModel::clearCache()
+qint64 ShiftSQLModel::recalcTotalItemCount()
 {
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
-void ShiftSQLModel::refreshData()
-{
-    if(!mDb.db())
-        return;
-
     query q(mDb);
     if(mQuery.size() <= 2) // '%%' -> '%<name>%'
     {
@@ -175,30 +165,15 @@ void ShiftSQLModel::refreshData()
         q.bind(1, mQuery);
     }
     q.step();
-    const int count = q.getRows().get<int>(0);
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
 
-    if(count != totalItemsCount) //Invalidate cache and reset model
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
+void ShiftSQLModel::clearCache()
+{
+    cache.clear();
+    cache.squeeze();
+    cacheFirstRow = 0;
 }
 
 void ShiftSQLModel::setSortingColumn(int /*col*/)
@@ -422,7 +397,7 @@ void ShiftSQLModel::setQuery(const QString &text)
         return;
     mQuery = tmp;
 
-    refreshData();
+    refreshData(true);
 }
 
 bool ShiftSQLModel::removeShift(db_id shiftId)
@@ -441,7 +416,7 @@ bool ShiftSQLModel::removeShift(db_id shiftId)
 
     emit Session->shiftRemoved(shiftId);
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 

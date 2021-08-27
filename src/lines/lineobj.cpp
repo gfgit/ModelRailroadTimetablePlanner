@@ -1,13 +1,13 @@
 #include "lineobj.h"
 
-#include "graph/graphicsscene.h"
 #include <QGraphicsLineItem>
 
 #include "app/session.h"
 
+#include <QPen>
+
 LineObj::LineObj() :
     lineId(0),
-    scene(new GraphicsScene),
     refCount(0)
 {
 
@@ -110,10 +110,10 @@ void StationObj::addJobStop(db_id stopId, db_id jobId, db_id lineId, const QStri
 
         JobStop s;
         s.stopId = stopId;
-        s.line = scene->addLine(x, y1, x, y2, p);
-        s.line->setToolTip(label);
+        //s.line = scene->addLine(x, y1, x, y2, p);
+        //s.line->setToolTip(label);
 
-        s.text = scene->addSimpleText(label, font);
+        //s.text = scene->addSimpleText(label, font);
         s.text->setPos(x + 5, y1);
         s.text->setZValue(1); //Labels must be above jobs and platforms
         s.text->setBrush(brush);

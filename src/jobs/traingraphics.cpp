@@ -5,7 +5,7 @@
 #include "app/scopedebug.h"
 
 #include <QGraphicsPathItem>
-#include "graph/graphicsscene.h"
+#include <QPen>
 #include "utils/model_roles.h"
 
 #include <QTime>
@@ -147,7 +147,7 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
     }
     if(scene != s.item->scene())
     {
-        scene->addItem(s.item);
+        //scene->addItem(s.item);
     }
 
     QFont labelFont;
@@ -262,7 +262,7 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
         QGraphicsSimpleTextItem *ti = s.texts[i];
         if(scene != ti->scene())
         {
-            scene->addItem(ti);
+            //scene->addItem(ti);
         }
 
         ti->setBrush(brush); // Don't set QPen
@@ -277,17 +277,17 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
 
     for(int i = oldSize; i < size; i++)
     {
-        QGraphicsSimpleTextItem *ti = scene->addSimpleText(name,
-                                                           labelFont);
-        ti->setBrush(brush); // Don't set QPen
-        ti->setZValue(1); //Labels must be above jobs and platforms
+//        QGraphicsSimpleTextItem *ti = scene->addSimpleText(name,
+//                                                           labelFont);
+//        ti->setBrush(brush); // Don't set QPen
+//        ti->setZValue(1); //Labels must be above jobs and platforms
 
-        const QPointF& p = vec[i];
-        if(angles[i])
-            ti->setPos(p.x(), p.y() - 25);
-        else
-            ti->setPos(p.x(), p.y() + 4);
-        s.texts << ti;
+//        const QPointF& p = vec[i];
+//        if(angles[i])
+//            ti->setPos(p.x(), p.y() - 25);
+//        else
+//            ti->setPos(p.x(), p.y() + 4);
+//        s.texts << ti;
     }
 }
 

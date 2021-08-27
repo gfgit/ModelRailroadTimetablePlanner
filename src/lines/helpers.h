@@ -8,7 +8,7 @@ class database;
 }
 
 namespace lines {
-
+//FIXME: remove or adapt to new railway segment schema
 double getStationsDistanceInMeters(sqlite3pp::database &db, db_id lineId, db_id stA, db_id stB);
 
 } // namespace lines

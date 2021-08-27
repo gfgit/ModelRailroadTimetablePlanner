@@ -309,44 +309,20 @@ Qt::ItemFlags RSModelsSQLModel::flags(const QModelIndex &idx) const
     return f;
 }
 
+qint64 RSModelsSQLModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM rs_models");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
 void RSModelsSQLModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
-}
-
-void RSModelsSQLModel::refreshData()
-{
-    if(!mDb.db())
-        return;
-
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_models");
-    q.step();
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
 }
 
 void RSModelsSQLModel::fetchRow(int row)
@@ -694,7 +670,7 @@ bool RSModelsSQLModel::removeRSModel(db_id modelId, const QString& name)
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 
@@ -786,6 +762,6 @@ bool RSModelsSQLModel::removeAllRSModels()
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }

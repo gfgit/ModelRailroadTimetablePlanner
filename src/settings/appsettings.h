@@ -64,7 +64,7 @@ public:
     FIELD(VerticalOffset,    "job_graph/vertical_offset",   int, 50)
     FIELD(HourOffset,        "job_graph/hour_offset",       int, 100)
     FIELD(StationOffset,     "job_graph/station_offset",    int, 150)
-    FIELD(PlatformOffset,    "job_graph/platform_offset",   int, 12)
+    FIELD(PlatformOffset,    "job_graph/platform_offset",   int, 20)
 
     FIELD(PlatformLineWidth, "job_graph/platf_line_width",  int, 2)
     FIELD(HourLineWidth,     "job_graph/hour_line_width",   int, 2)

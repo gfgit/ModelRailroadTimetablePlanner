@@ -157,46 +157,20 @@ QVariant JobsSQLModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
+qint64 JobsSQLModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM jobs");
+    q.step();
+    const qint64 count = q.getRows().get<int>(0);
+    return count;
+}
+
 void JobsSQLModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
-}
-
-void JobsSQLModel::refreshData()
-{
-    if(!mDb.db())
-        return;
-
-    emit itemsReady(-1, -1); //Notify we are about to refresh
-
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM jobs");
-    q.step();
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
 }
 
 void JobsSQLModel::setSortingColumn(int col)
@@ -216,7 +190,7 @@ void JobsSQLModel::clearCache_slot()
 {
     clearCache();
     QModelIndex start = index(0, 0);
-    QModelIndex end = index(curItemCount, NCols);
+    QModelIndex end = index(curItemCount - 1, NCols - 1);
     emit dataChanged(start, end);
 }
 

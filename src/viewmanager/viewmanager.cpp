@@ -22,6 +22,7 @@
 #include "jobs/jobsmanager.h"
 
 #include "graph/graphmanager.h"
+#include "graph/model/linegraphmanager.h"
 
 #include "sessionstartendrsviewer.h"
 
@@ -38,6 +39,7 @@ ViewManager::ViewManager(QObject *parent) :
     sessionRSViewer(nullptr)
 {
     mGraphMgr = new GraphManager(this);
+    lineGraphManager = new LineGraphManager(this);
 
     //RollingStock
     connect(Session, &MeetingSession::rollingstockRemoved, this, &ViewManager::onRSRemoved);
@@ -500,6 +502,11 @@ bool ViewManager::closeEditors()
     return true;
 }
 
+void ViewManager::clearAllLineGraphs()
+{
+    lineGraphManager->clearAllGraphs();
+}
+
 bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisible) const
 {
     db_id curLineId = mGraphMgr->getCurLineId();
@@ -536,12 +543,13 @@ bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisib
     //Clear previous selection to avoid multiple selection
     mGraphMgr->clearSelection();
 
-    if(curLineId != lineId)
-    {
-        //Change current line
-        if(!mGraphMgr->setCurrentLine(lineId))
-            return false;
-    }
+    //FIXME: adapt to new graph system
+//    if(curLineId != lineId)
+//    {
+//        //Change current line
+//        if(!mGraphMgr->setCurrentLine(lineId))
+//            return false;
+//    }
 
     return Session->mJobStorage->selectSegment(jobId, segmentId, select, ensureVisible);
 }
@@ -573,8 +581,9 @@ bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool select, bool ens
     db_id lineId = r.get<db_id>(1);
 
     //Change current line
-    if(!mGraphMgr->setCurrentLine(lineId))
-        return false;
+    //FIXME: adapt to new graph system
+    //if(!mGraphMgr->setCurrentLine(lineId))
+    //    return false;
 
     return Session->mJobStorage->selectSegment(sel.jobId, segmentId, select, ensureVisible);
 }

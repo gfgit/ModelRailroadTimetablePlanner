@@ -12,7 +12,6 @@ using namespace sqlite3pp;
 
 #include <QRgb>
 
-class GraphicsScene;
 class QGraphicsLineItem;
 class QGraphicsSimpleTextItem;
 
@@ -63,7 +62,6 @@ public:
     LineObj();
 
     db_id lineId;
-    GraphicsScene *scene;
 
     QVector<StationObj::Graph*> stations;
 

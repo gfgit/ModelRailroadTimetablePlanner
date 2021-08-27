@@ -15,8 +15,7 @@ class database;
 
 using namespace sqlite3pp;
 
-class QGraphicsView;
-class QGraphicsScene;
+class LineGraphWidget;
 class JobPathEditor;
 class QDockWidget;
 class QLabel;
@@ -115,11 +114,10 @@ private:
     QDockWidget *rsErrDock;
 #endif
 
-    QGraphicsView *view;
+    LineGraphWidget *view;
     QDockWidget *jobDock;
 
     CustomCompletionLineEdit *searchEdit;
-    CustomCompletionLineEdit *lineComboSearch;
 
     QLabel *welcomeLabel;
 

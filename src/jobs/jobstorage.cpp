@@ -35,33 +35,6 @@ JobStorage::~JobStorage()
     impl = nullptr;
 }
 
-void JobStorage::fixJobs()
-{
-    if(!mDb.db())
-        return;
-
-    query q(mDb, "SELECT id FROM jobs WHERE firstStop IS NULL OR lastStop IS NULL OR firstStop=lastStop");
-    query q_countStops(mDb, "SELECT COUNT(id) FROM stops WHERE jobId=?");
-
-    for(auto r : q)
-    {
-        db_id jobId = r.get<db_id>(0);
-        q_countStops.bind(1, jobId);
-        q_countStops.step();
-        int nStops = q_countStops.getRows().get<int>(0);
-        q_countStops.reset();
-        if(nStops < 2)
-        {
-            //Invalid job, jobs must have at least 2 stops (start, end)
-            removeJob(jobId);
-        }
-        else
-        {
-            updateFirstLast(jobId);
-        }
-    }
-}
-
 void JobStorage::clear()
 {
     for(TrainGraphics &tg : impl->m_data)

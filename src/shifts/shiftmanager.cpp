@@ -65,7 +65,7 @@ ShiftManager::ShiftManager(QWidget *parent) :
 
 void ShiftManager::showEvent(QShowEvent *e)
 {
-    model->refreshData();
+    model->refreshData(true);
     QWidget::showEvent(e);
 }
 
