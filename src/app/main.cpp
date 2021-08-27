@@ -130,7 +130,8 @@ int main(int argc, char *argv[])
 
     qDebug() << QApplication::applicationDisplayName()
              << "Version:" << QApplication::applicationVersion()
-             << "Built:" << AppBuildDate;
+             << "Built:" << AppBuildDate
+             << "Website: " << AppProjectWebSite;
     qDebug() << "Qt:" << QT_VERSION_STR;
     qDebug() << "Sqlite:" << sqlite3_libversion() << " DB Format: V" << FormatVersion;
     qDebug() << QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm");
