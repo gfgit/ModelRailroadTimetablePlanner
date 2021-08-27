@@ -49,7 +49,7 @@ CMake Minimun Version: **3.5**
 ### Setup Qt
 > Set `QT5_DIR` CMake variable:  
 > Set to the folder which contains `Qt5Config.cmake` file  
-> Example: `C:\Qt\5.15.2\mingw81_64\lib\cmake/Qt5`
+> Example: `C:\Qt\5.15.2\mingw81_64\lib\cmake\Qt5`
 
 ### Setup libzip
 If compiled from source `libzip` should generate CMake config package files  
