@@ -19,9 +19,9 @@ set(APP_PRODUCT_NAME "ModelRailroadTimetablePlanner")
 set(APP_DISPLAY_NAME "Model Railroad Timetable Planner")
 set(APP_COMPANY_NAME "Train Software")
 
-set(PROJECT_HOMEPAGE_URL "www.pollofrittomachebuono.altervista.org")
-set(APP_HELP_URL ${APP_ABOUT_URL})
-set(APP_UPDATE_URL ${APP_ABOUT_URL})
+set(PROJECT_HOMEPAGE_URL "https://github.com/gfgit/ModelRailroadTimetablePlanner")
+set(APP_HELP_URL ${PROJECT_HOMEPAGE_URL})
+set(APP_UPDATE_URL ${PROJECT_HOMEPAGE_URL})
 
 set(PROJECT_DESCRIPTION "${APP_DISPLAY_NAME} lets you create and manage model railway sessions")
 
@@ -102,6 +102,7 @@ set(CMAKE_AUTORCC ON)
 
 set(MR_TIMETABLE_PLANNER_DEFINITIONS ${MR_TIMETABLE_PLANNER_DEFINITIONS} -DAPPVERSION="${PROJECT_VERSION}" -DQT_DEPRECATED_WARNINGS)
 
+# Include our custom FindXXX moudules in '/cmake' subdirectory
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(Qt5 REQUIRED
