@@ -1,4 +1,49 @@
 
+function(get_dll_library_from_import_library LIB_VAR OUT_VAR)
+    # Locate DLL file
+    # Sometimes we link to import libraries '*.dll.a' or '*.lib'
+    # When installing we need the real '*.dll' file
+    # Try to locate it in same directory or in library path
+
+    get_filename_component(TEMP_EXT ${LIB_VAR} EXT)
+
+    if(${TEMP_EXT} MATCHES ".dll.a" OR ${TEMP_EXT} MATCHES ".lib")
+        # Get filename without extension and then add '.dll'
+        get_filename_component(TEMP_NAME ${LIB_VAR} NAME_WE)
+        set(TEMP_NAME "${TEMP_NAME}.dll")
+
+        # Get file path
+        get_filename_component(TEMP_PATH ${LIB_VAR} DIRECTORY)
+
+        # Try new file in same path
+        set(TEMP_PATH "${TEMP_PATH}/${TEMP_NAME}")
+
+        if(NOT EXISTS ${TEMP_PATH})
+            # Doesn't exist, try to find it in other directory, same name
+            # Searche also in CMAKE_LIBRARY_PATH which is not used by default in find_file(...)
+            find_file(TEMP_PATH_2 NAMES ${TEMP_NAME} PATHS ${CMAKE_LIBRARY_PATH})
+            set(TEMP_PATH ${TEMP_PATH_2})
+
+            # find_file caches the variable but this causes problems
+            # with subsequent calls reading old value instead of finding a new file
+            unset(TEMP_PATH_2 CACHE)
+            unset(TEMP_PATH_2)
+        endif()
+
+        unset(TEMP_NAME)
+
+    elseif(${TEMP_EXT} MATCHES ".dll")
+        # Library is already a *.dll, use it directly
+        set(TEMP_PATH ${LIB_VAR})
+    endif()
+
+    set("${OUT_VAR}" ${TEMP_PATH} PARENT_SCOPE)
+
+    unset(TEMP_PATH)
+    unset(TEMP_EXT)
+endfunction()
+
+
 #Set Win32 resources
 if (WIN32)
     configure_file(../packaging/windows/resources.rc.in ${CMAKE_BINARY_DIR}/resources/resources.rc)
@@ -83,7 +128,6 @@ target_include_directories(
     ${MR_TIMETABLE_PLANNER_TARGET}
     PRIVATE
     ${SQLite3_INCLUDE_DIRS}
-    ${LibZip_INCLUDE_DIRS}
     ${CMAKE_BINARY_DIR}/include #For template files
     )
 
@@ -98,8 +142,36 @@ target_link_libraries(
     Qt5::PrintSupport
     ${SQLite3_LIBRARIES}
     ${ZLIB_LIBRARIES}
-    ${LibZip_LIBRARIES}
     )
+
+# Link LibZip
+if(TARGET libzip::zip)
+    # LibZip was found with Config Package
+    # Include directory setup is automatic
+
+    target_link_libraries(
+        ${MR_TIMETABLE_PLANNER_TARGET}
+        PRIVATE
+        libzip::zip
+        )
+
+    get_target_property(LibZip_LIBRARY_TO_INSTALL libzip::zip IMPORT_LOCATION)
+else()
+    # LibZip was found with our Find Module
+    # Set include directories manually
+    target_include_directories(
+        ${MR_TIMETABLE_PLANNER_TARGET}
+        PRIVATE
+        ${LibZip_INCLUDE_DIRS}
+        )
+
+    target_link_libraries(
+        ${MR_TIMETABLE_PLANNER_TARGET}
+        PRIVATE
+        ${LibZip_LIBRARIES}
+        )
+    get_dll_library_from_import_library(${LibZip_LIBRARIES} LibZip_LIBRARY_TO_INSTALL)
+endif()
 
 if (WIN32)
     target_link_libraries(
@@ -107,10 +179,6 @@ if (WIN32)
         PRIVATE
         DbgHelp
         )
-endif()
-
-if(UNIX AND NOT APPLE)
-    install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET} RUNTIME DESTINATION bin)
 endif()
 
 ## Enable Crashpad if found
@@ -202,7 +270,7 @@ endif()
 
 ## Update/Release translations ##
 
-#(Run this target before installing installing and every time you update translations)
+#(Run this target before installing and every time you update translations)
 add_custom_target(RELEASE_TRANSLATIONS ALL
     COMMENT "Running translations it_IT...")
 
@@ -261,13 +329,15 @@ endforeach()
 
 if(WIN32)
     # Copy SQlite3 DLL
-    install(PROGRAMS ${SQLite3_LIBRARIES} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    get_dll_library_from_import_library(${SQLite3_LIBRARIES} SQLite3_LIBRARY_TO_INSTALL)
+    install(PROGRAMS ${SQLite3_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
     # Copy ZLib DLL
-    install(PROGRAMS ${ZLIB_LIBRARIES} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    get_dll_library_from_import_library(${ZLIB_LIBRARIES} ZLIB_LIBRARY_TO_INSTALL)
+    install(PROGRAMS ${ZLIB_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
     # Copy libzip DLL
-    install(PROGRAMS ${LibZip_LIBRARIES} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${LibZip_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
     if(RUN_WINDEPLOYQT)
         if(NOT WINDEPLOYQT_EXE)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.17)
 include(CMakeDependentOption)
 
 project(ModelRailroadTimetablePlanner VERSION 5.25.0 LANGUAGES CXX)
@@ -116,7 +116,13 @@ find_package(Qt5 REQUIRED
 
 find_package(SQLite3)
 find_package(ZLIB)
+
+# Prefer config files shipped with 'libzip'
+# If not found, it will fallback to out custom FindLibZip.cmake module
+# Located in '/cmake' subdirectory
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG true)
 find_package(LibZip)
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG false)
 
 if(BUILD_DOXYGEN)
     find_package(Doxygen)

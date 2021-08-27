@@ -55,6 +55,8 @@
 
 #include "app/scopedebug.h"
 
+#include <QPointer>
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -234,14 +236,27 @@ void MainWindow::setup_actions()
 
 void MainWindow::about()
 {
-    QMessageBox::information(this,
-                             tr("About"),
-                             tr("%1 application makes easier to deal with timetables and trains\n"
-                                "Beta version: %2\n"
-                                "Built: %3")
-                                 .arg(qApp->applicationDisplayName())
-                                 .arg(qApp->applicationVersion())
-                                 .arg(QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy")));
+    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    msgBox->setAttribute(Qt::WA_DeleteOnClose);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->setWindowTitle(tr("About %1").arg(qApp->applicationDisplayName()));
+
+    const QString translatedText =
+        tr(
+            "<h3>%1</h3>"
+            "<p>This program makes it easier to deal with timetables and trains.</p>"
+            "<p>Version: <b>%2</b></p>"
+            "<p>Built: %3</p>"
+            "<p>Website: <a href='%4'>%4</a></p>")
+            .arg(qApp->applicationDisplayName())
+            .arg(qApp->applicationVersion())
+            .arg(QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy"))
+            .arg(AppProjectWebSite);
+
+    msgBox->setTextFormat(Qt::RichText);
+    msgBox->setText(translatedText);
+    msgBox->setStandardButtons(QMessageBox::Ok);
+    msgBox->exec();
 }
 
 void MainWindow::onOpen()
@@ -847,7 +862,7 @@ void MainWindow::onJobSelected(db_id jobId)
     ui->actionNext_Job_Segment->setEnabled(selected);
 }
 
-//QT-BUG: If user closes a floating dock widget, when shown again it cannot dock anymore
+//QT-BUG 69922: If user closes a floating dock widget, when shown again it cannot dock anymore
 //HACK: intercept dock close event and manually re-dock and hide so next time is shown it's docked
 //NOTE: calling directly 'QDockWidget::setFloating(false)' from inside 'eventFinter()' causes CRASH
 //      so queue it. Cannot use 'QMetaObject::invokeMethod()' because it's not a slot.
