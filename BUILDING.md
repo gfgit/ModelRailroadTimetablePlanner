@@ -72,7 +72,7 @@ MinGW can link directly to `*.dll` dynamic libraries but CMake is set to look fo
 import libraries `*.dll.a`.  
 
 **SQLite 3** does not provide an import library so CMake will NOT find it.  
-To manually create an import library from a `*.dll` and associated `*.def` file, go to libraary directory and run:  
+To manually create an import library from a `*.dll` and associated `*.def` file, go to library directory and run:  
 > `dlltool --dllname sqlite3.dll --def sqlite3.def --output-lib sqlite3.dll.a`  
 
 For more informations see [DLL Import Library Tool](https://www.willus.com/mingw/colinp/win32/tools/dlltool.html)  
