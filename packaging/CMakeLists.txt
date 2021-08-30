@@ -34,7 +34,7 @@ string(APPEND EXCLUDED_DLLS " /x libzlib.dll")
 
 set(CMD_LIST_NSIS "")
 
-# Add DLLs
+# Add top level DLLs
 list(APPEND CMD_LIST_NSIS "File ${EXCLUDED_DLLS} \\\"${INST_DIR_ESC}\\\\*.dll\\\"")
 
 # Add icon engines
@@ -53,10 +53,6 @@ list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\platforms\\\\*.dll\\\"")
 list(APPEND CMD_LIST_NSIS "SetOutPath \\\"$INSTDIR\\\\printsupport\\\"")
 list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\printsupport\\\\*.dll\\\"")
 
-# Add icon engines
-list(APPEND CMD_LIST_NSIS "SetOutPath \\\"$INSTDIR\\\\iconengines\\\"")
-list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\iconengines\\\\*.dll\\\"")
-
 # Add styles
 list(APPEND CMD_LIST_NSIS "SetOutPath \\\"$INSTDIR\\\\styles\\\"")
 list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\styles\\\\*.dll\\\"")
@@ -70,10 +66,46 @@ list(APPEND CMD_LIST_NSIS "SetOutPath \\\"$INSTDIR\\\"")
 
 # Join to new-line separated string
 list(JOIN CMD_LIST_NSIS "\n" CMD_EXTRA_NSIS)
-message(${CMD_EXTRA_NSIS})
 
 set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS ${CMD_EXTRA_NSIS})
 
+#################################################
+# Add windeployqt artifacts to Uninstaller
+#################################################
+
+set(CMD_LIST_NSIS "")
+
+# Remove top level DLLs
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\*.dll\\\"")
+
+# Remove icon engines
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\iconengines\\\\*.dll\\\"")
+list(APPEND CMD_LIST_NSIS "RMDir \\\"$INSTDIR\\\\iconengines\\\"")
+
+# Remove image formats
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\imageformats\\\\*.dll\\\"")
+list(APPEND CMD_LIST_NSIS "RMDir \\\"$INSTDIR\\\\imageformats\\\"")
+
+# Remove platforms
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\platforms\\\\*.dll\\\"")
+list(APPEND CMD_LIST_NSIS "RMDir \\\"$INSTDIR\\\\platforms\\\"")
+
+# Remove print support
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\printsupport\\\\*.dll\\\"")
+list(APPEND CMD_LIST_NSIS "RMDir \\\"$INSTDIR\\\\printsupport\\\"")
+
+# Remove styles
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\styles\\\\*.dll\\\"")
+list(APPEND CMD_LIST_NSIS "RMDir \\\"$INSTDIR\\\\styles\\\"")
+
+# Remove translations
+list(APPEND CMD_LIST_NSIS "Delete \\\"$INSTDIR\\\\translations\\\\qt_*.qm\\\"")
+list(APPEND CMD_LIST_NSIS "RMDir \\\"$INSTDIR\\\\translations\\\"")
+
+# Join to new-line separated string
+list(JOIN CMD_LIST_NSIS "\n" CMD_EXTRA_NSIS)
+
+set(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS ${CMD_EXTRA_NSIS})
 
 
 include(CPack)
