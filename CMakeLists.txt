@@ -13,7 +13,7 @@ endif()
 
 ## Defines ##
 
-set(DB_FORMAT_VERSION 7)
+set(DB_FORMAT_VERSION 8)
 
 set(APP_PRODUCT_NAME "ModelRailroadTimetablePlanner")
 set(APP_DISPLAY_NAME "Model Railroad Timetable Planner")
