@@ -64,7 +64,6 @@ list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\styles\\\\*.dll\\\"")
 # Add translations
 list(APPEND CMD_LIST_NSIS "SetOutPath \\\"$INSTDIR\\\\translations\\\"")
 list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\translations\\\\qt_*.qm\\\"")
-list(APPEND CMD_LIST_NSIS "File \\\"${INST_DIR_ESC}\\\\translations\\\\mrtp_*.qm\\\"")
 
 # Go back to main install directory so CPack can continue
 list(APPEND CMD_LIST_NSIS "SetOutPath \\\"$INSTDIR\\\"")
