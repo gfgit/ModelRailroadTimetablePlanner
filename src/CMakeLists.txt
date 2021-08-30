@@ -313,31 +313,31 @@ endforeach()
 # Copy executable
 install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET}
     RUNTIME
-    DESTINATION ${CMAKE_INSTALL_PREFIX})
+    DESTINATION .)
 
 # Copy SVG icon
 install(FILES ${CMAKE_SOURCE_DIR}/files/icons/lightning/lightning.svg
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/icons)
+    DESTINATION icons)
 
 # For each .ts file install corrensponding .qm file
 foreach(TS_FILE ${MR_TIMETABLE_PLANNER_TS_FILES})
     get_filename_component(QM_FILE_NAME ${TS_FILE} NAME_WLE)
     install(FILES
         "${CMAKE_BINARY_DIR}/src/translations/${QM_FILE_NAME}.qm"
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/translations OPTIONAL)
+        DESTINATION translations OPTIONAL)
 endforeach()
 
 if(WIN32)
     # Copy SQlite3 DLL
     get_dll_library_from_import_library(${SQLite3_LIBRARIES} SQLite3_LIBRARY_TO_INSTALL)
-    install(PROGRAMS ${SQLite3_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${SQLite3_LIBRARY_TO_INSTALL} DESTINATION .)
 
     # Copy ZLib DLL
     get_dll_library_from_import_library(${ZLIB_LIBRARIES} ZLIB_LIBRARY_TO_INSTALL)
-    install(PROGRAMS ${ZLIB_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${ZLIB_LIBRARY_TO_INSTALL} DESTINATION .)
 
     # Copy libzip DLL
-    install(PROGRAMS ${LibZip_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${LibZip_LIBRARY_TO_INSTALL} DESTINATION .)
 
     if(RUN_WINDEPLOYQT)
         if(NOT WINDEPLOYQT_EXE)
