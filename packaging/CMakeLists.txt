@@ -1,3 +1,6 @@
+# Add out NSIS template to CMake
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/packaging ${CMAKE_MODULES_PATH})
+
 # Setup CPack variables
 
 set(CPACK_PACKAGE_VENDOR ${APP_COMPANY_NAME})
