@@ -4,6 +4,8 @@
 
 #include "db_metadata/imagemetadata.h"
 
+#include <QFileDevice>
+
 const char stationTable[] = "stations";
 const char stationSVGCol[] = "svg_data";
 
@@ -52,6 +54,10 @@ bool StationSVGHelper::saveImage(sqlite3pp::database &db, db_id stationId, QIODe
 
     if(!source || !source->open(QIODevice::ReadOnly))
         return false;
+
+    //Optimization for files, resize to avoid reallocations
+    if(QFileDevice *dev = qobject_cast<QFileDevice *>(dest))
+        dev->resize(source->size());
 
     constexpr int bufSize = 4096;
     char buf[bufSize];
