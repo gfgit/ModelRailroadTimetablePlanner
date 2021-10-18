@@ -3,6 +3,7 @@
 
 #include <QPushButton>
 #include <QPrintDialog>
+#include <QPointer>
 
 #include <QFormLayout>
 
@@ -22,6 +23,7 @@ PrinterOptionsPage::PrinterOptionsPage(PrintWizard *w, QWidget *parent) :
 
 void PrinterOptionsPage::onOpenDialog()
 {
-    QPrintDialog dlg(mWizard->printer, this);
-    dlg.exec();
+    QPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->printer, this);
+    dlg->exec();
+    delete dlg;
 }

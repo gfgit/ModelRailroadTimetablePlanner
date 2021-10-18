@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QMessageBox>
 #include <QVBoxLayout>
+#include <QPointer>
 
 #include "utils/sqldelegate/customcompletionlineedit.h"
 #include "shifts/shiftcombomodel.h"
@@ -71,9 +72,10 @@ void JobChangeShiftDlg::done(int ret)
             model.loadData(shiftId, mJobId, start, end);
             if(model.hasConcurrentJobs())
             {
-                ShiftBusyDlg dlg(this);
-                dlg.setModel(&model);
-                dlg.exec();
+                QPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
+                dlg->setModel(&model);
+                dlg->exec();
+                delete dlg;
                 return;
             }
 

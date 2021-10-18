@@ -356,7 +356,11 @@ void StationsManager::onEditStation()
     dlg->setStationInternalEditingEnabled(true);
     dlg->setStationExternalEditingEnabled(true);
     dlg->setStation(stId);
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    int ret = dlg->exec();
+    if(!dlg)
+        return;
+    delete dlg;
+    if(ret != QDialog::Accepted)
         return;
 
     //Refresh stations model
@@ -435,7 +439,12 @@ void StationsManager::onNewSegment()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
     dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     //Re-calc row count
@@ -455,7 +464,11 @@ void StationsManager::onEditSegment()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
     dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     //FIXME: check if actually changed
@@ -532,7 +545,11 @@ void StationsManager::onEditLine()
     QPointer<EditLineDlg> dlg(new EditLineDlg(Session->m_Db, this));
     dlg->setLineId(lineId);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     //FIXME: check if actually changed
