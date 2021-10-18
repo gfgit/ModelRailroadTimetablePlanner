@@ -135,7 +135,7 @@ void RsErrWorker::run()
         sendEvent(new RsWorkerResultEvent(this, data, !rsToCheck.isEmpty()), true);
         return;
     }
-    catch(std::exception e)
+    catch(std::exception& e)
     {
         qWarning() << "RsErrWorker: exception " << e.what();
     }
