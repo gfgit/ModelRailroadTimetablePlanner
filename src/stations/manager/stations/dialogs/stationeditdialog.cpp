@@ -8,6 +8,7 @@
 #include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
 
 #include "stations/manager/stations/model/stationsvghelper.h"
+#include "stations/manager/stations/dialogs/stationsvgplandlg.h"
 
 #include "stations/manager/segments/model/railwaysegmentsmodel.h"
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
@@ -678,5 +679,17 @@ void StationEditDialog::saveSVGToFile()
 
 void StationEditDialog::showSVGImage()
 {
+    QIODevice *dev = StationSVGHelper::loadImage(mDb, getStation());
+    if(!dev)
+    {
+        QMessageBox::warning(this, tr("Error Loading SVG"),
+                             tr("An error occurred while loading SVG station plan."));
+        return;
+    }
 
+    QPointer<StationSVGPlanDlg> dlg = new StationSVGPlanDlg(mDb, this);
+    dlg->setStation(getStation());
+    dlg->reloadSVG(dev);
+
+    dlg->exec();
 }
