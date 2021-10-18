@@ -21,6 +21,8 @@ public:
 
     void setBlobInfo(const QByteArray& table, const QByteArray& column, qint64 rowId);
 
+    bool reserveSizeAndReset(qint64 len);
+
     virtual bool open(OpenMode mode) override;
     virtual void close() override;
 

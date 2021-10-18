@@ -29,6 +29,49 @@ void ImageBlobDevice::setBlobInfo(const QByteArray &table, const QByteArray &col
     mColumn = column;
 }
 
+bool ImageBlobDevice::reserveSizeAndReset(qint64 len)
+{
+    //NOTE: this will discard any previous content
+
+    //Close previous BLOB handle
+    if(mBlob)
+        close();
+
+    //Create SQL statement
+    QByteArray sql = "UPDATE " + mTable + " SET " + mColumn + "=? WHERE rowId=?";
+
+    sqlite3_stmt *stmt = nullptr;
+    int rc = sqlite3_prepare_v2(mDb, sql.constData(), sql.size(), &stmt, nullptr);
+    if(rc != SQLITE_OK)
+        return false;
+
+    //Reserve BLOB memory
+    rc = sqlite3_bind_zeroblob64(stmt, 1, len);
+    if(rc != SQLITE_OK)
+    {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int64(stmt, 2, mRowId);
+    if(rc != SQLITE_OK)
+    {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+
+    if(rc != SQLITE_OK && rc != SQLITE_DONE)
+    {
+        return false;
+    }
+
+    //Open new BLOB handle
+    return open(QIODevice::ReadWrite);
+}
+
 bool ImageBlobDevice::open(QIODevice::OpenMode mode)
 {
     mode |= QIODevice::ReadOnly; //Always enable reading
