@@ -21,10 +21,10 @@ bool StationSVGHelper::addImage(sqlite3pp::database &db, db_id stationId, QIODev
     std::unique_ptr<ImageMetaData::ImageBlobDevice> dest;
     dest.reset(loadImage_internal(db, stationId));
 
-    if(!dest || !dest->open(QIODevice::WriteOnly))
+    if(!dest)
         return false;
 
-    //Make room for storing data
+    //Make room for storing data and open device
     dest->reserveSizeAndReset(source->size());
 
     constexpr int bufSize = 8192;
