@@ -7,9 +7,9 @@ namespace ImageMetaData
 
 constexpr char sql_get_key_id[] = "SELECT rowid FROM metadata WHERE name=? AND val NOT NULL";
 
-ImageBlobDevice::ImageBlobDevice(sqlite3 *db, qint64 rowId, QObject *parent) :
+ImageBlobDevice::ImageBlobDevice(sqlite3 *db, QObject *parent) :
     QIODevice(parent),
-    mRowId(rowId),
+    mRowId(0),
     mSize(0),
     mDb(db),
     mBlob(nullptr)
@@ -19,13 +19,21 @@ ImageBlobDevice::ImageBlobDevice(sqlite3 *db, qint64 rowId, QObject *parent) :
 
 ImageBlobDevice::~ImageBlobDevice()
 {
-    close();
+    ImageBlobDevice::close();
+}
+
+void ImageBlobDevice::setBlobInfo(const QByteArray &table, const QByteArray &column, qint64 rowId)
+{
+    mRowId = rowId;
+    mTable = table;
+    mColumn = column;
 }
 
 bool ImageBlobDevice::open(QIODevice::OpenMode mode)
 {
-    mode |= QIODevice::ReadOnly;
-    int rc = sqlite3_blob_open(mDb, "main", "metadata", "val", mRowId, (mode & QIODevice::WriteOnly) != 0, &mBlob);
+    mode |= QIODevice::ReadOnly; //Always enable reading
+    int rc = sqlite3_blob_open(mDb, "main", mTable.constData(), mColumn.constData(),
+                               mRowId, (mode & QIODevice::WriteOnly) != 0, &mBlob);
     if(rc != SQLITE_OK || !mBlob)
     {
         mBlob = nullptr;
@@ -132,7 +140,9 @@ ImageBlobDevice* getImage(sqlite3pp::database& db, const MetaDataManager::Key &k
     if(!rowId)
         return nullptr;
 
-    return new ImageBlobDevice(db.db(), rowId);
+    ImageBlobDevice *dev = new ImageBlobDevice(db.db());
+    dev->setBlobInfo("metadata", "val", rowId);
+    return dev;
 }
 
 void setImage(sqlite3pp::database& db, const MetaDataManager::Key &key, const void *data, int size)
