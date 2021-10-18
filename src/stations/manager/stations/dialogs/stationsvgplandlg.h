@@ -8,6 +8,10 @@
 class QIODevice;
 class QSvgRenderer;
 
+class QToolBar;
+class QScrollArea;
+
+
 namespace sqlite3pp {
 class database;
 }
@@ -27,14 +31,25 @@ public:
     void setStation(db_id stId);
     void reloadSVG(QIODevice *dev);
 
+signals:
+    void zoomChanged(int zoom);
+
+private slots:
+    void setZoom(int val);
+    void zoomToFit();
+
 private:
     sqlite3pp::database &mDb;
     db_id stationId;
 
+    QToolBar *toolBar;
+    QScrollArea *scrollArea;
     ssplib::SSPViewer *view;
 
     QSvgRenderer *mSvg;
     ssplib::StationPlan *m_plan;
+
+    int m_zoom;
 };
 
 #endif // STATIONSVGPLANDLG_H
