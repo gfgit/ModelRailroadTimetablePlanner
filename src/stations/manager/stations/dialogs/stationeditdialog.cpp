@@ -601,8 +601,6 @@ void StationEditDialog::removeSelectedGateConnection()
 
 void StationEditDialog::addSVGImage()
 {
-    QFileDialog::getOpenFileName(this, tr("Open SVG Image"), QString(), QStringLiteral("SVG "));
-
     QFileDialog dlg(this, tr("Open SVG Image"));
     dlg.setFileMode(QFileDialog::ExistingFile);
     dlg.setAcceptMode(QFileDialog::AcceptOpen);
