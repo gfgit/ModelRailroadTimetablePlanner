@@ -552,11 +552,14 @@ void StationEditDialog::addGateConnection()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
     dlg->setSegment(0, getStation(), EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     gateConnModel->refreshData(); //Recalc row count
-    delete dlg;
 }
 
 void StationEditDialog::editGateConnection()
@@ -571,11 +574,14 @@ void StationEditDialog::editGateConnection()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
     dlg->setSegment(segId, getStation(), EditRailwaySegmentDlg::LockToCurrentValue);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     gateConnModel->refreshData(true); //Refresh fields
-    delete dlg;
 }
 
 void StationEditDialog::removeSelectedGateConnection()
@@ -627,7 +633,10 @@ void StationEditDialog::addSVGImage()
     {
         QMessageBox::warning(this, tr("Error Adding SVG"),
                              tr("An error occurred while adding SVG station plan."));
+        return;
     }
+
+    updateSVGButtons(true);
 }
 
 void StationEditDialog::removeSVGImage()
@@ -641,7 +650,10 @@ void StationEditDialog::removeSVGImage()
     {
         QMessageBox::warning(this, tr("Error Deleting SVG"),
                              tr("An error occurred while deleting SVG station plan."));
+        return;
     }
+
+    updateSVGButtons(false);
 }
 
 void StationEditDialog::saveSVGToFile()
@@ -677,8 +689,10 @@ void StationEditDialog::saveSVGToFile()
 
 void StationEditDialog::showSVGImage()
 {
-    QIODevice *dev = StationSVGHelper::loadImage(mDb, getStation());
-    if(!dev)
+    std::unique_ptr<QIODevice> dev;
+    dev.reset(StationSVGHelper::loadImage(mDb, getStation()));
+
+    if(!dev || !dev->open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(this, tr("Error Loading SVG"),
                              tr("An error occurred while loading SVG station plan."));
@@ -687,7 +701,8 @@ void StationEditDialog::showSVGImage()
 
     QPointer<StationSVGPlanDlg> dlg = new StationSVGPlanDlg(mDb, this);
     dlg->setStation(getStation());
-    dlg->reloadSVG(dev);
+    dlg->reloadSVG(dev.get());
 
     dlg->exec();
+    delete dlg;
 }
