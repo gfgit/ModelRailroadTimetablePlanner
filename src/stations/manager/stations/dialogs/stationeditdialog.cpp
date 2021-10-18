@@ -193,7 +193,8 @@ bool StationEditDialog::setStation(db_id stationId)
     QString shortName;
     utils::StationType type = utils::StationType::Normal;
     qint64 phoneNumber = -1;
-    if(!gatesModel->getStationInfo(stationName, shortName, type, phoneNumber))
+    bool hasImage = false;
+    if(!gatesModel->getStationInfo(stationName, shortName, type, phoneNumber, hasImage))
         return false;
 
     ui->stationNameEdit->setText(stationName);
@@ -207,6 +208,8 @@ bool StationEditDialog::setStation(db_id stationId)
 
     //Update title
     setWindowTitle(stationName.isEmpty() ? tr("New Station") : stationName);
+
+    updateSVGButtons(hasImage);
 
     return true;
 }
@@ -511,6 +514,14 @@ void StationEditDialog::addTrackConnInternal(int mode)
     while (true);
 
     delete dlg;
+}
+
+void StationEditDialog::updateSVGButtons(bool hasImage)
+{
+    ui->addSVGBut->setEnabled(!hasImage);
+    ui->remSVGBut->setEnabled(hasImage);
+    ui->saveSVGBut->setEnabled(hasImage);
+    ui->showSVGBut->setEnabled(hasImage);
 }
 
 void StationEditDialog::removeSelectedTrackConn()

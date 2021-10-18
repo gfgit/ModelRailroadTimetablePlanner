@@ -65,6 +65,7 @@ private slots:
 
 private:
     void addTrackConnInternal(int mode);
+    void updateSVGButtons(bool hasImage);
 
 private:
     enum Tabs
