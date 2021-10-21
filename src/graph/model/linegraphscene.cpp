@@ -31,7 +31,8 @@ LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
     mDb(db),
     graphObjectId(0),
-    graphType(LineGraphType::NoGraph)
+    graphType(LineGraphType::NoGraph),
+    selectedJobId(0)
 {
 
 }
@@ -632,4 +633,18 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
     }
 
     return true;
+}
+
+db_id LineGraphScene::getSelectedJobId() const
+{
+    return selectedJobId;
+}
+
+void LineGraphScene::setSelectedJobId(db_id jobId)
+{
+    //TODO: draw box around selected job or highlight in graph view
+    if(selectedJobId == jobId)
+        return;
+    selectedJobId = jobId;
+    emit jobSelected(selectedJobId);
 }
