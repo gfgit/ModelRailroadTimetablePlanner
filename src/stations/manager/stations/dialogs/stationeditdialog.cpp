@@ -1,6 +1,9 @@
 #include "stationeditdialog.h"
 #include "ui_stationeditdialog.h"
 
+#include "app/session.h"
+#include "viewmanager/viewmanager.h"
+
 #include "stations/station_name_utils.h"
 
 #include "stations/manager/stations/model/stationgatesmodel.h"
@@ -8,7 +11,6 @@
 #include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
 
 #include "stations/manager/stations/model/stationsvghelper.h"
-#include "stations/manager/stations/dialogs/stationsvgplandlg.h"
 
 #include "stations/manager/segments/model/railwaysegmentsmodel.h"
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
@@ -695,10 +697,5 @@ void StationEditDialog::saveSVGToFile()
 
 void StationEditDialog::showSVGImage()
 {
-    QPointer<StationSVGPlanDlg> dlg = new StationSVGPlanDlg(mDb, this);
-    dlg->setStation(getStation());
-    dlg->reloadPlan();
-
-    dlg->exec();
-    delete dlg;
+    Session->getViewManager()->requestStSVGPlan(getStation());
 }
