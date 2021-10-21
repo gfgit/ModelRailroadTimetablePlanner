@@ -39,6 +39,9 @@ private slots:
     void setZoom(int val);
     void zoomToFit();
 
+protected:
+    void showEvent(QShowEvent *) override;
+
 private:
     sqlite3pp::database &mDb;
     db_id stationId;

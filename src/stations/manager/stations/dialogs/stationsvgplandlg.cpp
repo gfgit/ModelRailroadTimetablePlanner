@@ -45,6 +45,9 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     zoomAction->setText(tr("Zoom"));
 
     toolBar->addAction(tr("Fit To Window"), this, &StationSVGPlanDlg::zoomToFit);
+
+    setMinimumSize(400, 300);
+    resize(600, 500);
 }
 
 StationSVGPlanDlg::~StationSVGPlanDlg()
@@ -83,6 +86,7 @@ void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
     mSvg->load(&xml);
 
     view->update();
+    zoomToFit();
 }
 
 void StationSVGPlanDlg::reloadDBData()
@@ -113,4 +117,13 @@ void StationSVGPlanDlg::zoomToFit()
 
     const int val = qMin(zoomH, zoomV);
     setZoom(val);
+}
+
+void StationSVGPlanDlg::showEvent(QShowEvent *)
+{
+    //NOTE: when dialog is created it is hidden so it cannot zoom
+    //We load the station and then show the dialog
+    //Since dialog is hidden at first it cannot calculate zoom
+    //So when the dialog is first shown we trigger zoom again.
+    zoomToFit();
 }
