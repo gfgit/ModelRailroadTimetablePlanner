@@ -31,10 +31,7 @@ public:
      */
     typedef struct
     {
-        db_id jobId;
-        JobCategory category;
-
-        db_id stopId;
+        JobStopEntry stop;
         double arrivalY;
         double departureY;
     } JobStopGraph;

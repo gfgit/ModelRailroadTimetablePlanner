@@ -61,7 +61,7 @@ public:
      * \param pos Point in scene coordinates
      * \param tolerance A tolerance if mouse doesn't exactly click on job item
      */
-    JobEntry getJobAt(const QPointF& pos, const double tolerance);
+    JobStopEntry getJobAt(const QPointF& pos, const double tolerance);
 
     inline LineGraphType getGraphType() const
     {
@@ -83,8 +83,8 @@ public:
         return contentSize;
     }
 
-    db_id getSelectedJobId() const;
-    void setSelectedJobId(db_id jobId);
+    JobStopEntry getSelectedJob() const;
+    void setSelectedJobId(JobStopEntry stop);
 
 signals:
     void graphChanged(int type, db_id objectId);
@@ -224,7 +224,7 @@ private:
      *
      * Caches selected job item ID
      */
-    db_id selectedJobId;
+    JobStopEntry selectedJob;
 };
 
 #endif // LINEGRAPHSCENE_H

@@ -31,8 +31,7 @@ LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
     mDb(db),
     graphObjectId(0),
-    graphType(LineGraphType::NoGraph),
-    selectedJobId(0)
+    graphType(LineGraphType::NoGraph)
 {
 
 }
@@ -234,11 +233,12 @@ bool LineGraphScene::reloadJobs()
     return true;
 }
 
-JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
 {
     const double platformOffset = Session->platformOffset;
 
-    JobEntry job;
+    JobStopEntry job;
+    job.stopId = 0;
     job.jobId = 0;
     job.category = JobCategory::FREIGHT;
 
@@ -347,8 +347,7 @@ JobEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
         if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
         {
             //Found match
-            job.jobId = jobStop.jobId;
-            job.category = jobStop.category;
+            job = jobStop.stop;
             break;
         }
     }
@@ -515,9 +514,9 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
     for(auto stop : q)
     {
         StationGraphObject::JobStopGraph jobStop;
-        jobStop.stopId = stop.get<db_id>(0);
-        jobStop.jobId = stop.get<db_id>(1);
-        jobStop.category = JobCategory(stop.get<int>(2));
+        jobStop.stop.stopId = stop.get<db_id>(0);
+        jobStop.stop.jobId = stop.get<db_id>(1);
+        jobStop.stop.category = JobCategory(stop.get<int>(2));
         QTime arrival = stop.get<QTime>(3);
         QTime departure = stop.get<QTime>(4);
         db_id trackId = stop.get<db_id>(5);
@@ -526,7 +525,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
         if(trackId && outTrackId && trackId != outTrackId)
         {
             //Not last stop, neither first stop. Tracks must correspond
-            qWarning() << "Stop:" << jobStop.stopId << "Track not corresponding, using in";
+            qWarning() << "Stop:" << jobStop.stop.stopId << "Track not corresponding, using in";
         }
         else if(!trackId)
         {
@@ -534,7 +533,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
                 trackId = outTrackId; //First stop, use out gate connection
             else
             {
-                qWarning() << "Stop:" << jobStop.stopId << "Both in/out track NULL, skipping";
+                qWarning() << "Stop:" << jobStop.stop.stopId << "Both in/out track NULL, skipping";
                 continue; //Skip this stop
             }
         }
@@ -554,7 +553,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
         if(!platf)
         {
             //Requested platform is not in this station
-            qWarning() << "Stop:" << jobStop.stopId << "Track is not in this station";
+            qWarning() << "Stop:" << jobStop.stop.stopId << "Track is not in this station";
             continue; //Skip this stop
         }
 
@@ -635,16 +634,18 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
     return true;
 }
 
-db_id LineGraphScene::getSelectedJobId() const
+JobStopEntry LineGraphScene::getSelectedJob() const
 {
-    return selectedJobId;
+    return selectedJob;
 }
 
-void LineGraphScene::setSelectedJobId(db_id jobId)
+void LineGraphScene::setSelectedJobId(JobStopEntry stop)
 {
     //TODO: draw box around selected job or highlight in graph view
-    if(selectedJobId == jobId)
-        return;
-    selectedJobId = jobId;
-    emit jobSelected(selectedJobId);
+    const db_id oldJobId = selectedJob.jobId;
+
+    selectedJob = stop;
+
+    if(selectedJob.jobId != oldJobId)
+        emit jobSelected(selectedJob.jobId);
 }

@@ -224,7 +224,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
                     continue; //Skip, job not visible
 
-                jobPen.setColor(Session->colorForCat(jobStop.category));
+                jobPen.setColor(Session->colorForCat(jobStop.stop.category));
                 painter->setPen(jobPen);
 
                 top.setY(jobStop.arrivalY);
