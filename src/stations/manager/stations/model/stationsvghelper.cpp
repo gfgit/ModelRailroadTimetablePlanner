@@ -166,8 +166,8 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
             Q_UNUSED(reversed)
 
             //TODO: set segment name as tooltip because otherwise label is too long
-            //item.labelText = labelFmt.arg(fromStationName, segName);
-            item.labelText = fromStationName;
+            //item.labelText = labelFmt.arg(toStationName, segName);
+            item.labelText = toStationName;
 
 
             //Mark label as visible
