@@ -39,6 +39,10 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     scrollArea->setWidget(view);
     lay->addWidget(scrollArea);
 
+    //Actions
+    toolBar->addAction(tr("Reload"), this, &StationSVGPlanDlg::reloadPlan);
+    toolBar->addSeparator();
+
     QSpinBox *zoomSpin = new QSpinBox;
     zoomSpin->setRange(25, 400);
     connect(zoomSpin, qOverload<int>(&QSpinBox::valueChanged), this, &StationSVGPlanDlg::setZoom);
