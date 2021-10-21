@@ -32,6 +32,7 @@ public:
     void clearGraphsOfObject(db_id objectId, LineGraphType type);
 
 private slots:
+    //Scenes
     void onSceneDestroyed(QObject *obj);
 
     //Stations
@@ -49,6 +50,10 @@ private slots:
     void onLineSegmentsChanged(db_id lineId);
     void onLineRemoved(db_id lineId);
 
+    //Jobs
+    void onJobSelected(db_id jobId);
+
+    //Settings
     void updateGraphOptions();
 
 private:

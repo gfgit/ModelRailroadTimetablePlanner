@@ -3,6 +3,7 @@
 #include "linegraphscene.h"
 
 #include "app/session.h"
+#include "viewmanager/viewmanager.h"
 
 LineGraphManager::LineGraphManager(QObject *parent) :
     QObject(parent)
@@ -23,8 +24,7 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     connect(session, &MeetingSession::lineSegmentsChanged, this, &LineGraphManager::onLineSegmentsChanged);
     connect(session, &MeetingSession::lineRemoved, this, &LineGraphManager::onLineRemoved);
 
-    //TODO:
-
+    //Settings
     connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
 }
 
@@ -35,6 +35,7 @@ void LineGraphManager::registerScene(LineGraphScene *scene)
     scenes.append(scene);
 
     connect(scene, &LineGraphScene::destroyed, this, &LineGraphManager::onSceneDestroyed);
+    connect(scene, &LineGraphScene::jobSelected, this, &LineGraphManager::onJobSelected);
 }
 
 void LineGraphManager::unregisterScene(LineGraphScene *scene)
@@ -44,6 +45,7 @@ void LineGraphManager::unregisterScene(LineGraphScene *scene)
     scenes.removeOne(scene);
 
     disconnect(scene, &LineGraphScene::destroyed, this, &LineGraphManager::onSceneDestroyed);
+    disconnect(scene, &LineGraphScene::jobSelected, this, &LineGraphManager::onJobSelected);
 }
 
 void LineGraphManager::clearAllGraphs()
@@ -132,8 +134,33 @@ void LineGraphManager::onLineRemoved(db_id lineId)
     clearGraphsOfObject(lineId, LineGraphType::RailwayLine);
 }
 
+void LineGraphManager::onJobSelected(db_id jobId)
+{
+    //TODO: maybe allow multiple job editing, one per open LineGraphScene
+    if(jobId)
+        Session->getViewManager()->requestJobEditor(jobId);
+    else
+        Session->getViewManager()->requestClearJob();
+}
+
 void LineGraphManager::updateGraphOptions()
 {
+    //TODO: maybe get rid of theese variables in MeetingSession and always use AppSettings?
+    int hourOffset = AppSettings.getHourOffset();
+    Session->hourOffset = hourOffset;
+
+    int horizOffset = AppSettings.getHorizontalOffset();
+    Session->horizOffset = horizOffset;
+
+    int vertOffset = AppSettings.getVerticalOffset();
+    Session->vertOffset = vertOffset;
+
+    Session->stationOffset = AppSettings.getStationOffset();
+    Session->platformOffset = AppSettings.getPlatformOffset();
+
+    Session->jobLineWidth = AppSettings.getJobLineWidth();
+
+    //Reload all graphs
     for(LineGraphScene *scene : qAsConst(scenes))
     {
         scene->reload();
