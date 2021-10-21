@@ -12,6 +12,8 @@
 
 #include <ssplib/svgstationplanlib.h>
 
+#include "stations/manager/stations/model/stationsvghelper.h"
+
 StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
     mDb(db),
@@ -68,12 +70,24 @@ void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
     ssplib::StreamParser parser(m_plan, dev);
     parser.parse();
 
+    //Sort items
+    std::sort(m_plan->labels.begin(), m_plan->labels.end());
+    std::sort(m_plan->platforms.begin(), m_plan->platforms.end());
+    std::sort(m_plan->trackConnections.begin(), m_plan->trackConnections.end());
+
+    reloadDBData();
+
     dev->reset();
 
     QXmlStreamReader xml(dev);
     mSvg->load(&xml);
 
     view->update();
+}
+
+void StationSVGPlanDlg::reloadDBData()
+{
+    StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan);
 }
 
 void StationSVGPlanDlg::setZoom(int val)

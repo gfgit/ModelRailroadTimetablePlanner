@@ -30,6 +30,7 @@ public:
 
     void setStation(db_id stId);
     void reloadSVG(QIODevice *dev);
+    void reloadDBData();
 
 signals:
     void zoomChanged(int zoom);
