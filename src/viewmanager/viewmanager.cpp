@@ -284,6 +284,7 @@ StationSVGPlanDlg *ViewManager::createStPlanDlg(db_id stId)
     viewer->setAttribute(Qt::WA_DeleteOnClose);
     viewer->setWindowFlag(Qt::Window);
     viewer->setStation(stId);
+    viewer->reloadPlan();
 
     viewer->setObjectName(QString("StationSVGPlanDlg_%1").arg(stId));
 
