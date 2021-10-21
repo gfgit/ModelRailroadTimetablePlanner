@@ -8,12 +8,22 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     QObject(parent)
 {
     auto session = Session;
+    //Stations
     connect(session, &MeetingSession::stationNameChanged, this, &LineGraphManager::onStationNameChanged);
     connect(session, &MeetingSession::stationPlanChanged, this, &LineGraphManager::onStationPlanChanged);
+    connect(session, &MeetingSession::stationRemoved, this, &LineGraphManager::onStationRemoved);
+
+    //Segments
     connect(session, &MeetingSession::segmentNameChanged, this, &LineGraphManager::onSegmentNameChanged);
     connect(session, &MeetingSession::segmentStationsChanged, this, &LineGraphManager::onSegmentStationsChanged);
+    connect(session, &MeetingSession::segmentRemoved, this, &LineGraphManager::onSegmentRemoved);
+
+    //Lines
     connect(session, &MeetingSession::lineNameChanged, this, &LineGraphManager::onLineNameChanged);
     connect(session, &MeetingSession::lineSegmentsChanged, this, &LineGraphManager::onLineSegmentsChanged);
+    connect(session, &MeetingSession::lineRemoved, this, &LineGraphManager::onLineRemoved);
+
+    //TODO:
 
     connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
 }
@@ -44,6 +54,15 @@ void LineGraphManager::clearAllGraphs()
     }
 }
 
+void LineGraphManager::clearGraphsOfObject(db_id objectId, LineGraphType type)
+{
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->getGraphObjectId() == objectId && scene->getGraphType() == type)
+            scene->loadGraph(0, LineGraphType::NoGraph);
+    }
+}
+
 void LineGraphManager::onSceneDestroyed(QObject *obj)
 {
     LineGraphScene *scene = static_cast<LineGraphScene *>(obj);
@@ -65,6 +84,11 @@ void LineGraphManager::onStationPlanChanged(db_id stationId)
     }
 }
 
+void LineGraphManager::onStationRemoved(db_id stationId)
+{
+    clearGraphsOfObject(stationId, LineGraphType::SingleStation);
+}
+
 void LineGraphManager::onSegmentNameChanged(db_id segmentId)
 {
     onSegmentStationsChanged(segmentId); //FIXME: update only labels
@@ -83,6 +107,11 @@ void LineGraphManager::onSegmentStationsChanged(db_id segmentId)
     }
 }
 
+void LineGraphManager::onSegmentRemoved(db_id segmentId)
+{
+    clearGraphsOfObject(segmentId, LineGraphType::RailwaySegment);
+}
+
 void LineGraphManager::onLineNameChanged(db_id lineId)
 {
     onLineSegmentsChanged(lineId); //FIXME: update only labels
@@ -96,6 +125,11 @@ void LineGraphManager::onLineSegmentsChanged(db_id lineId)
         if(scene->graphType == LineGraphType::RailwayLine && scene->graphObjectId == lineId)
             scene->reload();
     }
+}
+
+void LineGraphManager::onLineRemoved(db_id lineId)
+{
+    clearGraphsOfObject(lineId, LineGraphType::RailwayLine);
 }
 
 void LineGraphManager::updateGraphOptions()
