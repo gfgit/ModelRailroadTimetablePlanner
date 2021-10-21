@@ -6,6 +6,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   printing/printwizard.h
   printing/printworker.h
   printing/progresspage.h
+  printing/sceneselectionmodel.h
   printing/selectionpage.h
 
   printing/fileoptionspage.cpp
@@ -13,6 +14,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   printing/printwizard.cpp
   printing/printworker.cpp
   printing/progresspage.cpp
+  printing/sceneselectionmodel.cpp
   printing/selectionpage.cpp
   PARENT_SCOPE
 )
