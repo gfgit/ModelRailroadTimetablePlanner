@@ -20,6 +20,8 @@ class StationSVGHelper
 {
     Q_DECLARE_TR_FUNCTIONS(Odt)
 public:
+    static bool stationHasSVG(sqlite3pp::database &db, db_id stationId, QString *stNameOut);
+
     static bool addImage(sqlite3pp::database &db, db_id stationId, QIODevice *source,
                          QString *errOut = nullptr);
     static bool removeImage(sqlite3pp::database &db, db_id stationId,

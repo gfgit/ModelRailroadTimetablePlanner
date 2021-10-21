@@ -20,6 +20,21 @@ static ImageMetaData::ImageBlobDevice *loadImage_internal(sqlite3pp::database &d
     return dev;
 }
 
+bool StationSVGHelper::stationHasSVG(sqlite3pp::database &db, db_id stationId, QString *stNameOut)
+{
+    sqlite3pp::query q(db);
+    q.prepare("SELECT name, (svg_data IS NULL) FROM stations WHERE id=?");
+    q.bind(1, stationId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+
+    if(stNameOut)
+        *stNameOut = q.getRows().get<QString>(0);
+
+    //svg_data IS NULL == 0 --> station has SVG image
+    return q.getRows().get<int>(1) == 0;
+}
+
 bool StationSVGHelper::addImage(sqlite3pp::database &db, db_id stationId, QIODevice *source, QString *errOut)
 {
     std::unique_ptr<ImageMetaData::ImageBlobDevice> dest;

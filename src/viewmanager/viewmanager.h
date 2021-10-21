@@ -89,7 +89,7 @@ private slots:
 private:
     RSJobViewer* createRSViewer(db_id rsId);
     StationJobView *createStJobViewer(db_id stId);
-    StationSVGPlanDlg *createStPlanDlg(db_id stId);
+    StationSVGPlanDlg *createStPlanDlg(db_id stId, QString &stNameOut);
     StationFreeRSViewer *createStFreeRSViewer(db_id stId);
     ShiftViewer *createShiftViewer(db_id id);
 

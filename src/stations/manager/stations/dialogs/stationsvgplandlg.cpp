@@ -143,6 +143,11 @@ void StationSVGPlanDlg::reloadDBData()
     setWindowTitle(tr("%1 Station Plan").arg(stationName));
 }
 
+bool StationSVGPlanDlg::stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut)
+{
+    return StationSVGHelper::stationHasSVG(db, stId, stNameOut);
+}
+
 void StationSVGPlanDlg::reloadPlan()
 {
     std::unique_ptr<QIODevice> dev;

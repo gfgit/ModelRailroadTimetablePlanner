@@ -32,6 +32,8 @@ public:
     void reloadSVG(QIODevice *dev);
     void reloadDBData();
 
+    static bool stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut);
+
 signals:
     void zoomChanged(int zoom);
 

@@ -27,6 +27,8 @@
 
 #include "sessionstartendrsviewer.h"
 
+#include <QMessageBox>
+
 ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
     mGraphMgr(nullptr),
@@ -278,8 +280,11 @@ StationJobView* ViewManager::createStJobViewer(db_id stId)
     return viewer;
 }
 
-StationSVGPlanDlg *ViewManager::createStPlanDlg(db_id stId)
+StationSVGPlanDlg *ViewManager::createStPlanDlg(db_id stId, QString& stNameOut)
 {
+    if(!StationSVGPlanDlg::stationHasSVG(Session->m_Db, stId, &stNameOut))
+        return nullptr;
+
     StationSVGPlanDlg *viewer = new StationSVGPlanDlg(Session->m_Db, m_mainWidget);
     viewer->setAttribute(Qt::WA_DeleteOnClose);
     viewer->setWindowFlag(Qt::Window);
@@ -332,7 +337,14 @@ void ViewManager::requestStSVGPlan(db_id stId)
     }
     else
     {
-        viewer = createStPlanDlg(stId);
+        QString stName;
+        viewer = createStPlanDlg(stId, stName);
+        if(!viewer)
+        {
+            QMessageBox::warning(m_mainWidget, stName,
+                                 tr("Station %1 has no SVG, please add one.").arg(stName));
+            return;
+        }
     }
 
     viewer->showNormal();
