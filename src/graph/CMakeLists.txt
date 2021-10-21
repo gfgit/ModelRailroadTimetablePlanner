@@ -7,5 +7,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   graph/graphmanager.cpp
 
   graph/linegraphtypes.h
+  graph/linegraphtypes.cpp
   PARENT_SCOPE
 )
