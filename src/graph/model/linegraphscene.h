@@ -10,22 +10,13 @@
 
 #include "utils/types.h"
 
+#include "graph/linegraphtypes.h"
+
 #include "stationgraphobject.h"
 
 namespace sqlite3pp {
 class database;
 }
-
-/*!
- * \brief Enum to describe view content type
- */
-enum class LineGraphType
-{
-    NoGraph = 0, //!< No content displayed
-    SingleStation, //!< Show a single station
-    RailwaySegment, //!< Show two adjacent stations and the segment in between
-    RailwayLine //!< Show a complete railway line (multiple adjacent segments)
-};
 
 /*!
  * \brief Class to store line information
