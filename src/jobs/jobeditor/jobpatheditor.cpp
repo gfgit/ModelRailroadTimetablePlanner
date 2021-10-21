@@ -450,7 +450,7 @@ bool JobPathEditor::saveChanges()
 
     stopModel->commitChanges();
 
-    jobs->updateJobPath(stopModel->getJobId());
+    //TODO: redraw graphs
 
     //When updating the path selection gets cleared so we restore it
     Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
