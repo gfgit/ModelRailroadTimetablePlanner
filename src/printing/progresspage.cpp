@@ -12,8 +12,6 @@
 
 #include "graph/graphmanager.h"
 
-#include "lines/linestorage.h"
-
 //BIG TODO: deselect jobs before printing because the dashed rectangle of the selection gets printed too!!!
 
 ProgressPage::ProgressPage(PrintWizard *w, QWidget *parent) :
@@ -57,8 +55,8 @@ void ProgressPage::initializePage()
     {
         db_id lineId = line.get<db_id>(0);
         QString name = line.get<QString>(1);
-        QGraphicsScene *scene = Session->mLineStorage->sceneForLine(lineId);
-        scenes.append({lineId, scene, name});
+        //QGraphicsScene *scene = Session->mLineStorage->sceneForLine(lineId);
+        scenes.append({lineId, nullptr, name});
     }
 
 // OLD CODE

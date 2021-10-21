@@ -10,8 +10,6 @@
 
 #include <QTime>
 
-#include "lines/linestorage.h"
-
 #include "jobs/jobstorage.h"
 
 #include "sqlite3pp/sqlite3pp.h"
@@ -38,7 +36,6 @@ void TrainGraphics::clear()
     for(SegmentGraph &seg : segments)
         seg.cleanup();
     segments.clear();
-    Session->mLineStorage->removeJobStops(m_jobId);
 }
 
 void TrainGraphics::setCategory(JobCategory cat)
@@ -67,7 +64,6 @@ void TrainGraphics::updateColor()
 void TrainGraphics::setId(db_id newId)
 {
     //Reset stop labels before jobId is changed otherwise we cannot delete them because id doesn't match anymore
-    Session->mLineStorage->removeJobStops(m_jobId);
 
     m_jobId = newId;
 }
@@ -80,26 +76,26 @@ void TrainGraphics::setId(db_id newId)
 
 void TrainGraphics::recalcPath()
 {
-    DEBUG_ENTRY;
+//    DEBUG_ENTRY;
 
-    clear();
+//    clear();
 
-    LineStorage *lines = Session->mLineStorage;
+//    LineStorage *lines = Session->mLineStorage;
 
-    query q_selectSegments(Session->m_Db, "SELECT id, lineId FROM jobsegments WHERE jobId=?");
-    q_selectSegments.bind(1, m_jobId);
-    for(query::iterator it = q_selectSegments.begin(); it != q_selectSegments.end(); ++it)
-    {
-        const query::rows &segment = *it;
+//    query q_selectSegments(Session->m_Db, "SELECT id, lineId FROM jobsegments WHERE jobId=?");
+//    q_selectSegments.bind(1, m_jobId);
+//    for(query::iterator it = q_selectSegments.begin(); it != q_selectSegments.end(); ++it)
+//    {
+//        const query::rows &segment = *it;
 
-        db_id segId = segment.get<db_id>(0);
-        db_id lineId = segment.get<db_id>(1);
-        if(lines->sceneForLine(lineId))
-        {
-            createSegment(segId);
-            drawSegment(segId, lineId);
-        }
-    }
+//        db_id segId = segment.get<db_id>(0);
+//        db_id lineId = segment.get<db_id>(1);
+//        if(lines->sceneForLine(lineId))
+//        {
+//            createSegment(segId);
+//            drawSegment(segId, lineId);
+//        }
+//    }
 }
 
 void TrainGraphics::createSegment(db_id segId)
@@ -138,17 +134,6 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
     SegmentGraph& s = seg.value();
     s.lineId = lineId;
     s.item->setData(LINE_ID, lineId);
-
-    auto scene = Session->mLineStorage->sceneForLine(lineId);
-    if(!scene)
-    {
-        qWarning() << "Err: job:" << m_jobId << "line:" << lineId << "Null Scene!!!";
-        return;
-    }
-    if(scene != s.item->scene())
-    {
-        //scene->addItem(s.item);
-    }
 
     QFont labelFont;
     labelFont.setPointSizeF(AppSettings.getJobLabelFontSize());
@@ -194,7 +179,7 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
 
     path.moveTo(cur);
 
-    Session->mLineStorage->addJobStop(stopId, stId, m_jobId, lineId, name, cur.y(), cur.y(), platf);
+    //Session->mLineStorage->addJobStop(stopId, stId, m_jobId, lineId, name, cur.y(), cur.y(), platf);
 
     ++it;
 
@@ -215,7 +200,7 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
         QPointF point2(point1.x(),
                        vertOffset + hour2 * hourOffset);
 
-        Session->mLineStorage->addJobStop(stopId, stId, m_jobId, lineId, name, point1.y(), point2.y(), platf);
+        //Session->mLineStorage->addJobStop(stopId, stId, m_jobId, lineId, name, point1.y(), point2.y(), platf);
 
         QPointF midPoint = (cur + point1)/2;
 
@@ -260,10 +245,6 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
     for(int i = 0; i < max; i++)
     {
         QGraphicsSimpleTextItem *ti = s.texts[i];
-        if(scene != ti->scene())
-        {
-            //scene->addItem(ti);
-        }
 
         ti->setBrush(brush); // Don't set QPen
         ti->setText(name);
