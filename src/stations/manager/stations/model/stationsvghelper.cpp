@@ -234,6 +234,7 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
     {
         ssplib::TrackConnectionInfo info;
         db_id connId = r.get<db_id>(0);
+        info.trackId = r.get<db_id>(1);
         utils::Side trackSide = utils::Side(r.get<int>(2));
         info.stationTrackPos = r.get<int>(3);
         info.gateId = r.get<db_id>(4);
