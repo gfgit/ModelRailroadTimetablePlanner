@@ -20,16 +20,25 @@ static ImageMetaData::ImageBlobDevice *loadImage_internal(sqlite3pp::database &d
     return dev;
 }
 
-bool StationSVGHelper::addImage(sqlite3pp::database &db, db_id stationId, QIODevice *source)
+bool StationSVGHelper::addImage(sqlite3pp::database &db, db_id stationId, QIODevice *source, QString *errOut)
 {
     std::unique_ptr<ImageMetaData::ImageBlobDevice> dest;
     dest.reset(loadImage_internal(db, stationId));
 
-    if(!dest)
+    if(!source || !dest)
+    {
+        if(errOut)
+            *errOut = tr("Null device");
         return false;
+    }
 
     //Make room for storing data and open device
-    dest->reserveSizeAndReset(source->size());
+    if(!dest->reserveSizeAndReset(source->size()))
+    {
+        if(errOut)
+            *errOut = dest->errorString();
+        return false;
+    }
 
     constexpr int bufSize = 8192;
     char buf[bufSize];
@@ -44,20 +53,38 @@ bool StationSVGHelper::addImage(sqlite3pp::database &db, db_id stationId, QIODev
     return true;
 }
 
-bool StationSVGHelper::removeImage(sqlite3pp::database &db, db_id stationId)
+bool StationSVGHelper::removeImage(sqlite3pp::database &db, db_id stationId, QString *errOut)
 {
     sqlite3pp::command cmd(db, "UPDATE stations SET svg_data = NULL WHERE id=?");
     cmd.bind(1, stationId);
-    return cmd.execute() == SQLITE_OK;
+    int ret = cmd.execute();
+    if(ret != SQLITE_OK)
+    {
+        if(errOut)
+            *errOut = tr("Cannot remove SVG: %1").arg(db.error_msg());
+        return false;
+    }
+    return true;
 }
 
-bool StationSVGHelper::saveImage(sqlite3pp::database &db, db_id stationId, QIODevice *dest)
+bool StationSVGHelper::saveImage(sqlite3pp::database &db, db_id stationId, QIODevice *dest, QString *errOut)
 {
     std::unique_ptr<ImageMetaData::ImageBlobDevice> source;
     source.reset(loadImage_internal(db, stationId));
 
-    if(!source || !source->open(QIODevice::ReadOnly))
+    if(!source || !dest)
+    {
+        if(errOut)
+            *errOut = tr("Null device");
         return false;
+    }
+
+    if(!source->open(QIODevice::ReadOnly))
+    {
+        if(errOut)
+            *errOut = tr("Cannot open source: %1").arg(source->errorString());
+        return false;
+    }
 
     //Optimization for files, resize to avoid reallocations
     if(QFileDevice *dev = qobject_cast<QFileDevice *>(dest))
