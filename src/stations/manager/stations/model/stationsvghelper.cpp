@@ -92,7 +92,7 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
               " LIMIT 100");
     q.bind(1, stationId);
 
-    const QString  labelFmt = QStringLiteral("%1 (%2)");
+    //const QString  labelFmt = QStringLiteral("%1 (%2)");
 
     for(auto r : q)
     {
@@ -167,6 +167,7 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
 
             //TODO: set segment name as tooltip because otherwise label is too long
             //item.labelText = labelFmt.arg(toStationName, segName);
+            Q_UNUSED(segName)
             item.labelText = toStationName;
 
 
