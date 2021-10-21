@@ -38,6 +38,7 @@ signals:
 private slots:
     void setZoom(int val);
     void zoomToFit();
+    void onLabelClicked(qint64 gateId, QChar letter, const QString& text);
 
 protected:
     void showEvent(QShowEvent *) override;

@@ -10,6 +10,8 @@
 
 #include <QSpinBox>
 
+#include <QMessageBox>
+
 #include <ssplib/svgstationplanlib.h>
 
 #include "stations/manager/stations/model/stationsvghelper.h"
@@ -26,6 +28,7 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
 
     view = new ssplib::SSPViewer(m_plan);
     view->setRenderer(mSvg);
+    connect(view, &ssplib::SSPViewer::labelClicked, this, &StationSVGPlanDlg::onLabelClicked);
 
     toolBar = new QToolBar;
     lay->addWidget(toolBar);
@@ -117,6 +120,12 @@ void StationSVGPlanDlg::zoomToFit()
 
     const int val = qMin(zoomH, zoomV);
     setZoom(val);
+}
+
+void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QString &text)
+{
+    QMessageBox::information(this, tr("Gate %1").arg(letter),
+                             tr("Station: %2").arg(text));
 }
 
 void StationSVGPlanDlg::showEvent(QShowEvent *)
