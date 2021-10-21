@@ -35,8 +35,9 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     lay->addWidget(redrawBut);
 
     QStringList items;
-    items.reserve(4);
-    items << tr("No Graph") << tr("Station") << tr("Segment") << tr("Line");
+    items.reserve(int(LineGraphType::NTypes));
+    for(int i = 0; i < int(LineGraphType::NTypes); i++)
+        items.append(utils::getLineGraphTypeName(LineGraphType(i)));
     graphTypeCombo->addItems(items);
     graphTypeCombo->setCurrentIndex(0);
 
