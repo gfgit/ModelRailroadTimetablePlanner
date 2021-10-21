@@ -11,10 +11,18 @@
 #include <QSpinBox>
 
 #include <QMessageBox>
+#include <QPushButton>
+#include <QPointer>
 
 #include <ssplib/svgstationplanlib.h>
 
 #include "stations/manager/stations/model/stationsvghelper.h"
+#include "stations/manager/segments/model/railwaysegmenthelper.h"
+
+#include "app/session.h"
+#include "viewmanager/viewmanager.h"
+
+#include <QDebug>
 
 StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     QWidget(parent),
@@ -198,8 +206,66 @@ void StationSVGPlanDlg::zoomToFit()
 
 void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QString &text)
 {
-    QMessageBox::information(this, tr("Gate %1").arg(letter),
-                             tr("Station: %2").arg(text));
+    RailwaySegmentHelper helper(mDb);
+    RailwaySegmentHelper::SegmentInfo info;
+    if(!helper.getSegmentInfoFromGate(gateId, info))
+    {
+        QMessageBox::warning(this, tr("Database Error"),
+                             tr("Cannot retrive details for gate %1 (%2)").arg(letter).arg(text));
+        return;
+    }
+
+    if(info.to.stationId == stationId)
+    {
+        //Reverse segment
+        qSwap(info.from, info.to);
+    }
+    else if(info.from.stationId != stationId)
+    {
+        //Segment not of this station
+        qWarning() << "StationSVGPlanDlg::onLabelClicked segment" << info.segmentId << info.segmentName
+                   << "NOT OF THIS STATION" << stationId;
+    }
+
+    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->setWindowTitle(tr("Gate %1").arg(letter));
+
+    const QString translatedText =
+        tr(
+            "<h3>Railway Segment Details</h3>"
+            "<p>"
+            "Segment: <b>%1</b><br>"
+            "From: <b>%2</b> (Gate: %3)<br>"
+            "To:   <b>%4</b> (Gate: %5)<br>"
+            "Distance: <b>%6 Km</b><br>"
+            "Max. Speed: <b>%7 km/h</b><br>"
+            "</p>")
+            .arg(info.segmentName)
+            .arg(info.from.stationName)
+            .arg(info.from.gateLetter)
+            .arg(info.to.stationName)
+            .arg(info.to.gateLetter)
+            .arg(info.distanceMeters)
+            .arg(info.maxSpeedKmH);
+
+    msgBox->setTextFormat(Qt::RichText);
+    msgBox->setText(translatedText);
+
+    QPushButton *showSVGBut = msgBox->addButton(tr("Show SVG"), QMessageBox::YesRole);
+    msgBox->addButton(QMessageBox::Ok);
+    msgBox->setDefaultButton(QMessageBox::Ok);
+
+    msgBox->exec();
+    if(!msgBox)
+        return;
+
+    if(msgBox->clickedButton() == showSVGBut)
+    {
+        Session->getViewManager()->requestStSVGPlan(info.to.stationId);
+    }
+
+    delete msgBox;
 }
 
 void StationSVGPlanDlg::showEvent(QShowEvent *)
