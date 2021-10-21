@@ -627,12 +627,15 @@ void StationEditDialog::addSVGImage()
 
     QFile f(fileName);
     if(!f.open(QFile::ReadOnly))
-        return;
-
-    if(!StationSVGHelper::addImage(mDb, getStation(), &f))
     {
-        QMessageBox::warning(this, tr("Error Adding SVG"),
-                             tr("An error occurred while adding SVG station plan."));
+        QMessageBox::warning(this, tr("Cannot Read File"), f.errorString());
+        return;
+    }
+
+    QString errMsg;
+    if(!StationSVGHelper::addImage(mDb, getStation(), &f, &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error Adding SVG"), errMsg);
         return;
     }
 
@@ -646,10 +649,10 @@ void StationEditDialog::removeSVGImage()
     if(ret != QMessageBox::Yes)
         return;
 
-    if(!StationSVGHelper::removeImage(mDb, getStation()))
+    QString errMsg;
+    if(!StationSVGHelper::removeImage(mDb, getStation(), &errMsg))
     {
-        QMessageBox::warning(this, tr("Error Deleting SVG"),
-                             tr("An error occurred while deleting SVG station plan."));
+        QMessageBox::warning(this, tr("Error Deleting SVG"), errMsg);
         return;
     }
 
@@ -678,12 +681,15 @@ void StationEditDialog::saveSVGToFile()
 
     QFile f(fileName);
     if(!f.open(QFile::WriteOnly))
-        return;
-
-    if(!StationSVGHelper::saveImage(mDb, getStation(), &f))
     {
-        QMessageBox::warning(this, tr("Error Saving SVG"),
-                             tr("An error occurred while saving copy of SVG station plan."));
+        QMessageBox::warning(this, tr("Cannot Save File"), f.errorString());
+        return;
+    }
+
+    QString errMsg;
+    if(!StationSVGHelper::saveImage(mDb, getStation(), &f, &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error Saving SVG"), errMsg);
     }
 }
 

@@ -136,10 +136,17 @@ void StationSVGPlanDlg::reloadPlan()
     std::unique_ptr<QIODevice> dev;
     dev.reset(StationSVGHelper::loadImage(mDb, stationId));
 
-    if(!dev || !dev->open(QIODevice::ReadOnly))
+    if(!dev)
     {
         QMessageBox::warning(this, tr("Error Loading SVG"),
-                             tr("An error occurred while loading SVG station plan."));
+                             tr("Cannot find SVG data"));
+        return;
+    }
+
+    if(!dev->open(QIODevice::ReadOnly))
+    {
+        QMessageBox::warning(this, tr("Error Loading SVG"),
+                             tr("Cannot read data: %1").arg(dev->errorString()));
         return;
     }
 
