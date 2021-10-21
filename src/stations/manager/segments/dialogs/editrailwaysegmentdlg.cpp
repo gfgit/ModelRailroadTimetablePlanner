@@ -195,40 +195,34 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     if(m_lockStationId == DoNotLock)
         m_lockGateId = DoNotLock; //Cannot lock gate without locking station
 
-    QString segName;
-    QFlags<utils::RailwaySegmentType> type;
-    int distance = 10000; // 10 km
-    int maxSpeed = 120;   // 120 km/h
+    RailwaySegmentHelper::SegmentInfo info;
+    info.segmentId = m_segmentId;
+    info.distanceMeters = 10000; // 10 km
+    info.maxSpeedKmH = 120;   // 120 km/h
 
-    db_id fromStId = m_lockStationId;
-    db_id fromGateId = m_lockGateId;
-    db_id toStId = 0;
-    db_id toGateId = 0;
+    info.from.stationId = m_lockStationId;
+    info.from.gateId = m_lockGateId;
+    info.to.stationId = 0;
+    info.to.gateId = 0;
+
+    QFlags<utils::RailwaySegmentType> type;
 
     if(segmentId)
     {
-        //Load details TODO
-        utils::RailwaySegmentType tmpType;
-
-        if(!helper->getSegmentInfo(segmentId,
-                                    segName, tmpType,
-                                    distance, maxSpeed,
-                                    fromStId, fromGateId,
-                                    toStId, toGateId))
+        if(!helper->getSegmentInfo(info))
         {
             return; //TODO: error reporting
         }
-        type = tmpType;
+        type = info.type;
 
-        if(m_lockStationId == toStId)
+        if(m_lockStationId == info.to.stationId)
         {
             //Reverse segment
             //Locked station must appear as 'From:'
-            qSwap(fromStId, toStId);
-            qSwap(fromGateId, toGateId);
+            qSwap(info.from, info.to);
             reversed = true;
         }
-        else if(m_lockStationId != fromStId)
+        else if(m_lockStationId != info.from.stationId)
         {
             //It's neither normal nor reversed
             m_lockStationId = DoNotLock;
@@ -238,9 +232,9 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
         if(m_lockGateId == LockToCurrentValue)
         {
             //Lock to current gate
-            m_lockGateId = fromGateId;
+            m_lockGateId = info.from.gateId;
         }
-        else if(m_lockGateId != fromGateId)
+        else if(m_lockGateId != info.from.gateId)
         {
             //User passed different gate, do not lock
             m_lockGateId = DoNotLock;
@@ -254,16 +248,16 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
         setWindowTitle(tr("New Railway Segment"));
     }
 
-    segmentNameEdit->setText(segName);
-    distanceSpin->setValue(distance);
-    maxSpeedSpin->setValue(maxSpeed);
+    segmentNameEdit->setText(info.segmentName);
+    distanceSpin->setValue(info.distanceMeters);
+    maxSpeedSpin->setValue(info.maxSpeedKmH);
     electifiedCheck->setChecked(type.testFlag(utils::RailwaySegmentType::Electrified));
     //FIXME: add support for other types
 
-    fromStationEdit->setData(fromStId);
-    fromGateEdit->setData(fromGateId);
-    toStationEdit->setData(toStId);
-    toGateEdit->setData(toGateId);
+    fromStationEdit->setData(info.from.stationId);
+    fromGateEdit->setData(info.from.gateId);
+    toStationEdit->setData(info.to.stationId);
+    toGateEdit->setData(info.to.gateId);
 
     if(m_lockStationId == DoNotLock)
     {
@@ -274,7 +268,7 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     else
     {
         //Filter out 'From:' station
-        toStationMatch->setFilter(fromStId);
+        toStationMatch->setFilter(info.from.stationId);
     }
     toStationMatch->refreshData();
 
