@@ -82,6 +82,13 @@ bool ImageBlobDevice::reserveSizeAndReset(qint64 len)
 
 bool ImageBlobDevice::open(QIODevice::OpenMode mode)
 {
+    if(isOpen())
+    {
+        qWarning().nospace() << "ImageBlobDevice::open Device already open "
+                             << '(' << mTable << '.' << mColumn << ')';
+        return false;
+    }
+
     mode |= QIODevice::ReadOnly; //Always enable reading
     int rc = sqlite3_blob_open(mDb, "main", mTable.constData(), mColumn.constData(),
                                mRowId, (mode & QIODevice::WriteOnly) != 0, &mBlob);
