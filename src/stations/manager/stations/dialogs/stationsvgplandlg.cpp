@@ -17,7 +17,7 @@
 #include "stations/manager/stations/model/stationsvghelper.h"
 
 StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
-    QDialog(parent),
+    QWidget(parent),
     mDb(db),
     stationId(0)
 {

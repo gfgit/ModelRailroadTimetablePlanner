@@ -1,7 +1,7 @@
 #ifndef STATIONSVGPLANDLG_H
 #define STATIONSVGPLANDLG_H
 
-#include <QDialog>
+#include <QWidget>
 
 #include "utils/types.h"
 
@@ -21,7 +21,7 @@ class StationPlan;
 class SSPViewer;
 }
 
-class StationSVGPlanDlg : public QDialog
+class StationSVGPlanDlg : public QWidget
 {
     Q_OBJECT
 public:
