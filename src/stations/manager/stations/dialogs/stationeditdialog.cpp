@@ -1,9 +1,6 @@
 #include "stationeditdialog.h"
 #include "ui_stationeditdialog.h"
 
-#include "app/session.h"
-#include "viewmanager/viewmanager.h"
-
 #include "stations/station_name_utils.h"
 
 #include "stations/manager/stations/model/stationgatesmodel.h"
@@ -87,7 +84,6 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->addSVGBut, &QPushButton::clicked, this, &StationEditDialog::addSVGImage);
     connect(ui->remSVGBut, &QPushButton::clicked, this, &StationEditDialog::removeSVGImage);
     connect(ui->saveSVGBut, &QPushButton::clicked, this, &StationEditDialog::saveSVGToFile);
-    connect(ui->showSVGBut, &QPushButton::clicked, this, &StationEditDialog::showSVGImage);
 
     //Gates Tab
     gatesModel = new StationGatesModel(mDb, this);
@@ -534,7 +530,6 @@ void StationEditDialog::updateSVGButtons(bool hasImage)
     ui->addSVGBut->setEnabled(!hasImage);
     ui->remSVGBut->setEnabled(hasImage);
     ui->saveSVGBut->setEnabled(hasImage);
-    ui->showSVGBut->setEnabled(hasImage);
 }
 
 void StationEditDialog::removeSelectedTrackConn()
@@ -693,9 +688,4 @@ void StationEditDialog::saveSVGToFile()
     {
         QMessageBox::warning(this, tr("Error Saving SVG"), errMsg);
     }
-}
-
-void StationEditDialog::showSVGImage()
-{
-    Session->getViewManager()->requestStSVGPlan(getStation());
 }

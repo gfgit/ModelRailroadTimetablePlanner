@@ -67,7 +67,6 @@ private slots:
     void addSVGImage();
     void removeSVGImage();
     void saveSVGToFile();
-    void showSVGImage();
 
 private:
     void addTrackConnInternal(int mode);
