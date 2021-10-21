@@ -35,6 +35,9 @@ public:
 signals:
     void zoomChanged(int zoom);
 
+public slots:
+    void reloadPlan();
+
 private slots:
     void setZoom(int val);
     void zoomToFit();

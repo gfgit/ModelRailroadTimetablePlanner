@@ -689,19 +689,9 @@ void StationEditDialog::saveSVGToFile()
 
 void StationEditDialog::showSVGImage()
 {
-    std::unique_ptr<QIODevice> dev;
-    dev.reset(StationSVGHelper::loadImage(mDb, getStation()));
-
-    if(!dev || !dev->open(QIODevice::ReadOnly))
-    {
-        QMessageBox::warning(this, tr("Error Loading SVG"),
-                             tr("An error occurred while loading SVG station plan."));
-        return;
-    }
-
     QPointer<StationSVGPlanDlg> dlg = new StationSVGPlanDlg(mDb, this);
     dlg->setStation(getStation());
-    dlg->reloadSVG(dev.get());
+    dlg->reloadPlan();
 
     dlg->exec();
     delete dlg;

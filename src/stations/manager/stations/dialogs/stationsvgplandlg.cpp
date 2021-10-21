@@ -94,7 +94,57 @@ void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
 
 void StationSVGPlanDlg::reloadDBData()
 {
+    //Clear previous data
+    for(ssplib::LabelItem& item : m_plan->labels)
+    {
+        item.visible = false;
+        item.itemId = 0;
+        item.labelText.clear();
+    }
+
+    for(ssplib::TrackItem& item : m_plan->platforms)
+    {
+        item.visible = false;
+        item.itemId = 0;
+
+        item.jobId = 0;
+        item.color = ssplib::whiteRGB;
+        item.jobName.clear();
+
+        item.trackName.clear();
+    }
+
+    for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
+    {
+        item.visible = false;
+        item.itemId = 0;
+
+        item.jobId = 0;
+        item.color = ssplib::whiteRGB;
+        item.jobName.clear();
+
+        item.info.gateId = 0;
+        item.info.trackId = 0;
+    }
+
+    //Reload from database
     StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan);
+}
+
+void StationSVGPlanDlg::reloadPlan()
+{
+    std::unique_ptr<QIODevice> dev;
+    dev.reset(StationSVGHelper::loadImage(mDb, stationId));
+
+    if(!dev || !dev->open(QIODevice::ReadOnly))
+    {
+        QMessageBox::warning(this, tr("Error Loading SVG"),
+                             tr("An error occurred while loading SVG station plan."));
+        return;
+    }
+
+    reloadSVG(dev.get());
+    reloadDBData();
 }
 
 void StationSVGPlanDlg::setZoom(int val)
