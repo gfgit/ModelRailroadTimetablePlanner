@@ -44,6 +44,13 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
+    void addEntry(const Entry& entry);
+    void removeAt(int row);
+    void moveRow(int row, bool up);
+
+public slots:
+    void removeAll();
+
 private:
     QVector<Entry> entries;
     LineGraphType selectedType;
