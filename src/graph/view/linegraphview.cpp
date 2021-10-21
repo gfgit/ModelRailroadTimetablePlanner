@@ -157,6 +157,25 @@ void LineGraphView::mousePressEvent(QMouseEvent *e)
     QAbstractScrollArea::mousePressEvent(e);
 }
 
+void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
+
+    QPoint pos = e->pos();
+    const QRect vp = viewport()->rect();
+
+    //Map to viewport
+    pos -= vp.topLeft();
+    if(pos.x() < 0 || pos.y() < 0)
+        return;
+
+    //Map to scene
+    pos -= origin;
+
+    JobEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
+    m_scene->setSelectedJobId(job.jobId);
+}
+
 void LineGraphView::onSceneDestroyed()
 {
     m_scene = nullptr;
