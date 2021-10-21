@@ -29,7 +29,8 @@ public:
                           QString *errOut = nullptr);
     static QIODevice* loadImage(sqlite3pp::database &db, db_id stationId);
 
-    static bool loadStationFromDB(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan);
+    static bool loadStationFromDB(sqlite3pp::database &db, db_id stationId,
+                                  QString &stName, ssplib::StationPlan *plan);
 };
 
 #endif // STATIONSVGHELPER_H

@@ -132,7 +132,15 @@ void StationSVGPlanDlg::reloadDBData()
     }
 
     //Reload from database
-    StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan);
+    QString stationName;
+    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, stationName, m_plan))
+    {
+        QMessageBox::warning(this, tr("Error Loading Station"),
+                             tr("Cannot load station from database"));
+        return;
+    }
+
+    setWindowTitle(tr("%1 Station Plan").arg(stationName));
 }
 
 void StationSVGPlanDlg::reloadPlan()

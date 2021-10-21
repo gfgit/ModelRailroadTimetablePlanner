@@ -295,8 +295,15 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
     return true;
 }
 
-bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan)
+bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationId, QString& stName, ssplib::StationPlan *plan)
 {
+    sqlite3pp::query q(db);
+    q.prepare("SELECT name FROM stations WHERE id=?");
+    q.bind(1, stationId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+    stName = q.getRows().get<QString>(0);
+
     if(!loadStationLabels(db, stationId, plan))
         return false;
 
