@@ -65,7 +65,6 @@ public:
     void resumeRSImportation();
 
 private slots:
-    void onGraphOptionsChanged();
 
     void onRSRemoved(db_id rsId);
     void onRSPlanChanged(db_id rsId);
