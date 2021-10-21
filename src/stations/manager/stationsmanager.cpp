@@ -113,7 +113,8 @@ void StationsManager::setup_StationPage()
 
     act_addSt = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
     act_remSt = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
-    act_planSt = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
+    act_stJobs = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
+    act_stSVG = stationToolBar->addAction(tr("SVG Plan"), this, &StationsManager::showStSVGPlan);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
     act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
 }
@@ -397,6 +398,19 @@ void StationsManager::showStJobViewer()
     if(!stId)
         return;
     Session->getViewManager()->requestStJobViewer(stId);
+}
+
+void StationsManager::showStSVGPlan()
+{
+    DEBUG_ENTRY;
+    if(!stationView->selectionModel()->hasSelection())
+        return;
+
+    QModelIndex idx = stationView->currentIndex();
+    db_id stId = stationsModel->getIdAtRow(idx.row());
+    if(!stId)
+        return;
+    Session->getViewManager()->requestStSVGPlan(stId);
 }
 
 void StationsManager::onShowFreeRS()
