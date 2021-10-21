@@ -18,6 +18,7 @@
 
 #include "stations/manager/stations/model/stationsvghelper.h"
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
+#include "utils/kmutils.h"
 
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"
@@ -239,14 +240,14 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
             "From: <b>%2</b> (Gate: %3)<br>"
             "To:   <b>%4</b> (Gate: %5)<br>"
             "Distance: <b>%6 Km</b><br>"
-            "Max. Speed: <b>%7 km/h</b><br>"
+            "Max. Speed: <b>%7 km/h</b>"
             "</p>")
             .arg(info.segmentName)
             .arg(info.from.stationName)
             .arg(info.from.gateLetter)
             .arg(info.to.stationName)
             .arg(info.to.gateLetter)
-            .arg(info.distanceMeters)
+            .arg(utils::kmNumToText(info.distanceMeters))
             .arg(info.maxSpeedKmH);
 
     msgBox->setTextFormat(Qt::RichText);
