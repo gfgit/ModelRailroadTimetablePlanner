@@ -10,8 +10,6 @@
 
 #include <QGraphicsPathItem>
 
-#include "lines/linestorage.h"
-
 class JobStoragePrivate
 {
 public:
@@ -24,8 +22,6 @@ JobStorage::JobStorage(sqlite3pp::database &db, QObject *parent) :
     mDb(db)
 {
     impl = new JobStoragePrivate;
-    connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobStorage::updateJobColors);
-    connect(Session, &MeetingSession::jobChanged, this, &JobStorage::updateJob);
 }
 
 JobStorage::~JobStorage()
@@ -166,167 +162,6 @@ void JobStorage::removeAllJobs()
     clear();
 
     emit jobRemoved(0);
-}
-
-void JobStorage::drawJobs()
-{
-    for(auto it = impl->m_data.begin(); it != impl->m_data.end(); )
-    {
-        TrainGraphics &tg = it.value();
-        tg.recalcPath();
-        if(tg.segments.isEmpty())
-        {
-            //No line of this job is currently loaded so discard job
-            it->clear();
-            it = impl->m_data.erase(it);
-        }else{
-            it++;
-        }
-    }
-}
-
-void JobStorage::updateJobColors()
-{
-    for(TrainGraphics &tg : impl->m_data)
-    {
-        tg.updateColor();
-    }
-}
-
-void JobStorage::updateJob(db_id newId, db_id oldId)
-{
-    auto it = impl->m_data.find(oldId);
-    if(it == impl->m_data.end())
-        return;
-
-    if(newId != oldId)
-    {
-        TrainGraphics tg = it.value(); //Deep copy
-        impl->m_data.erase(it);
-        it = impl->m_data.insert(newId, tg);
-    }
-
-    query q_getCat(mDb, "SELECT category FROM jobs WHERE id=?");
-    q_getCat.bind(1, newId);
-    q_getCat.step();
-    JobCategory cat = JobCategory(q_getCat.getRows().get<int>(0));
-    it.value().setId(newId);
-    it.value().setCategory(cat);
-}
-
-void JobStorage::updateJobPath(db_id jobId)
-{
-    auto it = impl->m_data.find(jobId);
-    if(it == impl->m_data.end())
-    {
-        //Give a chance to reload, look for a loaded line
-        query q(mDb, "SELECT category FROM jobs WHERE id=?");
-        q.bind(1, jobId);
-        int ret = q.step();
-        JobCategory cat = JobCategory(q.getRows().get<int>(0));
-        if(ret != SQLITE_ROW)
-            return;
-
-        TrainGraphics tg(jobId, cat);
-        it = impl->m_data.insert(jobId, tg);
-    }
-
-    TrainGraphics& tg = it.value();
-    tg.recalcPath();
-
-    if(tg.segments.isEmpty())
-    {
-        //No line of this job is currently loaded so discard job
-        tg.clear();
-        impl->m_data.erase(it);
-    }
-}
-
-void JobStorage::drawJobs(db_id lineId)
-{
-    query q_getSegments(mDb, "SELECT id, jobId FROM jobsegments WHERE lineId=?");
-
-    q_getSegments.bind(1, lineId);
-    for(auto seg : q_getSegments)
-    {
-        db_id segId = seg.get<db_id>(0);
-        db_id jobId = seg.get<db_id>(1);
-
-        auto tg = impl->m_data.find(jobId);
-        if(tg == impl->m_data.end() || !tg.value().segments.contains(segId))
-            continue;
-
-        tg.value().drawSegment(segId, lineId);
-    }
-    q_getSegments.reset();
-}
-
-void JobStorage::loadLine(db_id lineId)
-{
-    query q_getSegments(mDb, "SELECT id, jobId FROM jobsegments WHERE lineId=? ORDER BY jobId");
-    query q_getJobCat(mDb, "SELECT category FROM jobs WHERE id=?");
-
-    q_getSegments.bind(1, lineId);
-    for(auto seg : q_getSegments)
-    {
-        db_id segId = seg.get<db_id>(0);
-        db_id jobId = seg.get<db_id>(1);
-
-        auto it = impl->m_data.find(jobId);
-        if(it == impl->m_data.end())
-        {
-            q_getJobCat.bind(1, jobId);
-            int ret = q_getJobCat.step();
-            JobCategory cat = JobCategory(q_getJobCat.getRows().get<int>(0));
-            q_getJobCat.reset();
-            if(ret != SQLITE_ROW)
-                continue;
-
-            TrainGraphics tg(jobId, cat);
-            it = impl->m_data.insert(jobId, tg);
-        }
-
-        TrainGraphics &ref = it.value();
-        ref.createSegment(segId);
-    }
-    q_getSegments.reset();
-}
-
-void JobStorage::unloadLine(db_id lineId)
-{
-    if(impl->m_data.isEmpty() || !mDb.db())
-        return;
-
-    query q_getSegments(mDb, "SELECT id, jobId FROM jobsegments WHERE lineId=? ORDER BY jobId");
-
-    q_getSegments.bind(1, lineId);
-    for(auto seg : q_getSegments)
-    {
-        db_id segId = seg.get<db_id>(0);
-        db_id jobId = seg.get<db_id>(1);
-
-        auto it = impl->m_data.find(jobId);
-        if(it == impl->m_data.end())
-            continue;
-
-        TrainGraphics &tg = it.value();
-        auto segGraph = tg.segments.find(segId);
-        if(segGraph != tg.segments.end())
-        {
-            segGraph->cleanup();
-            tg.segments.erase(segGraph);
-        }
-
-        //Because we ORDER BY we work on a single job for a few cycles
-        //Last cycle may have empty job (removed all segments) check every cycle
-        if(tg.segments.isEmpty())
-        {
-            //Unload job
-            tg.clear();
-            impl->m_data.erase(it);
-        }
-    }
-    q_getSegments.reset();
 }
 
 void JobStorage::updateFirstLast(db_id jobId)
