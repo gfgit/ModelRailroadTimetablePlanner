@@ -15,7 +15,6 @@ using namespace sqlite3pp;
 
 #include <settings/appsettings.h>
 
-class LineStorage;
 class JobStorage;
 
 class ViewManager;
@@ -108,7 +107,6 @@ private:
 #endif
 
 public:
-    LineStorage *mLineStorage;
     JobStorage *mJobStorage;
 
 //Settings TODO: remove
