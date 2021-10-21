@@ -2,6 +2,8 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
+#include <QDebug>
+
 namespace ImageMetaData
 {
 
@@ -43,7 +45,11 @@ bool ImageBlobDevice::reserveSizeAndReset(qint64 len)
     sqlite3_stmt *stmt = nullptr;
     int rc = sqlite3_prepare_v2(mDb, sql.constData(), sql.size(), &stmt, nullptr);
     if(rc != SQLITE_OK)
+    {
+        qWarning() << "ImageBlobDevice::reserveSizeAndReset cannot prepare:" << sqlite3_errmsg(mDb);
+        setErrorString(tr("Cannot query database"));
         return false;
+    }
 
     //Reserve BLOB memory
     rc = sqlite3_bind_zeroblob64(stmt, 1, len);
@@ -65,6 +71,8 @@ bool ImageBlobDevice::reserveSizeAndReset(qint64 len)
 
     if(rc != SQLITE_OK && rc != SQLITE_DONE)
     {
+        qWarning() << "ImageBlobDevice::reserveSizeAndReset cannot step:" << sqlite3_errmsg(mDb);
+        setErrorString(tr("Cannot create BLOB"));
         return false;
     }
 
