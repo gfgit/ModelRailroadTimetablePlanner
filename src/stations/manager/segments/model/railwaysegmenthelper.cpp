@@ -1,5 +1,7 @@
 #include "railwaysegmenthelper.h"
 
+#include "app/session.h"
+
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
@@ -90,5 +92,8 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
             *outErrMsg = mDb.error_msg();
         return false;
     }
+
+    emit Session->segmentRemoved(segmentId);
+
     return true;
 }

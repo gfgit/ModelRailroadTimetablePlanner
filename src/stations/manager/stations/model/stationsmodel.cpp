@@ -333,6 +333,8 @@ bool StationsModel::removeStation(db_id stationId)
         return false;
     }
 
+    emit Session->stationRemoved(stationId);
+
     refreshData(); //Recalc row count
 
     return true;
