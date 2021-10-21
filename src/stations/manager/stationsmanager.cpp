@@ -113,7 +113,7 @@ void StationsManager::setup_StationPage()
 
     act_addSt = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
     act_remSt = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
-    act_planSt = stationToolBar->addAction(tr("Plan"), this, &StationsManager::showStPlan);
+    act_planSt = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
     act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
 }
@@ -386,7 +386,7 @@ void StationsManager::onEditStation()
     }
 }
 
-void StationsManager::showStPlan()
+void StationsManager::showStJobViewer()
 {
     DEBUG_ENTRY;
     if(!stationView->selectionModel()->hasSelection())
@@ -396,7 +396,7 @@ void StationsManager::showStPlan()
     db_id stId = stationsModel->getIdAtRow(idx.row());
     if(!stId)
         return;
-    Session->getViewManager()->requestStPlan(stId);
+    Session->getViewManager()->requestStJobViewer(stId);
 }
 
 void StationsManager::onShowFreeRS()

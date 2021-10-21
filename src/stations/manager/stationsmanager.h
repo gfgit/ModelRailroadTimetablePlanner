@@ -58,7 +58,7 @@ private slots:
     void onNewStation();
     void onEditStation();
 
-    void showStPlan();
+    void showStJobViewer();
     void onShowFreeRS();
 
     void onRemoveSegment();
