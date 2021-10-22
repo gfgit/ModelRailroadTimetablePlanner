@@ -7,25 +7,38 @@
 #include "printdefs.h"
 
 class QPrinter;
+class SceneSelectionModel;
+
+namespace sqlite3pp {
+class database;
+}
 
 class PrintWizard : public QWizard
 {
     Q_OBJECT
 public:
-
-    explicit PrintWizard(QWidget *parent = nullptr);
+    PrintWizard(sqlite3pp::database &db, QWidget *parent = nullptr);
     ~PrintWizard();
 
-    void setOutputType(Print::OutputType out);
     Print::OutputType getOutputType() const;
+    void setOutputType(Print::OutputType out);
 
+    inline SceneSelectionModel* getSelectionModel() const { return selectionModel; }
+
+    QString getOutputFile() const;
+    void setOutputFile(const QString& fileName);
+
+    bool getDifferentFiles() const;
+    void setDifferentFiles(bool newDifferentFiles);
+
+private:
     QPrinter *printer;
     QString fileOutput;
     bool differentFiles;
 
     Print::OutputType type;
 
-    QVector<bool> m_checks;
+    SceneSelectionModel *selectionModel;
 };
 
 #endif // PRINTWIZARD_H
