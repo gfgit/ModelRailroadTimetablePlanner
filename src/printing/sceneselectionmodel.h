@@ -8,6 +8,8 @@
 #include "utils/types.h"
 #include "graph/linegraphtypes.h"
 
+#include <sqlite3pp/sqlite3pp.h>
+
 class SceneSelectionModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -33,7 +35,7 @@ public:
         LineGraphType type;
     };
 
-    explicit SceneSelectionModel(QObject *parent = nullptr);
+    SceneSelectionModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -44,17 +46,30 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
-    void addEntry(const Entry& entry);
+    bool addEntry(const Entry& entry);
     void removeAt(int row);
     void moveRow(int row, bool up);
+
+    void setMode(SelectionMode mode, LineGraphType type);
+
+    qint64 getSelectionCount() const;
+    bool startIteration();
+    Entry getNextEntry();
 
 public slots:
     void removeAll();
 
 private:
+    void keepOnlyType(LineGraphType type);
+
+private:
+    sqlite3pp::database &mDb;
+    sqlite3pp::query mQuery;
+
     QVector<Entry> entries;
     LineGraphType selectedType;
     SelectionMode selectionMode;
+    int iterationIdx;
 };
 
 #endif // SCENESELECTIONMODEL_H
