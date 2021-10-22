@@ -31,7 +31,10 @@ public:
     void setGraphType(LineGraphType type);
 
     db_id getObjectId() const;
+    const QString &getObjectName() const;
     void setObjectId(db_id objectId, const QString& name);
+
+    void setName(const QString &newName);
 
 signals:
     void graphChanged(int type, db_id objectId);
@@ -51,6 +54,7 @@ private:
 
     db_id m_objectId;
     LineGraphType m_graphType;
+    QString m_name;
 };
 
 #endif // LINEGRAPHSELECTIONWIDGET_H

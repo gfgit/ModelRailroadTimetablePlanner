@@ -72,13 +72,24 @@ db_id LineGraphSelectionWidget::getObjectId() const
     return m_objectId;
 }
 
+const QString &LineGraphSelectionWidget::getObjectName() const
+{
+    return m_name;
+}
+
 void LineGraphSelectionWidget::setObjectId(db_id objectId, const QString &name)
 {
-    if(m_objectId == objectId)
-        return;
+    if(m_graphType == LineGraphType::NoGraph)
+        return; //Object ID must be null
+
+    m_name = name;
+    if(!objectId)
+        m_name.clear();
 
     objectCombo->setData(objectId, name);
-    emit graphChanged(int(m_graphType), m_objectId);
+
+    if(m_objectId != objectId)
+        emit graphChanged(int(m_graphType), m_objectId);
 }
 
 void LineGraphSelectionWidget::onTypeComboActivated(int index)
@@ -89,8 +100,7 @@ void LineGraphSelectionWidget::onTypeComboActivated(int index)
 
 void LineGraphSelectionWidget::onCompletionDone()
 {
-    QString name;
-    if(!objectCombo->getData(m_objectId, name))
+    if(!objectCombo->getData(m_objectId, m_name))
         return;
 
     emit graphChanged(int(m_graphType), m_objectId);
@@ -110,8 +120,8 @@ void LineGraphSelectionWidget::setupModel(LineGraphType type)
 
         //Manually clear line edit
         m_objectId = 0;
-        QString name;
-        objectCombo->setData(m_objectId, name);
+        m_name.clear();
+        objectCombo->setData(m_objectId, m_name);
 
         switch (LineGraphType(type))
         {
