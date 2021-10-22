@@ -233,6 +233,18 @@ SceneSelectionModel::Entry SceneSelectionModel::getNextEntry()
     return entry;
 }
 
+QString SceneSelectionModel::getModeName(SelectionMode mode)
+{
+    switch (mode)
+    {
+    case UseSelectedEntries:
+        return tr("Select items");
+    case AllOfTypeExceptSelected:
+        return tr("All except selected items");
+    }
+    return QString();
+}
+
 void SceneSelectionModel::removeAll()
 {
     beginResetModel();

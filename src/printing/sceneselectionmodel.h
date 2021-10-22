@@ -58,6 +58,8 @@ public:
     bool startIteration();
     Entry getNextEntry();
 
+    static QString getModeName(SelectionMode mode);
+
 signals:
     void selectionModeChanged(int mode, int type);
 
