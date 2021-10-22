@@ -22,6 +22,9 @@ private slots:
     void updateComboBoxes();
     void updateSelectionCount();
 
+    void onAddItem();
+    void onRemoveItem();
+
 private:
     void setupComboBoxes();
 
@@ -29,7 +32,10 @@ private:
     PrintWizard *mWizard;
 
     QListView *view;
-    QPushButton *selectNoneBut;
+
+    QPushButton *addBut;
+    QPushButton *remBut;
+    QPushButton *removeAllBut;
     QComboBox *modeCombo;
     QComboBox *typeCombo;
 
