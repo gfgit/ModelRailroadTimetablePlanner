@@ -11,40 +11,28 @@
 
 class QPrinter;
 class QPainter;
-class QGraphicsScene;
-class GraphManager;
+
+class SceneSelectionModel;
+
+class LineGraphScene;
+
+namespace sqlite3pp {
+class database;
+}
 
 class PrintWorker : public QObject
 {
     Q_OBJECT
 public:
-
-    typedef struct Scene_
-    {
-        db_id lineId;
-        QGraphicsScene *scene;
-        QString name;
-    } Scene;
-
-    typedef QVector<Scene> Scenes;
-
-    explicit PrintWorker(QObject *parent = nullptr);
-
-    void setScenes(const Scenes &scenes);
-
-    void setBackground(QGraphicsScene *background);
-    void setGraphMgr(GraphManager *value);
+    PrintWorker(sqlite3pp::database &db, QObject *parent = nullptr);
 
     void setPrinter(QPrinter *printer);
-
-    inline int getMaxProgress() { return m_scenes.size(); }
 
     void setOutputType(Print::OutputType type);
     void setFileOutput(const QString &value, bool different);
 
-    void printPdfMultipleFiles();
-    void printSvg();
-    void printNormal();
+    void setSelection(SceneSelectionModel *newSelection);
+    int getMaxProgress() const;
 
 signals:
     void progress(int val);
@@ -55,16 +43,26 @@ public slots:
     void doWork();
 
 private:
-    void printScene(QPainter *painter, const Scene &s);
+    void printSvg();
+    void printPdf();
+    void printPdfMultipleFiles();
+    void printPaged();
 
 private:
-    Scenes m_scenes;
+    typedef std::function<void(QPainter *painter, bool firstPage,
+                               const QString& title, const QRectF& sourceRect)> BeginPaintFunc;
+
+    void printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
+
+private:
     QPrinter *m_printer;
-    GraphManager *graphMgr;
+    SceneSelectionModel *selection;
 
     QString fileOutput;
     bool differentFiles;
     Print::OutputType outType;
+
+    LineGraphScene *scene;
 };
 
 #endif // PRINTWORKER_H
