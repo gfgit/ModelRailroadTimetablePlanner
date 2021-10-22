@@ -6,7 +6,7 @@ SceneSelectionModel::SceneSelectionModel(sqlite3pp::database &db, QObject *paren
     mQuery(mDb),
     selectedType(LineGraphType::NoGraph),
     selectionMode(UseSelectedEntries),
-    cachedCount(-1)
+    cachedCount(-1),
     iterationIdx(-1)
 {
 }
