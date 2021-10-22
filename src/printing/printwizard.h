@@ -31,6 +31,8 @@ public:
     bool getDifferentFiles() const;
     void setDifferentFiles(bool newDifferentFiles);
 
+    QPrinter *getPrinter() const;
+
 private:
     QPrinter *printer;
     QString fileOutput;

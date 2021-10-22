@@ -1,7 +1,5 @@
 #include "printwizard.h"
 
-#include "app/session.h"
-
 #include "selectionpage.h"
 #include "fileoptionspage.h"
 #include "printeroptionspage.h"
@@ -19,10 +17,10 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     printer = new QPrinter;
     selectionModel = new SceneSelectionModel(db, this);
 
-    setPage(0, new SelectionPage(this));
-    setPage(1, new FileOptionsPage(this));
+    setPage(0, new PrintSelectionPage(this));
+    setPage(1, new PrintFileOptionsPage(this));
     setPage(2, new PrinterOptionsPage(this));
-    setPage(3, new ProgressPage(this));
+    setPage(3, new PrintProgressPage(this));
 
     setWindowTitle(tr("Print Wizard"));
 }
@@ -60,4 +58,9 @@ bool PrintWizard::getDifferentFiles() const
 void PrintWizard::setDifferentFiles(bool newDifferentFiles)
 {
     differentFiles = newDifferentFiles;
+}
+
+QPrinter *PrintWizard::getPrinter() const
+{
+    return printer;
 }
