@@ -6,6 +6,7 @@ SceneSelectionModel::SceneSelectionModel(sqlite3pp::database &db, QObject *paren
     mQuery(mDb),
     selectedType(LineGraphType::NoGraph),
     selectionMode(UseSelectedEntries),
+    cachedCount(-1)
     iterationIdx(-1)
 {
 }
@@ -80,6 +81,10 @@ bool SceneSelectionModel::addEntry(const Entry &entry)
     beginInsertRows(QModelIndex(), row, row);
     entries.append(entry);
     endRemoveRows();
+
+    cachedCount = -1;
+    emit selectionCountChanged();
+
     return true;
 }
 
@@ -88,6 +93,9 @@ void SceneSelectionModel::removeAt(int row)
     beginRemoveRows(QModelIndex(), row, row);
     entries.removeAt(row);
     endRemoveRows();
+
+    cachedCount = -1;
+    emit selectionCountChanged();
 }
 
 void SceneSelectionModel::moveRow(int row, bool up)
@@ -121,38 +129,51 @@ void SceneSelectionModel::setMode(SelectionMode mode, LineGraphType type)
         keepOnlyType(selectedType);
 
     emit selectionModeChanged(int(mode), int(type));
+
+    cachedCount = -1;
+    emit selectionCountChanged();
 }
 
-qint64 SceneSelectionModel::getSelectionCount() const
+qint64 SceneSelectionModel::getSelectionCount()
 {
-    if(selectionMode == UseSelectedEntries)
-        return entries.size();
+    if(cachedCount >= 0)
+        return cachedCount;
 
-    QByteArray sql = "SELECT COUNT(id) FROM ";
-    switch (selectedType)
+    if(selectionMode == UseSelectedEntries)
     {
-    case LineGraphType::SingleStation:
-        sql.append("stations");
-        break;
-    case LineGraphType::RailwaySegment:
-        sql.append("railway_segments");
-        break;
-    case LineGraphType::RailwayLine:
-        sql.append("lines");
-        break;
-    default:
-        return -1; //Error
+        cachedCount = entries.size();
+    }
+    else
+    {
+        QByteArray sql = "SELECT COUNT(id) FROM ";
+        switch (selectedType)
+        {
+        case LineGraphType::SingleStation:
+            sql.append("stations");
+            break;
+        case LineGraphType::RailwaySegment:
+            sql.append("railway_segments");
+            break;
+        case LineGraphType::RailwayLine:
+            sql.append("lines");
+            break;
+        default:
+            return -1; //Error
+        }
+
+        sqlite3pp::query q(mDb);
+        if(q.prepare(sql) != SQLITE_OK || q.step() != SQLITE_ROW)
+            return -1;
+
+        qint64 totalCount = q.getRows().get<qint64>(0);
+        totalCount -= entries.size(); // "Except" selected
+        if(totalCount < 0)
+            totalCount = 0;
+
+        cachedCount = totalCount;
     }
 
-    sqlite3pp::query q(mDb);
-    if(q.prepare(sql) != SQLITE_OK || q.step() != SQLITE_ROW)
-        return -1;
-
-    qint64 totalCount = q.getRows().get<qint64>(0);
-    totalCount -= entries.size(); // "Except" selected
-    if(totalCount < 0)
-        return 0;
-    return totalCount;
+    return cachedCount;
 }
 
 bool SceneSelectionModel::startIteration()
@@ -241,6 +262,8 @@ QString SceneSelectionModel::getModeName(SelectionMode mode)
         return tr("Select items");
     case AllOfTypeExceptSelected:
         return tr("All except selected items");
+    default:
+        break;
     }
     return QString();
 }
@@ -251,6 +274,9 @@ void SceneSelectionModel::removeAll()
     entries.clear();
     entries.squeeze();
     endResetModel();
+
+    cachedCount = -1;
+    emit selectionCountChanged();
 }
 
 void SceneSelectionModel::keepOnlyType(LineGraphType type)

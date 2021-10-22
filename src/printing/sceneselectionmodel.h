@@ -55,7 +55,7 @@ public:
     inline SelectionMode getMode() const { return selectionMode; }
     inline LineGraphType getSelectedType() const { return selectedType; }
 
-    qint64 getSelectionCount() const;
+    qint64 getSelectionCount();
     bool startIteration();
     Entry getNextEntry();
 
@@ -63,6 +63,7 @@ public:
 
 signals:
     void selectionModeChanged(int mode, int type);
+    void selectionCountChanged();
 
 public slots:
     void removeAll();
@@ -77,6 +78,8 @@ private:
     QVector<Entry> entries;
     LineGraphType selectedType;
     SelectionMode selectionMode;
+
+    qint64 cachedCount;
     int iterationIdx;
 };
 
