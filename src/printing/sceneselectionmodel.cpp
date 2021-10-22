@@ -80,7 +80,7 @@ bool SceneSelectionModel::addEntry(const Entry &entry)
     const int row = entries.size();
     beginInsertRows(QModelIndex(), row, row);
     entries.append(entry);
-    endRemoveRows();
+    endInsertRows();
 
     cachedCount = -1;
     emit selectionCountChanged();
