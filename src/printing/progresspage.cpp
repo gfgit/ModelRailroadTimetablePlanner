@@ -71,6 +71,8 @@ void PrintProgressPage::handleFinished()
     m_thread.quit();
     m_thread.wait();
 
+    m_progressBar->setValue(m_progressBar->maximum());
+    m_progressBar->setEnabled(false);
     m_label->setText(tr("Completed"));
 
     complete = true;
