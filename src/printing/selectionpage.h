@@ -4,7 +4,7 @@
 #include <QWizardPage>
 
 class PrintWizard;
-class QListView;
+class QTableView;
 class QPushButton;
 class QComboBox;
 class QLabel;
@@ -31,7 +31,7 @@ private:
 private:
     PrintWizard *mWizard;
 
-    QListView *view;
+    QTableView *view;
 
     QPushButton *addBut;
     QPushButton *remBut;

@@ -1,7 +1,7 @@
 #include "selectionpage.h"
 #include "printwizard.h"
 
-#include <QListView>
+#include <QTableView>
 #include <QPushButton>
 #include <QComboBox>
 #include <QLabel>
@@ -33,7 +33,7 @@ PrintSelectionPage::PrintSelectionPage(PrintWizard *w, QWidget *parent) :
     connect(remBut, &QPushButton::clicked, this, &PrintSelectionPage::onRemoveItem);
     connect(removeAllBut, &QPushButton::clicked, model, &SceneSelectionModel::removeAll);
 
-    view = new QListView;
+    view = new QTableView;
     view->setModel(model);
 
     statusLabel = new QLabel;
