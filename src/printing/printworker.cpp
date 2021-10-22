@@ -1,5 +1,7 @@
 #include "printworker.h"
 
+#include "app/session.h"
+
 #include "sceneselectionmodel.h"
 
 #include "graph/model/linegraphscene.h"
@@ -109,11 +111,14 @@ void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         if(firstPage)
             firstPage = false;
 
+        QRectF stationLabelRect = sourceRect;
+        stationLabelRect.setHeight(Session->vertOffset - 5); //See LineGraphView::resizeHeaders()
+
         BackgroundHelper::drawBackgroundHourLines(&painter, sourceRect);
         BackgroundHelper::drawStations(&painter, scene, sourceRect);
         BackgroundHelper::drawJobStops(&painter, scene, sourceRect);
         BackgroundHelper::drawJobSegments(&painter, scene, sourceRect);
-        BackgroundHelper::drawStationHeader(&painter, scene, sourceRect, 0);
+        BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect, 0);
 
         if(endPaintingEveryPage)
             painter.end();
