@@ -52,7 +52,7 @@ void LineGraphManager::clearAllGraphs()
 {
     for(LineGraphScene *scene : qAsConst(scenes))
     {
-        scene->loadGraph(0, LineGraphType::NoGraph);
+        scene->loadGraph(0, LineGraphType::NoGraph, true);
     }
 }
 
