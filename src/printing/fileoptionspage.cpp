@@ -15,11 +15,9 @@
 #include <QFileDialog>
 #include "utils/file_format_names.h"
 
-#include <QPrinter>
-
 #include <QFileInfo>
 
-FileOptionsPage::FileOptionsPage(PrintWizard *w, QWidget *parent) :
+PrintFileOptionsPage::PrintFileOptionsPage(PrintWizard *w, QWidget *parent) :
     QWizardPage (parent),
     mWizard(w)
 {
@@ -31,24 +29,24 @@ FileOptionsPage::FileOptionsPage(PrintWizard *w, QWidget *parent) :
     setTitle(tr("File options"));
 }
 
-FileOptionsPage::~FileOptionsPage()
+PrintFileOptionsPage::~PrintFileOptionsPage()
 {
 
 }
 
-void FileOptionsPage::createFilesBox()
+void PrintFileOptionsPage::createFilesBox()
 {
     fileBox = new QGroupBox(tr("Files"));
 
     differentFilesCheckBox = new QCheckBox(tr("Different Files"));
     connect(differentFilesCheckBox, &QCheckBox::toggled,
-            this, &FileOptionsPage::onDifferentFiles);
+            this, &PrintFileOptionsPage::onDifferentFiles);
 
     pathEdit = new QLineEdit;
     connect(pathEdit, &QLineEdit::textChanged, this, &QWizardPage::completeChanged);
 
     fileBut = new QPushButton(tr("Choose"));
-    connect(fileBut, &QPushButton::clicked, this, &FileOptionsPage::onChooseFile);
+    connect(fileBut, &QPushButton::clicked, this, &PrintFileOptionsPage::onChooseFile);
 
     QLabel *label = new QLabel(tr("File(s)"));
 
@@ -60,10 +58,10 @@ void FileOptionsPage::createFilesBox()
     fileBox->setLayout(l);
 }
 
-void FileOptionsPage::initializePage()
+void PrintFileOptionsPage::initializePage()
 {
-    pathEdit->setText(mWizard->fileOutput);
-    if(mWizard->type == Print::Svg)
+    pathEdit->setText(mWizard->getOutputFile());
+    if(mWizard->getOutputType() == Print::Svg)
     {
         //Svg can only be printed in multiple files
         differentFilesCheckBox->setChecked(true);
@@ -71,12 +69,12 @@ void FileOptionsPage::initializePage()
     }
     else
     {
-        differentFilesCheckBox->setChecked(mWizard->differentFiles);
+        differentFilesCheckBox->setChecked(mWizard->getDifferentFiles());
         differentFilesCheckBox->setEnabled(true);
     }
 }
 
-bool FileOptionsPage::validatePage()
+bool PrintFileOptionsPage::validatePage()
 {
     QString path = pathEdit->text();
     if(path.isEmpty())
@@ -84,18 +82,18 @@ bool FileOptionsPage::validatePage()
         return false;
     }
 
-    mWizard->fileOutput = QDir::fromNativeSeparators(path);
-    mWizard->differentFiles = differentFilesCheckBox->isChecked();
+    mWizard->setOutputFile(QDir::fromNativeSeparators(path));
+    mWizard->setDifferentFiles(differentFilesCheckBox->isChecked());
 
     return true;
 }
 
-bool FileOptionsPage::isComplete() const
+bool PrintFileOptionsPage::isComplete() const
 {
     return !pathEdit->text().isEmpty();
 }
 
-void FileOptionsPage::onChooseFile()
+void PrintFileOptionsPage::onChooseFile()
 {
     QString path;
     if(differentFilesCheckBox->isChecked())
@@ -111,7 +109,7 @@ void FileOptionsPage::onChooseFile()
     {
         QString ext;
         QString fullName;
-        switch (mWizard->type)
+        switch (mWizard->getOutputType())
         {
         case Print::Pdf:
             ext = QStringLiteral(".pdf");
@@ -139,7 +137,7 @@ void FileOptionsPage::onChooseFile()
     pathEdit->setText(QDir::fromNativeSeparators(path));
 }
 
-void FileOptionsPage::onDifferentFiles()
+void PrintFileOptionsPage::onDifferentFiles()
 {
     //If pathEdit contains a file but user checks 'Different Files'
     //We go up to file directory and use that
@@ -149,7 +147,7 @@ void FileOptionsPage::onDifferentFiles()
         return;
 
     QString ext;
-    switch (mWizard->type)
+    switch (mWizard->getOutputType())
     {
     case Print::Pdf:
         ext = QStringLiteral(".pdf");
@@ -182,7 +180,7 @@ void FileOptionsPage::onDifferentFiles()
     pathEdit->setText(path);
 }
 
-int FileOptionsPage::nextId() const
+int PrintFileOptionsPage::nextId() const
 {
     return 3; //Go to ProgressPage
 }
