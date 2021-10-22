@@ -6,7 +6,8 @@
 class PrintWizard;
 class QListView;
 class QPushButton;
-class CheckProxyModel;
+class QComboBox;
+class QLabel;
 
 class SelectionPage : public QWizardPage
 {
@@ -14,19 +15,25 @@ class SelectionPage : public QWizardPage
 public:
     SelectionPage(PrintWizard *w, QWidget *parent = nullptr);
 
-    void initializePage() override;
     bool isComplete() const override;
-    bool validatePage() override;
     int nextId() const override;
+
+private slots:
+    void updateComboBoxes();
+    void updateSelectionCount();
+
+private:
+    void setupComboBoxes();
 
 private:
     PrintWizard *mWizard;
 
     QListView *view;
-    QPushButton *selectAllBut;
     QPushButton *selectNoneBut;
+    QComboBox *modeCombo;
+    QComboBox *typeCombo;
 
-    CheckProxyModel *proxyModel;
+    QLabel *statusLabel;
 };
 
 #endif // SELECTIONPAGE_H
