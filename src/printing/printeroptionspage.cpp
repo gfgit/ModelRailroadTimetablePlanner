@@ -6,6 +6,8 @@
 
 #include <QFormLayout>
 
+#include <QPointer>
+
 PrinterOptionsPage::PrinterOptionsPage(PrintWizard *w, QWidget *parent) :
     QWizardPage (parent),
     mWizard(w)
@@ -22,6 +24,7 @@ PrinterOptionsPage::PrinterOptionsPage(PrintWizard *w, QWidget *parent) :
 
 void PrinterOptionsPage::onOpenDialog()
 {
-    QPrintDialog dlg(mWizard->printer, this);
-    dlg.exec();
+    QPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
+    dlg->exec();
+    delete dlg;
 }
