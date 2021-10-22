@@ -5,20 +5,14 @@
 
 #include "utils/types.h"
 
-class QComboBox;
-class QPushButton;
-class CustomCompletionLineEdit;
-
 class LineGraphScene;
-class ISqlFKMatchModel;
+class LineGraphSelectionWidget;
+class QPushButton;
 
 /*!
- * \brief Toolbar to select railway stations or lines
+ * \brief Toolbar to select and refresh graph
  *
- * Consist of a combobox and a line edit
- * The combo box selects the content type (\sa LineGraphType)
- * The line edit allows to choose which item of selected type
- * should be shown.
+ * \sa LineGraphSelectionWidget
  */
 class LineGraphToolbar : public QWidget
 {
@@ -36,24 +30,15 @@ public slots:
     void resetToolbarToScene();
 
 private slots:
-    void onGraphChanged(int type, db_id objectId);
-    void onTypeComboActivated(int index);
-    void onCompletionDone();
+    void onWidgetGraphChanged(int type, db_id objectId);
+    void onSceneGraphChanged(int type, db_id objectId);
     void onSceneDestroyed();
-
-private:
-    void setupModel(int type);
 
 private:
     LineGraphScene *m_scene;
 
-    QComboBox *graphTypeCombo;
-    CustomCompletionLineEdit *objectCombo;
+    LineGraphSelectionWidget *selectionWidget;
     QPushButton *redrawBut;
-
-    ISqlFKMatchModel *matchModel;
-
-    int oldGraphType;
 };
 
 #endif // LINEGRAPHTOOLBAR_H
