@@ -10,9 +10,7 @@
 
 #include "sceneselectionmodel.h"
 
-#include "app/session.h"
-
-SelectionPage::SelectionPage(PrintWizard *w, QWidget *parent) :
+PrintSelectionPage::PrintSelectionPage(PrintWizard *w, QWidget *parent) :
     QWizardPage (parent),
     mWizard(w)
 {
@@ -24,7 +22,7 @@ SelectionPage::SelectionPage(PrintWizard *w, QWidget *parent) :
     view->setModel(model);
 
     statusLabel = new QLabel;
-    connect(model, &SceneSelectionModel::selectionCountChanged, this, &SelectionPage::updateSelectionCount);
+    connect(model, &SceneSelectionModel::selectionCountChanged, this, &PrintSelectionPage::updateSelectionCount);
 
     selectNoneBut = new QPushButton(tr("Unselect All"));
     connect(selectNoneBut, &QPushButton::clicked, model, &SceneSelectionModel::removeAll);
@@ -40,13 +38,13 @@ SelectionPage::SelectionPage(PrintWizard *w, QWidget *parent) :
     setSubTitle(tr("Select one or more items to be printed"));
 }
 
-bool SelectionPage::isComplete() const
+bool PrintSelectionPage::isComplete() const
 {
     const qint64 count = mWizard->getSelectionModel()->getSelectionCount();
     return count > 0;
 }
 
-int SelectionPage::nextId() const
+int PrintSelectionPage::nextId() const
 {
     int ret = 0;
     switch (mWizard->getOutputType())
@@ -61,7 +59,7 @@ int SelectionPage::nextId() const
     return ret;
 }
 
-void SelectionPage::updateComboBoxes()
+void PrintSelectionPage::updateComboBoxes()
 {
     SceneSelectionModel *model = mWizard->getSelectionModel();
 
@@ -74,7 +72,7 @@ void SelectionPage::updateComboBoxes()
     typeCombo->setEnabled(mode == SceneSelectionModel::AllOfTypeExceptSelected);
 }
 
-void SelectionPage::updateSelectionCount()
+void PrintSelectionPage::updateSelectionCount()
 {
     const qint64 count = mWizard->getSelectionModel()->getSelectionCount();
     statusLabel->setText(tr("%1 items selected.").arg(count));
@@ -82,7 +80,7 @@ void SelectionPage::updateSelectionCount()
     emit completeChanged();
 }
 
-void SelectionPage::setupComboBoxes()
+void PrintSelectionPage::setupComboBoxes()
 {
     SceneSelectionModel *model = mWizard->getSelectionModel();
 
@@ -103,6 +101,6 @@ void SelectionPage::setupComboBoxes()
         items.append(utils::getLineGraphTypeName(LineGraphType(i)));
     typeCombo->addItems(items);
 
-    connect(model, &SceneSelectionModel::selectionModeChanged, this, &SelectionPage::updateComboBoxes);
+    connect(model, &SceneSelectionModel::selectionModeChanged, this, &PrintSelectionPage::updateComboBoxes);
     updateComboBoxes();
 }

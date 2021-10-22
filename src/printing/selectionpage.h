@@ -1,5 +1,5 @@
-#ifndef SELECTIONPAGE_H
-#define SELECTIONPAGE_H
+#ifndef PRINTSELECTIONPAGE_H
+#define PRINTSELECTIONPAGE_H
 
 #include <QWizardPage>
 
@@ -9,11 +9,11 @@ class QPushButton;
 class QComboBox;
 class QLabel;
 
-class SelectionPage : public QWizardPage
+class PrintSelectionPage : public QWizardPage
 {
     Q_OBJECT
 public:
-    SelectionPage(PrintWizard *w, QWidget *parent = nullptr);
+    PrintSelectionPage(PrintWizard *w, QWidget *parent = nullptr);
 
     bool isComplete() const override;
     int nextId() const override;
@@ -36,4 +36,4 @@ private:
     QLabel *statusLabel;
 };
 
-#endif // SELECTIONPAGE_H
+#endif // PRINTSELECTIONPAGE_H
