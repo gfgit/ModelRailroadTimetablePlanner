@@ -33,7 +33,11 @@ public:
 
     QPrinter *getPrinter() const;
 
+    inline sqlite3pp::database& getDb() const { return mDb; }
+
 private:
+    sqlite3pp::database &mDb;
+
     QPrinter *printer;
     QString fileOutput;
     bool differentFiles;

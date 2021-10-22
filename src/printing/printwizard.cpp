@@ -11,11 +11,12 @@
 
 PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     QWizard (parent),
+    mDb(db),
     differentFiles(false),
     type(Print::Native)
 {
     printer = new QPrinter;
-    selectionModel = new SceneSelectionModel(db, this);
+    selectionModel = new SceneSelectionModel(mDb, this);
 
     setPage(0, new PrintSelectionPage(this));
     setPage(1, new PrintFileOptionsPage(this));
