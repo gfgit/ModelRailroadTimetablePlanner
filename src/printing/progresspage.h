@@ -1,5 +1,5 @@
-#ifndef PROGRESSPAGE_H
-#define PROGRESSPAGE_H
+#ifndef PRINTPROGRESSPAGE_H
+#define PRINTPROGRESSPAGE_H
 
 #include <QWizardPage>
 
@@ -10,15 +10,16 @@ class PrintWorker;
 class QLabel;
 class QProgressBar;
 
-class ProgressPage : public QWizardPage
+class PrintProgressPage : public QWizardPage
 {
     Q_OBJECT
 public:
-    ProgressPage(PrintWizard *w, QWidget *parent = nullptr);
+    PrintProgressPage(PrintWizard *w, QWidget *parent = nullptr);
 
     void initializePage() override;
     bool validatePage() override;
     bool isComplete() const override;
+
 public slots:
     void handleFinished();
     void handleProgress(int val);
@@ -34,4 +35,4 @@ private:
     bool complete;
 };
 
-#endif // PROGRESSPAGE_H
+#endif // PRINTPROGRESSPAGE_H
