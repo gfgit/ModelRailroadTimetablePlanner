@@ -119,6 +119,8 @@ void SceneSelectionModel::setMode(SelectionMode mode, LineGraphType type)
 
     if(selectionMode == AllOfTypeExceptSelected)
         keepOnlyType(selectedType);
+
+    emit selectionModeChanged(int(mode), int(type));
 }
 
 qint64 SceneSelectionModel::getSelectionCount() const

@@ -51,10 +51,15 @@ public:
     void moveRow(int row, bool up);
 
     void setMode(SelectionMode mode, LineGraphType type);
+    inline SelectionMode getMode() const { return selectionMode; }
+    inline LineGraphType getSelectedType() const { selectedType; }
 
     qint64 getSelectionCount() const;
     bool startIteration();
     Entry getNextEntry();
+
+signals:
+    void selectionModeChanged(int mode, int type);
 
 public slots:
     void removeAll();
