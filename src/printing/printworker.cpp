@@ -80,7 +80,7 @@ void PrintWorker::doWork()
 
 void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
 {
-    QPainter painter(m_printer);
+    QPainter painter;
 
     int progressVal = 0;
     bool firstPage = true;
