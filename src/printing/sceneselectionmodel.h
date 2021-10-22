@@ -18,7 +18,8 @@ public:
     enum SelectionMode
     {
         UseSelectedEntries = 0,
-        AllOfTypeExceptSelected
+        AllOfTypeExceptSelected,
+        NModes
     };
 
     enum Columns
@@ -52,7 +53,7 @@ public:
 
     void setMode(SelectionMode mode, LineGraphType type);
     inline SelectionMode getMode() const { return selectionMode; }
-    inline LineGraphType getSelectedType() const { selectedType; }
+    inline LineGraphType getSelectedType() const { return selectedType; }
 
     qint64 getSelectionCount() const;
     bool startIteration();
