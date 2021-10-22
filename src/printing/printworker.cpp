@@ -113,6 +113,7 @@ void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         BackgroundHelper::drawStations(&painter, scene, sourceRect);
         BackgroundHelper::drawJobStops(&painter, scene, sourceRect);
         BackgroundHelper::drawJobSegments(&painter, scene, sourceRect);
+        BackgroundHelper::drawStationHeader(&painter, scene, sourceRect, 0);
 
         if(endPaintingEveryPage)
             painter.end();
@@ -134,7 +135,9 @@ void PrintWorker::printSvg()
         svg.setViewBox(sourceRect);
 
         svg.setFileName(fmt.arg(title));
-        painter->begin(&svg);
+
+        if(!painter->begin(&svg))
+            qWarning() << "PrintWorker::printSvg(): cannot begin QPainter";
     };
 
     printInternal(beginPaint, true);
@@ -165,7 +168,8 @@ void PrintWorker::printPdfMultipleFiles()
                                    const QString& title, const QRectF& sourceRect)
     {
         printer->setOutputFileName(fmt.arg(title));
-        painter->begin(printer);
+        if(!painter->begin(printer))
+            qWarning() << "PrintWorker::printPdfMultipleFiles(): cannot begin QPainter";
     };
 
     printInternal(beginPaint, true);
@@ -177,9 +181,15 @@ void PrintWorker::printPaged()
                                                   const QString& title, const QRectF& sourceRect)
     {
         if(firstPage)
-            painter->begin(printer);
+        {
+            if(!painter->begin(printer))
+                qWarning() << "PrintWorker::printPaged(): cannot begin QPainter";
+        }
         else
-            printer->newPage();
+        {
+            if(!printer->newPage())
+                qWarning() << "PrintWorker::printPaged(): cannot add new page";
+        }
     };
 
     printInternal(beginPaint, false);
