@@ -3,7 +3,11 @@
 
 #include <QLabel>
 #include <QProgressBar>
+#include <QPushButton>
 #include <QVBoxLayout>
+
+#include <QPointer>
+#include <QMessageBox>
 
 #include "printworker.h"
 
@@ -27,27 +31,25 @@ PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     setTitle(tr("Printing"));
 }
 
+PrintProgressPage::~PrintProgressPage()
+{
+    m_thread.wait(5000);
+    if(m_worker)
+        m_worker->deleteLater();
+}
+
 void PrintProgressPage::initializePage()
 {
-    complete = false;
-    m_progressBar->reset();
-
     m_worker = new PrintWorker(mWizard->getDb());
-    m_worker->setSelection(mWizard->getSelectionModel());
-    m_worker->setOutputType(mWizard->getOutputType());
-    m_worker->setPrinter(mWizard->getPrinter());
-    m_worker->setFileOutput(mWizard->getOutputFile(), mWizard->getDifferentFiles());
-
-    m_progressBar->setMaximum(m_worker->getMaxProgress());
-
     m_worker->moveToThread(&m_thread);
-    connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
+
     connect(&m_thread, &QThread::started, m_worker, &PrintWorker::doWork);
     connect(m_worker, &PrintWorker::finished, this, &PrintProgressPage::handleFinished);
     connect(m_worker, &PrintWorker::progress, this, &PrintProgressPage::handleProgress);
     connect(m_worker, &PrintWorker::description, this, &PrintProgressPage::handleDescription);
+    connect(m_worker, &PrintWorker::errorOccured, this, &PrintProgressPage::handleError);
 
-    m_thread.start();
+    setupWorker();
 }
 
 bool PrintProgressPage::validatePage()
@@ -87,4 +89,47 @@ void PrintProgressPage::handleProgress(int val)
 void PrintProgressPage::handleDescription(const QString& text)
 {
     m_label->setText(QStringLiteral("Printing '%1' ...").arg(text));
+}
+
+void PrintProgressPage::handleError(const QString &text)
+{
+    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    msgBox->setIcon(QMessageBox::Warning);
+    auto tryAgainBut = msgBox->addButton(tr("Try again"), QMessageBox::YesRole);
+    msgBox->addButton(QMessageBox::Abort);
+    msgBox->setDefaultButton(tryAgainBut);
+    msgBox->setText(text);
+    msgBox->setWindowTitle(tr("Print Error"));
+
+    msgBox->exec();
+
+    if(msgBox)
+    {
+        if(msgBox->clickedButton() == tryAgainBut)
+        {
+            //Launch again worker
+            setupWorker();
+        }
+    }
+
+    delete msgBox;
+}
+
+void PrintProgressPage::setupWorker()
+{
+    m_thread.wait();
+
+    complete = false;
+    emit completeChanged();
+
+    m_progressBar->reset();
+
+    m_worker->setSelection(mWizard->getSelectionModel());
+    m_worker->setOutputType(mWizard->getOutputType());
+    m_worker->setPrinter(mWizard->getPrinter());
+    m_worker->setFileOutput(mWizard->getOutputFile(), mWizard->getDifferentFiles());
+
+    m_progressBar->setMaximum(m_worker->getMaxProgress());
+
+    m_thread.start();
 }

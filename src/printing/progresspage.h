@@ -15,6 +15,7 @@ class PrintProgressPage : public QWizardPage
     Q_OBJECT
 public:
     PrintProgressPage(PrintWizard *w, QWidget *parent = nullptr);
+    ~PrintProgressPage();
 
     void initializePage() override;
     bool validatePage() override;
@@ -24,6 +25,11 @@ public slots:
     void handleFinished();
     void handleProgress(int val);
     void handleDescription(const QString &text);
+    void handleError(const QString &text);
+
+private:
+    void setupWorker();
+
 private:
     PrintWizard *mWizard;
 

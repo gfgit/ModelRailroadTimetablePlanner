@@ -37,6 +37,7 @@ public:
 signals:
     void progress(int val);
     void description(const QString& text);
+    void errorOccured(const QString& msg);
     void finished();
 
 public slots:
@@ -49,7 +50,7 @@ private:
     void printPaged();
 
 private:
-    typedef std::function<void(QPainter *painter, bool firstPage,
+    typedef std::function<bool(QPainter *painter, bool firstPage,
                                const QString& title, const QRectF& sourceRect)> BeginPaintFunc;
 
     void printInternal(BeginPaintFunc func, bool endPaintingEveryPage);

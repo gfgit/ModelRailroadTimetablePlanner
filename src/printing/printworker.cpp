@@ -10,12 +10,29 @@
 #include <QPainter>
 
 #include <QPrinter>
-
+#include <QPdfWriter>
 #include <QSvgGenerator>
 
 #include "info.h"
 
+#include <QFile>
+
 #include <QDebug>
+
+bool testFileIsWriteable(const QString& fileName, QString &errOut)
+{
+    QFile tmp(fileName);
+    const bool existed = tmp.exists();
+    bool writable = tmp.open(QFile::WriteOnly);
+    errOut = tmp.errorString();
+
+    if(tmp.isOpen())
+        tmp.close();
+    if(!existed)
+        tmp.remove();
+
+    return writable;
+}
 
 PrintWorker::PrintWorker(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
@@ -105,8 +122,11 @@ void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
 
         emit description(scene->getGraphObjectName());
 
+        bool valid = true;
         if(func)
-            func(&painter, firstPage, scene->getGraphObjectName(), sourceRect);
+            valid = func(&painter, firstPage, scene->getGraphObjectName(), sourceRect);
+        if(!valid)
+            return;
 
         if(firstPage)
             firstPage = false;
@@ -133,18 +153,41 @@ void PrintWorker::printSvg()
 
     const QString fmt = QString("%1/%2.svg").arg(fileOutput);
 
-    auto beginPaint = [&svg, &fmt, &docTitle, &descr](QPainter *painter, bool firstPage,
-                                   const QString& title, const QRectF& sourceRect)
+    auto beginPaint = [this, &svg, &fmt, &docTitle, &descr](QPainter *painter, bool firstPage,
+                                                            const QString& title, const QRectF& sourceRect) -> bool
     {
+        const QString fileName = fmt.arg(title);
         svg.reset(new QSvgGenerator);
         svg->setTitle(docTitle);
         svg->setDescription(descr);
-        svg->setFileName(fmt.arg(title));
+        svg->setFileName(fileName);
         svg->setSize(sourceRect.size().toSize());
         svg->setViewBox(sourceRect);
 
         if(!painter->begin(svg.get()))
+        {
             qWarning() << "PrintWorker::printSvg(): cannot begin QPainter";
+            QString fileErr;
+            bool writable = testFileIsWriteable(fileName, fileErr);
+
+            QString msg;
+            if(!writable)
+            {
+                msg = tr("SVG Error: cannot open output file.\n"
+                         "Path: \"%1\"\n"
+                         "Error: %2").arg(fileName, fileErr);
+            }
+            else
+            {
+                msg = tr("SVG Error: generic error.");
+            }
+
+
+            emit errorOccured(msg);
+            return false;
+        }
+
+        return true;
     };
 
     printInternal(beginPaint, true);
@@ -169,14 +212,63 @@ void PrintWorker::printPdf()
 
 void PrintWorker::printPdfMultipleFiles()
 {
+    std::unique_ptr<QPdfWriter> writer;
+
+
     const QString fmt = QString("%1/%2.pdf").arg(fileOutput);
 
-    auto beginPaint = [printer = m_printer, &fmt](QPainter *painter, bool firstPage,
-                                   const QString& title, const QRectF& sourceRect)
+    auto beginPaint = [this, &writer, &fmt](QPainter *painter, bool firstPage,
+                                            const QString& title, const QRectF& sourceRect) -> bool
     {
-        printer->setOutputFileName(fmt.arg(title));
-        if(!painter->begin(printer))
+        const QString fileName = fmt.arg(title);
+        writer.reset(new QPdfWriter(fileName));
+        QPageSize ps(QPageSize::A4);
+        writer->setPageSize(ps);
+
+        if(!painter->begin(writer.get()))
+        {
             qWarning() << "PrintWorker::printPdfMultipleFiles(): cannot begin QPainter";
+
+            QString fileErr;
+            bool writable = testFileIsWriteable(fileName, fileErr);
+
+            QString msg;
+            if(!writable)
+            {
+                msg = tr("PDF Error: cannot open output file.\n"
+                         "Path: \"%1\"\n"
+                         "Error: %2").arg(fileName, fileErr);
+            }
+            else
+            {
+                msg = tr("PDF Error: generic error.");
+            }
+
+
+            emit errorOccured(msg);
+            return false;
+        }
+
+        const double scaleX = writer->width() / sourceRect.width();
+        const double scaleY = writer->height() / sourceRect.height();
+        const double scale = qMin(scaleX, scaleY);
+
+        const QRectF win = painter->window();
+
+        painter->fillRect(win, Qt::darkCyan);
+
+        QFont f;
+        f.setPointSize(10);
+        painter->setFont(f);
+        painter->drawText(painter->window().center(), "ciao");
+
+        painter->scale(scale, scale);
+
+        f.setPointSize(4);
+        painter->setPen(Qt::red);
+        painter->drawText(QPointF(10, 10), "BOB");
+
+        return true;
     };
 
     printInternal(beginPaint, true);
@@ -184,19 +276,28 @@ void PrintWorker::printPdfMultipleFiles()
 
 void PrintWorker::printPaged()
 {
-    auto beginPaint = [printer = m_printer](QPainter *painter, bool firstPage,
-                                                  const QString& title, const QRectF& sourceRect)
+    auto beginPaint = [this](QPainter *painter, bool firstPage,
+                             const QString& title, const QRectF& sourceRect) -> bool
     {
         if(firstPage)
         {
-            if(!painter->begin(printer))
+            if(!painter->begin(m_printer))
+            {
                 qWarning() << "PrintWorker::printPaged(): cannot begin QPainter";
+                emit errorOccured(tr("Cannot begin painting"));
+                return false;
+            }
         }
         else
         {
-            if(!printer->newPage())
+            if(!m_printer->newPage())
+            {
                 qWarning() << "PrintWorker::printPaged(): cannot add new page";
+                emit errorOccured(tr("Cannot create new page"));
+                return false;
+            }
         }
+        return true;
     };
 
     printInternal(beginPaint, false);
