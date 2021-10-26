@@ -46,17 +46,23 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int 
     //qDebug() << "Drawing hours..." << rect << scroll;
     const QString fmt(QStringLiteral("%1:00"));
 
-    const qreal top = verticalScroll;
+    const qreal top = verticalScroll - vertOffset;
     const qreal bottom = rect.bottom();
 
     int h = qFloor(top / hourOffset);
-    qreal y = h * hourOffset - verticalScroll + vertOffset;
+    if(h < 0)
+        h = 0;
 
-    for(; h <= 24 && y <= bottom; h++)
+    QRectF labelRect = rect;
+    labelRect.setWidth(labelRect.width() * 0.9);
+    labelRect.setHeight(hourOffset);
+    labelRect.moveTop(h * hourOffset - verticalScroll + vertOffset - hourOffset / 2);
+
+    for(; h <= 24 && labelRect.top() <= bottom; h++)
     {
         //qDebug() << "Y:" << y << fmt.arg(h);
-        painter->drawText(QPointF(5, y + 8), fmt.arg(h)); //y + 8 to center text vertically
-        y += hourOffset;
+        painter->drawText(labelRect, fmt.arg(h), QTextOption(Qt::AlignVCenter | Qt::AlignRight));
+        labelRect.moveTop(labelRect.top() + hourOffset);
     }
 }
 
