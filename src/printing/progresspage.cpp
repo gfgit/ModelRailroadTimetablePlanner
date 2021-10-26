@@ -14,6 +14,7 @@
 PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     QWizardPage(parent),
     mWizard(w),
+    m_worker(nullptr),
     complete(false)
 {
     m_label = new QLabel(tr("Printing..."));
