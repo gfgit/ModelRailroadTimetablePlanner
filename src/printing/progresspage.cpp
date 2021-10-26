@@ -25,7 +25,6 @@ PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     l->addWidget(m_progressBar);
     setLayout(l);
 
-    setCommitPage(true);
     setFinalPage(true);
 
     setTitle(tr("Printing"));
