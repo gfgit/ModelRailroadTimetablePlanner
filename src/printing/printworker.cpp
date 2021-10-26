@@ -232,8 +232,9 @@ void PrintWorker::printPdfMultipleFiles()
         const QString fileName = Print::getFileName(fileOutput, filePattern, QLatin1String(".pdf"),
                                                     title, type, progressiveNum);
         writer.reset(new QPdfWriter(fileName));
-        QPageSize ps(QPageSize::A4);
+        QPageSize ps(sourceRect.size(), QPageSize::Point);
         writer->setPageSize(ps);
+
 
         if(!painter->begin(writer.get()))
         {
@@ -262,21 +263,7 @@ void PrintWorker::printPdfMultipleFiles()
         const double scaleX = writer->width() / sourceRect.width();
         const double scaleY = writer->height() / sourceRect.height();
         const double scale = qMin(scaleX, scaleY);
-
-        const QRectF win = painter->window();
-
-        painter->fillRect(win, Qt::darkCyan);
-
-        QFont f;
-        f.setPointSize(10);
-        painter->setFont(f);
-        painter->drawText(painter->window().center(), "ciao");
-
         painter->scale(scale, scale);
-
-        f.setPointSize(4);
-        painter->setPen(Qt::red);
-        painter->drawText(QPointF(10, 10), "BOB");
 
         return true;
     };
