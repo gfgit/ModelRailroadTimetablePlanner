@@ -8,10 +8,33 @@
 
 #include <QtMath>
 
+/*!
+ * \brief Set font point size
+ * \param font
+ * \param points the value of font size to set
+ * \param p the QPainter which will draw
+ *
+ * This function is needed because each QPaintDevice has different resolution (DPI)
+ * The default value is 72 dots per inch (DPI)
+ * But for example QPdfWriter default is 1200,
+ * QPrinter default is 300 an QWidget depends on the screen,
+ * so it depends on Operating System display settings.
+ *
+ * To avoid differences between screen contents and printed output we
+ * rescale font sizes as it would be if DPI was 72
+ */
+inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
+{
+    const qreal pointSize = val * 72.0 / qreal(p->device()->logicalDpiY());
+    font.setPointSizeF(pointSize);
+}
+
 void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int verticalScroll)
 {
     //TODO: settings
     QFont hourTextFont;
+    setFontPointSizeDPI(hourTextFont, 18, painter);
+
     QPen hourTextPen(AppSettings.getHourTextColor());
 
     const int vertOffset = Session->vertOffset;
@@ -82,12 +105,12 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
 {
     QFont stationFont;
     stationFont.setBold(true);
-    stationFont.setPointSize(12);
+    setFontPointSizeDPI(stationFont, 25, painter);
 
     QPen stationPen(AppSettings.getStationTextColor());
 
     QFont platfBoldFont = stationFont;
-    platfBoldFont.setPointSize(10);
+    setFontPointSizeDPI(platfBoldFont, 16, painter);
 
     QFont platfNormalFont = platfBoldFont;
     platfNormalFont.setBold(false);
