@@ -33,7 +33,7 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int 
 {
     //TODO: settings
     QFont hourTextFont;
-    setFontPointSizeDPI(hourTextFont, 18, painter);
+    setFontPointSizeDPI(hourTextFont, 15, painter);
 
     QPen hourTextPen(AppSettings.getHourTextColor());
 
