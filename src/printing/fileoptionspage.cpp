@@ -45,6 +45,10 @@ void PrintFileOptionsPage::createFilesBox()
     pathEdit = new QLineEdit;
     connect(pathEdit, &QLineEdit::textChanged, this, &QWizardPage::completeChanged);
 
+    patternEdit = new QLineEdit;
+    connect(patternEdit, &QLineEdit::textChanged, this, &QWizardPage::completeChanged);
+    patternEdit->setEnabled(false); //Initially different files is not checked
+
     fileBut = new QPushButton(tr("Choose"));
     connect(fileBut, &QPushButton::clicked, this, &PrintFileOptionsPage::onChooseFile);
 
@@ -55,17 +59,26 @@ void PrintFileOptionsPage::createFilesBox()
     l->addWidget(label, 1, 0, 1, 2);
     l->addWidget(pathEdit, 2, 0);
     l->addWidget(fileBut, 2, 1);
+    l->addWidget(patternEdit, 3, 0);
     fileBox->setLayout(l);
+
+    QString patternHelp = tr("File name pattern:<br>"
+                             "<b>%n</b> Name_with_underscores<br>"
+                             "<b>%N</b> Name with spaces<br>"
+                             "<b>%t</b> Type (Station, ...)<br>"
+                             "<b>%i</b> Progressive number");
+    patternEdit->setToolTip(patternHelp);
 }
 
 void PrintFileOptionsPage::initializePage()
 {
     pathEdit->setText(mWizard->getOutputFile());
+    patternEdit->setText(Print::phDefaultPattern);
     if(mWizard->getOutputType() == Print::Svg)
     {
         //Svg can only be printed in multiple files
         differentFilesCheckBox->setChecked(true);
-        differentFilesCheckBox->setDisabled(true);
+        differentFilesCheckBox->setEnabled(false);
     }
     else
     {
@@ -76,13 +89,14 @@ void PrintFileOptionsPage::initializePage()
 
 bool PrintFileOptionsPage::validatePage()
 {
-    QString path = pathEdit->text();
+    const QString path = pathEdit->text();
     if(path.isEmpty())
     {
         return false;
     }
 
     mWizard->setOutputFile(QDir::fromNativeSeparators(path));
+    mWizard->setFilePattern(patternEdit->text());
     mWizard->setDifferentFiles(differentFilesCheckBox->isChecked());
 
     return true;
@@ -90,7 +104,10 @@ bool PrintFileOptionsPage::validatePage()
 
 bool PrintFileOptionsPage::isComplete() const
 {
-    return !pathEdit->text().isEmpty();
+    bool complete = !pathEdit->text().isEmpty();
+    if(complete && differentFilesCheckBox->isChecked())
+        complete = !patternEdit->text().isEmpty();
+    return complete;
 }
 
 void PrintFileOptionsPage::onChooseFile()
@@ -139,6 +156,9 @@ void PrintFileOptionsPage::onChooseFile()
 
 void PrintFileOptionsPage::onDifferentFiles()
 {
+    //Pattern is applicable only if printing multiple files
+    patternEdit->setEnabled(differentFilesCheckBox->isChecked());
+
     //If pathEdit contains a file but user checks 'Different Files'
     //We go up to file directory and use that
 

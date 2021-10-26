@@ -9,6 +9,31 @@
 
 #include <QPrinter>
 
+QString Print::getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
+                           const QString& name, LineGraphType type, int i)
+{
+    QString result = pattern;
+    if(result.contains(phNameUnderscore))
+    {
+        //Replace spaces with underscores
+        QString nameUnderscores = name;
+        nameUnderscores.replace(' ', '_');
+        result.replace(phNameUnderscore, nameUnderscores);
+    }
+
+    result.replace(phNameKeepSpaces, name);
+    result.replace(phType, utils::getLineGraphTypeName(type));
+    result.replace(phProgressive, QString::number(i).rightJustified(2, '0'));
+
+    if(!baseDir.endsWith('/'))
+        result.prepend('/');
+    result.prepend(baseDir);
+
+    result.append(extension);
+
+    return result;
+}
+
 PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     QWizard (parent),
     mDb(db),
@@ -64,4 +89,14 @@ void PrintWizard::setDifferentFiles(bool newDifferentFiles)
 QPrinter *PrintWizard::getPrinter() const
 {
     return printer;
+}
+
+const QString &PrintWizard::getFilePattern() const
+{
+    return filePattern;
+}
+
+void PrintWizard::setFilePattern(const QString &newFilePattern)
+{
+    filePattern = newFilePattern;
 }

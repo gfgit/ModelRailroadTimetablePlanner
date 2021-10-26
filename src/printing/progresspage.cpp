@@ -127,6 +127,7 @@ void PrintProgressPage::setupWorker()
     m_worker->setOutputType(mWizard->getOutputType());
     m_worker->setPrinter(mWizard->getPrinter());
     m_worker->setFileOutput(mWizard->getOutputFile(), mWizard->getDifferentFiles());
+    m_worker->setFilePattern(mWizard->getFilePattern());
 
     m_progressBar->setMaximum(m_worker->getMaxProgress());
 

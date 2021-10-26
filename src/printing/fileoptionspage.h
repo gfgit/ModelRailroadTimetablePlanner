@@ -35,6 +35,7 @@ private:
     QGroupBox *fileBox;
     QCheckBox *differentFilesCheckBox;
     QLineEdit *pathEdit;
+    QLineEdit *patternEdit;
     QPushButton *fileBut;
 
     QComboBox *pageCombo;

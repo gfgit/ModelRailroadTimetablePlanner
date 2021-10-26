@@ -31,6 +31,9 @@ public:
     bool getDifferentFiles() const;
     void setDifferentFiles(bool newDifferentFiles);
 
+    const QString &getFilePattern() const;
+    void setFilePattern(const QString &newFilePattern);
+
     QPrinter *getPrinter() const;
 
     inline sqlite3pp::database& getDb() const { return mDb; }
@@ -40,6 +43,7 @@ private:
 
     QPrinter *printer;
     QString fileOutput;
+    QString filePattern;
     bool differentFiles;
 
     Print::OutputType type;

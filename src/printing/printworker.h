@@ -30,6 +30,7 @@ public:
 
     void setOutputType(Print::OutputType type);
     void setFileOutput(const QString &value, bool different);
+    void setFilePattern(const QString &newFilePatter);
 
     void setSelection(SceneSelectionModel *newSelection);
     int getMaxProgress() const;
@@ -51,7 +52,8 @@ private:
 
 private:
     typedef std::function<bool(QPainter *painter, bool firstPage,
-                               const QString& title, const QRectF& sourceRect)> BeginPaintFunc;
+                               const QString& title, const QRectF& sourceRect,
+                               LineGraphType type, int progressiveNum)> BeginPaintFunc;
 
     void printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
 
@@ -60,6 +62,7 @@ private:
     SceneSelectionModel *selection;
 
     QString fileOutput;
+    QString filePattern;
     bool differentFiles;
     Print::OutputType outType;
 
