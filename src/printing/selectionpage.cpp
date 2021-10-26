@@ -84,7 +84,21 @@ void PrintSelectionPage::comboBoxesChanged()
 
     const int modeIdx = modeCombo->currentIndex();
     const SceneSelectionModel::SelectionMode mode = SceneSelectionModel::SelectionMode(modeIdx);
-    const LineGraphType type = LineGraphType(typeCombo->currentIndex());
+    LineGraphType type = LineGraphType(typeCombo->currentIndex());
+
+    if(mode == SceneSelectionModel::AllOfTypeExceptSelected)
+    {
+        //Type cannot be NoGraph
+        if(type == LineGraphType::NoGraph)
+            type = model->getSelectedType();
+
+        //Default to RailwayLine if still NoGraph
+        if(type == LineGraphType::NoGraph)
+            type = LineGraphType::RailwayLine;
+
+        //Update combo box
+        typeCombo->setCurrentIndex(int(type));
+    }
 
     model->setMode(mode, type);
 }

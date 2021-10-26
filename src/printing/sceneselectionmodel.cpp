@@ -114,7 +114,7 @@ void SceneSelectionModel::moveRow(int row, bool up)
 
 void SceneSelectionModel::setMode(SelectionMode mode, LineGraphType type)
 {
-    if(selectionMode == UseSelectedEntries)
+    if(mode == UseSelectedEntries)
         type = LineGraphType::NoGraph;
     else if(type == LineGraphType::NoGraph)
         return; //Must set a valid type
