@@ -115,6 +115,9 @@ void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
 
     int progressiveNum = 0;
 
+    const int vertOffset = Session->vertOffset;
+    const int horizOffset = Session->horizOffset;
+
     while (true)
     {
         const SceneSelectionModel::Entry entry = selection->getNextEntry();
@@ -141,13 +144,17 @@ void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
             firstPage = false;
 
         QRectF stationLabelRect = sourceRect;
-        stationLabelRect.setHeight(Session->vertOffset - 5); //See LineGraphView::resizeHeaders()
+        stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
+
+        QRectF hourPanelRect = sourceRect;
+        stationLabelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
 
         BackgroundHelper::drawBackgroundHourLines(&painter, sourceRect);
         BackgroundHelper::drawStations(&painter, scene, sourceRect);
         BackgroundHelper::drawJobStops(&painter, scene, sourceRect);
         BackgroundHelper::drawJobSegments(&painter, scene, sourceRect);
         BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect, 0);
+        BackgroundHelper::drawHourPanel(&painter, hourPanelRect, 0);
 
         if(endPaintingEveryPage)
             painter.end();
