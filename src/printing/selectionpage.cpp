@@ -38,6 +38,7 @@ PrintSelectionPage::PrintSelectionPage(PrintWizard *w, QWidget *parent) :
 
     statusLabel = new QLabel;
     connect(model, &SceneSelectionModel::selectionCountChanged, this, &PrintSelectionPage::updateSelectionCount);
+    updateSelectionCount();
 
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->addWidget(modeCombo);
