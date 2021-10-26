@@ -147,7 +147,7 @@ void PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
 
         QRectF hourPanelRect = sourceRect;
-        stationLabelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
+        hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
 
         BackgroundHelper::drawBackgroundHourLines(&painter, sourceRect);
         BackgroundHelper::drawStations(&painter, scene, sourceRect);
