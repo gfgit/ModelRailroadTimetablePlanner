@@ -77,7 +77,18 @@ int PrintSelectionPage::nextId() const
     return ret;
 }
 
-void PrintSelectionPage::updateComboBoxes()
+void PrintSelectionPage::comboBoxesChanged()
+{
+    SceneSelectionModel *model = mWizard->getSelectionModel();
+
+    const int modeIdx = modeCombo->currentIndex();
+    const SceneSelectionModel::SelectionMode mode = SceneSelectionModel::SelectionMode(modeIdx);
+    const LineGraphType type = LineGraphType(typeCombo->currentIndex());
+
+    model->setMode(mode, type);
+}
+
+void PrintSelectionPage::updateComboBoxesFromModel()
 {
     SceneSelectionModel *model = mWizard->getSelectionModel();
 
@@ -163,6 +174,9 @@ void PrintSelectionPage::setupComboBoxes()
     modeCombo = new QComboBox;
     typeCombo = new QComboBox;
 
+    connect(modeCombo, qOverload<int>(&QComboBox::activated), this, &PrintSelectionPage::comboBoxesChanged);
+    connect(typeCombo, qOverload<int>(&QComboBox::activated), this, &PrintSelectionPage::comboBoxesChanged);
+
     QStringList  items;
     items.reserve(SceneSelectionModel::NModes);
     for(int i = 0; i < SceneSelectionModel::NModes; i++)
@@ -177,6 +191,6 @@ void PrintSelectionPage::setupComboBoxes()
         items.append(utils::getLineGraphTypeName(LineGraphType(i)));
     typeCombo->addItems(items);
 
-    connect(model, &SceneSelectionModel::selectionModeChanged, this, &PrintSelectionPage::updateComboBoxes);
-    updateComboBoxes();
+    connect(model, &SceneSelectionModel::selectionModeChanged, this, &PrintSelectionPage::updateComboBoxesFromModel);
+    updateComboBoxesFromModel();
 }

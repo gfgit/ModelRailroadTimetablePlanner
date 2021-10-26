@@ -19,7 +19,8 @@ public:
     int nextId() const override;
 
 private slots:
-    void updateComboBoxes();
+    void comboBoxesChanged();
+    void updateComboBoxesFromModel();
     void updateSelectionCount();
 
     void onAddItem();
