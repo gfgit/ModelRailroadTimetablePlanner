@@ -42,14 +42,11 @@ public:
 
     inline bool taskRunning() const { return printTask; }
 
-signals:
-    void printOptionsChanged();
-
 protected:
     bool event(QEvent *e) override;
     void done(int result) override;
 
-private:
+public:
     void startPrintTask();
     void abortPrintTask();
     void handleProgressError(const QString& errMsg);

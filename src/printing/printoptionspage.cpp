@@ -135,7 +135,8 @@ bool PrintOptionsPage::validatePage()
         mWizard->setDifferentFiles(differentFilesCheckBox->isChecked());
     }
 
-    emit mWizard->printOptionsChanged();
+    //Start task
+    mWizard->startPrintTask();
 
     return true;
 }
