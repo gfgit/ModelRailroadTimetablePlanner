@@ -45,6 +45,9 @@ PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     lay->addWidget(printerBox, 2, 0, 1, 2);
 
     setTitle(tr("Print Options"));
+
+    //Change 'Next' to 'Print' so user understands better
+    setButtonText(QWizard::NextButton, tr("Print"));
 }
 
 PrintOptionsPage::~PrintOptionsPage()
