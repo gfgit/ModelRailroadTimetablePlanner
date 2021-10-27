@@ -1,8 +1,7 @@
 #include "printwizard.h"
 
 #include "selectionpage.h"
-#include "fileoptionspage.h"
-#include "printeroptionspage.h"
+#include "printoptionspage.h"
 #include "progresspage.h"
 
 #include "sceneselectionmodel.h"
@@ -62,9 +61,8 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     selectionModel = new SceneSelectionModel(mDb, this);
 
     setPage(0, new PrintSelectionPage(this));
-    setPage(1, new PrintFileOptionsPage(this));
-    setPage(2, new PrinterOptionsPage(this));
-    setPage(3, new PrintProgressPage(this));
+    setPage(1, new PrintOptionsPage(this));
+    setPage(2, new PrintProgressPage(this));
 
     setWindowTitle(tr("Print Wizard"));
 }

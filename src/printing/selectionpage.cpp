@@ -63,21 +63,6 @@ bool PrintSelectionPage::isComplete() const
     return count > 0;
 }
 
-int PrintSelectionPage::nextId() const
-{
-    int ret = 0;
-    switch (mWizard->getOutputType())
-    {
-    case Print::Native:
-        ret = 2;
-        break;
-    case Print::Pdf:
-    case Print::Svg:
-        ret = 1;
-    }
-    return ret;
-}
-
 void PrintSelectionPage::comboBoxesChanged()
 {
     SceneSelectionModel *model = mWizard->getSelectionModel();

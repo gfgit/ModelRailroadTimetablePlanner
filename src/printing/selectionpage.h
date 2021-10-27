@@ -16,7 +16,6 @@ public:
     PrintSelectionPage(PrintWizard *w, QWidget *parent = nullptr);
 
     bool isComplete() const override;
-    int nextId() const override;
 
 private slots:
     void comboBoxesChanged();
