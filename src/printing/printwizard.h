@@ -38,6 +38,9 @@ public:
 
     inline sqlite3pp::database& getDb() const { return mDb; }
 
+signals:
+    void printOptionsChanged();
+
 private:
     sqlite3pp::database &mDb;
 

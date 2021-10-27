@@ -21,7 +21,7 @@ public:
     bool validatePage() override;
     bool isComplete() const override;
 
-public slots:
+private slots:
     void onOutputTypeChanged();
     void onChooseFile();
     void onDifferentFiles();

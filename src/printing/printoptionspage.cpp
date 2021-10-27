@@ -105,18 +105,27 @@ void PrintOptionsPage::initializePage()
 
 bool PrintOptionsPage::validatePage()
 {
-    if(mWizard->getOutputType() == Print::Native)
-        return true;
-
-    const QString path = pathEdit->text();
-    if(path.isEmpty())
+    if(mWizard->getOutputType() != Print::Native)
     {
-        return false;
+        //Check files
+        const QString path = pathEdit->text();
+        if(path.isEmpty())
+        {
+            return false;
+        }
+
+        const QString pattern = patternEdit->text();
+        if(pattern.isEmpty())
+        {
+            return false;
+        }
+
+        mWizard->setOutputFile(QDir::fromNativeSeparators(path));
+        mWizard->setFilePattern(pattern);
+        mWizard->setDifferentFiles(differentFilesCheckBox->isChecked());
     }
 
-    mWizard->setOutputFile(QDir::fromNativeSeparators(path));
-    mWizard->setFilePattern(patternEdit->text());
-    mWizard->setDifferentFiles(differentFilesCheckBox->isChecked());
+    emit mWizard->printOptionsChanged();
 
     return true;
 }

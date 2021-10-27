@@ -49,6 +49,10 @@ void PrintProgressPage::initializePage()
     connect(m_worker, &PrintWorker::description, this, &PrintProgressPage::handleDescription);
     connect(m_worker, &PrintWorker::errorOccured, this, &PrintProgressPage::handleError);
 
+    //NOTE: initializePage() is called only the first time we get to PrintProgressPage
+    //So if the user goes back, selects a different file and then gets here again
+    //options are not updated so we need to update them manually by reacting to this signal
+    connect(mWizard, &PrintWizard::printOptionsChanged, this, &PrintProgressPage::setupWorker);
     setupWorker();
 }
 

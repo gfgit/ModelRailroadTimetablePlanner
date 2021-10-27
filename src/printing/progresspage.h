@@ -21,13 +21,11 @@ public:
     bool validatePage() override;
     bool isComplete() const override;
 
-public slots:
+private slots:
     void handleFinished();
     void handleProgress(int val);
     void handleDescription(const QString &text);
     void handleError(const QString &text);
-
-private:
     void setupWorker();
 
 private:
