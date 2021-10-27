@@ -3,19 +3,13 @@
 
 #include <QLabel>
 #include <QProgressBar>
-#include <QPushButton>
 #include <QVBoxLayout>
-
-#include <QPointer>
-#include <QMessageBox>
 
 #include "printworker.h"
 
 PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     QWizardPage(parent),
-    mWizard(w),
-    m_worker(nullptr),
-    complete(false)
+    mWizard(w)
 {
     m_label = new QLabel(tr("Printing..."));
     m_progressBar = new QProgressBar;
@@ -31,110 +25,37 @@ PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     setTitle(tr("Printing"));
 }
 
-PrintProgressPage::~PrintProgressPage()
-{
-    m_thread.wait(5000);
-    if(m_worker)
-        m_worker->deleteLater();
-}
-
-void PrintProgressPage::initializePage()
-{
-    m_worker = new PrintWorker(mWizard->getDb());
-    m_worker->moveToThread(&m_thread);
-
-    connect(&m_thread, &QThread::started, m_worker, &PrintWorker::doWork);
-    connect(m_worker, &PrintWorker::finished, this, &PrintProgressPage::handleFinished);
-    connect(m_worker, &PrintWorker::progress, this, &PrintProgressPage::handleProgress);
-    connect(m_worker, &PrintWorker::description, this, &PrintProgressPage::handleDescription);
-    connect(m_worker, &PrintWorker::errorOccured, this, &PrintProgressPage::handleError);
-
-    //NOTE: initializePage() is called only the first time we get to PrintProgressPage
-    //So if the user goes back, selects a different file and then gets here again
-    //options are not updated so we need to update them manually by reacting to this signal
-    connect(mWizard, &PrintWizard::printOptionsChanged, this, &PrintProgressPage::setupWorker);
-    setupWorker();
-}
-
-bool PrintProgressPage::validatePage()
-{
-    if(m_thread.isRunning())
-    {
-        if(!m_thread.wait(2000))
-            return false;
-    }
-
-    return complete;
-}
-
 bool PrintProgressPage::isComplete() const
 {
-    return complete;
+    return !mWizard->taskRunning();
 }
 
-void PrintProgressPage::handleFinished()
+void PrintProgressPage::handleProgressStart(int max)
 {
-    m_thread.quit();
-    m_thread.wait();
-
-    m_progressBar->setValue(m_progressBar->maximum());
-    m_progressBar->setEnabled(false);
-    m_label->setText(tr("Completed"));
-
-    complete = true;
+    //We are starting new progress
+    //Enable progress bar and set maximum
+    m_progressBar->setMaximum(max);
+    m_progressBar->setEnabled(true);
     emit completeChanged();
 }
 
-void PrintProgressPage::handleProgress(int val)
+void PrintProgressPage::handleProgress(int val, const QString& text)
 {
-    m_progressBar->setValue(val);
-}
+    const bool finished = val < 0;
 
-void PrintProgressPage::handleDescription(const QString& text)
-{
-    m_label->setText(QStringLiteral("Printing '%1' ...").arg(text));
-}
+    if(val == m_progressBar->maximum() && !finished)
+        m_progressBar->setMaximum(val + 1); //Increase maximum
 
-void PrintProgressPage::handleError(const QString &text)
-{
-    QPointer<QMessageBox> msgBox = new QMessageBox(this);
-    msgBox->setIcon(QMessageBox::Warning);
-    auto tryAgainBut = msgBox->addButton(tr("Try again"), QMessageBox::YesRole);
-    msgBox->addButton(QMessageBox::Abort);
-    msgBox->setDefaultButton(tryAgainBut);
-    msgBox->setText(text);
-    msgBox->setWindowTitle(tr("Print Error"));
-
-    msgBox->exec();
-
-    if(msgBox)
+    m_label->setText(text);
+    if(finished)
     {
-        if(msgBox->clickedButton() == tryAgainBut)
-        {
-            //Launch again worker
-            setupWorker();
-        }
+        //Set progress to max and set disabled
+        m_progressBar->setValue(m_progressBar->maximum());
+        m_progressBar->setEnabled(false);
+        emit completeChanged();
     }
-
-    delete msgBox;
-}
-
-void PrintProgressPage::setupWorker()
-{
-    m_thread.wait();
-
-    complete = false;
-    emit completeChanged();
-
-    m_progressBar->reset();
-
-    m_worker->setSelection(mWizard->getSelectionModel());
-    m_worker->setOutputType(mWizard->getOutputType());
-    m_worker->setPrinter(mWizard->getPrinter());
-    m_worker->setFileOutput(mWizard->getOutputFile(), mWizard->getDifferentFiles());
-    m_worker->setFilePattern(mWizard->getFilePattern());
-
-    m_progressBar->setMaximum(m_worker->getMaxProgress());
-
-    m_thread.start();
+    else
+    {
+        m_progressBar->setValue(val);
+    }
 }
