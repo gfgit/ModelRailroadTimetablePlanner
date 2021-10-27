@@ -1,32 +1,45 @@
-#ifndef SELECTIONPAGE_H
-#define SELECTIONPAGE_H
+#ifndef PRINTSELECTIONPAGE_H
+#define PRINTSELECTIONPAGE_H
 
 #include <QWizardPage>
 
 class PrintWizard;
-class QListView;
+class QTableView;
 class QPushButton;
-class CheckProxyModel;
+class QComboBox;
+class QLabel;
 
-class SelectionPage : public QWizardPage
+class PrintSelectionPage : public QWizardPage
 {
     Q_OBJECT
 public:
-    SelectionPage(PrintWizard *w, QWidget *parent = nullptr);
+    PrintSelectionPage(PrintWizard *w, QWidget *parent = nullptr);
 
-    void initializePage() override;
     bool isComplete() const override;
-    bool validatePage() override;
-    int nextId() const override;
+
+private slots:
+    void comboBoxesChanged();
+    void updateComboBoxesFromModel();
+    void updateSelectionCount();
+
+    void onAddItem();
+    void onRemoveItem();
+
+private:
+    void setupComboBoxes();
 
 private:
     PrintWizard *mWizard;
 
-    QListView *view;
-    QPushButton *selectAllBut;
-    QPushButton *selectNoneBut;
+    QTableView *view;
 
-    CheckProxyModel *proxyModel;
+    QPushButton *addBut;
+    QPushButton *remBut;
+    QPushButton *removeAllBut;
+    QComboBox *modeCombo;
+    QComboBox *typeCombo;
+
+    QLabel *statusLabel;
 };
 
-#endif // SELECTIONPAGE_H
+#endif // PRINTSELECTIONPAGE_H

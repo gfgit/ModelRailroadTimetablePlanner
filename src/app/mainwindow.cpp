@@ -794,21 +794,21 @@ void MainWindow::onRemoveJob()
 
 void MainWindow::onPrint()
 {
-    PrintWizard wizard(this);
+    PrintWizard wizard(Session->m_Db, this);
     wizard.setOutputType(Print::Native);
     wizard.exec();
 }
 
 void MainWindow::onPrintPDF()
 {
-    PrintWizard wizard(this);
+    PrintWizard wizard(Session->m_Db, this);
     wizard.setOutputType(Print::Pdf);
     wizard.exec();
 }
 
 void MainWindow::onExportSvg()
 {
-    PrintWizard wizard(this);
+    PrintWizard wizard(Session->m_Db, this);
     wizard.setOutputType(Print::Svg);
     wizard.exec();
 }

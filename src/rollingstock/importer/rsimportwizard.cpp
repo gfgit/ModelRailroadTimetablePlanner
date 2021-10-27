@@ -104,7 +104,7 @@ void RSImportWizard::done(int result)
                 msgBox->setDefaultButton(noBut);
                 msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
                 msgBox->exec();
-                bool abortClicked = msgBox && msgBox->clickedButton() != abortBut;
+                bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
                 delete msgBox;
                 if(!abortClicked)
                     return;
@@ -138,16 +138,6 @@ void RSImportWizard::done(int result)
     Session->clearImportRSTables();
 
     QWizard::done(result);
-}
-
-void RSImportWizard::initializePage(int id)
-{
-    QWizard::initializePage(id);
-}
-
-void RSImportWizard::cleanupPage(int id)
-{
-    QWizard::cleanupPage(id);
 }
 
 bool RSImportWizard::validateCurrentPage()
@@ -293,8 +283,8 @@ void RSImportWizard::abortLoadTask()
 {
     if(loadTask)
     {
-        loadTask->cleanup();
         loadTask->stop();
+        loadTask->cleanup();
         loadTask = nullptr;
     }
 }
@@ -311,8 +301,8 @@ void RSImportWizard::abortImportTask()
 {
     if(importTask)
     {
-        importTask->cleanup();
         importTask->stop();
+        importTask->cleanup();
         importTask = nullptr;
     }
 }

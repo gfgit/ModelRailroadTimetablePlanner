@@ -15,13 +15,11 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/rs_utils.h
   utils/session_rs_modes.h
   utils/types.h
-  utils/checkproxymodel.h
   utils/combodelegate.h
   utils/model_roles.h
   utils/platform_utils.h
   utils/worker_event_types.h
 
-  utils/checkproxymodel.cpp
   utils/colordelegate.cpp
   utils/colorview.cpp
   utils/combodelegate.cpp

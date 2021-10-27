@@ -1,7 +1,8 @@
 #ifndef PRINTWORKER_H
 #define PRINTWORKER_H
 
-#include <QObject>
+#include "utils/thread/iquittabletask.h"
+#include "utils/worker_event_types.h"
 
 #include <QVector>
 
@@ -11,60 +12,78 @@
 
 class QPrinter;
 class QPainter;
-class QGraphicsScene;
-class GraphManager;
+class QRectF;
 
-class PrintWorker : public QObject
+class SceneSelectionModel;
+
+class LineGraphScene;
+
+namespace sqlite3pp {
+class database;
+}
+
+class PrintProgressEvent : public QEvent
 {
-    Q_OBJECT
 public:
-
-    typedef struct Scene_
+    enum
     {
-        db_id lineId;
-        QGraphicsScene *scene;
-        QString name;
-    } Scene;
+        ProgressError = -1,
+        ProgressAbortedByUser = -2,
+        ProgressMaxFinished = -3
+    };
 
-    typedef QVector<Scene> Scenes;
+    static constexpr Type _Type = Type(CustomEvents::PrintProgress);
 
-    explicit PrintWorker(QObject *parent = nullptr);
+    PrintProgressEvent(QRunnable *self, int pr, const QString& descrOrErr);
 
-    void setScenes(const Scenes &scenes);
+public:
+    QRunnable *task;
+    int progress;
+    QString descriptionOrError;
+};
 
-    void setBackground(QGraphicsScene *background);
-    void setGraphMgr(GraphManager *value);
+
+class PrintWorker : public IQuittableTask
+{
+public:
+    PrintWorker(sqlite3pp::database &db, QObject *receiver);
+    ~PrintWorker();
 
     void setPrinter(QPrinter *printer);
 
-    inline int getMaxProgress() { return m_scenes.size(); }
-
     void setOutputType(Print::OutputType type);
     void setFileOutput(const QString &value, bool different);
+    void setFilePattern(const QString &newFilePatter);
 
-    void printPdfMultipleFiles();
-    void printSvg();
-    void printNormal();
+    void setSelection(SceneSelectionModel *newSelection);
+    int getMaxProgress() const;
 
-signals:
-    void progress(int val);
-    void description(const QString& text);
-    void finished();
-
-public slots:
-    void doWork();
+    //IQuittableTask
+    void run() override;
 
 private:
-    void printScene(QPainter *painter, const Scene &s);
+    bool printSvg();
+    bool printPdf();
+    bool printPdfMultipleFiles();
+    bool printPaged();
 
 private:
-    Scenes m_scenes;
+    typedef std::function<bool(QPainter *painter,
+                               const QString& title, const QRectF& sourceRect,
+                               LineGraphType type, int progressiveNum)> BeginPaintFunc;
+
+    bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
+
+private:
     QPrinter *m_printer;
-    GraphManager *graphMgr;
+    SceneSelectionModel *selection;
 
     QString fileOutput;
+    QString filePattern;
     bool differentFiles;
     Print::OutputType outType;
+
+    LineGraphScene *scene;
 };
 
 #endif // PRINTWORKER_H
