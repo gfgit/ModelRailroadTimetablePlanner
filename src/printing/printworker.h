@@ -1,7 +1,8 @@
 #ifndef PRINTWORKER_H
 #define PRINTWORKER_H
 
-#include <QObject>
+#include "utils/thread/iquittabletask.h"
+#include "utils/worker_event_types.h"
 
 #include <QVector>
 
@@ -11,6 +12,7 @@
 
 class QPrinter;
 class QPainter;
+class QRectF;
 
 class SceneSelectionModel;
 
@@ -20,11 +22,32 @@ namespace sqlite3pp {
 class database;
 }
 
-class PrintWorker : public QObject
+class PrintProgressEvent : public QEvent
 {
-    Q_OBJECT
 public:
-    PrintWorker(sqlite3pp::database &db, QObject *parent = nullptr);
+    enum
+    {
+        ProgressError = -1,
+        ProgressAbortedByUser = -2,
+        ProgressMaxFinished = -3
+    };
+
+    static constexpr Type _Type = Type(CustomEvents::PrintProgress);
+
+    PrintProgressEvent(QRunnable *self, int pr, const QString& descrOrErr);
+
+public:
+    QRunnable *task;
+    int progress;
+    QString descriptionOrError;
+};
+
+
+class PrintWorker : public IQuittableTask
+{
+public:
+    PrintWorker(sqlite3pp::database &db, QObject *receiver);
+    ~PrintWorker();
 
     void setPrinter(QPrinter *printer);
 
@@ -35,27 +58,21 @@ public:
     void setSelection(SceneSelectionModel *newSelection);
     int getMaxProgress() const;
 
-signals:
-    void progress(int val);
-    void description(const QString& text);
-    void errorOccured(const QString& msg);
-    void finished();
-
-public slots:
-    void doWork();
+    //IQuittableTask
+    void run() override;
 
 private:
-    void printSvg();
-    void printPdf();
-    void printPdfMultipleFiles();
-    void printPaged();
+    bool printSvg();
+    bool printPdf();
+    bool printPdfMultipleFiles();
+    bool printPaged();
 
 private:
-    typedef std::function<bool(QPainter *painter, bool firstPage,
+    typedef std::function<bool(QPainter *painter,
                                const QString& title, const QRectF& sourceRect,
                                LineGraphType type, int progressiveNum)> BeginPaintFunc;
 
-    void printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
+    bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
 
 private:
     QPrinter *m_printer;
