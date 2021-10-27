@@ -53,6 +53,8 @@ QString Print::getFileName(const QString& baseDir, const QString& pattern, const
 PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     QWizard (parent),
     mDb(db),
+    printer(nullptr),
+    filePattern(Print::phDefaultPattern),
     differentFiles(false),
     type(Print::Native)
 {

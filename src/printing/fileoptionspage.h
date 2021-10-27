@@ -23,11 +23,14 @@ public:
     int nextId() const override;
 
 public slots:
+    void onOutputTypeChanged();
     void onChooseFile();
-
     void onDifferentFiles();
+    void onOpenPrintDlg();
+
 private:
     void createFilesBox();
+    void createPrinterBox();
 
 private:
     PrintWizard *mWizard;
@@ -38,7 +41,10 @@ private:
     QLineEdit *patternEdit;
     QPushButton *fileBut;
 
-    QComboBox *pageCombo;
+    QGroupBox *printerBox;
+    QPushButton *printerOptionDlgBut;
+
+    QComboBox *outputTypeCombo;
 };
 
 #endif // PRINTFILEOPTIONSPAGE_H

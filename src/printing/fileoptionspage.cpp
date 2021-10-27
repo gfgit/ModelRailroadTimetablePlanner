@@ -12,21 +12,35 @@
 #include <QVBoxLayout>
 #include <QGridLayout>
 
-#include <QFileDialog>
 #include "utils/file_format_names.h"
+#include <QFileDialog>
+#include <QPrintDialog>
+#include <QPointer>
 
 #include <QFileInfo>
+
 
 PrintFileOptionsPage::PrintFileOptionsPage(PrintWizard *w, QWidget *parent) :
     QWizardPage (parent),
     mWizard(w)
 {
     createFilesBox();
-    QVBoxLayout *l = new QVBoxLayout;
-    l->addWidget(fileBox);
-    setLayout(l);
+    createPrinterBox();
 
-    setTitle(tr("File options"));
+    outputTypeCombo = new QComboBox;
+    QStringList items;
+    items.reserve(int(Print::NTypes));
+    for(int i = 0; i < int(Print::NTypes); i++)
+        items.append(Print::getOutputTypeName(Print::OutputType(i)));
+    outputTypeCombo->addItems(items);
+    connect(outputTypeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &PrintFileOptionsPage::onOutputTypeChanged);
+
+    QVBoxLayout *lay = new QVBoxLayout(this);
+    lay->addWidget(fileBox);
+    lay->addWidget(printerBox);
+
+    setTitle(tr("Print Options"));
 }
 
 PrintFileOptionsPage::~PrintFileOptionsPage()
@@ -70,25 +84,30 @@ void PrintFileOptionsPage::createFilesBox()
     patternEdit->setToolTip(patternHelp);
 }
 
+void PrintFileOptionsPage::createPrinterBox()
+{
+    printerBox = new QGroupBox(tr("Printer"));
+
+    printerOptionDlgBut = new QPushButton(tr("Open Printer Options"));
+    connect(printerOptionDlgBut, &QPushButton::clicked, this, &PrintFileOptionsPage::onOpenPrintDlg);
+
+    QVBoxLayout *l = new QVBoxLayout(printerBox);
+    l->addWidget(printerOptionDlgBut);
+}
+
 void PrintFileOptionsPage::initializePage()
 {
     pathEdit->setText(mWizard->getOutputFile());
-    patternEdit->setText(Print::phDefaultPattern);
-    if(mWizard->getOutputType() == Print::Svg)
-    {
-        //Svg can only be printed in multiple files
-        differentFilesCheckBox->setChecked(true);
-        differentFilesCheckBox->setEnabled(false);
-    }
-    else
-    {
-        differentFilesCheckBox->setChecked(mWizard->getDifferentFiles());
-        differentFilesCheckBox->setEnabled(true);
-    }
+    patternEdit->setText(mWizard->getFilePattern());
+    differentFilesCheckBox->setChecked(mWizard->getDifferentFiles());
+    outputTypeCombo->setCurrentIndex(int(mWizard->getOutputType()));
 }
 
 bool PrintFileOptionsPage::validatePage()
 {
+    if(mWizard->getOutputType() == Print::Native)
+        return true;
+
     const QString path = pathEdit->text();
     if(path.isEmpty())
     {
@@ -104,6 +123,9 @@ bool PrintFileOptionsPage::validatePage()
 
 bool PrintFileOptionsPage::isComplete() const
 {
+    if(mWizard->getOutputType() == Print::Native)
+        return true; //No need to check files
+
     bool complete = !pathEdit->text().isEmpty();
     if(complete && differentFilesCheckBox->isChecked())
         complete = !patternEdit->text().isEmpty();
@@ -200,7 +222,35 @@ void PrintFileOptionsPage::onDifferentFiles()
     pathEdit->setText(path);
 }
 
+void PrintFileOptionsPage::onOpenPrintDlg()
+{
+    QPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
+    dlg->exec();
+    delete dlg;
+}
+
 int PrintFileOptionsPage::nextId() const
 {
     return 3; //Go to ProgressPage
+}
+
+void PrintFileOptionsPage::onOutputTypeChanged()
+{
+    Print::OutputType type = Print::OutputType(outputTypeCombo->currentIndex());
+
+    fileBox->setEnabled(type != Print::Native);
+    printerBox->setEnabled(type == Print::Native);
+
+    if(type == Print::Svg)
+    {
+        //Svg can only be printed in multiple files
+        differentFilesCheckBox->setChecked(true);
+        differentFilesCheckBox->setEnabled(false);
+    }
+    else
+    {
+        differentFilesCheckBox->setEnabled(true);
+    }
+
+    mWizard->setOutputType(type);
 }
