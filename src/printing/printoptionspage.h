@@ -1,5 +1,5 @@
-#ifndef PRINTFILEOPTIONSPAGE_H
-#define PRINTFILEOPTIONSPAGE_H
+#ifndef PRINTOPTIONSPAGE_H
+#define PRINTOPTIONSPAGE_H
 
 #include <QWizardPage>
 
@@ -10,17 +10,16 @@ class QComboBox;
 class QGroupBox;
 class QCheckBox;
 
-class PrintFileOptionsPage : public QWizardPage
+class PrintOptionsPage : public QWizardPage
 {
     Q_OBJECT
 public:
-    PrintFileOptionsPage(PrintWizard *w, QWidget *parent = nullptr);
-    ~PrintFileOptionsPage();
+    PrintOptionsPage(PrintWizard *w, QWidget *parent = nullptr);
+    ~PrintOptionsPage();
 
     void initializePage() override;
     bool validatePage() override;
     bool isComplete() const override;
-    int nextId() const override;
 
 public slots:
     void onOutputTypeChanged();
@@ -47,4 +46,4 @@ private:
     QComboBox *outputTypeCombo;
 };
 
-#endif // PRINTFILEOPTIONSPAGE_H
+#endif // PRINTOPTIONSPAGE_H

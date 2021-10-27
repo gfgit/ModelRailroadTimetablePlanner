@@ -1,4 +1,4 @@
-#include "fileoptionspage.h"
+#include "printoptionspage.h"
 
 #include "printwizard.h"
 
@@ -20,7 +20,7 @@
 #include <QFileInfo>
 
 
-PrintFileOptionsPage::PrintFileOptionsPage(PrintWizard *w, QWidget *parent) :
+PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     QWizardPage (parent),
     mWizard(w)
 {
@@ -34,7 +34,7 @@ PrintFileOptionsPage::PrintFileOptionsPage(PrintWizard *w, QWidget *parent) :
         items.append(Print::getOutputTypeName(Print::OutputType(i)));
     outputTypeCombo->addItems(items);
     connect(outputTypeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &PrintFileOptionsPage::onOutputTypeChanged);
+            this, &PrintOptionsPage::onOutputTypeChanged);
 
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->addWidget(fileBox);
@@ -43,18 +43,18 @@ PrintFileOptionsPage::PrintFileOptionsPage(PrintWizard *w, QWidget *parent) :
     setTitle(tr("Print Options"));
 }
 
-PrintFileOptionsPage::~PrintFileOptionsPage()
+PrintOptionsPage::~PrintOptionsPage()
 {
 
 }
 
-void PrintFileOptionsPage::createFilesBox()
+void PrintOptionsPage::createFilesBox()
 {
     fileBox = new QGroupBox(tr("Files"));
 
     differentFilesCheckBox = new QCheckBox(tr("Different Files"));
     connect(differentFilesCheckBox, &QCheckBox::toggled,
-            this, &PrintFileOptionsPage::onDifferentFiles);
+            this, &PrintOptionsPage::onDifferentFiles);
 
     pathEdit = new QLineEdit;
     connect(pathEdit, &QLineEdit::textChanged, this, &QWizardPage::completeChanged);
@@ -64,7 +64,7 @@ void PrintFileOptionsPage::createFilesBox()
     patternEdit->setEnabled(false); //Initially different files is not checked
 
     fileBut = new QPushButton(tr("Choose"));
-    connect(fileBut, &QPushButton::clicked, this, &PrintFileOptionsPage::onChooseFile);
+    connect(fileBut, &QPushButton::clicked, this, &PrintOptionsPage::onChooseFile);
 
     QLabel *label = new QLabel(tr("File(s)"));
 
@@ -84,18 +84,18 @@ void PrintFileOptionsPage::createFilesBox()
     patternEdit->setToolTip(patternHelp);
 }
 
-void PrintFileOptionsPage::createPrinterBox()
+void PrintOptionsPage::createPrinterBox()
 {
     printerBox = new QGroupBox(tr("Printer"));
 
     printerOptionDlgBut = new QPushButton(tr("Open Printer Options"));
-    connect(printerOptionDlgBut, &QPushButton::clicked, this, &PrintFileOptionsPage::onOpenPrintDlg);
+    connect(printerOptionDlgBut, &QPushButton::clicked, this, &PrintOptionsPage::onOpenPrintDlg);
 
     QVBoxLayout *l = new QVBoxLayout(printerBox);
     l->addWidget(printerOptionDlgBut);
 }
 
-void PrintFileOptionsPage::initializePage()
+void PrintOptionsPage::initializePage()
 {
     pathEdit->setText(mWizard->getOutputFile());
     patternEdit->setText(mWizard->getFilePattern());
@@ -103,7 +103,7 @@ void PrintFileOptionsPage::initializePage()
     outputTypeCombo->setCurrentIndex(int(mWizard->getOutputType()));
 }
 
-bool PrintFileOptionsPage::validatePage()
+bool PrintOptionsPage::validatePage()
 {
     if(mWizard->getOutputType() == Print::Native)
         return true;
@@ -121,7 +121,7 @@ bool PrintFileOptionsPage::validatePage()
     return true;
 }
 
-bool PrintFileOptionsPage::isComplete() const
+bool PrintOptionsPage::isComplete() const
 {
     if(mWizard->getOutputType() == Print::Native)
         return true; //No need to check files
@@ -132,7 +132,7 @@ bool PrintFileOptionsPage::isComplete() const
     return complete;
 }
 
-void PrintFileOptionsPage::onChooseFile()
+void PrintOptionsPage::onChooseFile()
 {
     QString path;
     if(differentFilesCheckBox->isChecked())
@@ -176,7 +176,7 @@ void PrintFileOptionsPage::onChooseFile()
     pathEdit->setText(QDir::fromNativeSeparators(path));
 }
 
-void PrintFileOptionsPage::onDifferentFiles()
+void PrintOptionsPage::onDifferentFiles()
 {
     //Pattern is applicable only if printing multiple files
     patternEdit->setEnabled(differentFilesCheckBox->isChecked());
@@ -222,19 +222,14 @@ void PrintFileOptionsPage::onDifferentFiles()
     pathEdit->setText(path);
 }
 
-void PrintFileOptionsPage::onOpenPrintDlg()
+void PrintOptionsPage::onOpenPrintDlg()
 {
     QPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
     dlg->exec();
     delete dlg;
 }
 
-int PrintFileOptionsPage::nextId() const
-{
-    return 3; //Go to ProgressPage
-}
-
-void PrintFileOptionsPage::onOutputTypeChanged()
+void PrintOptionsPage::onOutputTypeChanged()
 {
     Print::OutputType type = Print::OutputType(outputTypeCombo->currentIndex());
 
