@@ -33,12 +33,16 @@ PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     for(int i = 0; i < int(Print::NTypes); i++)
         items.append(Print::getOutputTypeName(Print::OutputType(i)));
     outputTypeCombo->addItems(items);
-    connect(outputTypeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &PrintOptionsPage::onOutputTypeChanged);
+    connect(outputTypeCombo, qOverload<int>(&QComboBox::activated),
+            this, &PrintOptionsPage::updateOutputType);
 
-    QVBoxLayout *lay = new QVBoxLayout(this);
-    lay->addWidget(fileBox);
-    lay->addWidget(printerBox);
+    QLabel *typeLabel = new QLabel(tr("Output Type:"));
+
+    QGridLayout *lay = new QGridLayout(this);
+    lay->addWidget(typeLabel, 0, 0);
+    lay->addWidget(outputTypeCombo, 0, 1);
+    lay->addWidget(fileBox, 1, 0, 1, 2);
+    lay->addWidget(printerBox, 2, 0, 1, 2);
 
     setTitle(tr("Print Options"));
 }
@@ -101,6 +105,7 @@ void PrintOptionsPage::initializePage()
     patternEdit->setText(mWizard->getFilePattern());
     differentFilesCheckBox->setChecked(mWizard->getDifferentFiles());
     outputTypeCombo->setCurrentIndex(int(mWizard->getOutputType()));
+    updateOutputType();
 }
 
 bool PrintOptionsPage::validatePage()
@@ -238,7 +243,7 @@ void PrintOptionsPage::onOpenPrintDlg()
     delete dlg;
 }
 
-void PrintOptionsPage::onOutputTypeChanged()
+void PrintOptionsPage::updateOutputType()
 {
     Print::OutputType type = Print::OutputType(outputTypeCombo->currentIndex());
 

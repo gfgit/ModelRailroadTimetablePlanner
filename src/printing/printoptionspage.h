@@ -22,7 +22,7 @@ public:
     bool isComplete() const override;
 
 private slots:
-    void onOutputTypeChanged();
+    void updateOutputType();
     void onChooseFile();
     void onDifferentFiles();
     void onOpenPrintDlg();
