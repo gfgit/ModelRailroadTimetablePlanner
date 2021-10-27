@@ -9,8 +9,12 @@ namespace Print {
 enum OutputType {
     Native = 0,
     Pdf,
-    Svg
+    Svg,
+    NTypes
 };
+
+//Implemented in printwizard.cpp
+QString getOutputTypeName(OutputType type);
 
 //Place holders for file names
 const QLatin1String phNameUnderscore = QLatin1String("%n");

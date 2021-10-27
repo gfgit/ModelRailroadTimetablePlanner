@@ -9,6 +9,22 @@
 
 #include <QPrinter>
 
+QString Print::getOutputTypeName(Print::OutputType type)
+{
+    switch (type)
+    {
+    case Print::Native:
+        return PrintWizard::tr("Native Printer");
+    case Print::Pdf:
+        return PrintWizard::tr("PDF");
+    case Print::Svg:
+        return PrintWizard::tr("SVG");
+    default:
+        break;
+    }
+    return QString();
+}
+
 QString Print::getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
                            const QString& name, LineGraphType type, int i)
 {
