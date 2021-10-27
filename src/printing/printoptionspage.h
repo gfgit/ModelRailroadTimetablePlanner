@@ -24,7 +24,7 @@ public:
 private slots:
     void updateOutputType();
     void onChooseFile();
-    void onDifferentFiles();
+    void updateDifferentFiles();
     void onOpenPrintDlg();
 
 private:

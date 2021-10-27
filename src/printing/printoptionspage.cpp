@@ -18,6 +18,7 @@
 #include <QPointer>
 
 #include <QFileInfo>
+#include <QStandardPaths>
 
 
 PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
@@ -63,7 +64,7 @@ void PrintOptionsPage::createFilesBox()
 
     differentFilesCheckBox = new QCheckBox(tr("Different Files"));
     connect(differentFilesCheckBox, &QCheckBox::toggled,
-            this, &PrintOptionsPage::onDifferentFiles);
+            this, &PrintOptionsPage::updateDifferentFiles);
 
     pathEdit = new QLineEdit;
     connect(pathEdit, &QLineEdit::textChanged, this, &QWizardPage::completeChanged);
@@ -154,12 +155,33 @@ bool PrintOptionsPage::isComplete() const
 
 void PrintOptionsPage::onChooseFile()
 {
-    QString path;
+    QString path = pathEdit->text();
+
+    if(!path.isEmpty())
+    {
+        //Check if file or dir is valid
+        QFileInfo info(path);
+        if(differentFilesCheckBox->isChecked())
+        {
+            if(!info.isDir() || !info.exists())
+                path.clear();
+        }
+        else
+        {
+            if(info.isFile() && !info.absoluteDir().exists())
+                path.clear();
+        }
+    }
+
+    //Default to Documents folder
+    if(path.isEmpty())
+        path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+
     if(differentFilesCheckBox->isChecked())
     {
         path = QFileDialog::getExistingDirectory(this,
                                                  tr("Choose Folder"),
-                                                 pathEdit->text());
+                                                 path);
 
         if(path.isEmpty()) //User canceled dialog
             return;
@@ -184,7 +206,7 @@ void PrintOptionsPage::onChooseFile()
 
         path = QFileDialog::getSaveFileName(this,
                                             tr("Choose file"),
-                                            pathEdit->text(),
+                                            path,
                                             fullName);
         if(path.isEmpty()) //User canceled dialog
             return;
@@ -196,7 +218,7 @@ void PrintOptionsPage::onChooseFile()
     pathEdit->setText(QDir::fromNativeSeparators(path));
 }
 
-void PrintOptionsPage::onDifferentFiles()
+void PrintOptionsPage::updateDifferentFiles()
 {
     //Pattern is applicable only if printing multiple files
     patternEdit->setEnabled(differentFilesCheckBox->isChecked());
