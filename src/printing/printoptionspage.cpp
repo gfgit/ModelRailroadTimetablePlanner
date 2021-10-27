@@ -262,4 +262,7 @@ void PrintOptionsPage::updateOutputType()
     }
 
     mWizard->setOutputType(type);
+
+    //Check if new otptions are valid
+    emit completeChanged();
 }
