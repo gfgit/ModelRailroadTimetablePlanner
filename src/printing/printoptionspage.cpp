@@ -46,8 +46,10 @@ PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
 
     setTitle(tr("Print Options"));
 
-    //Change 'Next' to 'Print' so user understands better
-    setButtonText(QWizard::NextButton, tr("Print"));
+    setCommitPage(true);
+
+    //Change 'Commit' to 'Print' so user understands better
+    setButtonText(QWizard::CommitButton, tr("Print"));
 }
 
 PrintOptionsPage::~PrintOptionsPage()
