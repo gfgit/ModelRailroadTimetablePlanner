@@ -6,6 +6,13 @@
 
 #include "sceneselectionmodel.h"
 
+#include "printworker.h"
+#include <QThreadPool>
+
+#include <QMessageBox>
+#include <QPushButton>
+#include <QPointer>
+
 #include <QPrinter>
 
 QString Print::getOutputTypeName(Print::OutputType type)
@@ -55,20 +62,24 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     printer(nullptr),
     filePattern(Print::phDefaultPattern),
     differentFiles(false),
-    type(Print::Native)
+    type(Print::Native),
+    printTask(nullptr),
+    isStoppingTask(false)
 {
     printer = new QPrinter;
     selectionModel = new SceneSelectionModel(mDb, this);
 
     setPage(0, new PrintSelectionPage(this));
     setPage(1, new PrintOptionsPage(this));
-    setPage(2, new PrintProgressPage(this));
+    progressPage = new PrintProgressPage(this);
+    setPage(2, progressPage);
 
     setWindowTitle(tr("Print Wizard"));
 }
 
 PrintWizard::~PrintWizard()
 {
+    abortPrintTask();
     delete printer;
 }
 
@@ -115,4 +126,132 @@ const QString &PrintWizard::getFilePattern() const
 void PrintWizard::setFilePattern(const QString &newFilePattern)
 {
     filePattern = newFilePattern;
+}
+
+bool PrintWizard::event(QEvent *e)
+{
+    if(e->type() == PrintProgressEvent::_Type)
+    {
+        PrintProgressEvent *ev = static_cast<PrintProgressEvent *>(e);
+        ev->setAccepted(true);
+
+        if(ev->task == printTask)
+        {
+            if(ev->progress < 0)
+            {
+                //Task finished, delete it
+                delete printTask;
+                printTask = nullptr;
+            }
+
+            QString description;
+            if(ev->progress == PrintProgressEvent::ProgressError)
+                description = tr("Error");
+            else if(ev->progress == PrintProgressEvent::ProgressAbortedByUser)
+                description = tr("Canceled");
+            else
+                description = tr("Printing %1...").arg(ev->descriptionOrError);
+
+            progressPage->handleProgress(ev->progress, description);
+
+            if(ev->progress == PrintProgressEvent::ProgressError)
+            {
+                handleProgressError(ev->descriptionOrError);
+            }
+        }
+
+        return true;
+    }
+
+    return QWizard::event(e);
+}
+
+void PrintWizard::done(int result)
+{
+    if(result == QDialog::Rejected)
+    {
+        if(!isStoppingTask)
+        {
+            QPointer<QMessageBox> msgBox = new QMessageBox(this);
+            msgBox->setIcon(QMessageBox::Question);
+            msgBox->setWindowTitle(tr("Abort Printing?"));
+            msgBox->setText(tr("Do you want to cancel printing?\n"
+                               "Some items may have already be printed."));
+            QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
+            QPushButton *noBut = msgBox->addButton(QMessageBox::No);
+            msgBox->setDefaultButton(noBut);
+            msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
+            msgBox->exec();
+            bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
+            delete msgBox;
+            if(!abortClicked)
+                return;
+
+            if(printTask)
+            {
+                printTask->stop();
+                isStoppingTask = true;
+                progressPage->handleProgress(0, tr("Aborting..."));
+                return;
+            }
+        }
+        else
+        {
+            if(printTask)
+                return; //Already sent 'stop', just wait
+        }
+    }
+
+    QWizard::done(result);
+}
+
+void PrintWizard::startPrintTask()
+{
+    abortPrintTask();
+
+    printTask = new PrintWorker(mDb, this);
+    printTask->setSelection(selectionModel);
+    printTask->setOutputType(type);
+    printTask->setPrinter(printer);
+    printTask->setFileOutput(fileOutput, differentFiles);
+    printTask->setFilePattern(filePattern);
+
+    QThreadPool::globalInstance()->start(printTask);
+
+    progressPage->handleProgressStart(printTask->getMaxProgress());
+    progressPage->handleProgress(0, tr("Starting..."));
+}
+
+void PrintWizard::abortPrintTask()
+{
+    if(printTask)
+    {
+        printTask->stop();
+        printTask->cleanup();
+        printTask = nullptr;
+    }
+}
+
+void PrintWizard::handleProgressError(const QString &errMsg)
+{
+    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    msgBox->setIcon(QMessageBox::Warning);
+    auto tryAgainBut = msgBox->addButton(tr("Try again"), QMessageBox::YesRole);
+    msgBox->addButton(QMessageBox::Abort);
+    msgBox->setDefaultButton(tryAgainBut);
+    msgBox->setText(errMsg);
+    msgBox->setWindowTitle(tr("Print Error"));
+
+    msgBox->exec();
+
+    if(msgBox)
+    {
+        if(msgBox->clickedButton() == tryAgainBut)
+        {
+            //Go back to options page
+            back();
+        }
+    }
+
+    delete msgBox;
 }

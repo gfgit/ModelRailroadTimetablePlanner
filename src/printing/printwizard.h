@@ -8,6 +8,8 @@
 
 class QPrinter;
 class SceneSelectionModel;
+class PrintWorker;
+class PrintProgressPage;
 
 namespace sqlite3pp {
 class database;
@@ -38,8 +40,19 @@ public:
 
     inline sqlite3pp::database& getDb() const { return mDb; }
 
+    inline bool taskRunning() const { return printTask; }
+
 signals:
     void printOptionsChanged();
+
+protected:
+    bool event(QEvent *e) override;
+    void done(int result) override;
+
+private:
+    void startPrintTask();
+    void abortPrintTask();
+    void handleProgressError(const QString& errMsg);
 
 private:
     sqlite3pp::database &mDb;
@@ -52,6 +65,10 @@ private:
     Print::OutputType type;
 
     SceneSelectionModel *selectionModel;
+
+    PrintProgressPage *progressPage;
+    PrintWorker *printTask;
+    bool isStoppingTask;
 };
 
 #endif // PRINTWIZARD_H
