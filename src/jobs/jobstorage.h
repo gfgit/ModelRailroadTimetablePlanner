@@ -31,9 +31,7 @@ public:
     bool selectSegment(db_id jobId, db_id segId, bool select, bool ensureVisible);
 
 signals:
-    void jobAdded(db_id jobId);
     void aboutToRemoveJob(db_id jobId);
-    void jobRemoved(db_id jobId);
 
 private:
     JobStoragePrivate *impl;

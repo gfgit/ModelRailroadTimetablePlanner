@@ -61,7 +61,7 @@ bool JobStorage::addJob(db_id *outJobId)
     if(outJobId)
         *outJobId = jobId;
 
-    emit jobAdded(jobId);
+    emit Session->jobAdded(jobId);
 
     return true;
 }
@@ -128,7 +128,7 @@ bool JobStorage::removeJob(db_id jobId)
         impl->m_data.erase(it);
     }
 
-    emit jobRemoved(jobId);
+    emit Session->jobRemoved(jobId);
 
     return true;
 }

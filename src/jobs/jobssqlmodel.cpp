@@ -12,8 +12,6 @@ using namespace sqlite3pp;
 
 #include "utils/jobcategorystrings.h"
 
-#include "jobs/jobstorage.h"
-
 #include <QDebug>
 
 class JobsSQLModelResultEvent : public QEvent
@@ -38,8 +36,8 @@ JobsSQLModel::JobsSQLModel(sqlite3pp::database &db, QObject *parent) :
     connect(Session, &MeetingSession::stationNameChanged, this, &JobsSQLModel::clearCache_slot);
     connect(Session, &MeetingSession::jobChanged, this, &JobsSQLModel::clearCache_slot);
 
-    connect(Session->mJobStorage, &JobStorage::jobAdded, this, &JobsSQLModel::onJobAddedOrRemoved);
-    connect(Session->mJobStorage, &JobStorage::jobRemoved, this, &JobsSQLModel::onJobAddedOrRemoved);
+    connect(Session, &MeetingSession::jobAdded, this, &JobsSQLModel::onJobAddedOrRemoved);
+    connect(Session, &MeetingSession::jobRemoved, this, &JobsSQLModel::onJobAddedOrRemoved);
 }
 
 bool JobsSQLModel::event(QEvent *e)
@@ -248,12 +246,12 @@ void JobsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVari
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT jobs.id, jobs.category, jobs.shiftId, s.name,"
-                     "s1.departure, s1.stationId, s2.arrival, s2.stationId"
+    QByteArray sql = "SELECT jobs.id, jobs.category, jobs.shiftId, jobshifts.name,"
+                     "MIN(s1.departure), s1.stationId, MAX(s2.arrival), s2.stationId"
                      " FROM jobs"
-                     " LEFT JOIN stops s1 ON s1.id=jobs.firstStop"
-                     " LEFT JOIN stops s2 ON s2.id=jobs.lastStop"
-                     " LEFT JOIN jobshifts s ON s.id=jobs.shiftId";
+                     " LEFT JOIN stops s1 ON s1.job_id=jobs.id"
+                     " LEFT JOIN stops s2 ON s2.job_id=jobs.id"
+                     " LEFT JOIN jobshifts ON jobshifts.id=jobs.shiftId";
 
     switch (sortCol)
     {
@@ -269,7 +267,7 @@ void JobsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVari
     }
     case ShiftCol:
     {
-        whereCol = "s.name,s1.departure,jobs.id";
+        whereCol = "jobshifts.name,s1.departure,jobs.id";
         break;
     }
     case OriginTime:

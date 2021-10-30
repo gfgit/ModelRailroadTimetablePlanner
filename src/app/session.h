@@ -71,7 +71,9 @@ signals:
     void rollingStockModified(db_id rsId);
 
     //Jobs
+    void jobAdded(db_id jobId);
     void jobChanged(db_id jobId, db_id oldJobId); //Updated id/category/stops
+    void jobRemoved(db_id jobId);
 
     //Stations
     void stationNameChanged(db_id stationId);
