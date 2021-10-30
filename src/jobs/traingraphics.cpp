@@ -174,7 +174,7 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
 
     QPainterPath path;
 
-    const qreal x = Session->getStationGraphPos(lineId, stId, platf);
+    const qreal x = 0.0 /*= Session->getStationGraphPos(lineId, stId, platf)*/;
     QPointF cur(x, vertOffset + hour2 * hourOffset);
 
     path.moveTo(cur);
@@ -195,7 +195,7 @@ void TrainGraphics::drawSegment(db_id segId, db_id lineId)
         hour1 = timeToNum(arrival);
         hour2 = timeToNum(departure);
 
-        QPointF point1(Session->getStationGraphPos(lineId, stId, platf),
+        QPointF point1(0 /*Session->getStationGraphPos(lineId, stId, platf)*/,
                        vertOffset + hour1 * hourOffset);
         QPointF point2(point1.x(),
                        vertOffset + hour2 * hourOffset);

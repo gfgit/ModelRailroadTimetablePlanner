@@ -91,7 +91,6 @@ signals:
 
 //TODO: old methods, remove them
 public:
-    qreal getStationGraphPos(db_id lineId, db_id stId, int platf = 0);
 
     bool getPrevStop(db_id stopId, db_id &prevSt, db_id &lineId);
     bool getNextStop(db_id stopId, db_id &nextSt, db_id &lineId);

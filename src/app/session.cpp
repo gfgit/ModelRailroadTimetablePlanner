@@ -783,28 +783,6 @@ bool MeetingSession::revertAll()
     return true;
 }
 
-qreal MeetingSession::getStationGraphPos(db_id lineId, db_id stId, int platf)
-{
-    qreal x = horizOffset;
-
-    query q(Session->m_Db, "SELECT s.id,s.platforms,s.depot_platf FROM railways"
-                           " JOIN stations s ON s.id=railways.stationId"
-                           " WHERE railways.lineId=? ORDER BY railways.pos_meters ASC");
-    q.bind(1, lineId);
-
-    for(auto station : q)
-    {
-        if(station.get<db_id>(0) == stId)
-            return x + platf * platformOffset;
-
-        int platfCount = station.get<int>(1);
-        platfCount += station.get<int>(2);
-
-        x += stationOffset + platfCount * platformOffset;
-    }
-    return x;
-}
-
 QColor MeetingSession::colorForCat(JobCategory cat)
 {
     QColor col = settings.getCategoryColor(int(cat)); //TODO: maybe session-specific
