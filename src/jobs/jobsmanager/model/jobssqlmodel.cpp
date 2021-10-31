@@ -14,37 +14,37 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-class JobsSQLModelResultEvent : public QEvent
+class JobListModelResultEvent : public QEvent
 {
 public:
     static constexpr Type _Type = Type(CustomEvents::JobsModelResult);
-    inline JobsSQLModelResultEvent() : QEvent(_Type) {}
+    inline JobListModelResultEvent() : QEvent(_Type) {}
 
-    QVector<JobsSQLModel::JobItem> items;
+    QVector<JobListModel::JobItem> items;
     int firstRow;
 };
 
-JobsSQLModel::JobsSQLModel(sqlite3pp::database &db, QObject *parent) :
+JobListModel::JobListModel(sqlite3pp::database &db, QObject *parent) :
     IPagedItemModel(500, db, parent),
     cacheFirstRow(0),
     firstPendingRow(-BatchSize)
 {
     sortColumn = IdCol;
 
-    connect(Session, &MeetingSession::shiftNameChanged, this, &JobsSQLModel::clearCache_slot);
-    connect(Session, &MeetingSession::shiftJobsChanged, this, &JobsSQLModel::clearCache_slot);
-    connect(Session, &MeetingSession::stationNameChanged, this, &JobsSQLModel::clearCache_slot);
-    connect(Session, &MeetingSession::jobChanged, this, &JobsSQLModel::clearCache_slot);
+    connect(Session, &MeetingSession::shiftNameChanged, this, &JobListModel::clearCache_slot);
+    connect(Session, &MeetingSession::shiftJobsChanged, this, &JobListModel::clearCache_slot);
+    connect(Session, &MeetingSession::stationNameChanged, this, &JobListModel::clearCache_slot);
+    connect(Session, &MeetingSession::jobChanged, this, &JobListModel::clearCache_slot);
 
-    connect(Session, &MeetingSession::jobAdded, this, &JobsSQLModel::onJobAddedOrRemoved);
-    connect(Session, &MeetingSession::jobRemoved, this, &JobsSQLModel::onJobAddedOrRemoved);
+    connect(Session, &MeetingSession::jobAdded, this, &JobListModel::onJobAddedOrRemoved);
+    connect(Session, &MeetingSession::jobRemoved, this, &JobListModel::onJobAddedOrRemoved);
 }
 
-bool JobsSQLModel::event(QEvent *e)
+bool JobListModel::event(QEvent *e)
 {
-    if(e->type() == JobsSQLModelResultEvent::_Type)
+    if(e->type() == JobListModelResultEvent::_Type)
     {
-        JobsSQLModelResultEvent *ev = static_cast<JobsSQLModelResultEvent *>(e);
+        JobListModelResultEvent *ev = static_cast<JobListModelResultEvent *>(e);
         ev->setAccepted(true);
 
         handleResult(ev->items, ev->firstRow);
@@ -55,7 +55,7 @@ bool JobsSQLModel::event(QEvent *e)
     return QAbstractTableModel::event(e);
 }
 
-QVariant JobsSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant JobListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if(role == Qt::DisplayRole)
     {
@@ -89,17 +89,17 @@ QVariant JobsSQLModel::headerData(int section, Qt::Orientation orientation, int 
     return IPagedItemModel::headerData(section, orientation, role);
 }
 
-int JobsSQLModel::rowCount(const QModelIndex &parent) const
+int JobListModel::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : curItemCount;
 }
 
-int JobsSQLModel::columnCount(const QModelIndex &parent) const
+int JobListModel::columnCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : NCols;
 }
 
-QVariant JobsSQLModel::data(const QModelIndex &idx, int role) const
+QVariant JobListModel::data(const QModelIndex &idx, int role) const
 {
     const int row = idx.row();
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
@@ -108,7 +108,7 @@ QVariant JobsSQLModel::data(const QModelIndex &idx, int role) const
     if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
         //Fetch above or below current cache
-        const_cast<JobsSQLModel *>(this)->fetchRow(row);
+        const_cast<JobListModel *>(this)->fetchRow(row);
 
         //Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
@@ -154,7 +154,7 @@ QVariant JobsSQLModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-qint64 JobsSQLModel::recalcTotalItemCount()
+qint64 JobListModel::recalcTotalItemCount()
 {
     //TODO: consider filters
     query q(mDb, "SELECT COUNT(1) FROM jobs");
@@ -163,14 +163,14 @@ qint64 JobsSQLModel::recalcTotalItemCount()
     return count;
 }
 
-void JobsSQLModel::clearCache()
+void JobListModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
 }
 
-void JobsSQLModel::setSortingColumn(int col)
+void JobListModel::setSortingColumn(int col)
 {
     if(sortColumn == col || col == OriginSt || col == DestinationSt || col >= NCols)
         return;
@@ -183,7 +183,7 @@ void JobsSQLModel::setSortingColumn(int col)
     emit dataChanged(first, last);
 }
 
-void JobsSQLModel::clearCache_slot()
+void JobListModel::clearCache_slot()
 {
     clearCache();
     QModelIndex start = index(0, 0);
@@ -191,12 +191,12 @@ void JobsSQLModel::clearCache_slot()
     emit dataChanged(start, end);
 }
 
-void JobsSQLModel::onJobAddedOrRemoved()
+void JobListModel::onJobAddedOrRemoved()
 {
     refreshData(); //Recalc row count
 }
 
-void JobsSQLModel::fetchRow(int row)
+void JobListModel::fetchRow(int row)
 {
     if(!mDb.db())
         return;
@@ -227,7 +227,7 @@ void JobsSQLModel::fetchRow(int row)
     internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
 }
 
-void JobsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
+void JobListModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
 {
     query q(mDb);
 
@@ -447,14 +447,14 @@ void JobsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVari
     }
 
 
-    JobsSQLModelResultEvent *ev = new JobsSQLModelResultEvent;
+    JobListModelResultEvent *ev = new JobListModelResultEvent;
     ev->items = vec;
     ev->firstRow = first;
 
     qApp->postEvent(this, ev);
 }
 
-void JobsSQLModel::handleResult(const QVector<JobsSQLModel::JobItem> &items, int firstRow)
+void JobListModel::handleResult(const QVector<JobListModel::JobItem> &items, int firstRow)
 {
     if(firstRow == cacheFirstRow + cache.size())
     {

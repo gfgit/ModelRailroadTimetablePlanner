@@ -1,5 +1,5 @@
-#ifndef JOBSSQLMODEL_H
-#define JOBSSQLMODEL_H
+#ifndef JOBLISTMODEL_H
+#define JOBLISTMODEL_H
 
 #include "utils/sqldelegate/pageditemmodel.h"
 
@@ -9,7 +9,7 @@
 
 #include <QTime>
 
-class JobsSQLModel : public IPagedItemModel
+class JobListModel : public IPagedItemModel
 {
     Q_OBJECT
 public:
@@ -41,7 +41,7 @@ public:
     } JobItem;
 
 
-    JobsSQLModel(sqlite3pp::database &db, QObject *parent = nullptr);
+    JobListModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     bool event(QEvent *e) override;
 
@@ -102,4 +102,4 @@ private:
     int firstPendingRow;
 };
 
-#endif // JOBSSQLMODEL_H
+#endif // JOBLISTMODEL_H

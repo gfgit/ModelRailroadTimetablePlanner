@@ -34,7 +34,7 @@ JobsManager::JobsManager(QWidget *parent) :
     connect(view, &QTableView::doubleClicked, this, &JobsManager::onIndexClicked);
     l->addWidget(view);
 
-    jobsModel = new JobsSQLModel(Session->m_Db, this);
+    jobsModel = new JobListModel(Session->m_Db, this);
     view->setModel(jobsModel);
 
     auto ps = new ModelPageSwitcher(false, this);

@@ -4,7 +4,7 @@
 #include <QWidget>
 
 class QTableView;
-class JobsSQLModel;
+class JobListModel;
 
 class JobsManager : public QWidget
 {
@@ -20,7 +20,7 @@ private slots:
 
 private:
     QTableView *view;
-    JobsSQLModel *jobsModel;
+    JobListModel *jobsModel;
 };
 
 #endif // JOBSVIEWER_H
