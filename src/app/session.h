@@ -15,7 +15,6 @@ using namespace sqlite3pp;
 
 #include <settings/appsettings.h>
 
-class JobStorage;
 
 class ViewManager;
 class MetaDataManager;
@@ -106,9 +105,6 @@ private:
 #ifdef ENABLE_BACKGROUND_MANAGER
     std::unique_ptr<BackgroundManager> backgroundManager;
 #endif
-
-public:
-    JobStorage *mJobStorage;
 
 //Settings TODO: remove
 public:
