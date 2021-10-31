@@ -27,7 +27,7 @@ typedef enum {
     ToggleType = -1, //Used as flag in StopModel::setStopTypeRange()
     Normal = 0,
     Transit,
-    TransitLineChange,
+    TransitLineChange, //FIXME: remove
     First,
     Last
 } StopType;

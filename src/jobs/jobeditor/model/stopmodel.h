@@ -20,6 +20,10 @@ public:
     db_id stopId       = 0;
     db_id stationId    = 0;
 
+    db_id in_gate_conn = 0;
+    db_id out_gate_conn = 0;
+    db_id next_seg_conn = 0;
+
     db_id segment      = 0;
     db_id nextSegment  = 0;
 
@@ -32,9 +36,6 @@ public:
 
     QTime arrival;
     QTime departure;
-
-    QSet<db_id> coupled;  //TODO: really needed???
-    QSet<db_id> uncoupled;
 
     StopType type         = Normal;
 };
@@ -96,10 +97,6 @@ public:
     int defaultStopTimeSec();
 
     std::pair<QTime, QTime> getFirstLastTimes() const;
-
-    //TODO: seems useless
-    QSet<db_id> getCoupled(int row) const;
-    QSet<db_id> getUncoupled(int row) const;
 
     bool isEdited() const;
     bool commitChanges();

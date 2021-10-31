@@ -60,7 +60,7 @@ void StopModel::prepareQueries()
 
     q_lineHasSt.prepare("SELECT * FROM railways WHERE lineId=? AND stationId=?");
 
-    q_getCoupled.prepare("SELECT rsId, operation FROM coupling WHERE stopId=?");
+    q_getCoupled.prepare("SELECT rs_id, operation FROM coupling WHERE stop_id=?");
 
 
 
@@ -699,7 +699,7 @@ void StopModel::loadJobStops(db_id jobId)
     emit jobIdChanged(mJobId);
 
     {
-        query q_getCatAndShift(mDb, "SELECT category,shiftId FROM jobs WHERE id=?");
+        query q_getCatAndShift(mDb, "SELECT category,shift_id FROM jobs WHERE id=?");
         q_getCatAndShift.bind(1, mJobId);
         if(q_getCatAndShift.step() != SQLITE_ROW)
         {
@@ -715,8 +715,7 @@ void StopModel::loadJobStops(db_id jobId)
     }
 
 
-
-    query q_countStops(mDb, "SELECT COUNT(id) FROM stops WHERE jobId=?");
+    query q_countStops(mDb, "SELECT COUNT(id) FROM stops WHERE job_id=?");
     q_countStops.bind(1, mJobId);
     if(q_countStops.step() != SQLITE_ROW)
     {
@@ -730,7 +729,6 @@ void StopModel::loadJobStops(db_id jobId)
         endResetModel();
 
         insertAddHere(0, 1);
-
         stops.squeeze();
 
         startStopsEditing();
@@ -740,127 +738,59 @@ void StopModel::loadJobStops(db_id jobId)
 
     stops.reserve(count);
 
-    db_id oldLineId = 0;
-    db_id oldSeg = 0;
     int i = 0;
 
-    query q_selectStops(mDb, "SELECT id,"
-                             "stationId,"
-                             "arrival,"
-                             "departure,"
-                             "platform,"
-                             "transit,"
-                             "otherSegment"
+    query q_selectStops(mDb, "SELECT id,station_id,arrival,departure,type,"
+                             "in_gate_conn,out_gate_conn,"
+                             "next_segment_conn_id"
                              " FROM stops"
-                             " WHERE segmentId=?1 OR otherSegment=?1"
+                             " WHERE job_id=?1"
                              " ORDER BY arrival ASC");
-
-    query q_selectSegments(mDb, "SELECT id, lineId FROM jobsegments WHERE jobId=? ORDER BY num ASC");
-    q_selectSegments.bind(1, mJobId);
-    for(auto segment : q_selectSegments)
+    q_selectStops.bind(1, mJobId);
+    for(auto stop : q_selectStops)
     {
-        db_id segId = segment.get<db_id>(0);
-        db_id lineId = segment.get<db_id>(1);
+        StopItem s;
+        s.possibleLine = 0;
+        s.addHere = 0;
 
-        q_selectStops.bind(1, segId);
-        for(auto stop : q_selectStops)
+        s.stopId = stop.get<db_id>(0);
+        s.stationId = stop.get<db_id>(1);
+
+        s.arrival = stop.get<QTime>(2);
+        s.departure = stop.get<QTime>(3);
+
+        int stopType = stop.get<int>(4);
+
+        s.in_gate_conn = stop.get<db_id>(5);
+        s.out_gate_conn = stop.get<db_id>(6);
+        s.next_seg_conn = stop.get<db_id>(7);
+
+        StopType type = Normal;
+
+        if(i == 0)
         {
-            db_id otherSeg = stop.get<db_id>(6);
-            if(otherSeg != 0 && otherSeg != segId)
+            type = First;
+            if(stopType != 0)
             {
-                //It's last of this segment but we show it as first of next one
-                oldSeg = segId;
-                oldLineId = lineId;
-                continue;
+                //Error First cannot be a transit
+                qWarning() << "Error: First stop cannot be transit! Job:" << mJobId << "StopId:" << s.stopId;
             }
-
-            StopItem s;
-            s.possibleLine = 0;
-            s.addHere = 0;
-
-            s.stopId = stop.get<db_id>(0);
-            s.stationId = stop.get<db_id>(1);
-
-            s.arrival = stop.get<QTime>(2);
-            s.departure = stop.get<QTime>(3);
-
-            s.platform = stop.get<int>(4);
-
-            int transit = stop.get<int>(5);
-
-            qDebug() << "Got" << s.stationId << s.arrival << s.departure;
-
-            if(i == 0) //First
-            {
-                s.segment = segId;
-                s.curLine = 0;
-                s.nextLine = lineId;
-            }
-            else if(otherSeg == segId)
-            {
-                //First of new Segment
-                s.segment = oldSeg; //cur is the old one
-                s.curLine = oldLineId;
-                s.nextSegment = segId; //next is the new one
-                s.nextLine = lineId;
-            }
-            else
-            {
-                s.curLine = lineId;
-                s.segment = segId;
-                s.nextSegment = otherSeg;
-            }
-
-            StopType type = Normal;
-
-            if(i == 0)
-            {
-                type = First;
-                if(transit != 0)
-                {
-                    //Error First cannot be a transit
-                    qWarning() << "Error: First stop cannot be transit! Job:" << mJobId << "StopId:" << s.stopId;
-                }
-            }
-            else if (transit)
-            {
-                if(s.nextLine)
-                {
-                    type = TransitLineChange;
-                }
-                else
-                {
-                    type = Transit;
-                }
-
-                if(i == count - 1)
-                {
-                    //Error Last cannot be a transit
-                    qWarning() << "Error: Last stop cannot be transit! Job:" << mJobId << "StopId:" << s.stopId;
-                }
-            }
-            s.type = type;
-
-            //Load rollingstok
-            q_getCoupled.bind(1, s.stopId);
-            for(auto rs : q_getCoupled)
-            {
-                db_id rsId = rs.get<db_id>(0);
-                int op = rs.get<int>(1);
-
-                if(op == Coupled)
-                    s.coupled.insert(rsId);
-                else
-                    s.uncoupled.insert(rsId);
-            }
-            q_getCoupled.reset();
-
-            stops.append(s);
-            i++;
         }
-        q_selectStops.reset();
+        else if (stopType)
+        {
+            type = Transit;
+
+            if(i == count - 1)
+            {
+                //Error Last cannot be a transit
+                qWarning() << "Error: Last stop cannot be transit! Job:" << mJobId << "StopId:" << s.stopId;
+            }
+        }
+        s.type = type;
+
+        stops.append(s);
+        i++;
     }
-    q_selectSegments.finish();
     q_selectStops.finish();
 
     stops.last().type = Last;
@@ -2216,20 +2146,6 @@ std::pair<QTime, QTime> StopModel::getFirstLastTimes() const
     }
 
     return std::make_pair(first, last);
-}
-
-QSet<db_id> StopModel::getCoupled(int row) const
-{
-    if(row < 0 || row >= stops.size())
-        return QSet<db_id>();
-    return stops.at(row).coupled;
-}
-
-QSet<db_id> StopModel::getUncoupled(int row) const
-{
-    if(row < 0 || row >= stops.size())
-        return QSet<db_id>();
-    return stops.at(row).uncoupled;
 }
 
 void StopModel::setAutoInsertTransits(bool value)
