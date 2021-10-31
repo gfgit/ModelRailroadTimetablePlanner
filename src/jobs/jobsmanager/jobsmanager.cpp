@@ -6,7 +6,7 @@
 #include <QTableView>
 #include <QHeaderView>
 
-#include "model/jobssqlmodel.h"
+#include "model/joblistmodel.h"
 #include "model/jobshelper.h"
 #include "utils/jobcategorystrings.h"
 
