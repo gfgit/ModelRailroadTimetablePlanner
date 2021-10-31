@@ -6,8 +6,8 @@
 #include <QTableView>
 #include <QHeaderView>
 
-#include "jobssqlmodel.h"
-#include "jobstorage.h"
+#include "model/jobssqlmodel.h"
+#include "model/jobshelper.h"
 #include "utils/jobcategorystrings.h"
 
 #include "utils/sqldelegate/modelpageswitcher.h"
@@ -87,7 +87,7 @@ void JobsManager::onRemove()
                                     QMessageBox::Yes | QMessageBox::Cancel);
     if(ret == QMessageBox::Yes)
     {
-        if(!Session->mJobStorage->removeJob(jobId))
+        if(!JobsHelper::removeJob(Session->m_Db, jobId))
         {
             qWarning() << "Error while deleting job:" << jobId << "from JobManager" << Session->m_Db.error_msg();
             //ERRORMSG: message box or statusbar
@@ -100,5 +100,5 @@ void JobsManager::onRemoveAllJobs()
     int ret = QMessageBox::question(this, tr("Delete all jobs?"),
                                     tr("Are you really sure you want to delete all jobs from this session?"));
     if(ret == QMessageBox::Yes)
-        Session->mJobStorage->removeAllJobs();
+        JobsHelper::removeAllJobs(Session->m_Db);
 }
