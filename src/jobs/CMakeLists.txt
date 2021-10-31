@@ -3,8 +3,6 @@ add_subdirectory(jobsmanager)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  jobs/jobstorage.h
-  jobs/jobstorage.cpp
   jobs/traingraphics.h
   jobs/traingraphics.cpp
   PARENT_SCOPE

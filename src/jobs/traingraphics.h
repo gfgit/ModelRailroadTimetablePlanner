@@ -24,6 +24,7 @@ public:
     QVector<QGraphicsSimpleTextItem *> texts;
 };
 
+//FIXME: remove, class is deprecated
 class TrainGraphics
 {
 public:
