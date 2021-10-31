@@ -15,9 +15,9 @@
 
 #include "app/scopedebug.h"
 
-#include "jobs/jobstorage.h"
 #include "jobs/jobeditor/jobpatheditor.h"
-#include "jobs/jobsmanager.h"
+#include "jobs/jobsmanager/jobsmanager.h"
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include "graph/graphmanager.h"
 #include "graph/model/linegraphmanager.h"
@@ -546,7 +546,7 @@ bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisib
 //            return false;
 //    }
 
-    return Session->mJobStorage->selectSegment(jobId, segmentId, select, ensureVisible);
+    return true; //Session->mJobStorage->selectSegment(jobId, segmentId, select, ensureVisible);
 }
 
 //Move to prev/next segment of selected job: changes current line
@@ -580,7 +580,7 @@ bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool select, bool ens
     //if(!mGraphMgr->setCurrentLine(lineId))
     //    return false;
 
-    return Session->mJobStorage->selectSegment(sel.jobId, segmentId, select, ensureVisible);
+    return true; //Session->mJobStorage->selectSegment(sel.jobId, segmentId, select, ensureVisible);
 }
 
 bool ViewManager::requestJobEditor(db_id jobId, db_id stopId)
@@ -651,9 +651,7 @@ bool ViewManager::removeSelectedJob()
         }
     }
 
-    Session->mJobStorage->removeJob(jobId);
-
-    return true;
+    return JobsHelper::removeJob(Session->m_Db, jobId);
 }
 
 void ViewManager::requestShiftGraphEditor()
