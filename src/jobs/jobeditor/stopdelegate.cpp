@@ -266,7 +266,7 @@ void StopDelegate::onLineChosen(StopEditor *editor)
 {
     if(editor->closeOnLineChosen())
     {
-        commitData(editor);
-        closeEditor(editor, StopDelegate::EditNextItem);
+        emit commitData(editor);
+        emit closeEditor(editor, StopDelegate::EditNextItem);
     }
 }
