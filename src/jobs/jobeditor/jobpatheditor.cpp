@@ -15,10 +15,10 @@
 
 #include "model/stopmodel.h"
 #include "stopdelegate.h"
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include "jobs/jobeditor/editstopdialog.h"
 
-#include "jobs/jobstorage.h"
 #include "utils/jobcategorystrings.h"
 
 #include "shiftbusy/shiftbusydialog.h"
@@ -94,7 +94,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     //      with queued connections they are update one at a time and the UI stays responsive
     connect(this, &JobPathEditor::stationChange, Session, &MeetingSession::stationPlanChanged, Qt::QueuedConnection);
 
-    connect(Session->mJobStorage, &JobStorage::aboutToRemoveJob, this, &JobPathEditor::onJobRemoved);
+    connect(Session, &MeetingSession::jobRemoved, this, &JobPathEditor::onJobRemoved);
     connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
 
     setReadOnly(false);
@@ -168,12 +168,8 @@ bool JobPathEditor::createNewJob(db_id *out)
     if(!clearJob())
         return false; //Busy JobPathEditor
 
-    JobStorage *jobs = Session->mJobStorage;
-
     db_id jobId = 0;
-    jobs->addJob(&jobId); //Request add job
-
-    if(jobId == 0)
+    if(!JobsHelper::createNewJob(Session->m_Db, jobId) || jobId == 0)
     {
         return false; //An error occurred in database, abort
     }
@@ -181,14 +177,12 @@ bool JobPathEditor::createNewJob(db_id *out)
     if(!setJob_internal(jobId))
     {
         //If we fail opening JobPathEditor remove the job
-        //Call directly to the model.
-        jobs->removeJob(jobId);
+        JobsHelper::removeJob(Session->m_Db, jobId);
         return false;
     }
 
     if(out)
         *out = jobId;
-
 
     return true;
 }
@@ -396,7 +390,7 @@ bool JobPathEditor::saveChanges()
         {
             qDebug() << "User wants to delete job:" << stopModel->getJobId();
             stopModel->commitChanges();
-            Session->mJobStorage->removeJob(stopModel->getJobId());
+            JobsHelper::removeJob(Session->m_Db, stopModel->getJobId());
             canSetJob = true;
             clearJob();
             setEnabled(false);
@@ -428,9 +422,6 @@ bool JobPathEditor::saveChanges()
             return false;
         }
     }
-
-    JobStorage *jobs = Session->mJobStorage;
-    jobs->updateFirstLast(stopModel->getJobId());
 
     //Update views
     Session->getViewManager()->updateRSPlans(stopModel->getRsToUpdate());
@@ -489,7 +480,7 @@ void JobPathEditor::discardChanges()
         //This usually happens when you create a new job but then you change your mind and press 'Discard'
         qDebug() << "User wants to delete job:" << stopModel->getJobId();
         stopModel->commitChanges();
-        Session->mJobStorage->removeJob(stopModel->getJobId());
+        JobsHelper::removeJob(Session->m_Db, stopModel->getJobId());
         clearJob();
         setEnabled(false);
     }
@@ -713,7 +704,7 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
             //QAbstractItemView::edit doesn't let you pass additional arguments
             //So we work around by emitting a signal
             //See 'StopDelegate::createEditor()'
-            delegate->popupEditorLinesCombo();
+            emit delegate->popupEditorLinesCombo();
         }
         else
         {
@@ -736,8 +727,8 @@ void JobPathEditor::closeStopEditor()
     QWidget *ed = ui->view->indexWidget(idx);
     if(ed == nullptr)
         return;
-    delegate->commitData(ed);
-    delegate->closeEditor(ed);
+    emit delegate->commitData(ed);
+    emit delegate->closeEditor(ed);
 }
 
 void JobPathEditor::closeEvent(QCloseEvent *e)
