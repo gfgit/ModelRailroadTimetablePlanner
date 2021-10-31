@@ -1,4 +1,4 @@
-#include "jobssqlmodel.h"
+#include "joblistmodel.h"
 #include "app/session.h"
 
 #include <QCoreApplication>
@@ -246,12 +246,12 @@ void JobListModel::internalFetch(int first, int sortCol, int valRow, const QVari
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT jobs.id, jobs.category, jobs.shiftId, jobshifts.name,"
-                     "MIN(s1.departure), s1.stationId, MAX(s2.arrival), s2.stationId"
+    QByteArray sql = "SELECT jobs.id, jobs.category, jobs.shift_id, jobshifts.name,"
+                     "MIN(s1.departure), s1.station_id, MAX(s2.arrival), s2.station_id"
                      " FROM jobs"
                      " LEFT JOIN stops s1 ON s1.job_id=jobs.id"
                      " LEFT JOIN stops s2 ON s2.job_id=jobs.id"
-                     " LEFT JOIN jobshifts ON jobshifts.id=jobs.shiftId";
+                     " LEFT JOIN jobshifts ON jobshifts.id=jobs.shift_id";
 
     switch (sortCol)
     {

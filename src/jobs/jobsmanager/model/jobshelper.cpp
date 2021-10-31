@@ -8,7 +8,7 @@
 
 bool JobsHelper::createNewJob(sqlite3pp::database &db, db_id &outJobId)
 {
-    sqlite3pp::command q_newJob(db, "INSERT INTO jobs(id,category,shiftId) VALUES(NULL,0,NULL)");
+    sqlite3pp::command q_newJob(db, "INSERT INTO jobs(id,category,shift_id) VALUES(NULL,0,NULL)");
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(db.db());
     sqlite3_mutex_enter(mutex);
@@ -33,7 +33,7 @@ bool JobsHelper::createNewJob(sqlite3pp::database &db, db_id &outJobId)
 
 bool JobsHelper::removeJob(sqlite3pp::database &db, db_id jobId)
 {
-    sqlite3pp::query q(db, "SELECT shiftId FROM jobs WHERE id=?");
+    sqlite3pp::query q(db, "SELECT shift_id FROM jobs WHERE id=?");
     q.bind(1, jobId);
     if(q.step() != SQLITE_ROW)
     {
@@ -50,7 +50,7 @@ bool JobsHelper::removeJob(sqlite3pp::database &db, db_id jobId)
 
     db.execute("BEGIN TRANSACTION");
 
-    q.prepare("DELETE FROM stops WHERE jobId=?");
+    q.prepare("DELETE FROM stops WHERE job_id=?");
 
     q.bind(1, jobId);
     int ret = q.step();
