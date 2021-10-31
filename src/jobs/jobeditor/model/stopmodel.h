@@ -30,7 +30,6 @@ public:
     db_id curLine      = 0;
     db_id nextLine     = 0;
 
-    db_id possibleLine = 0;
     int addHere           = 0;
     int platform          = 0;
 

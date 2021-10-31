@@ -26,7 +26,6 @@
 #define OTHER_SEG_ROLE      (Qt::UserRole + 27)
 #define NEXT_LINE_ROLE      (Qt::UserRole + 28)
 
-#define POSSIBLE_LINE_ROLE  (Qt::UserRole + 29)
 #define ADDHERE_ROLE        (Qt::UserRole + 30)
 
 #define STOP_DESCR_ROLE     (Qt::UserRole + 31)

@@ -245,8 +245,6 @@ QVariant StopModel::data(const QModelIndex &index, int role) const
         return s.curLine;
     case NEXT_LINE_ROLE:
         return s.nextLine;
-    case POSSIBLE_LINE_ROLE:
-        return s.possibleLine;
     case ADDHERE_ROLE:
         return s.addHere;
     case PLATF_ID:
@@ -750,9 +748,6 @@ void StopModel::loadJobStops(db_id jobId)
     for(auto stop : q_selectStops)
     {
         StopItem s;
-        s.possibleLine = 0;
-        s.addHere = 0;
-
         s.stopId = stop.get<db_id>(0);
         s.stationId = stop.get<db_id>(1);
 
@@ -1338,8 +1333,6 @@ void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
         StopItem& stop = stops[i];
         if(stop.addHere != 0)
             break;
-
-        stop.possibleLine = lineId;
 
         if(stop.nextLine != 0)
             break;
