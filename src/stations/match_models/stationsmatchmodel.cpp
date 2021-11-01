@@ -4,7 +4,8 @@ StationsMatchModel::StationsMatchModel(database &db, QObject *parent) :
     ISqlFKMatchModel(parent),
     mDb(db),
     q_getMatches(mDb),
-    m_exceptStId(0)
+    mFromStationId(0),
+    mExceptStId(0)
 {
 
 }
@@ -17,17 +18,34 @@ QVariant StationsMatchModel::data(const QModelIndex &idx, int role) const
     switch (role)
     {
     case Qt::DisplayRole:
+    case Qt::ToolTipRole:
     {
-        if(isEmptyRow(idx.row()))
+        switch (idx.column())
         {
-            return ISqlFKMatchModel::tr("Empty");
+        case StationCol:
+        {
+            if(isEmptyRow(idx.row()))
+            {
+                return ISqlFKMatchModel::tr("Empty");
+            }
+            else if(isEllipsesRow(idx.row()))
+            {
+                return ellipsesString;
+            }
+
+            return items[idx.row()].stationName;
         }
-        else if(isEllipsesRow(idx.row()))
+        case SegmentCol:
         {
-            return ellipsesString;
+            if(isEmptyRow(idx.row()) || isEllipsesRow(idx.row()))
+            {
+                return QVariant(); //Emprty cell
+            }
+
+            return items[idx.row()].segmentName;
+        }
         }
 
-        return items[idx.row()].name;
     }
     case Qt::FontRole:
     {
@@ -40,6 +58,13 @@ QVariant StationsMatchModel::data(const QModelIndex &idx, int role) const
     }
 
     return QVariant();
+}
+
+int StationsMatchModel::columnCount(const QModelIndex &p) const
+{
+    if(!p.isValid())
+        return 0;
+    return mFromStationId ? 2 : 1;
 }
 
 void StationsMatchModel::autoSuggest(const QString &text)
@@ -66,21 +91,34 @@ void StationsMatchModel::refreshData()
 
     char emptyQuery = '%';
 
-    if(mQuery.isEmpty())
-        sqlite3_bind_text(q_getMatches.stmt(), 1, &emptyQuery, 1, SQLITE_STATIC);
-    else
-        sqlite3_bind_text(q_getMatches.stmt(), 1, mQuery, mQuery.size(), SQLITE_STATIC);
+    if(mFromStationId)
+        q_getMatches.bind(1, mFromStationId);
+    if(mExceptStId)
+        q_getMatches.bind(2, mExceptStId);
 
-    if(m_exceptStId)
-        q_getMatches.bind(2, m_exceptStId);
+    if(mQuery.isEmpty())
+        sqlite3_bind_text(q_getMatches.stmt(), 3, &emptyQuery, 1, SQLITE_STATIC);
+    else
+        sqlite3_bind_text(q_getMatches.stmt(), 3, mQuery, mQuery.size(), SQLITE_STATIC);
 
     auto end = q_getMatches.end();
     auto it = q_getMatches.begin();
     int i = 0;
     for(; i < MaxMatchItems && it != end; i++)
     {
-        items[i].stationId = (*it).get<db_id>(0);
-        items[i].name = (*it).get<QString>(1);
+        auto r = *it;
+        items[i].stationId = r.get<db_id>(0);
+        items[i].stationName = r.get<QString>(1);
+        if(mFromStationId)
+        {
+            items[i].segmentId = r.get<db_id>(2);
+            items[i].segmentName = r.get<QString>(3);
+        }
+        else
+        {
+            items[i].segmentId = 0;
+            items[i].segmentName.clear();
+        }
         ++it;
     }
 
@@ -117,25 +155,56 @@ db_id StationsMatchModel::getIdAtRow(int row) const
 
 QString StationsMatchModel::getNameAtRow(int row) const
 {
-    return items[row].name;
+    return items[row].stationName;
 }
 
-void StationsMatchModel::setFilter(db_id exceptStId)
+db_id StationsMatchModel::getSegmentAtRow(int row) const
 {
-    m_exceptStId = exceptStId;
+    return items[row].segmentId;
+}
 
-    QByteArray sql = "SELECT stations.id,stations.name FROM stations WHERE ";
-    if(m_exceptStId)
-        sql.append("stations.id<>?2 AND ");
+void StationsMatchModel::setFilter(db_id connectedToStationId, db_id exceptStId)
+{
+    mFromStationId = connectedToStationId;
+    mExceptStId = exceptStId;
 
-    sql.append("(stations.name LIKE ?1 OR stations.short_name LIKE ?1) LIMIT " QT_STRINGIFY(MaxMatchItems + 1));
+    QByteArray sql;
+    if(mFromStationId)
+    {
+        sql = "SELECT s.id, s.name, seg.id, seg.name"
+              " FROM railway_segments seg"
+              " JOIN station_gates g1 ON g1.id=seg.in_gate_id"
+              " JOIN station_gates g2 ON g2.id=seg.out_gate_id"
+              " JOIN stations s ON CASE WHEN g1.station_id<>?1 THEN s.id=g1.station_id ELSE s.id=g2.station_id END"
+              " JOIN stations s2 ON s2.id=g2.station_id"
+              " WHERE ";
+        if(mExceptStId)
+        {
+            sql += "((g1.station_id=?1 AND g2.station_id<>?2) OR"
+                   "(g2.station_id=?1 AND g1.station_id<>?2))";
+        }
+        else
+        {
+            sql += "(g1.station_id=?1 OR g2.station_id=?1)";
+        }
+
+        sql += "AND s.name LIKE ?3 OR s.short_name LIKE ?3) LIMIT " QT_STRINGIFY(MaxMatchItems + 1);
+    }
+    else
+    {
+        sql = "SELECT stations.id,stations.name FROM stations WHERE ";
+        if(mExceptStId)
+            sql.append("stations.id<>?2 AND ");
+        sql.append("(stations.name LIKE ?3 OR stations.short_name LIKE ?3) LIMIT " QT_STRINGIFY(MaxMatchItems + 1));
+    }
 
     q_getMatches.prepare(sql.constData());
 }
 
 StationMatchFactory::StationMatchFactory(database &db, QObject *parent) :
     IMatchModelFactory(parent),
-    exceptStId(0),
+    mFromStationId(0),
+    mExceptStId(0),
     mDb(db)
 {
 
@@ -144,6 +213,6 @@ StationMatchFactory::StationMatchFactory(database &db, QObject *parent) :
 ISqlFKMatchModel *StationMatchFactory::createModel()
 {
     StationsMatchModel *m = new StationsMatchModel(mDb);
-    m->setFilter(exceptStId);
+    m->setFilter(mFromStationId, mExceptStId);
     return m;
 }
