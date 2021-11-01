@@ -240,7 +240,7 @@ QVariant StopModel::data(const QModelIndex &index, int role) const
     case SEGMENT_ROLE:
         return s.segment;
     case OTHER_SEG_ROLE:
-        return s.nextSegment;
+        return s.nextSegment_;
     case CUR_LINE_ROLE:
         return s.curLine;
     case NEXT_LINE_ROLE:
@@ -738,12 +738,21 @@ void StopModel::loadJobStops(db_id jobId)
 
     int i = 0;
 
-    query q_selectStops(mDb, "SELECT id,station_id,arrival,departure,type,"
-                             "in_gate_conn,out_gate_conn,"
-                             "next_segment_conn_id"
+    StopItem::Segment prevSegment;
+    db_id prevOutGateId = 0;
+
+    query q_selectStops(mDb, "SELECT stops.id,stops.station_id,stops.arrival,stops.departure,stops.type,"
+                             "stops.in_gate_conn, g1.gate_id,g1.gate_track,g1.track_id,"
+                             "stops.out_gate_conn,g2.gate_id,g2.gate_track,g2.track_id,"
+                             "stops.next_segment_conn_id,c.seg_id,c.in_track,c.out_track,"
+                             "seg.in_gate_id,seg.out_gate_id"
                              " FROM stops"
-                             " WHERE job_id=?1"
-                             " ORDER BY arrival ASC");
+                             " JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
+                             " JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                             " JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                             " JOIN railway_segments seg ON seg.id=c.seg_id"
+                             " WHERE stops.job_id=?1"
+                             " ORDER BY stops.arrival ASC");
     q_selectStops.bind(1, mJobId);
     for(auto stop : q_selectStops)
     {
@@ -756,9 +765,59 @@ void StopModel::loadJobStops(db_id jobId)
 
         int stopType = stop.get<int>(4);
 
-        s.in_gate_conn = stop.get<db_id>(5);
-        s.out_gate_conn = stop.get<db_id>(6);
-        s.next_seg_conn = stop.get<db_id>(7);
+        s.fromGate.gateConnId = stop.get<db_id>(5);
+        s.fromGate.gateId = stop.get<db_id>(6);
+        s.fromGate.trackNum = stop.get<int>(7);
+        s.trackId = stop.get<db_id>(8);
+
+        s.toGate.gateConnId = stop.get<db_id>(9);
+        s.toGate.gateId = stop.get<db_id>(10);
+        s.toGate.trackNum = stop.get<int>(11);
+        db_id otherTrackId = stop.get<db_id>(12);
+
+        s.nextSegment.segConnId = stop.get<db_id>(13);
+        s.nextSegment.segmentId = stop.get<db_id>(13);
+        int nextSegInTrack = stop.get<db_id>(14);
+        s.nextSegment.outTrackNum = stop.get<db_id>(15);
+
+        db_id segInGateId = stop.get<db_id>(16);
+        db_id segOutGateId = stop.get<db_id>(17);
+
+        //Check consistency
+        if(s.trackId != otherTrackId)
+        {
+            //In gate leads to a different station track than out gate
+            qWarning() << "Stop:" << s.stopId << "Different track:" << s.fromGate.gateConnId << s.toGate.gateConnId;
+        }
+        if(prevSegment.segmentId != 0)
+        {
+            if(prevOutGateId != s.fromGate.gateId)
+            {
+                //Previous segment leads to a different in gate
+                qWarning() << "Stop:" << s.stopId << "Different prev segment:" << prevSegment.segConnId << s.fromGate.gateConnId;
+            }
+
+            if(segInGateId != s.toGate.gateId)
+            {
+                //Out gate leads to a different next semgent
+                qWarning() << "Stop:" << s.stopId << "Different next segment:" << s.nextSegment.segConnId << s.toGate.gateConnId;
+            }
+
+            if(s.fromGate.trackNum != prevSegment.outTrackNum)
+            {
+                //Previous segment leads to a different track than in gate track
+                qWarning() << "Stop:" << s.stopId << "Different in gate track:" << s.fromGate.gateConnId << s.toGate.gateConnId;
+            }
+
+            if(s.toGate.trackNum != nextSegInTrack)
+            {
+                //Out gate leads to a different than next segment in track
+                qWarning() << "Stop:" << s.stopId << "Different out gate track:" << s.toGate.gateConnId << s.nextSegment.segConnId;
+            }
+        }
+
+        prevSegment = s.nextSegment;
+        prevOutGateId = segOutGateId;
 
         StopType type = Normal;
 
@@ -1075,7 +1134,7 @@ void StopModel::setStopSeg(StopItem& s, db_id segId)
 
 void StopModel::setNextSeg(StopItem& s, db_id nextSeg)
 {
-    s.nextSegment = nextSeg;
+    s.nextSegment_ = nextSeg;
     if(nextSeg == 0)
     {
         q_setNextSeg.bind(1, null_type{}); //Bind NULL
@@ -1121,7 +1180,7 @@ void StopModel::resetStopsLine(int idx, StopItem& s)
         {
             break;
         }
-        if((stop.curLine != s.curLine && stop.segment != s.nextSegment) || stop.addHere == 1)
+        if((stop.curLine != s.curLine && stop.segment != s.nextSegment_) || stop.addHere == 1)
         {
             break; //It's an AddHere or in another line so we break loop.
         }
@@ -1140,7 +1199,7 @@ void StopModel::resetStopsLine(int idx, StopItem& s)
         //If we are last stop just delete it.
         //But if it's equal to s.nextSegment do not delete it because stop 's' still holds a reference to it,
         //it gets deleted anyway after the loop.
-        if(oldSegment != s.segment && oldSegment != s.nextSegment && (r == stops.count() - 2 || stops[r + 1].segment != oldSegment))
+        if(oldSegment != s.segment && oldSegment != s.nextSegment_ && (r == stops.count() - 2 || stops[r + 1].segment != oldSegment))
         {
             destroySegment(oldSegment, mJobId);
         }
@@ -1148,7 +1207,7 @@ void StopModel::resetStopsLine(int idx, StopItem& s)
         if(stop.nextLine == s.curLine)
         {
             //Reset next segment
-            db_id oldNextSeg = stop.nextSegment;
+            db_id oldNextSeg = stop.nextSegment_;
             setNextSeg(stop, 0);
             stop.nextLine = 0;
 
@@ -1166,7 +1225,7 @@ void StopModel::resetStopsLine(int idx, StopItem& s)
     }
 
     //First reset next segment on previous stop
-    db_id oldNextSeg = s.nextSegment;
+    db_id oldNextSeg = s.nextSegment_;
     setNextSeg(s, 0);
     s.nextLine = 0;
 
@@ -1197,8 +1256,8 @@ void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
     }
     else
     {
-        db_id nextSeg = s.nextSegment;
-        if(s.nextSegment == 0)
+        db_id nextSeg = s.nextSegment_;
+        if(s.nextSegment_ == 0)
         {
             nextSeg = createSegmentAfter(mJobId, s.segment);
         }
@@ -1255,7 +1314,7 @@ void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
                 }
 
                 setStopSeg(next, newSeg);
-                if(next.nextSegment != 0)
+                if(next.nextSegment_ != 0)
                 {
                     break;
                 }
@@ -1268,7 +1327,7 @@ void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
         stop.curLine = lineId;
 
         db_id oldCurSeg = stop.segment;
-        setStopSeg(stop, s.type == First ? s.segment : s.nextSegment);
+        setStopSeg(stop, s.type == First ? s.segment : s.nextSegment_);
 
         /*
          * 'stop' is on same line as 's' so we reset 'stop' nextSegment because it's the same of current segment
@@ -1281,13 +1340,13 @@ void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
         }
         else
         {
-            bool destroy = oldCurSeg != stop.segment && stop.nextSegment != oldCurSeg;
+            bool destroy = oldCurSeg != stop.segment && stop.nextSegment_ != oldCurSeg;
             if(destroy && r > 0)
             {
                 const StopItem& prev = stops[r - 1];
                 if(s.segment == oldCurSeg ||
-                        s.nextSegment == oldCurSeg ||
-                        prev.segment == oldCurSeg)
+                    s.nextSegment_ == oldCurSeg ||
+                    prev.segment == oldCurSeg)
                 {
                     destroy = false;
                 }
@@ -1306,16 +1365,16 @@ void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
             }
         }
 
-        if(stop.type == Last && stop.nextSegment != 0)
+        if(stop.type == Last && stop.nextSegment_ != 0)
         {
             //Clean up if needed (Should not be needed but just in case)
 
             //If they are different nextSegment isn't used otherwise don't destroy it
             //because it is used by previous stop
-            if(stop.nextSegment != stop.segment)
-                destroySegment(stop.nextSegment, mJobId);
+            if(stop.nextSegment_ != stop.segment)
+                destroySegment(stop.nextSegment_, mJobId);
             stop.nextLine = 0;
-            stop.nextSegment = 0;
+            stop.nextSegment_ = 0;
         }
 
         if(stop.type == Last || stop.nextLine != 0 || stop.stationId == 0)
@@ -1714,7 +1773,7 @@ void StopModel::removeStop(const QModelIndex &idx)
             //There is a line change so this becomes First line
             //And we discard oldFirst line
 
-            setStopSeg(next, next.nextSegment);
+            setStopSeg(next, next.nextSegment_);
             setNextSeg(next, 0); //Reset nextSeg
             next.curLine = 0;
 
@@ -1793,7 +1852,7 @@ void StopModel::removeStop(const QModelIndex &idx)
             //When we delete this stop, the segment becomes useless so we destroy it.
             beginRemoveRows(QModelIndex(), row, row);
 
-            db_id nextSeg = prev.nextSegment;
+            db_id nextSeg = prev.nextSegment_;
 
             setNextSeg(prev, 0); //Reset nextSegment of prev stop
             prev.nextLine = 0;
@@ -2294,7 +2353,7 @@ void StopModel::insertTransitsBefore(const QPersistentModelIndex& stop)
         item.curLine = to.curLine;
         item.segment = to.segment;
         item.nextLine = 0;
-        item.nextSegment = 0;
+        item.nextSegment_ = 0;
         item.platform = 0;
         item.arrival = item.departure = prevDep;
         item.stopId = createStop(mJobId, item.segment, item.arrival, Transit);

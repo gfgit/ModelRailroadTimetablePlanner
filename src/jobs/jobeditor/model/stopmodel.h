@@ -17,15 +17,32 @@ using namespace sqlite3pp;
 class StopItem
 {
 public:
+    struct Gate
+    {
+        db_id gateConnId = 0;
+        db_id gateId = 0;
+        int trackNum = 0;
+    };
+
+    struct Segment
+    {
+        db_id segConnId = 0;
+        db_id segmentId = 0;
+        int outTrackNum = 0;
+    };
+
     db_id stopId       = 0;
     db_id stationId    = 0;
 
-    db_id in_gate_conn = 0;
-    db_id out_gate_conn = 0;
-    db_id next_seg_conn = 0;
+    db_id trackId      = 0;
+
+    Gate fromGate;
+    Gate toGate;
+    Segment nextSegment;
+
 
     db_id segment      = 0;
-    db_id nextSegment  = 0;
+    db_id nextSegment_  = 0;
 
     db_id curLine      = 0;
     db_id nextLine     = 0;
