@@ -68,7 +68,7 @@ StopEditor::StopEditor(sqlite3pp::database &db, QWidget *parent) :
 
 bool StopEditor::eventFilter(QObject *watched, QEvent *ev)
 {
-    //Filter out right click to prevent cobobox popup from closoing when opening context menu
+    //Filter out right click to prevent cobobox popup from closing when opening context menu
     if(ev->type() == QEvent::MouseButtonRelease && watched == linesCombo->view()->viewport())
     {
         if(static_cast<QMouseEvent*>(ev)->button() == Qt::RightButton)
