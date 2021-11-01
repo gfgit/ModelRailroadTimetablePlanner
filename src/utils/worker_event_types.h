@@ -33,7 +33,6 @@ enum class CustomEvents
 
     //Stations
     StationsModelResult,
-    StationLinesListModelResult,
     LinesModelResult,
     LineSegmentsModelResult,
     RailwaySegmentsModelResult,
