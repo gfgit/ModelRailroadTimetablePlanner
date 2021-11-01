@@ -206,6 +206,7 @@ void CustomCompletionLineEdit::doneCompletion(const QModelIndex& idx)
         if(idx.row() >= 0 && !model->isEmptyRow(idx.row()) && !model->isEllipsesRow(idx.row()))
         {
             setData(model->getIdAtRow(idx.row()), model->getNameAtRow(idx.row()));
+            emit indexSelected(idx);
         }
         else
         {
