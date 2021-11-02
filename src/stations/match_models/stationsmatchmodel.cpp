@@ -45,7 +45,7 @@ QVariant StationsMatchModel::data(const QModelIndex &idx, int role) const
             return items[idx.row()].segmentName;
         }
         }
-
+        break;
     }
     case Qt::FontRole:
     {
