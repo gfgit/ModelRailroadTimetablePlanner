@@ -78,8 +78,8 @@ void ChooseSegmentDlg::setFilter(db_id fromStationId, db_id toStationId, db_id e
     toStationEdit->setData(lockToStationId);
     toStationEdit->setReadOnly(lockToStationId != DoNotLock);
 
-    fromStationMatch->setFilter(0);
-    toStationMatch->setFilter(0);
+    fromStationMatch->setFilter(0, 0);
+    toStationMatch->setFilter(0, 0);
     segmentMatch->setFilter(lockFromStationId, lockToStationId, excludeSegmentId);
 }
 
