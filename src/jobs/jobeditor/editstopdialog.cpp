@@ -9,7 +9,6 @@
 
 #include "model/stopmodel.h"
 
-#include "lines/helpers.h"
 #include "utils/jobcategorystrings.h"
 
 #include <QMessageBox>
@@ -40,7 +39,7 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
 
     stationsMatchModel = new StationsMatchModel(Session->m_Db, this);
     stationLineEdit = new CustomCompletionLineEdit(stationsMatchModel, this);
-    ui->stopBoxLayout->addWidget(stationLineEdit, 0, 1);
+    ui->curStopLay->setWidget(0, QFormLayout::FieldRole, stationLineEdit);
 
     //Coupling
     couplingMgr = new RSCouplingInterface(Session->m_Db, this);
@@ -94,11 +93,6 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
 
     connect(ui->calcPassingsBut, &QPushButton::clicked, this, &EditStopDialog::calcPassings);
 
-    connect(ui->calcTimeBut, &QPushButton::clicked, this, &EditStopDialog::calcTime);
-    connect(ui->applyTimeBut, &QPushButton::clicked, this, &EditStopDialog::applyTime);
-
-    connect(ui->platfRadio, &QRadioButton::toggled, this, &EditStopDialog::onPlatfRadioToggled);
-
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
@@ -117,21 +111,15 @@ EditStopDialog::~EditStopDialog()
 
 void EditStopDialog::clearUi()
 {
-    m_stopId = 0;
     stopIdx = QModelIndex();
+    curStop = StopItem();
+    prevStop = StopItem();
 
     m_jobId = 0;
-
-    m_prevStId = 0;
+    m_jobCat = JobCategory::FREIGHT;
 
     trainAssetModelBefore->setStop(0, QTime(), TrainAssetModel::BeforeStop);
     trainAssetModelAfter->setStop(0, QTime(), TrainAssetModel::AfterStop);
-
-    originalArrival = QTime();
-    originalDeparture = QTime();
-
-    curLine = 0;
-    curSegment = 0;
 
     //TODO: clear UI properly
 }
@@ -161,37 +149,30 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     stopIdx = idx;
     stopModel = stops;
 
+    curStop = stopModel->getItemAt(idx.row());
+
     m_jobId = idx.data(JOB_ID_ROLE).toLongLong();
     m_jobCat = JobCategory(idx.data(JOB_CATEGORY_ROLE).toInt());
 
-    m_stopId = idx.data(STOP_ID).toLongLong();
-    m_stationId = idx.data(STATION_ID).toLongLong();
-
-    stopType = StopType(idx.data(STOP_TYPE_ROLE).toInt());
-
     if(idx.row() == 0) //First stop
     {
-        m_prevStId = 0;
+        prevStop = StopItem();
 
         showBeforeAsset(false); //Hide train asset before stop
         showAfterAsset(true);
     }
     else //Not First stop
     {
-        QModelIndex prevIdx = idx.model()->index(idx.row() - 1, idx.column());
-        previousDep = prevIdx.data(DEP_ROLE).toTime();
-        m_prevStId = prevIdx.data(STATION_ID).toLongLong();
+        prevStop = stopModel->getItemAt(idx.row() - 1);
 
         //Cannot arrive at same time (or before) the previous departure, minimum travel duration of one minute
         //This reflects StopModel behaviour when editing stops with StopEditor
-        QTime minArrival = previousDep.addSecs(60);
+        QTime minArrival = prevStop.departure.addSecs(60);
         ui->arrivalTimeEdit->setMinimumTime(minArrival);
-        ui->calcTimeArr->setMinimumTime(minArrival);
 
-        if(stopType == Normal)
+        if(curStop.type == Normal)
             minArrival = minArrival.addSecs(60); //At least 1 minute stop for normal stops
         ui->departureTimeEdit->setMinimumTime(minArrival);
-        ui->calcTimeDep->setMinimumTime(minArrival);
 
         showBeforeAsset(true);
 
@@ -209,19 +190,13 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     const QString jobName = JobCategoryName::jobName(m_jobId, m_jobCat);
     setWindowTitle(jobName);
 
-    originalArrival = idx.data(ARR_ROLE).toTime();
-    originalDeparture = idx.data(DEP_ROLE).toTime();
+    stationsMatchModel->setFilter(prevStop.stationId, prevStop.stationId);
 
-    curSegment = idx.data(SEGMENT_ROLE).toLongLong();
-    curLine = idx.data(CUR_LINE_ROLE).toLongLong();
+    coupledModel->setStop(curStop.stopId, RsOp::Coupled);
+    uncoupledModel->setStop(curStop.stopId, RsOp::Uncoupled);
 
-    stationsMatchModel->setFilter(m_prevStId);
-
-    coupledModel->setStop(m_stopId, RsOp::Coupled);
-    uncoupledModel->setStop(m_stopId, RsOp::Uncoupled);
-
-    trainAssetModelBefore->setStop(m_jobId, originalArrival, TrainAssetModel::BeforeStop);
-    trainAssetModelAfter->setStop(m_jobId, originalArrival, TrainAssetModel::AfterStop);
+    trainAssetModelBefore->setStop(m_jobId, curStop.arrival, TrainAssetModel::BeforeStop);
+    trainAssetModelAfter->setStop(m_jobId, curStop.arrival, TrainAssetModel::AfterStop);
 
     updateInfo();
 
@@ -230,24 +205,16 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
 
 void EditStopDialog::updateInfo()
 {
-    ui->arrivalTimeEdit->setTime(originalArrival);
-    ui->departureTimeEdit->setTime(originalDeparture);
+    ui->arrivalTimeEdit->setTime(curStop.arrival);
+    ui->departureTimeEdit->setTime(curStop.arrival);
 
-    stationLineEdit->setData(m_stationId);
-
-    int platf = stopIdx.data(PLATF_ID).toInt();
-
-    int platfCount = 0;
-    int depotCount = 0;
-    stopModel->getStationPlatfCount(m_stationId, platfCount, depotCount);
-    setPlatformCount(platfCount, depotCount);
-    setPlatform(platf);
+    stationLineEdit->setData(curStop.stationId);
 
     //Show previous station if any
-    if(m_prevStId)
+    if(prevStop.stationId)
     {
         query q(Session->m_Db, "SELECT name FROM stations WHERE id=?");
-        q.bind(1, m_prevStId);
+        q.bind(1, prevStop.stationId);
         q.step();
         ui->prevStEdit->setText(q.getRows().get<QString>(0));
     }
@@ -256,134 +223,44 @@ void EditStopDialog::updateInfo()
 
     ui->descriptionEdit->setPlainText(descr);
 
-    if(stopType == First)
+    if(curStop.type == First)
     {
         ui->arrivalTimeEdit->setEnabled(false);
-        ui->calcTimeArr->setEnabled(false);
-
         ui->departureTimeEdit->setEnabled(true);
-        ui->calcTimeDep->setEnabled(true);
     }
-    else if (stopType == Last || stopType == Transit || stopType == TransitLineChange)
+    else if (curStop.type == Last || curStop.type == Transit || curStop.type == TransitLineChange)
     {
         ui->departureTimeEdit->setEnabled(false);
-        ui->calcTimeDep->setEnabled(false);
-
         ui->arrivalTimeEdit->setEnabled(true);
-        ui->calcTimeArr->setEnabled(true);
     }
     else
     {
         ui->arrivalTimeEdit->setEnabled(true);
-        ui->calcTimeArr->setEnabled(true);
         ui->departureTimeEdit->setEnabled(true);
-        ui->calcTimeDep->setEnabled(true);
     }
 
-    if(stopType == Transit || stopType == TransitLineChange)
+    if(curStop.type == Transit || curStop.type == TransitLineChange)
     {
         //On transit you cannot couple/uncouple rollingstock
         ui->editCoupledBut->setEnabled(false);
         ui->editUncoupledBut->setEnabled(false);
     }
 
-    couplingMgr->loadCouplings(stopModel, m_stopId, m_jobId, originalArrival);
-
-    speedBeforeStop = getTrainSpeedKmH(false);
-
-    updateSpeedAfterStop();
-    //Save original speed after stop to compare it after new coupling operations
-    originalSpeedAfterStopKmH = newSpeedAfterStopKmH; //Initially there is no difference
-
-    updateDistance();
-}
-
-void EditStopDialog::setPlatformCount(int maxMainPlatf, int maxDepots)
-{
-    ui->mainPlatfSpin->setMaximum(maxMainPlatf);
-    ui->depotSpin->setMaximum(maxDepots);
-
-    ui->platfRadio->setEnabled(maxMainPlatf);
-    ui->mainPlatfSpin->setEnabled(maxMainPlatf);
-
-    ui->depotSpin->setEnabled(maxDepots);
-    ui->depotRadio->setEnabled(maxDepots);
-}
-
-void EditStopDialog::setPlatform(int platf)
-{
-    if(platf < 0)
-    {
-        ui->platfRadio->setChecked(false);
-        ui->mainPlatfSpin->setEnabled(false);
-        ui->mainPlatfSpin->setValue(0);
-
-        ui->depotRadio->setChecked(true);
-        ui->depotSpin->setEnabled(true);
-        ui->depotSpin->setValue( - platf); //Negative num --> to positive
-    }
-    else
-    {
-        ui->platfRadio->setChecked(true);
-        ui->mainPlatfSpin->setEnabled(true);
-        ui->mainPlatfSpin->setValue(platf + 1); //DB starts from platf 0 --> change to 1
-
-        ui->depotRadio->setChecked(false);
-        ui->depotSpin->setEnabled(false);
-        ui->depotSpin->setValue(0);
-    }
-}
-
-int EditStopDialog::getPlatform()
-{
-    if(ui->platfRadio->isChecked())
-        return ui->mainPlatfSpin->value() - 1; //Positive from 0
-    else
-        return -ui->depotSpin->value(); //Negative from -1
+    couplingMgr->loadCouplings(stopModel, curStop.stopId, m_jobId, curStop.arrival);
 }
 
 void EditStopDialog::onStEditingFinished(db_id stationId)
 {
     DEBUG_ENTRY;
 
-    m_stationId = stationId;
+    curStop.stationId = stationId;
 
-    int platfCount = 0;
-    int depotCount = 0;
-    stopModel->getStationPlatfCount(m_stationId, platfCount, depotCount);
-    setPlatformCount(platfCount, depotCount);
-
-    //Fix platform
-    int platf = stopModel->data(stopIdx, PLATF_ID).toInt();
-    if(platf < 0 && -platf > depotCount)
-    {
-        if(depotCount)
-            platf = -depotCount; //Max depot platform
-        else
-            platf = 0; //If there arent depots, use platform 0 (First main platform)
-    }
-    else if(platf >= platfCount)
-    {
-        if(platfCount)
-            platf = platfCount - 1; //Max main platform
-        else
-            platf = -1; //If there are no main platforms, use -1 (First depot platform)
-    }
-
-    //Update UI for platform
-    setPlatform(platf);
-
-    updateDistance();
+    //TODO: platform
 }
 
 void EditStopDialog::saveDataToModel()
 {
     DEBUG_ENTRY;
-
-    stopModel->setData(stopIdx, m_stationId, STATION_ID);
-
-    int platf = getPlatform();
-    stopModel->setData(stopIdx, platf, PLATF_ID);
 
     if(ui->descriptionEdit->document()->isModified())
     {
@@ -392,43 +269,7 @@ void EditStopDialog::saveDataToModel()
                            STOP_DESCR_ROLE);
     }
 
-    stopModel->setData(stopIdx, ui->arrivalTimeEdit->time(), ARR_ROLE);
-    stopModel->setData(stopIdx, ui->departureTimeEdit->time(), DEP_ROLE);
-}
-
-void EditStopDialog::updateDistance()
-{
-    DEBUG_ENTRY;
-
-    if(stopType == First)
-    {
-        ui->infoLabel->setText(tr("This is the first stop"));
-        return;
-    }
-
-    query q(Session->m_Db, "SELECT name FROM stations WHERE id=?");
-    q.bind(1, m_prevStId);
-    q.step();
-
-    QString res = tr("Train leaves %1 at %2")
-            .arg(q.getRows().get<QString>(0))
-            .arg(previousDep.toString("HH:mm"));
-    if(stopType == Last)
-        res.append(tr("\nThis is the last stop"));
-    ui->infoLabel->setText(res);
-
-    query q_getLineNameAndSpeed(Session->m_Db, "SELECT name,max_speed FROM lines WHERE id=?");
-    q_getLineNameAndSpeed.bind(1, curLine);
-    if(q_getLineNameAndSpeed.step() != SQLITE_ROW)
-    {
-        //Error
-    }
-    auto r = q_getLineNameAndSpeed.getRows();
-    QString lineName = r.get<QString>(0);
-    int lineSpeedKmH = r.get<int>(1);
-
-    ui->currentLineText->setText(lineName);
-    ui->lineSpeedBox->setValue(lineSpeedKmH);
+    stopModel->setStopInfo(stopIdx, curStop, prevStop.nextSegment);
 }
 
 void EditStopDialog::editCoupled()
@@ -438,13 +279,12 @@ void EditStopDialog::editCoupled()
 
     RSCoupleDialog dlg(couplingMgr, RsOp::Coupled, this);
     dlg.setWindowTitle(tr("Couple"));
-    dlg.loadProxyModels(Session->m_Db, m_jobId, m_stopId, m_stationId, ui->arrivalTimeEdit->time());
+    dlg.loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, ui->arrivalTimeEdit->time());
 
     dlg.exec();
 
     coupledModel->refreshData(true);
     trainAssetModelAfter->refreshData(true);
-    updateSpeedAfterStop();
 }
 
 
@@ -455,13 +295,12 @@ void EditStopDialog::editUncoupled()
 
     RSCoupleDialog dlg(couplingMgr, RsOp::Uncoupled, this);
     dlg.setWindowTitle(tr("Uncouple"));
-    dlg.loadProxyModels(Session->m_Db, m_jobId, m_stopId, m_stationId, originalArrival);
+    dlg.loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, curStop.arrival);
 
     dlg.exec();
 
     uncoupledModel->refreshData(true);
     trainAssetModelAfter->refreshData(true);
-    updateSpeedAfterStop();
 }
 
 bool EditStopDialog::hasEngineAfterStop()
@@ -474,16 +313,16 @@ void EditStopDialog::calcPassings()
 {
     DEBUG_ENTRY;
 
-    Direction myDirection = Session->getStopDirection(m_stopId, m_stationId);
+    Direction myDirection = Session->getStopDirection(curStop.stopId, curStop.stationId);
 
     query q(Session->m_Db, "SELECT s.id, s.jobid, j.category, s.arrival, s.departure, s.platform"
                            " FROM stops s"
                            " JOIN jobs j ON j.id=s.jobId"
                            " WHERE s.stationId=? AND s.departure >=? AND s.arrival<=? AND s.jobId <> ?");
 
-    q.bind(1, m_stationId);
-    q.bind(2, originalArrival);
-    q.bind(3, originalDeparture);
+    q.bind(1, curStop.stationId);
+    q.bind(2, curStop.arrival);
+    q.bind(3, curStop.arrival);
     q.bind(4, m_jobId);
 
     QVector<JobPassingsModel::Entry> passings, crossings;
@@ -499,7 +338,7 @@ void EditStopDialog::calcPassings()
         e.departure = r.get<QTime>(4);
         e.platform = r.get<int>(5);
 
-        Direction otherDir = Session->getStopDirection(otherStopId, m_stationId);
+        Direction otherDir = Session->getStopDirection(otherStopId, curStop.stationId);
 
         if(myDirection == otherDir)
             passings.append(e); //Same direction -> Passing
@@ -543,72 +382,26 @@ QSet<db_id> EditStopDialog::getRsToUpdate() const
 
 int EditStopDialog::getTrainSpeedKmH(bool afterStop)
 {
-    query q(Session->m_Db, "SELECT MIN(rs_models.max_speed), rsId FROM("
-                           "SELECT coupling.rsId AS rsId, MAX(stops.arrival)"
+    query q(Session->m_Db, "SELECT MIN(rs_models.max_speed), rs_id FROM("
+                           "SELECT coupling.rs_id AS rs_id, MAX(stops.arrival)"
                            " FROM stops"
-                           " JOIN coupling ON coupling.stopId=stops.id"
-                           " WHERE stops.jobId=? AND stops.arrival<?"
-                           " GROUP BY coupling.rsId"
+                           " JOIN coupling ON coupling.stop_id=stops.id"
+                           " WHERE stops.job_id=? AND stops.arrival<?"
+                           " GROUP BY coupling.rs_id"
                            " HAVING coupling.operation=1)"
-                           " JOIN rs_list ON rs_list.id=rsId"
+                           " JOIN rs_list ON rs_list.id=rs_id"
                            " JOIN rs_models ON rs_models.id=rs_list.model_id");
     q.bind(1, m_jobId); //TODO: maybe move to model
 
     //HACK: 1 minute is the min interval between stops,
     //by adding 1 minute we include the current stop but leave out the next one
     if(afterStop)
-        q.bind(2, originalArrival.addSecs(60));
+        q.bind(2, curStop.arrival.addSecs(60));
     else
-        q.bind(2, originalArrival);
+        q.bind(2, curStop.arrival);
 
     q.step();
     return q.getRows().get<int>(0);
-}
-
-void EditStopDialog::updateSpeedAfterStop()
-{
-    newSpeedAfterStopKmH = getTrainSpeedKmH(true);
-    ui->trainSpeedBox->setValue(newSpeedAfterStopKmH);
-
-    const int lineSpeedKmH = ui->lineSpeedBox->value();
-    const int maxSpeedKmH = qMin(newSpeedAfterStopKmH, lineSpeedKmH);
-
-    ui->speedEdit->setValue(maxSpeedKmH);
-}
-
-void EditStopDialog::calcTime()
-{
-    DEBUG_IMPORTANT_ENTRY;
-
-    double maxSpeedKmH = ui->speedEdit->value();
-
-    if(maxSpeedKmH == 0.0)
-    {
-        qDebug() << "Err!";
-        return;
-    }
-
-    const double distanceMeters = lines::getStationsDistanceInMeters(Session->m_Db, curLine, m_stationId, m_prevStId);
-
-    QTime time = previousDep;
-
-    const double secs = (distanceMeters / maxSpeedKmH) * 3.6;
-    time = time.addSecs(qCeil(secs));
-    qDebug() << "Arrival:" << time;
-
-    ui->calcTimeArr->setTime(time);
-
-    QTime curArr = ui->arrivalTimeEdit->time();
-    QTime curDep = ui->departureTimeEdit->time();
-
-    time = time.addSecs(curArr.secsTo(curDep));
-    ui->calcTimeDep->setTime(time);
-}
-
-void EditStopDialog::applyTime()
-{
-    ui->arrivalTimeEdit->setTime(ui->calcTimeArr->time());
-    ui->departureTimeEdit->setTime(ui->calcTimeDep->time());
 }
 
 void EditStopDialog::setReadOnly(bool value)
@@ -619,24 +412,10 @@ void EditStopDialog::setReadOnly(bool value)
     ui->arrivalTimeEdit->setReadOnly(readOnly);
     ui->departureTimeEdit->setReadOnly(readOnly);
 
-    ui->platfRadio->setEnabled(!readOnly);
-    ui->depotRadio->setEnabled(!readOnly);
-    ui->mainPlatfSpin->setReadOnly(readOnly);
-    ui->depotSpin->setReadOnly(readOnly);
-
     ui->descriptionEdit->setReadOnly(readOnly);
 
     ui->editCoupledBut->setEnabled(!readOnly);
     ui->editUncoupledBut->setEnabled(!readOnly);
-
-    ui->applyTimeBut->setEnabled(!readOnly);
-}
-
-void EditStopDialog::onPlatfRadioToggled(bool enable)
-{
-    DEBUG_ENTRY;
-    ui->mainPlatfSpin->setEnabled(enable);
-    ui->depotSpin->setDisabled(enable);
 }
 
 void EditStopDialog::done(int val)

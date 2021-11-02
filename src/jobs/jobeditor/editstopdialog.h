@@ -8,6 +8,8 @@
 
 #include "utils/types.h"
 
+#include "jobs/jobeditor/model/stopmodel.h" //TODO: include only StopItem
+
 class CustomCompletionLineEdit;
 class StopModel;
 class TrainAssetModel;
@@ -31,8 +33,6 @@ public:
     void updateInfo();
     void onStEditingFinished(db_id stationId);
 
-    void updateSpeedAfterStop();
-
     bool hasEngineAfterStop();
 
     QSet<db_id> getRsToUpdate() const;
@@ -49,56 +49,31 @@ public slots:
     void editCoupled();
     void editUncoupled();
 
-    void calcTime();
-    void applyTime();
-
-    void onPlatfRadioToggled(bool enable);
-
     void calcPassings();
 
     void couplingCustomContextMenuRequested(const QPoint &pos);
 
 private:
     void saveDataToModel();
-    void updateDistance();
 
     void showBeforeAsset(bool val);
     void showAfterAsset(bool val);
 
     void setPlatformCount(int maxMainPlatf, int maxDepots);
-    void setPlatform(int platf);
-    int getPlatform();
 
     int getTrainSpeedKmH(bool afterStop);
 
 private:
     Ui::EditStopDialog *ui;
+
     CustomCompletionLineEdit *stationLineEdit;
     StationsMatchModel *stationsMatchModel;
 
     db_id m_jobId;
-    db_id m_stopId;
-
-    db_id m_stationId;
-    db_id m_prevStId;
-
-    db_id curSegment;
-    db_id curLine;
+    JobCategory m_jobCat;
 
     StopModel *stopModel;
     QPersistentModelIndex stopIdx;
-
-    StopType stopType;
-    JobCategory m_jobCat;
-
-    QTime previousDep;
-
-    QTime originalArrival;
-    QTime originalDeparture;
-
-    int speedBeforeStop;
-    int originalSpeedAfterStopKmH;
-    int newSpeedAfterStopKmH;
 
     QSet<db_id> rsToUpdate;
 
@@ -107,11 +82,14 @@ private:
     StopCouplingModel *coupledModel;
     StopCouplingModel *uncoupledModel;
 
-    TrainAssetModel    *trainAssetModelBefore;
-    TrainAssetModel    *trainAssetModelAfter;
+    TrainAssetModel   *trainAssetModelBefore;
+    TrainAssetModel   *trainAssetModelAfter;
 
-    JobPassingsModel *passingsModel;
-    JobPassingsModel *crossingsModel;
+    JobPassingsModel  *passingsModel;
+    JobPassingsModel  *crossingsModel;
+
+    StopItem curStop;
+    StopItem prevStop;
 
     bool readOnly;
 };

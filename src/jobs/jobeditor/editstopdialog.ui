@@ -39,7 +39,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="stopTab">
       <attribute name="title">
@@ -409,25 +409,6 @@
            </rect>
           </property>
           <layout class="QVBoxLayout" name="infoScrollLay">
-           <item>
-            <widget class="QLabel" name="infoLabel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Infos here...</string>
-             </property>
-            </widget>
-           </item>
            <item>
             <widget class="QGroupBox" name="passingsBox">
              <property name="font">
