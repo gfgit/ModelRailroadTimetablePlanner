@@ -135,7 +135,7 @@ void LineGraphSelectionWidget::setupModel(LineGraphType type)
         case LineGraphType::SingleStation:
         {
             StationsMatchModel *m = new StationsMatchModel(Session->m_Db, this);
-            m->setFilter(0);
+            m->setFilter(0, 0);
             matchModel = m;
             break;
         }
