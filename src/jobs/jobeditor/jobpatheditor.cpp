@@ -688,31 +688,10 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
         stopModel->addStop();
 
         int row = index.row();
-        if(row > 0 && AppSettings.getChooseLineOnAddStop())
-        {
-            //idx - 1 is former Last Stop (now it became a normal Stop)
-            //idx     is new Last Stop (former AddHere)
-            //idx + 1 is the new AddHere
-
-            //Edit former Last Stop
-            QModelIndex prev = stopModel->index(row - 1, 0);
-            ui->view->setCurrentIndex(prev);
-            ui->view->scrollTo(prev);
-            ui->view->edit(prev);
-
-            //Tell editor to popup lines combo
-            //QAbstractItemView::edit doesn't let you pass additional arguments
-            //So we work around by emitting a signal
-            //See 'StopDelegate::createEditor()'
-            emit delegate->popupEditorLinesCombo();
-        }
-        else
-        {
-            QModelIndex lastStop = stopModel->index(row, 0);
-            ui->view->setCurrentIndex(lastStop);
-            ui->view->scrollTo(lastStop);
-            ui->view->edit(lastStop);
-        }
+        QModelIndex lastStop = stopModel->index(row, 0);
+        ui->view->setCurrentIndex(lastStop);
+        ui->view->scrollTo(lastStop);
+        ui->view->edit(lastStop);
     }
 }
 

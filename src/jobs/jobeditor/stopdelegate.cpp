@@ -244,12 +244,3 @@ void StopDelegate::loadIcon(const QString &fileName)
 {
     renderer->load(fileName);
 }
-
-void StopDelegate::onLineChosen(StopEditor *editor)
-{
-    if(editor->closeOnLineChosen())
-    {
-        emit commitData(editor);
-        emit closeEditor(editor, StopDelegate::EditNextItem);
-    }
-}

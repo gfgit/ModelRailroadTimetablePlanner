@@ -46,12 +46,6 @@ public:
 
     void loadIcon(const QString& fileName);
 
-signals:
-    void popupEditorLinesCombo();
-
-private slots:
-    void onLineChosen(StopEditor *editor);
-
 private:
     QSvgRenderer *renderer;
     sqlite3pp::database &mDb;
