@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>512</height>
+    <width>653</width>
+    <height>657</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QVBoxLayout" name="dialogLayout">
+  <layout class="QGridLayout" name="gridLayout_2">
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -26,7 +26,7 @@
    <property name="bottomMargin">
     <number>4</number>
    </property>
-   <item>
+   <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
@@ -39,110 +39,6 @@
        <property name="leftMargin">
         <number>9</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="mainBox">
-         <property name="title">
-          <string>Time</string>
-         </property>
-         <layout class="QGridLayout" name="stopBoxLayout">
-          <item row="1" column="1">
-           <widget class="QTimeEdit" name="arrivalTimeEdit"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Arrival</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Station</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>Departure</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QTimeEdit" name="departureTimeEdit"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QGroupBox" name="coupledBox">
-         <property name="title">
-          <string>Coupled</string>
-         </property>
-         <layout class="QVBoxLayout" name="coupledLayout">
-          <property name="spacing">
-           <number>3</number>
-          </property>
-          <property name="leftMargin">
-           <number>3</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <widget class="QListView" name="coupledView"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="editCoupledBut">
-            <property name="text">
-             <string>Edit</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QGroupBox" name="uncoupledBox">
-         <property name="title">
-          <string>Uncoupled</string>
-         </property>
-         <layout class="QVBoxLayout" name="uncoupledLayout">
-          <property name="spacing">
-           <number>3</number>
-          </property>
-          <property name="leftMargin">
-           <number>3</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <widget class="QListView" name="uncoupledView"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="editUncoupledBut">
-            <property name="text">
-             <string>Edit</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="platfBox">
          <property name="title">
@@ -203,6 +99,42 @@
           </property>
           <item>
            <widget class="QPlainTextEdit" name="descriptionEdit"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="mainBox">
+         <property name="title">
+          <string>Time</string>
+         </property>
+         <layout class="QGridLayout" name="stopBoxLayout">
+          <item row="1" column="1">
+           <widget class="QTimeEdit" name="arrivalTimeEdit"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Arrival</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Station</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Departure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QTimeEdit" name="departureTimeEdit"/>
           </item>
          </layout>
         </widget>
@@ -350,6 +282,150 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="rsTab">
+      <attribute name="title">
+       <string>Rollingstock</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="coupledBox">
+         <property name="title">
+          <string>Coupled</string>
+         </property>
+         <layout class="QVBoxLayout" name="coupledLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QListView" name="coupledView"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="editCoupledBut">
+            <property name="text">
+             <string>Edit</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QGroupBox" name="uncoupledBox">
+         <property name="title">
+          <string>Uncoupled</string>
+         </property>
+         <layout class="QVBoxLayout" name="uncoupledLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QListView" name="uncoupledView"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="editUncoupledBut">
+            <property name="text">
+             <string>Edit</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="2">
+        <widget class="QGroupBox" name="rollingstockBox">
+         <property name="title">
+          <string>Job Asset</string>
+         </property>
+         <layout class="QGridLayout" name="trainAssetGridLayout">
+          <item row="0" column="1">
+           <widget class="QLabel" name="assetBeforeLabel">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Asset Before Stop</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QListView" name="assetBeforeView">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QListView" name="assetAfterView">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="assetAfterLabel">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Asset After Stop</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
      <widget class="QWidget" name="infoTab">
       <attribute name="title">
        <string>Info</string>
@@ -389,8 +465,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>515</width>
-            <height>553</height>
+            <width>641</width>
+            <height>584</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -411,75 +487,6 @@
              <property name="text">
               <string>Infos here...</string>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="rollingstockBox">
-             <property name="title">
-              <string>Rollingstock</string>
-             </property>
-             <layout class="QGridLayout" name="trainAssetGridLayout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="assetAfterLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Asset After Stop</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="assetBeforeLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Asset Before Stop</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QListView" name="assetAfterView">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QListView" name="assetBeforeView">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-               </widget>
-              </item>
-             </layout>
             </widget>
            </item>
            <item>
@@ -531,7 +538,7 @@
      </widget>
     </widget>
    </item>
-   <item>
+   <item row="1" column="0">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
