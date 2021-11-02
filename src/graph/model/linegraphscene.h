@@ -176,7 +176,7 @@ private:
     /*!
      * \brief Load job segments between 2 stations
      *
-     * Load jobsegments and stores them in 'from' station
+     * Load job segments and stores them in 'from' station
      * \sa loadStationJobStops()
      */
     bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromSt, const StationGraphObject &toSt);
