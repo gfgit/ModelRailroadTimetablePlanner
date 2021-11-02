@@ -185,9 +185,6 @@ void SettingsDialog::loadSettings()
     ui->autoMoveLastCouplingsCheck->setChecked(settings.getAutoShiftLastStopCouplings());
     ui->autoUncoupleAllAtLastStopCheck->setChecked(settings.getAutoUncoupleAtLastStop());
 
-    //Job Editor
-    ui->chooseLineBeforeLastStopBox->setChecked(settings.getChooseLineOnAddStop());
-
     //Shift Graph
     set(ui->shiftHourOffsetSpin, settings.getShiftHourOffset());
     set(ui->shiftHorizOffsetSpin, settings.getShiftHorizOffset());
@@ -268,9 +265,6 @@ void SettingsDialog::saveSettings()
     newVal = ui->autoUncoupleAllAtLastStopCheck->isChecked();
     stopSetingsChanged |= settings.getAutoUncoupleAtLastStop() != newVal;
     settings.setAutoUncoupleAtLastStop(newVal);
-
-    //Job Editor
-    settings.setChooseLineOnAddStop(ui->chooseLineBeforeLastStopBox->isChecked());
 
     //Shift Graph
     settings.setShiftHourOffset(ui->shiftHourOffsetSpin->value());

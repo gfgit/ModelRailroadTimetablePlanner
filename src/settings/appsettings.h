@@ -85,9 +85,6 @@ public:
     QColor getCategoryColor(int category);
     void setCategoryColor(int category, const QColor& color);
 
-    //Job Editor
-    FIELD(ChooseLineOnAddStop, "job_editor/choose_line_on_add_stop", bool, true)
-
     //Stops
     FIELD(AutoInsertTransits,  "job_editor/auto_insert_transits", bool, true)
     FIELD(AutoShiftLastStopCouplings, "job_editor/auto_shift_couplings", bool, true)

@@ -156,8 +156,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>557</width>
-            <height>552</height>
+            <width>555</width>
+            <height>689</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -476,31 +476,24 @@
           <bool>false</bool>
          </property>
          <layout class="QFormLayout" name="formLayout_9">
-          <item row="1" column="0" colspan="2">
+          <item row="0" column="0" colspan="2">
            <widget class="QCheckBox" name="autoInsertTransitsCheckBox">
             <property name="text">
              <string>Auto insert transits between two stops.</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QCheckBox" name="chooseLineBeforeLastStopBox">
+          <item row="1" column="0" colspan="2">
+           <widget class="QCheckBox" name="autoMoveLastCouplingsCheck">
             <property name="text">
-             <string>Choose next line before editing newly added last stop.</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QCheckBox" name="autoUncoupleAllAtLastStopCheck">
-            <property name="text">
-             <string>Auto uncouple all rollingstock items at last stop.</string>
+             <string>Auto move uncoupled rollingstock pieces from last stop when adding a new one.</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0" colspan="2">
-           <widget class="QCheckBox" name="autoMoveLastCouplingsCheck">
+           <widget class="QCheckBox" name="autoUncoupleAllAtLastStopCheck">
             <property name="text">
-             <string>Auto move uncoupled rollingstock pieces from last stop when adding a new one.</string>
+             <string>Auto uncouple all rollingstock items at last stop.</string>
             </property>
            </widget>
           </item>
