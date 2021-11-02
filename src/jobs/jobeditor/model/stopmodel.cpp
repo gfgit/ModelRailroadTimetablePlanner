@@ -711,14 +711,14 @@ void StopModel::loadJobStops(db_id jobId)
     }
 
 
-    query q_countStops(mDb, "SELECT COUNT(id) FROM stops WHERE job_id=?");
-    q_countStops.bind(1, mJobId);
-    if(q_countStops.step() != SQLITE_ROW)
+    query q_selectStops(mDb, "SELECT COUNT(id) FROM stops WHERE job_id=?");
+    q_selectStops.bind(1, mJobId);
+    if(q_selectStops.step() != SQLITE_ROW)
     {
         qWarning() << database_error(mDb).what();
     }
-    int count = q_countStops.getRows().get<int>(0);
-    q_countStops.finish();
+    int count = q_selectStops.getRows().get<int>(0);
+    q_selectStops.finish();
 
     if(count == 0)
     {
@@ -739,18 +739,18 @@ void StopModel::loadJobStops(db_id jobId)
     StopItem::Segment prevSegment;
     db_id prevOutGateId = 0;
 
-    query q_selectStops(mDb, "SELECT stops.id,stops.station_id,stops.arrival,stops.departure,stops.type,"
-                             "stops.in_gate_conn, g1.gate_id,g1.gate_track,g1.track_id,"
-                             "stops.out_gate_conn,g2.gate_id,g2.gate_track,g2.track_id,"
-                             "stops.next_segment_conn_id,c.seg_id,c.in_track,c.out_track,"
-                             "seg.in_gate_id,seg.out_gate_id"
-                             " FROM stops"
-                             " JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
-                             " JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
-                             " JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
-                             " JOIN railway_segments seg ON seg.id=c.seg_id"
-                             " WHERE stops.job_id=?1"
-                             " ORDER BY stops.arrival ASC");
+    q_selectStops.prepare("SELECT stops.id,stops.station_id,stops.arrival,stops.departure,stops.type,"
+                          "stops.in_gate_conn, g1.gate_id,g1.gate_track,g1.track_id,"
+                          "stops.out_gate_conn,g2.gate_id,g2.gate_track,g2.track_id,"
+                          "stops.next_segment_conn_id,c.seg_id,c.in_track,c.out_track,"
+                          "seg.in_gate_id,seg.out_gate_id"
+                          " FROM stops"
+                          " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
+                          " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                          " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                          " LEFT JOIN railway_segments seg ON seg.id=c.seg_id"
+                          " WHERE stops.job_id=?1"
+                          " ORDER BY stops.arrival ASC");
     q_selectStops.bind(1, mJobId);
     for(auto stop : q_selectStops)
     {
