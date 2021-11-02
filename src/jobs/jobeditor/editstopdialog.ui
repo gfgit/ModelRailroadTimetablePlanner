@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
+  <layout class="QGridLayout" name="mainLay">
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -41,11 +41,11 @@
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="mainTab">
+     <widget class="QWidget" name="stopTab">
       <attribute name="title">
        <string>Stop</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
+      <layout class="QGridLayout" name="stopTabLay">
        <property name="leftMargin">
         <number>9</number>
        </property>
@@ -60,9 +60,9 @@
          <property name="title">
           <string>Time</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_2">
+         <layout class="QFormLayout" name="timeLay">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="arrivalLabel">
             <property name="text">
              <string>Arrival</string>
             </property>
@@ -72,7 +72,7 @@
            <widget class="QTimeEdit" name="arrivalTimeEdit"/>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_3">
+           <widget class="QLabel" name="departureLabel">
             <property name="text">
              <string>Departure</string>
             </property>
@@ -128,9 +128,9 @@
          <property name="title">
           <string>Previous Stop</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
+         <layout class="QFormLayout" name="prevStopLay">
           <item row="0" column="0">
-           <widget class="QLabel" name="label">
+           <widget class="QLabel" name="prevStLabel">
             <property name="text">
              <string>Prev. Station:</string>
             </property>
@@ -140,7 +140,7 @@
            <widget class="QLineEdit" name="prevStEdit"/>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_13">
+           <widget class="QLabel" name="prevOutGateLabel">
             <property name="text">
              <string>Out Gate:</string>
             </property>
@@ -150,7 +150,7 @@
            <widget class="QLineEdit" name="prevOutGateEdit"/>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_14">
+           <widget class="QLabel" name="prevSegmentLabel">
             <property name="text">
              <string>Segment:</string>
             </property>
@@ -173,44 +173,44 @@
          <property name="title">
           <string>Current Stop</string>
          </property>
-         <layout class="QFormLayout" name="formLayout_3">
+         <layout class="QFormLayout" name="curStopLay">
           <item row="0" column="0">
-           <widget class="QLabel" name="label_5">
+           <widget class="QLabel" name="stationLabel">
             <property name="text">
              <string>Station:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="0">
-           <widget class="QLabel" name="label_7">
+           <widget class="QLabel" name="stationTrackLabel">
             <property name="text">
              <string>Track:</string>
             </property>
            </widget>
           </item>
           <item row="3" column="0">
-           <widget class="QLabel" name="label_6">
+           <widget class="QLabel" name="outGateLabel">
             <property name="text">
              <string>Out Gate:</string>
             </property>
            </widget>
           </item>
           <item row="4" column="0">
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="outGateTrackLabel">
             <property name="text">
              <string>Out Gate Track:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="label_10">
+           <widget class="QLabel" name="inGateLabel">
             <property name="text">
              <string>In Gate:</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QLabel" name="inGateLabel">
+           <widget class="QLabel" name="inGateEdit">
             <property name="text">
              <string>A</string>
             </property>
@@ -225,7 +225,7 @@
       <attribute name="title">
        <string>Rollingstock</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_4">
+      <layout class="QGridLayout" name="rsTabLay">
        <item row="0" column="0">
         <widget class="QGroupBox" name="coupledBox">
          <property name="title">
@@ -369,7 +369,7 @@
       <attribute name="title">
        <string>Info</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="infoTabLay">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -408,7 +408,7 @@
             <height>589</height>
            </rect>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
+          <layout class="QVBoxLayout" name="infoScrollLay">
            <item>
             <widget class="QLabel" name="infoLabel">
              <property name="sizePolicy">
@@ -438,7 +438,7 @@
              <property name="title">
               <string>Passings / Crossings</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
+             <layout class="QVBoxLayout" name="passingsLay">
               <item>
                <widget class="QPushButton" name="calcPassingsBut">
                 <property name="text">
@@ -447,7 +447,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_4">
+               <widget class="QLabel" name="passingsLabel">
                 <property name="text">
                  <string>Passings</string>
                 </property>
@@ -457,7 +457,7 @@
                <widget class="QTableView" name="passingsView"/>
               </item>
               <item>
-               <widget class="QLabel" name="label_12">
+               <widget class="QLabel" name="crossingsLabel">
                 <property name="text">
                  <string>Crossings</string>
                 </property>
