@@ -10,13 +10,17 @@
 
 #include "jobs/jobeditor/model/stopmodel.h" //TODO: include only StopItem
 
-class CustomCompletionLineEdit;
 class StopModel;
 class TrainAssetModel;
 class RSCouplingInterface;
 class JobPassingsModel;
 class StopCouplingModel;
+
+class CustomCompletionLineEdit;
+
 class StationsMatchModel;
+class StationGatesMatchModel;
+class StationTracksMatchModel;
 
 namespace Ui {
 class EditStopDialog;
@@ -66,8 +70,13 @@ private:
 private:
     Ui::EditStopDialog *ui;
 
-    CustomCompletionLineEdit *stationLineEdit;
-    StationsMatchModel *stationsMatchModel;
+    CustomCompletionLineEdit *stationEdit;
+    CustomCompletionLineEdit *stationTrackEdit;
+    CustomCompletionLineEdit *outGateEdit;
+
+    StationsMatchModel *stationMatchModel;
+    StationGatesMatchModel *stationOutGateMatchModel;
+    StationTracksMatchModel *stationTrackMatchModel;
 
     db_id m_jobId;
     JobCategory m_jobCat;

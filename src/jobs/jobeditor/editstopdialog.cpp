@@ -29,6 +29,8 @@
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
 #include "stations/match_models/stationsmatchmodel.h"
+#include "stations/match_models/stationgatesmatchmodel.h"
+#include "stations/match_models/stationtracksmatchmodel.h"
 
 EditStopDialog::EditStopDialog(QWidget *parent) :
     QDialog(parent),
@@ -37,9 +39,19 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    stationsMatchModel = new StationsMatchModel(Session->m_Db, this);
-    stationLineEdit = new CustomCompletionLineEdit(stationsMatchModel, this);
-    ui->curStopLay->setWidget(0, QFormLayout::FieldRole, stationLineEdit);
+    //Stop
+    stationMatchModel = new StationsMatchModel(Session->m_Db, this);
+    stationOutGateMatchModel = new StationGatesMatchModel(Session->m_Db, this);
+    stationTrackMatchModel = new StationTracksMatchModel(Session->m_Db, this);
+
+    stationEdit = new CustomCompletionLineEdit(stationMatchModel, this);
+    ui->curStopLay->setWidget(0, QFormLayout::FieldRole, stationEdit);
+
+    stationTrackEdit = new CustomCompletionLineEdit(stationTrackMatchModel, this);
+    ui->curStopLay->setWidget(2, QFormLayout::FieldRole, stationTrackEdit);
+
+    outGateEdit = new CustomCompletionLineEdit(stationOutGateMatchModel, this);
+    ui->curStopLay->setWidget(3, QFormLayout::FieldRole, outGateEdit);
 
     //Coupling
     couplingMgr = new RSCouplingInterface(Session->m_Db, this);
@@ -86,7 +98,7 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
     crossingsModel = new JobPassingsModel(this);
     ui->crossingsView->setModel(crossingsModel);
 
-    connect(stationLineEdit, &CustomCompletionLineEdit::dataIdChanged, this, &EditStopDialog::onStEditingFinished);
+    connect(stationEdit, &CustomCompletionLineEdit::dataIdChanged, this, &EditStopDialog::onStEditingFinished);
 
     connect(ui->editCoupledBut, &QPushButton::clicked, this, &EditStopDialog::editCoupled);
     connect(ui->editUncoupledBut, &QPushButton::clicked, this, &EditStopDialog::editUncoupled);
@@ -190,7 +202,10 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     const QString jobName = JobCategoryName::jobName(m_jobId, m_jobCat);
     setWindowTitle(jobName);
 
-    stationsMatchModel->setFilter(prevStop.stationId, prevStop.stationId);
+    //FIXME: filter track by IN GATE, filter out gate by track, filter also by track side
+    stationMatchModel->setFilter(prevStop.stationId, prevStop.stationId);
+    stationTrackMatchModel->setFilter(curStop.stationId);
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId);
 
     coupledModel->setStop(curStop.stopId, RsOp::Coupled);
     uncoupledModel->setStop(curStop.stopId, RsOp::Uncoupled);
@@ -208,7 +223,9 @@ void EditStopDialog::updateInfo()
     ui->arrivalTimeEdit->setTime(curStop.arrival);
     ui->departureTimeEdit->setTime(curStop.arrival);
 
-    stationLineEdit->setData(curStop.stationId);
+    stationEdit->setData(curStop.stationId);
+    stationTrackEdit->setData(curStop.trackId);
+    outGateEdit->setData(curStop.toGate.gateId);
 
     //Show previous station if any
     if(prevStop.stationId)
@@ -408,7 +425,10 @@ void EditStopDialog::setReadOnly(bool value)
 {
     readOnly = value;
 
-    stationLineEdit->setReadOnly(readOnly);
+    stationEdit->setReadOnly(readOnly);
+    stationTrackEdit->setReadOnly(readOnly);
+    outGateEdit->setReadOnly(readOnly);
+
     ui->arrivalTimeEdit->setReadOnly(readOnly);
     ui->departureTimeEdit->setReadOnly(readOnly);
 
