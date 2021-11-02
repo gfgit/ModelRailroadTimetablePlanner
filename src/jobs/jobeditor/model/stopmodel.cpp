@@ -1722,6 +1722,129 @@ bool StopModel::isAddHere(const QModelIndex &idx)
     return false;
 }
 
+bool StopModel::updatePrevSegment(int row, StopItem &prevStop, StopItem &curStop, db_id segmentId)
+{
+    bool reversed = false;
+    query q(mDb, "SELECT s.in_gate_id,g1.station_id,s.out_gate_id,g2.station_id"
+                 " FROM railway_segments s"
+                 " JOIN station_gates g1 ON g1.id=s.in_gate_id"
+                 " JOIN station_gates g2 ON g2.id=s.out_gate_id"
+                 " WHERE s.id=?");
+    q.bind(1, segmentId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+
+    auto seg = q.getRows();
+    db_id in_gateId = seg.get<db_id>(0);
+    db_id in_stationId = seg.get<db_id>(1);
+    db_id out_gateId = seg.get<db_id>(2);
+    db_id out_stationId = seg.get<db_id>(3);
+
+    if(out_stationId == prevStop.stationId)
+    {
+        //Segment is reversed
+        qSwap(in_gateId, out_gateId);
+        qSwap(in_stationId, out_stationId);
+        reversed = true;
+    }
+    else if(in_stationId != prevStop.stationId)
+    {
+        //Error: segment is not connected to previous station
+        return false;
+    }
+
+    if(out_stationId != curStop.stationId)
+    {
+        //Error: segment is not connected to next (current) station
+        return false;
+    }
+
+    if(in_gateId != prevStop.toGate.gateId)
+    {
+        //Try to find a gate connected to previous track_id
+        QByteArray sql = "SELECT c.id,c.gate_track,sc.id,sc.%2_track"
+                         " FROM station_gate_connections c"
+                         " JOIN railway_connections sc ON sc.seg_id=?3 AND sc.%1_track=c.gate_track"
+                         " WHERE c.track_id=?1 AND c.gate_id=?2";
+        if(reversed)
+        {
+            sql.replace("%1", "out");
+            sql.replace("%2", "in");
+        }else{
+            sql.replace("%1", "in");
+            sql.replace("%2", "out");
+        }
+
+        q.prepare(sql);
+        q.bind(1, prevStop.trackId);
+        q.bind(2, in_gateId);
+        q.bind(3, segmentId);
+        if(q.step() != SQLITE_ROW)
+        {
+            //Error: gate is not connected to previous track
+            //User must change previous track
+            return false;
+        }
+
+        auto conn = q.getRows();
+        prevStop.toGate.gateConnId = conn.get<db_id>(0);
+        prevStop.toGate.gateId = in_gateId;
+        prevStop.toGate.trackNum = conn.get<int>(1);
+        prevStop.nextSegment.segConnId = conn.get<db_id>(2);
+        prevStop.nextSegment.segmentId = segmentId;
+        prevStop.nextSegment.outTrackNum = conn.get<int>(3);
+
+        //Update prev stop
+        command cmd(mDb, "UPDATE stops SET out_gate_conn=?, next_segment_conn_id=? WHERE id=?");
+        cmd.bind(1, prevStop.toGate.gateConnId);
+        cmd.bind(2, prevStop.nextSegment.segConnId);
+        cmd.bind(3, prevStop.stopId);
+        if(cmd.execute() != SQLITE_OK)
+        {
+            qWarning() << "StopModel: cannot update previous stop segment:" << mDb.error_msg() << prevStop.stopId;
+            return false;
+        }
+    }
+
+    curStop.fromGate.gateConnId = 0;
+    curStop.fromGate.gateId = out_gateId;
+    curStop.fromGate.trackNum = prevStop.nextSegment.outTrackNum;
+
+    return true;
+}
+
+void StopModel::setStopInfo(const QModelIndex &idx, const StopItem &newItem, const StopItem::Segment &prevSeg)
+{
+    const int row = idx.row();
+
+    if(!idx.isValid() && row >= stops.count())
+        return;
+
+    StopItem& s = stops[row];
+    StopItem newStop =  newItem;
+
+    if(s.type != First && row > 0)
+    {
+        //Update previous segment
+        StopItem& prevStop = stops[row - 1];
+        if(prevStop.nextSegment.segmentId != prevSeg.segmentId)
+        {
+            if(!updatePrevSegment(row, prevStop, newStop, prevSeg.segmentId))
+                return;
+        }
+    }
+
+    if(s.stationId != newStop.stationId)
+    {
+        //Update station
+    }
+
+    if(s.arrival != newStop.arrival || s.departure != newStop.departure)
+    {
+        //Update Arrival and Departure
+    }
+}
+
 void StopModel::removeStop(const QModelIndex &idx)
 {
     const int row = idx.row();

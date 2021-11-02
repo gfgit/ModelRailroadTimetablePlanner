@@ -97,6 +97,9 @@ public:
 
     bool isAddHere(const QModelIndex& idx);
 
+    bool updatePrevSegment(int row, StopItem& prevStop, StopItem &curStop, db_id segmentId);
+    void setStopInfo(const QModelIndex& idx, const StopItem& newItem, const StopItem::Segment& prevSeg);
+
     void setArrival(const QModelIndex &idx, const QTime &time, bool setDepTime);
     void setDeparture(const QModelIndex &index, QTime time, bool propagate);
     int setStopType(const QModelIndex &idx, StopType type);
