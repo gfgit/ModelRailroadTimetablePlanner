@@ -1722,7 +1722,7 @@ bool StopModel::isAddHere(const QModelIndex &idx)
     return false;
 }
 
-bool StopModel::updatePrevSegment(int row, StopItem &prevStop, StopItem &curStop, db_id segmentId)
+bool StopModel::updatePrevSegment(StopItem &prevStop, StopItem &curStop, db_id segmentId)
 {
     bool reversed = false;
     query q(mDb, "SELECT s.in_gate_id,g1.station_id,s.out_gate_id,g2.station_id"
@@ -1813,7 +1813,14 @@ bool StopModel::updatePrevSegment(int row, StopItem &prevStop, StopItem &curStop
     return true;
 }
 
-void StopModel::setStopInfo(const QModelIndex &idx, const StopItem &newItem, const StopItem::Segment &prevSeg)
+bool StopModel::updateCurrentInGate(StopItem &curStop, const StopItem::Segment &prevSeg)
+{
+    //FIIXME
+    //query q(mDb, "SELECT ");
+    return false;
+}
+
+void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg)
 {
     const int row = idx.row();
 
@@ -1821,7 +1828,6 @@ void StopModel::setStopInfo(const QModelIndex &idx, const StopItem &newItem, con
         return;
 
     StopItem& s = stops[row];
-    StopItem newStop =  newItem;
 
     if(s.type != First && row > 0)
     {
@@ -1829,20 +1835,52 @@ void StopModel::setStopInfo(const QModelIndex &idx, const StopItem &newItem, con
         StopItem& prevStop = stops[row - 1];
         if(prevStop.nextSegment.segmentId != prevSeg.segmentId)
         {
-            if(!updatePrevSegment(row, prevStop, newStop, prevSeg.segmentId))
+            if(!updatePrevSegment(prevStop, newStop, prevSeg.segmentId))
                 return;
+            prevSeg = prevStop.nextSegment;
         }
     }
 
+    command cmd(mDb);
+
     if(s.stationId != newStop.stationId)
     {
-        //Update station
+        //Update station, reset out gate
+        cmd.prepare("UPDATE stops SET station_id=?,out_gate_conn=NULL WHERE id=?");
+        cmd.bind(1, newStop.stationId);
+        cmd.bind(2, s.stopId);
+
+        if(cmd.execute() != SQLITE_OK)
+            return;
+
+        s.stationId = newStop.stationId;
+        s.toGate.gateConnId = 0;
+    }
+
+    if(s.fromGate.gateConnId != newStop.fromGate.gateConnId)
+    {
+        updateCurrentInGate(newStop, prevSeg);
     }
 
     if(s.arrival != newStop.arrival || s.departure != newStop.departure)
     {
         //Update Arrival and Departure
+        //NOTE: they must be set togheter so CHECK constraint fires at the end
+        //Otherwise it would be impossible to set arrival > departure and then update departure
+
+        cmd.prepare("UPDATE stops SET arrival=?,departure=? WHERE id=?");
+        cmd.bind(1, newStop.arrival);
+        cmd.bind(2, newStop.departure);
+        cmd.bind(3, s.stopId);
+
+        if(cmd.execute() != SQLITE_OK)
+            return;
+
+        s.arrival = newStop.arrival;
+        s.departure = newStop.departure;
     }
+
+
 }
 
 void StopModel::removeStop(const QModelIndex &idx)
