@@ -267,14 +267,14 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
     if(m_lockStationId == DoNotLock)
     {
-        fromStationMatch->setFilter(0);
+        fromStationMatch->setFilter(0, 0);
         fromStationMatch->refreshData();
-        toStationMatch->setFilter(0);
+        toStationMatch->setFilter(0, 0);
     }
     else
     {
         //Filter out 'From:' station
-        toStationMatch->setFilter(fromStId);
+        toStationMatch->setFilter(0, fromStId);
     }
     toStationMatch->refreshData();
 
