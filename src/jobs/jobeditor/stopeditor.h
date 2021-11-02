@@ -26,9 +26,8 @@ public:
 
     void setStop(const StopItem& item, const StopItem& prev);
 
-    QTime getArrival();
-    QTime getDeparture();
-    db_id getStation();
+    inline const StopItem& getCurItem() const { return oldItem; }
+    inline const StopItem& getPrevItem() const { return prevItem; }
 
 private slots:
     void onStationSelected();

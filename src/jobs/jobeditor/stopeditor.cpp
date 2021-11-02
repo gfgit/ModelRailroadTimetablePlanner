@@ -115,15 +115,15 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
 
     depEdit->setTime(item.departure);
 
-    /* Next stop must be at least one minute after
-     * This is to prevent contemporary stops that will break ORDER BY arrival queries */
-    const QTime minArr = prev.departure.addSecs(60);
-    arrEdit->blockSignals(true);
-    arrEdit->setMinimumTime(minArr);
-    arrEdit->blockSignals(false);
-
     if(item.type != First)
     {
+        /* Next stop must be at least one minute after
+         * This is to prevent contemporary stops that will break ORDER BY arrival queries */
+        const QTime minArr = prevItem.departure.addSecs(60);
+        arrEdit->blockSignals(true);
+        arrEdit->setMinimumTime(minArr);
+        arrEdit->blockSignals(false);
+
         //First stop: arrival is hidden, you can change only departure so do not set a minimum
         //Normal stop: at least 1 minute stop
         //Transit, Last: departure = arrival
@@ -133,21 +133,6 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         else
             depEdit->setMinimumTime(minDep);
     }
-}
-
-QTime StopEditor::getArrival()
-{
-    return arrEdit->time();
-}
-
-QTime StopEditor::getDeparture()
-{
-    return depEdit->time();
-}
-
-db_id StopEditor::getStation()
-{
-    return oldItem.stationId;
 }
 
 void StopEditor::onStationSelected()
@@ -172,9 +157,13 @@ void StopEditor::onStationSelected()
         return;
 
     oldItem.stationId = newStId;
-    prevItem.nextSegment.segmentId = prevSegmentId; //TODO: set connection
 
-    //Update segment
+    //Update prev segment
+    prevItem.nextSegment.segConnId = 0; //Reset, will be reloaded by model
+    prevItem.nextSegment.outTrackNum = -1;
+    prevItem.nextSegment.segmentId = prevSegmentId;
+
+    //Update next segment
     segmentMatchModel->setFilter(oldItem.stationId, 0, 0);
     mSegmentEdit->setData(0); //Reset, user must choose again
 }
