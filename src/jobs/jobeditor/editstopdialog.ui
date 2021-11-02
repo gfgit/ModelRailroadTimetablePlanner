@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>653</width>
-    <height>657</height>
+    <width>849</width>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,16 @@
    <property name="bottomMargin">
     <number>4</number>
    </property>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
@@ -39,45 +49,49 @@
        <property name="leftMargin">
         <number>9</number>
        </property>
-       <item row="1" column="0">
-        <widget class="QGroupBox" name="platfBox">
-         <property name="title">
-          <string>Platform</string>
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="timeBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <item row="0" column="1">
-           <widget class="QRadioButton" name="platfRadio">
+         <property name="title">
+          <string>Time</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_2">
             <property name="text">
-             <string>Main</string>
+             <string>Arrival</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QRadioButton" name="depotRadio">
+          <item row="0" column="1">
+           <widget class="QTimeEdit" name="arrivalTimeEdit"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_3">
             <property name="text">
-             <string>Depot</string>
+             <string>Departure</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="mainPlatfSpin">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="depotSpin">
-            <property name="minimum">
-             <number>1</number>
-            </property>
-           </widget>
+           <widget class="QTimeEdit" name="departureTimeEdit"/>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="0" column="1" rowspan="2">
+       <item row="0" column="1" rowspan="4">
         <widget class="QGroupBox" name="descrBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Description</string>
          </property>
@@ -104,180 +118,105 @@
         </widget>
        </item>
        <item row="0" column="0">
-        <widget class="QGroupBox" name="mainBox">
-         <property name="title">
-          <string>Time</string>
+        <widget class="QGroupBox" name="prevStopBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-         <layout class="QGridLayout" name="stopBoxLayout">
-          <item row="1" column="1">
-           <widget class="QTimeEdit" name="arrivalTimeEdit"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>Arrival</string>
-            </property>
-           </widget>
-          </item>
+         <property name="title">
+          <string>Previous Stop</string>
+         </property>
+         <layout class="QFormLayout" name="formLayout">
           <item row="0" column="0">
            <widget class="QLabel" name="label">
             <property name="text">
-             <string>Station</string>
+             <string>Prev. Station:</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="prevStEdit"/>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>Departure</string>
+             <string>Out Gate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="prevOutGateEdit"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_14">
+            <property name="text">
+             <string>Segment:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
-           <widget class="QTimeEdit" name="departureTimeEdit"/>
+           <widget class="QLineEdit" name="prevSegmentEdit"/>
           </item>
          </layout>
         </widget>
        </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="timeTab">
-      <attribute name="title">
-       <string>Time</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>Arrival</string>
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="curStopBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="prevStEdit">
-         <property name="readOnly">
-          <bool>true</bool>
+         <property name="title">
+          <string>Current Stop</string>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Previous Station</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Line Max.Speed</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>Speed</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Train Max.Speed</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Departure</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QTimeEdit" name="calcTimeArr"/>
-       </item>
-       <item row="5" column="2">
-        <widget class="QTimeEdit" name="calcTimeDep"/>
-       </item>
-       <item row="4" column="4">
-        <widget class="QPushButton" name="calcTimeBut">
-         <property name="text">
-          <string>Re-Calc</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="4">
-        <widget class="QPushButton" name="applyTimeBut">
-         <property name="text">
-          <string>Apply</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QSpinBox" name="speedEdit">
-         <property name="suffix">
-          <string> Km/h</string>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QSpinBox" name="lineSpeedBox">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::NoButtons</enum>
-         </property>
-         <property name="suffix">
-          <string> Km/h</string>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QSpinBox" name="trainSpeedBox">
-         <property name="wrapping">
-          <bool>false</bool>
-         </property>
-         <property name="frame">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::NoButtons</enum>
-         </property>
-         <property name="showGroupSeparator" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> Km/h</string>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Line</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="currentLineText">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
+         <layout class="QFormLayout" name="formLayout_3">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Station:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Track:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="text">
+             <string>Out Gate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="label_8">
+            <property name="text">
+             <string>Out Gate Track:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>In Gate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="inGateLabel">
+            <property name="text">
+             <string>A</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>
@@ -465,8 +404,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>641</width>
-            <height>584</height>
+            <width>837</width>
+            <height>589</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -536,16 +475,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>
