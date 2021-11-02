@@ -89,17 +89,11 @@ bool JobsHelper::removeAllJobs(sqlite3pp::database &db)
     cmd.prepare("DELETE FROM old_stops");
     cmd.execute();
 
-    cmd.prepare("DELETE FROM old_jobsegments");
-    cmd.execute();
-
     //Current
     cmd.prepare("DELETE FROM coupling");
     cmd.execute();
 
     cmd.prepare("DELETE FROM stops");
-    cmd.execute();
-
-    cmd.prepare("DELETE FROM jobsegments");
     cmd.execute();
 
     //Delete jobs
