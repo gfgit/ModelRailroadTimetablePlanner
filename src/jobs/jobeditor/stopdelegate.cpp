@@ -184,7 +184,6 @@ QWidget *StopDelegate::createEditor(QWidget *parent,
                                     const QModelIndex &index) const
 
 {
-    StopType type = getStopType(index);
     int addHere = index.data(ADDHERE_ROLE).toInt();
     if( addHere != 0)
     {
@@ -194,15 +193,10 @@ QWidget *StopDelegate::createEditor(QWidget *parent,
 
     StopEditor *editor = new StopEditor(mDb, parent);
     editor->setAutoFillBackground(true);
-    editor->setStopType(type);
     editor->setEnabled(false); //Mark it
 
     //Prevent JobPathEditor context menu in table view during stop editing
     editor->setContextMenuPolicy(Qt::PreventContextMenu);
-
-    //See 'StopEditor::popupLinesCombo'
-    connect(this, &StopDelegate::popupEditorLinesCombo, editor, &StopEditor::popupLinesCombo);
-    connect(editor, &StopEditor::lineChosen, this, &StopDelegate::onLineChosen);
 
     return editor;
 }
@@ -216,24 +210,18 @@ void StopDelegate::setEditorData(QWidget *editor,
     ed->setEnabled(true); //Mark it
 
     const StopModel *model = static_cast<const StopModel *>(index.model());
+
     const StopItem item = model->getItemAt(index.row());
+    StopItem prev;
 
     int r = index.row();
     if(r > 0)
     {
-        const StopItem prev = model->getItemAt(r - 1);
-        ed->setPrevSt(prev.stationId);
-        ed->setPrevDeparture(prev.departure);
+        //Current stop is not First, get also previous one
+        prev = model->getItemAt(r - 1);
     }
 
-    ed->setStation(item.stationId);
-    ed->setArrival(item.arrival);
-    ed->setDeparture(item.departure);
-    ed->setCurLine(item.curLine);
-    if(item.nextLine)
-        ed->setNextLine(item.nextLine);
-
-    ed->calcInfo();
+    ed->setStop(item, prev);
 }
 
 void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
@@ -243,13 +231,8 @@ void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
 
     qDebug() << "End editing: stop" << index.row();
     StopEditor *ed = static_cast<StopEditor*>(editor);
-    model->setData(index, ed->getArrival(), ARR_ROLE);
-    model->setData(index, ed->getDeparture(), DEP_ROLE);
-    model->setData(index, ed->getStation(), STATION_ID);
-
-    db_id nextLine = ed->getNextLine();
-    qDebug() << "NextLine:" << nextLine;
-    model->setData(index, nextLine, NEXT_LINE_ROLE);
+    StopModel *stopModel = static_cast<StopModel *>(model);
+    stopModel->setStopInfo(index, ed->getCurItem(), ed->getPrevItem().nextSegment);
 }
 
 void StopDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
