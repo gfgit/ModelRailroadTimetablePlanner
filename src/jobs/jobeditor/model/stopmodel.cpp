@@ -67,7 +67,7 @@ void StopModel::prepareQueries()
     q_setArrival.prepare("UPDATE stops SET arrival=? WHERE id=?");
     q_setDeparture.prepare("UPDATE stops SET departure=? WHERE id=?");
 
-    q_setSegPos.prepare("UPDATE jobsegments SET num=num+? WHERE jobId=? AND num>=?");
+    q_setSegPos.prepare("UPDATE jobsegments SET num=num+? WHERE job_id=? AND num>=?");
 
     q_setSegLine.prepare("UPDATE jobsegments SET lineId=? WHERE id=?");
 
@@ -147,7 +147,7 @@ void StopModel::uncoupleStillCoupledAtLastStop()
         uncoupleStillCoupledAtStop(s);
 
         //Select them to update them
-        query q_selectMoved(mDb, "SELECT rsId FROM coupling WHERE stopId=?");
+        query q_selectMoved(mDb, "SELECT rs_id FROM coupling WHERE stop_id=?");
         q_selectMoved.bind(1, s.stopId);
         for(auto rs : q_selectMoved)
         {
@@ -161,12 +161,12 @@ void StopModel::uncoupleStillCoupledAtLastStop()
 void StopModel::uncoupleStillCoupledAtStop(const StopItem& s)
 {
     //Uncouple all still-coupled RS
-    command q_uncoupleRS(mDb, "INSERT OR IGNORE INTO coupling(id,rsId,stopId,operation) VALUES(NULL,?,?,0)");
-    query q_selectStillOn(mDb, "SELECT coupling.rsId,MAX(stops.arrival)"
+    command q_uncoupleRS(mDb, "INSERT OR IGNORE INTO coupling(id,rs_id,stop_id,operation) VALUES(NULL,?,?,0)");
+    query q_selectStillOn(mDb, "SELECT coupling.rs_id,MAX(stops.arrival)"
                                " FROM stops"
-                               " JOIN coupling ON coupling.stopId=stops.id"
-                               " WHERE stops.jobId=?1 AND stops.arrival<?2"
-                               " GROUP BY coupling.rsId"
+                               " JOIN coupling ON coupling.stop_id=stops.id"
+                               " WHERE stops.job_id=?1 AND stops.arrival<?2"
+                               " GROUP BY coupling.rs_id"
                                " HAVING coupling.operation=1");
     q_selectStillOn.bind(1, mJobId);
     q_selectStillOn.bind(2, s.arrival);
@@ -897,7 +897,7 @@ void StopModel::insertAddHere(int row, int type)
 db_id StopModel::createStop(db_id jobId, db_id segId, const QTime& time, int transit)
 {
     command q_addStop(mDb, "INSERT INTO stops"
-                           "(id,jobId,stationId,arrival,departure,platform,transit,description,segmentId,otherSegment)"
+                           "(id,job_id,stationId,arrival,departure,platform,transit,description,segmentId,otherSegment)"
                            " VALUES (NULL,?,NULL,?,?,?,?,NULL,?,NULL)");
     q_addStop.bind(1, jobId);
     q_addStop.bind(2, time);
@@ -918,7 +918,7 @@ db_id StopModel::createStop(db_id jobId, db_id segId, const QTime& time, int tra
 
 db_id StopModel::createSegment(db_id jobId, int num)
 {
-    command q_addSegment(mDb, "INSERT INTO jobsegments(id,jobId,lineId,num) VALUES (NULL,?,NULL,?)");
+    command q_addSegment(mDb, "INSERT INTO jobsegments(id,job_id,lineId,num) VALUES (NULL,?,NULL,?)");
     q_addSegment.bind(1, jobId);
     q_addSegment.bind(2, num);
 
@@ -1054,7 +1054,7 @@ void StopModel::addStop()
             {
                 //We are new last stop and previous is not First (>= 1)
                 //Move uncoupled rs from former last stop (now last but one) to new last stop
-                command q_moveUncoupled(mDb, "UPDATE OR IGNORE coupling SET stopId=? WHERE stopId=? AND operation=?");
+                command q_moveUncoupled(mDb, "UPDATE OR IGNORE coupling SET stop_id=? WHERE stop_id=? AND operation=?");
                 q_moveUncoupled.bind(1, last.stopId);
                 q_moveUncoupled.bind(2, s.stopId);
                 q_moveUncoupled.bind(3, RsOp::Uncoupled);
@@ -1070,7 +1070,7 @@ void StopModel::addStop()
             uncoupleStillCoupledAtStop(last);
 
             //Select them to update them
-            query q_selectMoved(mDb, "SELECT rsId FROM coupling WHERE stopId=?");
+            query q_selectMoved(mDb, "SELECT rs_id FROM coupling WHERE stop_id=?");
             q_selectMoved.bind(1, last.stopId);
             for(auto rs : q_selectMoved)
             {
@@ -1452,14 +1452,14 @@ void StopModel::rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep)
     firstStop.arrival = firstArr;
     firstStop.departure = firstDep;
 
-    query q(Session->m_Db, "SELECT MIN(rs_models.max_speed), rsId FROM("
-                           "SELECT coupling.rsId AS rsId, MAX(stops.arrival)"
+    query q(Session->m_Db, "SELECT MIN(rs_models.max_speed), rs_id FROM("
+                           "SELECT coupling.rs_id AS rs_id, MAX(stops.arrival)"
                            " FROM stops"
-                           " JOIN coupling ON coupling.stopId=stops.id"
-                           " WHERE stops.jobId=? AND stops.arrival<?"
-                           " GROUP BY coupling.rsId"
+                           " JOIN coupling ON coupling.stop_id=stops.id"
+                           " WHERE stops.job_id=? AND stops.arrival<?"
+                           " GROUP BY coupling.rs_id"
                            " HAVING coupling.operation=1)"
-                           " JOIN rs_list ON rs_list.id=rsId"
+                           " JOIN rs_list ON rs_list.id=rs_id"
                            " JOIN rs_models ON rs_models.id=rs_list.model_id");
 
     QTime prevDep = firstDep;
@@ -1605,7 +1605,7 @@ void StopModel::shiftStopsBy24hoursFrom(const QTime &startTime)
     //SOLUTION: shift all subsequent stops by 24 hours so there will be no conflicts and then reset the time once at a time
     //          so in the end they all will have correct time (no need to shift backwards)
 
-    command q_shiftArrDep(mDb, "UPDATE stops SET arrival=arrival+?1,departure=departure+?1 WHERE jobId=?2 AND arrival>?3");
+    command q_shiftArrDep(mDb, "UPDATE stops SET arrival=arrival+?1,departure=departure+?1 WHERE job_id=?2 AND arrival>?3");
     const int shiftMin = 24 * 60; //Shift by 24h
     q_shiftArrDep.bind(1, shiftMin);
     q_shiftArrDep.bind(2, mJobId);
@@ -1964,7 +1964,7 @@ void StopModel::removeStop(const QModelIndex &idx)
         {
             //We are new last stop and previous is not First (>= 1)
             //Move couplings from former last stop (now removed) to new last stop (former last but one)
-            command q_moveUncoupled(mDb, "UPDATE OR IGNORE coupling SET stopId=? WHERE stopId=?");
+            command q_moveUncoupled(mDb, "UPDATE OR IGNORE coupling SET stop_id=? WHERE stop_id=?");
             q_moveUncoupled.bind(1, prev.stopId);
             q_moveUncoupled.bind(2, s.stopId);
             int ret = q_moveUncoupled.execute();
@@ -1976,7 +1976,7 @@ void StopModel::removeStop(const QModelIndex &idx)
             }
 
             //Select them to update them
-            query q_selectMoved(mDb, "SELECT rsId FROM coupling WHERE stopId=?");
+            query q_selectMoved(mDb, "SELECT rs_id FROM coupling WHERE stop_id=?");
             q_selectMoved.bind(1, prev.stopId);
             for(auto rs : q_selectMoved)
             {
@@ -2556,23 +2556,11 @@ bool StopModel::startStopsEditing()
     bool alreadyEditing = editState == InfoEditing;
     editState = StopsEditing;
 
-    //Backup jobsegments
-    command q_backupSegments(mDb, "INSERT INTO old_jobsegments SELECT * FROM jobsegments WHERE jobId=?");
-    q_backupSegments.bind(1, mJobId);
-    int ret = q_backupSegments.execute();
-    q_backupSegments.reset();
-
-    if(ret != SQLITE_OK)
-    {
-        qDebug() << "Error while saving old segments:" << ret << mDb.error_msg() << mDb.extended_error_code();
-        return false;
-    }
-
     //Backup stops
-    command q_backupStops(mDb, "INSERT INTO old_stops SELECT * FROM stops WHERE jobId=?");
-    q_backupStops.bind(1, mJobId);
-    ret = q_backupStops.execute();
-    q_backupStops.reset();
+    command q_backup(mDb, "INSERT INTO old_stops SELECT * FROM stops WHERE job_id=?");
+    q_backup.bind(1, mJobId);
+    int ret = q_backup.execute();
+    q_backup.reset();
 
     if(ret != SQLITE_OK)
     {
@@ -2581,13 +2569,13 @@ bool StopModel::startStopsEditing()
     }
 
     //Backup couplings
-    command q_backupCouplings(mDb, "INSERT INTO old_coupling(id, stopId, rsId, operation)"
-                                   " SELECT coupling.id, coupling.stopId, coupling.rsId, coupling.operation"
-                                   " FROM coupling"
-                                   " JOIN stops ON stops.id=coupling.stopId WHERE stops.jobId=?");
-    q_backupCouplings.bind(1, mJobId);
-    ret = q_backupCouplings.execute();
-    q_backupCouplings.reset();
+    q_backup.prepare("INSERT INTO old_coupling(id, stop_id, rs_id, operation)"
+                     " SELECT coupling.id, coupling.stop_id, coupling.rs_id, coupling.operation"
+                     " FROM coupling"
+                     " JOIN stops ON stops.id=coupling.stop_id WHERE stops.job_id=?");
+    q_backup.bind(1, mJobId);
+    ret = q_backup.execute();
+    q_backup.reset();
 
     if(ret != SQLITE_OK)
     {
@@ -2609,7 +2597,7 @@ bool StopModel::endStopsEditing()
     if(editState == StopsEditing)
     {
         //Clear old_stops (will automatically clear old_couplings with FK: ON DELETE CASCADE)
-        command q_clearOldStops(mDb, "DELETE FROM old_stops WHERE jobId=?");
+        command q_clearOldStops(mDb, "DELETE FROM old_stops WHERE job_id=?");
         q_clearOldStops.bind(1, mJobId);
         int ret = q_clearOldStops.execute();
         q_clearOldStops.reset();
@@ -2617,18 +2605,6 @@ bool StopModel::endStopsEditing()
         if(ret != SQLITE_OK)
         {
             qDebug() << "Error while clearing old stops:" << ret << mDb.error_msg() << mDb.extended_error_code();
-            return false;
-        }
-
-        //Clear old_jobsegments
-        command q_clearOldSegments(mDb, "DELETE FROM old_jobsegments WHERE jobId=?");
-        q_clearOldSegments.bind(1, mJobId);
-        ret = q_clearOldSegments.execute();
-        q_clearOldSegments.reset();
-
-        if(ret != SQLITE_OK)
-        {
-            qDebug() << "Error while clearing old segments:" << ret << mDb.error_msg() << mDb.extended_error_code();
             return false;
         }
     }
@@ -2645,7 +2621,7 @@ bool StopModel::commitChanges()
     if(editState == NotEditing)
         return true;
 
-    command q(mDb, "UPDATE jobs SET category=?, shiftId=? WHERE id=?");
+    command q(mDb, "UPDATE jobs SET category=?, shift_id=? WHERE id=?");
     q.bind(1, int(category));
     if(newShiftId)
         q.bind(2, newShiftId);
@@ -2706,10 +2682,10 @@ bool StopModel::revertChanges()
         //Delete current data
 
         //Clear stops (will automatically clear couplings with FK: ON DELETE CASCADE)
-        command q_clearCurStops(mDb, "DELETE FROM stops WHERE jobId=?");
-        q_clearCurStops.bind(1, mJobId);
-        int ret = q_clearCurStops.execute();
-        q_clearCurStops.reset();
+        command cmd(mDb, "DELETE FROM stops WHERE job_id=?");
+        cmd.bind(1, mJobId);
+        int ret = cmd.execute();
+        cmd.finish();
 
         if(ret != SQLITE_OK)
         {
@@ -2717,37 +2693,13 @@ bool StopModel::revertChanges()
             return false;
         }
 
-        //Clear jobsegments
-        command q_clearCurSegments(mDb, "DELETE FROM jobsegments WHERE jobId=?");
-        q_clearCurSegments.bind(1, mJobId);
-        ret = q_clearCurSegments.execute();
-        q_clearCurSegments.reset();
-
-        if(ret != SQLITE_OK)
-        {
-            qDebug() << "Error while clearing current segments:" << ret << mDb.error_msg() << mDb.extended_error_code();
-            return false;
-        }
-
         //Now restore old data
 
-        //Restore jobsegments
-        command q_restoreSegments(mDb, "INSERT INTO jobsegments SELECT * FROM old_jobsegments WHERE jobId=?");
-        q_restoreSegments.bind(1, mJobId);
-        ret = q_restoreSegments.execute();
-        q_restoreSegments.reset();
-
-        if(ret != SQLITE_OK)
-        {
-            qDebug() << "Error while restoring old segments:" << ret << mDb.error_msg() << mDb.extended_error_code();
-            return false;
-        }
-
         //Restore stops
-        command q_restoreStops(mDb, "INSERT INTO stops SELECT * FROM old_stops WHERE jobId=?");
-        q_restoreStops.bind(1, mJobId);
-        ret = q_restoreStops.execute();
-        q_restoreStops.reset();
+        cmd.prepare("INSERT INTO stops SELECT * FROM old_stops WHERE job_id=?");
+        cmd.bind(1, mJobId);
+        ret = cmd.execute();
+        cmd.reset();
 
         if(ret != SQLITE_OK)
         {
@@ -2756,13 +2708,13 @@ bool StopModel::revertChanges()
         }
 
         //Restore couplings
-        command q_restoreCouplings(mDb, "INSERT INTO coupling(id, stopId, rsId, operation)"
-                                        " SELECT old_coupling.id, old_coupling.stopId, old_coupling.rsId, old_coupling.operation"
-                                        " FROM old_coupling"
-                                        " JOIN stops ON stops.id=old_coupling.stopId WHERE stops.jobId=?");
-        q_restoreCouplings.bind(1, mJobId);
-        ret = q_restoreCouplings.execute();
-        q_restoreCouplings.reset();
+        cmd.prepare("INSERT INTO coupling(id, stop_id, rs_id, operation)"
+                    " SELECT old_coupling.id, old_coupling.stop_id, old_coupling.rs_id, old_coupling.operation"
+                    " FROM old_coupling"
+                    " JOIN stops ON stops.id=old_coupling.stop_id WHERE stops.job_id=?");
+        cmd.bind(1, mJobId);
+        ret = cmd.execute();
+        cmd.reset();
 
         if(ret != SQLITE_OK)
         {
