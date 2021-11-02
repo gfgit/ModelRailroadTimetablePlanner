@@ -4,8 +4,6 @@
 
 #include "app/scopedebug.h"
 
-#include "lines/helpers.h"
-
 #include "app/session.h"
 
 #include <QtMath>
@@ -2283,7 +2281,7 @@ int StopModel::calcTimeBetweenStInSecs(db_id stA, db_id stB, db_id lineId)
         return 0; //Error
     const double speedKmH = q.getRows().get<double>(0);
 
-    const double meters = lines::getStationsDistanceInMeters(mDb, lineId, stA, stB);
+    const double meters = 0; //lines::getStationsDistanceInMeters(mDb, lineId, stA, stB);
 
     qDebug() << "Km:" << meters/1000.0 << "Speed:" << speedKmH;
 
