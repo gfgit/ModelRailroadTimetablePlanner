@@ -245,7 +245,7 @@ void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     StopEditor *ed = static_cast<StopEditor*>(editor);
     model->setData(index, ed->getArrival(), ARR_ROLE);
     model->setData(index, ed->getDeparture(), DEP_ROLE);
-    model->setData(index, ed->getStation(), STATION_ROLE);
+    model->setData(index, ed->getStation(), STATION_ID);
 
     db_id nextLine = ed->getNextLine();
     qDebug() << "NextLine:" << nextLine;

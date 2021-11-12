@@ -9,7 +9,6 @@
 #include <QGraphicsScene>
 
 #include "graph/graphmanager.h"
-#include "graph/backgroundhelper.h"
 
 #include <QDebug>
 
@@ -165,6 +164,7 @@ void PrintWorker::printScene(QPainter *painter, const Scene& s)
     QPicture tmpPic;
     QPainter p(&tmpPic);
 
+    /* FIXME: adapt to new graph system
     BackgroundHelper *helper = graphMgr->getBackGround();
     QRectF labelsRect = source;
     labelsRect.setHeight(helper->getVertOffset());
@@ -176,6 +176,7 @@ void PrintWorker::printScene(QPainter *painter, const Scene& s)
                                         0, s.lineId);
 
     p.end();
+    */
 
     qreal xScale = target.width() / source.width();
     qreal yScale = target.height() / source.height();

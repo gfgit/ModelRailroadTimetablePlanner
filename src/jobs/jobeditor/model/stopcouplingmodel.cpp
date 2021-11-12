@@ -16,38 +16,14 @@ StopCouplingModel::StopCouplingModel(sqlite3pp::database &db, QObject *parent) :
 {
 }
 
-void StopCouplingModel::refreshData()
+qint64 StopCouplingModel::recalcTotalItemCount()
 {
-    if(!mDb.db())
-        return;
-
     query q(mDb, "SELECT COUNT(1) FROM coupling WHERE stopId=? AND operation=?");
     q.bind(1, m_stopId);
     q.bind(2, m_operation);
     q.step();
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
 }
 
 void StopCouplingModel::setStop(db_id stopId, RsOp op)
@@ -55,8 +31,7 @@ void StopCouplingModel::setStop(db_id stopId, RsOp op)
     m_stopId = stopId;
     m_operation = op;
 
-    refreshData();
-    clearCache();
+    refreshData(true);
 }
 
 void StopCouplingModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)

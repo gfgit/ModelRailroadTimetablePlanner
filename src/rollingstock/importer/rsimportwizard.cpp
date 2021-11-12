@@ -31,6 +31,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 
+#include <QPointer>
+
 RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     QWizard (parent),
     loadTask(nullptr),
@@ -93,16 +95,18 @@ void RSImportWizard::done(int result)
         {
             if(result == QDialog::Rejected) //RejectWithoutAsking skips this
             {
-                QMessageBox msgBox(this);
-                msgBox.setIcon(QMessageBox::Question);
-                msgBox.setWindowTitle(RsImportStrings::tr("Abort import?"));
-                msgBox.setText(RsImportStrings::tr("Do you want to import process? No data will be imported"));
-                QPushButton *abortBut = msgBox.addButton(QMessageBox::Abort);
-                QPushButton *noBut = msgBox.addButton(QMessageBox::No);
-                msgBox.setDefaultButton(noBut);
-                msgBox.setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
-                msgBox.exec();
-                if(msgBox.clickedButton() != abortBut)
+                QPointer<QMessageBox> msgBox = new QMessageBox(this);
+                msgBox->setIcon(QMessageBox::Question);
+                msgBox->setWindowTitle(RsImportStrings::tr("Abort import?"));
+                msgBox->setText(RsImportStrings::tr("Do you want to import process? No data will be imported"));
+                QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
+                QPushButton *noBut = msgBox->addButton(QMessageBox::No);
+                msgBox->setDefaultButton(noBut);
+                msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
+                msgBox->exec();
+                bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
+                delete msgBox;
+                if(!abortClicked)
                     return;
             }
 
@@ -134,16 +138,6 @@ void RSImportWizard::done(int result)
     Session->clearImportRSTables();
 
     QWizard::done(result);
-}
-
-void RSImportWizard::initializePage(int id)
-{
-    QWizard::initializePage(id);
-}
-
-void RSImportWizard::cleanupPage(int id)
-{
-    QWizard::cleanupPage(id);
 }
 
 bool RSImportWizard::validateCurrentPage()
@@ -289,8 +283,8 @@ void RSImportWizard::abortLoadTask()
 {
     if(loadTask)
     {
-        loadTask->cleanup();
         loadTask->stop();
+        loadTask->cleanup();
         loadTask = nullptr;
     }
 }
@@ -307,8 +301,8 @@ void RSImportWizard::abortImportTask()
 {
     if(importTask)
     {
-        importTask->cleanup();
         importTask->stop();
+        importTask->cleanup();
         importTask = nullptr;
     }
 }

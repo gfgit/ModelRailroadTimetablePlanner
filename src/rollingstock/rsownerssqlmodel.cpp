@@ -199,44 +199,20 @@ Qt::ItemFlags RSOwnersSQLModel::flags(const QModelIndex &idx) const
     return f;
 }
 
+qint64 RSOwnersSQLModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM rs_owners");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
 void RSOwnersSQLModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
-}
-
-void RSOwnersSQLModel::refreshData()
-{
-    if(!mDb.db())
-        return;
-
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_owners");
-    q.step();
-    const int count = q.getRows().get<int>(0);
-    if(count != totalItemsCount)
-    {
-        beginResetModel();
-
-        clearCache();
-        totalItemsCount = count;
-        emit totalItemsCountChanged(totalItemsCount);
-
-        //Round up division
-        const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
-        emit pageCountChanged(pageCount);
-
-        if(curPage >= pageCount)
-        {
-            switchToPage(pageCount - 1);
-        }
-
-        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
-
-        endResetModel();
-    }
 }
 
 void RSOwnersSQLModel::fetchRow(int row)
@@ -491,7 +467,7 @@ bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }
 
@@ -552,6 +528,6 @@ bool RSOwnersSQLModel::removeAllRSOwners()
         return false;
     }
 
-    refreshData();
+    refreshData(); //Recalc row count
     return true;
 }

@@ -5,6 +5,7 @@ add_subdirectory(thread)
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
   utils/colorview.h
+  utils/colordelegate.h
   utils/directiontype.h
   utils/file_format_names.h
   utils/imageviewer.h
@@ -21,6 +22,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/worker_event_types.h
 
   utils/checkproxymodel.cpp
+  utils/colordelegate.cpp
   utils/colorview.cpp
   utils/combodelegate.cpp
   utils/imageviewer.cpp

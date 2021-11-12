@@ -35,7 +35,12 @@ enum class CustomEvents
     StationsModelResult,
     StationLinesListModelResult,
     LinesModelResult,
-    RailwayNodeModelResult,
+    LineSegmentsModelResult,
+    RailwaySegmentsModelResult,
+
+    StationGatesListResult,
+    StationTracksListResult,
+    StationTrackConnListResult,
 
     //Jobs
     JobsModelResult

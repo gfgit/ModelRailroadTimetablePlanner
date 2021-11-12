@@ -1,5 +1,7 @@
 #include "pageditemmodel.h"
 
+#include <sqlite3pp/sqlite3pp.h>
+
 IPagedItemModel::IPagedItemModel(const int itemsPerPage, sqlite3pp::database &db, QObject *parent) :
     QAbstractTableModel(parent),
     mDb(db),
@@ -10,6 +12,44 @@ IPagedItemModel::IPagedItemModel(const int itemsPerPage, sqlite3pp::database &db
     ItemsPerPage(itemsPerPage)
 {
 
+}
+
+void IPagedItemModel::refreshData(bool forceUpdate)
+{
+    if(!mDb.db())
+        return;
+
+    emit itemsReady(-1, -1); //Notify we are about to refresh
+
+    qint64 count = recalcTotalItemCount();
+    if(count != totalItemsCount || forceUpdate)
+    {
+        beginResetModel();
+
+        clearCache();
+        totalItemsCount = count;
+        emit totalItemsCountChanged(totalItemsCount);
+
+        //Round up division
+        const int rem = count % ItemsPerPage;
+        pageCount = count / ItemsPerPage + (rem != 0);
+        emit pageCountChanged(pageCount);
+
+        if(curPage >= pageCount)
+        {
+            switchToPage(pageCount - 1);
+        }
+
+        curItemCount = totalItemsCount ? (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage : 0;
+
+        endResetModel();
+    }
+}
+
+qint64 IPagedItemModel::recalcTotalItemCount()
+{
+    //NOTE: either override this or refreshData()
+    return 0; //Default implementation
 }
 
 int IPagedItemModel::getSortingColumn() const

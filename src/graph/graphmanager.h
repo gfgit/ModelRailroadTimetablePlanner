@@ -5,8 +5,6 @@
 
 #include "utils/types.h"
 
-class BackgroundHelper;
-class GraphicsView;
 class LineStorage;
 
 typedef struct JobSelection
@@ -22,11 +20,7 @@ public:
     explicit GraphManager(QObject *parent = nullptr);
     ~GraphManager();
 
-    GraphicsView *getView() const;
-
     db_id getCurLineId() const;
-
-    BackgroundHelper *getBackGround() const;
 
     JobSelection getSelectedJob();
     void clearSelection();
@@ -39,7 +33,6 @@ signals:
     void jobSelected(db_id jobId);
 
 public slots:
-    bool setCurrentLine(db_id lineId);
     void onSelectionChanged();
     void onSelectionCleared();
 
@@ -54,8 +47,6 @@ public:
     LineStorage *lineStorage;
 
 private:
-    BackgroundHelper *backGround;
-    GraphicsView *view;
 
     db_id curLineId;
 

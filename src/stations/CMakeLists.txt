@@ -1,12 +1,11 @@
 add_subdirectory(manager)
+add_subdirectory(match_models)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  stations/stationsmatchmodel.h
-  stations/stationssqlmodel.h
+  stations/station_utils.h
+  stations/station_name_utils.h
 
-  stations/stationsmatchmodel.cpp
-  stations/stationssqlmodel.cpp
   PARENT_SCOPE
 )
 

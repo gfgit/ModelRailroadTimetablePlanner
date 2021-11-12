@@ -37,6 +37,7 @@ typedef enum {
     Coupled   = 1
 } RsOp;
 
+//FIXME: remove, use utils::RailwaySegmentType
 enum class LineType
 {
     NonElectric = 0,

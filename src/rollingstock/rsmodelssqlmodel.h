@@ -61,7 +61,6 @@ public:
 
     // Cached rows management
     virtual void clearCache() override;
-    virtual void refreshData() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -74,6 +73,9 @@ public:
     db_id getModelIdAtRow(int row) const;
 
     bool removeAllRSModels();
+
+protected:
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     void fetchRow(int row);

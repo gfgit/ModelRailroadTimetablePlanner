@@ -25,112 +25,126 @@ void RsErrWorker::run()
 {
     using namespace RsErrors;
 
-
-    query q_selectCoupling(mDb, "SELECT coupling.id, coupling.operation, coupling.stopId,"
-                                " stops.jobId, jobs.category,"
-                                " stops.stationId, stations.name,"
-                                " stops.transit, stops.arrival, stops.departure"
-                                " FROM coupling"
-                                " JOIN stops ON stops.id=coupling.stopId"
-                                " JOIN jobs ON jobs.id=stops.jobId"
-                                " JOIN stations ON stations.id=stops.stationId"
-                                " WHERE coupling.rsId=? ORDER BY stops.arrival ASC");
-
-    qDebug() << "Starting WORKER: rs check";
-
     QMap<db_id, RSErrorList> data;
 
-    if(rsToCheck.isEmpty())
-    {
-        query q_countRs(mDb, "SELECT COUNT() FROM rs_list");
-        query q_selectRs(mDb, "SELECT rs_list.id,rs_list.number,"
-                              "rs_models.name,rs_models.suffix,rs_models.type"
-                              " FROM rs_list"
-                              " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id");
+    try{
 
-        q_countRs.step();
-        int rsCount = q_countRs.getRows().get<int>(0);
-        q_countRs.reset();
+        query q_selectCoupling(mDb, "SELECT coupling.id, coupling.operation, coupling.stop_id,"
+                                    " stops.job_id, jobs.category,"
+                                    " stops.station_id, stations.name,"
+                                    " stops.type, stops.arrival, stops.departure"
+                                    " FROM coupling"
+                                    " JOIN stops ON stops.id=coupling.stop_id"
+                                    " JOIN jobs ON jobs.id=stops.job_id"
+                                    " JOIN stations ON stations.id=stops.station_id"
+                                    " WHERE coupling.rs_id=? ORDER BY stops.arrival ASC");
 
-        int i = 0;
-        sendEvent(new RsWorkerProgressEvent(0, rsCount), false);
+        qDebug() << "Starting WORKER: rs check";
 
-        for(auto r : q_selectRs)
+        if(rsToCheck.isEmpty())
         {
-            if(++i % 4 == 0) //Check every 4 RS to keep overhead low.
+            query q_countRs(mDb, "SELECT COUNT() FROM rs_list");
+            query q_selectRs(mDb, "SELECT rs_list.id,rs_list.number,"
+                                  "rs_models.name,rs_models.suffix,rs_models.type"
+                                  " FROM rs_list"
+                                  " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id");
+
+            q_countRs.step();
+            int rsCount = q_countRs.getRows().get<int>(0);
+            q_countRs.reset();
+
+            int i = 0;
+            sendEvent(new RsWorkerProgressEvent(0, rsCount), false);
+
+            for(auto r : q_selectRs)
             {
-                if(wasStopped())
+                if(++i % 4 == 0) //Check every 4 RS to keep overhead low.
+                {
+                    if(wasStopped())
+                        break;
+
+                    sendEvent(new RsWorkerProgressEvent(i, rsCount), false);
+                }
+
+                RSErrorList rs;
+                rs.rsId = r.get<db_id>(0);
+
+                int number = r.get<int>(1);
+                int modelNameLen = sqlite3_column_bytes(q_selectRs.stmt(), 2);
+                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_selectRs.stmt(), 2));
+
+                int modelSuffixLen = sqlite3_column_bytes(q_selectRs.stmt(), 3);
+                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_selectRs.stmt(), 3));
+                RsType type = RsType(r.get<int>(4));
+
+                rs.rsName = rs_utils::formatNameRef(modelName, modelNameLen,
+                                                    number,
+                                                    modelSuffix, modelSuffixLen,
+                                                    type);
+
+                checkRs(rs, q_selectCoupling);
+
+                if(rs.errors.size()) //Insert only if there are errors
+                    data.insert(rs.rsId, rs);
+            }
+        }
+        else
+        {
+            query q_getRsInfo(mDb, "SELECT rs_list.number,"
+                                   "rs_models.name,rs_models.suffix,rs_models.type"
+                                   " FROM rs_list"
+                                   " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
+                                   " WHERE rs_list.id=?");
+            int i = 0;
+            for(db_id rsId : qAsConst(rsToCheck))
+            {
+                if(++i % 4 == 0 && wasStopped()) //Check every 4 RS to keep overhead low.
                     break;
 
-                sendEvent(new RsWorkerProgressEvent(i, rsCount), false);
-            }
+                RSErrorList rs;
+                rs.rsId = rsId;
 
-            RSErrorList rs;
-            rs.rsId = r.get<db_id>(0);
+                q_getRsInfo.bind(1, rs.rsId);
+                if(q_getRsInfo.step() != SQLITE_ROW)
+                {
+                    q_getRsInfo.reset();
+                    continue; //RS does not exist!
+                }
 
-            int number = r.get<int>(1);
-            int modelNameLen = sqlite3_column_bytes(q_selectRs.stmt(), 2);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_selectRs.stmt(), 2));
+                int number = sqlite3_column_int(q_getRsInfo.stmt(), 0);
+                int modelNameLen = sqlite3_column_bytes(q_getRsInfo.stmt(), 1);
+                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_getRsInfo.stmt(), 1));
 
-            int modelSuffixLen = sqlite3_column_bytes(q_selectRs.stmt(), 3);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_selectRs.stmt(), 3));
-            RsType type = RsType(r.get<int>(4));
+                int modelSuffixLen = sqlite3_column_bytes(q_getRsInfo.stmt(), 2);
+                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_getRsInfo.stmt(), 2));
+                RsType type = RsType(sqlite3_column_int(q_getRsInfo.stmt(), 3));
 
-            rs.rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                number,
-                                                modelSuffix, modelSuffixLen,
-                                                type);
-
-            checkRs(rs, q_selectCoupling);
-
-            if(rs.errors.size()) //Insert only if there are errors
-                data.insert(rs.rsId, rs);
-        }
-    }
-    else
-    {
-        query q_getRsInfo(mDb, "SELECT rs_list.number,"
-                               "rs_models.name,rs_models.suffix,rs_models.type"
-                               " FROM rs_list"
-                               " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                               " WHERE rs_list.id=?");
-        int i = 0;
-        for(db_id rsId : rsToCheck)
-        {
-            if(++i % 4 == 0 && wasStopped()) //Check every 4 RS to keep overhead low.
-                break;
-
-            RSErrorList rs;
-            rs.rsId = rsId;
-
-            q_getRsInfo.bind(1, rs.rsId);
-            if(q_getRsInfo.step() != SQLITE_ROW)
-            {
+                rs.rsName = rs_utils::formatNameRef(modelName, modelNameLen,
+                                                    number,
+                                                    modelSuffix, modelSuffixLen,
+                                                    type);
                 q_getRsInfo.reset();
-                continue; //RS does not exist!
+
+                checkRs(rs, q_selectCoupling);
+
+                //Insert also if there aren't errors to tell RsErrorTreeModel to remove this RS
+                data.insert(rs.rsId, rs);
             }
-
-            int number = sqlite3_column_int(q_getRsInfo.stmt(), 0);
-            int modelNameLen = sqlite3_column_bytes(q_getRsInfo.stmt(), 1);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_getRsInfo.stmt(), 1));
-
-            int modelSuffixLen = sqlite3_column_bytes(q_getRsInfo.stmt(), 2);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_getRsInfo.stmt(), 2));
-            RsType type = RsType(sqlite3_column_int(q_getRsInfo.stmt(), 3));
-
-            rs.rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                number,
-                                                modelSuffix, modelSuffixLen,
-                                                type);
-            q_getRsInfo.reset();
-
-            checkRs(rs, q_selectCoupling);
-
-            //Insert also if there aren't errors to tell RsErrorTreeModel to remove this RS
-            data.insert(rs.rsId, rs);
         }
+
+        sendEvent(new RsWorkerResultEvent(this, data, !rsToCheck.isEmpty()), true);
+        return;
+    }
+    catch(std::exception& e)
+    {
+        qWarning() << "RsErrWorker: exception " << e.what();
+    }
+    catch(...)
+    {
+        qWarning() << "RsErrWorker: generic exception";
     }
 
+    //FIXME: Send error
     sendEvent(new RsWorkerResultEvent(this, data, !rsToCheck.isEmpty()), true);
 }
 

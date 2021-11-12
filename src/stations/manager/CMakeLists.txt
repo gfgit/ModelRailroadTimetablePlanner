@@ -1,16 +1,14 @@
 add_subdirectory(free_rs_viewer)
-add_subdirectory(railwaynode)
+add_subdirectory(lines)
+add_subdirectory(segments)
+add_subdirectory(stations)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  stations/manager/colordelegate.h
-  stations/manager/defaultplatfdelegate.h
   stations/manager/stationplanmodel.h
   stations/manager/stationsmanager.h
   stations/manager/stationjobview.h
 
-  stations/manager/colordelegate.cpp
-  stations/manager/defaultplatfdelegate.cpp
   stations/manager/stationplanmodel.cpp
   stations/manager/stationsmanager.cpp
   stations/manager/stationjobview.cpp

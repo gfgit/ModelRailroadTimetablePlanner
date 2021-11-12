@@ -7,7 +7,7 @@
 
 #include <QVector>
 
-
+//FIXME remove and use instad RailwaySegmentMatchModel
 class StationLinesListModel : public IPagedItemModel
 {
     Q_OBJECT
@@ -45,7 +45,6 @@ public:
 
     // Cached rows management
     virtual void clearCache() override;
-    virtual void refreshData() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -58,6 +57,9 @@ public:
 
 signals:
     void resultsReady();
+
+protected:
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     void fetchRow(int row);

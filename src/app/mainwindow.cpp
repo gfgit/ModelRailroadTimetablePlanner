@@ -12,6 +12,7 @@
 #include "jobs/jobeditor/jobpatheditor.h"
 #include <QDockWidget>
 
+#include <QPointer>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QLabel>
@@ -20,14 +21,11 @@
 
 #include "settings/settingsdialog.h"
 
-#include "graph/graphmanager.h"
-#include "graph/graphicsview.h"
-#include <QGraphicsItem>
+#include "graph/graphmanager.h" //FIXME: remove
+
+#include "graph/view/linegraphwidget.h"
 
 #include "db_metadata/meetinginformationdialog.h"
-
-#include "lines/linestorage.h"
-#include "lines/linesmatchmodel.h"
 
 #include "printing/printwizard.h"
 
@@ -63,14 +61,13 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     jobEditor(nullptr),
-    #ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_RS_CHECKER
     rsErrorsWidget(nullptr),
     rsErrDock(nullptr),
-    #endif
+#endif
     view(nullptr),
     jobDock(nullptr),
     searchEdit(nullptr),
-    lineComboSearch(nullptr),
     welcomeLabel(nullptr),
     recentFileActs{nullptr},
     m_mode(CentralWidgetMode::StartPageMode)
@@ -84,28 +81,8 @@ MainWindow::MainWindow(QWidget *parent) :
     auto graphMgr = viewMgr->getGraphMgr();
     connect(graphMgr, &GraphManager::jobSelected, this, &MainWindow::onJobSelected);
 
-    view = graphMgr->getView();
-    view->setObjectName("GraphicsView");
-    view->setParent(this);
-
-    auto linesMatchModel = new LinesMatchModel(Session->m_Db, true, this);
-    linesMatchModel->setHasEmptyRow(false); //Do not allow empty view (no line selected)
-    lineComboSearch = new CustomCompletionLineEdit(linesMatchModel, this);
-    lineComboSearch->setPlaceholderText(tr("Choose line"));
-    lineComboSearch->setToolTip(tr("Choose a railway line"));
-    lineComboSearch->setMinimumWidth(200);
-    lineComboSearch->setMinimumHeight(25);
-    lineComboSearch->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-
-    QAction *sep = ui->mainToolBar->insertSeparator(ui->actionPrev_Job_Segment);
-    ui->mainToolBar->insertWidget(sep, lineComboSearch);
-
-    connect(lineComboSearch, &CustomCompletionLineEdit::dataIdChanged, graphMgr, &GraphManager::setCurrentLine);
-    connect(graphMgr, &GraphManager::currentLineChanged, lineComboSearch, &CustomCompletionLineEdit::setData_slot);
-
-    auto lineStorage = Session->mLineStorage;
-    connect(lineStorage, &LineStorage::lineAdded, this, &MainWindow::checkLineNumber);
-    connect(lineStorage, &LineStorage::lineRemoved, this, &MainWindow::checkLineNumber);
+    //view = graphMgr->getView();
+    view = new LineGraphWidget(this);
 
     //Welcome label
     welcomeLabel = new QLabel(this);
@@ -248,13 +225,13 @@ void MainWindow::setup_actions()
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
     connect(ui->actionNext_Job_Segment, &QAction::triggered, this, []()
-    {
-        Session->getViewManager()->requestJobShowPrevNextSegment(false);
-    });
+            {
+                Session->getViewManager()->requestJobShowPrevNextSegment(false);
+            });
     connect(ui->actionPrev_Job_Segment, &QAction::triggered, this, []()
-    {
-        Session->getViewManager()->requestJobShowPrevNextSegment(true);
-    });
+            {
+                Session->getViewManager()->requestJobShowPrevNextSegment(true);
+            });
 }
 
 void MainWindow::about()
@@ -399,26 +376,32 @@ void MainWindow::loadFile(const QString& fileName)
         //Probably the application crashed before finishing RS importation
         //Give user choice to resume it or discard
 
-        QMessageBox msgBox(QMessageBox::Warning,
-                           tr("RS Import"),
-                           tr("There is some rollingstock import data left in this file. "
-                              "Probably the application has crashed!<br>"
-                              "Before deleting it would you like to resume importation?<br>"
-                              "<i>(Sorry for the crash, would you like to contact me and share information about it?)</i>"),
-                           QMessageBox::NoButton, this);
-        auto resumeBut = msgBox.addButton(tr("Resume importation"), QMessageBox::YesRole);
-        msgBox.addButton(tr("Just delete it"), QMessageBox::NoRole);
-        msgBox.setDefaultButton(resumeBut);
-        msgBox.setTextFormat(Qt::RichText);
+        QPointer<QMessageBox> msgBox = new QMessageBox(
+            QMessageBox::Warning,
+            tr("RS Import"),
+            tr("There is some rollingstock import data left in this file. "
+               "Probably the application has crashed!<br>"
+               "Before deleting it would you like to resume importation?<br>"
+               "<i>(Sorry for the crash, would you like to contact me and share information about it?)</i>"),
+            QMessageBox::NoButton, this);
+        auto resumeBut = msgBox->addButton(tr("Resume importation"), QMessageBox::YesRole);
+        msgBox->addButton(tr("Just delete it"), QMessageBox::NoRole);
+        msgBox->setDefaultButton(resumeBut);
+        msgBox->setTextFormat(Qt::RichText);
 
-        msgBox.exec();
+        msgBox->exec();
 
-        if(msgBox.clickedButton() == resumeBut)
+        if(msgBox)
         {
-            Session->getViewManager()->resumeRSImportation();
-        }else{
-            Session->clearImportRSTables();
+            if(msgBox->clickedButton() == resumeBut)
+            {
+                Session->getViewManager()->resumeRSImportation();
+            }else{
+                Session->clearImportRSTables();
+            }
         }
+
+        delete msgBox;
     }
 }
 
@@ -500,7 +483,7 @@ void MainWindow::onNew()
     DEBUG_ENTRY;
 
 #ifdef SEARCHBOX_MODE_ASYNC
-    Session->getBackgroundManager()->abortTrivialTasks();
+    emit Session->getBackgroundManager()->abortTrivialTasks();
 #endif
 
 #ifdef ENABLE_RS_CHECKER
@@ -609,10 +592,10 @@ void MainWindow::onSaveCopyAs()
     database backupDB(fileName.toUtf8(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
     int rc = Session->m_Db.backup(backupDB, [](int pageCount, int remaining, int res)
-    {
-        Q_UNUSED(res)
-        qDebug() << pageCount << "/" << remaining;
-    });
+                                  {
+                                      Q_UNUSED(res)
+                                      qDebug() << pageCount << "/" << remaining;
+                                  });
 
     if(rc != SQLITE_OK && rc != SQLITE_DONE)
     {
@@ -661,36 +644,36 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
         rsErrDock->hide();
 #endif
         welcomeLabel->setText(
-                    tr("<p><b>There are no lines in this session</b></p>"
-                       "<p>"
-                        "<table align=\"center\">"
-                            "<tr>"
-                                "<td>Start by creating the railway layout for this session:</td>"
-                            "</tr>"
-                            "<tr>"
-                                "<td>"
-                                    "<table>"
-                                        "<tr>"
-                                            "<td>1.</td>"
-                                            "<td>Create stations (<b>Edit</b> > <b>Stations</b>)</td>"
-                                        "</tr>"
-                                        "<tr>"
-                                            "<td>2.</td>"
-                                            "<td>Create railway lines (<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b>)</td>"
-                                        "</tr>"
-                                        "<tr>"
-                                            "<td>3.</td>"
-                                            "<td>Add stations to railway lines</td>"
-                                        "</tr>"
-                                        "<tr>"
-                                            "<td></td>"
-                                            "<td>(<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b> > <b>Edit Line</b>)</td>"
-                                        "</tr>"
-                                    "</table>"
-                                "</td>"
-                            "</tr>"
-                        "</table>"
-                       "</p>"));
+            tr("<p><b>There are no lines in this session</b></p>"
+               "<p>"
+               "<table align=\"center\">"
+               "<tr>"
+               "<td>Start by creating the railway layout for this session:</td>"
+               "</tr>"
+               "<tr>"
+               "<td>"
+               "<table>"
+               "<tr>"
+               "<td>1.</td>"
+               "<td>Create stations (<b>Edit</b> > <b>Stations</b>)</td>"
+               "</tr>"
+               "<tr>"
+               "<td>2.</td>"
+               "<td>Create railway lines (<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b>)</td>"
+               "</tr>"
+               "<tr>"
+               "<td>3.</td>"
+               "<td>Add stations to railway lines</td>"
+               "</tr>"
+               "<tr>"
+               "<td></td>"
+               "<td>(<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b> > <b>Edit Line</b>)</td>"
+               "</tr>"
+               "</table>"
+               "</td>"
+               "</tr>"
+               "</table>"
+               "</p>"));
         break;
     }
     case CentralWidgetMode::ViewSessionMode:
@@ -718,7 +701,7 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
     {
         if(centralWidget() != welcomeLabel)
         {
-            takeCentralWidget(); //Remove ownership from QGraphicsView
+            takeCentralWidget(); //Remove ownership from LineGraphWidget
             setCentralWidget(welcomeLabel);
             view->hide();
             welcomeLabel->show();
@@ -763,8 +746,6 @@ bool MainWindow::closeSession()
     //Reset filePath to refresh title
     setCurrentFile(QString());
 
-    lineComboSearch->setData(0);
-
     return true;
 }
 
@@ -772,7 +753,6 @@ void MainWindow::enableDBActions(bool enable)
 {
     databaseActionGroup->setEnabled(enable);
     searchEdit->setEnabled(enable);
-    lineComboSearch->setEnabled(enable);
     if(!enable)
         jobEditor->setEnabled(false);
 
@@ -853,19 +833,16 @@ void MainWindow::onOpenSettings()
 
 void MainWindow::checkLineNumber()
 {
-    auto graphMgr = Session->getViewManager()->getGraphMgr();
-    db_id firstLineId = graphMgr->getFirstLineId();
-
-    if(firstLineId && m_mode != CentralWidgetMode::ViewSessionMode)
+    //FIXME: lines are now optional, you can work using only segments
+    //Segments are now more important than lines, check segments
+    db_id firstLineId = 0; //FIXME
+    if(/*firstLineId &&*/ m_mode != CentralWidgetMode::ViewSessionMode)
     {
         //First line was added or newly opened file -> Session has at least one line
         ui->actionAddJob->setEnabled(true);
         ui->actionAddJob->setToolTip(tr("Add train job"));
         ui->actionRemoveJob->setEnabled(true);
         setCentralWidgetMode(CentralWidgetMode::ViewSessionMode);
-
-        //Show first line (Alphabetically)
-        graphMgr->setCurrentLine(firstLineId);
     }
     else if(firstLineId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
     {
@@ -896,9 +873,9 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         if(jobDock->isFloating())
         {
             QTimer::singleShot(0, jobDock, [this]()
-            {
-                jobDock->setFloating(false);
-            });
+                               {
+                                   jobDock->setFloating(false);
+                               });
         }
     }
 #ifdef ENABLE_RS_CHECKER
@@ -907,9 +884,9 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
         if(rsErrDock->isFloating())
         {
             QTimer::singleShot(0, rsErrDock, [this]()
-            {
-                rsErrDock->setFloating(false);
-            });
+                               {
+                                   rsErrDock->setFloating(false);
+                               });
         }
     }
 #endif

@@ -231,7 +231,6 @@ QVariant StopModel::data(const QModelIndex &index, int role) const
     case STOP_ID:
         return s.stopId;
     case STATION_ID:
-    case STATION_ROLE:
         return s.stationId;
     case STOP_TYPE_ROLE:
         return int(s.type);
@@ -271,7 +270,6 @@ bool StopModel::setData(const QModelIndex &index, const QVariant &value, int rol
     switch (role)
     {
     case STATION_ID:
-    case STATION_ROLE:
         setStation(index, value.toLongLong());
         break;
     case STOP_TYPE_ROLE:

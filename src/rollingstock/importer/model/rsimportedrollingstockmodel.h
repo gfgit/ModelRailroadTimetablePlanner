@@ -66,7 +66,6 @@ public:
 
     // Cached rows management
     virtual void clearCache() override;
-    virtual void refreshData() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -80,6 +79,9 @@ public:
     bool checkNewNumberIsValid(db_id importedRsId, db_id importedModelId, db_id matchExistingModelId, RsType rsType,
                                int number, int newNumber,
                                QString *errTextOut) override;
+
+protected:
+    virtual qint64 recalcTotalItemCount() override;
 
 private:
     void fetchRow(int row);

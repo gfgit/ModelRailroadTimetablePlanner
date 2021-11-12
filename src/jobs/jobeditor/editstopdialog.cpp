@@ -29,7 +29,7 @@
 #include "utils/sqldelegate/modelpageswitcher.h"
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
-#include "stations/stationsmatchmodel.h"
+#include "stations/match_models/stationsmatchmodel.h"
 
 EditStopDialog::EditStopDialog(QWidget *parent) :
     QDialog(parent),
@@ -215,7 +215,7 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     curSegment = idx.data(SEGMENT_ROLE).toLongLong();
     curLine = idx.data(CUR_LINE_ROLE).toLongLong();
 
-    stationsMatchModel->setFilter(curLine, m_prevStId);
+    stationsMatchModel->setFilter(m_prevStId);
 
     coupledModel->setStop(m_stopId, RsOp::Coupled);
     uncoupledModel->setStop(m_stopId, RsOp::Uncoupled);
@@ -442,8 +442,8 @@ void EditStopDialog::editCoupled()
 
     dlg.exec();
 
-    coupledModel->refreshData();
-    trainAssetModelAfter->refreshData();
+    coupledModel->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
     updateSpeedAfterStop();
 }
 
@@ -459,8 +459,8 @@ void EditStopDialog::editUncoupled()
 
     dlg.exec();
 
-    uncoupledModel->refreshData();
-    trainAssetModelAfter->refreshData();
+    uncoupledModel->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
     updateSpeedAfterStop();
 }
 
@@ -530,17 +530,10 @@ void EditStopDialog::couplingCustomContextMenuRequested(const QPoint& pos)
         return; //User didn't select 'Refresh' action
 
     //Refresh data
-    coupledModel->refreshData();
-    coupledModel->clearCache();
-
-    uncoupledModel->refreshData();
-    uncoupledModel->clearCache();
-
-    trainAssetModelBefore->refreshData();
-    trainAssetModelBefore->clearCache();
-
-    trainAssetModelAfter->refreshData();
-    trainAssetModelAfter->clearCache();
+    coupledModel->refreshData(true);
+    uncoupledModel->refreshData(true);
+    trainAssetModelBefore->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
 }
 
 QSet<db_id> EditStopDialog::getRsToUpdate() const

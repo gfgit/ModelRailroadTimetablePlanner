@@ -11,14 +11,13 @@ class QToolBar;
 class QToolButton;
 class QTableView;
 
-class StationsSQLModel;
-class LinesSQLModel;
+class StationsModel;
+class RailwaySegmentsModel;
+class LinesModel;
 
 namespace Ui {
 class StationsManager;
 }
-
-class SpinBoxEditorFactory;
 
 class StationsManager : public QWidget
 {
@@ -29,6 +28,7 @@ public:
     typedef enum
     {
         StationsTab = 0,
+        RailwaySegmentsTab,
         LinesTab,
         NTabs
     } Tabs;
@@ -58,14 +58,20 @@ private slots:
     void onNewStation();
     void onEditStation();
 
-    void onNewLine();
-    void onRemoveLine();
-    void onEditLine();
     void showStPlan();
     void onShowFreeRS();
 
+    void onRemoveSegment();
+    void onNewSegment();
+    void onEditSegment();
+
+    void onNewLine();
+    void onRemoveLine();
+    void onEditLine();
+
 private:
-    void setup_StPage();
+    void setup_StationPage();
+    void setup_SegmentPage();
     void setup_LinePage();
 
 protected:
@@ -76,16 +82,16 @@ private:
     Ui::StationsManager *ui;
 
     QToolBar *stationToolBar;
+    QToolBar *segmentsToolBar;
     QToolBar *linesToolBar;
 
     QTableView *stationView;
+    QTableView *segmentsView;
     QTableView *linesView;
 
-    StationsSQLModel *stationsModel;
-    LinesSQLModel *linesModel;
-
-    SpinBoxEditorFactory *stationPlatfCountFactory;
-    SpinBoxEditorFactory *lineSpeedSpinFactory;
+    StationsModel *stationsModel;
+    RailwaySegmentsModel *segmentsModel;
+    LinesModel *linesModel;
 
     QAction *act_addSt;
     QAction *act_remSt;
