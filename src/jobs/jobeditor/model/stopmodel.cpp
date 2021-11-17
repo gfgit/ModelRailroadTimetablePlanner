@@ -781,9 +781,18 @@ void StopModel::loadJobStops(db_id jobId)
         db_id segInGateId = stop.get<db_id>(17);
         db_id segOutGateId = stop.get<db_id>(18);
 
-        //Check consistency
-        if(s.trackId != otherTrackId)
+        //Fix station track on First stop
+        if(!s.fromGate.gateConnId)
         {
+            //If station has no 'in' connection use 'out' connection
+            //This might happen on first stop
+            s.trackId = otherTrackId;
+        }
+
+        //Check consistency
+        if(s.trackId != otherTrackId && s.toGate.gateConnId)
+        {
+            //Last stop has no 'out' connection so do not check track if on 'Last' stop
             //In gate leads to a different station track than out gate
             qWarning() << "Stop:" << s.stopId << "Different track:" << s.fromGate.gateConnId << s.toGate.gateConnId;
         }
