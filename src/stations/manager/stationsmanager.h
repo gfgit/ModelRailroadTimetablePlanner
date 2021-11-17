@@ -58,7 +58,8 @@ private slots:
     void onNewStation();
     void onEditStation();
 
-    void showStPlan();
+    void showStJobViewer();
+    void showStSVGPlan();
     void onShowFreeRS();
 
     void onRemoveSegment();
@@ -96,7 +97,8 @@ private:
     QAction *act_addSt;
     QAction *act_remSt;
     QAction *act_editSt;
-    QAction *act_planSt;
+    QAction *act_stJobs;
+    QAction *act_stSVG;
     QAction *act_freeRs;
 
     int oldCurrentTab;

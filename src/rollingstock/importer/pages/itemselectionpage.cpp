@@ -7,6 +7,8 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 
+#include <QPointer>
+
 #include "../rsimportwizard.h"
 #include "../intefaces/irsimportmodel.h"
 #include "../intefaces/iduplicatesitemmodel.h"
@@ -112,16 +114,16 @@ void ItemSelectionPage::initializePage()
     dupModel.reset(IDuplicatesItemModel::createModel(m_mode, model->getDb(), model, this));
 
     bool canGoBack = mWizard->currentId() != RSImportWizard::SelectOwnersIdx;
-    FixDuplicatesDlg dlg(dupModel.get(), canGoBack, this);
+    QPointer<FixDuplicatesDlg> dlg = new FixDuplicatesDlg(dupModel.get(), canGoBack, this);
     if(m_mode == ModelModes::Rollingstock && editorFactory)
     {
         QStyledItemDelegate *delegate = new QStyledItemDelegate(this);
         delegate->setItemEditorFactory(editorFactory);
-        dlg.setItemDelegateForColumn(DuplicatesImportedRSModel::NewNumber, delegate);
+        dlg->setItemDelegateForColumn(DuplicatesImportedRSModel::NewNumber, delegate);
     }
 
     //First load
-    int res = dlg.blockingReloadCount(IDuplicatesItemModel::LoadingData);
+    int res = dlg->blockingReloadCount(IDuplicatesItemModel::LoadingData);
     if(res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
     {
         /* HACK:
@@ -131,12 +133,14 @@ void ItemSelectionPage::initializePage()
          * (that is 1 before current that is already the old page)
          * Solution: call it after 'initializePage()' has finished by posting an event
          */
+        delete dlg;
         mWizard->goToPrevPageQueued();
         return;
     }
     else if(res != QDialog::Accepted)
     {
         //Prevent showing another message box asking user if he is sure about quitting
+        delete dlg;
         mWizard->done(RSImportWizard::RejectWithoutAsking);
         return;
     }
@@ -144,7 +148,8 @@ void ItemSelectionPage::initializePage()
     if(dupModel->getItemCount() > 0)
     {
         //We have duplicates, run dialog
-        res = dlg.exec();
+        res = dlg->exec();
+        delete dlg;
         if(res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
         {
             /* HACK: see above */
@@ -158,6 +163,8 @@ void ItemSelectionPage::initializePage()
             return;
         }
     }
+
+    delete dlg;
 
     //Duplicates are now fixed, refresh main model
     model->refreshData();

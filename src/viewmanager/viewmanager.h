@@ -7,19 +7,25 @@
 
 #include "utils/types.h"
 
-class RSJobViewer;
 class RollingStockManager;
+class RSJobViewer;
+class SessionStartEndRSViewer;
+
 class StationsManager;
 class StationJobView;
 class StationFreeRSViewer;
+class StationSVGPlanDlg;
+
 class ShiftManager;
 class ShiftViewer;
-class JobPathEditor;
 class ShiftGraphEditor;
-class GraphManager; //FIXME: remove
-class LineGraphManager;
+
 class JobsManager;
-class SessionStartEndRSViewer;
+class JobPathEditor;
+class GraphManager; //FIXME: remove
+
+class LineGraphManager;
+
 
 class ViewManager : public QObject
 {
@@ -50,7 +56,8 @@ public:
     void updateRSPlans(QSet<db_id> set);
 
     void requestRSInfo(db_id rsId);
-    void requestStPlan(db_id stId);
+    void requestStJobViewer(db_id stId);
+    void requestStSVGPlan(db_id stId);
     void requestStFreeRSViewer(db_id stId);
     void requestShiftViewer(db_id id);
     void requestShiftGraphEditor();
@@ -81,6 +88,7 @@ private slots:
 private:
     RSJobViewer* createRSViewer(db_id rsId);
     StationJobView *createStJobViewer(db_id stId);
+    StationSVGPlanDlg *createStPlanDlg(db_id stId, QString &stNameOut);
     StationFreeRSViewer *createStFreeRSViewer(db_id stId);
     ShiftViewer *createShiftViewer(db_id id);
 
@@ -92,19 +100,19 @@ private:
 
     RollingStockManager *rsManager;
     QHash<db_id, RSJobViewer *> rsHash;
+    SessionStartEndRSViewer *sessionRSViewer;
 
     StationsManager *stManager;
     QHash<db_id, StationJobView *> stHash;
     QHash<db_id, StationFreeRSViewer *> stRSHash;
+    QHash<db_id, StationSVGPlanDlg *> stPlanHash;
 
     ShiftManager *shiftManager;
     QHash<db_id, ShiftViewer *> shiftHash;
     ShiftGraphEditor *shiftGraphEditor;
 
-    JobPathEditor *jobEditor;
     JobsManager *jobsManager;
-
-    SessionStartEndRSViewer *sessionRSViewer;
+    JobPathEditor *jobEditor;
 };
 
 #endif // VIEWMANAGER_H

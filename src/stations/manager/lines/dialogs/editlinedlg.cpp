@@ -144,8 +144,14 @@ void EditLineDlg::addStation()
     QPointer<ChooseSegmentDlg> dlg(new ChooseSegmentDlg(mDb, this));
     dlg->setFilter(lastStationId, ChooseSegmentDlg::DoNotLock, lastSegmentId);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
         return;
+
+    if(ret != QDialog::Accepted)
+    {
+        delete dlg;
+        return;
+    }
 
     db_id segmentId = 0;
     QString segmentName;

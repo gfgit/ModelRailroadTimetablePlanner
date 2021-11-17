@@ -8,6 +8,7 @@
 #include "stations/manager/stationsmanager.h"
 #include "stations/manager/stationjobview.h"
 #include "stations/manager/free_rs_viewer/stationfreersviewer.h"
+#include "stations/manager/stations/dialogs/stationsvgplandlg.h"
 
 #include "shifts/shiftmanager.h"
 #include "shifts/shiftviewer.h"
@@ -23,6 +24,8 @@
 #include "graph/model/linegraphmanager.h"
 
 #include "sessionstartendrsviewer.h"
+
+#include <QMessageBox>
 
 ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
@@ -199,6 +202,13 @@ void ViewManager::onStRemoved(db_id stId)
         it2.value()->close();
         stRSHash.erase(it2);
     }
+
+    auto it3 = stPlanHash.constFind(stId);
+    if(it3 != stPlanHash.cend())
+    {
+        it3.value()->close();
+        stPlanHash.erase(it3);
+    }
 }
 
 void ViewManager::onStNameChanged(db_id stId)
@@ -216,6 +226,12 @@ void ViewManager::onStNameChanged(db_id stId)
     {
         it2.value()->updateTitle();
     }
+
+    auto it3 = stPlanHash.constFind(stId);
+    if(it3 != stPlanHash.cend())
+    {
+        it3.value()->reloadDBData();
+    }
 }
 
 void ViewManager::onStPlanChanged(db_id stId)
@@ -231,6 +247,12 @@ void ViewManager::onStPlanChanged(db_id stId)
     if(it2 != stRSHash.cend())
     {
         it2.value()->updateData();
+    }
+
+    auto it3 = stPlanHash.constFind(stId);
+    if(it3 != stPlanHash.cend())
+    {
+        it3.value()->reloadDBData();
     }
 }
 
@@ -253,7 +275,29 @@ StationJobView* ViewManager::createStJobViewer(db_id stId)
     return viewer;
 }
 
-void ViewManager::requestStPlan(db_id stId)
+StationSVGPlanDlg *ViewManager::createStPlanDlg(db_id stId, QString& stNameOut)
+{
+    if(!StationSVGPlanDlg::stationHasSVG(Session->m_Db, stId, &stNameOut))
+        return nullptr;
+
+    StationSVGPlanDlg *viewer = new StationSVGPlanDlg(Session->m_Db, m_mainWidget);
+    viewer->setAttribute(Qt::WA_DeleteOnClose);
+    viewer->setWindowFlag(Qt::Window);
+    viewer->setStation(stId);
+    viewer->reloadPlan();
+
+    viewer->setObjectName(QString("StationSVGPlanDlg_%1").arg(stId));
+
+    stPlanHash.insert(stId, viewer);
+    connect(viewer, &StationSVGPlanDlg::destroyed, this, [this, stId]()
+    {
+        stPlanHash.remove(stId);
+    });
+
+    return viewer;
+}
+
+void ViewManager::requestStJobViewer(db_id stId)
 {
     DEBUG_ENTRY;
     StationJobView *viewer = nullptr;
@@ -270,6 +314,33 @@ void ViewManager::requestStPlan(db_id stId)
 
     viewer->updateName();
     viewer->updateJobsList();
+
+    viewer->showNormal();
+    viewer->update();
+    viewer->raise();
+}
+
+void ViewManager::requestStSVGPlan(db_id stId)
+{
+    DEBUG_ENTRY;
+    StationSVGPlanDlg *viewer = nullptr;
+
+    auto it = stPlanHash.constFind(stId);
+    if(it != stPlanHash.constEnd())
+    {
+        viewer = it.value();
+    }
+    else
+    {
+        QString stName;
+        viewer = createStPlanDlg(stId, stName);
+        if(!viewer)
+        {
+            QMessageBox::warning(m_mainWidget, stName,
+                                 tr("Station %1 has no SVG, please add one.").arg(stName));
+            return;
+        }
+    }
 
     viewer->showNormal();
     viewer->update();
@@ -476,6 +547,9 @@ bool ViewManager::closeEditors()
 
     qDeleteAll(stRSHash);
     stRSHash.clear();
+
+    qDeleteAll(stPlanHash);
+    stPlanHash.clear();
 
 
     if(shiftManager && !shiftManager->close())

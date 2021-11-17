@@ -10,6 +10,7 @@
 #include <QStandardPaths>
 
 #include <QMessageBox>
+#include <QPointer>
 
 #include <QCloseEvent>
 
@@ -268,10 +269,11 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
 
     if(act == editStopAct)
     {
-        EditStopDialog dlg(this);
-        dlg.setReadOnly(m_readOnly);
-        dlg.setStop(stopModel, index);
-        dlg.exec();
+        QPointer<EditStopDialog> dlg = new EditStopDialog(this);
+        dlg->setReadOnly(m_readOnly);
+        dlg->setStop(stopModel, index);
+        dlg->exec();
+        delete dlg;
         return;
     }
 
@@ -418,9 +420,10 @@ bool JobPathEditor::saveChanges()
                        times.first, times.second);
         if(model.hasConcurrentJobs())
         {
-            ShiftBusyDlg dlg(this);
-            dlg.setModel(&model);
-            dlg.exec();
+            QPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
+            dlg->setModel(&model);
+            dlg->exec();
+            delete dlg;
 
             stopModel->setNewShiftId(stopModel->getJobShiftId());
 
@@ -599,9 +602,10 @@ void JobPathEditor::onJobShiftChanged(db_id shiftId)
                        times.first, times.second);
         if(model.hasConcurrentJobs())
         {
-            ShiftBusyDlg dlg(this);
-            dlg.setModel(&model);
-            dlg.exec();
+            QPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
+            dlg->setModel(&model);
+            dlg->exec();
+            delete dlg;
 
             stopModel->setNewShiftId(0);
 
