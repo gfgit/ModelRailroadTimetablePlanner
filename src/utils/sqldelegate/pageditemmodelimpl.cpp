@@ -1,6 +1,3 @@
-#include "ipageditemmodelimpl.h"
+#include "pageditemmodelimpl.h"
 
-IPagedItemModelImpl::IPagedItemModelImpl()
-{
 
-}
