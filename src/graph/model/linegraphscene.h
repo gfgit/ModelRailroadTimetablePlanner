@@ -143,6 +143,20 @@ private:
 
 private:
     /*!
+     * \brief Get job stop at graph position
+     *
+     * \param prevSt Station at position's left
+     * \param nextSt Station at position's right
+     * \param pos Point in scene coordinates
+     * \param tolerance A tolerance if mouse doesn't exactly click on job item
+     *
+     * Check if a job stop in this station matches requested position
+     * Otherwise return null selection
+     */
+    JobStopEntry getJobStopAt(const StationGraphObject *prevSt, const StationGraphObject *nextSt,
+                              const QPointF &pos, const double tolerance);
+
+    /*!
      * \brief Recalculate and store content size
      *
      * Stores cached calculated size of the graph.

@@ -4,6 +4,8 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
+#include <QRectF>
+
 #include <QDebug>
 
 //TODO: maybe move to utils?
@@ -235,10 +237,113 @@ bool LineGraphScene::reloadJobs()
     return true;
 }
 
-JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+JobStopEntry LineGraphScene::getJobStopAt(const StationGraphObject *prevSt, const StationGraphObject *nextSt,
+                                          const QPointF &pos, const double tolerance)
 {
     const double platformOffset = Session->platformOffset;
 
+    JobStopEntry job;
+
+    //Find nearest station
+    const StationGraphObject *nearestSt = nullptr;
+
+    double nextStDistance = 0;
+    if(nextSt)
+    {
+        nextStDistance = qAbs(nextSt->xPos - pos.x());
+        if(nextStDistance <= tolerance)
+        {
+            //Next station is a good candidate
+            nearestSt = nextSt;
+        }
+    }
+
+    if(prevSt)
+    {
+        const double prevStRight = prevSt->xPos + prevSt->platforms.count() * platformOffset;
+        if(pos.x() >= prevSt->xPos && pos.x() <= prevStRight)
+        {
+            //Requested pos is inside this station
+            nearestSt = prevSt;
+        }
+        else if(pos.x() >= prevStRight)
+        {
+            //Requested position is between prevSt and nextSt, find nearest
+            const double prevStDistance = pos.x() - prevStRight;
+            if(prevStDistance <= tolerance
+                && (!nearestSt || prevStDistance < nextStDistance))
+            {
+                nearestSt = prevSt;
+            }
+        }
+    }
+
+    if(!nearestSt)
+        return job; //Both stations exceed tolerance, null selection
+
+
+    const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
+    const StationGraphObject::PlatformGraph *nextPlatf = nullptr;
+    double prevPos = 0;
+    double nextPos = 0;
+
+    double xPos = nearestSt->xPos;
+    for(const StationGraphObject::PlatformGraph& platf : nearestSt->platforms)
+    {
+        if(xPos >= pos.x())
+        {
+            //We went past the requested position
+            nextPlatf = &platf;
+            nextPos = xPos;
+            break;
+        }
+
+        prevPlatf = &platf;
+        prevPos = xPos;
+
+        xPos += platformOffset;
+    }
+
+    //Find nearest platform
+    const StationGraphObject::PlatformGraph *resultPlatf = nullptr;
+
+    const double prevDistance = qAbs(prevPos - pos.x());
+    if(prevPlatf && prevDistance <= tolerance)
+    {
+        //Previous platform is a good candidate
+        resultPlatf = prevPlatf;
+    }
+
+    const double nextDistance = qAbs(nextPos - pos.x());
+    if(nextPlatf && nextDistance <= tolerance)
+    {
+        //Next platform is a good candidate
+        if(!resultPlatf || nextDistance < prevDistance)
+        {
+            //We are the nearest
+            resultPlatf = nextPlatf;
+        }
+    }
+
+    if(!resultPlatf)
+        return job; //No match
+
+    for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
+    {
+        //NOTE: in stops arrival comes BEFORE departure
+        if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
+        {
+            //Found match
+            job = jobStop.stop;
+            break;
+        }
+    }
+
+    return job;
+}
+
+JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+{
     JobStopEntry job;
 
     if(stationPositions.isEmpty())
@@ -247,10 +352,15 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
     db_id prevStId = 0;
     db_id nextStId = 0;
 
+    const StationPosEntry *entry = nullptr;
+
     for(const StationPosEntry& stPos : qAsConst(stationPositions))
     {
         if(stPos.xPos <= pos.x())
+        {
             prevStId = stPos.stationId;
+            entry = &stPos;
+        }
 
         if(stPos.xPos >= pos.x())
         {
@@ -263,91 +373,43 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
     auto prevSt = stations.constFind(prevStId);
     auto nextSt = stations.constFind(nextStId);
 
-    if(prevSt == stations.constEnd() && nextSt == stations.constEnd())
+    const StationGraphObject *prevStPtr = prevSt == stations.constEnd() ? nullptr : &prevSt.value();
+    const StationGraphObject *nextStPtr = nextSt == stations.constEnd() ? nullptr : &nextSt.value();
+
+    if(!prevStPtr && !nextStPtr)
         return job; //Error
 
-    const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
-    const StationGraphObject::PlatformGraph *nextPlatf = nullptr;
-    double prevPos = 0;
-    double nextPos = 0;
+    job = getJobStopAt(prevStPtr, nextStPtr, pos, tolerance);
+    if(job.jobId)
+        return job; //Found match
 
-    double xPos = 0;
-    if(prevSt != stations.constEnd())
+    //Check job segments
+    if(!entry)
+        return job; //Error, no match
+
+    double prevSegDistance = -1;
+    for(const JobSegmentGraph& segment : qAsConst(entry->nextSegmentJobGraphs))
     {
-        xPos = prevSt->xPos;
-        for(const StationGraphObject::PlatformGraph& platf : prevSt->platforms)
+        //NOTE: in segments arrival comes AFTER departure
+        const QRectF r = QRectF(segment.fromDeparture, segment.toArrival).normalized();
+        if(r.contains(pos))
         {
-            if(xPos <= pos.x())
+            //Requested position is inside bounds, might be a match
+            const double deltaX = segment.toArrival.x() - segment.fromDeparture.x();
+            if(qFuzzyIsNull(deltaX))
+                continue; //Error: arrival is equal to departure
+
+            const double resultingY = r.top() + (pos.x() - r.left()) * r.height() / r.width();
+            const double segDistance = qAbs(resultingY - pos.y());
+            if(prevSegDistance < 0 || segDistance < prevSegDistance)
             {
-                prevPlatf = &platf;
-                prevPos = xPos;
+                //We are a better match than previous, replace it
+                //Use departure station ('from') because arrival station might be last one
+                //So there might be no segments after arrival
+                job.stopId = segment.fromStopId;
+                job.jobId = segment.jobId;
+                job.category = segment.category;
             }
-            if(xPos >= pos.x())
-            {
-                //We went past the requested position
-                nextPlatf = &platf;
-                nextPos = xPos;
-                break;
-            }
-
-            xPos += platformOffset;
-        }
-    }
-
-    const double prevDistance = qAbs(prevPos - pos.x());
-    if(prevPlatf && prevDistance > tolerance)
-    {
-        //Discard because too distant
-        prevPlatf = nullptr;
-    }
-
-    if(!nextPlatf && nextSt != stations.constEnd())
-    {
-        //Use second station
-        xPos = nextSt->xPos;
-        for(const StationGraphObject::PlatformGraph& platf : nextSt->platforms)
-        {
-            if(xPos >= pos.x())
-            {
-                nextPlatf = &platf;
-                nextPos = xPos;
-                break;
-            }
-
-            xPos += platformOffset;
-        }
-    }
-
-    const double nextDistance = qAbs(nextPos - pos.x());
-    if(nextPlatf && nextDistance > tolerance)
-    {
-        //Discard because too distant
-        nextPlatf = nullptr;
-    }
-
-    const StationGraphObject::PlatformGraph *resultPlatf = nullptr;
-    if(!prevPlatf)
-        resultPlatf = nextPlatf;
-    else if(!nextPlatf)
-        resultPlatf = prevPlatf;
-    else
-    {
-        if(prevDistance < nextDistance)
-            resultPlatf = prevPlatf;
-        else
-            resultPlatf = nextPlatf;
-    }
-
-    if(!resultPlatf)
-        return job; //No match
-
-    for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
-    {
-        if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
-        {
-            //Found match
-            job = jobStop.stop;
-            break;
         }
     }
 
