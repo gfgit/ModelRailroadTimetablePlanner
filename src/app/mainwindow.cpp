@@ -798,7 +798,7 @@ void MainWindow::onRemoveJob()
 
 void MainWindow::onPrint()
 {
-    QPointer<PrintWizard> wizard = new PrintWizard(this);
+    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
     wizard->setOutputType(Print::Native);
     wizard->exec();
     delete wizard;
@@ -806,7 +806,7 @@ void MainWindow::onPrint()
 
 void MainWindow::onPrintPDF()
 {
-    QPointer<PrintWizard> wizard = new PrintWizard(this);
+    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
     wizard->setOutputType(Print::Pdf);
     wizard->exec();
     delete wizard;
@@ -814,7 +814,7 @@ void MainWindow::onPrintPDF()
 
 void MainWindow::onExportSvg()
 {
-    QPointer<PrintWizard> wizard = new PrintWizard(this);
+    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
     wizard->setOutputType(Print::Svg);
     wizard->exec();
     delete wizard;

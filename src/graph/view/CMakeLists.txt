@@ -6,6 +6,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   graph/view/linegraphtoolbar.h
   graph/view/linegraphview.h
   graph/view/linegraphwidget.h
+  graph/view/linegraphselectionwidget.h
   graph/view/stationlabelsheader.h
 
   graph/view/backgroundhelper.cpp
@@ -13,6 +14,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   graph/view/linegraphtoolbar.cpp
   graph/view/linegraphview.cpp
   graph/view/linegraphwidget.cpp
+  graph/view/linegraphselectionwidget.cpp
   graph/view/stationlabelsheader.cpp
 
   PARENT_SCOPE

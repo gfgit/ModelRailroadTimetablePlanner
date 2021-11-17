@@ -19,8 +19,6 @@
 
 #include "jobs/jobeditor/editstopdialog.h"
 
-#include "lines/linestorage.h"
-
 #include "jobs/jobstorage.h"
 #include "utils/jobcategorystrings.h"
 
@@ -95,7 +93,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     //Connect to stationsModel to update station views
     //NOTE: here we use queued connections to avoid freezing the UI if there are many stations to update
     //      with queued connections they are update one at a time and the UI stays responsive
-    connect(this, &JobPathEditor::stationChange, Session->mLineStorage, &LineStorage::stationPlanChanged, Qt::QueuedConnection);
+    connect(this, &JobPathEditor::stationChange, Session, &MeetingSession::stationPlanChanged, Qt::QueuedConnection);
 
     connect(Session->mJobStorage, &JobStorage::aboutToRemoveJob, this, &JobPathEditor::onJobRemoved);
     connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
@@ -455,7 +453,7 @@ bool JobPathEditor::saveChanges()
 
     stopModel->commitChanges();
 
-    jobs->updateJobPath(stopModel->getJobId());
+    //TODO: redraw graphs
 
     //When updating the path selection gets cleared so we restore it
     Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);

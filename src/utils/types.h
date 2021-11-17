@@ -70,4 +70,11 @@ typedef struct JobEntry_
     JobCategory category;
 } JobEntry;
 
+typedef struct
+{
+    db_id stopId = 0;
+    db_id jobId = 0;
+    JobCategory category = JobCategory::FREIGHT;
+} JobStopEntry;
+
 #endif // TYPES_H

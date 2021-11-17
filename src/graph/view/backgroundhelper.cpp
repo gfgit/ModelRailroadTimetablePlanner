@@ -8,10 +8,33 @@
 
 #include <QtMath>
 
+/*!
+ * \brief Set font point size
+ * \param font
+ * \param points the value of font size to set
+ * \param p the QPainter which will draw
+ *
+ * This function is needed because each QPaintDevice has different resolution (DPI)
+ * The default value is 72 dots per inch (DPI)
+ * But for example QPdfWriter default is 1200,
+ * QPrinter default is 300 an QWidget depends on the screen,
+ * so it depends on Operating System display settings.
+ *
+ * To avoid differences between screen contents and printed output we
+ * rescale font sizes as it would be if DPI was 72
+ */
+inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
+{
+    const qreal pointSize = val * 72.0 / qreal(p->device()->logicalDpiY());
+    font.setPointSizeF(pointSize);
+}
+
 void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int verticalScroll)
 {
     //TODO: settings
     QFont hourTextFont;
+    setFontPointSizeDPI(hourTextFont, 15, painter);
+
     QPen hourTextPen(AppSettings.getHourTextColor());
 
     const int vertOffset = Session->vertOffset;
@@ -23,17 +46,23 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int 
     //qDebug() << "Drawing hours..." << rect << scroll;
     const QString fmt(QStringLiteral("%1:00"));
 
-    const qreal top = verticalScroll;
+    const qreal top = verticalScroll - vertOffset;
     const qreal bottom = rect.bottom();
 
     int h = qFloor(top / hourOffset);
-    qreal y = h * hourOffset - verticalScroll + vertOffset;
+    if(h < 0)
+        h = 0;
 
-    for(; h <= 24 && y <= bottom; h++)
+    QRectF labelRect = rect;
+    labelRect.setWidth(labelRect.width() * 0.9);
+    labelRect.setHeight(hourOffset);
+    labelRect.moveTop(h * hourOffset - verticalScroll + vertOffset - hourOffset / 2);
+
+    for(; h <= 24 && labelRect.top() <= bottom; h++)
     {
         //qDebug() << "Y:" << y << fmt.arg(h);
-        painter->drawText(QPointF(5, y + 8), fmt.arg(h)); //y + 8 to center text vertically
-        y += hourOffset;
+        painter->drawText(labelRect, fmt.arg(h), QTextOption(Qt::AlignVCenter | Qt::AlignRight));
+        labelRect.moveTop(labelRect.top() + hourOffset);
     }
 }
 
@@ -82,12 +111,12 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
 {
     QFont stationFont;
     stationFont.setBold(true);
-    stationFont.setPointSize(12);
+    setFontPointSizeDPI(stationFont, 25, painter);
 
     QPen stationPen(AppSettings.getStationTextColor());
 
     QFont platfBoldFont = stationFont;
-    platfBoldFont.setPointSize(10);
+    setFontPointSizeDPI(platfBoldFont, 16, painter);
 
     QFont platfNormalFont = platfBoldFont;
     platfNormalFont.setBold(false);
@@ -224,7 +253,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
                     continue; //Skip, job not visible
 
-                jobPen.setColor(Session->colorForCat(jobStop.category));
+                jobPen.setColor(Session->colorForCat(jobStop.stop.category));
                 painter->setPen(jobPen);
 
                 top.setY(jobStop.arrivalY);

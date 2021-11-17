@@ -83,8 +83,6 @@ public: //Settings
 
 protected:
     bool event(QEvent *e) override;
-    void initializePage(int id) override;
-    void cleanupPage(int id) override;
 
 private:
     RSImportedOwnersModel *ownersModel;

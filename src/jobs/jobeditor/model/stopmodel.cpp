@@ -5,7 +5,6 @@
 #include "app/scopedebug.h"
 
 #include "lines/helpers.h"
-#include "lines/linestorage.h"
 
 #include "app/session.h"
 
@@ -41,12 +40,12 @@ StopModel::StopModel(database &db, QObject *parent) :
 {
     reloadSettings();
     connect(&AppSettings, &MRTPSettings::stopOptionsChanged, this, &StopModel::reloadSettings);
+
     connect(Session, &MeetingSession::shiftJobsChanged, this, &StopModel::onExternalShiftChange);
     connect(Session, &MeetingSession::shiftNameChanged, this, &StopModel::onShiftNameChanged);
 
-    auto lines = Session->mLineStorage;
-    connect(lines, &LineStorage::lineNameChanged, this, &StopModel::onStationLineNameChanged);
-    connect(lines, &LineStorage::stationNameChanged, this, &StopModel::onStationLineNameChanged);
+    connect(Session, &MeetingSession::lineNameChanged, this, &StopModel::onStationLineNameChanged);
+    connect(Session, &MeetingSession::stationNameChanged, this, &StopModel::onStationLineNameChanged);
 }
 
 void StopModel::prepareQueries()

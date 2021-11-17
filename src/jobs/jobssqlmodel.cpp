@@ -12,7 +12,6 @@ using namespace sqlite3pp;
 
 #include "utils/jobcategorystrings.h"
 
-#include "lines/linestorage.h"
 #include "jobs/jobstorage.h"
 
 #include <QDebug>
@@ -36,7 +35,7 @@ JobsSQLModel::JobsSQLModel(sqlite3pp::database &db, QObject *parent) :
 
     connect(Session, &MeetingSession::shiftNameChanged, this, &JobsSQLModel::clearCache_slot);
     connect(Session, &MeetingSession::shiftJobsChanged, this, &JobsSQLModel::clearCache_slot);
-    connect(Session->mLineStorage, &LineStorage::stationNameChanged, this, &JobsSQLModel::clearCache_slot);
+    connect(Session, &MeetingSession::stationNameChanged, this, &JobsSQLModel::clearCache_slot);
     connect(Session, &MeetingSession::jobChanged, this, &JobsSQLModel::clearCache_slot);
 
     connect(Session->mJobStorage, &JobStorage::jobAdded, this, &JobsSQLModel::onJobAddedOrRemoved);

@@ -10,8 +10,6 @@
 #include "stations/manager/free_rs_viewer/stationfreersviewer.h"
 #include "stations/manager/stations/dialogs/stationsvgplandlg.h"
 
-#include "lines/linestorage.h"
-
 #include "shifts/shiftmanager.h"
 #include "shifts/shiftviewer.h"
 #include "shifts/shiftgraph/shiftgrapheditor.h"
@@ -50,17 +48,14 @@ ViewManager::ViewManager(QObject *parent) :
     connect(Session, &MeetingSession::rollingStockModified, this, &ViewManager::onRSInfoChanged);
 
     //Stations
-    LineStorage *lines = Session->mLineStorage;
-    connect(lines, &LineStorage::stationRemoved, this, &ViewManager::onStRemoved);
-    connect(lines, &LineStorage::stationNameChanged, this, &ViewManager::onStNameChanged);
-    connect(lines, &LineStorage::stationModified, this, &ViewManager::onStPlanChanged);
+    connect(Session, &MeetingSession::stationRemoved, this, &ViewManager::onStRemoved);
+    connect(Session, &MeetingSession::stationNameChanged, this, &ViewManager::onStNameChanged);
+    connect(Session, &MeetingSession::stationPlanChanged, this, &ViewManager::onStPlanChanged);
 
     //Shifts
     connect(Session, &MeetingSession::shiftNameChanged, this, &ViewManager::onShiftEdited);
     connect(Session, &MeetingSession::shiftRemoved, this, &ViewManager::onShiftRemoved);
     connect(Session, &MeetingSession::shiftJobsChanged, this, &ViewManager::onShiftJobsChanged);
-
-    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &ViewManager::onGraphOptionsChanged);
 }
 
 void ViewManager::requestRSInfo(db_id rsId)
@@ -765,11 +760,4 @@ void ViewManager::finalizeQueries()
 {
     if(jobEditor)
         jobEditor->finalizeQueries();
-}
-
-void ViewManager::onGraphOptionsChanged()
-{
-    //TODO: remove this function, handle directly inside the models, draw line before jobs
-    Session->mLineStorage->redrawAllLines();
-    Session->mJobStorage->drawJobs();
 }

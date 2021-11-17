@@ -82,7 +82,7 @@ bool LineGraphView::event(QEvent *e)
 
 bool LineGraphView::viewportEvent(QEvent *e)
 {
-    if(e->type() == QEvent::ToolTip)
+    if(e->type() == QEvent::ToolTip && m_scene && m_scene->getGraphType() != LineGraphType::NoGraph)
     {
         QHelpEvent *ev = static_cast<QHelpEvent *>(e);
 
@@ -99,7 +99,7 @@ bool LineGraphView::viewportEvent(QEvent *e)
         //Map to scene
         pos -= origin;
 
-        JobEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
+        JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
 
         if(job.jobId)
         {
@@ -155,6 +155,28 @@ void LineGraphView::mousePressEvent(QMouseEvent *e)
 {
     emit syncToolbarToScene();
     QAbstractScrollArea::mousePressEvent(e);
+}
+
+void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
+        return; //Nothing to select
+
+    const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
+
+    QPoint pos = e->pos();
+    const QRect vp = viewport()->rect();
+
+    //Map to viewport
+    pos -= vp.topLeft();
+    if(pos.x() < 0 || pos.y() < 0)
+        return;
+
+    //Map to scene
+    pos -= origin;
+
+    JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
+    m_scene->setSelectedJobId(job);
 }
 
 void LineGraphView::onSceneDestroyed()

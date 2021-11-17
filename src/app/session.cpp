@@ -11,8 +11,6 @@
 #include "graph/graphmanager.h"
 #include "db_metadata/metadatamanager.h"
 
-#include "lines/linestorage.h"
-
 #include "jobs/jobstorage.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER
@@ -60,7 +58,6 @@ MeetingSession::MeetingSession() :
 
     loadSettings(settings_file);
 
-    mLineStorage = new LineStorage(m_Db);
     mJobStorage = new JobStorage(m_Db);
 
     viewManager.reset(new ViewManager);
@@ -76,7 +73,6 @@ MeetingSession::~MeetingSession()
 {
     //JobStorage refers to LineStorage so delete it first
     delete mJobStorage;
-    delete mLineStorage;
 }
 
 MeetingSession *MeetingSession::Get()
@@ -209,7 +205,6 @@ DB_Error MeetingSession::closeDB()
     }
 
     mJobStorage->clear();
-    mLineStorage->clear();
 
 #ifdef ENABLE_RS_CHECKER
     backgroundManager->getRsChecker()->clearModel();
