@@ -395,10 +395,6 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
         if(r.contains(pos))
         {
             //Requested position is inside bounds, might be a match
-            const double deltaX = segment.toArrival.x() - segment.fromDeparture.x();
-            if(qFuzzyIsNull(deltaX))
-                continue; //Error: arrival is equal to departure
-
             const double resultingY = r.top() + (pos.x() - r.left()) * r.height() / r.width();
             const double segDistance = qAbs(resultingY - pos.y());
             if(prevSegDistance < 0 || segDistance < prevSegDistance)
@@ -409,6 +405,9 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
                 job.stopId = segment.fromStopId;
                 job.jobId = segment.jobId;
                 job.category = segment.category;
+
+                //Store new minimum distance
+                prevSegDistance = segDistance;
             }
         }
     }
