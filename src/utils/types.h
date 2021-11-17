@@ -64,17 +64,17 @@ enum class JobCategory : qint8
 constexpr JobCategory LastFreightCategory = JobCategory::POSTAL;
 constexpr JobCategory FirstPassengerCategory = JobCategory::REGIONAL;
 
-typedef struct JobEntry_
+struct JobEntry
 {
     db_id jobId;
     JobCategory category;
-} JobEntry;
+};
 
-typedef struct
+struct JobStopEntry
 {
     db_id stopId = 0;
     db_id jobId = 0;
-    JobCategory category = JobCategory::FREIGHT;
-} JobStopEntry;
+    JobCategory category = JobCategory::NCategories;
+};
 
 #endif // TYPES_H
