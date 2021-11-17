@@ -739,11 +739,11 @@ void StopModel::loadJobStops(db_id jobId)
     StopItem::Segment prevSegment;
     db_id prevOutGateId = 0;
 
-    q_selectStops.prepare("SELECT stops.id,stops.station_id,stops.arrival,stops.departure,stops.type,"
-                          "stops.in_gate_conn, g1.gate_id,g1.gate_track,g1.track_id,"
-                          "stops.out_gate_conn,g2.gate_id,g2.gate_track,g2.track_id,"
-                          "stops.next_segment_conn_id,c.seg_id,c.in_track,c.out_track,"
-                          "seg.in_gate_id,seg.out_gate_id"
+    q_selectStops.prepare("SELECT stops.id, stops.station_id, stops.arrival, stops.departure, stops.type,"
+                          "stops.in_gate_conn, g1.gate_id, g1.gate_track, g1.track_id,"
+                          "stops.out_gate_conn, g2.gate_id, g2.gate_track, g2.track_id,"
+                          "stops.next_segment_conn_id, c.seg_id, c.in_track, c.out_track,"
+                          "seg.in_gate_id, seg.out_gate_id"
                           " FROM stops"
                           " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
                           " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
@@ -774,12 +774,12 @@ void StopModel::loadJobStops(db_id jobId)
         db_id otherTrackId = stop.get<db_id>(12);
 
         s.nextSegment.segConnId = stop.get<db_id>(13);
-        s.nextSegment.segmentId = stop.get<db_id>(13);
-        int nextSegInTrack = stop.get<db_id>(14);
-        s.nextSegment.outTrackNum = stop.get<db_id>(15);
+        s.nextSegment.segmentId = stop.get<db_id>(14);
+        int nextSegInTrack = stop.get<db_id>(15);
+        s.nextSegment.outTrackNum = stop.get<db_id>(16);
 
-        db_id segInGateId = stop.get<db_id>(16);
-        db_id segOutGateId = stop.get<db_id>(17);
+        db_id segInGateId = stop.get<db_id>(17);
+        db_id segOutGateId = stop.get<db_id>(18);
 
         //Check consistency
         if(s.trackId != otherTrackId)
