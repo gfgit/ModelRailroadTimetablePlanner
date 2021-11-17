@@ -647,5 +647,8 @@ void LineGraphScene::setSelectedJobId(JobStopEntry stop)
     selectedJob = stop;
 
     if(selectedJob.jobId != oldJobId)
+    {
+        emit redrawGraph();
         emit jobSelected(selectedJob.jobId);
+    }
 }
