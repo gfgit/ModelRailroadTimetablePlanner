@@ -251,7 +251,8 @@ void JobListModel::internalFetch(int first, int sortCol, int valRow, const QVari
                      " FROM jobs"
                      " LEFT JOIN stops s1 ON s1.job_id=jobs.id"
                      " LEFT JOIN stops s2 ON s2.job_id=jobs.id"
-                     " LEFT JOIN jobshifts ON jobshifts.id=jobs.shift_id";
+                     " LEFT JOIN jobshifts ON jobshifts.id=jobs.shift_id"
+                     " GROUP BY jobs.id";
 
     switch (sortCol)
     {
