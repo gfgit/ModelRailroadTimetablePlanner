@@ -1,5 +1,7 @@
 #include "railwaysegmenthelper.h"
 
+#include "app/session.h"
+
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
@@ -9,32 +11,65 @@ RailwaySegmentHelper::RailwaySegmentHelper(sqlite3pp::database &db) :
 
 }
 
-bool RailwaySegmentHelper::getSegmentInfo(db_id segmentId,
-                                          QString &outName, utils::RailwaySegmentType &outType,
-                                          int &outDistance, int &outSpeed,
-                                          db_id &outFromStId, db_id &outFromGateId,
-                                          db_id &outToStId, db_id &outToGateId)
+bool RailwaySegmentHelper::getSegmentInfo(SegmentInfo &info)
 {
-    query q(mDb, "SELECT s.in_gate_id,s.out_gate_id,s.name,s.max_speed_kmh,"
-                 "s.type,s.distance_meters,"
-                 "g1.station_id,g2.station_id"
+    query q(mDb, "SELECT s.name,s.max_speed_kmh,s.type,s.distance_meters,"
+                 "s.in_gate_id,g1.station_id,"
+                 "s.out_gate_id,g2.station_id"
                  " FROM railway_segments s"
                  " JOIN station_gates g1 ON g1.id=s.in_gate_id"
                  " JOIN station_gates g2 ON g2.id=s.out_gate_id"
                  " WHERE s.id=?");
-    q.bind(1, segmentId);
+    q.bind(1, info.segmentId);
     if(q.step() != SQLITE_ROW)
         return false; //FIXME: show error to user
 
     auto r = q.getRows();
-    outFromGateId = r.get<db_id>(0);
-    outToGateId = r.get<db_id>(1);
-    outName = r.get<QString>(2);
-    outSpeed = r.get<int>(3);
-    outType = utils::RailwaySegmentType(r.get<db_id>(4));
-    outDistance = r.get<int>(5);
-    outFromStId = r.get<db_id>(6);
-    outToStId = r.get<db_id>(7);
+    info.segmentName = r.get<QString>(0);
+    info.maxSpeedKmH = r.get<int>(1);
+    info.type = utils::RailwaySegmentType(r.get<db_id>(2));
+    info.distanceMeters = r.get<db_id>(3);
+
+    info.from.gateId = r.get<db_id>(4);
+    info.from.stationId = r.get<db_id>(5);
+
+    info.to.gateId = r.get<db_id>(6);
+    info.to.stationId = r.get<db_id>(7);
+
+    return true;
+}
+
+bool RailwaySegmentHelper::getSegmentInfoFromGate(db_id gateId, SegmentInfo &info)
+{
+    query q(mDb, "SELECT s.id,s.name,s.max_speed_kmh,s.type,s.distance_meters,"
+                 "s.in_gate_id,g1.name,g1.station_id,st1.name,"
+                 "s.out_gate_id,g2.name,g2.station_id,st2.name"
+                 " FROM railway_segments s"
+                 " JOIN station_gates g1 ON g1.id=s.in_gate_id"
+                 " JOIN station_gates g2 ON g2.id=s.out_gate_id"
+                 " JOIN stations st1 ON st1.id=g1.station_id"
+                 " JOIN stations st2 ON st2.id=g2.station_id"
+                 " WHERE g1.id=?1 OR g2.id=?1");
+    q.bind(1, gateId);
+    if(q.step() != SQLITE_ROW)
+        return false; //FIXME: show error to user
+
+    auto r = q.getRows();
+    info.segmentId = r.get<db_id>(0);
+    info.segmentName = r.get<QString>(1);
+    info.maxSpeedKmH = r.get<int>(2);
+    info.type = utils::RailwaySegmentType(r.get<db_id>(3));
+    info.distanceMeters = r.get<db_id>(4);
+
+    info.from.gateId = r.get<db_id>(5);
+    info.from.gateLetter = r.get<const char*>(6)[0];
+    info.from.stationId = r.get<db_id>(7);
+    info.from.stationName = r.get<QString>(8);
+
+    info.to.gateId = r.get<db_id>(9);
+    info.to.gateLetter = r.get<const char*>(10)[0];
+    info.to.stationId = r.get<db_id>(11);
+    info.to.stationName = r.get<QString>(12);
 
     return true;
 }
@@ -90,5 +125,8 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
             *outErrMsg = mDb.error_msg();
         return false;
     }
+
+    emit Session->segmentRemoved(segmentId);
+
     return true;
 }

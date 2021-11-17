@@ -13,7 +13,6 @@
 
 #include "app/session.h"
 #include "utils/jobcategorystrings.h"
-#include "lines/linestorage.h"
 
 ShiftGraphHolder::ShiftGraphHolder(database& db, QObject *parent) :
     QObject(parent),
@@ -38,7 +37,7 @@ ShiftGraphHolder::ShiftGraphHolder(database& db, QObject *parent) :
     connect(&AppSettings, &MRTPSettings::shiftGraphOptionsChanged,
             this, &ShiftGraphHolder::updateShiftGraphOptions);
 
-    connect(Session->mLineStorage, &LineStorage::stationNameChanged, this, &ShiftGraphHolder::stationNameChanged);
+    connect(Session, &MeetingSession::stationNameChanged, this, &ShiftGraphHolder::stationNameChanged);
 
     connect(Session, &MeetingSession::shiftNameChanged, this, &ShiftGraphHolder::shiftNameChanged);
     connect(Session, &MeetingSession::shiftRemoved, this, &ShiftGraphHolder::shiftRemoved);
@@ -315,9 +314,9 @@ void ShiftGraphHolder::updateJobColors()
     //TODO: maybe store JobCategory inside JobGraph
     query q_getJobCat(mDb, "SELECT category FROM jobs WHERE id=?");
 
-    for(ShiftGraphObj *obj : m_shifts)
+    for(ShiftGraphObj *obj : qAsConst(m_shifts))
     {
-        for(auto it : obj->vec)
+        for(auto it : qAsConst(obj->vec))
         {
             db_id jobId = it.key();
             ShiftGraphObj::JobGraph& g = it.value();

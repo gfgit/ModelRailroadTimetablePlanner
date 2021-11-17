@@ -465,9 +465,11 @@ QString StationGatesModel::getStationName() const
     return q.getRows().get<QString>(0);
 }
 
-bool StationGatesModel::getStationInfo(QString& name, QString &shortName, utils::StationType &type, qint64 &phoneNumber) const
+bool StationGatesModel::getStationInfo(QString& name, QString &shortName,
+                                       utils::StationType &type, qint64 &phoneNumber,
+                                       bool &hasImage) const
 {
-    query q(mDb, "SELECT name,short_name,type,phone_number FROM stations WHERE id=?");
+    query q(mDb, "SELECT name,short_name,type,phone_number,svg_data IS NULL FROM stations WHERE id=?");
     q.bind(1, m_stationId);
     if(q.step() != SQLITE_ROW)
         return false;
@@ -480,6 +482,9 @@ bool StationGatesModel::getStationInfo(QString& name, QString &shortName, utils:
         phoneNumber = -1;
     else
         phoneNumber = r.get<qint64>(3);
+
+    //svg_data IS NULL == 0 --> station has SVG image
+    hasImage = r.get<int>(4) == 0;
 
     return true;
 }

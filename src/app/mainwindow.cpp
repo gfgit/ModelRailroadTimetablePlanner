@@ -257,6 +257,7 @@ void MainWindow::about()
     msgBox->setText(translatedText);
     msgBox->setStandardButtons(QMessageBox::Ok);
     msgBox->exec();
+    delete msgBox;
 }
 
 void MainWindow::onOpen()
@@ -720,15 +721,18 @@ void MainWindow::onCloseSession()
 
 void MainWindow::onProperties()
 {
-    PropertiesDialog dlg(this);
-    dlg.exec();
+    QPointer<PropertiesDialog> dlg = new PropertiesDialog(this);
+    dlg->exec();
+    delete dlg;
 }
 
 void MainWindow::onMeetingInformation()
 {
-    MeetingInformationDialog dlg(this);
-    if(dlg.exec() == QDialog::Accepted)
-        dlg.saveData();
+    QPointer<MeetingInformationDialog> dlg = new MeetingInformationDialog(this);
+    int ret = dlg->exec();
+    if(dlg && ret == QDialog::Accepted)
+        dlg->saveData();
+    delete dlg;
 }
 
 bool MainWindow::closeSession()
@@ -794,23 +798,26 @@ void MainWindow::onRemoveJob()
 
 void MainWindow::onPrint()
 {
-    PrintWizard wizard(this);
-    wizard.setOutputType(Print::Native);
-    wizard.exec();
+    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
+    wizard->setOutputType(Print::Native);
+    wizard->exec();
+    delete wizard;
 }
 
 void MainWindow::onPrintPDF()
 {
-    PrintWizard wizard(this);
-    wizard.setOutputType(Print::Pdf);
-    wizard.exec();
+    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
+    wizard->setOutputType(Print::Pdf);
+    wizard->exec();
+    delete wizard;
 }
 
 void MainWindow::onExportSvg()
 {
-    PrintWizard wizard(this);
-    wizard.setOutputType(Print::Svg);
-    wizard.exec();
+    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
+    wizard->setOutputType(Print::Svg);
+    wizard->exec();
+    delete wizard;
 }
 
 #ifdef ENABLE_USER_QUERY
@@ -826,9 +833,10 @@ void MainWindow::onExecQuery()
 void MainWindow::onOpenSettings()
 {
     DEBUG_ENTRY;
-    SettingsDialog dlg(this);
-    dlg.loadSettings();
-    dlg.exec();
+    QPointer<SettingsDialog> dlg = new SettingsDialog(this);
+    dlg->loadSettings();
+    dlg->exec();
+    delete dlg;
 }
 
 void MainWindow::checkLineNumber()

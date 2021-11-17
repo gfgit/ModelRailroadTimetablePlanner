@@ -26,28 +26,14 @@ public:
     bool removeJob(db_id jobId);
     void removeAllJobs();
 
-    void drawJobs();
-
-    void updateJobPath(db_id jobId);
-
     void updateFirstLast(db_id jobId);
 
     bool selectSegment(db_id jobId, db_id segId, bool select, bool ensureVisible);
-
-private:
-    friend class LineStoragePrivate;
-    void drawJobs(db_id lineId);
-    void loadLine(db_id lineId);
-    void unloadLine(db_id lineId);
 
 signals:
     void jobAdded(db_id jobId);
     void aboutToRemoveJob(db_id jobId);
     void jobRemoved(db_id jobId);
-
-private slots:
-    void updateJobColors();
-    void updateJob(db_id newId, db_id oldId);
 
 private:
     JobStoragePrivate *impl;

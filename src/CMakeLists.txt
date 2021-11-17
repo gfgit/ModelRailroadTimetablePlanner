@@ -142,6 +142,7 @@ target_link_libraries(
     Qt5::PrintSupport
     ${SQLite3_LIBRARIES}
     ${ZLIB_LIBRARIES}
+    ssplib::ssplib
     )
 
 # Link LibZip

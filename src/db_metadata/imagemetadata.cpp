@@ -2,14 +2,16 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
+#include <QDebug>
+
 namespace ImageMetaData
 {
 
 constexpr char sql_get_key_id[] = "SELECT rowid FROM metadata WHERE name=? AND val NOT NULL";
 
-ImageBlobDevice::ImageBlobDevice(sqlite3 *db, qint64 rowId, QObject *parent) :
+ImageBlobDevice::ImageBlobDevice(sqlite3 *db, QObject *parent) :
     QIODevice(parent),
-    mRowId(rowId),
+    mRowId(0),
     mSize(0),
     mDb(db),
     mBlob(nullptr)
@@ -19,13 +21,77 @@ ImageBlobDevice::ImageBlobDevice(sqlite3 *db, qint64 rowId, QObject *parent) :
 
 ImageBlobDevice::~ImageBlobDevice()
 {
-    close();
+    ImageBlobDevice::close();
+}
+
+void ImageBlobDevice::setBlobInfo(const QByteArray &table, const QByteArray &column, qint64 rowId)
+{
+    mRowId = rowId;
+    mTable = table;
+    mColumn = column;
+}
+
+bool ImageBlobDevice::reserveSizeAndReset(qint64 len)
+{
+    //NOTE: this will discard any previous content
+
+    //Close previous BLOB handle
+    if(mBlob)
+        close();
+
+    //Create SQL statement
+    QByteArray sql = "UPDATE " + mTable + " SET " + mColumn + "=? WHERE rowId=?";
+
+    sqlite3_stmt *stmt = nullptr;
+    int rc = sqlite3_prepare_v2(mDb, sql.constData(), sql.size(), &stmt, nullptr);
+    if(rc != SQLITE_OK)
+    {
+        qWarning() << "ImageBlobDevice::reserveSizeAndReset cannot prepare:" << sqlite3_errmsg(mDb);
+        setErrorString(tr("Cannot query database"));
+        return false;
+    }
+
+    //Reserve BLOB memory
+    rc = sqlite3_bind_zeroblob64(stmt, 1, len);
+    if(rc != SQLITE_OK)
+    {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+    rc = sqlite3_bind_int64(stmt, 2, mRowId);
+    if(rc != SQLITE_OK)
+    {
+        sqlite3_finalize(stmt);
+        return false;
+    }
+
+    rc = sqlite3_step(stmt);
+
+    sqlite3_finalize(stmt);
+
+    if(rc != SQLITE_OK && rc != SQLITE_DONE)
+    {
+        qWarning() << "ImageBlobDevice::reserveSizeAndReset cannot step:" << sqlite3_errmsg(mDb);
+        setErrorString(tr("Cannot create BLOB"));
+        return false;
+    }
+
+    //Open new BLOB handle
+    return open(QIODevice::ReadWrite);
 }
 
 bool ImageBlobDevice::open(QIODevice::OpenMode mode)
 {
-    mode |= QIODevice::ReadOnly;
-    int rc = sqlite3_blob_open(mDb, "main", "metadata", "val", mRowId, (mode & QIODevice::WriteOnly) != 0, &mBlob);
+    if(isOpen())
+    {
+        qWarning().nospace() << "ImageBlobDevice::open Device already open "
+                             << '(' << mTable << '.' << mColumn << ')';
+        return false;
+    }
+
+    mode |= QIODevice::ReadOnly; //Always enable reading
+    int rc = sqlite3_blob_open(mDb, "main", mTable.constData(), mColumn.constData(),
+                               mRowId, (mode & QIODevice::WriteOnly) != 0, &mBlob);
     if(rc != SQLITE_OK || !mBlob)
     {
         mBlob = nullptr;
@@ -132,7 +198,9 @@ ImageBlobDevice* getImage(sqlite3pp::database& db, const MetaDataManager::Key &k
     if(!rowId)
         return nullptr;
 
-    return new ImageBlobDevice(db.db(), rowId);
+    ImageBlobDevice *dev = new ImageBlobDevice(db.db());
+    dev->setBlobInfo("metadata", "val", rowId);
+    return dev;
 }
 
 void setImage(sqlite3pp::database& db, const MetaDataManager::Key &key, const void *data, int size)

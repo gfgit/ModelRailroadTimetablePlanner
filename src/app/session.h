@@ -15,7 +15,6 @@ using namespace sqlite3pp;
 
 #include <settings/appsettings.h>
 
-class LineStorage;
 class JobStorage;
 
 class ViewManager;
@@ -76,11 +75,19 @@ signals:
 
     //Stations
     void stationNameChanged(db_id stationId);
+    //TODO: separate job stop changes (time plan) from track changes (track plan)
     void stationPlanChanged(db_id stationId);
+    void stationRemoved(db_id stationId);
+
+    //Segments
     void segmentNameChanged(db_id segmentId);
     void segmentStationsChanged(db_id segmentId);
+    void segmentRemoved(db_id segmentId);
+
+    //Lines
     void lineNameChanged(db_id lineId);
     void lineSegmentsChanged(db_id lineId);
+    void lineRemoved(db_id lineId);
 
 //TODO: old methods, remove them
 public:
@@ -100,7 +107,6 @@ private:
 #endif
 
 public:
-    LineStorage *mLineStorage;
     JobStorage *mJobStorage;
 
 //Settings TODO: remove

@@ -333,8 +333,9 @@ void RollingStockManager::visibilityChanged(int v)
 
 void RollingStockManager::importRS(bool resume, QWidget *parent)
 {
-    RSImportWizard w(resume, parent);
-    w.exec();
+    QPointer<RSImportWizard> w = new RSImportWizard(resume, parent);
+    w->exec();
+    delete w;
 }
 
 void RollingStockManager::onViewRSPlan()
@@ -468,10 +469,11 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
     RSMatchModelFactory factory(ModelModes::Models, Session->m_Db, this);
     std::unique_ptr<ISqlFKMatchModel> matchModel;
     matchModel.reset(factory.createModel());
-    ChooseItemDlg dlg(matchModel.get(), this);
-    dlg.setDescription(tr("Please choose a rollingstock model"));
-    dlg.setPlaceholder(tr("Model"));
-    dlg.setCallback([this, &dlg](db_id modelId, QString &errMsg) -> bool
+
+    QPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
+    dlg->setDescription(tr("Please choose a rollingstock model"));
+    dlg->setPlaceholder(tr("Model"));
+    dlg->setCallback([this, &dlg](db_id modelId, QString &errMsg) -> bool
     {
         if(!modelId)
         {
@@ -479,13 +481,15 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
             return false;
         }
 
-        return createRsModelWithDifferentSuffix(modelId, errMsg, &dlg);
+        return createRsModelWithDifferentSuffix(modelId, errMsg, dlg);
     });
 
-    if(dlg.exec() == QDialog::Accepted)
+    if(dlg->exec() == QDialog::Accepted)
     {
         //TODO: select and edit the new item
     }
+
+    delete dlg;
 }
 
 bool RollingStockManager::createRsModelWithDifferentSuffix(db_id sourceModelId, QString &errMsg, QWidget *w)
@@ -592,8 +596,9 @@ void RollingStockManager::onMergeModels()
     if(m_readOnly)
         return;
 
-    MergeModelsDialog dlg(Session->m_Db, this);
-    dlg.exec();
+    QPointer<MergeModelsDialog> dlg = new MergeModelsDialog(Session->m_Db, this);
+    dlg->exec();
+    delete dlg;
 
     if(clearModelTimers[ModelsTab] == ModelLoaded)
     {
@@ -610,8 +615,9 @@ void RollingStockManager::onMergeOwners()
     if(m_readOnly)
         return;
 
-    MergeOwnersDialog dlg(Session->m_Db, this);
-    dlg.exec();
+    QPointer<MergeOwnersDialog> dlg = new MergeOwnersDialog(Session->m_Db, this);
+    dlg->exec();
+    delete dlg;
 
     if(clearModelTimers[OwnersTab] == ModelLoaded)
     {

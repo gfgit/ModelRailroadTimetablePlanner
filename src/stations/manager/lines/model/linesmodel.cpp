@@ -1,5 +1,7 @@
 #include "linesmodel.h"
 
+#include "app/session.h"
+
 #include <QCoreApplication>
 #include <QEvent>
 
@@ -240,6 +242,8 @@ bool LinesModel::removeLine(db_id lineId)
 
         return false;
     }
+
+    emit Session->lineRemoved(lineId);
 
     refreshData(); //Recalc row count
 

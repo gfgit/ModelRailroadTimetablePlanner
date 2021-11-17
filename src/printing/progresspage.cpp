@@ -7,19 +7,9 @@
 
 #include "printworker.h"
 
-#include "app/session.h"
-#include "viewmanager/viewmanager.h"
-
-#include "graph/graphmanager.h"
-
-#include "lines/linestorage.h"
-
-//BIG TODO: deselect jobs before printing because the dashed rectangle of the selection gets printed too!!!
-
-ProgressPage::ProgressPage(PrintWizard *w, QWidget *parent) :
+PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     QWizardPage(parent),
-    mWizard(w),
-    complete(false)
+    mWizard(w)
 {
     m_label = new QLabel(tr("Printing..."));
     m_progressBar = new QProgressBar;
@@ -30,99 +20,42 @@ ProgressPage::ProgressPage(PrintWizard *w, QWidget *parent) :
     l->addWidget(m_progressBar);
     setLayout(l);
 
-    setCommitPage(true);
     setFinalPage(true);
 
     setTitle(tr("Printing"));
 }
 
-void ProgressPage::initializePage()
+bool PrintProgressPage::isComplete() const
 {
-    complete = false;
-    m_progressBar->reset();
-
-    m_worker = new PrintWorker;
-    m_worker->setOutputType(mWizard->type);
-    m_worker->setPrinter(mWizard->printer);
-    m_worker->setFileOutput(mWizard->fileOutput, mWizard->differentFiles);
-
-    auto grapgMgr = Session->getViewManager()->getGraphMgr();
-    m_worker->setGraphMgr(grapgMgr);
-
-    PrintWorker::Scenes scenes;
-
-    //FIXME: allow selection of witch line to print
-    query q(Session->m_Db, "SELECT id,name FROM lines");
-    for(auto line : q)
-    {
-        db_id lineId = line.get<db_id>(0);
-        QString name = line.get<QString>(1);
-        QGraphicsScene *scene = Session->mLineStorage->sceneForLine(lineId);
-        scenes.append({lineId, scene, name});
-    }
-
-// OLD CODE
-//    LinesModel *model = mWizard->linesModel;
-
-//    for(int row = 0; row < size; row++)
-//    {
-//        if(vec.at(row))
-//        {
-//            const LineObj *line = model->getLineObjForRow(row);
-//            if(!line)
-//                continue;
-
-//            scenes.append({line->lineId, line->scene, line->name});
-//        }
-//    }
-
-    m_worker->setScenes(scenes);
-
-    m_progressBar->setMaximum(m_worker->getMaxProgress());
-
-    m_worker->moveToThread(&m_thread);
-    connect(&m_thread, &QThread::finished, m_worker, &QObject::deleteLater);
-    connect(&m_thread, &QThread::started, m_worker, &PrintWorker::doWork);
-    connect(m_worker, &PrintWorker::finished, this, &ProgressPage::handleFinished);
-    connect(m_worker, &PrintWorker::progress, this, &ProgressPage::handleProgress);
-    connect(m_worker, &PrintWorker::description, this, &ProgressPage::handleDescription);
-
-    m_thread.start();
+    return !mWizard->taskRunning();
 }
 
-bool ProgressPage::validatePage()
+void PrintProgressPage::handleProgressStart(int max)
 {
-    if(m_thread.isRunning())
-    {
-        if(!m_thread.wait(2000))
-            return false;
-    }
-
-    return complete;
-}
-
-bool ProgressPage::isComplete() const
-{
-    return complete;
-}
-
-void ProgressPage::handleFinished()
-{
-    m_thread.quit();
-    m_thread.wait();
-
-    m_label->setText(tr("Completed"));
-
-    complete = true;
+    //We are starting new progress
+    //Enable progress bar and set maximum
+    m_progressBar->setMaximum(max);
+    m_progressBar->setEnabled(true);
     emit completeChanged();
 }
 
-void ProgressPage::handleProgress(int val)
+void PrintProgressPage::handleProgress(int val, const QString& text)
 {
-    m_progressBar->setValue(val);
-}
+    const bool finished = val < 0;
 
-void ProgressPage::handleDescription(const QString& text)
-{
-    m_label->setText(QStringLiteral("Printing '%1' ...").arg(text));
+    if(val == m_progressBar->maximum() && !finished)
+        m_progressBar->setMaximum(val + 1); //Increase maximum
+
+    m_label->setText(text);
+    if(finished)
+    {
+        //Set progress to max and set disabled
+        m_progressBar->setValue(m_progressBar->maximum());
+        m_progressBar->setEnabled(false);
+        emit completeChanged();
+    }
+    else
+    {
+        m_progressBar->setValue(val);
+    }
 }

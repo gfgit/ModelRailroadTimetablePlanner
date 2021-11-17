@@ -6,6 +6,7 @@
 #include <QVector>
 
 #include "utils/types.h"
+#include "graph/linegraphtypes.h"
 
 class LineGraphScene;
 
@@ -28,17 +29,31 @@ public:
     void unregisterScene(LineGraphScene *scene);
 
     void clearAllGraphs();
+    void clearGraphsOfObject(db_id objectId, LineGraphType type);
 
 private slots:
+    //Scenes
     void onSceneDestroyed(QObject *obj);
 
+    //Stations
     void onStationNameChanged(db_id stationId);
     void onStationPlanChanged(db_id stationId);
+    void onStationRemoved(db_id stationId);
+
+    //Segments
     void onSegmentNameChanged(db_id segmentId);
     void onSegmentStationsChanged(db_id segmentId);
+    void onSegmentRemoved(db_id segmentId);
+
+    //Lines
     void onLineNameChanged(db_id lineId);
     void onLineSegmentsChanged(db_id lineId);
+    void onLineRemoved(db_id lineId);
 
+    //Jobs
+    void onJobSelected(db_id jobId);
+
+    //Settings
     void updateGraphOptions();
 
 private:

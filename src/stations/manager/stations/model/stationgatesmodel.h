@@ -107,7 +107,9 @@ public:
     }
 
     QString getStationName() const;
-    bool getStationInfo(QString &name, QString& shortName, utils::StationType& type, qint64& phoneNumber) const;
+    bool getStationInfo(QString &name, QString& shortName,
+                        utils::StationType& type, qint64& phoneNumber,
+                        bool &hasImage) const;
     bool setStationInfo(const QString &name, const QString& shortName, utils::StationType type, qint64 phoneNumber);
 
 signals:

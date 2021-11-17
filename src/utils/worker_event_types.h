@@ -43,7 +43,10 @@ enum class CustomEvents
     StationTrackConnListResult,
 
     //Jobs
-    JobsModelResult
+    JobsModelResult,
+
+    //Printing
+    PrintProgress
 };
 
 #endif // WORKER_EVENT_TYPES_H
