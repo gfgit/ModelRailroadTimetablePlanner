@@ -2312,7 +2312,7 @@ void StopModel::removeLastIfEmpty()
     {
         const StopItem& stop = stops[row];
 
-        if(stop.stationId == 0 || stop.segment == 0)
+        if(stop.stationId == 0)
         {
             removeStop(index(row));
         }
