@@ -185,8 +185,8 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
 
         BackgroundHelper::drawBackgroundHourLines(&painter, sourceRect);
         BackgroundHelper::drawStations(&painter, scene, sourceRect);
-        BackgroundHelper::drawJobStops(&painter, scene, sourceRect);
-        BackgroundHelper::drawJobSegments(&painter, scene, sourceRect);
+        BackgroundHelper::drawJobStops(&painter, scene, sourceRect, false);
+        BackgroundHelper::drawJobSegments(&painter, scene, sourceRect, false);
         BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect, 0);
         BackgroundHelper::drawHourPanel(&painter, hourPanelRect, 0);
 
