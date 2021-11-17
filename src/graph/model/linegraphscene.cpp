@@ -230,6 +230,8 @@ bool LineGraphScene::reloadJobs()
         lastSt = toSt;
     }
 
+    updateJobSelection();
+
     return true;
 }
 
@@ -238,9 +240,6 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
     const double platformOffset = Session->platformOffset;
 
     JobStopEntry job;
-    job.stopId = 0;
-    job.jobId = 0;
-    job.category = JobCategory::FREIGHT;
 
     if(stationPositions.isEmpty())
         return job;
@@ -634,6 +633,48 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
     return true;
 }
 
+void LineGraphScene::updateJobSelection()
+{
+    if(!selectedJob.jobId)
+        return;
+
+    query q(mDb);
+
+    if(selectedJob.stopId)
+    {
+        //Check if stop is valid
+        q.prepare("SELECT job_id FROM stops WHERE id=?");
+        q.bind(1, selectedJob.stopId);
+        if(q.step() == SQLITE_ROW)
+        {
+            db_id jobId = q.getRows().get<db_id>(0);
+            if(jobId != selectedJob.jobId)
+                selectedJob.stopId = 0; //Stop doesn't belong to this job
+        }
+        else
+        {
+            //This stop doesn't exist anymore
+            selectedJob.stopId = 0;
+        }
+    }
+
+    q.prepare("SELECT category FROM jobs WHERE id=?");
+    q.bind(1, selectedJob.jobId);
+    if(q.step() != SQLITE_ROW)
+    {
+        //Job doesn't exist anymore, clear selection
+        setSelectedJobId(JobStopEntry{});
+        return;
+    }
+
+    JobCategory newCategory = JobCategory(q.getRows().get<int>(0));
+
+    if(newCategory != selectedJob.category)
+    {
+        selectedJob.category = newCategory;
+    }
+}
+
 JobStopEntry LineGraphScene::getSelectedJob() const
 {
     return selectedJob;
@@ -645,6 +686,12 @@ void LineGraphScene::setSelectedJobId(JobStopEntry stop)
     const db_id oldJobId = selectedJob.jobId;
 
     selectedJob = stop;
+    if(!selectedJob.jobId)
+    {
+        //Clear other members too
+        selectedJob.stopId = 0;
+        selectedJob.category = JobCategory::NCategories;
+    }
 
     if(selectedJob.jobId != oldJobId)
     {

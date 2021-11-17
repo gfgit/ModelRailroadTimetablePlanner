@@ -51,7 +51,9 @@ public:
      * \brief Load graph jobs
      *
      * Reloads only jobs but not stations
+     * It also updates current job selection
      * \sa loadGraph()
+     * \sa updateJobSelection()
      */
     bool reloadJobs();
 
@@ -95,8 +97,8 @@ public slots:
     /*!
      * \brief Reload everything
      *
-     * \param pos Point in scene coordinates
-     * \param tolerance A tolerance if mouse doesn't exactly click on job item
+     * Reload entire contents
+     * \sa loadSegmentJobs()
      */
     void reload();
 
@@ -180,6 +182,16 @@ private:
      * \sa loadStationJobStops()
      */
     bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromSt, const StationGraphObject &toSt);
+
+    /*!
+     * \brief Update job selection category
+     *
+     * Updates current selection.
+     * If selected job got removed or changed ID (Number) selection is cleared
+     * If selected stop got removed or doesn't belong to selected job it's cleared
+     * Category of selected job gets updated if changed in the meantime
+     */
+    void updateJobSelection();
 
 private:
     friend class BackgroundHelper;
