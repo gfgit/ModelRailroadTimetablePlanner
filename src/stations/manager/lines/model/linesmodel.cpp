@@ -1,28 +1,15 @@
 #include "linesmodel.h"
 
-#include "app/session.h"
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "app/session.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/worker_event_types.h"
-
 #include "utils/kmutils.h"
 
 #include <QDebug>
-
-class LinesModelResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::LinesModelResult);
-    inline LinesModelResultEvent() : QEvent(_Type) {}
-
-    QVector<LinesModel::LineItem> items;
-    int firstRow;
-};
 
 //Error messages
 static constexpr char errorNameAlreadyUsedText[] =
@@ -35,26 +22,9 @@ static constexpr char errorLineInUseText[] =
                       "Cannot delete <b>%1</b> line because it is stille referenced.");
 
 LinesModel::LinesModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
     sortColumn = NameCol;
-}
-
-bool LinesModel::event(QEvent *e)
-{
-    if(e->type() == LinesModelResultEvent::_Type)
-    {
-        LinesModelResultEvent *ev = static_cast<LinesModelResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant LinesModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -82,16 +52,6 @@ QVariant LinesModel::headerData(int section, Qt::Orientation orientation, int ro
     }
 
     return QAbstractTableModel::headerData(section, orientation, role);
-}
-
-int LinesModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int LinesModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant LinesModel::data(const QModelIndex &idx, int role) const
@@ -147,22 +107,6 @@ QVariant LinesModel::data(const QModelIndex &idx, int role) const
     }
 
     return QVariant();
-}
-
-qint64 LinesModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM lines");
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
-}
-
-void LinesModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
 }
 
 void LinesModel::setSortingColumn(int col)
@@ -250,32 +194,13 @@ bool LinesModel::removeLine(db_id lineId)
     return true;
 }
 
-void LinesModel::fetchRow(int row)
+qint64 LinesModel::recalcTotalItemCount()
 {
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM lines");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
 }
 
 void LinesModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
@@ -347,99 +272,24 @@ void LinesModel::internalFetch(int first, int sortCol, int valRow, const QVarian
     auto it = q.begin();
     const auto end = q.end();
 
-    if(reverse)
-    {
-        int i = BatchSize - 1;
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
 
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            LineItem &item = vec[i];
-            item.lineId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.startMeters = r.get<int>(2);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
+    for(; it != end; ++it)
     {
-        int i = 0;
+        auto r = *it;
+        LineItem &item = vec[i];
+        item.lineId = r.get<db_id>(0);
+        item.name = r.get<QString>(1);
+        item.startMeters = r.get<int>(2);
 
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            LineItem &item = vec[i];
-            item.lineId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.startMeters = r.get<int>(2);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
+        i += increment;
     }
 
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
 
-    LinesModelResultEvent *ev = new LinesModelResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void LinesModel::handleResult(const QVector<LinesModel::LineItem> &items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<LineItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-    emit itemsReady(firstRow, lastRow);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
+    postResult(vec, first);
 }
