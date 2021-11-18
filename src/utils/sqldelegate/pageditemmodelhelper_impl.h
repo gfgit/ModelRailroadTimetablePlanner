@@ -3,6 +3,8 @@
 
 #include "pageditemmodelhelper.h"
 
+#include <QCoreApplication>
+
 #include <QDebug>
 
 template <typename SuperType, typename ModelItemType>
@@ -69,6 +71,16 @@ void IPagedItemModelImpl<SuperType, ModelItemType>::fetchRow(int row)
     //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
     SuperType *self = static_cast<SuperType *>(this);
     self->internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
+}
+
+template<typename SuperType, typename ModelItemType>
+void IPagedItemModelImpl<SuperType, ModelItemType>::postResult(const Cache &items, int firstRow)
+{
+    ResultEvent *ev = new ResultEvent;
+    ev->items = items;
+    ev->firstRow = firstRow;
+
+    qApp->postEvent(this, ev);
 }
 
 template <typename SuperType, typename ModelItemType>

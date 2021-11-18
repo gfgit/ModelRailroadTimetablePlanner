@@ -49,6 +49,7 @@ protected:
 
 protected:
     void fetchRow(int row);
+    void postResult(const Cache &items, int firstRow);
     void handleResult(const Cache &items, int firstRow);
 
 protected:
