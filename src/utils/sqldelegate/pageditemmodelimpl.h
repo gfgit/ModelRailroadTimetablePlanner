@@ -14,11 +14,12 @@ private:
     //Get some definition from SuperType so we don't have to pass them as templates
     typedef typename SuperType::ModelItemType ModelItemType_;
     static constexpr int NCols_ = SuperType::NCols;
+    static constexpr int BatchSize_ = SuperType::BatchSize;
 public:
     IPagedItemModelImpl(const int itemsPerPage, sqlite3pp::database &db, QObject *parent = nullptr)
         : IPagedItemModel(itemsPerPage, db, parent),
         cacheFirstRow(0),
-        firstPendingRow(-SuperType::BatchSize)
+        firstPendingRow(-BatchSize_)
     {
     }
 
@@ -47,6 +48,7 @@ protected:
     bool event(QEvent *e) override;
 
 protected:
+    void fetchRow(int row);
     void handleResult(const QVector<ModelItemType_> &items, int firstRow);
 
 protected:
@@ -92,17 +94,47 @@ bool IPagedItemModelImpl<SuperType>::event(QEvent *e)
 }
 
 template<typename SuperType>
+void IPagedItemModelImpl<SuperType>::fetchRow(int row)
+{
+    if(firstPendingRow != -BatchSize_)
+        return; //Currently fetching another batch, wait for it to finish first
+
+    if(row >= firstPendingRow && row < firstPendingRow + BatchSize_)
+        return; //Already fetching this batch
+
+    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
+        return; //Already cached
+
+    //TODO: abort previous fetching here
+
+    const int remainder = row % BatchSize_;
+    firstPendingRow = row - remainder;
+    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
+
+    QVariant val;
+    int valRow = 0;
+
+
+    //TODO: use a custom QRunnable
+    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
+    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
+    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
+    SuperType *self = static_cast<SuperType *>(this);
+    self->internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
+}
+
+template<typename SuperType>
 void IPagedItemModelImpl<SuperType>::handleResult(const QVector<ModelItemType_> &items, int firstRow)
 {
     if(firstRow == cacheFirstRow + cache.size())
     {
         qDebug() << "RES: appending First:" << cacheFirstRow;
         cache.append(items);
-        if(cache.size() > ItemsPerPage)
+        if(cache.size() > IPagedItemModel::ItemsPerPage)
         {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % SuperType::BatchSize;
-            const int n = remainder ? extra + SuperType::BatchSize - remainder : extra;
+            const int extra = cache.size() - IPagedItemModel::ItemsPerPage; //Round up to BatchSize
+            const int remainder = extra % BatchSize_;
+            const int n = remainder ? extra + BatchSize_ - remainder : extra;
             qDebug() << "RES: removing last" << n;
             cache.remove(0, n);
             cacheFirstRow += n;
@@ -116,10 +148,10 @@ void IPagedItemModelImpl<SuperType>::handleResult(const QVector<ModelItemType_> 
             QVector<ModelItemType_> tmp = items;
             tmp.append(cache);
             cache = tmp;
-            if(cache.size() > ItemsPerPage)
+            if(cache.size() > IPagedItemModel::ItemsPerPage)
             {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
+                const int n = cache.size() - IPagedItemModel::ItemsPerPage;
+                cache.remove(IPagedItemModel::ItemsPerPage, n);
                 qDebug() << "RES: removing first" << n;
             }
         }
@@ -132,16 +164,32 @@ void IPagedItemModelImpl<SuperType>::handleResult(const QVector<ModelItemType_> 
         qDebug() << "NEW First:" << cacheFirstRow;
     }
 
-    firstPendingRow = -SuperType::BatchSize;
+    firstPendingRow = -BatchSize_; //Tell model we ended fetching
 
     int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
     if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
+    {
+        //Ok, there is no extra row so notify just our batch
+        lastRow = curItemCount -1;
+    }
+    else if(items.count() < BatchSize_)
+    {
+        //Error: fetching returned less rows than expected
+
+        //NOTE: when not on last batch of last page, it should always be of BatchSize_
+        //      last batch of last page can have less rows
+
+        //Remove the '+1' to avoid triggering fetching of next batch
+        //Otherwise it may cause infinite loop.
+        emit modelError(IPagedItemModel::tr("Fetching returned less rows than expected.\n"
+                                            "%1 instead of %2").arg(items.count()).arg(BatchSize_));
+        lastRow--;
+    }
 
     if(firstRow > 0)
         firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
     QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, SuperType::NCols - 1);
+    QModelIndex lastIdx = index(lastRow, NCols_ - 1);
     emit dataChanged(firstIdx, lastIdx);
     emit itemsReady(firstRow, lastRow);
 
