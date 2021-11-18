@@ -9,6 +9,7 @@ IPagedItemModel::IPagedItemModel(const int itemsPerPage, sqlite3pp::database &db
     curItemCount(0),
     pageCount(0),
     curPage(0),
+    sortColumn(0),
     ItemsPerPage(itemsPerPage)
 {
 
