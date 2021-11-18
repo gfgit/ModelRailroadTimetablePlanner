@@ -18,6 +18,15 @@ public:
     {
     }
 
+    // Basic functionality:
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
+    // IPagedItemModel
+
+    // Cached rows management
+    virtual void clearCache() override;
+
 protected:
 
     //TODO: this would be better in .cpp file so
@@ -41,6 +50,26 @@ protected:
     int cacheFirstRow;
     int firstPendingRow;
 };
+
+template<typename ModelItemType, typename SuperType>
+int IPagedItemModelImpl<ModelItemType, SuperType>::rowCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : curItemCount;
+}
+
+template<typename ModelItemType, typename SuperType>
+int IPagedItemModelImpl<ModelItemType, SuperType>::columnCount(const QModelIndex &parent) const
+{
+    return parent.isValid() ? 0 : NCols;
+}
+
+template<typename ModelItemType, typename SuperType>
+void IPagedItemModelImpl<ModelItemType, SuperType>::clearCache()
+{
+    cache.clear();
+    cache.squeeze();
+    cacheFirstRow = 0;
+}
 
 template<typename ModelItemType, typename SuperType>
 bool IPagedItemModelImpl<ModelItemType, SuperType>::event(QEvent *e)
