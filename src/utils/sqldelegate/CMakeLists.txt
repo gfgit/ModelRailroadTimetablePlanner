@@ -7,7 +7,8 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/sqldelegate/isqlfkmatchmodel.h
   utils/sqldelegate/modelpageswitcher.h
   utils/sqldelegate/pageditemmodel.h
-  utils/sqldelegate/pageditemmodelimpl.h
+  utils/sqldelegate/pageditemmodelhelper.h
+  utils/sqldelegate/pageditemmodelhelper_impl.h
   utils/sqldelegate/sqlfkfielddelegate.h
 
   utils/sqldelegate/IFKField.cpp
@@ -17,7 +18,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/sqldelegate/isqlfkmatchmodel.cpp
   utils/sqldelegate/modelpageswitcher.cpp
   utils/sqldelegate/pageditemmodel.cpp
-  utils/sqldelegate/pageditemmodelimpl.cpp
   utils/sqldelegate/sqlfkfielddelegate.cpp
   PARENT_SCOPE
 )
