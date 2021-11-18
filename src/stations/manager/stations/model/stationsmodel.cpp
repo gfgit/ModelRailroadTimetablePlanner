@@ -1,28 +1,15 @@
 #include "stationsmodel.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
-
-#include "utils/worker_event_types.h"
 
 #include "stations/station_name_utils.h"
 
 #include "app/session.h"
 
 #include <QDebug>
-
-class StationsSQLModelResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::StationsModelResult);
-    inline StationsSQLModelResultEvent() : QEvent(_Type) {}
-
-    QVector<StationsModel::StationItem> items;
-    int firstRow;
-};
 
 //Error messages
 static constexpr char
@@ -48,26 +35,9 @@ static constexpr char
                         "Please delete all jobs stopping here and remove the station from any line.");
 
 StationsModel::StationsModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
     sortColumn = NameCol;
-}
-
-bool StationsModel::event(QEvent *e)
-{
-    if(e->type() == StationsSQLModelResultEvent::_Type)
-    {
-        StationsSQLModelResultEvent *ev = static_cast<StationsSQLModelResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant StationsModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -99,16 +69,6 @@ QVariant StationsModel::headerData(int section, Qt::Orientation orientation, int
     }
 
     return QAbstractTableModel::headerData(section, orientation, role);
-}
-
-int StationsModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int StationsModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant StationsModel::data(const QModelIndex &idx, int role) const
@@ -241,13 +201,6 @@ qint64 StationsModel::recalcTotalItemCount()
     return count;
 }
 
-void StationsModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
 void StationsModel::setSortingColumn(int col)
 {
     if(sortColumn == col || (col != NameCol && col != TypeCol))
@@ -340,34 +293,6 @@ bool StationsModel::removeStation(db_id stationId)
     return true;
 }
 
-void StationsModel::fetchRow(int row)
-{
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
-}
-
 void StationsModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
 {
     query q(mDb);
@@ -442,111 +367,31 @@ void StationsModel::internalFetch(int first, int sortCol, int valRow, const QVar
     auto it = q.begin();
     const auto end = q.end();
 
-    if(reverse)
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
+
+    for(; it != end; ++it)
     {
-        int i = BatchSize - 1;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            StationItem &item = vec[i];
-            item.stationId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.shortName = r.get<QString>(2);
-            item.type = utils::StationType(r.get<int>(3));
-            if(r.column_type(4) == SQLITE_NULL)
-                item.phone_number = -1;
-            else
-                item.phone_number = r.get<qint64>(4);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
-    {
-        int i = 0;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            StationItem &item = vec[i];
-            item.stationId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.shortName = r.get<QString>(2);
-            item.type = utils::StationType(r.get<int>(3));
-            if(r.column_type(4) == SQLITE_NULL)
-                item.phone_number = -1;
-            else
-                item.phone_number = r.get<qint64>(4);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
-    }
-
-
-    StationsSQLModelResultEvent *ev = new StationsSQLModelResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void StationsModel::handleResult(const QVector<StationsModel::StationItem> &items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<StationItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
+        auto r = *it;
+        StationItem &item = vec[i];
+        item.stationId = r.get<db_id>(0);
+        item.name = r.get<QString>(1);
+        item.shortName = r.get<QString>(2);
+        item.type = utils::StationType(r.get<int>(3));
+        if(r.column_type(4) == SQLITE_NULL)
+            item.phone_number = -1;
         else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
+            item.phone_number = r.get<qint64>(4);
+
+        i += increment;
     }
 
-    firstPendingRow = -BatchSize;
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
 
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-    emit itemsReady(firstRow, lastRow);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
+    postResult(vec, first);
 }
 
 bool StationsModel::setName(StationsModel::StationItem &item, const QString &val)
