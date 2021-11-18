@@ -7,9 +7,13 @@
 
 #include <QDebug>
 
-template <typename ModelItemType, typename SuperType>
+template <typename SuperType>
 class IPagedItemModelImpl : public IPagedItemModel
 {
+private:
+    //Get some definition from SuperType so we don't have to pass them as templates
+    typedef typename SuperType::ModelItemType ModelItemType_;
+    static constexpr int NCols_ = SuperType::NCols;
 public:
     IPagedItemModelImpl(const int itemsPerPage, sqlite3pp::database &db, QObject *parent = nullptr)
         : IPagedItemModel(itemsPerPage, db, parent),
@@ -36,43 +40,43 @@ protected:
         static constexpr Type _Type = Type(QEvent::User + 1);
         inline ResultEvent() : QEvent(_Type) {}
 
-        QVector<ModelItemType> items;
+        QVector<ModelItemType_> items;
         int firstRow;
     };
 
     bool event(QEvent *e) override;
 
 protected:
-    void handleResult(const QVector<ModelItemType> &items, int firstRow);
+    void handleResult(const QVector<ModelItemType_> &items, int firstRow);
 
 protected:
-    QVector<ModelItemType> cache;
+    QVector<ModelItemType_> cache;
     int cacheFirstRow;
     int firstPendingRow;
 };
 
-template<typename ModelItemType, typename SuperType>
-int IPagedItemModelImpl<ModelItemType, SuperType>::rowCount(const QModelIndex &parent) const
+template<typename SuperType>
+int IPagedItemModelImpl<SuperType>::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : curItemCount;
 }
 
-template<typename ModelItemType, typename SuperType>
-int IPagedItemModelImpl<ModelItemType, SuperType>::columnCount(const QModelIndex &parent) const
+template<typename SuperType>
+int IPagedItemModelImpl<SuperType>::columnCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : NCols;
+    return parent.isValid() ? 0 : NCols_;
 }
 
-template<typename ModelItemType, typename SuperType>
-void IPagedItemModelImpl<ModelItemType, SuperType>::clearCache()
+template<typename SuperType>
+void IPagedItemModelImpl<SuperType>::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
 }
 
-template<typename ModelItemType, typename SuperType>
-bool IPagedItemModelImpl<ModelItemType, SuperType>::event(QEvent *e)
+template<typename SuperType>
+bool IPagedItemModelImpl<SuperType>::event(QEvent *e)
 {
     if(e->type() == ResultEvent::_Type)
     {
@@ -87,8 +91,8 @@ bool IPagedItemModelImpl<ModelItemType, SuperType>::event(QEvent *e)
     return IPagedItemModel::event(e);
 }
 
-template<typename ModelItemType, typename SuperType>
-void IPagedItemModelImpl<ModelItemType, SuperType>::handleResult(const QVector<ModelItemType> &items, int firstRow)
+template<typename SuperType>
+void IPagedItemModelImpl<SuperType>::handleResult(const QVector<ModelItemType_> &items, int firstRow)
 {
     if(firstRow == cacheFirstRow + cache.size())
     {
@@ -109,7 +113,7 @@ void IPagedItemModelImpl<ModelItemType, SuperType>::handleResult(const QVector<M
         if(firstRow + items.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<ModelItemType> tmp = items;
+            QVector<ModelItemType_> tmp = items;
             tmp.append(cache);
             cache = tmp;
             if(cache.size() > ItemsPerPage)
