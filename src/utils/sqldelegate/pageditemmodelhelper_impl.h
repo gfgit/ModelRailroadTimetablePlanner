@@ -86,10 +86,36 @@ void IPagedItemModelImpl<SuperType, ModelItemType>::postResult(const Cache &item
 template <typename SuperType, typename ModelItemType>
 void IPagedItemModelImpl<SuperType, ModelItemType>::handleResult(const Cache &items, int firstRow)
 {
+    Cache itemsCopy = items;
+
+    int lastRow = firstRow + itemsCopy.count(); //Last row + 1 extra to re-trigger possible next batch
+    if(lastRow >= curItemCount)
+    {
+        //Ok, there is no extra row so notify just our batch
+        lastRow = curItemCount -1;
+    }
+    else if(itemsCopy.count() < BatchSize_)
+    {
+        //Error: fetching returned less rows than expected
+
+        //NOTE: when not on last batch of last page, it should always be of BatchSize_
+        //      last batch of last page can have less rows
+
+        emit modelError(IPagedItemModel::tr("Fetching returned less rows than expected.\n"
+                                            "%1 instead of %2").arg(itemsCopy.count()).arg(BatchSize_));
+
+        //Insert fake items to prevent triggering re-fetching which leads to infinite loop
+        const int expectedCount = qMin(BatchSize_, curItemCount - firstRow);
+        const int realCount = itemsCopy.count();
+        itemsCopy.insert(realCount, expectedCount - realCount, ModelItemType{});
+
+        lastRow = firstRow + itemsCopy.count() - 1;
+    }
+
     if(firstRow == cacheFirstRow + cache.size())
     {
         qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
+        cache.append(itemsCopy);
         if(cache.size() > IPagedItemModel::ItemsPerPage)
         {
             const int extra = cache.size() - IPagedItemModel::ItemsPerPage; //Round up to BatchSize
@@ -102,10 +128,10 @@ void IPagedItemModelImpl<SuperType, ModelItemType>::handleResult(const Cache &it
     }
     else
     {
-        if(firstRow + items.size() == cacheFirstRow)
+        if(firstRow + itemsCopy.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
-            Cache tmp = items;
+            Cache tmp = itemsCopy;
             tmp.append(cache);
             cache = tmp;
             if(cache.size() > IPagedItemModel::ItemsPerPage)
@@ -118,33 +144,13 @@ void IPagedItemModelImpl<SuperType, ModelItemType>::handleResult(const Cache &it
         else
         {
             qDebug() << "RES: replacing";
-            cache = items;
+            cache = itemsCopy;
         }
         cacheFirstRow = firstRow;
         qDebug() << "NEW First:" << cacheFirstRow;
     }
 
     firstPendingRow = -BatchSize_; //Tell model we ended fetching
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-    {
-        //Ok, there is no extra row so notify just our batch
-        lastRow = curItemCount -1;
-    }
-    else if(items.count() < BatchSize_)
-    {
-        //Error: fetching returned less rows than expected
-
-        //NOTE: when not on last batch of last page, it should always be of BatchSize_
-        //      last batch of last page can have less rows
-
-        //Remove the '+1' to avoid triggering fetching of next batch
-        //Otherwise it may cause infinite loop.
-        emit modelError(IPagedItemModel::tr("Fetching returned less rows than expected.\n"
-                                            "%1 instead of %2").arg(items.count()).arg(BatchSize_));
-        lastRow--;
-    }
 
     if(firstRow > 0)
         firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
