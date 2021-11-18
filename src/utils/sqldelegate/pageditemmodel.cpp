@@ -46,6 +46,11 @@ void IPagedItemModel::refreshData(bool forceUpdate)
     }
 }
 
+void IPagedItemModel::setSortingColumn(int col)
+{
+    //Do nothing, it must be reimplemented
+}
+
 qint64 IPagedItemModel::recalcTotalItemCount()
 {
     //NOTE: either override this or refreshData()
