@@ -8,6 +8,15 @@
 #include <QDebug>
 
 template <typename SuperType, typename ModelItemType>
+IPagedItemModelImpl<SuperType, ModelItemType>::IPagedItemModelImpl(const int itemsPerPage, sqlite3pp::database &db, QObject *parent)
+    : IPagedItemModel(itemsPerPage, db, parent),
+    cacheFirstRow(0),
+    firstPendingRow(-BatchSize_)
+{
+
+}
+
+template <typename SuperType, typename ModelItemType>
 int IPagedItemModelImpl<SuperType, ModelItemType>::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : curItemCount;

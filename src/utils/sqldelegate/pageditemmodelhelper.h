@@ -14,12 +14,7 @@ protected:
     static constexpr int BatchSize_ = SuperType::BatchSize;
 
 public:
-    IPagedItemModelImpl(const int itemsPerPage, sqlite3pp::database &db, QObject *parent = nullptr)
-        : IPagedItemModel(itemsPerPage, db, parent),
-        cacheFirstRow(0),
-        firstPendingRow(-BatchSize_)
-    {
-    }
+    IPagedItemModelImpl(const int itemsPerPage, sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
