@@ -38,6 +38,13 @@ void LineGraphManager::registerScene(LineGraphScene *scene)
     connect(scene, &LineGraphScene::destroyed, this, &LineGraphManager::onSceneDestroyed);
     connect(scene, &LineGraphScene::sceneActivated, this, &LineGraphManager::setActiveScene);
     connect(scene, &LineGraphScene::jobSelected, this, &LineGraphManager::onJobSelected);
+
+    if(scenes.count() == 1)
+    {
+        //This is the first scene registered
+        //activate it so we have an active scene even if user does't activate one
+        setActiveScene(scene);
+    }
 }
 
 void LineGraphManager::unregisterScene(LineGraphScene *scene)
@@ -74,8 +81,21 @@ void LineGraphManager::clearGraphsOfObject(db_id objectId, LineGraphType type)
 
 void LineGraphManager::setActiveScene(LineGraphScene *scene)
 {
-    if(activeScene == scene)
-        return;
+    if(scene)
+    {
+        if(activeScene == scene)
+            return;
+
+        //NOTE: Only registere scenes can become active
+        //Otherwise we cannot track if scene got destroyed and reset active scene.
+        if(!scenes.contains(scene))
+            return;
+    }
+    else if(!scenes.isEmpty())
+    {
+        //Activate first registered scene because previous one was unregistered
+        scene = scenes.first();
+    }
 
     activeScene = scene;
     emit activeSceneChanged(activeScene);

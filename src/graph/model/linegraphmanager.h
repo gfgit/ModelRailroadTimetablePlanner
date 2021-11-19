@@ -25,7 +25,27 @@ class LineGraphManager : public QObject
 public:
     explicit LineGraphManager(QObject *parent = nullptr);
 
+    /*!
+     * \brief subscribe scene to notifications
+     *
+     * The scene gets registered on this manager and will be refreshed
+     * we railway layout changes.
+     * The first scene registered is set as active
+     *
+     * \sa unregisterScene()
+     * \sa setActiveScene()
+     */
     void registerScene(LineGraphScene *scene);
+
+    /*!
+     * \brief unsubscribe scene from notifications
+     *
+     * The scene will not be refreshed by this manager anymore
+     * If it was the active scene, active scene will be reset
+     *
+     * \sa registerScene()
+     * \sa setActiveScene()
+     */
     void unregisterScene(LineGraphScene *scene);
 
     void clearAllGraphs();
@@ -48,7 +68,10 @@ public slots:
      * \brief sets active scene
      *
      * This scene instance will be the active one and will therefore receive
-     * user requests to show items
+     * user requests to show items.
+     * Scene must be registered on this manager first.
+     * If scene parameter is nullptr (i.e. when resetting active scene) we try
+     * to activate our first registered scene.
      *
      * \sa getActiveScene()
      * \sa activeSceneChanged()
