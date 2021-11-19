@@ -52,12 +52,6 @@ void IPagedItemModel::setSortingColumn(int col)
     //Do nothing, it must be reimplemented
 }
 
-qint64 IPagedItemModel::recalcTotalItemCount()
-{
-    //NOTE: either override this or refreshData()
-    return 0; //Default implementation
-}
-
 int IPagedItemModel::getSortingColumn() const
 {
     return sortColumn;
@@ -100,4 +94,18 @@ void IPagedItemModel::switchToPage(int page)
     QModelIndex first = index(0, 0);
     QModelIndex last = index(curItemCount - 1, columnCount() - 1);
     emit dataChanged(first, last);
+}
+
+void IPagedItemModel::clearCache_slot()
+{
+    clearCache();
+    QModelIndex start = index(0, 0);
+    QModelIndex end = index(rowCount() - 1, columnCount() - 1);
+    emit dataChanged(start, end);
+}
+
+qint64 IPagedItemModel::recalcTotalItemCount()
+{
+    //NOTE: either override this or refreshData()
+    return 0; //Default implementation
 }

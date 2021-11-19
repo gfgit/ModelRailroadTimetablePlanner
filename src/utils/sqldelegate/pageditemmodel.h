@@ -49,6 +49,9 @@ signals:
     void pageCountChanged(int count);
     void currentPageChanged(int page);
 
+public:
+    void clearCache_slot();
+
 protected:
     virtual qint64 recalcTotalItemCount();
 
@@ -61,4 +64,6 @@ protected:
     int sortColumn;
     const int ItemsPerPage;
 };
+
+
 #endif // PAGEDITEMMODEL_H
