@@ -760,3 +760,40 @@ void LineGraphScene::setSelectedJobId(JobStopEntry stop)
         emit jobSelected(selectedJob.jobId);
     }
 }
+
+bool LineGraphScene::requestShowZone(db_id stationId, db_id segmentId, QTime from, QTime to)
+{
+    //TODO: when we will load incrementally, ensure relevant items are loaded
+
+    const double vertOffset = Session->vertOffset;
+    const double hourOffset = Session->hourOffset;
+    const double platfOffset = Session->platformOffset;
+
+    QRectF result;
+    result.setTop(vertOffset + timeToHourFraction(from) * hourOffset);
+    result.setBottom(vertOffset + timeToHourFraction(to) * hourOffset);
+
+    for(const StationPosEntry& entry : qAsConst(stationPositions))
+    {
+        //Match the requested station or both station in the segment
+        if(entry.stationId == stationId || entry.segmentId == segmentId)
+        {
+            auto st = stations.constFind(entry.stationId);
+            if(st == stations.constEnd())
+                continue;
+
+            if(result.left() > entry.xPos)
+                result.setLeft(entry.xPos);
+
+            const int platfCount = st->platforms.count();
+            const double rightPos = entry.xPos + platfCount * platfOffset;
+
+            if(result.right() < rightPos)
+                result.setRight(rightPos);
+        }
+    }
+
+    emit requestShowRect(result);
+
+    return true;
+}

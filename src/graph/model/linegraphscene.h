@@ -101,6 +101,22 @@ public:
      */
     inline void activateScene() { emit sceneActivated(this); }
 
+    /*!
+     * \brief requestShowZone
+     * \param stationId null if you want to select segment
+     * \param segmentId null if you want to select station
+     * \param from top of the zone
+     * \param to bottom of the zone
+     *
+     * Calculates a zone in the scene which show the selected station or entire segment
+     * (It depends on which is non-null)
+     * The y values are calculated from the QTime arguments
+     * Then it requests the view to show the area.
+     *
+     * \sa requestShowRect()
+     */
+    bool requestShowZone(db_id stationId, db_id segmentId, QTime from, QTime to);
+
 signals:
     void graphChanged(int type, db_id objectId);
     void redrawGraph();
@@ -113,6 +129,13 @@ signals:
      * \sa activateScene()
      */
     void sceneActivated(LineGraphScene *self);
+
+    /*!
+     * \brief request LineGraphView to show this rect
+     *
+     * The view will ensure this rect is visible
+     */
+    void requestShowRect(const QRectF& rect);
 
 public slots:
     /*!
