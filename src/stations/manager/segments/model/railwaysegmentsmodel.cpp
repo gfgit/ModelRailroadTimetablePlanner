@@ -2,6 +2,8 @@
 
 #include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
+#include "app/session.h"
+
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
@@ -17,7 +19,7 @@ RailwaySegmentsModel::RailwaySegmentsModel(sqlite3pp::database &db, QObject *par
     BaseClass(500, db, parent),
     filterFromStationId(0)
 {
-    //TODO: connect to StationsModel stationNameChanged
+    connect(Session, &MeetingSession::stationNameChanged, this, &IPagedItemModel::clearCache_slot);
     sortColumn = NameCol;
 }
 
