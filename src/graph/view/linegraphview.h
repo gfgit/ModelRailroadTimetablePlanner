@@ -26,6 +26,15 @@ public:
     LineGraphScene *scene() const;
     void setScene(LineGraphScene *newScene);
 
+    /*!
+     * \brief ensure point is visible
+     * \param x point coordinate
+     * \param y point coordinate
+     * \param xmargin margin at left and right of point
+     * \param ymargin margin above and below point
+     *
+     * Ensures a point is visible with margins in the viewport
+     */
     void ensureVisible(int x, int y, int xmargin, int ymargin);
 
 signals:
@@ -43,6 +52,13 @@ public slots:
      * \sa updateScrollBars()
      */
     void redrawGraph();
+
+    /*!
+     * \brief ensure a rect is visible in the viewport
+     *
+     * \sa ensureVisible()
+     */
+    void ensureRectVisible(const QRectF& r);
 
 protected:
     /*!

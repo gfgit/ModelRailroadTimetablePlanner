@@ -51,12 +51,14 @@ void LineGraphView::setScene(LineGraphScene *newScene)
     if(m_scene)
     {
         disconnect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphView::redrawGraph);
+        disconnect(m_scene, &LineGraphScene::requestShowRect, this, &LineGraphView::ensureRectVisible);
         disconnect(m_scene, &QObject::destroyed, this, &LineGraphView::onSceneDestroyed);
     }
     m_scene = newScene;
     if(m_scene)
     {
         connect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphView::redrawGraph);
+        connect(m_scene, &LineGraphScene::requestShowRect, this, &LineGraphView::ensureRectVisible);
         connect(m_scene, &QObject::destroyed, this, &LineGraphView::onSceneDestroyed);
     }
     redrawGraph();
@@ -67,6 +69,13 @@ void LineGraphView::redrawGraph()
     updateScrollBars();
 
     viewport()->update();
+}
+
+void LineGraphView::ensureRectVisible(const QRectF &r)
+{
+    QRect r2 = r.toRect();
+    const QPoint c = r2.center();
+    ensureVisible(c.x(), c.y(), r2.width() / 2, r2.height() / 2);
 }
 
 bool LineGraphView::event(QEvent *e)
