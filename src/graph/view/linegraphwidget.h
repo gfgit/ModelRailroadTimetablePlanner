@@ -25,6 +25,10 @@ class LineGraphWidget : public QWidget
 public:
     explicit LineGraphWidget(QWidget *parent = nullptr);
 
+    inline LineGraphScene *getScene() const { return m_scene; }
+    inline LineGraphView *getView() const { return view; }
+    inline LineGraphToolbar *getToolbar() const { return toolBar; }
+
 private:
     LineGraphScene *m_scene;
 
