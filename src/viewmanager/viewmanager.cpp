@@ -21,6 +21,7 @@
 
 #include "graph/graphmanager.h"
 #include "graph/model/linegraphmanager.h"
+#include "graph/model/linegraphscene.h"
 
 #include "sessionstartendrsviewer.h"
 
@@ -504,6 +505,84 @@ void ViewManager::clearAllLineGraphs()
 
 bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisible) const
 {
+    LineGraphScene *scene = lineGraphManager->getActiveScene();
+    if(!scene)
+        return false; //No active scene, we cannot select anything
+
+    //Check jobId is valid and get category
+
+    query q(Session->m_Db, "SELECT category FROM jobs WHERE id=?");
+    q.bind(1, jobId);
+    if(q.step() == SQLITE_ROW)
+        return false; //Job doen't exist
+
+    JobStopEntry selectedJob;
+    selectedJob.jobId = jobId;
+    selectedJob.category = JobCategory(q.getRows().get<int>(0));
+
+    // Try to select earliest stop of this job in current graph, if any
+    bool needsLineChange = false;
+
+    switch (scene->getGraphType())
+    {
+    case LineGraphType::SingleStation:
+    {
+        q.prepare("SELECT stop.id, MIN(stop.arrival)"
+                  " FROM stops"
+                  " WHERE stops.job_id=? AND stops.station_id=?");
+        break;
+    }
+    case LineGraphType::RailwaySegment:
+    {
+        //FIXME: add query
+        break;
+    }
+    case LineGraphType::RailwayLine:
+    {
+        break;
+    }
+    case LineGraphType::NoGraph:
+    case LineGraphType::NTypes:
+    {
+        //We need to load a new graph
+        needsLineChange = true;
+        break;
+    }
+    }
+
+    if(!needsLineChange)
+    {
+        q.bind(1, jobId);
+        q.bind(2, scene->getGraphObjectId());
+
+        if(q.step() == SQLITE_ROW)
+        {
+            //Get stop info
+
+            //We didn't find a stop, load a new graph
+            needsLineChange = true;
+        }
+    }
+
+    if(needsLineChange)
+    {
+        //Find a line graph or segment or station with this job
+    }
+
+    if(!selectedJob.stopId)
+        return false; //No stop found, abort
+
+    //Select job
+    if(select)
+        scene->setSelectedJobId(selectedJob);
+
+    if(ensureVisible)
+    {
+        //TODO: make scene emit a signal and view will react
+    }
+
+    //Old code: REMOVE IT
+
     db_id curLineId = mGraphMgr->getCurLineId();
 
     //Try to select first available segment in current line
