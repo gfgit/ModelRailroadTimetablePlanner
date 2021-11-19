@@ -31,6 +31,31 @@ public:
     void clearAllGraphs();
     void clearGraphsOfObject(db_id objectId, LineGraphType type);
 
+    /*!
+     * \brief get active scene
+     * \return Scene instance or nullptr if no scene is active
+     */
+    inline LineGraphScene *getActiveScene() const { return activeScene; }
+
+signals:
+    /*!
+     * \brief Active scene is changed
+     */
+    void activeSceneChanged(LineGraphScene *scene);
+
+public slots:
+    /*!
+     * \brief sets active scene
+     *
+     * This scene instance will be the active one and will therefore receive
+     * user requests to show items
+     *
+     * \sa getActiveScene()
+     * \sa activeSceneChanged()
+     * \sa LineGraphScene::activateScene()
+     */
+    void setActiveScene(LineGraphScene *scene);
+
 private slots:
     //Scenes
     void onSceneDestroyed(QObject *obj);
@@ -58,6 +83,7 @@ private slots:
 
 private:
     QVector<LineGraphScene *> scenes;
+    LineGraphScene *activeScene;
 };
 
 #endif // LINEGRAPHMANAGER_H

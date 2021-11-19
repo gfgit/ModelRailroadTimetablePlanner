@@ -33,6 +33,16 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     lay->addWidget(redrawBut);
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+
+    //Accept focus events by click
+    setFocusPolicy(Qt::ClickFocus);
+
+    //Install event filter to catch focus events on children widgets
+    for(QObject *child : selectionWidget->children())
+    {
+        if(child->isWidgetType())
+            child->installEventFilter(this);
+    }
 }
 
 LineGraphToolbar::~LineGraphToolbar()
@@ -53,6 +63,17 @@ void LineGraphToolbar::setScene(LineGraphScene *scene)
         connect(m_scene, &LineGraphScene::graphChanged, this, &LineGraphToolbar::onSceneGraphChanged);
         connect(m_scene, &QObject::destroyed, this, &LineGraphToolbar::onSceneDestroyed);
     }
+}
+
+bool LineGraphToolbar::eventFilter(QObject *watched, QEvent *ev)
+{
+    if(ev->type() == QEvent::FocusIn)
+    {
+        if(m_scene)
+            m_scene->activateScene();
+    }
+
+    return QWidget::eventFilter(watched, ev);
 }
 
 void LineGraphToolbar::resetToolbarToScene()
@@ -99,4 +120,12 @@ void LineGraphToolbar::onSceneDestroyed()
 {
     m_scene = nullptr;
     resetToolbarToScene(); //Clear UI
+}
+
+void LineGraphToolbar::focusInEvent(QFocusEvent *e)
+{
+    if(m_scene)
+        m_scene->activateScene();
+
+    QWidget::focusInEvent(e);
 }

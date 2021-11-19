@@ -6,7 +6,8 @@
 #include "viewmanager/viewmanager.h"
 
 LineGraphManager::LineGraphManager(QObject *parent) :
-    QObject(parent)
+    QObject(parent),
+    activeScene(nullptr)
 {
     auto session = Session;
     //Stations
@@ -35,6 +36,7 @@ void LineGraphManager::registerScene(LineGraphScene *scene)
     scenes.append(scene);
 
     connect(scene, &LineGraphScene::destroyed, this, &LineGraphManager::onSceneDestroyed);
+    connect(scene, &LineGraphScene::sceneActivated, this, &LineGraphManager::setActiveScene);
     connect(scene, &LineGraphScene::jobSelected, this, &LineGraphManager::onJobSelected);
 }
 
@@ -45,7 +47,12 @@ void LineGraphManager::unregisterScene(LineGraphScene *scene)
     scenes.removeOne(scene);
 
     disconnect(scene, &LineGraphScene::destroyed, this, &LineGraphManager::onSceneDestroyed);
+    disconnect(scene, &LineGraphScene::sceneActivated, this, &LineGraphManager::setActiveScene);
     disconnect(scene, &LineGraphScene::jobSelected, this, &LineGraphManager::onJobSelected);
+
+    //Reset active scene if it is unregistered
+    if(activeScene == scene)
+        setActiveScene(nullptr);
 }
 
 void LineGraphManager::clearAllGraphs()
@@ -63,6 +70,15 @@ void LineGraphManager::clearGraphsOfObject(db_id objectId, LineGraphType type)
         if(scene->getGraphObjectId() == objectId && scene->getGraphType() == type)
             scene->loadGraph(0, LineGraphType::NoGraph);
     }
+}
+
+void LineGraphManager::setActiveScene(LineGraphScene *scene)
+{
+    if(activeScene == scene)
+        return;
+
+    activeScene = scene;
+    emit activeSceneChanged(activeScene);
 }
 
 void LineGraphManager::onSceneDestroyed(QObject *obj)

@@ -179,6 +179,14 @@ void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
     m_scene->setSelectedJobId(job);
 }
 
+void LineGraphView::focusInEvent(QFocusEvent *e)
+{
+    if(m_scene)
+        m_scene->activateScene();
+
+    QAbstractScrollArea::focusInEvent(e);
+}
+
 void LineGraphView::onSceneDestroyed()
 {
     m_scene = nullptr;

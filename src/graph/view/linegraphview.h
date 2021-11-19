@@ -79,6 +79,17 @@ protected:
      */
     void mouseDoubleClickEvent(QMouseEvent *e) override;
 
+    /*!
+     * \brief Activate view
+     *
+     * This view (and its scene) is now active
+     * It will receive requests to show items
+     *
+     * \sa LineGraphScene::activateScene()
+     * \sa LineGraphManager::setActiveScene()
+     */
+    void focusInEvent(QFocusEvent *e) override;
+
 private slots:
     void onSceneDestroyed();
     void resizeHeaders();

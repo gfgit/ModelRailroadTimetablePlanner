@@ -88,10 +88,31 @@ public:
     JobStopEntry getSelectedJob() const;
     void setSelectedJobId(JobStopEntry stop);
 
+    /*!
+     * \brief activate scene
+     * \param self a pointer to LineGraphScene instance
+     *
+     * For scenes registered on a LineGraphManager, this tells
+     * our instance is now the active one and will therefore receive
+     * user requests to show items
+     *
+     * \sa LineGraphManager::setActiveScene()
+     * \sa sceneActivated()
+     */
+    inline void activateScene() { emit sceneActivated(this); }
+
 signals:
     void graphChanged(int type, db_id objectId);
     void redrawGraph();
     void jobSelected(db_id jobId);
+
+    /*!
+     * \brief Signal for activation
+     * \param self a pointer to LineGraphScene instance
+     *
+     * \sa activateScene()
+     */
+    void sceneActivated(LineGraphScene *self);
 
 public slots:
     /*!
