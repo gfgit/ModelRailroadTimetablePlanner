@@ -244,21 +244,34 @@ void LineGraphView::updateScrollBars()
 
 void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)
 {
-    //FIXME: consider verticalOffset and horizOffset for panels
-
     auto hbar = horizontalScrollBar();
     auto vbar = verticalScrollBar();
     auto vp = viewport();
 
+    const int horizOffset = hourPanel->width() + 5;
+    const int vertOffset = stationHeader->height() + 5;
+
     int logicalX = x;
-    if (logicalX - xmargin < hbar->value()) {
-        hbar->setValue(qMax(0, logicalX - xmargin));
-    } else if (logicalX > hbar->value() + vp->width() - xmargin) {
-        hbar->setValue(qMin(logicalX - vp->width() + xmargin, hbar->maximum()));
+
+    int val = hbar->value();
+    if (logicalX - xmargin < hbar->value() + horizOffset)
+    {
+        val = qMax(0, logicalX - xmargin - horizOffset);
     }
-    if (y - ymargin < vbar->value()) {
-        vbar->setValue(qMax(0, y - ymargin));
-    } else if (y > vbar->value() + vp->height() - ymargin) {
-        vbar->setValue(qMin(y - vp->height() + ymargin, vbar->maximum()));
+    else if (logicalX > hbar->value() + vp->width() - xmargin)
+    {
+        val = qMin(logicalX - vp->width() + xmargin, hbar->maximum());
     }
+    hbar->setValue(val);
+
+    val = vbar->value();
+    if (y - ymargin < vbar->value() + vertOffset)
+    {
+        val = qMax(0, y - ymargin - vertOffset);
+    }
+    else if (y > vbar->value() + vp->height() - ymargin)
+    {
+        val = qMin(y - vp->height() + ymargin, vbar->maximum());
+    }
+    vbar->setValue(val);
 }

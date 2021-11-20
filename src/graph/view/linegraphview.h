@@ -28,13 +28,16 @@ public:
 
     /*!
      * \brief ensure point is visible
-     * \param x point coordinate
-     * \param y point coordinate
-     * \param xmargin margin at left and right of point
-     * \param ymargin margin above and below point
+     * \badcode
+     * @badcode
      *
-     * Ensures a point is visible with margins in the viewport
-     */
+     * Scrolls the contents of the scroll area so that the point (\a x, \a y) is visible
+     * inside the region of the viewport with margins specified in pixels by \a xmargin and
+     * \a ymargin. If the specified point cannot be reached, the contents are scrolled to
+     * the nearest valid position. The default value for both margins is 50 pixels.
+     *
+     * Vertical and horizontal headers are excluded from the visible zone
+    */
     void ensureVisible(int x, int y, int xmargin, int ymargin);
 
 signals:
