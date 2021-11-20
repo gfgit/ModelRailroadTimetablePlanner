@@ -185,7 +185,7 @@ void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
     pos -= origin;
 
     JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
-    m_scene->setSelectedJobId(job);
+    m_scene->setSelectedJob(job);
 }
 
 void LineGraphView::focusInEvent(QFocusEvent *e)
@@ -244,6 +244,8 @@ void LineGraphView::updateScrollBars()
 
 void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)
 {
+    //FIXME: consider verticalOffset and horizOffset for panels
+
     auto hbar = horizontalScrollBar();
     auto vbar = verticalScrollBar();
     auto vp = viewport();
