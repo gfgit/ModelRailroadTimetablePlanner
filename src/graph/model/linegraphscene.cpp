@@ -800,6 +800,10 @@ bool LineGraphScene::requestShowZone(db_id stationId, db_id segmentId, QTime fro
         }
     }
 
+    //Set a margin around the selection so it douesn't end up at view edges
+    const double margin = hourOffset / 4;
+    result.adjust(-margin, -margin, margin, margin);
+
     emit requestShowRect(result);
 
     return true;
