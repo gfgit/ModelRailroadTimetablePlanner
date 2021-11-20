@@ -344,16 +344,12 @@ bool LineGraphSelectionHelper::requestCurrentJobNextSegmentVisible(LineGraphScen
 
         if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
         {
+            //Found stop and belongs to requested job
             auto stop = q.getRows();
-            db_id jobId = stop.get<db_id>(0);
-            if(jobId == selectedJob.jobId)
-            {
-                //Found stop and belongs to requested job
-                info.firstStopId = stop.get<db_id>(1);
-                info.arrivalAndStart = stop.get<QTime>(2);
-                info.departure = stop.get<QTime>(3);
-                info.firstStationId = stop.get<db_id>(4);
-            }
+            info.firstStopId = stop.get<db_id>(0);
+            info.arrivalAndStart = stop.get<QTime>(1);
+            info.departure = stop.get<QTime>(2);
+            info.firstStationId = stop.get<db_id>(3);
         }
     }
 
