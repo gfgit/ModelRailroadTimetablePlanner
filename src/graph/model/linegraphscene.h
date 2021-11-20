@@ -85,8 +85,24 @@ public:
         return contentSize;
     }
 
+    /*!
+     * \brief get selected job
+     *
+     * Get selected job info
+     * \sa setSelectedJob()
+     */
     JobStopEntry getSelectedJob() const;
-    void setSelectedJob(JobStopEntry stop);
+
+    /*!
+     * \brief setSelectedJob
+     * \param stop a specific stop or just a job ID and its category
+     * \param sendChange emit redrawGraph() and jobSelected() signals if true
+     *
+     * Set job selection and schedule graph redraw
+     * \sa jobSelected()
+     * \sa getSelectedJob()
+     */
+    void setSelectedJob(JobStopEntry stop, bool sendChange = true);
 
     /*!
      * \brief activate scene
@@ -118,7 +134,7 @@ public:
     bool requestShowZone(db_id stationId, db_id segmentId, QTime from, QTime to);
 
 signals:
-    void graphChanged(int type, db_id objectId);
+    void graphChanged(int type, db_id objectId, LineGraphScene *self);
     void redrawGraph();
 
     /*!
@@ -129,6 +145,7 @@ signals:
      *
      * Selection changed: either user clicked on a job
      * or on an empty zone to clear selection
+     * \sa setSelectedJob()
      */
     void jobSelected(db_id jobId, int category, db_id stopId);
 

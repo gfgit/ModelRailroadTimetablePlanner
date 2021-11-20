@@ -80,7 +80,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     if(type == LineGraphType::NoGraph)
     {
         //Nothing to load
-        emit graphChanged(int(graphType), graphObjectId);
+        emit graphChanged(int(graphType), graphObjectId, this);
         emit redrawGraph();
         return true;
     }
@@ -175,7 +175,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     reloadJobs();
 
-    emit graphChanged(int(graphType), graphObjectId);
+    emit graphChanged(int(graphType), graphObjectId, this);
     emit redrawGraph();
 
     return true;
@@ -741,7 +741,7 @@ JobStopEntry LineGraphScene::getSelectedJob() const
     return selectedJob;
 }
 
-void LineGraphScene::setSelectedJob(JobStopEntry stop)
+void LineGraphScene::setSelectedJob(JobStopEntry stop, bool sendChange)
 {
     //TODO: draw box around selected job or highlight in graph view
     const JobStopEntry oldJob = selectedJob;
@@ -754,7 +754,7 @@ void LineGraphScene::setSelectedJob(JobStopEntry stop)
         selectedJob.category = JobCategory::NCategories;
     }
 
-    if(selectedJob.jobId != oldJob.jobId || selectedJob.category != oldJob.category)
+    if(sendChange && (selectedJob.jobId != oldJob.jobId || selectedJob.category != oldJob.category))
     {
         emit redrawGraph();
         emit jobSelected(selectedJob.jobId, int(selectedJob.category), selectedJob.stopId);
