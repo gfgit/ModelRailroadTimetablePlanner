@@ -170,13 +170,26 @@ void LineGraphManager::onLineRemoved(db_id lineId)
     clearGraphsOfObject(lineId, LineGraphType::RailwayLine);
 }
 
-void LineGraphManager::onJobSelected(db_id jobId)
+void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)
 {
-    //TODO: maybe allow multiple job editing, one per open LineGraphScene
     if(jobId)
         Session->getViewManager()->requestJobEditor(jobId);
     else
         Session->getViewManager()->requestClearJob();
+
+    if(AppSettings.getSyncSelectionOnAllGraphs())
+    {
+        //Sync selection among all registered scenes
+        JobStopEntry selectedJob;
+        selectedJob.jobId = jobId;
+        selectedJob.category = JobCategory(category);
+        selectedJob.stopId = stopId;
+
+        for(LineGraphScene *scene : qAsConst(scenes))
+        {
+            scene->setSelectedJob(selectedJob);
+        }
+    }
 }
 
 void LineGraphManager::updateGraphOptions()

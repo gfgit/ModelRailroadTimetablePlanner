@@ -99,7 +99,7 @@ private slots:
     void onLineRemoved(db_id lineId);
 
     //Jobs
-    void onJobSelected(db_id jobId);
+    void onJobSelected(db_id jobId, int category, db_id stopId);
 
     //Settings
     void updateGraphOptions();
