@@ -13,49 +13,35 @@ class StationsMatchModel : public ISqlFKMatchModel
 {
     Q_OBJECT
 public:
-    enum Columns
-    {
-        StationCol = 0,
-        SegmentCol,
-        NCols
-    };
-
     StationsMatchModel(database &db, QObject *parent = nullptr);
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
-    int columnCount(const QModelIndex &p = QModelIndex()) const override;
-
     // ISqlFKMatchModel:
     void autoSuggest(const QString& text) override;
-    void refreshData() override;
-
+    virtual void refreshData() override;
     QString getName(db_id id) const override;
 
     db_id getIdAtRow(int row) const override;
     QString getNameAtRow(int row) const override;
 
-    db_id getSegmentAtRow(int row) const;
-
     // StationsMatchModel:
-    void setFilter(db_id connectedToStationId, db_id exceptStId);
+    void setFilter(db_id exceptStId, int unused=0);
 
 private:
     struct StationItem
     {
-        db_id stationId = 0;
-        db_id segmentId = 0;
-        QString stationName;
-        QString segmentName;
+        db_id stationId;
+        QString name;
+        char padding[4];
     };
     StationItem items[MaxMatchItems];
 
     database &mDb;
     query q_getMatches;
 
-    db_id mFromStationId;
-    db_id mExceptStId;
+    db_id m_exceptStId;
 
     QByteArray mQuery;
 };
@@ -66,15 +52,10 @@ class StationMatchFactory : public IMatchModelFactory
 
     ISqlFKMatchModel *createModel() override;
 
-    inline void setExceptStation(db_id fromStId, db_id exceptStId)
-    {
-        mFromStationId = fromStId;
-        mExceptStId = exceptStId;
-    }
+    inline void setExceptStation(db_id stationId) { exceptStId = stationId; }
 
 private:
-    db_id mFromStationId;
-    db_id mExceptStId;
+    db_id exceptStId;
     sqlite3pp::database &mDb;
 };
 
