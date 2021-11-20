@@ -158,7 +158,7 @@ void LineGraphManager::onGraphChanged(int graphType_, db_id graphObjId, LineGrap
         return; //Cannot find job in current graph, give up
 
     //Ensure job is visible
-    scene->requestShowZone(info.firstStId, info.segmentId, info.arrivalAndStart, info.departure);
+    scene->requestShowZone(info.firstStationId, info.segmentId, info.arrivalAndStart, info.departure);
 }
 
 void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)

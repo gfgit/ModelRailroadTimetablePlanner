@@ -73,9 +73,9 @@ bool LineGraphSelectionHelper::tryFindJobStopInGraph(LineGraphScene *scene, db_i
 
     //If graph is SingleStation we already know the station ID
     if(scene->getGraphType() == LineGraphType::SingleStation)
-        info.firstStId = scene->getGraphObjectId();
+        info.firstStationId = scene->getGraphObjectId();
     else
-        info.firstStId = stop.get<db_id>(4);
+        info.firstStationId = stop.get<db_id>(4);
 
     return true;
 }
@@ -98,7 +98,7 @@ bool LineGraphSelectionHelper::tryFindJobStopsAfter(db_id jobId, SegmentInfo& in
     info.firstStopId = stop.get<db_id>(0);
     info.arrivalAndStart = stop.get<QTime>(1);
     info.departure = stop.get<QTime>(2);
-    info.firstStId = stop.get<db_id>(3);
+    info.firstStationId = stop.get<db_id>(3);
     info.segmentId = stop.get<db_id>(4);
     q.reset();
 
@@ -109,7 +109,7 @@ bool LineGraphSelectionHelper::tryFindJobStopsAfter(db_id jobId, SegmentInfo& in
     if(q.step() != SQLITE_ROW)
     {
         //We found only 1 stop, return that
-        info.secondStId = 0;
+        info.secondStationId = 0;
         return true;
     }
 
@@ -118,7 +118,7 @@ bool LineGraphSelectionHelper::tryFindJobStopsAfter(db_id jobId, SegmentInfo& in
     //db_id secondStopId = stop.get<db_id>(0);
     //QTime secondArrival = stop.get<QTime>(1);
     info.departure = stop.get<QTime>(2); //Overwrite departure
-    info.secondStId = stop.get<db_id>(3);
+    info.secondStationId = stop.get<db_id>(3);
 
     return true;
 }
@@ -129,10 +129,10 @@ bool LineGraphSelectionHelper::tryFindNewGraphForJob(db_id jobId, SegmentInfo& i
     if(!tryFindJobStopsAfter(jobId, info))
         return false; //No stops found
 
-    if(!info.secondStId || !info.segmentId)
+    if(!info.secondStationId || !info.segmentId)
     {
         //We found only 1 stop, select first station
-        outGraphObjId = info.firstStId;
+        outGraphObjId = info.firstStationId;
         outGraphType = LineGraphType::SingleStation;
         return true;
     }
@@ -217,7 +217,7 @@ bool LineGraphSelectionHelper::requestJobSelection(LineGraphScene *scene, db_id 
 
     if(ensureVisible)
     {
-        return scene->requestShowZone(info.firstStId, info.segmentId,
+        return scene->requestShowZone(info.firstStationId, info.segmentId,
                                       info.arrivalAndStart, info.departure);
     }
 
@@ -253,10 +253,10 @@ bool LineGraphSelectionHelper::requestCurrentJobPrevSegmentVisible(LineGraphScen
                 //Found stop and belongs to requested job
                 info.firstStopId = stop.get<db_id>(1);
                 info.arrivalAndStart = stop.get<QTime>(2);
-                info.firstStId = stop.get<db_id>(3);
+                info.firstStationId = stop.get<db_id>(3);
                 info.segmentId = stop.get<db_id>(4);
                 info.departure = stop.get<QTime>(5);
-                info.secondStId = stop.get<db_id>(6);
+                info.secondStationId = stop.get<db_id>(6);
             }
         }
     }
@@ -269,12 +269,115 @@ bool LineGraphSelectionHelper::requestCurrentJobPrevSegmentVisible(LineGraphScen
             return false; //No stops found, give up
     }
 
-    //FIXME: implement
-    return false;
+    db_id graphObjId = 0;
+    LineGraphType graphType = LineGraphType::NoGraph;
+
+    if(!tryFindNewGraphForJob(selectedJob.jobId, info, graphObjId, graphType))
+    {
+        //Could not find a suitable graph, abort
+        return false;
+    }
+
+    //NOTE: clear selection to avoid LineGraphManager trying to follow selection
+    //do not emit change because selection might be synced between all scenes
+    //and because it's restored soon after
+    scene->setSelectedJob(JobStopEntry{}, false); //Clear selection
+
+    //Select the graph
+    scene->loadGraph(graphObjId, graphType);
+
+    //Restore selection
+    selectedJob.stopId = info.firstStopId;
+    scene->setSelectedJob(selectedJob); //This time emit
+
+    return scene->requestShowZone(info.firstStationId, info.segmentId,
+                                  info.arrivalAndStart, info.departure);
 }
 
 bool LineGraphSelectionHelper::requestCurrentJobNextSegmentVisible(LineGraphScene *scene, bool goToEnd)
 {
-    //FIXME: implement
-    return false;
+    //TODO: maybe go to first segment AFTER last segment in current view.
+    //So it may not be 'next' but maybe 2 or 3 segments after current.
+
+    JobStopEntry selectedJob = scene->getSelectedJob();
+    if(!selectedJob.jobId)
+        return false; //No job selected, nothing to do
+
+    query q(mDb);
+
+    SegmentInfo info;
+    if(selectedJob.stopId && !goToEnd)
+    {
+        //Start from current stop and get previous stop
+        q.prepare("SELECT s2.job_id, s1.id, MIN(s1.arrival), s1.departure, s1.station_id, c.seg_id"
+                  " FROM stops s2"
+                  " JOIN stops s1 ON s1.job_id=s2.job_id"
+                  " LEFT JOIN railway_connections c ON c.id=s1.next_segment_conn_id"
+                  " WHERE s2.id=? AND s1.arrival > s2.arrival");
+        q.bind(1, selectedJob.stopId);
+
+        if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+        {
+            auto stop = q.getRows();
+            db_id jobId = stop.get<db_id>(0);
+            if(jobId == selectedJob.jobId)
+            {
+                //Found stop and belongs to requested job
+                info.firstStopId = stop.get<db_id>(1);
+                info.arrivalAndStart = stop.get<QTime>(2);
+                info.departure = stop.get<QTime>(3);
+                info.firstStationId = stop.get<db_id>(4);
+                info.segmentId = stop.get<db_id>(5);
+            }
+        }
+    }
+
+    if(!info.firstStopId)
+    {
+        //goToEnd or failed to get next stop so go to end anyway
+
+        //Select last station, no segment
+        q.prepare("SELECT s1.id, MAX(s1.arrival), s1.departure, s1.station_id"
+                  " FROM stops s1"
+                  " WHERE s1.job_id=?");
+        q.bind(1, selectedJob.jobId);
+
+        if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+        {
+            auto stop = q.getRows();
+            db_id jobId = stop.get<db_id>(0);
+            if(jobId == selectedJob.jobId)
+            {
+                //Found stop and belongs to requested job
+                info.firstStopId = stop.get<db_id>(1);
+                info.arrivalAndStart = stop.get<QTime>(2);
+                info.departure = stop.get<QTime>(3);
+                info.firstStationId = stop.get<db_id>(4);
+            }
+        }
+    }
+
+    db_id graphObjId = 0;
+    LineGraphType graphType = LineGraphType::NoGraph;
+
+    if(!tryFindNewGraphForJob(selectedJob.jobId, info, graphObjId, graphType))
+    {
+        //Could not find a suitable graph, abort
+        return false;
+    }
+
+    //NOTE: clear selection to avoid LineGraphManager trying to follow selection
+    //do not emit change because selection might be synced between all scenes
+    //and because it's restored soon after
+    scene->setSelectedJob(JobStopEntry{}, false); //Clear selection
+
+    //Select the graph
+    scene->loadGraph(graphObjId, graphType);
+
+    //Restore selection
+    selectedJob.stopId = info.firstStopId;
+    scene->setSelectedJob(selectedJob); //This time emit
+
+    return scene->requestShowZone(info.firstStationId, info.segmentId,
+                                  info.arrivalAndStart, info.departure);
 }

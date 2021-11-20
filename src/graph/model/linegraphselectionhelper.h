@@ -21,8 +21,8 @@ public:
     struct SegmentInfo
     {
         db_id segmentId = 0;
-        db_id firstStId = 0;
-        db_id secondStId = 0;
+        db_id firstStationId = 0;
+        db_id secondStationId = 0;
         db_id firstStopId = 0;
 
         /*!
