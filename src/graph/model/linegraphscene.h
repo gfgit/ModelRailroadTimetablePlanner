@@ -86,7 +86,7 @@ public:
     }
 
     JobStopEntry getSelectedJob() const;
-    void setSelectedJobId(JobStopEntry stop);
+    void setSelectedJob(JobStopEntry stop);
 
     /*!
      * \brief activate scene
@@ -120,7 +120,17 @@ public:
 signals:
     void graphChanged(int type, db_id objectId);
     void redrawGraph();
-    void jobSelected(db_id jobId);
+
+    /*!
+     * \brief job selected
+     * \param jobId ID of the job on 0 if selection cleared.
+     * \param category job's category casted to int
+     * \param stopId possible stop ID hint to select a specific section
+     *
+     * Selection changed: either user clicked on a job
+     * or on an empty zone to clear selection
+     */
+    void jobSelected(db_id jobId, int category, db_id stopId);
 
     /*!
      * \brief Signal for activation

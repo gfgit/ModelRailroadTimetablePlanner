@@ -724,7 +724,7 @@ void LineGraphScene::updateJobSelection()
     if(q.step() != SQLITE_ROW)
     {
         //Job doesn't exist anymore, clear selection
-        setSelectedJobId(JobStopEntry{});
+        setSelectedJob(JobStopEntry{});
         return;
     }
 
@@ -741,10 +741,10 @@ JobStopEntry LineGraphScene::getSelectedJob() const
     return selectedJob;
 }
 
-void LineGraphScene::setSelectedJobId(JobStopEntry stop)
+void LineGraphScene::setSelectedJob(JobStopEntry stop)
 {
     //TODO: draw box around selected job or highlight in graph view
-    const db_id oldJobId = selectedJob.jobId;
+    const JobStopEntry oldJob = selectedJob;
 
     selectedJob = stop;
     if(!selectedJob.jobId)
@@ -754,10 +754,10 @@ void LineGraphScene::setSelectedJobId(JobStopEntry stop)
         selectedJob.category = JobCategory::NCategories;
     }
 
-    if(selectedJob.jobId != oldJobId)
+    if(selectedJob.jobId != oldJob.jobId || selectedJob.category != oldJob.category)
     {
         emit redrawGraph();
-        emit jobSelected(selectedJob.jobId);
+        emit jobSelected(selectedJob.jobId, int(selectedJob.category), selectedJob.stopId);
     }
 }
 
