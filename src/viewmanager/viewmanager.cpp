@@ -19,7 +19,6 @@
 #include "jobs/jobsmanager/jobsmanager.h"
 #include "jobs/jobsmanager/model/jobshelper.h"
 
-#include "graph/graphmanager.h"
 #include "graph/model/linegraphmanager.h"
 #include "graph/model/linegraphselectionhelper.h"
 
@@ -27,7 +26,6 @@
 
 ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
-    mGraphMgr(nullptr),
     m_mainWidget(nullptr),
     rsManager(nullptr),
     stManager(nullptr),
@@ -37,7 +35,6 @@ ViewManager::ViewManager(QObject *parent) :
     jobsManager(nullptr),
     sessionRSViewer(nullptr)
 {
-    mGraphMgr = new GraphManager(this);
     lineGraphManager = new LineGraphManager(this);
 
     //RollingStock
@@ -399,11 +396,6 @@ ShiftViewer* ViewManager::createShiftViewer(db_id id)
     return viewer;
 }
 
-GraphManager *ViewManager::getGraphMgr() const
-{
-    return mGraphMgr;
-}
-
 void ViewManager::requestShiftViewer(db_id id)
 {
     ShiftViewer *viewer = nullptr;
@@ -578,24 +570,24 @@ bool ViewManager::requestClearJob(bool evenIfEditing)
 
 bool ViewManager::removeSelectedJob()
 {
-    db_id jobId = mGraphMgr->getSelectedJob().jobId;
-    if(jobId == 0)
+    JobStopEntry selectedJob = lineGraphManager->getCurrentSelectedJob();
+    if(selectedJob.jobId == 0)
         return false;
 
     if(jobEditor)
     {
-        if(jobEditor->currentJobId() == jobId)
+        if(jobEditor->currentJobId() == selectedJob.jobId)
         {
             if(!jobEditor->clearJob())
             {
-                requestJobSelection(jobId, true, false);
+                requestJobSelection(selectedJob.jobId, true, false);
                 return false;
             }
             jobEditor->setEnabled(false);
         }
     }
 
-    return JobsHelper::removeJob(Session->m_Db, jobId);
+    return JobsHelper::removeJob(Session->m_Db, selectedJob.jobId);
 }
 
 void ViewManager::requestShiftGraphEditor()

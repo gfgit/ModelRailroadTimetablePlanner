@@ -16,7 +16,6 @@ class ShiftManager;
 class ShiftViewer;
 class JobPathEditor;
 class ShiftGraphEditor;
-class GraphManager; //FIXME: remove
 class LineGraphManager;
 class JobsManager;
 class SessionStartEndRSViewer;
@@ -34,8 +33,6 @@ public:
 
     bool closeEditors();
     void clearAllLineGraphs();
-
-    GraphManager *getGraphMgr() const;
 
     inline LineGraphManager *getLineGraphMgr() const { return lineGraphManager; }
 
@@ -95,7 +92,6 @@ private:
     ShiftViewer *createShiftViewer(db_id id);
 
 private:
-    GraphManager *mGraphMgr;
     LineGraphManager *lineGraphManager;
 
     QWidget *m_mainWidget;
