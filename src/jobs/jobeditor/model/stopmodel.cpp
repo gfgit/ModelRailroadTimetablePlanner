@@ -225,22 +225,12 @@ QVariant StopModel::data(const QModelIndex &index, int role) const
         return jobShiftId;
     case JOB_CATEGORY_ROLE:
         return int(category);
-    case STOP_ID:
-        return s.stopId;
     case STATION_ID:
         return s.stationId;
-    case STOP_TYPE_ROLE:
-        return int(s.type);
     case ARR_ROLE:
         return s.arrival;
     case DEP_ROLE:
         return s.departure;
-    case SEGMENT_ROLE:
-        return s.segment;
-    case OTHER_SEG_ROLE:
-        return s.nextSegment_;
-    case CUR_LINE_ROLE:
-        return s.curLine;
     case NEXT_LINE_ROLE:
         return s.nextLine;
     case ADDHERE_ROLE:

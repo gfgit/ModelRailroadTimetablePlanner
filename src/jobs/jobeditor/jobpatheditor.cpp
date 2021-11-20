@@ -194,7 +194,10 @@ void JobPathEditor::toggleTransit(const QModelIndex& index)
     if(m_readOnly)
         return;
 
-    StopType type = StopDelegate::getStopType(index);
+    if(!index.isValid() || index.row() >= stopModel->rowCount())
+        return;
+
+    StopType type = stopModel->getItemTypeAt(index.row());
     if(type == First || type == Last)
         return;
 

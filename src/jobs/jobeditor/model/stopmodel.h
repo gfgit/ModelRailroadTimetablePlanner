@@ -137,6 +137,7 @@ public:
     LineType getLineTypeAfterStop(db_id stopId) const;
 
     inline StopItem getItemAt(int row) const { return stops.at(row); }
+    inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
 
     void uncoupleStillCoupledAtLastStop();
     void uncoupleStillCoupledAtStop(const StopItem &s);

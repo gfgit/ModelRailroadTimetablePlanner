@@ -169,10 +169,11 @@ QSize StopDelegate::sizeHint(const QStyleOptionViewItem &/*option*/,
 {
     int w = 200;
     int h = 100;
-    StopType t = getStopType(index);
-    if(t == Transit)
+    const StopModel *model = static_cast<const StopModel *>(index.model());
+    StopType type = model->getItemTypeAt(index.row());
+    if(type == Transit)
         h = 60;
-    else if(t == TransitLineChange)
+    else if(type == TransitLineChange)
         h = 80;
     if(index.data(ADDHERE_ROLE).toInt() != 0)
         h = 30;

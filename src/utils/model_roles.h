@@ -5,7 +5,6 @@
 
 //Useful constants to set/retrive data from models
 
-#define STOP_ID             (Qt::UserRole)
 #define STATION_ID          (Qt::UserRole + 1)
 
 #define LINE_ID             (Qt::UserRole)
@@ -21,9 +20,6 @@
 #define STOP_TYPE_ROLE      (Qt::UserRole + 20)
 #define ARR_ROLE            (Qt::UserRole + 21)
 #define DEP_ROLE            (Qt::UserRole + 22)
-#define CUR_LINE_ROLE       (Qt::UserRole + 24)
-#define SEGMENT_ROLE        (Qt::UserRole + 26)
-#define OTHER_SEG_ROLE      (Qt::UserRole + 27)
 #define NEXT_LINE_ROLE      (Qt::UserRole + 28)
 
 #define ADDHERE_ROLE        (Qt::UserRole + 30)
@@ -34,7 +30,6 @@
 #define RS_MODEL_ID         (Qt::UserRole + 40)
 #define RS_TYPE_ROLE        (Qt::UserRole + 41)
 #define RS_SUB_TYPE_ROLE    (Qt::UserRole + 42)
-#define RS_OWNER_ID         (Qt::UserRole + 43)
 #define RS_NUMBER           (Qt::UserRole + 44)
 #define RS_IS_ENGINE        (Qt::UserRole + 45)
 

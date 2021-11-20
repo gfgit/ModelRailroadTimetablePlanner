@@ -19,17 +19,6 @@ class StopDelegate : public QStyledItemDelegate
     Q_OBJECT
 
 public:
-
-    static inline StopType getStopType(const QModelIndex& idx)
-    {
-        return static_cast<StopType>(idx.data(STOP_TYPE_ROLE).toInt());
-    }
-
-    static inline void setStopType(QAbstractItemModel *m, const QModelIndex& idx, StopType type)
-    {
-        m->setData(idx, int(type), STOP_TYPE_ROLE);
-    }
-
     StopDelegate(sqlite3pp::database &db, QObject *parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
