@@ -61,7 +61,7 @@ bool LineGraphSelectionHelper::tryFindJobStopInGraph(LineGraphScene *scene, db_i
     q.bind(1, jobId);
     q.bind(2, scene->getGraphObjectId());
 
-    if(q.step() != SQLITE_ROW)
+    if(q.step() != SQLITE_ROW || q.getRows().column_type(0) == SQLITE_NULL)
         return false; //We didn't find a stop in current graph, give up
 
     //Get stop info
@@ -90,7 +90,7 @@ bool LineGraphSelectionHelper::tryFindJobStopsAfter(db_id jobId, SegmentInfo& in
     //Find first job stop after or equal to startTime
     q.bind(1, jobId);
     q.bind(2, info.arrivalAndStart);
-    if(q.step() != SQLITE_ROW)
+    if(q.step() != SQLITE_ROW || q.getRows().column_type(0) == SQLITE_NULL)
         return false;
 
     //Get first stop info
@@ -222,4 +222,59 @@ bool LineGraphSelectionHelper::requestJobSelection(LineGraphScene *scene, db_id 
     }
 
     return true;
+}
+
+bool LineGraphSelectionHelper::requestCurrentJobPrevSegmentVisible(LineGraphScene *scene, bool goToStart)
+{
+    JobStopEntry selectedJob = scene->getSelectedJob();
+    if(!selectedJob.jobId)
+        return false; //No job selected, nothing to do
+
+    query q(mDb);
+
+    SegmentInfo info;
+    if(selectedJob.stopId && !goToStart)
+    {
+        //Start from current stop and get previous stop
+        q.prepare("SELECT s2.job_id, s1.id, MAX(s1.arrival), s1.station_id, c.seg_id,"
+                  "s2.departure, s2.station_id"
+                  " FROM stops s2"
+                  " JOIN stops s1 ON s1.job_id=s2.job_id"
+                  " LEFT JOIN railway_connections c ON c.id=s1.next_segment_conn_id"
+                  " WHERE s2.id=? AND s1.arrival < s2.arrival");
+        q.bind(1, selectedJob.stopId);
+
+        if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+        {
+            auto stop = q.getRows();
+            db_id jobId = stop.get<db_id>(0);
+            if(jobId == selectedJob.jobId)
+            {
+                //Found stop and belongs to requested job
+                info.firstStopId = stop.get<db_id>(1);
+                info.arrivalAndStart = stop.get<QTime>(2);
+                info.firstStId = stop.get<db_id>(3);
+                info.segmentId = stop.get<db_id>(4);
+                info.departure = stop.get<QTime>(5);
+                info.secondStId = stop.get<db_id>(6);
+            }
+        }
+    }
+
+    if(!info.firstStopId)
+    {
+        //goToStart or failed to get previous stop so go to start anyway
+
+        if(!tryFindJobStopsAfter(selectedJob.jobId, info))
+            return false; //No stops found, give up
+    }
+
+    //FIXME: implement
+    return false;
+}
+
+bool LineGraphSelectionHelper::requestCurrentJobNextSegmentVisible(LineGraphScene *scene, bool goToEnd)
+{
+    //FIXME: implement
+    return false;
 }

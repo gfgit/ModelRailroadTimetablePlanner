@@ -94,6 +94,9 @@ public:
      */
     bool requestJobSelection(LineGraphScene *scene, db_id jobId, bool select, bool ensureVisible);
 
+    bool requestCurrentJobPrevSegmentVisible(LineGraphScene *scene, bool goToStart);
+    bool requestCurrentJobNextSegmentVisible(LineGraphScene *scene, bool goToEnd);
+
 private:
     sqlite3pp::database &mDb;
 };
