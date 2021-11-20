@@ -8,7 +8,6 @@
 #include "app/scopedebug.h"
 
 #include "viewmanager/viewmanager.h"
-#include "graph/graphmanager.h"
 #include "db_metadata/metadatamanager.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER
