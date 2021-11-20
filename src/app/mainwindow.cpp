@@ -224,14 +224,17 @@ void MainWindow::setup_actions()
 
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
-    //TODO: add absolute=true version like in a dropdown or if shift pressed
+    ui->actionNext_Job_Segment->setToolTip(tr("Hold shift and click to go to <b>last</b> job stop."));
+    ui->actionPrev_Job_Segment->setToolTip(tr("Hold shift and click to go to <b>first</b> job stop."));
     connect(ui->actionNext_Job_Segment, &QAction::triggered, this, []()
             {
-                Session->getViewManager()->requestJobShowPrevNextSegment(false, false);
+                bool shiftPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+                Session->getViewManager()->requestJobShowPrevNextSegment(false, shiftPressed);
             });
     connect(ui->actionPrev_Job_Segment, &QAction::triggered, this, []()
             {
-                Session->getViewManager()->requestJobShowPrevNextSegment(true, false);
+                bool shiftPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+                Session->getViewManager()->requestJobShowPrevNextSegment(true, shiftPressed);
             });
 }
 
