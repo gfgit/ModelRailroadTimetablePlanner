@@ -26,6 +26,18 @@ public:
     LineGraphScene *scene() const;
     void setScene(LineGraphScene *newScene);
 
+    /*!
+     * \brief ensure point is visible
+     * \badcode
+     * @badcode
+     *
+     * Scrolls the contents of the scroll area so that the point (\a x, \a y) is visible
+     * inside the region of the viewport with margins specified in pixels by \a xmargin and
+     * \a ymargin. If the specified point cannot be reached, the contents are scrolled to
+     * the nearest valid position. The default value for both margins is 50 pixels.
+     *
+     * Vertical and horizontal headers are excluded from the visible zone
+    */
     void ensureVisible(int x, int y, int xmargin, int ymargin);
 
 signals:
@@ -43,6 +55,13 @@ public slots:
      * \sa updateScrollBars()
      */
     void redrawGraph();
+
+    /*!
+     * \brief ensure a rect is visible in the viewport
+     *
+     * \sa ensureVisible()
+     */
+    void ensureRectVisible(const QRectF& r);
 
 protected:
     /*!
@@ -78,6 +97,17 @@ protected:
      * \sa LineGraphScene::getJobAt()
      */
     void mouseDoubleClickEvent(QMouseEvent *e) override;
+
+    /*!
+     * \brief Activate view
+     *
+     * This view (and its scene) is now active
+     * It will receive requests to show items
+     *
+     * \sa LineGraphScene::activateScene()
+     * \sa LineGraphManager::setActiveScene()
+     */
+    void focusInEvent(QFocusEvent *e) override;
 
 private slots:
     void onSceneDestroyed();

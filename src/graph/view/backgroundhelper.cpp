@@ -225,15 +225,30 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
     }
 }
 
-void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
 {
     const double platfOffset = Session->platformOffset;
 
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
 
+    QPen selectedJobPen;
+
+    const JobStopEntry selectedJob = scene->getSelectedJob();
+    if(drawSelection && selectedJob.jobId)
+    {
+        selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
+        selectedJobPen.setCapStyle(Qt::RoundCap);
+
+        QColor color = Session->colorForCat(selectedJob.category);
+        color.setAlpha(SelectedJobAlphaFactor);
+        selectedJobPen.setColor(color);
+    }
+
     QPointF top;
     QPointF bottom;
+
+    JobCategory lastJobCategory = JobCategory::NCategories;
 
     for(const StationGraphObject &st : qAsConst(scene->stations))
     {
@@ -253,11 +268,26 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
                     continue; //Skip, job not visible
 
-                jobPen.setColor(Session->colorForCat(jobStop.stop.category));
-                painter->setPen(jobPen);
-
                 top.setY(jobStop.arrivalY);
                 bottom.setY(jobStop.departureY);
+
+                if(drawSelection && selectedJob.jobId == jobStop.stop.jobId)
+                {
+                    //Draw selection around segment
+                    painter->setPen(selectedJobPen);
+                    painter->drawLine(top, bottom);
+
+                    //Reset pen
+                    painter->setPen(jobPen);
+                }
+
+                if(lastJobCategory != jobStop.stop.category)
+                {
+                    QColor color = Session->colorForCat(jobStop.stop.category);
+                    jobPen.setColor(color);
+                    painter->setPen(jobPen);
+                    lastJobCategory = jobStop.stop.category;
+                }
 
                 painter->drawLine(top, bottom);
             }
@@ -268,12 +298,27 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     }
 }
 
-void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
 {
     const double stationOffset = Session->stationOffset;
 
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
+
+    QPen selectedJobPen;
+
+    const JobStopEntry selectedJob = scene->getSelectedJob();
+    if(drawSelection && selectedJob.jobId)
+    {
+        selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
+        selectedJobPen.setCapStyle(Qt::RoundCap);
+
+        QColor color = Session->colorForCat(selectedJob.category);
+        color.setAlpha(SelectedJobAlphaFactor);
+        selectedJobPen.setColor(color);
+    }
+
+    JobCategory lastJobCategory = JobCategory::NCategories;
 
     //Iterate until one but last
     //This way we can always acces next station
@@ -303,8 +348,24 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
             if(job.fromDeparture.y() > rect.bottom() || job.toArrival.y() < rect.top())
                 continue; //Skip, job not visible
 
-            jobPen.setColor(Session->colorForCat(job.category));
-            painter->setPen(jobPen);
+
+            if(drawSelection && selectedJob.jobId == job.jobId)
+            {
+                //Draw selection around segment
+                painter->setPen(selectedJobPen);
+                painter->drawLine(job.fromDeparture, job.toArrival);
+
+                //Reset pen
+                painter->setPen(jobPen);
+            }
+
+            if(lastJobCategory != job.category)
+            {
+                QColor color = Session->colorForCat(job.category);
+                jobPen.setColor(color);
+                painter->setPen(jobPen);
+                lastJobCategory = job.category;
+            }
 
             painter->drawLine(job.fromDeparture, job.toArrival);
         }

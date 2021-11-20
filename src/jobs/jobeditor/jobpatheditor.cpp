@@ -444,7 +444,7 @@ bool JobPathEditor::saveChanges()
     //TODO: redraw graphs
 
     //When updating the path selection gets cleared so we restore it FIXME CRASH
-    //Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
+    Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
 
     canSetJob = true;
     return true;

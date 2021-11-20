@@ -88,7 +88,7 @@ private slots:
 
     void onSessionRSViewer();
 
-    void onJobSearchItemSelected(db_id jobId);
+    void onJobSearchItemSelected();
     void onJobSearchResultsReady();
 
 private:

@@ -16,7 +16,6 @@ class ShiftManager;
 class ShiftViewer;
 class JobPathEditor;
 class ShiftGraphEditor;
-class GraphManager; //FIXME: remove
 class LineGraphManager;
 class JobsManager;
 class SessionStartEndRSViewer;
@@ -35,8 +34,6 @@ public:
     bool closeEditors();
     void clearAllLineGraphs();
 
-    GraphManager *getGraphMgr() const;
-
     inline LineGraphManager *getLineGraphMgr() const { return lineGraphManager; }
 
     bool requestJobSelection(db_id jobId, bool select, bool ensureVisible) const;
@@ -45,7 +42,17 @@ public:
     bool requestClearJob(bool evenIfEditing = false);
     bool removeSelectedJob();
 
-    bool requestJobShowPrevNextSegment(bool prev, bool select = true, bool ensureVisible = true);
+    /*!
+     * \brief requestJobShowPrevNextSegment
+     * \param prev if true go to previous otherwise go to next
+     * \param absolute if true go to first or last segment instead of prev/next
+     * \return true on success
+     *
+     * Ensures prev/next segment of the job is visible.
+     * If there is not segment before/after current in this graph then returns false.
+     * Otherwise it will load a new graph and ensure prev/next segment is visible.
+     */
+    bool requestJobShowPrevNextSegment(bool prev, bool absolute);
 
     void updateRSPlans(QSet<db_id> set);
 
@@ -85,7 +92,6 @@ private:
     ShiftViewer *createShiftViewer(db_id id);
 
 private:
-    GraphManager *mGraphMgr;
     LineGraphManager *lineGraphManager;
 
     QWidget *m_mainWidget;

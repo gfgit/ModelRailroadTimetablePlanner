@@ -21,7 +21,7 @@
 
 #include "settings/settingsdialog.h"
 
-#include "graph/graphmanager.h" //FIXME: remove
+#include "graph/model/linegraphmanager.h"
 
 #include "graph/view/linegraphwidget.h"
 
@@ -78,8 +78,8 @@ MainWindow::MainWindow(QWidget *parent) :
     auto viewMgr = Session->getViewManager();
     viewMgr->m_mainWidget = this;
 
-    auto graphMgr = viewMgr->getGraphMgr();
-    connect(graphMgr, &GraphManager::jobSelected, this, &MainWindow::onJobSelected);
+    auto graphMgr = viewMgr->getLineGraphMgr();
+    connect(graphMgr, &LineGraphManager::jobSelected, this, &MainWindow::onJobSelected);
 
     //view = graphMgr->getView();
     view = new LineGraphWidget(this);
@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     searchEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     searchEdit->setPlaceholderText(tr("Find"));
     searchEdit->setClearButtonEnabled(true);
-    connect(searchEdit, &CustomCompletionLineEdit::dataIdChanged, this, &MainWindow::onJobSearchItemSelected);
+    connect(searchEdit, &CustomCompletionLineEdit::completionDone, this, &MainWindow::onJobSearchItemSelected);
     connect(searchModel, &SearchResultModel::resultsReady, this, &MainWindow::onJobSearchResultsReady);
 
     QWidget* spacer = new QWidget();
@@ -224,13 +224,14 @@ void MainWindow::setup_actions()
 
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
+    //TODO: add absolute=true version like in a dropdown or if shift pressed
     connect(ui->actionNext_Job_Segment, &QAction::triggered, this, []()
             {
-                Session->getViewManager()->requestJobShowPrevNextSegment(false);
+                Session->getViewManager()->requestJobShowPrevNextSegment(false, false);
             });
     connect(ui->actionPrev_Job_Segment, &QAction::triggered, this, []()
             {
-                Session->getViewManager()->requestJobShowPrevNextSegment(true);
+                Session->getViewManager()->requestJobShowPrevNextSegment(true, false);
             });
 }
 
@@ -899,8 +900,13 @@ void MainWindow::onSessionRSViewer()
     Session->getViewManager()->showSessionStartEndRSViewer();
 }
 
-void MainWindow::onJobSearchItemSelected(db_id jobId)
+void MainWindow::onJobSearchItemSelected()
 {
+    db_id jobId = 0;
+    QString tmp;
+    if(!searchEdit->getData(jobId, tmp))
+        return;
+
     searchEdit->clear(); //Clear text
     Session->getViewManager()->requestJobSelection(jobId, true, true);
 }

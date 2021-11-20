@@ -19,14 +19,13 @@
 #include "jobs/jobsmanager/jobsmanager.h"
 #include "jobs/jobsmanager/model/jobshelper.h"
 
-#include "graph/graphmanager.h"
 #include "graph/model/linegraphmanager.h"
+#include "graph/model/linegraphselectionhelper.h"
 
 #include "sessionstartendrsviewer.h"
 
 ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
-    mGraphMgr(nullptr),
     m_mainWidget(nullptr),
     rsManager(nullptr),
     stManager(nullptr),
@@ -36,7 +35,6 @@ ViewManager::ViewManager(QObject *parent) :
     jobsManager(nullptr),
     sessionRSViewer(nullptr)
 {
-    mGraphMgr = new GraphManager(this);
     lineGraphManager = new LineGraphManager(this);
 
     //RollingStock
@@ -398,11 +396,6 @@ ShiftViewer* ViewManager::createShiftViewer(db_id id)
     return viewer;
 }
 
-GraphManager *ViewManager::getGraphMgr() const
-{
-    return mGraphMgr;
-}
-
 void ViewManager::requestShiftViewer(db_id id)
 {
     ShiftViewer *viewer = nullptr;
@@ -504,83 +497,26 @@ void ViewManager::clearAllLineGraphs()
 
 bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisible) const
 {
-    db_id curLineId = mGraphMgr->getCurLineId();
+    LineGraphScene *scene = lineGraphManager->getActiveScene();
+    if(!scene)
+        return false; //No active scene, we cannot select anything
 
-    //Try to select first available segment in current line
-    //If the job has no segment in this line, switch current line to first job segment
-
-    db_id segmentId = 0;
-    db_id lineId = 0;
-    query q(Session->m_Db, "SELECT id,lineId FROM jobsegments WHERE jobId=? ORDER BY num");
-    q.bind(1, jobId);
-    for(auto r : q)
-    {
-        db_id segId = r.get<db_id>(0);
-        db_id segLineId = r.get<db_id>(1);
-        if(!lineId)
-        {
-            //Save first segment in case we cannot find one in current line
-            segmentId = segId;
-            lineId = segLineId;
-        }
-        if(segLineId == curLineId)
-        {
-            //Fount one in current line, stop search
-            segmentId = segId;
-            lineId = segLineId;
-            break;
-        }
-    }
-
-    if(!segmentId)
-        return false; //Job doesn't seem to have a path, or it doesn't exist!
-
-    //Clear previous selection to avoid multiple selection
-    mGraphMgr->clearSelection();
-
-    //FIXME: adapt to new graph system
-//    if(curLineId != lineId)
-//    {
-//        //Change current line
-//        if(!mGraphMgr->setCurrentLine(lineId))
-//            return false;
-//    }
-
-    return true; //Session->mJobStorage->selectSegment(jobId, segmentId, select, ensureVisible);
+    LineGraphSelectionHelper helper(Session->m_Db);
+    return helper.requestJobSelection(scene, jobId, select, ensureVisible);
 }
 
-//Move to prev/next segment of selected job: changes current line
-bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool select, bool ensureVisible)
+bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool absolute)
 {
-    JobSelection sel = mGraphMgr->getSelectedJob();
-    if(sel.jobId == 0 || sel.segmentId == 0)
-        return false; //No selected Job
+    LineGraphScene *scene = lineGraphManager->getActiveScene();
+    if(!scene)
+        return false; //No active scene, we cannot select anything
 
-    query q(Session->m_Db);
+    LineGraphSelectionHelper helper(Session->m_Db);
+
     if(prev)
-    {
-        q.prepare("SELECT s.id,s.lineId,MAX(s.num) FROM jobsegments s JOIN jobsegments s1 ON s1.id=?"
-                  " WHERE s.jobId=? AND s.num<s1.num");
-    }else{
-        q.prepare("SELECT s.id,s.lineId,MIN(s.num) FROM jobsegments s JOIN jobsegments s1 ON s1.id=?"
-                  " WHERE s.jobId=? AND s.num>s1.num");
-    }
-    q.bind(1, sel.segmentId);
-    q.bind(2, sel.jobId);
-    q.step();
-    auto r = q.getRows();
-    if(r.column_type(0) == SQLITE_NULL)
-        return false; //Alredy First segment (or Last if going forward)
-
-    db_id segmentId = r.get<db_id>(0);
-    db_id lineId = r.get<db_id>(1);
-
-    //Change current line
-    //FIXME: adapt to new graph system
-    //if(!mGraphMgr->setCurrentLine(lineId))
-    //    return false;
-
-    return true; //Session->mJobStorage->selectSegment(sel.jobId, segmentId, select, ensureVisible);
+        return helper.requestCurrentJobPrevSegmentVisible(scene, absolute);
+    else
+        return helper.requestCurrentJobNextSegmentVisible(scene, absolute);
 }
 
 bool ViewManager::requestJobEditor(db_id jobId, db_id stopId)
@@ -634,24 +570,24 @@ bool ViewManager::requestClearJob(bool evenIfEditing)
 
 bool ViewManager::removeSelectedJob()
 {
-    db_id jobId = mGraphMgr->getSelectedJob().jobId;
-    if(jobId == 0)
+    JobStopEntry selectedJob = lineGraphManager->getCurrentSelectedJob();
+    if(selectedJob.jobId == 0)
         return false;
 
     if(jobEditor)
     {
-        if(jobEditor->currentJobId() == jobId)
+        if(jobEditor->currentJobId() == selectedJob.jobId)
         {
             if(!jobEditor->clearJob())
             {
-                requestJobSelection(jobId, true, false);
+                requestJobSelection(selectedJob.jobId, true, false);
                 return false;
             }
             jobEditor->setEnabled(false);
         }
     }
 
-    return JobsHelper::removeJob(Session->m_Db, jobId);
+    return JobsHelper::removeJob(Session->m_Db, selectedJob.jobId);
 }
 
 void ViewManager::requestShiftGraphEditor()

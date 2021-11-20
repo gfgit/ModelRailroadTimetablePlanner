@@ -23,6 +23,16 @@ public:
 
     void setScene(LineGraphScene *scene);
 
+    /*!
+     * \brief listen to focus events
+     *
+     * If a children widget gets focus events we do not know it
+     * So we install an event filter on every children and listen
+     *
+     * \sa focusInEvent()
+     */
+    bool eventFilter(QObject *watched, QEvent *ev) override;
+
 signals:
     void requestRedraw();
 
@@ -33,6 +43,17 @@ private slots:
     void onWidgetGraphChanged(int type, db_id objectId);
     void onSceneGraphChanged(int type, db_id objectId);
     void onSceneDestroyed();
+
+protected:
+    /*!
+     * \brief Activate scene
+     *
+     * Activate scene, it will receive requests to show items
+     *
+     * \sa LineGraphScene::activateScene()
+     * \sa LineGraphManager::setActiveScene()
+     */
+    void focusInEvent(QFocusEvent *e) override;
 
 private:
     LineGraphScene *m_scene;

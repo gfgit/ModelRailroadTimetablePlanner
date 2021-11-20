@@ -8,7 +8,6 @@
 #include "app/scopedebug.h"
 
 #include "viewmanager/viewmanager.h"
-#include "graph/graphmanager.h"
 #include "db_metadata/metadatamanager.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER
@@ -412,7 +411,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "UNIQUE(stop_id,rs_id))");
     CHECK(result);
 
-    //Create also backup tables to save old jobsegments stops and couplings before editing a job and restore them if user cancels the edits.
+    //Create also backup tables to save old stops and couplings before editing a job and restore them if user cancels the edits.
     //NOTE: the structure of the table must be the same, remember to update theese if updating stops or couplings
 
     result = m_Db.execute("CREATE TABLE old_stops ("
