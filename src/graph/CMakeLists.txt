@@ -3,9 +3,6 @@ add_subdirectory(view)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  graph/graphmanager.h
-  graph/graphmanager.cpp
-
   graph/linegraphtypes.h
   graph/linegraphtypes.cpp
   PARENT_SCOPE
