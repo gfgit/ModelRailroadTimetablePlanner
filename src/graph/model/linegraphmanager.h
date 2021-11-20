@@ -82,6 +82,8 @@ public slots:
 private slots:
     //Scenes
     void onSceneDestroyed(QObject *obj);
+    void onGraphChanged(int graphType_, db_id graphObjId, LineGraphScene *scene);
+    void onJobSelected(db_id jobId, int category, db_id stopId);
 
     //Stations
     void onStationNameChanged(db_id stationId);
@@ -99,7 +101,6 @@ private slots:
     void onLineRemoved(db_id lineId);
 
     //Jobs
-    void onJobSelected(db_id jobId, int category, db_id stopId);
 
     //Settings
     void updateGraphOptions();
@@ -107,6 +108,7 @@ private slots:
 private:
     QVector<LineGraphScene *> scenes;
     LineGraphScene *activeScene;
+    bool m_followJobOnGraphChange;
 };
 
 #endif // LINEGRAPHMANAGER_H
