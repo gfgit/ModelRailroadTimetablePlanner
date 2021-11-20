@@ -21,7 +21,7 @@
 
 #include "graph/graphmanager.h"
 #include "graph/model/linegraphmanager.h"
-#include "graph/model/linegraphscene.h"
+#include "graph/model/linegraphselectionhelper.h"
 
 #include "sessionstartendrsviewer.h"
 
@@ -598,130 +598,8 @@ bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisib
     if(!scene)
         return false; //No active scene, we cannot select anything
 
-    //Check jobId is valid and get category
-
-    query q(Session->m_Db, "SELECT category FROM jobs WHERE id=?");
-    q.bind(1, jobId);
-    if(q.step() != SQLITE_ROW)
-        return false; //Job doen't exist
-
-    JobStopEntry selectedJob;
-    selectedJob.jobId = jobId;
-    selectedJob.category = JobCategory(q.getRows().get<int>(0));
-
-    QTime arrival, departure;
-    db_id stationId = 0;
-
-    // Try to select earliest stop of this job in current graph, if any
-    bool needsGraphChange = false;
-
-    switch (scene->getGraphType())
-    {
-    case LineGraphType::SingleStation:
-    {
-        q.prepare("SELECT stops.id, MIN(stops.arrival), stops.departure"
-                  " FROM stops"
-                  " WHERE stops.job_id=? AND stops.station_id=?");
-        break;
-    }
-    case LineGraphType::RailwaySegment:
-    {
-        q.prepare("SELECT stops.id, MIN(stops.arrival), stops.departure, stops.station_id"
-                  " FROM railway_segments seg"
-                  " JOIN station_gates g1 ON g1.id=seg.in_gate_id"
-                  " JOIN station_gates g2 ON g2.id=seg.in_gate_id"
-                  " JOIN stops ON stops.jobId=? AND"
-                  " (stops.station_id=g1.station_id OR stops.station_id=g2.station_id)"
-                  " WHERE seg.id=?");
-        break;
-    }
-    case LineGraphType::RailwayLine:
-    {
-        q.prepare("SELECT stops.id, MIN(stops.arrival), stops.departure, stops.station_id"
-                  " FROM line_segments"
-                  " JOIN railway_segments seg ON seg.id=line_segments.seg_id"
-                  " JOIN station_gates g1 ON g1.id=seg.in_gate_id"
-                  " JOIN station_gates g2 ON g2.id=seg.in_gate_id"
-                  " JOIN stops ON stops.jobId=? AND"
-                  " (stops.station_id=g1.station_id OR stops.station_id=g2.station_id)"
-                  " WHERE line_segments.line_id=?");
-        break;
-    }
-    case LineGraphType::NoGraph:
-    case LineGraphType::NTypes:
-    {
-        //We need to load a new graph
-        needsGraphChange = true;
-        break;
-    }
-    }
-
-    if(!needsGraphChange)
-    {
-        q.bind(1, jobId);
-        q.bind(2, scene->getGraphObjectId());
-
-        if(q.step() == SQLITE_ROW)
-        {
-            //Get stop info
-            auto stop = q.getRows();
-            selectedJob.stopId = stop.get<db_id>(0);
-            arrival = stop.get<QTime>(1);
-            departure = stop.get<QTime>(2);
-
-            //If graph is SingleStation we already know the station ID
-            if(scene->getGraphType() == LineGraphType::SingleStation)
-                stationId = scene->getGraphObjectId();
-            else
-                stationId = stop.get<db_id>(3);
-        }
-        else
-        {
-            //We didn't find a stop, load a new graph
-            needsGraphChange = true;
-        }
-    }
-
-    if(needsGraphChange)
-    {
-        //Find a line graph or segment or station with this job
-
-        //Find first 2 stops of the job
-
-        db_id graphObjId = 0;
-        LineGraphType graphType = LineGraphType::NoGraph;
-
-        SegmentInfo info;
-
-        if(!tryFindGraphForJob(Session->m_Db, selectedJob.jobId, info, graphObjId, graphType))
-        {
-            //Could not find a suitable graph, abort
-            return false;
-        }
-
-        //Extract the info
-        stationId = info.firstStId;
-        selectedJob.stopId = info.firstStopId;
-        arrival = info.arrivalAndStart;
-        departure = info.departure;
-
-        //Select the graph
-        scene->loadGraph(graphObjId, graphType);
-    }
-
-    if(!selectedJob.stopId)
-        return false; //No stop found, abort
-
-    //Select job
-    if(select)
-        scene->setSelectedJobId(selectedJob);
-
-    if(ensureVisible)
-    {
-        return scene->requestShowZone(stationId, 0, arrival, departure);
-    }
-
-    return true;
+    LineGraphSelectionHelper helper(Session->m_Db);
+    return helper.requestJobSelection(scene, jobId, select, ensureVisible);
 }
 
 //Move to prev/next segment of selected job: changes current line
