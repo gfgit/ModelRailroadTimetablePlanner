@@ -513,38 +513,18 @@ bool ViewManager::requestJobSelection(db_id jobId, bool select, bool ensureVisib
     return helper.requestJobSelection(scene, jobId, select, ensureVisible);
 }
 
-//Move to prev/next segment of selected job: changes current line
-bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool select, bool ensureVisible)
+bool ViewManager::requestJobShowPrevNextSegment(bool prev, bool absolute)
 {
-    JobSelection sel = mGraphMgr->getSelectedJob();
-    if(sel.jobId == 0 || sel.segmentId == 0)
-        return false; //No selected Job
+    LineGraphScene *scene = lineGraphManager->getActiveScene();
+    if(!scene)
+        return false; //No active scene, we cannot select anything
 
-    query q(Session->m_Db);
+    LineGraphSelectionHelper helper(Session->m_Db);
+
     if(prev)
-    {
-        q.prepare("SELECT s.id,s.lineId,MAX(s.num) FROM jobsegments s JOIN jobsegments s1 ON s1.id=?"
-                  " WHERE s.jobId=? AND s.num<s1.num");
-    }else{
-        q.prepare("SELECT s.id,s.lineId,MIN(s.num) FROM jobsegments s JOIN jobsegments s1 ON s1.id=?"
-                  " WHERE s.jobId=? AND s.num>s1.num");
-    }
-    q.bind(1, sel.segmentId);
-    q.bind(2, sel.jobId);
-    q.step();
-    auto r = q.getRows();
-    if(r.column_type(0) == SQLITE_NULL)
-        return false; //Alredy First segment (or Last if going forward)
-
-    db_id segmentId = r.get<db_id>(0);
-    db_id lineId = r.get<db_id>(1);
-
-    //Change current line
-    //FIXME: adapt to new graph system
-    //if(!mGraphMgr->setCurrentLine(lineId))
-    //    return false;
-
-    return true; //Session->mJobStorage->selectSegment(sel.jobId, segmentId, select, ensureVisible);
+        return helper.requestCurrentJobPrevSegmentVisible(scene, absolute);
+    else
+        return helper.requestCurrentJobNextSegmentVisible(scene, absolute);
 }
 
 bool ViewManager::requestJobEditor(db_id jobId, db_id stopId)
