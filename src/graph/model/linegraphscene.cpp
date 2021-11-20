@@ -773,6 +773,10 @@ bool LineGraphScene::requestShowZone(db_id stationId, db_id segmentId, QTime fro
     result.setTop(vertOffset + timeToHourFraction(from) * hourOffset);
     result.setBottom(vertOffset + timeToHourFraction(to) * hourOffset);
 
+    //NOTE: Initially left() is 0 which will always be less than any station position
+    //So the first station must set it's position regardless of left() value
+    bool leftEdgeSet = false;
+
     for(const StationPosEntry& entry : qAsConst(stationPositions))
     {
         //Match the requested station or both station in the segment
@@ -782,8 +786,11 @@ bool LineGraphScene::requestShowZone(db_id stationId, db_id segmentId, QTime fro
             if(st == stations.constEnd())
                 continue;
 
-            if(result.left() > entry.xPos)
+            if(result.left() > entry.xPos || !leftEdgeSet)
+            {
                 result.setLeft(entry.xPos);
+                leftEdgeSet = true;
+            }
 
             const int platfCount = st->platforms.count();
             const double rightPos = entry.xPos + platfCount * platfOffset;
