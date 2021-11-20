@@ -48,7 +48,7 @@ public:
      *
      * Try to find a job stop in current graph.
      * If scene has NoGraph or does not contain requested job then returns false
-     * Segment and second station ID are always left empty
+     * SegmentInfo::secondStId is always left empty
      */
     bool tryFindJobStopInGraph(LineGraphScene *scene, db_id jobId, SegmentInfo& info);
 
