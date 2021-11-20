@@ -128,7 +128,7 @@ MainWindow::MainWindow(QWidget *parent) :
     searchEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     searchEdit->setPlaceholderText(tr("Find"));
     searchEdit->setClearButtonEnabled(true);
-    connect(searchEdit, &CustomCompletionLineEdit::dataIdChanged, this, &MainWindow::onJobSearchItemSelected);
+    connect(searchEdit, &CustomCompletionLineEdit::completionDone, this, &MainWindow::onJobSearchItemSelected);
     connect(searchModel, &SearchResultModel::resultsReady, this, &MainWindow::onJobSearchResultsReady);
 
     QWidget* spacer = new QWidget();
@@ -899,8 +899,13 @@ void MainWindow::onSessionRSViewer()
     Session->getViewManager()->showSessionStartEndRSViewer();
 }
 
-void MainWindow::onJobSearchItemSelected(db_id jobId)
+void MainWindow::onJobSearchItemSelected()
 {
+    db_id jobId = 0;
+    QString tmp;
+    if(!searchEdit->getData(jobId, tmp))
+        return;
+
     searchEdit->clear(); //Clear text
     Session->getViewManager()->requestJobSelection(jobId, true, true);
 }
