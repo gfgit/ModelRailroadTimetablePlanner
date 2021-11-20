@@ -29,6 +29,7 @@ public:
         db_id segConnId = 0;
         db_id segmentId = 0;
         int outTrackNum = 0;
+        bool reversed = false;
     };
 
     db_id stopId       = 0;

@@ -781,6 +781,14 @@ void StopModel::loadJobStops(db_id jobId)
         db_id segInGateId = stop.get<db_id>(17);
         db_id segOutGateId = stop.get<db_id>(18);
 
+        if(s.toGate.gateId && s.toGate.gateId == segOutGateId)
+        {
+            //Segment is reversed
+            qSwap(segInGateId, segOutGateId);
+            qSwap(nextSegInTrack, s.nextSegment.outTrackNum);
+            s.nextSegment.reversed = true;
+        }
+
         //Fix station track on First stop
         if(!s.fromGate.gateConnId)
         {
