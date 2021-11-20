@@ -81,6 +81,9 @@ public:
     QFont getJobLabelFont(); //TODO: settings
     void setJobLabelFont(const QFont& f);
 
+    FIELD(FollowSelectionOnGraphChange, "job_graph/follow_selection_on_graph_change", bool, true)
+    FIELD(SyncSelectionOnAllGraphs, "job_graph/sync_job_selection", bool, true)
+
     //Job Colors
     QColor getCategoryColor(int category);
     void setCategoryColor(int category, const QColor& color);

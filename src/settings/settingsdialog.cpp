@@ -167,6 +167,9 @@ void SettingsDialog::loadSettings()
     ui->mainPlatformColor-> setColor(settings.getMainPlatfColor());
     ui->depotPlatformColor->setColor(settings.getDepotPlatfColor());
 
+    ui->followJobSelectionCheck->setChecked(settings.getFollowSelectionOnGraphChange());
+    ui->syncJobSelectionCheck->setChecked(settings.getSyncSelectionOnAllGraphs());
+
     //Job Colors
     for(int cat = 0; cat < int(JobCategory::NCategories); cat++)
     {
@@ -242,6 +245,9 @@ void SettingsDialog::saveSettings()
     settings.setStationTextColor(ui->stationTextColor->color());
     settings.setMainPlatfColor(ui->mainPlatformColor->color());
     settings.setDepotPlatfColor(ui->depotPlatformColor->color());
+
+    settings.setFollowSelectionOnGraphChange(ui->followJobSelectionCheck->isChecked());
+    settings.setSyncSelectionOnAllGraphs(ui->syncJobSelectionCheck->isChecked());
 
     //Job Colors
     for(int cat = 0; cat < int(JobCategory::NCategories); cat++)
