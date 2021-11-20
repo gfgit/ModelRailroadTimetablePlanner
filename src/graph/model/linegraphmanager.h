@@ -57,11 +57,34 @@ public:
      */
     inline LineGraphScene *getActiveScene() const { return activeScene; }
 
+    /*!
+     * \brief get current selected job
+     *
+     * If there is an active scene, return it's selection otherwise null JobStopEntry::jobId
+     * \sa getActiveScene()
+     * \sa LineGraphScene::getSelectedJob()
+     */
+    JobStopEntry getCurrentSelectedJob() const;
+
 signals:
     /*!
      * \brief Active scene is changed
      */
     void activeSceneChanged(LineGraphScene *scene);
+
+    /*!
+     * \brief jobSelected
+     * \param jobId
+     * \param category
+     * \param stopId
+     *
+     * Emitted when \a active scene job selection changes or if active scene changes.
+     * Not emitted for other scenes.
+     *
+     * \sa getActiveScene()
+     * \sa getCurrentSelectedJob()
+     */
+    void jobSelected(db_id jobId, int category, db_id stopId);
 
 public slots:
     /*!
@@ -108,6 +131,7 @@ private slots:
 private:
     QVector<LineGraphScene *> scenes;
     LineGraphScene *activeScene;
+    JobStopEntry lastSelectedJob;
     bool m_followJobOnGraphChange;
 };
 

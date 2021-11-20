@@ -90,6 +90,14 @@ void LineGraphManager::clearGraphsOfObject(db_id objectId, LineGraphType type)
     }
 }
 
+JobStopEntry LineGraphManager::getCurrentSelectedJob() const
+{
+    JobStopEntry selectedJob;
+    if(activeScene)
+        selectedJob = activeScene->getSelectedJob();
+    return selectedJob;
+}
+
 void LineGraphManager::setActiveScene(LineGraphScene *scene)
 {
     if(scene)
@@ -110,6 +118,15 @@ void LineGraphManager::setActiveScene(LineGraphScene *scene)
 
     activeScene = scene;
     emit activeSceneChanged(activeScene);
+
+    //Triegger selection update or clear it
+    JobStopEntry selectedJob;
+    if(activeScene)
+    {
+        selectedJob = activeScene->getSelectedJob();
+    }
+
+    onJobSelected(selectedJob.jobId, int(selectedJob.category), selectedJob.stopId);
 }
 
 void LineGraphManager::onSceneDestroyed(QObject *obj)
@@ -146,6 +163,14 @@ void LineGraphManager::onGraphChanged(int graphType_, db_id graphObjId, LineGrap
 
 void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)
 {
+    JobCategory cat = JobCategory(category);
+    if(lastSelectedJob.jobId == jobId && lastSelectedJob.category == cat && lastSelectedJob.stopId == stopId)
+        return; //Selection did not change
+
+    lastSelectedJob.jobId = jobId;
+    lastSelectedJob.category = cat;
+    lastSelectedJob.stopId = stopId;
+
     if(jobId)
         Session->getViewManager()->requestJobEditor(jobId);
     else
@@ -154,14 +179,19 @@ void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)
     if(AppSettings.getSyncSelectionOnAllGraphs())
     {
         //Sync selection among all registered scenes
-        JobStopEntry selectedJob;
-        selectedJob.jobId = jobId;
-        selectedJob.category = JobCategory(category);
-        selectedJob.stopId = stopId;
-
         for(LineGraphScene *scene : qAsConst(scenes))
         {
-            scene->setSelectedJob(selectedJob);
+            scene->setSelectedJob(lastSelectedJob);
+        }
+    }
+
+    if(activeScene)
+    {
+        const JobStopEntry selectedJob = activeScene->getSelectedJob();
+        if(selectedJob.jobId == lastSelectedJob.jobId)
+        {
+            emit jobSelected(lastSelectedJob.jobId, int(lastSelectedJob.category),
+                             lastSelectedJob.stopId);
         }
     }
 }
