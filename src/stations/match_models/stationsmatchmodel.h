@@ -27,7 +27,7 @@ public:
     QString getNameAtRow(int row) const override;
 
     // StationsMatchModel:
-    void setFilter(db_id exceptStId, int unused=0);
+    void setFilter(db_id exceptStId);
 
 private:
     struct StationItem

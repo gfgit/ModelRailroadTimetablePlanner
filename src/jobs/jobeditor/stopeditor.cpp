@@ -100,9 +100,9 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     }
 
     if(item.type == First)
-        stationsMatchModel->setFilter(0, 0);
+        stationsMatchModel->setFilter(0);
     else
-        stationsMatchModel->setFilter(prevItem.stationId, prevItem.stationId);
+        stationsMatchModel->setFilter(prevItem.stationId);
     mStationEdit->setData(item.stationId);
 
     segmentMatchModel->setFilter(item.stationId, 0, 0);
@@ -143,7 +143,7 @@ void StopEditor::onStationSelected()
 
     if(prevSegmentRow >= 0)
     {
-        prevSegmentId = stationsMatchModel->getSegmentAtRow(prevSegmentRow);
+        //prevSegmentId = stationsMatchModel->getSegmentAtRow(prevSegmentRow);
         prevSegmentRow = -1;
     }
 

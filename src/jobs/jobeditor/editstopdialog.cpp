@@ -203,7 +203,7 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     setWindowTitle(jobName);
 
     //FIXME: filter track by IN GATE, filter out gate by track, filter also by track side
-    stationMatchModel->setFilter(prevStop.stationId, prevStop.stationId);
+    stationMatchModel->setFilter(prevStop.stationId);
     stationTrackMatchModel->setFilter(curStop.stationId);
     stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId);
 

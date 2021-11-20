@@ -120,7 +120,7 @@ QString StationsMatchModel::getNameAtRow(int row) const
     return items[row].name;
 }
 
-void StationsMatchModel::setFilter(db_id exceptStId, int unused)
+void StationsMatchModel::setFilter(db_id exceptStId)
 {
     m_exceptStId = exceptStId;
 
