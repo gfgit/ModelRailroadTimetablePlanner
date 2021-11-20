@@ -19,7 +19,7 @@ bool LineGraphSelectionHelper::tryFindJobStopInGraph(LineGraphScene *scene, db_i
     {
     case LineGraphType::SingleStation:
     {
-        q.prepare("SELECT stops.id, c.id, MIN(stops.arrival), stops.departure"
+        q.prepare("SELECT stops.id, c.seg_id, MIN(stops.arrival), stops.departure"
                   " FROM stops"
                   " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
                   " WHERE stops.job_id=? AND stops.station_id=?");
@@ -27,7 +27,7 @@ bool LineGraphSelectionHelper::tryFindJobStopInGraph(LineGraphScene *scene, db_i
     }
     case LineGraphType::RailwaySegment:
     {
-        q.prepare("SELECT stops.id, c.id, MIN(stops.arrival), stops.departure, stops.station_id"
+        q.prepare("SELECT stops.id, c.seg_id, MIN(stops.arrival), stops.departure, stops.station_id"
                   " FROM railway_segments seg"
                   " JOIN station_gates g1 ON g1.id=seg.in_gate_id"
                   " JOIN station_gates g2 ON g2.id=seg.out_gate_id"
@@ -39,7 +39,7 @@ bool LineGraphSelectionHelper::tryFindJobStopInGraph(LineGraphScene *scene, db_i
     }
     case LineGraphType::RailwayLine:
     {
-        q.prepare("SELECT stops.id, c.id, MIN(stops.arrival), stops.departure, stops.station_id"
+        q.prepare("SELECT stops.id, c.seg_id, MIN(stops.arrival), stops.departure, stops.station_id"
                   " FROM line_segments"
                   " JOIN railway_segments seg ON seg.id=line_segments.seg_id"
                   " JOIN station_gates g1 ON g1.id=seg.in_gate_id"
