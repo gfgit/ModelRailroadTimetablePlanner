@@ -31,12 +31,12 @@ ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
     m_mainWidget(nullptr),
     rsManager(nullptr),
+    sessionRSViewer(nullptr),
     stManager(nullptr),
     shiftManager(nullptr),
     shiftGraphEditor(nullptr),
-    jobEditor(nullptr),
     jobsManager(nullptr),
-    sessionRSViewer(nullptr)
+    jobEditor(nullptr)
 {
     lineGraphManager = new LineGraphManager(this);
 
