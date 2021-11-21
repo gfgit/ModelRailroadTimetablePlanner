@@ -1,14 +1,18 @@
 #ifndef RSOWNERSSQLMODEL_H
 #define RSOWNERSSQLMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/sqldelegate/pageditemmodelhelper.h"
 
 #include "utils/types.h"
 
-#include <QVector>
+struct RSOwnersSQLModelItem
+{
+    db_id ownerId;
+    QString name;
+};
 
 
-class RSOwnersSQLModel : public IPagedItemModel
+class RSOwnersSQLModel : public IPagedItemModelImpl<RSOwnersSQLModel, RSOwnersSQLModelItem>
 {
     Q_OBJECT
 
@@ -16,28 +20,20 @@ public:
 
     enum { BatchSize = 100 };
 
-    typedef enum {
+    enum Columns {
         Name = 0,
         NCols
-    } Columns;
+    };
 
-    typedef struct RSOwner_
-    {
-        db_id ownerId;
-        QString name;
-    } RSOwner;
+    typedef RSOwnersSQLModelItem RSOwner;
+    typedef IPagedItemModelImpl<RSOwnersSQLModel, RSOwnersSQLModelItem> BaseClass;
 
     RSOwnersSQLModel(sqlite3pp::database &db, QObject *parent = nullptr);
-    bool event(QEvent *e) override;
 
     // QAbstractTableModel
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-    // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
@@ -49,12 +45,6 @@ public:
 
 
     // IPagedItemModel
-
-    // Cached rows management
-    virtual void clearCache() override;
-
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
-    virtual void setSortingColumn(int col) override;
 
     // RSOwnersSQLModel
 
@@ -68,14 +58,8 @@ protected:
     virtual qint64 recalcTotalItemCount() override;
 
 private:
-    void fetchRow(int row);
+    friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
-    void handleResult(const QVector<RSOwner> &items, int firstRow);
-
-private:
-    QVector<RSOwner> cache;
-    int cacheFirstRow;
-    int firstPendingRow;
 };
 
 #endif // RSOWNERSSQLMODEL_H

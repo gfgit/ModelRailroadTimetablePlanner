@@ -113,7 +113,8 @@ void StationsManager::setup_StationPage()
 
     act_addSt = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
     act_remSt = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
-    act_planSt = stationToolBar->addAction(tr("Plan"), this, &StationsManager::showStPlan);
+    act_stJobs = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
+    act_stSVG = stationToolBar->addAction(tr("SVG Plan"), this, &StationsManager::showStSVGPlan);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
     act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
 }
@@ -356,7 +357,11 @@ void StationsManager::onEditStation()
     dlg->setStationInternalEditingEnabled(true);
     dlg->setStationExternalEditingEnabled(true);
     dlg->setStation(stId);
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    int ret = dlg->exec();
+    if(!dlg)
+        return;
+    delete dlg;
+    if(ret != QDialog::Accepted)
         return;
 
     //Refresh stations model
@@ -382,7 +387,7 @@ void StationsManager::onEditStation()
     }
 }
 
-void StationsManager::showStPlan()
+void StationsManager::showStJobViewer()
 {
     DEBUG_ENTRY;
     if(!stationView->selectionModel()->hasSelection())
@@ -392,7 +397,20 @@ void StationsManager::showStPlan()
     db_id stId = stationsModel->getIdAtRow(idx.row());
     if(!stId)
         return;
-    Session->getViewManager()->requestStPlan(stId);
+    Session->getViewManager()->requestStJobViewer(stId);
+}
+
+void StationsManager::showStSVGPlan()
+{
+    DEBUG_ENTRY;
+    if(!stationView->selectionModel()->hasSelection())
+        return;
+
+    QModelIndex idx = stationView->currentIndex();
+    db_id stId = stationsModel->getIdAtRow(idx.row());
+    if(!stId)
+        return;
+    Session->getViewManager()->requestStSVGPlan(stId);
 }
 
 void StationsManager::onShowFreeRS()
@@ -435,7 +453,12 @@ void StationsManager::onNewSegment()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
     dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     //Re-calc row count
@@ -455,7 +478,11 @@ void StationsManager::onEditSegment()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
     dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     //FIXME: check if actually changed
@@ -532,7 +559,11 @@ void StationsManager::onEditLine()
     QPointer<EditLineDlg> dlg(new EditLineDlg(Session->m_Db, this));
     dlg->setLineId(lineId);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     //FIXME: check if actually changed

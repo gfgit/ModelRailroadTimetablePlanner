@@ -27,7 +27,7 @@ public:
     virtual void refreshData(bool forceUpdate = false);
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
-    virtual void setSortingColumn(int col) = 0;
+    virtual void setSortingColumn(int col);
     int getSortingColumn() const;
 
     // Items
@@ -49,6 +49,9 @@ signals:
     void pageCountChanged(int count);
     void currentPageChanged(int page);
 
+public:
+    void clearCache_slot();
+
 protected:
     virtual qint64 recalcTotalItemCount();
 
@@ -61,4 +64,6 @@ protected:
     int sortColumn;
     const int ItemsPerPage;
 };
+
+
 #endif // PAGEDITEMMODEL_H

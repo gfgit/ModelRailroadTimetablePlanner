@@ -1,26 +1,13 @@
 #include "stationtracksmodel.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/worker_event_types.h"
-
 #include "utils/model_roles.h"
 
 #include <QDebug>
-
-class StationsTracksModelResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::StationTracksListResult);
-    inline StationsTracksModelResultEvent() : QEvent(_Type) {}
-
-    QVector<StationTracksModel::TrackItem> items;
-    int firstRow;
-};
 
 //Error messages
 
@@ -39,28 +26,11 @@ static constexpr char
 
 
 StationTracksModel::StationTracksModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(BatchSize, db, parent),
+    BaseClass(BatchSize, db, parent),
     m_stationId(0),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize),
     editable(false)
 {
     sortColumn = PosCol;
-}
-
-bool StationTracksModel::event(QEvent *e)
-{
-    if(e->type() == StationsTracksModelResultEvent::_Type)
-    {
-        StationsTracksModelResultEvent *ev = static_cast<StationsTracksModelResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant StationTracksModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -122,17 +92,6 @@ QVariant StationTracksModel::headerData(int section, Qt::Orientation orientation
     }
 
     return QAbstractTableModel::headerData(section, orientation, role);
-}
-
-
-int StationTracksModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int StationTracksModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
@@ -367,23 +326,6 @@ Qt::ItemFlags StationTracksModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-qint64 StationTracksModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM station_tracks WHERE station_id=?");
-    q.bind(1, m_stationId);
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
-}
-
-void StationTracksModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
 void StationTracksModel::setSortingColumn(int col)
 {
     Q_UNUSED(col);
@@ -531,32 +473,14 @@ bool StationTracksModel::moveTrackUpDown(db_id trackId, bool up, bool topOrBotto
     return true;
 }
 
-void StationTracksModel::fetchRow(int row)
+qint64 StationTracksModel::recalcTotalItemCount()
 {
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM station_tracks WHERE station_id=?");
+    q.bind(1, m_stationId);
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
 }
 
 void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
@@ -635,117 +559,34 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
 
     const QRgb whiteColor = qRgb(255, 255, 255);
 
-    if(reverse)
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
+
+    for(; it != end; ++it)
     {
-        int i = BatchSize - 1;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            TrackItem &item = vec[i];
-            item.trackId = r.get<db_id>(0);
-            item.type = utils::StationTrackType(r.get<int>(1));
-            item.trackLegth = r.get<int>(2);
-            item.platfLength = r.get<int>(3);
-            item.freightLength = r.get<int>(4);
-            item.maxAxesCount = r.get<db_id>(5);
-            if(r.column_type(6) == SQLITE_NULL)
-                item.color = whiteColor;
-            else
-                item.color = QRgb(r.get<int>(6));
-            item.name = r.get<QString>(7);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
-    {
-        int i = 0;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            TrackItem &item = vec[i];
-            item.trackId = r.get<db_id>(0);
-            item.type = utils::StationTrackType(r.get<int>(1));
-            item.trackLegth = r.get<int>(2);
-            item.platfLength = r.get<int>(3);
-            item.freightLength = r.get<int>(4);
-            item.maxAxesCount = r.get<db_id>(5);
-            if(r.column_type(6) == SQLITE_NULL)
-                item.color = whiteColor;
-            else
-                item.color = QRgb(r.get<int>(6));
-            item.name = r.get<QString>(7);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
-    }
-
-
-    StationsTracksModelResultEvent *ev = new StationsTracksModelResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void StationTracksModel::handleResult(const QVector<StationTracksModel::TrackItem> &items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<TrackItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
+        auto r = *it;
+        TrackItem &item = vec[i];
+        item.trackId = r.get<db_id>(0);
+        item.type = utils::StationTrackType(r.get<int>(1));
+        item.trackLegth = r.get<int>(2);
+        item.platfLength = r.get<int>(3);
+        item.freightLength = r.get<int>(4);
+        item.maxAxesCount = r.get<db_id>(5);
+        if(r.column_type(6) == SQLITE_NULL)
+            item.color = whiteColor;
         else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
+            item.color = QRgb(r.get<int>(6));
+        item.name = r.get<QString>(7);
+
+        i += increment;
     }
 
-    firstPendingRow = -BatchSize;
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
 
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-    emit itemsReady(firstRow, lastRow);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
+    postResult(vec, first);
 }
 
 bool StationTracksModel::setName(StationTracksModel::TrackItem &item, const QString &name)

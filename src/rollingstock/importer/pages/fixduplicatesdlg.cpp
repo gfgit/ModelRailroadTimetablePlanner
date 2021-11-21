@@ -119,7 +119,7 @@ void FixDuplicatesDlg::done(int res)
             msgBox->exec();
 
             const bool goBack = msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage;
-            delete  msgBox;
+            delete msgBox;
 
             if(goBack)
             {

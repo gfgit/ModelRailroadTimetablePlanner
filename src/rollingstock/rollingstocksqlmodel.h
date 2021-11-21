@@ -1,14 +1,25 @@
 #ifndef ROLLINGSTOCKSQLMODEL_H
 #define ROLLINGSTOCKSQLMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/sqldelegate/pageditemmodelhelper.h"
 #include "utils/sqldelegate/IFKField.h"
 
 #include "utils/types.h"
 
-#include <QVector>
+struct RollingstockSQLModelItem
+{
+    db_id rsId;
+    db_id modelId;
+    db_id ownerId;
+    QString modelName;
+    QString modelSuffix;
+    QString ownerName;
+    int number;
+    RsType type;
+};
 
-class RollingstockSQLModel : public IPagedItemModel, public IFKField
+class RollingstockSQLModel : public IPagedItemModelImpl<RollingstockSQLModel, RollingstockSQLModelItem>,
+                             public IFKField
 {
     Q_OBJECT
 
@@ -16,29 +27,19 @@ public:
 
     enum { BatchSize = 100 };
 
-    typedef enum {
+    enum Columns {
         Model = 0,
         Number,
         Suffix,
         Owner,
         TypeCol,
         NCols
-    } Columns;
+    };
 
-    typedef struct RSItem_
-    {
-        db_id rsId;
-        db_id modelId;
-        db_id ownerId;
-        QString modelName;
-        QString modelSuffix;
-        QString ownerName;
-        int number;
-        RsType type;
-    } RSItem;
+    typedef RollingstockSQLModelItem RSItem;
+    typedef IPagedItemModelImpl<RollingstockSQLModel, RollingstockSQLModelItem> BaseClass;
 
     RollingstockSQLModel(sqlite3pp::database &db, QObject *parent = nullptr);
-    bool event(QEvent *e) override;
 
     // QAbstractTableModel
 
@@ -46,9 +47,6 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
@@ -59,9 +57,6 @@ public:
 
 
     // IPagedItemModel
-
-    // Cached rows management
-    virtual void clearCache() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -76,6 +71,8 @@ public:
     bool removeRSItemAt(int row);
     db_id addRSItem(int *outRow, QString *errOut = nullptr);
 
+    bool removeAllRS();
+
     // Convinience
     inline db_id getIdAtRow(int row) const
     {
@@ -86,24 +83,17 @@ public:
         return item.rsId;
     }
 
-    bool removeAllRS();
 
 protected:
     virtual qint64 recalcTotalItemCount() override;
 
 private:
-    void fetchRow(int row);
+    friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
-    void handleResult(const QVector<RSItem> &items, int firstRow);
 
     bool setModel(RSItem &item, db_id modelId, const QString &name);
     bool setOwner(RSItem &item, db_id ownerId, const QString &name);
     bool setNumber(RSItem &item, int number);
-
-private:
-    QVector<RSItem> cache;
-    int cacheFirstRow;
-    int firstPendingRow;
 };
 
 #endif // ROLLINGSTOCKSQLMODEL_H

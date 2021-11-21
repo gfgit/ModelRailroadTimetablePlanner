@@ -12,6 +12,7 @@
 #include "utils/jobcategorystrings.h"
 
 #include <QMessageBox>
+#include <QPointer>
 
 #include <QtMath>
 
@@ -294,11 +295,12 @@ void EditStopDialog::editCoupled()
     coupledModel->clearCache();
     trainAssetModelAfter->clearCache();
 
-    RSCoupleDialog dlg(couplingMgr, RsOp::Coupled, this);
-    dlg.setWindowTitle(tr("Couple"));
-    dlg.loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, ui->arrivalTimeEdit->time());
+    QPointer<RSCoupleDialog> dlg = new RSCoupleDialog(couplingMgr, RsOp::Coupled, this);
+    dlg->setWindowTitle(tr("Couple"));
+    dlg->loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, ui->arrivalTimeEdit->time());
 
-    dlg.exec();
+    dlg->exec();
+    delete dlg;
 
     coupledModel->refreshData(true);
     trainAssetModelAfter->refreshData(true);
@@ -310,11 +312,12 @@ void EditStopDialog::editUncoupled()
     uncoupledModel->clearCache();
     trainAssetModelAfter->clearCache();
 
-    RSCoupleDialog dlg(couplingMgr, RsOp::Uncoupled, this);
-    dlg.setWindowTitle(tr("Uncouple"));
-    dlg.loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, curStop.arrival);
+    QPointer<RSCoupleDialog> dlg = new RSCoupleDialog(couplingMgr, RsOp::Uncoupled, this);
+    dlg->setWindowTitle(tr("Uncouple"));
+    dlg->loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, curStop.arrival);
 
-    dlg.exec();
+    dlg->exec();
+    delete dlg;
 
     uncoupledModel->refreshData(true);
     trainAssetModelAfter->refreshData(true);

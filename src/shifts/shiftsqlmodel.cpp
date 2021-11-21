@@ -176,11 +176,6 @@ void ShiftSQLModel::clearCache()
     cacheFirstRow = 0;
 }
 
-void ShiftSQLModel::setSortingColumn(int /*col*/)
-{
-    //Sort only by name
-}
-
 void ShiftSQLModel::fetchRow(int row)
 {
     if(firstPendingRow != -BatchSize)

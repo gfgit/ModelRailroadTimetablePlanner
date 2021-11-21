@@ -31,10 +31,10 @@ JobListModel::JobListModel(sqlite3pp::database &db, QObject *parent) :
 {
     sortColumn = IdCol;
 
-    connect(Session, &MeetingSession::shiftNameChanged, this, &JobListModel::clearCache_slot);
-    connect(Session, &MeetingSession::shiftJobsChanged, this, &JobListModel::clearCache_slot);
-    connect(Session, &MeetingSession::stationNameChanged, this, &JobListModel::clearCache_slot);
-    connect(Session, &MeetingSession::jobChanged, this, &JobListModel::clearCache_slot);
+    connect(Session, &MeetingSession::shiftNameChanged, this, &IPagedItemModel::clearCache_slot);
+    connect(Session, &MeetingSession::shiftJobsChanged, this, &IPagedItemModel::clearCache_slot);
+    connect(Session, &MeetingSession::stationNameChanged, this, &IPagedItemModel::clearCache_slot);
+    connect(Session, &MeetingSession::jobChanged, this, &IPagedItemModel::clearCache_slot);
 
     connect(Session, &MeetingSession::jobAdded, this, &JobListModel::onJobAddedOrRemoved);
     connect(Session, &MeetingSession::jobRemoved, this, &JobListModel::onJobAddedOrRemoved);
@@ -181,14 +181,6 @@ void JobListModel::setSortingColumn(int col)
     QModelIndex first = index(0, 0);
     QModelIndex last = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
-}
-
-void JobListModel::clearCache_slot()
-{
-    clearCache();
-    QModelIndex start = index(0, 0);
-    QModelIndex end = index(curItemCount - 1, NCols - 1);
-    emit dataChanged(start, end);
 }
 
 void JobListModel::onJobAddedOrRemoved()

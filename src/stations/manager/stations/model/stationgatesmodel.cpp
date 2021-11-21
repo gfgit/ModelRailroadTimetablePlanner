@@ -1,26 +1,13 @@
 #include "stationgatesmodel.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/worker_event_types.h"
-
 #include "stations/station_name_utils.h"
 
 #include <QDebug>
-
-class StationsGatesModelResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::StationGatesListResult);
-    inline StationsGatesModelResultEvent() : QEvent(_Type) {}
-
-    QVector<StationGatesModel::GateItem> items;
-    int firstRow;
-};
 
 //Error messages
 static constexpr char
@@ -43,28 +30,11 @@ static constexpr char
 
 
 StationGatesModel::StationGatesModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(BatchSize, db, parent),
+    BaseClass(BatchSize, db, parent),
     m_stationId(0),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize),
     editable(false)
 {
     sortColumn = LetterCol;
-}
-
-bool StationGatesModel::event(QEvent *e)
-{
-    if(e->type() == StationsGatesModelResultEvent::_Type)
-    {
-        StationsGatesModelResultEvent *ev = static_cast<StationsGatesModelResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant StationGatesModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -115,16 +85,6 @@ QVariant StationGatesModel::headerData(int section, Qt::Orientation orientation,
     }
 
     return QAbstractTableModel::headerData(section, orientation, role);
-}
-
-int StationGatesModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int StationGatesModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant StationGatesModel::data(const QModelIndex &idx, int role) const
@@ -300,23 +260,6 @@ Qt::ItemFlags StationGatesModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-qint64 StationGatesModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM station_gates WHERE station_id=?");
-    q.bind(1, m_stationId);
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
-}
-
-void StationGatesModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
 void StationGatesModel::setSortingColumn(int col)
 {
     if(sortColumn == col || (col != LetterCol && col != SideCol))
@@ -465,9 +408,11 @@ QString StationGatesModel::getStationName() const
     return q.getRows().get<QString>(0);
 }
 
-bool StationGatesModel::getStationInfo(QString& name, QString &shortName, utils::StationType &type, qint64 &phoneNumber) const
+bool StationGatesModel::getStationInfo(QString& name, QString &shortName,
+                                       utils::StationType &type, qint64 &phoneNumber,
+                                       bool &hasImage) const
 {
-    query q(mDb, "SELECT name,short_name,type,phone_number FROM stations WHERE id=?");
+    query q(mDb, "SELECT name,short_name,type,phone_number,svg_data IS NULL FROM stations WHERE id=?");
     q.bind(1, m_stationId);
     if(q.step() != SQLITE_ROW)
         return false;
@@ -480,6 +425,9 @@ bool StationGatesModel::getStationInfo(QString& name, QString &shortName, utils:
         phoneNumber = -1;
     else
         phoneNumber = r.get<qint64>(3);
+
+    //svg_data IS NULL == 0 --> station has SVG image
+    hasImage = r.get<int>(4) == 0;
 
     return true;
 }
@@ -501,32 +449,14 @@ bool StationGatesModel::setStationInfo(const QString &name, const QString &short
     return q.execute() == SQLITE_OK;
 }
 
-void StationGatesModel::fetchRow(int row)
+qint64 StationGatesModel::recalcTotalItemCount()
 {
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM station_gates WHERE station_id=?");
+    q.bind(1, m_stationId);
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
 }
 
 void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
@@ -607,111 +537,31 @@ void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const 
     auto it = q.begin();
     const auto end = q.end();
 
-    if(reverse)
-    {
-        int i = BatchSize - 1;
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
 
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            GateItem &item = vec[i];
-            item.gateId = r.get<db_id>(0);
-            item.outTrackCount = r.get<int>(1);
-            item.type = utils::GateType(r.get<int>(2));
-            item.defaultInPlatfId = r.get<db_id>(3);
-            item.letter = r.get<const char *>(4)[0];
-            item.side = utils::Side(r.get<int>(5));
-            if(r.column_type(6) != SQLITE_NULL)
-                item.defPlatfName = r.get<QString>(6);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
+    for(; it != end; ++it)
     {
-        int i = 0;
+        auto r = *it;
+        GateItem &item = vec[i];
+        item.gateId = r.get<db_id>(0);
+        item.outTrackCount = r.get<int>(1);
+        item.type = utils::GateType(r.get<int>(2));
+        item.defaultInPlatfId = r.get<db_id>(3);
+        item.letter = r.get<const char *>(4)[0];
+        item.side = utils::Side(r.get<int>(5));
+        if(r.column_type(6) != SQLITE_NULL)
+            item.defPlatfName = r.get<QString>(6);
 
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            GateItem &item = vec[i];
-            item.gateId = r.get<db_id>(0);
-            item.outTrackCount = r.get<int>(1);
-            item.type = utils::GateType(r.get<int>(2));
-            item.defaultInPlatfId = r.get<db_id>(3);
-            item.letter = r.get<const char *>(4)[0];
-            item.side = utils::Side(r.get<int>(5));
-            if(r.column_type(6) != SQLITE_NULL)
-                item.defPlatfName = r.get<QString>(6);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
+        i += increment;
     }
 
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
 
-    StationsGatesModelResultEvent *ev = new StationsGatesModelResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void StationGatesModel::handleResult(const QVector<StationGatesModel::GateItem> &items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<GateItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-    emit itemsReady(firstRow, lastRow);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
+    postResult(vec, first);
 }
 
 bool StationGatesModel::setName(StationGatesModel::GateItem &item, const QChar &val)

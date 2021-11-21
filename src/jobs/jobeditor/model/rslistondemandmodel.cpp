@@ -191,8 +191,3 @@ void RSListOnDemandModel::handleResult(const QVector<RSItem>& items, int firstRo
     QModelIndex lastIdx = index(lastRow, NCols - 1);
     emit dataChanged(firstIdx, lastIdx);
 }
-
-void RSListOnDemandModel::setSortingColumn(int /*col*/)
-{
-    //Only sort by name
-}

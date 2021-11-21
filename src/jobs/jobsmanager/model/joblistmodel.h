@@ -84,7 +84,6 @@ public:
     }
 
 private slots:
-    void clearCache_slot();
     void onJobAddedOrRemoved();
 
 protected:

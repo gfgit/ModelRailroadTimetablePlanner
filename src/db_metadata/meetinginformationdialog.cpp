@@ -181,7 +181,7 @@ void MeetingInformationDialog::saveData()
 
 void MeetingInformationDialog::showImage()
 {
-    ImageViewer dlg(this);
+    QPointer<ImageViewer> dlg = new ImageViewer(this);
 
     if(img.isNull() && !needsToSaveImg)
     {
@@ -206,9 +206,10 @@ void MeetingInformationDialog::showImage()
         }
     }
 
-    dlg.setImage(img);
+    dlg->setImage(img);
 
-    dlg.exec();
+    dlg->exec();
+    delete dlg;
 
     if(!needsToSaveImg)
         img = QImage(); //Cleanup to free memory

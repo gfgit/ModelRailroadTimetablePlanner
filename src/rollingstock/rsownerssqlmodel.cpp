@@ -1,26 +1,13 @@
 #include "rsownerssqlmodel.h"
 
-#include <QCoreApplication>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
 #include "utils/rs_types_names.h"
 
-#include "utils/worker_event_types.h"
-
 #include <QDebug>
-
-class RSOwnersResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::RsOwnersModelResult);
-
-    inline RSOwnersResultEvent() : QEvent(_Type) {}
-
-    QVector<RSOwnersSQLModel::RSOwner> items;
-    int firstRow;
-};
 
 static constexpr char
 errorOwnerNameAlreadyUsed[] = QT_TRANSLATE_NOOP("RSOwnersSQLModel",
@@ -32,26 +19,9 @@ errorOwnerInUseCannotDelete[] = QT_TRANSLATE_NOOP("RSOwnersSQLModel",
                                                   "If you wish to remove it, please first delete all <b>%1</b> pieces.");
 
 RSOwnersSQLModel::RSOwnersSQLModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
     sortColumn = Name;
-}
-
-bool RSOwnersSQLModel::event(QEvent *e)
-{
-    if(e->type() == RSOwnersResultEvent::_Type)
-    {
-        RSOwnersResultEvent *ev = static_cast<RSOwnersResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant RSOwnersSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -74,16 +44,6 @@ QVariant RSOwnersSQLModel::headerData(int section, Qt::Orientation orientation, 
         }
     }
     return IPagedItemModel::headerData(section, orientation, role);
-}
-
-int RSOwnersSQLModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int RSOwnersSQLModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant RSOwnersSQLModel::data(const QModelIndex &idx, int role) const
@@ -199,245 +159,6 @@ Qt::ItemFlags RSOwnersSQLModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-qint64 RSOwnersSQLModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_owners");
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
-}
-
-void RSOwnersSQLModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
-void RSOwnersSQLModel::fetchRow(int row)
-{
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-//    RSOwner *item = nullptr;
-
-//    if(cache.size())
-//    {
-//        if(firstPendingRow >= cacheFirstRow + cache.size())
-//        {
-//            valRow = cacheFirstRow + cache.size();
-//            item = &cache.last();
-//        }
-//        else if(firstPendingRow > (cacheFirstRow - firstPendingRow))
-//        {
-//            valRow = cacheFirstRow;
-//            item = &cache.first();
-//        }
-//    }
-
-    /*switch (sortCol) TODO: use val in WHERE clause
-    {
-    case Name:
-    {
-        if(item)
-        {
-            val = item->name;
-        }
-        break;
-    }
-        //No data hint for TypeCol column
-    }*/
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
-}
-
-void RSOwnersSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
-{
-    query q(mDb);
-
-    int offset = first - valRow + curPage * ItemsPerPage;
-    bool reverse = false;
-
-    if(valRow > first)
-    {
-        offset = 0;
-        reverse = true;
-    }
-
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
-
-    const char *whereCol;
-
-    QByteArray sql = "SELECT id,name FROM rs_owners";
-    switch (sortCol)
-    {
-    case Name:
-    {
-        whereCol = "name"; //Order by 2 columns, no where clause
-        break;
-    }
-    }
-
-    if(val.isValid())
-    {
-        sql += " WHERE ";
-        sql += whereCol;
-        if(reverse)
-            sql += "<?3";
-        else
-            sql += ">?3";
-    }
-
-    sql += " ORDER BY ";
-    sql += whereCol;
-
-    if(reverse)
-        sql += " DESC";
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    if(val.isValid())
-    {
-        switch (sortCol)
-        {
-        case Name:
-        {
-            q.bind(3, val.toString());
-            break;
-        }
-        }
-    }
-
-    QVector<RSOwner> vec(BatchSize);
-
-    auto it = q.begin();
-    const auto end = q.end();
-
-    if(reverse)
-    {
-        int i = BatchSize - 1;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            RSOwner &item = vec[i];
-            item.ownerId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
-    {
-        int i = 0;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            RSOwner &item = vec[i];
-            item.ownerId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
-    }
-
-
-    RSOwnersResultEvent *ev = new RSOwnersResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void RSOwnersSQLModel::handleResult(const QVector<RSOwner>& items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<RSOwner> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
-}
-
-void RSOwnersSQLModel::setSortingColumn(int /*col*/)
-{
-    //Only sort by name
-}
-
 bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
 {
     if(!ownerId)
@@ -530,4 +251,103 @@ bool RSOwnersSQLModel::removeAllRSOwners()
 
     refreshData(); //Recalc row count
     return true;
+}
+
+qint64 RSOwnersSQLModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM rs_owners");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
+void RSOwnersSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+{
+    query q(mDb);
+
+    int offset = first - valRow + curPage * ItemsPerPage;
+    bool reverse = false;
+
+    if(valRow > first)
+    {
+        offset = 0;
+        reverse = true;
+    }
+
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+
+    const char *whereCol;
+
+    QByteArray sql = "SELECT id,name FROM rs_owners";
+    switch (sortCol)
+    {
+    case Name:
+    {
+        whereCol = "name"; //Order by 2 columns, no where clause
+        break;
+    }
+    }
+
+    if(val.isValid())
+    {
+        sql += " WHERE ";
+        sql += whereCol;
+        if(reverse)
+            sql += "<?3";
+        else
+            sql += ">?3";
+    }
+
+    sql += " ORDER BY ";
+    sql += whereCol;
+
+    if(reverse)
+        sql += " DESC";
+
+    sql += " LIMIT ?1";
+    if(offset)
+        sql += " OFFSET ?2";
+
+    q.prepare(sql);
+    q.bind(1, BatchSize);
+    if(offset)
+        q.bind(2, offset);
+
+    if(val.isValid())
+    {
+        switch (sortCol)
+        {
+        case Name:
+        {
+            q.bind(3, val.toString());
+            break;
+        }
+        }
+    }
+
+    QVector<RSOwner> vec(BatchSize);
+
+    auto it = q.begin();
+    const auto end = q.end();
+
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
+
+    for(; it != end; ++it)
+    {
+        auto r = *it;
+        RSOwner &item = vec[i];
+        item.ownerId = r.get<db_id>(0);
+        item.name = r.get<QString>(1);
+
+        i += increment;
+    }
+
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
+
+    postResult(vec, first);
 }

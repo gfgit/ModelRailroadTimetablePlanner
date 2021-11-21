@@ -7,6 +7,8 @@
 #include "stations/manager/stations/model/stationtracksmodel.h"
 #include "stations/manager/stations/model/stationtrackconnectionsmodel.h"
 
+#include "stations/manager/stations/model/stationsvghelper.h"
+
 #include "stations/manager/segments/model/railwaysegmentsmodel.h"
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
 
@@ -26,6 +28,9 @@
 #include <QInputDialog>
 #include "newtrackconndlg.h"
 #include "stations/manager/segments/dialogs/editrailwaysegmentdlg.h"
+
+#include <QFileDialog>
+#include "utils/file_format_names.h"
 
 #include <QPointer>
 
@@ -75,6 +80,10 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
 
     //Station Tab
     ui->stationTypeCombo->addItems(stationTypeEnum);
+
+    connect(ui->addSVGBut, &QPushButton::clicked, this, &StationEditDialog::addSVGImage);
+    connect(ui->remSVGBut, &QPushButton::clicked, this, &StationEditDialog::removeSVGImage);
+    connect(ui->saveSVGBut, &QPushButton::clicked, this, &StationEditDialog::saveSVGToFile);
 
     //Gates Tab
     gatesModel = new StationGatesModel(mDb, this);
@@ -193,7 +202,8 @@ bool StationEditDialog::setStation(db_id stationId)
     QString shortName;
     utils::StationType type = utils::StationType::Normal;
     qint64 phoneNumber = -1;
-    if(!gatesModel->getStationInfo(stationName, shortName, type, phoneNumber))
+    bool hasImage = false;
+    if(!gatesModel->getStationInfo(stationName, shortName, type, phoneNumber, hasImage))
         return false;
 
     ui->stationNameEdit->setText(stationName);
@@ -207,6 +217,8 @@ bool StationEditDialog::setStation(db_id stationId)
 
     //Update title
     setWindowTitle(stationName.isEmpty() ? tr("New Station") : stationName);
+
+    updateSVGButtons(hasImage);
 
     return true;
 }
@@ -513,6 +525,13 @@ void StationEditDialog::addTrackConnInternal(int mode)
     delete dlg;
 }
 
+void StationEditDialog::updateSVGButtons(bool hasImage)
+{
+    ui->addSVGBut->setEnabled(!hasImage);
+    ui->remSVGBut->setEnabled(hasImage);
+    ui->saveSVGBut->setEnabled(hasImage);
+}
+
 void StationEditDialog::removeSelectedTrackConn()
 {
     if(!ui->trackConnView->selectionModel()->hasSelection())
@@ -530,11 +549,14 @@ void StationEditDialog::addGateConnection()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
     dlg->setSegment(0, getStation(), EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     gateConnModel->refreshData(); //Recalc row count
-    delete dlg;
 }
 
 void StationEditDialog::editGateConnection()
@@ -549,11 +571,14 @@ void StationEditDialog::editGateConnection()
     QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
     dlg->setSegment(segId, getStation(), EditRailwaySegmentDlg::LockToCurrentValue);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if(!dlg)
+        return;
+    delete dlg;
+
+    if(ret != QDialog::Accepted)
         return;
 
     gateConnModel->refreshData(true); //Refresh fields
-    delete dlg;
 }
 
 void StationEditDialog::removeSelectedGateConnection()
@@ -575,4 +600,92 @@ void StationEditDialog::removeSelectedGateConnection()
     }
 
     gateConnModel->refreshData(); //Recalc row count
+}
+
+void StationEditDialog::addSVGImage()
+{
+    QFileDialog dlg(this, tr("Open SVG Image"));
+    dlg.setFileMode(QFileDialog::ExistingFile);
+    dlg.setAcceptMode(QFileDialog::AcceptOpen);
+    //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+
+    QStringList filters;
+    filters << FileFormats::tr(FileFormats::svgFile);
+    filters << FileFormats::tr(FileFormats::allFiles);
+    dlg.setNameFilters(filters);
+
+    if(dlg.exec() != QDialog::Accepted)
+        return;
+
+    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+
+    if(fileName.isEmpty())
+        return;
+
+    QFile f(fileName);
+    if(!f.open(QFile::ReadOnly))
+    {
+        QMessageBox::warning(this, tr("Cannot Read File"), f.errorString());
+        return;
+    }
+
+    QString errMsg;
+    if(!StationSVGHelper::addImage(mDb, getStation(), &f, &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error Adding SVG"), errMsg);
+        return;
+    }
+
+    updateSVGButtons(true);
+}
+
+void StationEditDialog::removeSVGImage()
+{
+    int ret = QMessageBox::question(this, tr("Delete Image?"),
+                                    tr("Are you sure to delete SVG plan of this station?"));
+    if(ret != QMessageBox::Yes)
+        return;
+
+    QString errMsg;
+    if(!StationSVGHelper::removeImage(mDb, getStation(), &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error Deleting SVG"), errMsg);
+        return;
+    }
+
+    updateSVGButtons(false);
+}
+
+void StationEditDialog::saveSVGToFile()
+{
+    QFileDialog dlg(this, tr("Save SVG Copy"));
+    dlg.setFileMode(QFileDialog::AnyFile);
+    dlg.setAcceptMode(QFileDialog::AcceptSave);
+    //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+
+    QStringList filters;
+    filters << FileFormats::tr(FileFormats::svgFile);
+    filters << FileFormats::tr(FileFormats::allFiles);
+    dlg.setNameFilters(filters);
+
+    if(dlg.exec() != QDialog::Accepted)
+        return;
+
+    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+
+    if(fileName.isEmpty())
+        return;
+
+    QFile f(fileName);
+    if(!f.open(QFile::WriteOnly))
+    {
+        QMessageBox::warning(this, tr("Cannot Save File"), f.errorString());
+        return;
+    }
+
+    QString errMsg;
+    if(!StationSVGHelper::saveImage(mDb, getStation(), &f, &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error Saving SVG"), errMsg);
+    }
 }

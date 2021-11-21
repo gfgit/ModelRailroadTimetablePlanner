@@ -116,6 +116,7 @@ find_package(Qt5 REQUIRED
 
 find_package(SQLite3)
 find_package(ZLIB)
+find_package(ssplib)
 
 # Prefer config files shipped with 'libzip'
 # If not found, it will fallback to out custom FindLibZip.cmake module

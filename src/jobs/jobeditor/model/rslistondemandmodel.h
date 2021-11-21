@@ -44,7 +44,6 @@ public:
 
     // Cached rows management
     virtual void clearCache() override;
-    virtual void setSortingColumn(int col) override;
 
 private:
     virtual void internalFetch(int first, int sortColumn, int valRow, const QVariant &val) = 0;

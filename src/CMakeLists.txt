@@ -141,6 +141,7 @@ target_link_libraries(
     Qt5::PrintSupport
     ${SQLite3_LIBRARIES}
     ${ZLIB_LIBRARIES}
+    ssplib::ssplib
     )
 
 # Link LibZip
@@ -343,10 +344,11 @@ if(WIN32)
             message(FATAL_ERROR "In order to run windeployqt you must first set th exe path in WINDEPLOYQT_EXE")
         endif()
 
+        # Use [[...]] to delay variable expansion
         install(CODE "
             message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE}\")
-            execute_process(COMMAND ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}
-                WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}
+            execute_process(COMMAND ${WINDEPLOYQT_EXE} [[${CMAKE_INSTALL_PREFIX}]]
+                WORKING_DIRECTORY [[${CMAKE_INSTALL_PREFIX}]]
                 OUTPUT_VARIABLE WINDEPLOYQT_EXE_RESULT
                 ERROR_VARIABLE WINDEPLOYQT_EXE_RESULT)
 

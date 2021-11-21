@@ -26,6 +26,7 @@
 #include <QPainter>
 
 #include <QPrintDialog>
+#include <QPointer>
 
 #include "info.h"
 
@@ -102,11 +103,13 @@ void ShiftGraphEditor::onPrintGraph()
 {
     QPrinter printer;
 
-    QPrintDialog dlg(&printer, this);
-    if(dlg.exec() == QDialog::Accepted)
+    QPointer<QPrintDialog> dlg = new QPrintDialog(&printer, this);
+    if(dlg->exec() == QDialog::Accepted && dlg)
     {
         print(&printer);
     }
+
+    delete dlg;
 }
 
 void ShiftGraphEditor::exportSVG(const QString& fileName)
@@ -160,18 +163,22 @@ void ShiftGraphEditor::refreshView()
 
 void ShiftGraphEditor::onShowOptions()
 {
-    GraphOptions dlg(this);
-    dlg.setHideSameStations(graph->getHideSameStations());
+    QPointer<GraphOptions> dlg = new GraphOptions(this);
+    dlg->setHideSameStations(graph->getHideSameStations());
 
-    if(dlg.exec() == QDialog::Rejected)
-        return;
+    int ret = dlg->exec();
+    if(dlg && ret == QDialog::Accepted)
+    {
+        graph->setHideSameStations(dlg->hideSameStation());
+    }
 
-    graph->setHideSameStations(dlg.hideSameStation());
+    delete dlg;
 }
 
 void ShiftGraphEditor::showShiftMenuForJob(db_id jobId)
 {
-    JobChangeShiftDlg dlg(Session->m_Db, this);
-    dlg.setJob(jobId);
-    dlg.exec();
+    QPointer<JobChangeShiftDlg> dlg = new JobChangeShiftDlg(Session->m_Db, this);
+    dlg->setJob(jobId);
+    dlg->exec();
+    delete dlg;
 }
