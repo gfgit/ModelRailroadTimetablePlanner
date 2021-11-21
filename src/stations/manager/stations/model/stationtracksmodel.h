@@ -1,7 +1,7 @@
 #ifndef STATIONTRACKSMODEL_H
 #define STATIONTRACKSMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/sqldelegate/pageditemmodelhelper.h"
 
 #include "stations/station_utils.h"
 
@@ -9,14 +9,26 @@
 
 #include <QFlags>
 
-class StationTracksModel : public IPagedItemModel
+struct StationTracksModelItem
+{
+    db_id trackId;
+    int trackLegth;
+    int platfLength;
+    int freightLength;
+    int maxAxesCount;
+    QString name;
+    QRgb color;
+    QFlags<utils::StationTrackType> type;
+};
+
+class StationTracksModel : public IPagedItemModelImpl<StationTracksModel, StationTracksModelItem>
 {
     Q_OBJECT
 
 public:
     enum { BatchSize = 100 };
 
-    typedef enum {
+    enum Columns {
         PosCol = -1, //Fake column, uses row header
         NameCol = 0,
         ColorCol,
@@ -27,23 +39,12 @@ public:
         FreightLengthCol,
         MaxAxesCol,
         NCols
-    } Columns;
+    };
 
-    typedef struct TrackItem_
-    {
-        db_id trackId;
-        int trackLegth;
-        int platfLength;
-        int freightLength;
-        int maxAxesCount;
-        QString name;
-        QRgb color;
-        QFlags<utils::StationTrackType> type;
-    } TrackItem;
+    typedef StationTracksModelItem TrackItem;
+    typedef IPagedItemModelImpl<StationTracksModel, StationTracksModelItem> BaseClass;
 
     StationTracksModel(sqlite3pp::database &db, QObject *parent = nullptr);
-
-    bool event(QEvent *e) override;
 
     // QAbstractTableModel
 
@@ -51,9 +52,6 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
@@ -63,9 +61,6 @@ public:
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
     // IPagedItemModel
-
-    // Cached rows management
-    virtual void clearCache() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -115,9 +110,8 @@ protected:
     virtual qint64 recalcTotalItemCount() override;
 
 private:
-    void fetchRow(int row);
+    friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant &val);
-    void handleResult(const QVector<TrackItem> &items, int firstRow);
 
     bool setName(TrackItem &item, const QString &name);
     bool setType(TrackItem &item, QFlags<utils::StationTrackType> type);
@@ -127,9 +121,6 @@ private:
 
 private:
     db_id m_stationId;
-    QVector<TrackItem> cache;
-    int cacheFirstRow;
-    int firstPendingRow;
     bool editable;
 };
 

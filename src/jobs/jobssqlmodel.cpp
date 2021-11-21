@@ -33,9 +33,9 @@ JobsSQLModel::JobsSQLModel(sqlite3pp::database &db, QObject *parent) :
 {
     sortColumn = IdCol;
 
-    connect(Session, &MeetingSession::shiftNameChanged, this, &JobsSQLModel::clearCache_slot);
-    connect(Session, &MeetingSession::shiftJobsChanged, this, &JobsSQLModel::clearCache_slot);
-    connect(Session, &MeetingSession::stationNameChanged, this, &JobsSQLModel::clearCache_slot);
+    connect(Session, &MeetingSession::shiftNameChanged, this, &IPagedItemModel::clearCache_slot);
+    connect(Session, &MeetingSession::shiftJobsChanged, this, &IPagedItemModel::clearCache_slot);
+    connect(Session, &MeetingSession::stationNameChanged, this, &IPagedItemModel::clearCache_slot);
     connect(Session, &MeetingSession::jobChanged, this, &JobsSQLModel::clearCache_slot);
 
     connect(Session->mJobStorage, &JobStorage::jobAdded, this, &JobsSQLModel::onJobAddedOrRemoved);
@@ -183,14 +183,6 @@ void JobsSQLModel::setSortingColumn(int col)
     QModelIndex first = index(0, 0);
     QModelIndex last = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
-}
-
-void JobsSQLModel::clearCache_slot()
-{
-    clearCache();
-    QModelIndex start = index(0, 0);
-    QModelIndex end = index(curItemCount - 1, NCols - 1);
-    emit dataChanged(start, end);
 }
 
 void JobsSQLModel::onJobAddedOrRemoved()

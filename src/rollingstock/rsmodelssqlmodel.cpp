@@ -1,26 +1,14 @@
 #include "rsmodelssqlmodel.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
 #include "utils/model_roles.h"
 #include "utils/rs_types_names.h"
-#include "utils/worker_event_types.h"
 
 #include <QDebug>
-
-class RSModelsResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::RsModelsModelResult);
-    inline RSModelsResultEvent() :QEvent(_Type) {}
-
-    QVector<RSModelsSQLModel::RSModel> items;
-    int firstRow;
-};
 
 static constexpr char
 errorModelNameAlreadyUsedWithSameSuffix[] = QT_TRANSLATE_NOOP("RSModelsSQLModel",
@@ -48,26 +36,9 @@ errorModelInUseCannotDelete[] = QT_TRANSLATE_NOOP("RSModelsSQLModel",
                                                   "If you wish to remove it, please first delete all <b>%1</b> pieces.");
 
 RSModelsSQLModel::RSModelsSQLModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
     sortColumn = Name;
-}
-
-bool RSModelsSQLModel::event(QEvent *e)
-{
-    if(e->type() == RSModelsResultEvent::_Type)
-    {
-        RSModelsResultEvent *ev = static_cast<RSModelsResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant RSModelsSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -100,16 +71,6 @@ QVariant RSModelsSQLModel::headerData(int section, Qt::Orientation orientation, 
         }
     }
     return IPagedItemModel::headerData(section, orientation, role);
-}
-
-int RSModelsSQLModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int RSModelsSQLModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant RSModelsSQLModel::data(const QModelIndex &idx, int role) const
@@ -309,255 +270,6 @@ Qt::ItemFlags RSModelsSQLModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-qint64 RSModelsSQLModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_models");
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
-}
-
-void RSModelsSQLModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
-void RSModelsSQLModel::fetchRow(int row)
-{
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-    //    RSModel *item = nullptr;
-
-    //    if(cache.size())
-    //    {
-    //        if(firstPendingRow >= cacheFirstRow + cache.size())
-    //        {
-    //            valRow = cacheFirstRow + cache.size();
-    //            item = &cache.last();
-    //        }
-    //        else if(firstPendingRow > (cacheFirstRow - firstPendingRow))
-    //        {
-    //            valRow = cacheFirstRow;
-    //            item = &cache.first();
-    //        }
-    //    }
-
-    /*switch (sortCol) TODO: use val in WHERE clause
-    {
-    case Name:
-    {
-        if(item)
-        {
-            val = item->name;
-        }
-        break;
-    }
-        //No data hint for TypeCol column
-    }*/
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
-}
-
-void RSModelsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
-{
-    query q(mDb);
-
-    int offset = first - valRow + curPage * ItemsPerPage;
-    bool reverse = false;
-
-    if(valRow > first)
-    {
-        offset = 0;
-        reverse = true;
-    }
-
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
-
-    const char *whereCol;
-
-    QByteArray sql = "SELECT id,name,suffix,max_speed,axes,type,sub_type FROM rs_models";
-    switch (sortCol)
-    {
-    case Name:
-    {
-        whereCol = "name,suffix"; //Order by 2 columns, no where clause
-        break;
-    }
-    case TypeCol:
-    {
-        whereCol = "type,sub_type,name,suffix"; //Order by 4 columns, no where clause
-        break;
-    }
-    }
-
-    if(val.isValid())
-    {
-        sql += " WHERE ";
-        sql += whereCol;
-        if(reverse)
-            sql += "<?3";
-        else
-            sql += ">?3";
-    }
-
-    sql += " ORDER BY ";
-    sql += whereCol;
-
-    if(reverse)
-        sql += " DESC";
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    if(val.isValid())
-    {
-        switch (sortCol)
-        {
-        case Name:
-        {
-            q.bind(3, val.toString());
-            break;
-        }
-        }
-    }
-
-    QVector<RSModel> vec(BatchSize);
-
-    auto it = q.begin();
-    const auto end = q.end();
-
-    if(reverse)
-    {
-        int i = BatchSize - 1;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            RSModel &item = vec[i];
-            item.modelId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.suffix = r.get<QString>(2);
-            item.maxSpeedKmH = r.get<qint16>(3);
-            item.axes = r.get<qint8>(4);
-            item.type = RsType(r.get<int>(5));
-            item.sub_type = RsEngineSubType(r.get<int>(6));
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
-    {
-        int i = 0;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            RSModel &item = vec[i];
-            item.modelId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.suffix = r.get<QString>(2);
-            item.maxSpeedKmH = r.get<qint16>(3);
-            item.axes = r.get<qint8>(4);
-            item.type = RsType(r.get<int>(5));
-            item.sub_type = RsEngineSubType(r.get<int>(6));
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
-    }
-
-
-    RSModelsResultEvent *ev = new RSModelsResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void RSModelsSQLModel::handleResult(const QVector<RSModel>& items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<RSModel> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
-}
-
 void RSModelsSQLModel::setSortingColumn(int col)
 {
     if(sortColumn == col || (col != Name && col != TypeCol))
@@ -569,76 +281,6 @@ void RSModelsSQLModel::setSortingColumn(int col)
     QModelIndex first = index(0, 0);
     QModelIndex last = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
-}
-
-bool RSModelsSQLModel::setNameOrSuffix(RSModel& item, const QString& newName, bool suffix)
-{
-    if(suffix ? item.suffix == newName : item.name == newName)
-        return false; //No change
-
-    command set_name(mDb, suffix ? "UPDATE rs_models SET suffix=? WHERE id=?"
-                                 : "UPDATE rs_models SET name=? WHERE id=?");
-    set_name.bind(1, newName);
-    set_name.bind(2, item.modelId);
-    int ret = set_name.execute();
-    if(ret != SQLITE_OK)
-    {
-        qDebug() << "setNameOrSuffix()" << ret << mDb.error_code() << mDb.extended_error_code() << mDb.error_msg();
-        ret = mDb.extended_error_code();
-        if(ret == SQLITE_CONSTRAINT_UNIQUE)
-        {
-            emit modelError(tr(suffix ? errorModelSuffixAlreadyUsedWithSameName
-                                      : errorModelNameAlreadyUsedWithSameSuffix)
-                            .arg(newName)
-                            .arg(suffix ? item.name : item.suffix));
-        }
-        return false;
-    }
-
-    if(suffix)
-        item.suffix = newName;
-    else
-        item.name = newName;
-
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
-    cache.clear();
-    cacheFirstRow = 0;
-
-    return true;
-}
-
-bool RSModelsSQLModel::setType(RSModel &item, RsType type, RsEngineSubType subType)
-{
-    if(type == RsType::NTypes)
-        type = item.type;
-    else
-        subType = item.sub_type;
-
-    if(type != RsType::Engine)
-        subType = RsEngineSubType::Invalid; //Only engines can have a subType for now
-
-    command set_type(mDb, "UPDATE rs_models SET type=?,sub_type=? WHERE id=?");
-    set_type.bind(1, int(type));
-    set_type.bind(2, int(subType));
-    set_type.bind(3, item.modelId);
-    if(set_type.execute() != SQLITE_OK)
-        return false;
-
-    item.type = type;
-    item.sub_type = subType;
-
-    if(sortColumn == TypeCol)
-    {
-        //This row has now changed position so we need to invalidate cache
-        //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-        //but the view will trigger fetching at same scroll position so it is enough
-        cache.clear();
-        cacheFirstRow = 0;
-    }
-
-    return true;
 }
 
 bool RSModelsSQLModel::removeRSModel(db_id modelId, const QString& name)
@@ -763,5 +405,184 @@ bool RSModelsSQLModel::removeAllRSModels()
     }
 
     refreshData(); //Recalc row count
+    return true;
+}
+
+qint64 RSModelsSQLModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM rs_models");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
+void RSModelsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+{
+    query q(mDb);
+
+    int offset = first - valRow + curPage * ItemsPerPage;
+    bool reverse = false;
+
+    if(valRow > first)
+    {
+        offset = 0;
+        reverse = true;
+    }
+
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+
+    const char *whereCol = nullptr;
+
+    QByteArray sql = "SELECT id,name,suffix,max_speed,axes,type,sub_type FROM rs_models";
+    switch (sortCol)
+    {
+    case Name:
+    {
+        whereCol = "name,suffix"; //Order by 2 columns, no where clause
+        break;
+    }
+    case TypeCol:
+    {
+        whereCol = "type,sub_type,name,suffix"; //Order by 4 columns, no where clause
+        break;
+    }
+    }
+
+    if(val.isValid())
+    {
+        sql += " WHERE ";
+        sql += whereCol;
+        if(reverse)
+            sql += "<?3";
+        else
+            sql += ">?3";
+    }
+
+    sql += " ORDER BY ";
+    sql += whereCol;
+
+    if(reverse)
+        sql += " DESC";
+
+    sql += " LIMIT ?1";
+    if(offset)
+        sql += " OFFSET ?2";
+
+    q.prepare(sql);
+    q.bind(1, BatchSize);
+    if(offset)
+        q.bind(2, offset);
+
+    if(val.isValid())
+    {
+        switch (sortCol)
+        {
+        case Name:
+        {
+            q.bind(3, val.toString());
+            break;
+        }
+        }
+    }
+
+    QVector<RSModel> vec(BatchSize);
+
+    auto it = q.begin();
+    const auto end = q.end();
+
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
+
+    for(; it != end; ++it)
+    {
+        auto r = *it;
+        RSModel &item = vec[i];
+        item.modelId = r.get<db_id>(0);
+        item.name = r.get<QString>(1);
+        item.suffix = r.get<QString>(2);
+        item.maxSpeedKmH = r.get<qint16>(3);
+        item.axes = r.get<qint8>(4);
+        item.type = RsType(r.get<int>(5));
+        item.sub_type = RsEngineSubType(r.get<int>(6));
+
+        i += increment;
+    }
+
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
+
+    postResult(vec, first);
+}
+
+bool RSModelsSQLModel::setNameOrSuffix(RSModel& item, const QString& newName, bool suffix)
+{
+    if(suffix ? item.suffix == newName : item.name == newName)
+        return false; //No change
+
+    command set_name(mDb, suffix ? "UPDATE rs_models SET suffix=? WHERE id=?"
+                                 : "UPDATE rs_models SET name=? WHERE id=?");
+    set_name.bind(1, newName);
+    set_name.bind(2, item.modelId);
+    int ret = set_name.execute();
+    if(ret != SQLITE_OK)
+    {
+        qDebug() << "setNameOrSuffix()" << ret << mDb.error_code() << mDb.extended_error_code() << mDb.error_msg();
+        ret = mDb.extended_error_code();
+        if(ret == SQLITE_CONSTRAINT_UNIQUE)
+        {
+            emit modelError(tr(suffix ? errorModelSuffixAlreadyUsedWithSameName
+                                      : errorModelNameAlreadyUsedWithSameSuffix)
+                            .arg(newName)
+                            .arg(suffix ? item.name : item.suffix));
+        }
+        return false;
+    }
+
+    if(suffix)
+        item.suffix = newName;
+    else
+        item.name = newName;
+
+    //This row has now changed position so we need to invalidate cache
+    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    //but the view will trigger fetching at same scroll position so it is enough
+    cache.clear();
+    cacheFirstRow = 0;
+
+    return true;
+}
+
+bool RSModelsSQLModel::setType(RSModel &item, RsType type, RsEngineSubType subType)
+{
+    if(type == RsType::NTypes)
+        type = item.type;
+    else
+        subType = item.sub_type;
+
+    if(type != RsType::Engine)
+        subType = RsEngineSubType::Invalid; //Only engines can have a subType for now
+
+    command set_type(mDb, "UPDATE rs_models SET type=?,sub_type=? WHERE id=?");
+    set_type.bind(1, int(type));
+    set_type.bind(2, int(subType));
+    set_type.bind(3, item.modelId);
+    if(set_type.execute() != SQLITE_OK)
+        return false;
+
+    item.type = type;
+    item.sub_type = subType;
+
+    if(sortColumn == TypeCol)
+    {
+        //This row has now changed position so we need to invalidate cache
+        //HACK: we emit dataChanged for this index (that doesn't exist anymore)
+        //but the view will trigger fetching at same scroll position so it is enough
+        cache.clear();
+        cacheFirstRow = 0;
+    }
+
     return true;
 }

@@ -9,6 +9,7 @@ IPagedItemModel::IPagedItemModel(const int itemsPerPage, sqlite3pp::database &db
     curItemCount(0),
     pageCount(0),
     curPage(0),
+    sortColumn(0),
     ItemsPerPage(itemsPerPage)
 {
 
@@ -46,10 +47,10 @@ void IPagedItemModel::refreshData(bool forceUpdate)
     }
 }
 
-qint64 IPagedItemModel::recalcTotalItemCount()
+void IPagedItemModel::setSortingColumn(int col)
 {
-    //NOTE: either override this or refreshData()
-    return 0; //Default implementation
+    //Do nothing, it must be reimplemented
+    Q_UNUSED(col)
 }
 
 int IPagedItemModel::getSortingColumn() const
@@ -94,4 +95,18 @@ void IPagedItemModel::switchToPage(int page)
     QModelIndex first = index(0, 0);
     QModelIndex last = index(curItemCount - 1, columnCount() - 1);
     emit dataChanged(first, last);
+}
+
+void IPagedItemModel::clearCache_slot()
+{
+    clearCache();
+    QModelIndex start = index(0, 0);
+    QModelIndex end = index(rowCount() - 1, columnCount() - 1);
+    emit dataChanged(start, end);
+}
+
+qint64 IPagedItemModel::recalcTotalItemCount()
+{
+    //NOTE: either override this or refreshData()
+    return 0; //Default implementation
 }

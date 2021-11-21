@@ -1,13 +1,23 @@
 #ifndef RSMODELSSQLMODEL_H
 #define RSMODELSSQLMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/sqldelegate/pageditemmodelhelper.h"
 
 #include "utils/types.h"
 
-#include <QVector>
+struct RSModelsSQLModelItem
+{
+    db_id modelId;
+    QString name;
+    QString suffix;
+    qint16 maxSpeedKmH;
+    qint8 axes;
+    RsType type;
+    RsEngineSubType sub_type;
+};
 
-class RSModelsSQLModel : public IPagedItemModel
+
+class RSModelsSQLModel : public IPagedItemModelImpl<RSModelsSQLModel, RSModelsSQLModelItem>
 {
     Q_OBJECT
 
@@ -15,7 +25,7 @@ public:
 
     enum { BatchSize = 100 };
 
-    typedef enum {
+    enum Columns {
         Name = 0,
         Suffix,
         MaxSpeed,
@@ -23,30 +33,17 @@ public:
         TypeCol,
         SubTypeCol,
         NCols
-    } Columns;
+    };
 
-    typedef struct RSModel_
-    {
-        db_id modelId;
-        QString name;
-        QString suffix;
-        qint16 maxSpeedKmH;
-        qint8 axes;
-        RsType type;
-        RsEngineSubType sub_type;
-    } RSModel;
+    typedef RSModelsSQLModelItem RSModel;
+    typedef IPagedItemModelImpl<RSModelsSQLModel, RSModelsSQLModelItem> BaseClass;
 
     RSModelsSQLModel(sqlite3pp::database &db, QObject *parent = nullptr);
-    bool event(QEvent *e) override;
 
     // QAbstractTableModel:
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-    // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
@@ -58,9 +55,6 @@ public:
 
 
     // IPagedItemModel:
-
-    // Cached rows management
-    virtual void clearCache() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -78,17 +72,11 @@ protected:
     virtual qint64 recalcTotalItemCount() override;
 
 private:
-    void fetchRow(int row);
+    friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
-    void handleResult(const QVector<RSModel> &items, int firstRow);
 
     bool setNameOrSuffix(RSModel &item, const QString &newName, bool suffix);
     bool setType(RSModel &item, RsType type, RsEngineSubType subType);
-
-private:
-    QVector<RSModel> cache;
-    int cacheFirstRow;
-    int firstPendingRow;
 };
 
 #endif // RSMODELSSQLMODEL_H

@@ -1,28 +1,17 @@
 #include "rollingstocksqlmodel.h"
-#include "app/session.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
+
+#include "app/session.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/worker_event_types.h"
 #include "utils/model_roles.h"
 #include "utils/rs_types_names.h"
 #include "utils/rs_utils.h"
 
 #include <QDebug>
-
-class RollingstockModelResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::RollingstockModelResult);
-    inline RollingstockModelResultEvent() : QEvent(_Type) {}
-
-    QVector<RollingstockSQLModel::RSItem> items;
-    int firstRow;
-};
 
 //ERRORMSG: show other errors
 static constexpr char
@@ -31,26 +20,9 @@ errorRSInUseCannotDelete[] = QT_TRANSLATE_NOOP("RollingstockSQLModel",
                                                "If you wish to remove it, please first remove it from its jobs.");
 
 RollingstockSQLModel::RollingstockSQLModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
     sortColumn = Model;
-}
-
-bool RollingstockSQLModel::event(QEvent *e)
-{
-    if(e->type() == RollingstockModelResultEvent::_Type)
-    {
-        RollingstockModelResultEvent *ev = static_cast<RollingstockModelResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant RollingstockSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -81,16 +53,6 @@ QVariant RollingstockSQLModel::headerData(int section, Qt::Orientation orientati
         }
     }
     return IPagedItemModel::headerData(section, orientation, role);
-}
-
-int RollingstockSQLModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int RollingstockSQLModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant RollingstockSQLModel::data(const QModelIndex &idx, int role) const
@@ -187,267 +149,6 @@ Qt::ItemFlags RollingstockSQLModel::flags(const QModelIndex &idx) const
     return f;
 }
 
-qint64 RollingstockSQLModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_list");
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
-}
-
-void RollingstockSQLModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
-void RollingstockSQLModel::fetchRow(int row)
-{
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-    //    RSItem *item = nullptr;
-
-    //    if(cache.size())
-    //    {
-    //        if(firstPendingRow >= cacheFirstRow + cache.size())
-    //        {
-    //            valRow = cacheFirstRow + cache.size();
-    //            item = &cache.last();
-    //        }
-    //        else if(firstPendingRow > (cacheFirstRow - firstPendingRow))
-    //        {
-    //            valRow = cacheFirstRow;
-    //            item = &cache.first();
-    //        }
-    //    }
-
-    /*switch (sortCol) TODO: use val in WHERE clause
-    {
-    case Name:
-    {
-        if(item)
-        {
-            val = item->name;
-        }
-        break;
-    }
-        //No data hint for TypeCol column
-    }*/
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
-}
-
-void RollingstockSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
-{
-    query q(mDb);
-
-    int offset = first - valRow + curPage * ItemsPerPage;
-    bool reverse = false;
-
-    if(valRow > first)
-    {
-        offset = 0;
-        reverse = true;
-    }
-
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
-
-    const char *whereCol;
-
-    QByteArray sql = "SELECT rs_list.id,rs_list.number,rs_list.model_id,rs_list.owner_id,"
-                     "rs_models.name,rs_models.suffix,rs_models.type,rs_owners.name"
-                     " FROM rs_list"
-                     " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                     " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id";
-    switch (sortCol)
-    {
-    case Model:
-    {
-        whereCol = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
-        break;
-    }
-    case Owner:
-    {
-        whereCol = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
-        break;
-    }
-    case TypeCol:
-    {
-        whereCol = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
-        break;
-    }
-    }
-
-    if(val.isValid())
-    {
-        sql += " WHERE ";
-        sql += whereCol;
-        if(reverse)
-            sql += "<?3";
-        else
-            sql += ">?3";
-    }
-
-    sql += " ORDER BY ";
-    sql += whereCol;
-
-    if(reverse)
-        sql += " DESC";
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    if(val.isValid())
-    {
-        switch (sortCol)
-        {
-        case Model:
-        {
-            q.bind(3, val.toString());
-            break;
-        }
-        }
-    }
-
-    QVector<RSItem> vec(BatchSize);
-
-    auto it = q.begin();
-    const auto end = q.end();
-
-    if(reverse)
-    {
-        int i = BatchSize - 1;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            RSItem &item = vec[i];
-            item.rsId = r.get<db_id>(0);
-            item.number = r.get<int>(1);
-            item.modelId = r.get<db_id>(2);
-            item.ownerId = r.get<db_id>(3);
-            item.modelName = r.get<QString>(4);
-            item.modelSuffix = r.get<QString>(5);
-            item.type = RsType(r.get<int>(6));
-            item.ownerName = r.get<QString>(7);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
-    {
-        int i = 0;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            RSItem &item = vec[i];
-            item.rsId = r.get<db_id>(0);
-            item.number = r.get<int>(1);
-            item.modelId = r.get<db_id>(2);
-            item.ownerId = r.get<db_id>(3);
-            item.modelName = r.get<QString>(4);
-            item.modelSuffix = r.get<QString>(5);
-            item.type = RsType(r.get<int>(6));
-            item.ownerName = r.get<QString>(7);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
-    }
-
-
-    RollingstockModelResultEvent *ev = new RollingstockModelResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void RollingstockSQLModel::handleResult(const QVector<RSItem>& items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<RSItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-    emit itemsReady(firstRow, lastRow);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
-}
-
 void RollingstockSQLModel::setSortingColumn(int col)
 {
     if(sortColumn == col || col == Number || col == Suffix || col >= NCols)
@@ -524,6 +225,244 @@ bool RollingstockSQLModel::setFieldData(int row, int col, db_id id, const QStrin
     }
 
     return ret;
+}
+
+bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
+{
+    if(!rsId)
+        return false;
+
+    command cmd(mDb, "DELETE FROM rs_list WHERE id=?");
+    cmd.bind(1, rsId);
+    int ret = cmd.execute();
+    if(ret != SQLITE_OK)
+    {
+        ret = mDb.extended_error_code();
+        if(ret == SQLITE_CONSTRAINT_TRIGGER)
+        {
+            QString name;
+            if(item)
+            {
+                name = rs_utils::formatName(item->modelName, item->number, item->modelSuffix, item->type);
+            }
+            else
+            {
+                query q(mDb, "SELECT rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
+                             " FROM rs_list"
+                             " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
+                             " WHERE rs_list.id=?");
+                q.bind(1, rsId);
+                q.step();
+
+                sqlite3_stmt *stmt = q.stmt();
+
+                int number = sqlite3_column_int(stmt, 0);
+                int modelNameLen = sqlite3_column_bytes(stmt, 1);
+                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 1));
+
+                int modelSuffixLen = sqlite3_column_bytes(stmt, 2);
+                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
+
+                RsType type = RsType(sqlite3_column_int(stmt, 3));
+
+                name = rs_utils::formatNameRef(modelName, modelNameLen,
+                                               number,
+                                               modelSuffix, modelSuffixLen,
+                                               type);
+            }
+
+            emit modelError(tr(errorRSInUseCannotDelete).arg(name));
+            return false;
+        }
+        qWarning() << "RollingstockSQLModel: error removing model" << ret << mDb.error_msg();
+        return false;
+    }
+
+    emit Session->rollingstockRemoved(rsId);
+
+    refreshData(); //Recalc row count
+    return true;
+}
+
+bool RollingstockSQLModel::removeRSItemAt(int row)
+{
+    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+        return false; //Not fetched yet or invalid
+
+    const RSItem &item = cache.at(row - cacheFirstRow);
+    return removeRSItem(item.rsId, &item);
+}
+
+db_id RollingstockSQLModel::addRSItem(int *outRow, QString *errOut)
+{
+    db_id rsId = 0;
+
+    command cmd(mDb, "INSERT INTO rs_list(id,model_id,number,owner_id) VALUES (NULL,NULL,0,NULL)");
+    sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
+    sqlite3_mutex_enter(mutex);
+    int ret = cmd.execute();
+    if(ret == SQLITE_OK)
+    {
+        rsId = mDb.last_insert_rowid();
+    }
+    sqlite3_mutex_leave(mutex);
+
+    if(ret == SQLITE_CONSTRAINT_UNIQUE)
+    {
+        //There is already an RS with no model set, use that instead
+        query findEmpty(mDb, "SELECT id FROM rs_list WHERE model_id=0 OR model_id IS NULL LIMIT 1");
+        if(findEmpty.step() == SQLITE_ROW)
+        {
+            rsId = findEmpty.getRows().get<db_id>(0);
+        }
+    }
+    else if(ret != SQLITE_OK)
+    {
+        if(errOut)
+            *errOut = mDb.error_msg();
+        qDebug() << "RollingstockSQLModel Error adding:" << ret << mDb.error_msg() << mDb.error_code() << mDb.extended_error_code();
+    }
+
+    refreshData(); //Recalc row count
+    switchToPage(0); //Reset to first page and so it is shown as first row
+
+    if(outRow)
+        *outRow = rsId ? 0 : -1; //Empty model is always the first
+
+    return rsId;
+}
+
+bool RollingstockSQLModel::removeAllRS()
+{
+    command cmd(mDb, "DELETE FROM rs_list");
+    int ret = cmd.execute();
+    if(ret != SQLITE_OK)
+    {
+        qWarning() << "Removing ALL RS:" << ret << mDb.extended_error_code() << "Err:" << mDb.error_msg();
+        return false;
+    }
+
+    refreshData(); //Recalc row count
+    return true;
+}
+
+qint64 RollingstockSQLModel::recalcTotalItemCount()
+{
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM rs_list");
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
+void RollingstockSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+{
+    query q(mDb);
+
+    int offset = first - valRow + curPage * ItemsPerPage;
+    bool reverse = false;
+
+    if(valRow > first)
+    {
+        offset = 0;
+        reverse = true;
+    }
+
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+
+    const char *whereCol = nullptr;
+
+    QByteArray sql = "SELECT rs_list.id,rs_list.number,rs_list.model_id,rs_list.owner_id,"
+                     "rs_models.name,rs_models.suffix,rs_models.type,rs_owners.name"
+                     " FROM rs_list"
+                     " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
+                     " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id";
+    switch (sortCol)
+    {
+    case Model:
+    {
+        whereCol = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
+        break;
+    }
+    case Owner:
+    {
+        whereCol = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+        break;
+    }
+    case TypeCol:
+    {
+        whereCol = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+        break;
+    }
+    }
+
+    if(val.isValid())
+    {
+        sql += " WHERE ";
+        sql += whereCol;
+        if(reverse)
+            sql += "<?3";
+        else
+            sql += ">?3";
+    }
+
+    sql += " ORDER BY ";
+    sql += whereCol;
+
+    if(reverse)
+        sql += " DESC";
+
+    sql += " LIMIT ?1";
+    if(offset)
+        sql += " OFFSET ?2";
+
+    q.prepare(sql);
+    q.bind(1, BatchSize);
+    if(offset)
+        q.bind(2, offset);
+
+    if(val.isValid())
+    {
+        switch (sortCol)
+        {
+        case Model:
+        {
+            q.bind(3, val.toString());
+            break;
+        }
+        }
+    }
+
+    QVector<RSItem> vec(BatchSize);
+
+    auto it = q.begin();
+    const auto end = q.end();
+
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
+
+    for(; it != end; ++it)
+    {
+        auto r = *it;
+        RSItem &item = vec[i];
+        item.rsId = r.get<db_id>(0);
+        item.number = r.get<int>(1);
+        item.modelId = r.get<db_id>(2);
+        item.ownerId = r.get<db_id>(3);
+        item.modelName = r.get<QString>(4);
+        item.modelSuffix = r.get<QString>(5);
+        item.type = RsType(r.get<int>(6));
+        item.ownerName = r.get<QString>(7);
+
+        i += increment;
+    }
+
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
+
+    postResult(vec, first);
 }
 
 bool RollingstockSQLModel::setModel(RSItem &item, db_id modelId, const QString &name)
@@ -655,124 +594,5 @@ bool RollingstockSQLModel::setNumber(RSItem &item, int number)
 
     emit Session->rollingStockModified(item.rsId);
 
-    return true;
-}
-
-bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
-{
-    if(!rsId)
-        return false;
-
-    command cmd(mDb, "DELETE FROM rs_list WHERE id=?");
-    cmd.bind(1, rsId);
-    int ret = cmd.execute();
-    if(ret != SQLITE_OK)
-    {
-        ret = mDb.extended_error_code();
-        if(ret == SQLITE_CONSTRAINT_TRIGGER)
-        {
-            QString name;
-            if(item)
-            {
-                name = rs_utils::formatName(item->modelName, item->number, item->modelSuffix, item->type);
-            }
-            else
-            {
-                query q(mDb, "SELECT rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
-                             " FROM rs_list"
-                             " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                             " WHERE rs_list.id=?");
-                q.bind(1, rsId);
-                q.step();
-
-                sqlite3_stmt *stmt = q.stmt();
-
-                int number = sqlite3_column_int(stmt, 0);
-                int modelNameLen = sqlite3_column_bytes(stmt, 1);
-                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 1));
-
-                int modelSuffixLen = sqlite3_column_bytes(stmt, 2);
-                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
-
-                RsType type = RsType(sqlite3_column_int(stmt, 3));
-
-                name = rs_utils::formatNameRef(modelName, modelNameLen,
-                                               number,
-                                               modelSuffix, modelSuffixLen,
-                                               type);
-            }
-
-            emit modelError(tr(errorRSInUseCannotDelete).arg(name));
-            return false;
-        }
-        qWarning() << "RollingstockSQLModel: error removing model" << ret << mDb.error_msg();
-        return false;
-    }
-
-    emit Session->rollingstockRemoved(rsId);
-
-    refreshData(); //Recalc row count
-    return true;
-}
-
-bool RollingstockSQLModel::removeRSItemAt(int row)
-{
-    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
-
-    const RSItem &item = cache.at(row - cacheFirstRow);
-    return removeRSItem(item.rsId, &item);
-}
-
-db_id RollingstockSQLModel::addRSItem(int *outRow, QString *errOut)
-{
-    db_id rsId = 0;
-
-    command cmd(mDb, "INSERT INTO rs_list(id,model_id,number,owner_id) VALUES (NULL,NULL,0,NULL)");
-    sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
-    sqlite3_mutex_enter(mutex);
-    int ret = cmd.execute();
-    if(ret == SQLITE_OK)
-    {
-        rsId = mDb.last_insert_rowid();
-    }
-    sqlite3_mutex_leave(mutex);
-
-    if(ret == SQLITE_CONSTRAINT_UNIQUE)
-    {
-        //There is already an RS with no model set, use that instead
-        query findEmpty(mDb, "SELECT id FROM rs_list WHERE model_id=0 OR model_id IS NULL LIMIT 1");
-        if(findEmpty.step() == SQLITE_ROW)
-        {
-            rsId = findEmpty.getRows().get<db_id>(0);
-        }
-    }
-    else if(ret != SQLITE_OK)
-    {
-        if(errOut)
-            *errOut = mDb.error_msg();
-        qDebug() << "RollingstockSQLModel Error adding:" << ret << mDb.error_msg() << mDb.error_code() << mDb.extended_error_code();
-    }
-
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
-
-    if(outRow)
-        *outRow = rsId ? 0 : -1; //Empty model is always the first
-
-    return rsId;
-}
-
-bool RollingstockSQLModel::removeAllRS()
-{
-    command cmd(mDb, "DELETE FROM rs_list");
-    int ret = cmd.execute();
-    if(ret != SQLITE_OK)
-    {
-        qWarning() << "Removing ALL RS:" << ret << mDb.extended_error_code() << "Err:" << mDb.error_msg();
-        return false;
-    }
-
-    refreshData(); //Recalc row count
     return true;
 }
