@@ -16,7 +16,7 @@
 #include "stations/manager/lines/model/linesegmentsmodel.h"
 #include "stations/manager/lines/dialogs/choosesegmentdlg.h"
 
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 
 EditLineDlg::EditLineDlg(sqlite3pp::database &db, QWidget *parent) :
@@ -141,17 +141,11 @@ void EditLineDlg::addStation()
     db_id lastStationId = model->getLastStation();
     db_id lastSegmentId = model->getLastRailwaySegment();
 
-    QPointer<ChooseSegmentDlg> dlg(new ChooseSegmentDlg(mDb, this));
+    OwningQPointer<ChooseSegmentDlg> dlg(new ChooseSegmentDlg(mDb, this));
     dlg->setFilter(lastStationId, ChooseSegmentDlg::DoNotLock, lastSegmentId);
     int ret = dlg->exec();
-    if(!dlg)
+    if(ret != QDialog::Accepted || !dlg)
         return;
-
-    if(ret != QDialog::Accepted)
-    {
-        delete dlg;
-        return;
-    }
 
     db_id segmentId = 0;
     QString segmentName;
@@ -161,8 +155,6 @@ void EditLineDlg::addStation()
     {
         model->addStation(segmentId, isReversed);
     }
-
-    delete dlg;
 }
 
 void EditLineDlg::removeAfterCurrentPos()

@@ -14,6 +14,7 @@
 #include <QStandardPaths>
 
 #include "utils/imageviewer.h"
+#include "utils/owningqpointer.h"
 
 #include <QDebug>
 
@@ -181,7 +182,7 @@ void MeetingInformationDialog::saveData()
 
 void MeetingInformationDialog::showImage()
 {
-    QPointer<ImageViewer> dlg = new ImageViewer(this);
+    OwningQPointer<ImageViewer> dlg = new ImageViewer(this);
 
     if(img.isNull() && !needsToSaveImg)
     {
@@ -209,7 +210,6 @@ void MeetingInformationDialog::showImage()
     dlg->setImage(img);
 
     dlg->exec();
-    delete dlg;
 
     if(!needsToSaveImg)
         img = QImage(); //Cleanup to free memory

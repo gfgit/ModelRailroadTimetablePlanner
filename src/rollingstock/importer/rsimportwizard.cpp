@@ -31,7 +31,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     QWizard (parent),
@@ -95,7 +95,7 @@ void RSImportWizard::done(int result)
         {
             if(result == QDialog::Rejected) //RejectWithoutAsking skips this
             {
-                QPointer<QMessageBox> msgBox = new QMessageBox(this);
+                OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
                 msgBox->setIcon(QMessageBox::Question);
                 msgBox->setWindowTitle(RsImportStrings::tr("Abort import?"));
                 msgBox->setText(RsImportStrings::tr("Do you want to import process? No data will be imported"));
@@ -105,7 +105,6 @@ void RSImportWizard::done(int result)
                 msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
                 msgBox->exec();
                 bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
-                delete msgBox;
                 if(!abortClicked)
                     return;
             }

@@ -11,7 +11,7 @@
 
 #include <QMessageBox>
 #include <QPushButton>
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 #include <QPrinter>
 
@@ -172,7 +172,7 @@ void PrintWizard::done(int result)
     {
         if(!isStoppingTask)
         {
-            QPointer<QMessageBox> msgBox = new QMessageBox(this);
+            OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
             msgBox->setIcon(QMessageBox::Question);
             msgBox->setWindowTitle(tr("Abort Printing?"));
             msgBox->setText(tr("Do you want to cancel printing?\n"
@@ -183,7 +183,6 @@ void PrintWizard::done(int result)
             msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
             msgBox->exec();
             bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
-            delete msgBox;
             if(!abortClicked)
                 return;
 
@@ -234,7 +233,7 @@ void PrintWizard::abortPrintTask()
 
 void PrintWizard::handleProgressError(const QString &errMsg)
 {
-    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
     msgBox->setIcon(QMessageBox::Warning);
     auto tryAgainBut = msgBox->addButton(tr("Try again"), QMessageBox::YesRole);
     msgBox->addButton(QMessageBox::Abort);
@@ -243,15 +242,12 @@ void PrintWizard::handleProgressError(const QString &errMsg)
     msgBox->setWindowTitle(tr("Print Error"));
 
     msgBox->exec();
+    if(!msgBox)
+        return;
 
-    if(msgBox)
+    if(msgBox->clickedButton() == tryAgainBut)
     {
-        if(msgBox->clickedButton() == tryAgainBut)
-        {
-            //Go back to options page
-            back();
-        }
+        //Go back to options page
+        back();
     }
-
-    delete msgBox;
 }

@@ -13,6 +13,8 @@
 #include <QPushButton>
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
+#include "utils/owningqpointer.h"
+
 #include "stations/match_models/stationsmatchmodel.h"
 #include "stations/match_models/stationgatesmatchmodel.h"
 
@@ -20,7 +22,6 @@
 #include "stations/manager/segments/model/railwaysegmentconnectionsmodel.h"
 
 #include "stations/manager/segments/dialogs/editrailwayconnectiondlg.h"
-#include <QPointer>
 
 EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
@@ -315,8 +316,6 @@ void EditRailwaySegmentDlg::updateTrackConnectionModel()
 
 void EditRailwaySegmentDlg::editSegmentTrackConnections()
 {
-    QPointer<EditRailwayConnectionDlg> dlg(new EditRailwayConnectionDlg(connModel, this));
+    OwningQPointer<EditRailwayConnectionDlg> dlg(new EditRailwayConnectionDlg(connModel, this));
     dlg->exec();
-    if(dlg)
-        delete dlg;
 }

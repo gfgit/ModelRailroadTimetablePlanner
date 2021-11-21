@@ -12,7 +12,7 @@
 #include "jobs/jobeditor/jobpatheditor.h"
 #include <QDockWidget>
 
-#include <QPointer>
+#include "utils/owningqpointer.h"
 #include <QMessageBox>
 #include <QPushButton>
 #include <QLabel>
@@ -54,8 +54,6 @@
 #include <QTimer> //HACK: TODO remove
 
 #include "app/scopedebug.h"
-
-#include <QPointer>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -236,8 +234,7 @@ void MainWindow::setup_actions()
 
 void MainWindow::about()
 {
-    QPointer<QMessageBox> msgBox = new QMessageBox(this);
-    msgBox->setAttribute(Qt::WA_DeleteOnClose);
+    OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
     msgBox->setIcon(QMessageBox::Information);
     msgBox->setWindowTitle(tr("About %1").arg(qApp->applicationDisplayName()));
 
@@ -257,7 +254,6 @@ void MainWindow::about()
     msgBox->setText(translatedText);
     msgBox->setStandardButtons(QMessageBox::Ok);
     msgBox->exec();
-    delete msgBox;
 }
 
 void MainWindow::onOpen()
@@ -377,7 +373,7 @@ void MainWindow::loadFile(const QString& fileName)
         //Probably the application crashed before finishing RS importation
         //Give user choice to resume it or discard
 
-        QPointer<QMessageBox> msgBox = new QMessageBox(
+        OwningQPointer<QMessageBox> msgBox = new QMessageBox(
             QMessageBox::Warning,
             tr("RS Import"),
             tr("There is some rollingstock import data left in this file. "
@@ -391,18 +387,15 @@ void MainWindow::loadFile(const QString& fileName)
         msgBox->setTextFormat(Qt::RichText);
 
         msgBox->exec();
+        if(!msgBox)
+            return;
 
-        if(msgBox)
+        if(msgBox->clickedButton() == resumeBut)
         {
-            if(msgBox->clickedButton() == resumeBut)
-            {
-                Session->getViewManager()->resumeRSImportation();
-            }else{
-                Session->clearImportRSTables();
-            }
+            Session->getViewManager()->resumeRSImportation();
+        }else{
+            Session->clearImportRSTables();
         }
-
-        delete msgBox;
     }
 }
 
@@ -721,18 +714,16 @@ void MainWindow::onCloseSession()
 
 void MainWindow::onProperties()
 {
-    QPointer<PropertiesDialog> dlg = new PropertiesDialog(this);
+    OwningQPointer<PropertiesDialog> dlg = new PropertiesDialog(this);
     dlg->exec();
-    delete dlg;
 }
 
 void MainWindow::onMeetingInformation()
 {
-    QPointer<MeetingInformationDialog> dlg = new MeetingInformationDialog(this);
+    OwningQPointer<MeetingInformationDialog> dlg = new MeetingInformationDialog(this);
     int ret = dlg->exec();
     if(dlg && ret == QDialog::Accepted)
         dlg->saveData();
-    delete dlg;
 }
 
 bool MainWindow::closeSession()
@@ -798,26 +789,23 @@ void MainWindow::onRemoveJob()
 
 void MainWindow::onPrint()
 {
-    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
+    OwningQPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
     wizard->setOutputType(Print::Native);
     wizard->exec();
-    delete wizard;
 }
 
 void MainWindow::onPrintPDF()
 {
-    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
+    OwningQPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
     wizard->setOutputType(Print::Pdf);
     wizard->exec();
-    delete wizard;
 }
 
 void MainWindow::onExportSvg()
 {
-    QPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
+    OwningQPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
     wizard->setOutputType(Print::Svg);
     wizard->exec();
-    delete wizard;
 }
 
 #ifdef ENABLE_USER_QUERY
@@ -833,10 +821,9 @@ void MainWindow::onExecQuery()
 void MainWindow::onOpenSettings()
 {
     DEBUG_ENTRY;
-    QPointer<SettingsDialog> dlg = new SettingsDialog(this);
+    OwningQPointer<SettingsDialog> dlg = new SettingsDialog(this);
     dlg->loadSettings();
     dlg->exec();
-    delete dlg;
 }
 
 void MainWindow::checkLineNumber()
