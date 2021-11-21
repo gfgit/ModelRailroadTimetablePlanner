@@ -1,33 +1,20 @@
 #include "joblistmodel.h"
-#include "app/session.h"
 
-#include <QCoreApplication>
-#include <QEvent>
+#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
+
+#include "app/session.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/worker_event_types.h"
 #include "utils/model_roles.h"
 
 #include "utils/jobcategorystrings.h"
 
 #include <QDebug>
 
-class JobListModelResultEvent : public QEvent
-{
-public:
-    static constexpr Type _Type = Type(CustomEvents::JobsModelResult);
-    inline JobListModelResultEvent() : QEvent(_Type) {}
-
-    QVector<JobListModel::JobItem> items;
-    int firstRow;
-};
-
 JobListModel::JobListModel(sqlite3pp::database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
     sortColumn = IdCol;
 
@@ -38,21 +25,6 @@ JobListModel::JobListModel(sqlite3pp::database &db, QObject *parent) :
 
     connect(Session, &MeetingSession::jobAdded, this, &JobListModel::onJobAddedOrRemoved);
     connect(Session, &MeetingSession::jobRemoved, this, &JobListModel::onJobAddedOrRemoved);
-}
-
-bool JobListModel::event(QEvent *e)
-{
-    if(e->type() == JobListModelResultEvent::_Type)
-    {
-        JobListModelResultEvent *ev = static_cast<JobListModelResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
 }
 
 QVariant JobListModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -87,16 +59,6 @@ QVariant JobListModel::headerData(int section, Qt::Orientation orientation, int 
         }
     }
     return IPagedItemModel::headerData(section, orientation, role);
-}
-
-int JobListModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int JobListModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant JobListModel::data(const QModelIndex &idx, int role) const
@@ -154,22 +116,6 @@ QVariant JobListModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-qint64 JobListModel::recalcTotalItemCount()
-{
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM jobs");
-    q.step();
-    const qint64 count = q.getRows().get<int>(0);
-    return count;
-}
-
-void JobListModel::clearCache()
-{
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
 void JobListModel::setSortingColumn(int col)
 {
     if(sortColumn == col || col == OriginSt || col == DestinationSt || col >= NCols)
@@ -188,35 +134,13 @@ void JobListModel::onJobAddedOrRemoved()
     refreshData(); //Recalc row count
 }
 
-void JobListModel::fetchRow(int row)
+qint64 JobListModel::recalcTotalItemCount()
 {
-    if(!mDb.db())
-        return;
-
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QVariant val;
-    int valRow = 0;
-
-
-    //TODO: use a custom QRunnable
-    //    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-    //                              Q_ARG(int, firstPendingRow), Q_ARG(int, sortCol),
-    //                              Q_ARG(int, valRow), Q_ARG(QVariant, val));
-    internalFetch(firstPendingRow, sortColumn, val.isNull() ? 0 : valRow, val);
+    //TODO: consider filters
+    query q(mDb, "SELECT COUNT(1) FROM jobs");
+    q.step();
+    const qint64 count = q.getRows().get<int>(0);
+    return count;
 }
 
 void JobListModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
@@ -322,183 +246,65 @@ void JobListModel::internalFetch(int first, int sortCol, int valRow, const QVari
     auto it = q.begin();
     const auto end = q.end();
 
-    if(reverse)
+    int i = reverse ? BatchSize - 1 : 0;
+    const int increment = reverse ? -1 : 1;
+
+    for(; it != end; ++it)
     {
-        int i = BatchSize - 1;
+        auto r = *it;
+        JobItem &item = vec[i];
+        item.jobId = r.get<db_id>(0);
+        item.category = JobCategory(r.get<int>(1));
+        item.shiftId = r.get<db_id>(2);
 
-        for(; it != end; ++it)
+        if(item.shiftId)
         {
-            auto r = *it;
-            JobItem &item = vec[i];
-            item.jobId = r.get<db_id>(0);
-            item.category = JobCategory(r.get<int>(1));
-            item.shiftId = r.get<db_id>(2);
-
-            if(item.shiftId)
+            auto shift = shiftHash.constFind(item.shiftId);
+            if(shift == shiftHash.constEnd())
             {
-                auto shift = shiftHash.constFind(item.shiftId);
-                if(shift == shiftHash.constEnd())
-                {
-                    shift = shiftHash.insert(item.shiftId, r.get<QString>(3));
-                }
-                item.shiftName = shift.value();
+                shift = shiftHash.insert(item.shiftId, r.get<QString>(3));
             }
-
-            item.originTime = r.get<QTime>(4);
-            item.originStId = r.get<db_id>(5);
-            item.destTime = r.get<QTime>(6);
-            item.destStId = r.get<db_id>(7);
-
-            if(item.originStId)
-            {
-                auto st = stationHash.constFind(item.originStId);
-                if(st == stationHash.constEnd())
-                {
-                    q_stationName.bind(1, item.originStId);
-                    q_stationName.step();
-                    st = stationHash.insert(item.originStId, q_stationName.getRows().get<QString>(0));
-                    q_stationName.reset();
-                }
-                item.origStName = st.value();
-            }
-
-            if(item.destStId)
-            {
-                auto st = stationHash.constFind(item.destStId);
-                if(st == stationHash.constEnd())
-                {
-                    q_stationName.bind(1, item.destStId);
-                    q_stationName.step();
-                    st = stationHash.insert(item.destStId, q_stationName.getRows().get<QString>(0));
-                    q_stationName.reset();
-                }
-                item.destStName = st.value();
-            }
-
-            i--;
+            item.shiftName = shift.value();
         }
-        if(i > -1)
-            vec.remove(0, i + 1);
-    }
-    else
-    {
-        int i = 0;
 
-        for(; it != end; ++it)
+        item.originTime = r.get<QTime>(4);
+        item.originStId = r.get<db_id>(5);
+        item.destTime = r.get<QTime>(6);
+        item.destStId = r.get<db_id>(7);
+
+        if(item.originStId)
         {
-            auto r = *it;
-            JobItem &item = vec[i];
-            item.jobId = r.get<db_id>(0);
-            item.category = JobCategory(r.get<int>(1));
-            item.shiftId = r.get<db_id>(2);
-
-            if(item.shiftId)
+            auto st = stationHash.constFind(item.originStId);
+            if(st == stationHash.constEnd())
             {
-                auto shift = shiftHash.constFind(item.shiftId);
-                if(shift == shiftHash.constEnd())
-                {
-                    shift = shiftHash.insert(item.shiftId, r.get<QString>(3));
-                }
-                item.shiftName = shift.value();
+                q_stationName.bind(1, item.originStId);
+                q_stationName.step();
+                st = stationHash.insert(item.originStId, q_stationName.getRows().get<QString>(0));
+                q_stationName.reset();
             }
-
-            item.originTime = r.get<QTime>(4);
-            item.originStId = r.get<db_id>(5);
-            item.destTime = r.get<QTime>(6);
-            item.destStId = r.get<db_id>(7);
-
-            if(item.originStId)
-            {
-                auto st = stationHash.constFind(item.originStId);
-                if(st == stationHash.constEnd())
-                {
-                    q_stationName.bind(1, item.originStId);
-                    q_stationName.step();
-                    st = stationHash.insert(item.originStId, q_stationName.getRows().get<QString>(0));
-                    q_stationName.reset();
-                }
-                item.origStName = st.value();
-            }
-
-            if(item.destStId)
-            {
-                auto st = stationHash.constFind(item.destStId);
-                if(st == stationHash.constEnd())
-                {
-                    q_stationName.bind(1, item.destStId);
-                    q_stationName.step();
-                    st = stationHash.insert(item.destStId, q_stationName.getRows().get<QString>(0));
-                    q_stationName.reset();
-                }
-                item.destStName = st.value();
-            }
-
-            i++;
+            item.origStName = st.value();
         }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
+
+        if(item.destStId)
+        {
+            auto st = stationHash.constFind(item.destStId);
+            if(st == stationHash.constEnd())
+            {
+                q_stationName.bind(1, item.destStId);
+                q_stationName.step();
+                st = stationHash.insert(item.destStId, q_stationName.getRows().get<QString>(0));
+                q_stationName.reset();
+            }
+            item.destStName = st.value();
+        }
+
+        i += increment;
     }
 
+    if(reverse && i > -1)
+        vec.remove(0, i + 1);
+    else if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
 
-    JobListModelResultEvent *ev = new JobListModelResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void JobListModel::handleResult(const QVector<JobListModel::JobItem> &items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing first" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<JobItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing last" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    int lastRow = firstRow + items.count(); //Last row + 1 extra to re-trigger possible next batch
-    if(lastRow >= curItemCount)
-        lastRow = curItemCount -1; //Ok, there is no extra row so notify just our batch
-
-    if(firstRow > 0)
-        firstRow--; //Try notify also the row before because there might be another batch waiting so re-trigger it
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(lastRow, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-    emit itemsReady(firstRow, lastRow);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
+    postResult(vec, first);
 }
