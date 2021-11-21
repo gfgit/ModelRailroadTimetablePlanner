@@ -109,12 +109,6 @@ QVariant LinesModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-void LinesModel::setSortingColumn(int col)
-{
-    //Sort only by name
-    Q_UNUSED(col)
-}
-
 bool LinesModel::addLine(const QString &name, db_id *outLineId)
 {
     if(name.isEmpty())

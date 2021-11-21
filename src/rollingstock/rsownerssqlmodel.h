@@ -53,9 +53,6 @@ public:
     // Cached rows management
     virtual void clearCache() override;
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
-    virtual void setSortingColumn(int col) override;
-
     // RSOwnersSQLModel
 
     bool removeRSOwner(db_id ownerId, const QString &name);

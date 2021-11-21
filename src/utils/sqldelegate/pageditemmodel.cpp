@@ -50,6 +50,7 @@ void IPagedItemModel::refreshData(bool forceUpdate)
 void IPagedItemModel::setSortingColumn(int col)
 {
     //Do nothing, it must be reimplemented
+    Q_UNUSED(col)
 }
 
 int IPagedItemModel::getSortingColumn() const

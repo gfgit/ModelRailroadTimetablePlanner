@@ -433,11 +433,6 @@ void RSOwnersSQLModel::handleResult(const QVector<RSOwner>& items, int firstRow)
     qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
 }
 
-void RSOwnersSQLModel::setSortingColumn(int /*col*/)
-{
-    //Only sort by name
-}
-
 bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
 {
     if(!ownerId)

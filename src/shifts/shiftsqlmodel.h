@@ -48,9 +48,6 @@ public:
     // Cached rows management
     virtual void clearCache() override;
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
-    virtual void setSortingColumn(int col) override;
-
     // ShiftSQLModel
     db_id shiftAtRow(int row) const;
     QString shiftNameAtRow(int row) const;

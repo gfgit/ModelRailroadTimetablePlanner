@@ -40,9 +40,6 @@ public:
 
     // IPagedItemModel
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
-    virtual void setSortingColumn(int col) override;
-
     // LinesModel
     bool addLine(const QString& name, db_id *outLineId = nullptr);
     bool removeLine(db_id lineId);

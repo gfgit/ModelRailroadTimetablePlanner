@@ -272,12 +272,6 @@ void LineSegmentsModel::refreshData(bool forceUpdate)
     }
 }
 
-void LineSegmentsModel::setSortingColumn(int col)
-{
-    //Sort only by segment index position
-    Q_UNUSED(col)
-}
-
 void LineSegmentsModel::setLine(db_id lineId)
 {
     m_lineId = lineId;
