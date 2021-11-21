@@ -2075,7 +2075,7 @@ void StopModel::insertStopBefore(const QModelIndex &idx)
         oldFirst.curLine = first.nextLine;
         oldFirst.nextLine = 0;
 
-        first.stopId = createStop(mJobId, first.segment, first.arrival);
+        first.stopId = createStop(mJobId, first.arrival, first.departure, 0);
 
         //Shift next stops by 1 minute
         setArrival(oldFirstIdx, first.arrival.addSecs(60), true);
@@ -2096,7 +2096,7 @@ void StopModel::insertStopBefore(const QModelIndex &idx)
         new_stop.arrival = arr;
         new_stop.segment = s->segment;
 
-        new_stop.stopId = createStop(mJobId, new_stop.segment, new_stop.arrival);
+        new_stop.stopId = createStop(mJobId, new_stop.arrival, new_stop.departure, 0);
         new_stop.nextLine = 0;
         new_stop.curLine = s->curLine;
         new_stop.addHere = 0;
@@ -2516,7 +2516,7 @@ void StopModel::insertTransitsBefore(const QPersistentModelIndex& stop)
         item.nextSegment_ = 0;
         item.platform = 0;
         item.arrival = item.departure = prevDep;
-        item.stopId = createStop(mJobId, item.segment, item.arrival, Transit);
+        item.stopId = createStop(mJobId, item.arrival, item.departure, Transit);
 
         setStation_internal(item, stId, nodeId);
 
