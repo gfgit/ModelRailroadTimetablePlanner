@@ -138,6 +138,7 @@ public:
 
     inline StopItem getItemAt(int row) const { return stops.at(row); }
     inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
+    inline db_id getItemStationAt(int row) const { return stops.at(row).stationId; }
 
     void uncoupleStillCoupledAtLastStop();
     void uncoupleStillCoupledAtStop(const StopItem &s);
