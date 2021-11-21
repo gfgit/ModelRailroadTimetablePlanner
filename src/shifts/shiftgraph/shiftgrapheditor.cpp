@@ -62,33 +62,25 @@ ShiftGraphEditor::~ShiftGraphEditor()
 
 void ShiftGraphEditor::onSaveGraph()
 {
-    QFileDialog dlg(this, tr("Save Shift Graph"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Shift Graph"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
     filters << FileFormats::tr(FileFormats::pdfFile);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
 
-    if(fileName.endsWith(QStringLiteral(".pdf")))
-    {
-        exportPDF(fileName);
-    }
-    else if(fileName.endsWith(QStringLiteral(".svg")))
-    {
-        exportSVG(fileName);
-    }
-    else if(dlg.selectedNameFilter().contains("pdf")) //TODO: needed?
+    if(fileName.endsWith(QStringLiteral(".pdf")) || dlg->selectedNameFilter().contains("pdf"))
     {
         exportPDF(fileName);
     }

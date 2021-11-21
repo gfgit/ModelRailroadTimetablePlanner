@@ -16,6 +16,7 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
+#include "utils/owningqpointer.h"
 
 #include "odt_export/stationsheetexport.h"
 
@@ -112,20 +113,20 @@ void StationJobView::onSaveSheet()
 {
     DEBUG_ENTRY;
 
-    QFileDialog dlg(this, tr("Save Station Sheet"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-    dlg.selectFile(tr("%1_station.odt").arg(windowTitle()));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Station Sheet"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->selectFile(tr("%1_station.odt").arg(windowTitle()));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::odtFormat);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;

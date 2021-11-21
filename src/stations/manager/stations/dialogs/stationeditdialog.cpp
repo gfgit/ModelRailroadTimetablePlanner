@@ -590,20 +590,20 @@ void StationEditDialog::removeSelectedGateConnection()
 
 void StationEditDialog::addSVGImage()
 {
-    QFileDialog dlg(this, tr("Open SVG Image"));
-    dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setAcceptMode(QFileDialog::AcceptOpen);
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Open SVG Image"));
+    dlg->setFileMode(QFileDialog::ExistingFile);
+    dlg->setAcceptMode(QFileDialog::AcceptOpen);
     //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
@@ -644,21 +644,20 @@ void StationEditDialog::removeSVGImage()
 
 void StationEditDialog::saveSVGToFile()
 {
-    QFileDialog dlg(this, tr("Save SVG Copy"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save SVG Copy"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
     //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
-
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
 

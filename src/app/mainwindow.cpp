@@ -280,21 +280,21 @@ void MainWindow::onOpen()
     }
 #endif
 
-    QFileDialog dlg(this, tr("Open Session"));
-    dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setAcceptMode(QFileDialog::AcceptOpen);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Open Session"));
+    dlg->setFileMode(QFileDialog::ExistingFile);
+    dlg->setAcceptMode(QFileDialog::AcceptOpen);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::tttFormat);
     filters << FileFormats::tr(FileFormats::sqliteFormat);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
@@ -496,21 +496,21 @@ void MainWindow::onNew()
     }
 #endif
 
-    QFileDialog dlg(this, tr("Create new Session"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Create new Session"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::tttFormat);
     filters << FileFormats::tr(FileFormats::sqliteFormat);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
@@ -560,21 +560,21 @@ void MainWindow::onSaveCopyAs()
     if(!Session->getViewManager()->closeEditors())
         return;
 
-    QFileDialog dlg(this, tr("Save Session Copy"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Session Copy"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::tttFormat);
     filters << FileFormats::tr(FileFormats::sqliteFormat);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;

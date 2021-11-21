@@ -6,6 +6,7 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
+#include "utils/owningqpointer.h"
 
 #include <QDir>
 
@@ -94,14 +95,14 @@ void ChooseFilePage::onChoose()
     }
     filters << FileFormats::tr(FileFormats::allFiles);
 
-    QFileDialog dlg(this, title, pathEdit->text());
-    dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setAcceptMode(QFileDialog::AcceptOpen);
-    dlg.setNameFilters(filters);
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, title, pathEdit->text());
+    dlg->setFileMode(QFileDialog::ExistingFile);
+    dlg->setAcceptMode(QFileDialog::AcceptOpen);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     pathEdit->setText(QDir::toNativeSeparators(fileName));
 }

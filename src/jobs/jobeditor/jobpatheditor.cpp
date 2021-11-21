@@ -660,20 +660,20 @@ void JobPathEditor::setReadOnly(bool readOnly)
 
 void JobPathEditor::onSaveSheet()
 {
-    QFileDialog dlg(this, tr("Save Job Sheet"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-    dlg.selectFile(tr("job%1_sheet.odt").arg(stopModel->getJobId()));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Job Sheet"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->selectFile(tr("job%1_sheet.odt").arg(stopModel->getJobId()));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::odtFormat);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
