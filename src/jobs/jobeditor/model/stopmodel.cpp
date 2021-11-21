@@ -901,17 +901,16 @@ void StopModel::insertAddHere(int row, int type)
     endInsertRows();
 }
 
-db_id StopModel::createStop(db_id jobId, db_id segId, const QTime& time, int transit)
+db_id StopModel::createStop(db_id jobId, const QTime& arr, const QTime& dep, int type)
 {
     command q_addStop(mDb, "INSERT INTO stops"
-                           "(id,job_id,stationId,arrival,departure,platform,transit,description,segmentId,otherSegment)"
-                           " VALUES (NULL,?,NULL,?,?,?,?,NULL,?,NULL)");
+                           "(id,job_id,stationId,arrival,departure,type,description,"
+                           " in_gate_conn,out_gate_conn,next_segment_conn_id)"
+                           " VALUES (NULL,?,NULL,?,?,?,NULL,NULL,NULL,NULL)");
     q_addStop.bind(1, jobId);
-    q_addStop.bind(2, time);
-    q_addStop.bind(3, time);
-    q_addStop.bind(4, 0); //Platform
-    q_addStop.bind(5, transit); //Transit
-    q_addStop.bind(6, segId);
+    q_addStop.bind(2, arr);
+    q_addStop.bind(3, dep);
+    q_addStop.bind(4, type);
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
@@ -1050,10 +1049,8 @@ void StopModel::addStop()
          * This is to prevent contemporary stops that will break ORDER BY arrival queries */
         const QTime time = s.departure.addSecs(60);
         last.arrival = time;
-
-        last.stopId = createStop(mJobId, s.segment, last.arrival);
-        last.segment = s.segment;
         last.departure = last.arrival;
+        last.stopId = createStop(mJobId, last.arrival, last.departure, 0);
 
         if(autoMoveUncoupleToNewLast)
         {
@@ -1095,10 +1092,7 @@ void StopModel::addStop()
 
         last.arrival = QTime(0, 0);
         last.departure = last.arrival;
-
-        //Doesn't need 'setStopSeg' because it sets on 'createStop'
-        last.segment = createSegment(mJobId, 0);
-        last.stopId = createStop(mJobId, last.segment, last.arrival);
+        last.stopId = createStop(mJobId, last.arrival, last.departure, 0);
     }
 
     emit dataChanged(index(idx, 0),

@@ -225,7 +225,7 @@ private:
 
 private:
     void insertAddHere(int row, int type);
-    db_id createStop(db_id jobId, db_id segId, const QTime &time, int transit = 0);
+    db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, int type = 0);
     db_id createSegment(db_id jobId, int num);
     db_id createSegmentAfter(db_id jobId, db_id prevSeg);
     void setStopSeg(StopItem &s, db_id segId);
