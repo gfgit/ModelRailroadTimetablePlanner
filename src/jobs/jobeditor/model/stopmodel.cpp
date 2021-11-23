@@ -2383,11 +2383,11 @@ bool StopModel::trySelectTrackForStop(StopItem &item)
         //TODO: choose 'default' track, corretto tracciato
         q.prepare("SELECT c.id, t.id, MIN(t.pos)"
                   " FROM station_gate_connections c"
-                  " JOIN station_tracks t ON c.track_id=t.id2"
+                  " JOIN station_tracks t ON c.track_id=t.id"
                   " WHERE c.gate_id=? AND c.gate_track=?");
         q.bind(1, item.fromGate.gateId);
-        q.bind(1, item.fromGate.trackNum);
-        if(q.step() != SQLITE_ROW)
+        q.bind(2, item.fromGate.trackNum);
+        if(q.step() != SQLITE_ROW || q.getRows().column_type(0) != SQLITE_NULL)
             return false;
 
         auto gate = q.getRows();
@@ -2398,10 +2398,10 @@ bool StopModel::trySelectTrackForStop(StopItem &item)
 
     q.prepare("SELECT c.id, c.gate_id, c.gate_track, t.id, MIN(t.pos)"
               " FROM station_tracks t"
-              " JOIN station_gate_connections c ON c.track_id=t.id2"
+              " JOIN station_gate_connections c ON c.track_id=t.id"
               " WHERE t.station_id=?");
     q.bind(1, item.stationId);
-    if(q.step() != SQLITE_ROW)
+    if(q.step() != SQLITE_ROW || q.getRows().column_type(0) == SQLITE_NULL)
         return false;
 
     auto gate = q.getRows();
@@ -2855,21 +2855,19 @@ bool StopModel::revertChanges()
         //Reload info and stops
         needsStopReload = true;
     }
-    else
-    {
-        //Just reset info in case of InfoEditing
-        mNewJobId = mJobId;
-        emit jobIdChanged(mJobId);
 
-        category = oldCategory;
-        emit categoryChanged(int(category));
+    //Reset info
+    mNewJobId = mJobId;
+    emit jobIdChanged(mJobId);
 
-        newShiftId = jobShiftId;
-        emit jobShiftChanged(jobShiftId);
+    category = oldCategory;
+    emit categoryChanged(int(category));
 
-        rsToUpdate.clear();
-        stationsToUpdate.clear();
-    }
+    newShiftId = jobShiftId;
+    emit jobShiftChanged(jobShiftId);
+
+    rsToUpdate.clear();
+    stationsToUpdate.clear();
 
     bool ret = endStopsEditing();
     if(!ret)
