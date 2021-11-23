@@ -7,7 +7,7 @@
 
 #include <QTime>
 
-typedef struct JobListModelItem
+struct JobListModelItem
 {
     db_id jobId;
     db_id shiftId;
