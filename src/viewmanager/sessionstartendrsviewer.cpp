@@ -9,6 +9,7 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
+#include "utils/owningqpointer.h"
 
 #include "app/session.h"
 
@@ -77,20 +78,19 @@ void SessionStartEndRSViewer::modeChanged()
 
 void SessionStartEndRSViewer::exportSheet()
 {
-    QFileDialog dlg(this, tr("Expoert RS session plan"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Expoert RS session plan"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::odtFormat);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
-
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
 

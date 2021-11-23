@@ -8,7 +8,7 @@
 
 #include <QProgressDialog>
 #include <QMessageBox>
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 #include "../intefaces/iduplicatesitemmodel.h"
 
@@ -106,7 +106,7 @@ void FixDuplicatesDlg::done(int res)
         int count = model->getItemCount();
         if(count)
         {
-            QPointer<QMessageBox> msgBox = new QMessageBox(this);
+            OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
             msgBox->setIcon(QMessageBox::Warning);
             msgBox->setWindowTitle(RsImportStrings::tr("Not yet!"));
             msgBox->setText(RsImportStrings::tr("There are still %1 items to be fixed").arg(count));
@@ -119,7 +119,6 @@ void FixDuplicatesDlg::done(int res)
             msgBox->exec();
 
             const bool goBack = msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage;
-            delete msgBox;
 
             if(goBack)
             {
@@ -190,7 +189,7 @@ int FixDuplicatesDlg::blockingReloadCount(int mode)
 int FixDuplicatesDlg::warnCancel(QWidget *w)
 {
     //Warn user
-    QPointer<QMessageBox> msgBox = new QMessageBox(w);
+    OwningQPointer<QMessageBox> msgBox = new QMessageBox(w);
     msgBox->setIcon(QMessageBox::Warning);
     msgBox->setWindowTitle(RsImportStrings::tr("Aborting RS Import"));
     msgBox->setText(RsImportStrings::tr("If you don't fix duplicated items you cannot proceed.\n"
@@ -220,8 +219,6 @@ int FixDuplicatesDlg::warnCancel(QWidget *w)
     {
         ret = FixDuplicatesDlg::GoBackToPrevPage;
     }
-
-    delete msgBox;
 
     return ret;
 }

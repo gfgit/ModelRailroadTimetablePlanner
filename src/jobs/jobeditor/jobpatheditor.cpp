@@ -10,7 +10,7 @@
 #include <QStandardPaths>
 
 #include <QMessageBox>
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 #include <QCloseEvent>
 
@@ -272,11 +272,10 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
 
     if(act == editStopAct)
     {
-        QPointer<EditStopDialog> dlg = new EditStopDialog(this);
+        OwningQPointer<EditStopDialog> dlg = new EditStopDialog(this);
         dlg->setReadOnly(m_readOnly);
         dlg->setStop(stopModel, index);
         dlg->exec();
-        delete dlg;
         return;
     }
 
@@ -428,10 +427,9 @@ bool JobPathEditor::saveChanges()
                        times.first, times.second);
         if(model.hasConcurrentJobs())
         {
-            QPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
+            OwningQPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
             dlg->setModel(&model);
             dlg->exec();
-            delete dlg;
 
             stopModel->setNewShiftId(stopModel->getJobShiftId());
 
@@ -607,10 +605,9 @@ void JobPathEditor::onJobShiftChanged(db_id shiftId)
                        times.first, times.second);
         if(model.hasConcurrentJobs())
         {
-            QPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
+            OwningQPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
             dlg->setModel(&model);
             dlg->exec();
-            delete dlg;
 
             stopModel->setNewShiftId(0);
 
@@ -668,20 +665,20 @@ void JobPathEditor::setReadOnly(bool readOnly)
 
 void JobPathEditor::onSaveSheet()
 {
-    QFileDialog dlg(this, tr("Save Job Sheet"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-    dlg.selectFile(tr("job%1_sheet.odt").arg(stopModel->getJobId()));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Job Sheet"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->selectFile(tr("job%1_sheet.odt").arg(stopModel->getJobId()));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::odtFormat);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;

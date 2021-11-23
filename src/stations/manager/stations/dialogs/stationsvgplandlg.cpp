@@ -12,7 +12,7 @@
 
 #include <QMessageBox>
 #include <QPushButton>
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 #include <ssplib/svgstationplanlib.h>
 
@@ -228,7 +228,7 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
                    << "NOT OF THIS STATION" << stationId;
     }
 
-    QPointer<QMessageBox> msgBox = new QMessageBox(this);
+    OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
     msgBox->setIcon(QMessageBox::Information);
     msgBox->setWindowTitle(tr("Gate %1").arg(letter));
 
@@ -265,8 +265,6 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
     {
         Session->getViewManager()->requestStSVGPlan(info.to.stationId);
     }
-
-    delete msgBox;
 }
 
 void StationSVGPlanDlg::showEvent(QShowEvent *)
