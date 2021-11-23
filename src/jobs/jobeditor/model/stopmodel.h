@@ -152,6 +152,12 @@ public:
 
     void setAutoUncoupleAtLast(bool value);
 
+    //Convinience for StopEditor
+    bool trySelectTrackForStop(StopItem &item);
+
+    bool trySetTrackConnections(StopItem &item, db_id trackId,
+                               QString *outErr);
+
 signals:
     void edited(bool val);
 

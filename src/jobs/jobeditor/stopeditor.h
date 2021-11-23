@@ -4,14 +4,14 @@
 #include <QFrame>
 #include <QTime>
 
-#include "jobs/jobeditor/model/stopmodel.h" //TODO: include only StopItem
+#include "jobs/jobeditor/model/stopmodel.h"
 
 class CustomCompletionLineEdit;
 class QTimeEdit;
 class QGridLayout;
 
 class StationsMatchModel;
-
+class StationTracksMatchModel;
 class RailwaySegmentMatchModel;
 
 namespace sqlite3pp {
@@ -22,7 +22,7 @@ class StopEditor : public QFrame
 {
     Q_OBJECT
 public:
-    StopEditor(sqlite3pp::database &db, QWidget *parent = nullptr);
+    StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent = nullptr);
 
     void setStop(const StopItem& item, const StopItem& prev);
 
@@ -31,23 +31,25 @@ public:
 
 private slots:
     void onStationSelected();
+    void onTrackSelected();
 
     void arrivalChanged(const QTime &arrival);
 
 private:
     QGridLayout *lay;
     CustomCompletionLineEdit *mStationEdit;
+    CustomCompletionLineEdit *mTrackEdit;
     CustomCompletionLineEdit *mSegmentEdit;
     QTimeEdit *arrEdit;
     QTimeEdit *depEdit;
 
     StationsMatchModel *stationsMatchModel;
+    StationTracksMatchModel *stationTrackMatchModel;
     RailwaySegmentMatchModel *segmentMatchModel;
 
+    StopModel *model;
     StopItem oldItem;
     StopItem prevItem;
-
-    int prevSegmentRow;
 };
 
 #endif // STOPEDITOR_H

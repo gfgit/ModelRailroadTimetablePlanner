@@ -904,7 +904,7 @@ void StopModel::insertAddHere(int row, int type)
 db_id StopModel::createStop(db_id jobId, const QTime& arr, const QTime& dep, int type)
 {
     command q_addStop(mDb, "INSERT INTO stops"
-                           "(id,job_id,stationId,arrival,departure,type,description,"
+                           "(id,job_id,station_id,arrival,departure,type,description,"
                            " in_gate_conn,out_gate_conn,next_segment_conn_id)"
                            " VALUES (NULL,?,NULL,?,?,?,NULL,NULL,NULL,NULL)");
     q_addStop.bind(1, jobId);
@@ -2373,6 +2373,135 @@ void StopModel::setAutoMoveUncoupleToNewLast(bool value)
 void StopModel::setAutoUncoupleAtLast(bool value)
 {
     autoUncoupleAtLast = value;
+}
+
+bool StopModel::trySelectTrackForStop(StopItem &item)
+{
+    query q(mDb);
+    if(item.fromGate.gateConnId)
+    {
+        //TODO: choose 'default' track, corretto tracciato
+        q.prepare("SELECT c.id, t.id, MIN(t.pos)"
+                  " FROM station_gate_connections c"
+                  " JOIN station_tracks t ON c.track_id=t.id2"
+                  " WHERE c.gate_id=? AND c.gate_track=?");
+        q.bind(1, item.fromGate.gateId);
+        q.bind(1, item.fromGate.trackNum);
+        if(q.step() != SQLITE_ROW)
+            return false;
+
+        auto gate = q.getRows();
+        item.fromGate.gateConnId = gate.get<db_id>(0);
+        item.trackId = gate.get<db_id>(1);
+        return true;
+    }
+
+    q.prepare("SELECT c.id, c.gate_id, c.gate_track, t.id, MIN(t.pos)"
+              " FROM station_tracks t"
+              " JOIN station_gate_connections c ON c.track_id=t.id2"
+              " WHERE t.station_id=?");
+    q.bind(1, item.stationId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+
+    auto gate = q.getRows();
+    item.fromGate.gateConnId = gate.get<db_id>(0);
+    item.fromGate.gateId = gate.get<db_id>(1);
+    item.fromGate.trackNum = gate.get<int>(2);
+    item.trackId = gate.get<db_id>(3);
+
+    //TODO: should we reset out gate here?
+
+    return true;
+}
+
+bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *outErr)
+{
+    query q(mDb, "SELECT station_id FROM station_tracks WHERE id=?");
+    q.bind(1, trackId);
+    if(q.step() == SQLITE_ROW)
+    {
+        db_id stId = q.getRows().get<db_id>(0);
+        if(item.stationId != stId)
+        {
+            if(outErr)
+                *outErr = tr("Track belongs to a different station.");
+            return false;
+        }
+    }else{
+        if(outErr)
+            *outErr = tr("Track doesn't exist.");
+        return false;
+    }
+
+    if(item.type == First)
+    {
+        //Fake in gate, select one just to set the track
+        q.prepare("SELECT id,gate_id,gate_track FROM station_gate_connections WHERE track_id=? LIMIT 1");
+        q.bind(1, trackId);
+        if(q.step() != SQLITE_ROW)
+        {
+            if(outErr)
+                *outErr = tr("Track is not connected to any of station gates.");
+            return false;
+        }
+
+        auto gate = q.getRows();
+        item.fromGate.gateConnId = gate.get<db_id>(0);
+        item.fromGate.gateId = gate.get<db_id>(1);
+        item.fromGate.trackNum = gate.get<int>(2);
+    }
+
+    q.prepare("SELECT id FROM station_gate_connections"
+              " WHERE gate_id=? AND gate_track=? AND track_id=?");
+
+    if(item.type != First)
+    {
+        //Item is not first stop, check in gate
+        q.bind(1, item.fromGate.gateId);
+        q.bind(2, item.fromGate.trackNum);
+        q.bind(3, trackId);
+
+        if(q.step() == SQLITE_ROW)
+        {
+            //Found a connection
+            item.fromGate.gateConnId = q.getRows().get<db_id>(0);
+        }else{
+            if(outErr)
+                *outErr = tr("Track is not connected to in gate track.\n"
+                             "Please choose a new track or change previous segment.");
+            return false;
+        }
+    }
+
+    if(item.toGate.gateConnId)
+    {
+        //For every type of stop, check out gate
+        q.bind(1, item.toGate.gateId);
+        q.bind(2, item.toGate.trackNum);
+        q.bind(3, trackId);
+
+        if(q.step() == SQLITE_ROW)
+        {
+            //Found a connection
+            item.toGate.gateConnId = q.getRows().get<db_id>(0);
+        }else{
+            //Connection not found, inform user and reset out gate
+            item.toGate.gateConnId = 0;
+            item.toGate.gateId = 0;
+            item.toGate.trackNum = -1;
+
+            if(outErr)
+                *outErr = tr("Track is not connected to selected out gate track.\n"
+                             "Please choose a new out gate or out track, this might change next segment.");
+            //Still return true to let user change out gate
+        }
+    }
+
+    //Store new track ID
+    item.trackId = trackId;
+
+    return true;
 }
 
 void StopModel::insertTransitsBefore(const QPersistentModelIndex& stop)

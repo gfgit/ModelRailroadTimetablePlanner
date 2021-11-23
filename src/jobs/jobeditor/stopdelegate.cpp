@@ -192,7 +192,9 @@ QWidget *StopDelegate::createEditor(QWidget *parent,
         return nullptr;
     }
 
-    StopEditor *editor = new StopEditor(mDb, parent);
+    StopModel *model = const_cast<StopModel*>(static_cast<const StopModel *>(index.model()));
+
+    StopEditor *editor = new StopEditor(mDb, model, parent);
     editor->setAutoFillBackground(true);
     editor->setEnabled(false); //Mark it
 
