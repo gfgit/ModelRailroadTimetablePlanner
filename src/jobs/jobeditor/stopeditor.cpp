@@ -50,7 +50,8 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     lay->addWidget(mStationEdit, 0, 0);
     lay->addWidget(arrEdit, 0, 1);
     lay->addWidget(depEdit, 0, 2);
-    lay->addWidget(mSegmentEdit, 1, 0, 1, 3);
+    lay->addWidget(mTrackEdit, 1, 0, 1, 3);
+    lay->addWidget(mSegmentEdit, 2, 0, 1, 3);
 
     setTabOrder(mStationEdit, arrEdit);
     setTabOrder(arrEdit, depEdit);
