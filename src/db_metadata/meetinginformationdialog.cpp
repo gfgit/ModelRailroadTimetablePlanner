@@ -14,6 +14,7 @@
 #include <QStandardPaths>
 
 #include "utils/imageviewer.h"
+#include "utils/owningqpointer.h"
 
 #include <QDebug>
 
@@ -181,7 +182,7 @@ void MeetingInformationDialog::saveData()
 
 void MeetingInformationDialog::showImage()
 {
-    QPointer<ImageViewer> dlg = new ImageViewer(this);
+    OwningQPointer<ImageViewer> dlg = new ImageViewer(this);
 
     if(img.isNull() && !needsToSaveImg)
     {
@@ -209,7 +210,6 @@ void MeetingInformationDialog::showImage()
     dlg->setImage(img);
 
     dlg->exec();
-    delete dlg;
 
     if(!needsToSaveImg)
         img = QImage(); //Cleanup to free memory
@@ -217,10 +217,10 @@ void MeetingInformationDialog::showImage()
 
 void MeetingInformationDialog::importImage()
 {
-    QFileDialog dlg(this, tr("Import image"));
-    dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setAcceptMode(QFileDialog::AcceptOpen);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Import image"));
+    dlg->setFileMode(QFileDialog::ExistingFile);
+    dlg->setAcceptMode(QFileDialog::AcceptOpen);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
 
     QList<QByteArray> mimes = QImageReader::supportedMimeTypes();
     QStringList filters;
@@ -230,12 +230,12 @@ void MeetingInformationDialog::importImage()
 
     filters << "application/octet-stream"; // will show "All files (*)"
 
-    dlg.setMimeTypeFilters(filters);
+    dlg->setMimeTypeFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
 

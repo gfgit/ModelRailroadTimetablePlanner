@@ -13,9 +13,10 @@
 #include <QGridLayout>
 
 #include "utils/file_format_names.h"
+#include "utils/owningqpointer.h"
+
 #include <QFileDialog>
 #include <QPrintDialog>
-#include <QPointer>
 
 #include <QFileInfo>
 #include <QStandardPaths>
@@ -266,7 +267,7 @@ void PrintOptionsPage::updateDifferentFiles()
 
 void PrintOptionsPage::onOpenPrintDlg()
 {
-    QPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
+    OwningQPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
     dlg->exec();
     delete dlg;
 }

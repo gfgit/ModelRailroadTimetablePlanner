@@ -11,6 +11,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/imageviewer.h
   utils/jobcategorystrings.h
   utils/kmutils.h
+  utils/owningqpointer.h
   utils/rs_types_names.h
   utils/rs_utils.h
   utils/session_rs_modes.h

@@ -35,7 +35,7 @@
 #include "stations/manager/lines/dialogs/editlinedlg.h"
 
 #include <QInputDialog>
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 StationsManager::StationsManager(QWidget *parent) :
     QWidget(parent),
@@ -302,7 +302,7 @@ void StationsManager::onNewStation()
 {
     DEBUG_ENTRY;
 
-    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
     dlg->setWindowTitle(tr("Add Station"));
     dlg->setLabelText(tr("Please choose a name for the new station."));
     dlg->setTextValue(QString());
@@ -328,8 +328,6 @@ void StationsManager::onNewStation()
     }
     while (true);
 
-    delete dlg;
-
     //TODO
     //    QModelIndex idx = stationsModel->index(row, 0);
     //    stationView->setCurrentIndex(idx);
@@ -353,15 +351,12 @@ void StationsManager::onEditStation()
     if(!stId)
         return;
 
-    QPointer<StationEditDialog> dlg(new StationEditDialog(Session->m_Db, this));
+    OwningQPointer<StationEditDialog> dlg(new StationEditDialog(Session->m_Db, this));
     dlg->setStationInternalEditingEnabled(true);
     dlg->setStationExternalEditingEnabled(true);
     dlg->setStation(stId);
     int ret = dlg->exec();
-    if(!dlg)
-        return;
-    delete dlg;
-    if(ret != QDialog::Accepted)
+    if(!dlg || ret != QDialog::Accepted)
         return;
 
     //Refresh stations model
@@ -450,15 +445,11 @@ void StationsManager::onRemoveSegment()
 
 void StationsManager::onNewSegment()
 {
-    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
     dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 
-    if(!dlg)
-        return;
-    delete dlg;
-
-    if(ret != QDialog::Accepted)
+    if(ret != QDialog::Accepted || !dlg)
         return;
 
     //Re-calc row count
@@ -475,14 +466,11 @@ void StationsManager::onEditSegment()
     if(!segmentId)
         return;
 
-    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
     dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(!dlg)
-        return;
-    delete dlg;
 
-    if(ret != QDialog::Accepted)
+    if(ret != QDialog::Accepted || !dlg)
         return;
 
     //FIXME: check if actually changed
@@ -497,7 +485,7 @@ void StationsManager::onNewLine()
 {
     DEBUG_ENTRY;
 
-    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
     dlg->setWindowTitle(tr("Add Line"));
     dlg->setLabelText(tr("Please choose a name for the new railway line."));
     dlg->setTextValue(QString());
@@ -522,8 +510,6 @@ void StationsManager::onNewLine()
         }
     }
     while (true);
-
-    delete dlg;
 
     //TODO
     //    QModelIndex idx = linesModel->index(row, 0);
@@ -556,14 +542,11 @@ void StationsManager::onEditLine()
     if(!lineId)
         return;
 
-    QPointer<EditLineDlg> dlg(new EditLineDlg(Session->m_Db, this));
+    OwningQPointer<EditLineDlg> dlg(new EditLineDlg(Session->m_Db, this));
     dlg->setLineId(lineId);
     int ret = dlg->exec();
-    if(!dlg)
-        return;
-    delete dlg;
 
-    if(ret != QDialog::Accepted)
+    if(ret != QDialog::Accepted || !dlg)
         return;
 
     //FIXME: check if actually changed

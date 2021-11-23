@@ -26,8 +26,7 @@
 #include <QPainter>
 
 #include <QPrintDialog>
-#include <QPointer>
-
+#include "utils/owningqpointer.h"
 #include "info.h"
 
 ShiftGraphEditor::ShiftGraphEditor(QWidget *parent) :
@@ -63,33 +62,25 @@ ShiftGraphEditor::~ShiftGraphEditor()
 
 void ShiftGraphEditor::onSaveGraph()
 {
-    QFileDialog dlg(this, tr("Save Shift Graph"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Shift Graph"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
     filters << FileFormats::tr(FileFormats::pdfFile);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
 
-    if(fileName.endsWith(QStringLiteral(".pdf")))
-    {
-        exportPDF(fileName);
-    }
-    else if(fileName.endsWith(QStringLiteral(".svg")))
-    {
-        exportSVG(fileName);
-    }
-    else if(dlg.selectedNameFilter().contains("pdf")) //TODO: needed?
+    if(fileName.endsWith(QStringLiteral(".pdf")) || dlg->selectedNameFilter().contains("pdf"))
     {
         exportPDF(fileName);
     }
@@ -103,13 +94,12 @@ void ShiftGraphEditor::onPrintGraph()
 {
     QPrinter printer;
 
-    QPointer<QPrintDialog> dlg = new QPrintDialog(&printer, this);
-    if(dlg->exec() == QDialog::Accepted && dlg)
-    {
-        print(&printer);
-    }
+    OwningQPointer<QPrintDialog> dlg = new QPrintDialog(&printer, this);
 
-    delete dlg;
+    if(dlg->exec() != QDialog::Accepted)
+        return;
+
+    print(&printer);
 }
 
 void ShiftGraphEditor::exportSVG(const QString& fileName)
@@ -163,7 +153,7 @@ void ShiftGraphEditor::refreshView()
 
 void ShiftGraphEditor::onShowOptions()
 {
-    QPointer<GraphOptions> dlg = new GraphOptions(this);
+    OwningQPointer<GraphOptions> dlg = new GraphOptions(this);
     dlg->setHideSameStations(graph->getHideSameStations());
 
     int ret = dlg->exec();
@@ -171,14 +161,11 @@ void ShiftGraphEditor::onShowOptions()
     {
         graph->setHideSameStations(dlg->hideSameStation());
     }
-
-    delete dlg;
 }
 
 void ShiftGraphEditor::showShiftMenuForJob(db_id jobId)
 {
-    QPointer<JobChangeShiftDlg> dlg = new JobChangeShiftDlg(Session->m_Db, this);
+    OwningQPointer<JobChangeShiftDlg> dlg = new JobChangeShiftDlg(Session->m_Db, this);
     dlg->setJob(jobId);
     dlg->exec();
-    delete dlg;
 }

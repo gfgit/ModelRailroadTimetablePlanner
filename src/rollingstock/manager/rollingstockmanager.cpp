@@ -38,7 +38,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 RollingStockManager::RollingStockManager(QWidget *parent) :
     QWidget(parent),
@@ -333,9 +333,8 @@ void RollingStockManager::visibilityChanged(int v)
 
 void RollingStockManager::importRS(bool resume, QWidget *parent)
 {
-    QPointer<RSImportWizard> w = new RSImportWizard(resume, parent);
+    OwningQPointer<RSImportWizard> w = new RSImportWizard(resume, parent);
     w->exec();
-    delete w;
 }
 
 void RollingStockManager::onViewRSPlan()
@@ -359,16 +358,16 @@ void RollingStockManager::onViewRSPlanSearch()
     std::unique_ptr<ISqlFKMatchModel> matchModel;
     matchModel.reset(factory.createModel());
 
-    QPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
+    OwningQPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
     dlg->setDescription(tr("Please choose a rollingstock item"));
     dlg->setPlaceholder(tr("[model][.][number][:owner]"));
 
     int ret = dlg->exec();
 
-    if(ret == QDialog::Accepted && dlg)
-        Session->getViewManager()->requestRSInfo(dlg->getItemId());
+    if(ret != QDialog::Rejected || !dlg)
+        return;
 
-    delete dlg;
+    Session->getViewManager()->requestRSInfo(dlg->getItemId());
 }
 
 void RollingStockManager::onNewRs()
@@ -470,7 +469,7 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
     std::unique_ptr<ISqlFKMatchModel> matchModel;
     matchModel.reset(factory.createModel());
 
-    QPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
+    OwningQPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
     dlg->setDescription(tr("Please choose a rollingstock model"));
     dlg->setPlaceholder(tr("Model"));
     dlg->setCallback([this, &dlg](db_id modelId, QString &errMsg) -> bool
@@ -484,28 +483,23 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
         return createRsModelWithDifferentSuffix(modelId, errMsg, dlg);
     });
 
-    if(dlg->exec() == QDialog::Accepted)
-    {
-        //TODO: select and edit the new item
-    }
+    if(dlg->exec() != QDialog::Accepted)
+        return;
 
-    delete dlg;
+    //TODO: select and edit the new item
 }
 
 bool RollingStockManager::createRsModelWithDifferentSuffix(db_id sourceModelId, QString &errMsg, QWidget *w)
 {
-    QPointer<QInputDialog> dlg = new QInputDialog(w);
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(w);
     dlg->setLabelText(tr("Please choose an unique suffix for this model, or leave empty"));
     dlg->setWindowTitle(tr("Choose Suffix"));
     dlg->setInputMode(QInputDialog::TextInput);
 
-    bool ret = true; //Default: Abort without errors
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return true; //Default: Abort without errors
 
-    if(dlg->exec() == QDialog::Accepted && dlg)
-        ret = modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg->textValue(), &errMsg);
-
-    delete dlg;
-    return ret;
+    return modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg->textValue(), &errMsg);
 }
 
 void RollingStockManager::onRemoveRsModel()
@@ -596,9 +590,8 @@ void RollingStockManager::onMergeModels()
     if(m_readOnly)
         return;
 
-    QPointer<MergeModelsDialog> dlg = new MergeModelsDialog(Session->m_Db, this);
+    OwningQPointer<MergeModelsDialog> dlg = new MergeModelsDialog(Session->m_Db, this);
     dlg->exec();
-    delete dlg;
 
     if(clearModelTimers[ModelsTab] == ModelLoaded)
     {
@@ -615,9 +608,8 @@ void RollingStockManager::onMergeOwners()
     if(m_readOnly)
         return;
 
-    QPointer<MergeOwnersDialog> dlg = new MergeOwnersDialog(Session->m_Db, this);
+    OwningQPointer<MergeOwnersDialog> dlg = new MergeOwnersDialog(Session->m_Db, this);
     dlg->exec();
-    delete dlg;
 
     if(clearModelTimers[OwnersTab] == ModelLoaded)
     {

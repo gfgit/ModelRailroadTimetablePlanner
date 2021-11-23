@@ -7,7 +7,7 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 #include "../rsimportwizard.h"
 #include "../intefaces/irsimportmodel.h"
@@ -114,7 +114,7 @@ void ItemSelectionPage::initializePage()
     dupModel.reset(IDuplicatesItemModel::createModel(m_mode, model->getDb(), model, this));
 
     bool canGoBack = mWizard->currentId() != RSImportWizard::SelectOwnersIdx;
-    QPointer<FixDuplicatesDlg> dlg = new FixDuplicatesDlg(dupModel.get(), canGoBack, this);
+    OwningQPointer<FixDuplicatesDlg> dlg = new FixDuplicatesDlg(dupModel.get(), canGoBack, this);
     if(m_mode == ModelModes::Rollingstock && editorFactory)
     {
         QStyledItemDelegate *delegate = new QStyledItemDelegate(this);
@@ -133,14 +133,12 @@ void ItemSelectionPage::initializePage()
          * (that is 1 before current that is already the old page)
          * Solution: call it after 'initializePage()' has finished by posting an event
          */
-        delete dlg;
         mWizard->goToPrevPageQueued();
         return;
     }
     else if(res != QDialog::Accepted)
     {
         //Prevent showing another message box asking user if he is sure about quitting
-        delete dlg;
         mWizard->done(RSImportWizard::RejectWithoutAsking);
         return;
     }
@@ -149,7 +147,6 @@ void ItemSelectionPage::initializePage()
     {
         //We have duplicates, run dialog
         res = dlg->exec();
-        delete dlg;
         if(res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
         {
             /* HACK: see above */
@@ -163,8 +160,6 @@ void ItemSelectionPage::initializePage()
             return;
         }
     }
-
-    delete dlg;
 
     //Duplicates are now fixed, refresh main model
     model->refreshData();

@@ -32,7 +32,7 @@
 #include <QFileDialog>
 #include "utils/file_format_names.h"
 
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 void setupView(QTableView *view, IPagedItemModel *model)
 {
@@ -332,7 +332,7 @@ void StationEditDialog::onGatesChanged()
 
 void StationEditDialog::addGate()
 {
-    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
     dlg->setWindowTitle(tr("Add Gate"));
     dlg->setLabelText(tr("Please choose a letter for the new station gate."));
     dlg->setTextValue(QString());
@@ -358,8 +358,6 @@ void StationEditDialog::addGate()
         }
     }
     while (true);
-
-    delete dlg;
 }
 
 void StationEditDialog::removeSelectedGate()
@@ -388,7 +386,7 @@ void StationEditDialog::onTracksChanged()
 
 void StationEditDialog::addTrack()
 {
-    QPointer<QInputDialog> dlg = new QInputDialog(this);
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
     dlg->setWindowTitle(tr("Add Track"));
     dlg->setLabelText(tr("Please choose a name for the new station track."));
     dlg->setTextValue(QString());
@@ -414,8 +412,6 @@ void StationEditDialog::addTrack()
         }
     }
     while (true);
-
-    delete dlg;
 }
 
 void StationEditDialog::removeSelectedTrack()
@@ -483,9 +479,9 @@ void StationEditDialog::addTrackConnInternal(int mode)
     QScopedPointer<ISqlFKMatchModel> tracks(trackFactory->createModel());
     QScopedPointer<ISqlFKMatchModel> gates(gatesFactory->createModel());
 
-    QPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(),
-                                                        static_cast<StationGatesMatchModel *>(gates.get()),
-                                                        this);
+    OwningQPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(),
+                                                              static_cast<StationGatesMatchModel *>(gates.get()),
+                                                              this);
     dlg->setMode(dlgMode);
 
     do{
@@ -521,8 +517,6 @@ void StationEditDialog::addTrackConnInternal(int mode)
         }
     }
     while (true);
-
-    delete dlg;
 }
 
 void StationEditDialog::updateSVGButtons(bool hasImage)
@@ -546,14 +540,10 @@ void StationEditDialog::removeSelectedTrackConn()
 
 void StationEditDialog::addGateConnection()
 {
-    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
     dlg->setSegment(0, getStation(), EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(!dlg)
-        return;
-    delete dlg;
-
-    if(ret != QDialog::Accepted)
+    if(ret != QDialog::Accepted || !dlg)
         return;
 
     gateConnModel->refreshData(); //Recalc row count
@@ -568,14 +558,10 @@ void StationEditDialog::editGateConnection()
     if(!segId)
         return;
 
-    QPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
     dlg->setSegment(segId, getStation(), EditRailwaySegmentDlg::LockToCurrentValue);
     int ret = dlg->exec();
-    if(!dlg)
-        return;
-    delete dlg;
-
-    if(ret != QDialog::Accepted)
+    if(ret != QDialog::Accepted || !dlg)
         return;
 
     gateConnModel->refreshData(true); //Refresh fields
@@ -604,20 +590,20 @@ void StationEditDialog::removeSelectedGateConnection()
 
 void StationEditDialog::addSVGImage()
 {
-    QFileDialog dlg(this, tr("Open SVG Image"));
-    dlg.setFileMode(QFileDialog::ExistingFile);
-    dlg.setAcceptMode(QFileDialog::AcceptOpen);
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Open SVG Image"));
+    dlg->setFileMode(QFileDialog::ExistingFile);
+    dlg->setAcceptMode(QFileDialog::AcceptOpen);
     //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
     if(fileName.isEmpty())
         return;
@@ -658,21 +644,20 @@ void StationEditDialog::removeSVGImage()
 
 void StationEditDialog::saveSVGToFile()
 {
-    QFileDialog dlg(this, tr("Save SVG Copy"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save SVG Copy"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
     //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
     filters << FileFormats::tr(FileFormats::allFiles);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
-
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
 

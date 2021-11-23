@@ -11,7 +11,7 @@
 
 #include <QDialog>
 #include <QDialogButtonBox>
-#include <QPointer>
+#include "utils/owningqpointer.h"
 
 #include "graph/view/linegraphselectionwidget.h"
 
@@ -115,7 +115,7 @@ void PrintSelectionPage::onAddItem()
 
     const LineGraphType requestedType = model->getSelectedType();
 
-    QPointer<QDialog> dlg = new QDialog(this);
+    OwningQPointer<QDialog> dlg = new QDialog(this);
     QVBoxLayout *lay = new QVBoxLayout(dlg);
 
     LineGraphSelectionWidget *selectionWidget = new LineGraphSelectionWidget;
@@ -142,17 +142,15 @@ void PrintSelectionPage::onAddItem()
     connect(selectionWidget, &LineGraphSelectionWidget::graphChanged, this, updateDlg);
     updateDlg();
 
-    if(dlg->exec() == QDialog::Accepted && dlg)
-    {
-        SceneSelectionModel::Entry entry;
-        entry.objectId = selectionWidget->getObjectId();
-        entry.name = selectionWidget->getObjectName();
-        entry.type = selectionWidget->getGraphType();
+    if(dlg->exec() != QDialog::Accepted)
+        return;
 
-        model->addEntry(entry);
-    }
+    SceneSelectionModel::Entry entry;
+    entry.objectId = selectionWidget->getObjectId();
+    entry.name = selectionWidget->getObjectName();
+    entry.type = selectionWidget->getGraphType();
 
-    delete dlg;
+    model->addEntry(entry);
 }
 
 void PrintSelectionPage::onRemoveItem()

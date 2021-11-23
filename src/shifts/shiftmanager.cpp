@@ -14,6 +14,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QMessageBox>
+#include "utils/owningqpointer.h"
 
 #include <QToolBar>
 #include <QActionGroup>
@@ -154,21 +155,20 @@ void ShiftManager::onSaveSheet()
     QString shiftName = model->shiftNameAtRow(idx.row());
     qDebug() << "Printing Shift:" << shiftId;
 
-    QFileDialog dlg(this, tr("Save Shift Sheet"));
-    dlg.setFileMode(QFileDialog::AnyFile);
-    dlg.setAcceptMode(QFileDialog::AcceptSave);
-    dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
-    dlg.selectFile(tr("shift_%1.odt").arg(shiftName));
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Shift Sheet"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->selectFile(tr("shift_%1.odt").arg(shiftName));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::odtFormat);
-    dlg.setNameFilters(filters);
+    dlg->setNameFilters(filters);
 
-    if(dlg.exec() != QDialog::Accepted)
+    if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
-    QString fileName = dlg.selectedUrls().value(0).toLocalFile();
-
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
 
