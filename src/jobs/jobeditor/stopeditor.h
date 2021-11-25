@@ -26,6 +26,8 @@ public:
 
     void setStop(const StopItem& item, const StopItem& prev);
 
+    void updateStopArrDep();
+
     inline const StopItem& getCurItem() const { return oldItem; }
     inline const StopItem& getPrevItem() const { return prevItem; }
 

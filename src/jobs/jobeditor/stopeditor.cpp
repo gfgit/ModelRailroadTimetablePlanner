@@ -143,6 +143,12 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     }
 }
 
+void StopEditor::updateStopArrDep()
+{
+    oldItem.arrival = arrEdit->time();
+    oldItem.departure = depEdit->time();
+}
+
 void StopEditor::onStationSelected()
 {
     db_id newStId = 0;
@@ -227,5 +233,4 @@ void StopEditor::arrivalChanged(const QTime& arrival)
     }
     depEdit->setMinimumTime(minDep);
     depEdit->setTime(dep); //Set after setting minimum time
-    oldItem.arrival = arrival;
 }

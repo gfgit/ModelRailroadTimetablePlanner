@@ -235,6 +235,8 @@ void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     qDebug() << "End editing: stop" << index.row();
     StopEditor *ed = static_cast<StopEditor*>(editor);
     StopModel *stopModel = static_cast<StopModel *>(model);
+
+    ed->updateStopArrDep(); //Sync UI with stop item
     stopModel->setStopInfo(index, ed->getCurItem(), ed->getPrevItem().nextSegment);
 }
 
