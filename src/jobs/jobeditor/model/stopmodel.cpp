@@ -1769,7 +1769,7 @@ bool StopModel::updateCurrentInGate(StopItem &curStop, const StopItem::Segment &
             cmd.prepare("UPDATE stops SET station_id=? WHERE id=?");
             cmd.bind(1, stationId);
             cmd.bind(2, curStop.stopId);
-            if(cmd.execute() != SQLITE_ROW)
+            if(cmd.execute() != SQLITE_OK)
                 return false;
 
             curStop.stationId = stationId;
