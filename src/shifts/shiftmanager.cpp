@@ -172,7 +172,7 @@ void ShiftManager::onSaveSheet()
     if(fileName.isEmpty())
         return;
 
-    ShiftSheetExport w(shiftId);
+    ShiftSheetExport w(Session->m_Db, shiftId);
     w.write();
     w.save(fileName);
 }
