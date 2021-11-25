@@ -2392,7 +2392,7 @@ bool StopModel::trySelectTrackForStop(StopItem &item)
                   " WHERE c.gate_id=? AND c.gate_track=?");
         q.bind(1, item.fromGate.gateId);
         q.bind(2, item.fromGate.trackNum);
-        if(q.step() != SQLITE_ROW || q.getRows().column_type(0) != SQLITE_NULL)
+        if(q.step() != SQLITE_ROW || q.getRows().column_type(0) == SQLITE_NULL)
             return false;
 
         auto gate = q.getRows();
