@@ -308,7 +308,7 @@ bool LineGraphSelectionHelper::requestCurrentJobNextSegmentVisible(LineGraphScen
     SegmentInfo info;
     if(selectedJob.stopId && !goToEnd)
     {
-        //Start from current stop and get previous stop
+        //Start from current stop and get next stop
         q.prepare("SELECT s2.job_id, s1.id, MIN(s1.arrival), s1.departure, s1.station_id, c.seg_id"
                   " FROM stops s2"
                   " JOIN stops s1 ON s1.job_id=s2.job_id"
