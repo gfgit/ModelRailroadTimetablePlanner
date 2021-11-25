@@ -87,7 +87,7 @@ JobWriter::JobWriter(database &db) :
                        " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
                        " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
                        " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
-                       " WHERE stops.jobId=? ORDER BY stops.arrival"),
+                       " WHERE stops.job_id=? ORDER BY stops.arrival"),
 
     q_getFirstStop(mDb, "SELECT stops.id, stations.name, MIN(stops.departure)"
                         " FROM stops"
@@ -104,10 +104,13 @@ JobWriter::JobWriter(database &db) :
                           " JOIN rs_list ON rs_list.id=coupling.rs_id"
                           " JOIN rs_models ON rs_models.id=rs_list.model_id"
                           " WHERE stop_id=?"),
+
     q_selectPassings(mDb, "SELECT stops.id,stops.job_id,jobs.category,"
                           "stops.arrival,stops.departure"
                           " FROM stops"
+                          " JOIN jobs ON jobs.id=stops.job_id"
                           " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? AND stops.job_id<>?"),
+
     q_getStopCouplings(mDb, "SELECT coupling.rs_id,"
                             "rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
                             " FROM coupling"
@@ -115,7 +118,6 @@ JobWriter::JobWriter(database &db) :
                             " JOIN rs_models ON rs_models.id=rs_list.model_id"
                             " WHERE coupling.stop_id=? AND coupling.operation=?")
 {
-
 }
 
 void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
@@ -557,7 +559,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
 
     //Job summary
     q_getFirstStop.bind(1, jobId);
-    if(q_getFirstStop.step() == SQLITE_ROW)
+    if(q_getFirstStop.step() == SQLITE_ROW && q_getFirstStop.getRows().column_type(0) != SQLITE_NULL)
     {
         auto r = q_getFirstStop.getRows();
 
@@ -573,7 +575,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
     q_getFirstStop.reset();
 
     q_getLastStop.bind(1, jobId);
-    if(q_getLastStop.step() == SQLITE_ROW)
+    if(q_getLastStop.step() == SQLITE_ROW && q_getLastStop.getRows().column_type(0) != SQLITE_NULL)
     {
         auto r = q_getLastStop.getRows();
 
