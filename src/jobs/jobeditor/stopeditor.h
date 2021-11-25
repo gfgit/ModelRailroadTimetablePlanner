@@ -32,6 +32,7 @@ public:
 private slots:
     void onStationSelected();
     void onTrackSelected();
+    void onNextSegmentSelected();
 
     void arrivalChanged(const QTime &arrival);
 

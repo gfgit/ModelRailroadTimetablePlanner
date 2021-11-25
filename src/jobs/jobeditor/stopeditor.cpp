@@ -35,6 +35,7 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
 
     mSegmentEdit = new CustomCompletionLineEdit(segmentMatchModel, this);
     mSegmentEdit->setPlaceholderText(tr("Next segment"));
+    connect(mSegmentEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditor::onNextSegmentSelected);
 
     arrEdit = new QTimeEdit;
     depEdit = new QTimeEdit;
@@ -167,12 +168,18 @@ void StopEditor::onStationSelected()
 
     //Update prev segment
     prevItem.nextSegment.segConnId = 0; //Reset, will be reloaded by model
+    prevItem.nextSegment.inTrackNum = -1;
     prevItem.nextSegment.outTrackNum = -1;
     prevItem.nextSegment.segmentId = 0;
 
     //Update next segment
     segmentMatchModel->setFilter(oldItem.stationId, 0, 0);
     mSegmentEdit->setData(0); //Reset, user must choose again
+
+    oldItem.nextSegment.segConnId = 0;
+    oldItem.nextSegment.segmentId = 0;
+    oldItem.nextSegment.inTrackNum = -1;
+    oldItem.nextSegment.outTrackNum = -1;
 }
 
 void StopEditor::onTrackSelected()
@@ -191,6 +198,20 @@ void StopEditor::onTrackSelected()
 
         if(!stillSucceded)
             mTrackEdit->setData(oldItem.trackId); //Reset to previous track
+    }
+}
+
+void StopEditor::onNextSegmentSelected()
+{
+    db_id newSegId = 0;
+    QString segmentName;
+    if(!mSegmentEdit->getData(newSegId, segmentName))
+        return;
+
+    db_id outGateId = 0;
+    if(!model->trySelectNextSegment(oldItem, newSegId, 0, outGateId))
+    {
+        QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment '%1'").arg(segmentName));
     }
 }
 
