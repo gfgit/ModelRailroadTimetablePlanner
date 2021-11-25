@@ -1779,7 +1779,7 @@ bool StopModel::updateCurrentInGate(StopItem &curStop, const StopItem::Segment &
     //Set gate
     cmd.prepare("UPDATE stops SET in_gate_conn=? WHERE id=?");
     cmd.bind(1, curStop.fromGate.gateConnId);
-    cmd.bind(1, curStop.stopId);
+    cmd.bind(2, curStop.stopId);
     int ret = cmd.execute();
     return ret == SQLITE_OK;
 }
