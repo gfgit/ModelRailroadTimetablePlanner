@@ -253,7 +253,7 @@ void OdtDocument::saveManifest(const QString& path)
     if(!manifestDir.exists())
         manifestDir.mkpath(".");
 
-    QFile manifest(dir.filePath(manifestFileName));
+    QFile manifest(manifestDir.filePath(manifestFileName));
     manifest.open(QFile::WriteOnly | QFile::Truncate);
     QXmlStreamWriter xml(&manifest);
     writeStartDoc(xml);
