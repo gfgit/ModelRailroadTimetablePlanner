@@ -1838,6 +1838,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
     if(s.fromGate.gateConnId != newStop.fromGate.gateConnId)
     {
         updateCurrentInGate(newStop, prevSeg);
+        s.fromGate = newStop.fromGate;
+        s.trackId = newStop.trackId;
     }
 
     if(s.arrival != newStop.arrival || s.departure != newStop.departure)
