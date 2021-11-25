@@ -195,7 +195,11 @@ bool OdtDocument::saveTo(const QString& fileName)
         }
     }
 
-    zip_close(zipper);
+    if(zip_close(zipper) != 0)
+    {
+        qDebug() << "Failed to close zip:" << zip_strerror(zipper);
+    }
+
     return true;
 }
 
@@ -360,7 +364,7 @@ void OdtDocument::saveMeta(const QString& path)
 
     //Language
     xml.writeStartElement("dc:language");
-    xml.writeCharacters(AppSettings.getLanguage().name());
+    xml.writeCharacters(AppSettings.getLanguage().bcp47Name());
     xml.writeEndElement(); //dc:language
 
     //Generator
