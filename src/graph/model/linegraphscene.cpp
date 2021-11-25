@@ -331,7 +331,7 @@ JobStopEntry LineGraphScene::getJobStopAt(const StationGraphObject *prevSt, cons
     for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
     {
         //NOTE: in stops arrival comes BEFORE departure
-        if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
+        if(jobStop.arrivalY <= pos.y() + tolerance && jobStop.departureY >= pos.y() - tolerance)
         {
             //Found match
             job = jobStop.stop;
