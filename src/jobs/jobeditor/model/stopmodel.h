@@ -106,8 +106,6 @@ public:
     void setDeparture(const QModelIndex &index, QTime time, bool propagate);
     int setStopType(const QModelIndex &idx, StopType type);
     int setStopTypeRange(int firstRow, int lastRow, StopType type);
-    void setLine(const QModelIndex &idx, db_id lineId);
-    bool lineHasSt(db_id lineId, db_id stId);
     void setStation(const QPersistentModelIndex &idx, db_id stId);
 
     QString getDescription(const StopItem &s) const;
@@ -207,20 +205,13 @@ private:
     database& mDb;
 
     //TODO: do not store queries, prepare them when needed
-    query q_segPos;
     query q_getRwNode;
-    query q_lineHasSt;
     query q_getCoupled;
 
     command q_setArrival;
     command q_setDeparture;
 
-    command q_setSegPos;
-    command q_setSegLine;
-    command q_setStopSeg;
-    command q_setNextSeg;
     command q_setStopSt;
-    command q_removeSeg;
 
     bool timeCalcEnabled;
     bool autoInsertTransits;
@@ -230,14 +221,8 @@ private:
 private:
     void insertAddHere(int row, int type);
     db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, int type = 0);
-    db_id createSegment(db_id jobId, int num);
-    db_id createSegmentAfter(db_id jobId, db_id prevSeg);
-    void setStopSeg(StopItem &s, db_id segId);
-    void setNextSeg(StopItem &s, db_id nextSeg);
-    void destroySegment(db_id segId, db_id jobId);
-    void resetStopsLine(int idx, StopItem &s);
-    void propagateLineChange(int idx, StopItem &s, db_id lineId);
     void deleteStop(db_id stopId);
+
     int propageteTimeOffset(int row, const int msecOffset);
     void insertTransitsBefore(const QPersistentModelIndex &stop);
     void setStation_internal(StopItem &item, db_id stId, db_id nodeId);

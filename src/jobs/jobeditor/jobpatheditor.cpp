@@ -202,21 +202,10 @@ void JobPathEditor::toggleTransit(const QModelIndex& index)
     if(type == First || type == Last)
         return;
 
-    if(type == Transit || type == TransitLineChange)
-    {
+    if(type == Transit)
         type = Normal;
-    }
     else
-    {
-        db_id nextLineId = index.data(NEXT_LINE_ROLE).toLongLong();
-        if (nextLineId != 0) {
-            type = TransitLineChange;
-        }
-        else
-        {
-            type = Transit;
-        }
-    }
+        type = Transit;
 
     int err = stopModel->setStopType(index, type);
 

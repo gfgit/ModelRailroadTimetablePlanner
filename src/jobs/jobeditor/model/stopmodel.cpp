@@ -18,18 +18,11 @@ StopModel::StopModel(database &db, QObject *parent) :
     oldCategory(JobCategory::FREIGHT),
     editState(NotEditing),
     mDb(db),
-    q_segPos(mDb),
     q_getRwNode(mDb),
-    q_lineHasSt(mDb),
     q_getCoupled(mDb),
     q_setArrival(mDb),
     q_setDeparture(mDb),
-    q_setSegPos(mDb),
-    q_setSegLine(mDb),
-    q_setStopSeg(mDb),
-    q_setNextSeg(mDb),
     q_setStopSt(mDb),
-    q_removeSeg(mDb),
     timeCalcEnabled(true),
     autoInsertTransits(false),
     autoMoveUncoupleToNewLast(true),
@@ -47,55 +40,26 @@ StopModel::StopModel(database &db, QObject *parent) :
 
 void StopModel::prepareQueries()
 {
-
-
-    q_segPos.prepare("SELECT num FROM jobsegments WHERE id=?");
-
     q_getRwNode.prepare("SELECT railways.id FROM railways"
                         " JOIN jobsegments ON jobsegments.id=?"
                         " WHERE railways.stationId=? AND railways.lineId=jobsegments.lineId");
 
-    q_lineHasSt.prepare("SELECT * FROM railways WHERE lineId=? AND stationId=?");
-
     q_getCoupled.prepare("SELECT rs_id, operation FROM coupling WHERE stop_id=?");
-
-
-
-
 
     q_setArrival.prepare("UPDATE stops SET arrival=? WHERE id=?");
     q_setDeparture.prepare("UPDATE stops SET departure=? WHERE id=?");
 
-    q_setSegPos.prepare("UPDATE jobsegments SET num=num+? WHERE job_id=? AND num>=?");
-
-    q_setSegLine.prepare("UPDATE jobsegments SET lineId=? WHERE id=?");
-
-    q_setStopSeg.prepare("UPDATE stops SET segmentId=?, rw_node=? WHERE id=?");
-
-    q_setNextSeg.prepare("UPDATE stops SET otherSegment=?, other_rw_node=? WHERE id=?");
-
     q_setStopSt.prepare("UPDATE stops SET stationId=?, rw_node=? WHERE id=?");
-
-    q_removeSeg.prepare("DELETE FROM jobsegments WHERE id=?");
-
 }
 
 void StopModel::finalizeQueries()
 {
-    q_segPos.finish();
     q_getRwNode.finish();
-    q_lineHasSt.finish();
     q_getCoupled.finish();
 
     q_setArrival.finish();
     q_setDeparture.finish();
-
-    q_setSegPos.finish();
-    q_setSegLine.finish();
-    q_setStopSeg.finish();
-    q_setNextSeg.finish();
     q_setStopSt.finish();
-    q_removeSeg.finish();
 }
 
 void StopModel::reloadSettings()
@@ -212,8 +176,6 @@ QVariant StopModel::data(const QModelIndex &index, int role) const
         return s.arrival;
     case DEP_ROLE:
         return s.departure;
-    case NEXT_LINE_ROLE:
-        return s.nextLine;
     case ADDHERE_ROLE:
         return s.addHere;
     case STOP_DESCR_ROLE:
@@ -244,9 +206,6 @@ bool StopModel::setData(const QModelIndex &index, const QVariant &value, int rol
         break;
     case DEP_ROLE:
         setDeparture(index, value.toTime(), true);
-        break;
-    case NEXT_LINE_ROLE:
-        setLine(index, value.toLongLong());
         break;
     case STOP_DESCR_ROLE:
         setDescription(index, value.toString());
@@ -898,68 +857,6 @@ db_id StopModel::createStop(db_id jobId, const QTime& arr, const QTime& dep, int
     return stopId;
 }
 
-db_id StopModel::createSegment(db_id jobId, int num)
-{
-    command q_addSegment(mDb, "INSERT INTO jobsegments(id,job_id,lineId,num) VALUES (NULL,?,NULL,?)");
-    q_addSegment.bind(1, jobId);
-    q_addSegment.bind(2, num);
-
-    sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
-    sqlite3_mutex_enter(mutex);
-    q_addSegment.execute();
-    db_id segId = mDb.last_insert_rowid();
-    sqlite3_mutex_leave(mutex);
-
-    q_addSegment.reset();
-
-    return segId;
-}
-
-db_id StopModel::createSegmentAfter(db_id jobId, db_id prevSeg)
-{
-    q_segPos.bind(1, prevSeg);
-    q_segPos.step();
-
-    /*Get seg pos and then increment by 1 to get nextSeg pos*/
-    int pos = q_segPos.getRows().get<int>(0) + 1;
-    q_segPos.reset();
-
-    q_setSegPos.bind(1, 1); //Shift by +1
-    q_setSegPos.bind(2, jobId);
-    q_setSegPos.bind(3, pos);
-    q_setSegPos.execute();
-    q_setSegPos.reset();
-
-    return createSegment(jobId, pos);
-}
-
-void StopModel::destroySegment(db_id segId, db_id jobId)
-{
-    q_segPos.bind(1, segId); //Get segment pos, increment to get next segments
-    if(q_segPos.step() != SQLITE_ROW)
-    {
-        qWarning() << "JobId" << jobId << "Segment:" << segId << "Err: tryed to destroy segment that doesn't exist";
-        q_segPos.reset();
-        return;
-    }
-    int pos = q_segPos.getRows().get<int>(0) + 1;
-    q_segPos.reset();
-
-    q_removeSeg.bind(1, segId); //Remove segment
-    int ret = q_removeSeg.execute();
-    if(ret != SQLITE_OK)
-    {
-        qWarning() << "DB err:" << ret << mDb.error_code() << mDb.error_msg() << mDb.extended_error_code();
-    }
-    q_removeSeg.reset();
-
-    q_setSegPos.bind(1, -1); //Shift by -1 to fill hole in 'num' column
-    q_setSegPos.bind(2, jobId);
-    q_setSegPos.bind(3, pos);
-    q_setSegPos.execute();
-    q_setSegPos.reset();
-}
-
 void StopModel::deleteStop(db_id stopId)
 {
     command q_removeStop(mDb, "DELETE FROM stops WHERE id=?");
@@ -1075,329 +972,6 @@ void StopModel::addStop()
                      index(idx, 0));
 
     insertAddHere(idx + 1, 1); //Insert only at end because may invalidate StopItem& references due to mem realloc
-}
-
-bool StopModel::lineHasSt(db_id lineId, db_id stId)
-{
-    q_lineHasSt.bind(1, lineId);
-    q_lineHasSt.bind(2, stId);
-    int res = q_lineHasSt.step();
-    q_lineHasSt.reset();
-
-    return (res == SQLITE_ROW);
-}
-
-void StopModel::setStopSeg(StopItem& s, db_id segId)
-{
-    s.segment = segId;
-
-    q_getRwNode.bind(1, segId);
-    q_getRwNode.bind(2, s.stationId);
-    q_getRwNode.step();
-    db_id nodeId = q_getRwNode.getRows().get<db_id>(0);
-    q_getRwNode.reset();
-
-    q_setStopSeg.bind(1, segId);
-    if(nodeId)
-        q_setStopSeg.bind(2, nodeId);
-    else
-        q_setStopSeg.bind(2, null_type{}); //Bind NULL instead of 0
-    q_setStopSeg.bind(3, s.stopId);
-    q_setStopSeg.execute();
-    q_setStopSeg.reset();
-}
-
-void StopModel::setNextSeg(StopItem& s, db_id nextSeg)
-{
-    s.nextSegment_ = nextSeg;
-    if(nextSeg == 0)
-    {
-        q_setNextSeg.bind(1, null_type{}); //Bind NULL
-        q_setNextSeg.bind(2, null_type{}); //Bind NULL
-    }
-    else
-    {
-        q_getRwNode.bind(1, nextSeg);
-        q_getRwNode.bind(2, s.stationId);
-        q_getRwNode.step();
-        db_id nodeId = q_getRwNode.getRows().get<db_id>(0);
-        q_getRwNode.reset();
-
-        q_setNextSeg.bind(1, nextSeg);
-        if(nodeId)
-            q_setNextSeg.bind(2, nodeId);
-        else
-            q_setNextSeg.bind(2, null_type{}); //Bind NULL instead of 0
-    }
-
-    q_setNextSeg.bind(3, s.stopId);
-    q_setNextSeg.execute();
-    q_setNextSeg.reset();
-}
-
-void StopModel::resetStopsLine(int idx, StopItem& s)
-{
-    //Cannot reset nextLine on First stop
-    if(s.type == First)
-        return;
-
-    startStopsEditing();
-
-    if(s.type == TransitLineChange)
-        s.type = Transit;
-
-    int r = idx + 1;
-    for(; r < stops.count(); r++)
-    {
-        StopItem& stop = stops[r];
-
-        if(s.addHere == 2)
-        {
-            break;
-        }
-        if((stop.curLine != s.curLine && stop.segment != s.nextSegment_) || stop.addHere == 1)
-        {
-            break; //It's an AddHere or in another line so we break loop.
-        }
-
-        if(!lineHasSt(s.curLine, stop.stationId) && stop.stationId != 0)
-        {
-            break;
-        }
-
-        stop.curLine = s.curLine;
-
-        db_id oldSegment = stop.segment;
-        setStopSeg(stop, s.segment);
-
-        //Check if next stop is using this segment otherwise delete it.
-        //If we are last stop just delete it.
-        //But if it's equal to s.nextSegment do not delete it because stop 's' still holds a reference to it,
-        //it gets deleted anyway after the loop.
-        if(oldSegment != s.segment && oldSegment != s.nextSegment_ && (r == stops.count() - 2 || stops[r + 1].segment != oldSegment))
-        {
-            destroySegment(oldSegment, mJobId);
-        }
-
-        if(stop.nextLine == s.curLine)
-        {
-            //Reset next segment
-            db_id oldNextSeg = stop.nextSegment_;
-            setNextSeg(stop, 0);
-            stop.nextLine = 0;
-
-            //Check if next stop is using this segment otherwise delete it.
-            if(r == stops.count() - 2 || stops[r + 1].segment != oldNextSeg)
-            {
-                destroySegment(oldNextSeg, mJobId);
-            }
-        }
-
-        if((stop.nextLine != s.curLine && stop.nextLine != 0) || stop.stationId == 0)
-        {
-            break;
-        }
-    }
-
-    //First reset next segment on previous stop
-    db_id oldNextSeg = s.nextSegment_;
-    setNextSeg(s, 0);
-    s.nextLine = 0;
-
-    //Only now that there aren't any references to s.nextSegment we can destroy it.
-    destroySegment(oldNextSeg, mJobId);
-
-    emit dataChanged(index(idx,   0),
-                     index(r, 0));
-}
-
-void StopModel::propagateLineChange(int idx, StopItem& s, db_id lineId)
-{
-    startStopsEditing();
-
-    if(s.type == Transit)
-        s.type = TransitLineChange;
-
-    s.nextLine = lineId;
-    if(s.type == First)
-    {
-        q_setSegLine.bind(1, lineId);
-        q_setSegLine.bind(2, s.segment);
-        q_setSegLine.execute();
-        q_setSegLine.reset();
-
-        //Update rw_node field
-        setStopSeg(s, s.segment);
-    }
-    else
-    {
-        db_id nextSeg = s.nextSegment_;
-        if(s.nextSegment_ == 0)
-        {
-            nextSeg = createSegmentAfter(mJobId, s.segment);
-        }
-
-        q_setSegLine.bind(1, lineId);
-        q_setSegLine.bind(2, nextSeg);
-        q_setSegLine.execute();
-        q_setSegLine.reset();
-
-        //Update other_rw_node field
-        setNextSeg(s, nextSeg);
-    }
-
-    bool endHere = false;
-
-    int r = idx + 1;
-    for(; r < stops.count(); r++)
-    {
-        StopItem& stop = stops[r];
-
-        if(stop.addHere != 0)
-        {
-            endHere = true;
-            break;
-        }
-
-        if(stop.stationId != 0 && !lineHasSt(lineId, stop.stationId))
-        {
-            //Create a new segment for this stop and next on this old segment
-            //Because they are in another line
-
-            db_id oldSeg = stop.segment;
-            db_id newSeg = createSegmentAfter(mJobId, oldSeg);
-
-            q_setSegLine.bind(1, stop.curLine);
-            q_setSegLine.bind(2, newSeg);
-            q_setSegLine.execute();
-            q_setSegLine.reset();
-
-            //Point prev stop.next... to this stop
-            StopItem& prev = stops[r - 1];
-            prev.nextLine = stop.curLine;
-            setNextSeg(prev, newSeg);
-
-            setStopSeg(stop, newSeg);
-
-            r += 1;
-            for(; r < stops.count(); r++)
-            {
-                StopItem& next = stops[r];
-                if(next.addHere != 0)
-                {
-                    break;
-                }
-
-                setStopSeg(next, newSeg);
-                if(next.nextSegment_ != 0)
-                {
-                    break;
-                }
-            }
-
-            endHere = true;
-            break;
-        }
-
-        stop.curLine = lineId;
-
-        db_id oldCurSeg = stop.segment;
-        setStopSeg(stop, s.type == First ? s.segment : s.nextSegment_);
-
-        /*
-         * 'stop' is on same line as 's' so we reset 'stop' nextSegment because it's the same of current segment
-         * then obviously we reset nextLine
-         */
-        if(stop.nextLine == lineId)
-        {
-            stop.nextLine = 0;
-            setNextSeg(stop, 0);
-        }
-        else
-        {
-            bool destroy = oldCurSeg != stop.segment && stop.nextSegment_ != oldCurSeg;
-            if(destroy && r > 0)
-            {
-                const StopItem& prev = stops[r - 1];
-                if(s.segment == oldCurSeg ||
-                    s.nextSegment_ == oldCurSeg ||
-                    prev.segment == oldCurSeg)
-                {
-                    destroy = false;
-                }
-            }
-            if(destroy && stop.type != Last)
-            {
-                //If stop isn't Last check if oldCurSeg is used by nextStops
-                if(stops[r + 1].segment == oldCurSeg)
-                    destroy = false;
-            }
-
-            if(destroy)
-            {
-                //oldCurSeg is not used anymore by this job
-                destroySegment(oldCurSeg, mJobId);
-            }
-        }
-
-        if(stop.type == Last && stop.nextSegment_ != 0)
-        {
-            //Clean up if needed (Should not be needed but just in case)
-
-            //If they are different nextSegment isn't used otherwise don't destroy it
-            //because it is used by previous stop
-            if(stop.nextSegment_ != stop.segment)
-                destroySegment(stop.nextSegment_, mJobId);
-            stop.nextLine = 0;
-            stop.nextSegment_ = 0;
-        }
-
-        if(stop.type == Last || stop.nextLine != 0 || stop.stationId == 0)
-        {
-            endHere = true;
-            break;
-        }
-    }
-
-    if(endHere)
-        return;
-
-    for(int i = r; i < stops.count(); i++)
-    {
-        StopItem& stop = stops[i];
-        if(stop.addHere != 0)
-            break;
-
-        if(stop.nextLine != 0)
-            break;
-    }
-
-    emit dataChanged(index(idx,   0),
-                     index(r, 0));
-}
-
-void StopModel::setLine(const QModelIndex& idx, db_id lineId)
-{
-    DEBUG_IMPORTANT_ENTRY;
-    if(!idx.isValid() || idx.row() >= stops.count())
-        return;
-    qDebug() << "Setting line: stop" << idx.row() << "To Id:" << lineId;
-
-    StopItem& s = stops[idx.row()];
-    if(s.type == Last || s.addHere != 0 || s.nextLine == lineId)
-        return;
-
-    if(s.nextLine == 0 && (s.curLine == lineId || lineId == 0))
-        return;
-
-    if(s.nextLine != 0 && (s.curLine == lineId || lineId == 0))
-    {
-        resetStopsLine(idx.row(), s); //Reset
-    }
-    else
-    {
-        propagateLineChange(idx.row(), s, lineId);
-    }
 }
 
 #ifdef ENABLE_AUTO_TIME_RECALC
@@ -1765,6 +1339,8 @@ bool StopModel::updateStopTime(StopItem &item, int row, bool propagate, const QT
             cmd.bind(2, s.departure);
             cmd.bind(3, s.stopId);
             cmd.execute();
+
+            stationsToUpdate.insert(s.stationId);
         }
     }
 
@@ -1782,6 +1358,9 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
     command cmd(mDb);
 
     StopItem& s = stops[row];
+
+    stationsToUpdate.insert(s.stationId);
+    stationsToUpdate.insert(newStop.stationId);
 
     if(s.type != First && row > 0)
     {
@@ -1918,7 +1497,6 @@ void StopModel::removeStop(const QModelIndex &idx)
         beginRemoveRows(QModelIndex(), row, row);
 
         deleteStop(s.stopId);
-        destroySegment(s.segment, mJobId); //We were last stop so remove segment
         stops.removeAt(row);
 
         endRemoveRows();
@@ -1931,28 +1509,10 @@ void StopModel::removeStop(const QModelIndex &idx)
 
         QModelIndex nextIdx = index(row + 1, 0);
         StopItem& next = stops[nextIdx.row()];
-        next.type = First;
-        setDeparture(nextIdx, next.departure, true);
-
-        if(next.nextLine != 0)
-        {
-            //There is a line change so this becomes First line
-            //And we discard oldFirst line
-
-            setStopSeg(next, next.nextSegment_);
-            setNextSeg(next, 0); //Reset nextSeg
-            next.curLine = 0;
-
-            //nextLine stays as is because it's First
-
-            //Destroy oldFirst segment because now it's empty
-            destroySegment(s.segment, mJobId);
-        }
-        else
-        {
-            next.nextLine = next.curLine;
-            next.curLine = 0; //Don't destroySegment
-        }
+        next.type = First; //FIXME: remove transit flag if set
+        const QTime oldArr = next.arrival;
+        const QTime oldDep = next.arrival;
+        updateStopTime(next, row + 1, true, oldArr, oldDep);
 
         deleteStop(s.stopId);
         stops.removeAt(row);
@@ -2003,32 +1563,10 @@ void StopModel::removeStop(const QModelIndex &idx)
             setStopType(prevIdx, Last);
         }
 
-        if(prev.nextLine == 0 || prev.type == First)
-        {
-            //If nextLine == 0 or previous is First
-            //we just delete this stop leaving prev segment untouched.
-            beginRemoveRows(QModelIndex(), row, row);
-            deleteStop(s.stopId);
-            stops.removeAt(row);
-            endRemoveRows();
-        }
-        else
-        {
-            //Prev stop changes line so we are in a new segment.
-            //When we delete this stop, the segment becomes useless so we destroy it.
-            beginRemoveRows(QModelIndex(), row, row);
-
-            db_id nextSeg = prev.nextSegment_;
-
-            setNextSeg(prev, 0); //Reset nextSegment of prev stop
-            prev.nextLine = 0;
-
-            destroySegment(nextSeg, mJobId);
-            deleteStop(s.stopId);
-            stops.removeAt(row);
-
-            endRemoveRows();
-        }
+        beginRemoveRows(QModelIndex(), row, row);
+        deleteStop(s.stopId);
+        stops.removeAt(row);
+        endRemoveRows();
 
         emit dataChanged(prevIdx, prevIdx); //Update previous stop
     }

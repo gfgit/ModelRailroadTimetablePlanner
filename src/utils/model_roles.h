@@ -18,7 +18,6 @@
 #define STOP_TYPE_ROLE      (Qt::UserRole + 20)
 #define ARR_ROLE            (Qt::UserRole + 21)
 #define DEP_ROLE            (Qt::UserRole + 22)
-#define NEXT_LINE_ROLE      (Qt::UserRole + 28)
 
 #define ADDHERE_ROLE        (Qt::UserRole + 30)
 
