@@ -77,7 +77,7 @@ signals:
     //Stations
     void stationNameChanged(db_id stationId);
     //TODO: separate job stop changes (time plan) from track changes (track plan)
-    void stationPlanChanged(db_id stationId);
+    void stationPlanChanged(const QSet<db_id>& stationIds);
     void stationRemoved(db_id stationId);
 
     //Segments

@@ -52,9 +52,6 @@ public:
 
     void selectStop(db_id stopId);
 
-signals:
-    void stationChange(db_id stId);
-
 public slots:
     void done(int) override;
 

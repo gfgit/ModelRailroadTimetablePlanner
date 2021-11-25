@@ -198,16 +198,22 @@ void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)
 
 void LineGraphManager::onStationNameChanged(db_id stationId)
 {
-    onStationPlanChanged(stationId); //FIXME: update only labels
+    onStationPlanChanged({stationId}); //FIXME: update only labels
 }
 
-void LineGraphManager::onStationPlanChanged(db_id stationId)
+void LineGraphManager::onStationPlanChanged(const QSet<db_id>& stationIds)
 {
     //FIXME: speed up with threads???
     for(LineGraphScene *scene : qAsConst(scenes))
     {
-        if(scene->stations.contains(stationId))
-            scene->reload();
+        for(db_id stationId : stationIds)
+        {
+            if(scene->stations.contains(stationId))
+            {
+                scene->reload();
+                break;
+            }
+        }
     }
 }
 

@@ -86,7 +86,7 @@ private slots:
 
     void onStRemoved(db_id stId);
     void onStNameChanged(db_id stId);
-    void onStPlanChanged(db_id stId);
+    void onStPlanChanged(const QSet<db_id> &stationIds);
 
     void onShiftRemoved(db_id shiftId);
     void onShiftEdited(db_id shiftId);

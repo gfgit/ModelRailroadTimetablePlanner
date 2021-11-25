@@ -232,26 +232,31 @@ void ViewManager::onStNameChanged(db_id stId)
     }
 }
 
-void ViewManager::onStPlanChanged(db_id stId)
+void ViewManager::onStPlanChanged(const QSet<db_id>& stationIds)
 {
     //If there is a StationJobViewer window open for this station, update it's contents
-    auto it = stHash.constFind(stId);
-    if(it != stHash.cend())
+    for(db_id stationId : stationIds)
     {
-        it.value()->updateJobsList();
+        auto it = stHash.constFind(stationId);
+        if(it != stHash.cend())
+        {
+            it.value()->updateJobsList();
+        }
+
+        auto it2 = stRSHash.constFind(stationId);
+        if(it2 != stRSHash.cend())
+        {
+            it2.value()->updateData();
+        }
+
+        auto it3 = stPlanHash.constFind(stationId);
+        if(it3 != stPlanHash.cend())
+        {
+            it3.value()->reloadDBData();
+        }
     }
 
-    auto it2 = stRSHash.constFind(stId);
-    if(it2 != stRSHash.cend())
-    {
-        it2.value()->updateData();
-    }
 
-    auto it3 = stPlanHash.constFind(stId);
-    if(it3 != stPlanHash.cend())
-    {
-        it3.value()->reloadDBData();
-    }
 }
 
 StationJobView* ViewManager::createStJobViewer(db_id stId)

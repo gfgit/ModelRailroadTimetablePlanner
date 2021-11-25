@@ -90,11 +90,6 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     connect(ui->view, &QListView::customContextMenuRequested, this, &JobPathEditor::showContextMenu);
     connect(ui->view, &QListView::clicked, this, &JobPathEditor::onIndexClicked);
 
-    //Connect to stationsModel to update station views
-    //NOTE: here we use queued connections to avoid freezing the UI if there are many stations to update
-    //      with queued connections they are update one at a time and the UI stays responsive
-    connect(this, &JobPathEditor::stationChange, Session, &MeetingSession::stationPlanChanged, Qt::QueuedConnection);
-
     connect(Session, &MeetingSession::jobRemoved, this, &JobPathEditor::onJobRemoved);
     connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
 
@@ -437,11 +432,7 @@ bool JobPathEditor::saveChanges()
 #endif
 
     //Update station views
-    auto stations = stopModel->getStationsToUpdate();
-    for(db_id stId : stations)
-    {
-        emit stationChange(stId);
-    }
+    emit Session->stationPlanChanged(stopModel->getStationsToUpdate());
 
     stopModel->commitChanges();
 
@@ -501,10 +492,7 @@ void JobPathEditor::discardChanges()
 #endif
 
     //Update station views
-    for(db_id stId : stToUpdate)
-    {
-        emit stationChange(stId);
-    }
+    emit Session->stationPlanChanged(stopModel->getStationsToUpdate());
 }
 
 db_id JobPathEditor::currentJobId() const
