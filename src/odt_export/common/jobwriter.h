@@ -22,7 +22,8 @@ private:
     database &mDb;
 
     query q_getJobStops;
-    query q_getFirstLastStops;
+    query q_getFirstStop;
+    query q_getLastStop;
     query q_initialJobAxes;
     query q_selectPassings;
     query q_getStopCouplings;
