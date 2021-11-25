@@ -765,7 +765,7 @@ void StopModel::loadJobStops(db_id jobId)
 
         s.nextSegment.segConnId = stop.get<db_id>(13);
         s.nextSegment.segmentId = stop.get<db_id>(14);
-        int nextSegInTrack = stop.get<db_id>(15);
+        s.nextSegment.inTrackNum = stop.get<db_id>(15);
         s.nextSegment.outTrackNum = stop.get<db_id>(16);
 
         db_id segInGateId = stop.get<db_id>(17);
@@ -775,7 +775,7 @@ void StopModel::loadJobStops(db_id jobId)
         {
             //Segment is reversed
             qSwap(segInGateId, segOutGateId);
-            qSwap(nextSegInTrack, s.nextSegment.outTrackNum);
+            qSwap(s.nextSegment.inTrackNum, s.nextSegment.outTrackNum);
             s.nextSegment.reversed = true;
         }
 
@@ -814,7 +814,7 @@ void StopModel::loadJobStops(db_id jobId)
                 qWarning() << "Stop:" << s.stopId << "Different in gate track:" << s.fromGate.gateConnId << s.toGate.gateConnId;
             }
 
-            if(s.toGate.trackNum != nextSegInTrack)
+            if(s.toGate.trackNum != s.nextSegment.inTrackNum)
             {
                 //Out gate leads to a different than next segment in track
                 qWarning() << "Stop:" << s.stopId << "Different out gate track:" << s.toGate.gateConnId << s.nextSegment.segConnId;
@@ -824,11 +824,11 @@ void StopModel::loadJobStops(db_id jobId)
         prevSegment = s.nextSegment;
         prevOutGateId = segOutGateId;
 
-        StopType type = Normal;
+        s.type = Normal;
 
         if(i == 0)
         {
-            type = First;
+            s.type = First;
             if(stopType != 0)
             {
                 //Error First cannot be a transit
@@ -837,7 +837,7 @@ void StopModel::loadJobStops(db_id jobId)
         }
         else if (stopType)
         {
-            type = Transit;
+            s.type = Transit;
 
             if(i == count - 1)
             {
@@ -845,14 +845,14 @@ void StopModel::loadJobStops(db_id jobId)
                 qWarning() << "Error: Last stop cannot be transit! Job:" << mJobId << "StopId:" << s.stopId;
             }
         }
-        s.type = type;
 
         stops.append(s);
         i++;
     }
     q_selectStops.finish();
 
-    stops.last().type = Last;
+    if(!stops.isEmpty() && stops.last().type != First)
+        stops.last().type = Last; //Update Last stop type unless it's First
 
     endResetModel();
 
@@ -1721,102 +1721,67 @@ bool StopModel::isAddHere(const QModelIndex &idx)
     return false;
 }
 
-bool StopModel::updatePrevSegment(StopItem &prevStop, StopItem &curStop, db_id segmentId)
-{
-    bool reversed = false;
-    query q(mDb, "SELECT s.in_gate_id,g1.station_id,s.out_gate_id,g2.station_id"
-                 " FROM railway_segments s"
-                 " JOIN station_gates g1 ON g1.id=s.in_gate_id"
-                 " JOIN station_gates g2 ON g2.id=s.out_gate_id"
-                 " WHERE s.id=?");
-    q.bind(1, segmentId);
-    if(q.step() != SQLITE_ROW)
-        return false;
-
-    auto seg = q.getRows();
-    db_id in_gateId = seg.get<db_id>(0);
-    db_id in_stationId = seg.get<db_id>(1);
-    db_id out_gateId = seg.get<db_id>(2);
-    db_id out_stationId = seg.get<db_id>(3);
-
-    if(out_stationId == prevStop.stationId)
-    {
-        //Segment is reversed
-        qSwap(in_gateId, out_gateId);
-        qSwap(in_stationId, out_stationId);
-        reversed = true;
-    }
-    else if(in_stationId != prevStop.stationId)
-    {
-        //Error: segment is not connected to previous station
-        return false;
-    }
-
-    if(out_stationId != curStop.stationId)
-    {
-        //Error: segment is not connected to next (current) station
-        return false;
-    }
-
-    if(in_gateId != prevStop.toGate.gateId)
-    {
-        //Try to find a gate connected to previous track_id
-        QByteArray sql = "SELECT c.id,c.gate_track,sc.id,sc.%2_track"
-                         " FROM station_gate_connections c"
-                         " JOIN railway_connections sc ON sc.seg_id=?3 AND sc.%1_track=c.gate_track"
-                         " WHERE c.track_id=?1 AND c.gate_id=?2";
-        if(reversed)
-        {
-            sql.replace("%1", "out");
-            sql.replace("%2", "in");
-        }else{
-            sql.replace("%1", "in");
-            sql.replace("%2", "out");
-        }
-
-        q.prepare(sql);
-        q.bind(1, prevStop.trackId);
-        q.bind(2, in_gateId);
-        q.bind(3, segmentId);
-        if(q.step() != SQLITE_ROW)
-        {
-            //Error: gate is not connected to previous track
-            //User must change previous track
-            return false;
-        }
-
-        auto conn = q.getRows();
-        prevStop.toGate.gateConnId = conn.get<db_id>(0);
-        prevStop.toGate.gateId = in_gateId;
-        prevStop.toGate.trackNum = conn.get<int>(1);
-        prevStop.nextSegment.segConnId = conn.get<db_id>(2);
-        prevStop.nextSegment.segmentId = segmentId;
-        prevStop.nextSegment.outTrackNum = conn.get<int>(3);
-
-        //Update prev stop
-        command cmd(mDb, "UPDATE stops SET out_gate_conn=?, next_segment_conn_id=? WHERE id=?");
-        cmd.bind(1, prevStop.toGate.gateConnId);
-        cmd.bind(2, prevStop.nextSegment.segConnId);
-        cmd.bind(3, prevStop.stopId);
-        if(cmd.execute() != SQLITE_OK)
-        {
-            qWarning() << "StopModel: cannot update previous stop segment:" << mDb.error_msg() << prevStop.stopId;
-            return false;
-        }
-    }
-
-    curStop.fromGate.gateConnId = 0;
-    curStop.fromGate.gateId = out_gateId;
-    curStop.fromGate.trackNum = prevStop.nextSegment.outTrackNum;
-
-    return true;
-}
-
 bool StopModel::updateCurrentInGate(StopItem &curStop, const StopItem::Segment &prevSeg)
 {
-    //FIIXME
-    //query q(mDb, "SELECT ");
-    return false;
+    command cmd(mDb);
+
+    if(!curStop.fromGate.gateConnId)
+    {
+        //FIXME: select appropriate gate
+        query q(mDb, "SELECT in_gate_id,out_gate_id FROM railway_segments WHERE id=?");
+        q.bind(1, prevSeg.segmentId);
+        if(q.step() != SQLITE_ROW)
+            return false;
+
+        auto r = q.getRows();
+        db_id segInGate = r.get<db_id>(0);
+        db_id segOutGate = r.get<db_id>(1);
+
+        q.prepare("SELECT in_track,out_track FROM railway_connections WHERE id=?");
+        q.bind(1, prevSeg.segConnId);
+        if(q.step() != SQLITE_ROW)
+            return false;
+
+        r = q.getRows();
+        int segInTrack = r.get<int>(0);
+        int segOutTrack = r.get<int>(1);
+
+        //Segment out gate = next station in gate
+        curStop.fromGate.gateId = prevSeg.reversed ? segInGate : segOutGate;
+        curStop.fromGate.trackNum = prevSeg.reversed ? segInTrack : segOutTrack;
+
+        //Check station
+        q.prepare("SELECT station_id FROM station_gates WHERE id=?");
+        q.bind(1, curStop.fromGate.gateId);
+        if(q.step() != SQLITE_ROW)
+            return false;
+
+        r = q.getRows();
+        db_id stationId = r.get<db_id>(0);
+
+        if(curStop.stationId != stationId)
+        {
+            //Different station, reset track and out gate
+            if(!trySelectTrackForStop(curStop))
+                return false;
+
+            //Update station
+            cmd.prepare("UPDATE stops SET station_id=? WHERE id=?");
+            cmd.bind(1, stationId);
+            cmd.bind(2, curStop.stopId);
+            if(cmd.execute() != SQLITE_ROW)
+                return false;
+
+            curStop.stationId = stationId;
+        }
+    }
+
+    //Set gate
+    cmd.prepare("UPDATE stops SET in_gate_conn=? WHERE id=?");
+    cmd.bind(1, curStop.fromGate.gateConnId);
+    cmd.bind(1, curStop.stopId);
+    int ret = cmd.execute();
+    return ret == SQLITE_OK;
 }
 
 void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg)
@@ -1826,6 +1791,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
     if(!idx.isValid() && row >= stops.count())
         return;
 
+    command cmd(mDb);
+
     StopItem& s = stops[row];
 
     if(s.type != First && row > 0)
@@ -1834,13 +1801,25 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         StopItem& prevStop = stops[row - 1];
         if(prevStop.nextSegment.segmentId != prevSeg.segmentId)
         {
-            if(!updatePrevSegment(prevStop, newStop, prevSeg.segmentId))
+            if(!trySelectNextSegment(prevStop, prevSeg.segmentId, newStop.stationId, newStop.fromGate.gateId))
                 return;
+
+            //Update prev stop
+            cmd.prepare("UPDATE stops SET out_gate_conn=?, next_segment_conn_id=? WHERE id=?");
+            cmd.bind(1, prevStop.toGate.gateConnId);
+            cmd.bind(2, prevStop.nextSegment.segConnId);
+            cmd.bind(3, prevStop.stopId);
+            if(cmd.execute() != SQLITE_OK)
+            {
+                qWarning() << "StopModel: cannot update previous stop segment:" << mDb.error_msg() << prevStop.stopId;
+                return;
+            }
+
             prevSeg = prevStop.nextSegment;
+            newStop.fromGate.gateConnId = 0;
+            newStop.fromGate.trackNum = prevStop.nextSegment.outTrackNum;
         }
     }
-
-    command cmd(mDb);
 
     if(s.stationId != newStop.stationId)
     {
@@ -1879,7 +1858,31 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         s.departure = newStop.departure;
     }
 
+    if(s.toGate.gateConnId != newStop.toGate.gateConnId)
+    {
+        //Update next stop
+        cmd.prepare("UPDATE stops SET out_gate_conn=?, next_segment_conn_id=? WHERE id=?");
+        cmd.bind(1, newStop.toGate.gateConnId);
+        cmd.bind(2, newStop.nextSegment.segConnId);
+        cmd.bind(3, newStop.stopId);
+        if(cmd.execute() != SQLITE_OK)
+        {
+            qWarning() << "StopModel: cannot update previous stop segment:" << mDb.error_msg() << s.stopId;
+            return;
+        }
 
+        s.toGate = newStop.toGate;
+        s.nextSegment = newStop.nextSegment;
+    }
+
+    if(row < stops.count() - 2 && s.nextSegment.segConnId)
+    {
+        //Before Last and AddHere, so there is a stop after this
+        //Update next station
+        StopItem& nextStop = stops[row + 1];
+        nextStop.fromGate.gateConnId = 0; //Reset to trigger update
+        updateCurrentInGate(nextStop, s.nextSegment);
+    }
 }
 
 void StopModel::removeStop(const QModelIndex &idx)
@@ -2378,7 +2381,7 @@ void StopModel::setAutoUncoupleAtLast(bool value)
 bool StopModel::trySelectTrackForStop(StopItem &item)
 {
     query q(mDb);
-    if(item.fromGate.gateConnId)
+    if(item.fromGate.gateId)
     {
         //TODO: choose 'default' track, corretto tracciato
         q.prepare("SELECT c.id, t.id, MIN(t.pos)"
@@ -2500,6 +2503,80 @@ bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *o
 
     //Store new track ID
     item.trackId = trackId;
+
+    return true;
+}
+
+bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id nextStationId, db_id &out_gateId)
+{
+    bool reversed = false;
+    query q(mDb, "SELECT s.in_gate_id,g1.station_id,s.out_gate_id,g2.station_id"
+                 " FROM railway_segments s"
+                 " JOIN station_gates g1 ON g1.id=s.in_gate_id"
+                 " JOIN station_gates g2 ON g2.id=s.out_gate_id"
+                 " WHERE s.id=?");
+    q.bind(1, segmentId);
+    if(q.step() != SQLITE_ROW)
+        return false;
+
+    auto seg = q.getRows();
+    db_id in_gateId = seg.get<db_id>(0);
+    db_id in_stationId = seg.get<db_id>(1);
+    out_gateId = seg.get<db_id>(2);
+    db_id out_stationId = seg.get<db_id>(3);
+
+    if(out_stationId == item.stationId)
+    {
+        //Segment is reversed
+        qSwap(in_gateId, out_gateId);
+        qSwap(in_stationId, out_stationId);
+        reversed = true;
+    }
+    else if(in_stationId != item.stationId)
+    {
+        //Error: segment is not connected to previous station
+        return false;
+    }
+
+    if(nextStationId && out_stationId != nextStationId)
+    {
+        //Error: segment is not connected to next (current) station
+        return false;
+    }
+
+    //Station out gate = segment in gate
+    if(in_gateId != item.toGate.gateId || item.toGate.trackNum != item.nextSegment.inTrackNum)
+    {
+        //Try to find a gate connected to previous track_id
+        QByteArray sql = "SELECT c.id,c.gate_track,sc.id,sc.%2_track"
+                         " FROM station_gate_connections c"
+                         " JOIN railway_connections sc ON sc.seg_id=?3 AND sc.%1_track=c.gate_track"
+                         " WHERE c.track_id=?1 AND c.gate_id=?2";
+
+        sql.replace("%1", reversed ? "out" : "in");
+        sql.replace("%2", reversed ? "in" : "out");
+
+        q.prepare(sql);
+        q.bind(1, item.trackId);
+        q.bind(2, in_gateId);
+        q.bind(3, segmentId);
+        if(q.step() != SQLITE_ROW)
+        {
+            //Error: gate is not connected to previous track
+            //User must change previous track
+            return false;
+        }
+
+        auto conn = q.getRows();
+        item.toGate.gateConnId = conn.get<db_id>(0);
+        item.toGate.gateId = in_gateId;
+        item.toGate.trackNum = conn.get<int>(1);
+        item.nextSegment.segConnId = conn.get<db_id>(2);
+        item.nextSegment.segmentId = segmentId;
+        item.nextSegment.inTrackNum = item.toGate.trackNum;
+        item.nextSegment.outTrackNum = conn.get<int>(3);
+        item.nextSegment.reversed = reversed;
+    }
 
     return true;
 }

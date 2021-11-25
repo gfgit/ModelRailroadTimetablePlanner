@@ -28,6 +28,7 @@ public:
     {
         db_id segConnId = 0;
         db_id segmentId = 0;
+        int inTrackNum = 0;
         int outTrackNum = 0;
         bool reversed = false;
     };
@@ -98,7 +99,6 @@ public:
 
     bool isAddHere(const QModelIndex& idx);
 
-    bool updatePrevSegment(StopItem& prevStop, StopItem &curStop, db_id segmentId);
     bool updateCurrentInGate(StopItem& curStop, const StopItem::Segment& prevSeg);
     void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
 
@@ -157,6 +157,7 @@ public:
 
     bool trySetTrackConnections(StopItem &item, db_id trackId,
                                QString *outErr);
+    bool trySelectNextSegment(StopItem &item, db_id segmentId, db_id nextStationId, db_id &out_gateId);
 
 signals:
     void edited(bool val);
