@@ -110,6 +110,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     mStationEdit->setData(item.stationId);
 
     stationTrackMatchModel->setFilter(item.stationId);
+    mTrackEdit->setData(item.trackId);
     mTrackEdit->setEnabled(item.stationId != 0); //Enable only if station is selected
 
     segmentMatchModel->setFilter(item.stationId, 0, 0);
