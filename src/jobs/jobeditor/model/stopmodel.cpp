@@ -1792,6 +1792,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
             if(!trySelectNextSegment(prevStop, prevSeg.segmentId, newStop.stationId, newStop.fromGate.gateId))
                 return;
 
+            startStopsEditing();
+
             //Update prev stop
             cmd.prepare("UPDATE stops SET out_gate_conn=?, next_segment_conn_id=? WHERE id=?");
             cmd.bind(1, prevStop.toGate.gateConnId);
@@ -1811,6 +1813,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
     if(s.stationId != newStop.stationId)
     {
+        startStopsEditing();
+
         //Update station, reset out gate
         cmd.prepare("UPDATE stops SET station_id=?,out_gate_conn=NULL WHERE id=?");
         cmd.bind(1, newStop.stationId);
@@ -1825,6 +1829,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
     if(s.fromGate.gateConnId != newStop.fromGate.gateConnId)
     {
+        startStopsEditing();
+
         updateCurrentInGate(newStop, prevSeg);
         s.fromGate = newStop.fromGate;
         s.trackId = newStop.trackId;
@@ -1832,6 +1838,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
     if(s.arrival != newStop.arrival || s.departure != newStop.departure)
     {
+        startStopsEditing();
+
         if(updateStopTime(newStop, row, true, s.arrival, s.departure))
         {
             //Succeded, store new sanitized values
@@ -1844,6 +1852,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
     const db_id oldSegConnId = s.nextSegment.segConnId;
     if(s.toGate.gateConnId != newStop.toGate.gateConnId)
     {
+        startStopsEditing();
+
         //Update next stop
         cmd.prepare("UPDATE stops SET out_gate_conn=?, next_segment_conn_id=? WHERE id=?");
         cmd.bind(1, newStop.toGate.gateConnId);
@@ -1861,6 +1871,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
     if(row < stops.count() - 2 && s.nextSegment.segConnId && s.nextSegment.segmentId != oldSegConnId)
     {
+        startStopsEditing();
+
         //Before Last and AddHere, so there is a stop after this
         //Update next station beause next segment changed
         StopItem& nextStop = stops[row + 1];
