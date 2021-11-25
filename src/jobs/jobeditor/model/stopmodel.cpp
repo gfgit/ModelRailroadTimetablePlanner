@@ -30,7 +30,6 @@ StopModel::StopModel(database &db, QObject *parent) :
     q_setNextSeg(mDb),
     q_setStopSt(mDb),
     q_removeSeg(mDb),
-    q_setPlatform(mDb),
     timeCalcEnabled(true),
     autoInsertTransits(false),
     autoMoveUncoupleToNewLast(true),
@@ -79,8 +78,6 @@ void StopModel::prepareQueries()
 
     q_removeSeg.prepare("DELETE FROM jobsegments WHERE id=?");
 
-    q_setPlatform.prepare("UPDATE stops SET platform=? WHERE id=?");
-
 }
 
 void StopModel::finalizeQueries()
@@ -99,7 +96,6 @@ void StopModel::finalizeQueries()
     q_setNextSeg.finish();
     q_setStopSt.finish();
     q_removeSeg.finish();
-    q_setPlatform.finish();
 }
 
 void StopModel::reloadSettings()
@@ -181,21 +177,6 @@ void StopModel::uncoupleStillCoupledAtStop(const StopItem& s)
     }
 }
 
-bool StopModel::getStationPlatfCount(db_id stationId, int &platfCount, int &depotCount)
-{
-    query q_getPlatfs(mDb, "SELECT platforms,depot_platf FROM stations WHERE id=?");
-    q_getPlatfs.bind(1, stationId);
-    if(q_getPlatfs.step() != SQLITE_ROW)
-    {
-        //Error
-        return false;
-    }
-    auto r = q_getPlatfs.getRows();
-    platfCount = r.get<int>(0);
-    depotCount = r.get<int>(1);
-    return true;
-}
-
 const QSet<db_id> &StopModel::getRsToUpdate() const
 {
     return rsToUpdate;
@@ -235,8 +216,6 @@ QVariant StopModel::data(const QModelIndex &index, int role) const
         return s.nextLine;
     case ADDHERE_ROLE:
         return s.addHere;
-    case PLATF_ID:
-        return s.platform;
     case STOP_DESCR_ROLE:
         return getDescription(s);
     default:
@@ -268,9 +247,6 @@ bool StopModel::setData(const QModelIndex &index, const QVariant &value, int rol
         break;
     case NEXT_LINE_ROLE:
         setLine(index, value.toLongLong());
-        break;
-    case PLATF_ID:
-        setPlatform(index, value.toInt());
         break;
     case STOP_DESCR_ROLE:
         setDescription(index, value.toString());
@@ -1559,28 +1535,6 @@ void StopModel::rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep)
 
 void StopModel::setStation_internal(StopItem& item, db_id stId, db_id nodeId)
 {
-    int platf = 0;
-    //Check if platform is out of range
-    query q_getDefPlatf(mDb, "SELECT defplatf_freight,defplatf_passenger FROM stations WHERE id=?");
-    q_getDefPlatf.bind(1, stId);
-    if(q_getDefPlatf.step() != SQLITE_ROW)
-    {
-        //Error
-    }
-    auto r = q_getDefPlatf.getRows();
-    const int defPlatf_freight = r.get<int>(0);
-    const int defPlatf_passenger = r.get<int>(1);
-
-    platf = category >= FirstPassengerCategory ?
-                defPlatf_passenger : defPlatf_freight;
-
-
-    q_setPlatform.bind(1, platf);
-    q_setPlatform.bind(2, item.stopId);
-    q_setPlatform.execute();
-    q_setPlatform.reset();
-    item.platform = platf;
-
     //Mark for update both old and new station
     if(item.stationId)
         stationsToUpdate.insert(item.stationId);
@@ -1668,50 +1622,6 @@ void StopModel::setStation(const QPersistentModelIndex& idx, db_id stId)
             setArrival(idx, arrival, true);
         }
     }
-}
-
-void StopModel::setPlatform(const QModelIndex& idx, int platf)
-{
-    if(!idx.isValid() || idx.row() >= stops.count())
-        return;
-
-    StopItem& s = stops[idx.row()];
-    if(s.platform == platf)
-        return;
-
-    int platfCount = 0;
-    int depotCount = 0;
-    getStationPlatfCount(s.stationId, platfCount, depotCount);
-
-    //Check if it's valid
-    if(platf < 0)
-    {
-        //Depot platform
-        if(platf < -depotCount)
-            return; //Out of range
-        //Note: only '>' because they start from '-1', '-2' and so on
-        //Index 0 is a main platform
-    }
-    else
-    {
-        //Main platform
-        if(platf >= platfCount)
-            return; //Out of range
-        //Note: '>=' because they start from '0', '1' and so on
-    }
-
-    startStopsEditing();
-
-    //Mark the station for update
-    stationsToUpdate.insert(s.stationId);
-
-    s.platform = platf;
-    q_setPlatform.bind(1, s.platform);
-    q_setPlatform.bind(2, s.stopId);
-    q_setPlatform.execute();
-    q_setPlatform.reset();
-
-    emit dataChanged(idx, idx);
 }
 
 bool StopModel::isAddHere(const QModelIndex &idx)
@@ -2800,7 +2710,6 @@ void StopModel::insertTransitsBefore(const QPersistentModelIndex& stop)
         item.segment = to.segment;
         item.nextLine = 0;
         item.nextSegment_ = 0;
-        item.platform = 0;
         item.arrival = item.departure = prevDep;
         item.stopId = createStop(mJobId, item.arrival, item.departure, Transit);
 

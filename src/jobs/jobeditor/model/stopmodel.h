@@ -49,13 +49,12 @@ public:
     db_id curLine      = 0;
     db_id nextLine     = 0;
 
-    int addHere           = 0;
-    int platform          = 0;
+    int addHere = 0;
 
     QTime arrival;
     QTime departure;
 
-    StopType type         = Normal;
+    StopType type = Normal;
 };
 
 //BIG TODO: when changing arrival to a station where a RS is (un)coupled, the station is marked for update but not the RS
@@ -110,7 +109,6 @@ public:
     void setLine(const QModelIndex &idx, db_id lineId);
     bool lineHasSt(db_id lineId, db_id stId);
     void setStation(const QPersistentModelIndex &idx, db_id stId);
-    void setPlatform(const QModelIndex &idx, int platf);
 
     QString getDescription(const StopItem &s) const;
     void setDescription(const QModelIndex &idx, const QString &descr);
@@ -143,8 +141,6 @@ public:
 
     void uncoupleStillCoupledAtLastStop();
     void uncoupleStillCoupledAtStop(const StopItem &s);
-
-    bool getStationPlatfCount(db_id stationId, int &platfCount, int &depotCount);
 
 #ifdef ENABLE_AUTO_TIME_RECALC
     void rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep);
@@ -225,7 +221,6 @@ private:
     command q_setNextSeg;
     command q_setStopSt;
     command q_removeSeg;
-    command q_setPlatform;
 
     bool timeCalcEnabled;
     bool autoInsertTransits;

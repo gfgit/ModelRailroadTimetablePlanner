@@ -9,8 +9,6 @@
 
 #define LINE_ID             (Qt::UserRole)
 
-#define PLATF_ID            (Qt::UserRole + 4)
-
 #define JOB_SHIFT_ID        (Qt::UserRole + 6)
 
 #define JOB_ID_ROLE         (Qt::UserRole + 10)
