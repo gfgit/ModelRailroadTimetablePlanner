@@ -271,11 +271,17 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 top.setY(jobStop.arrivalY);
                 bottom.setY(jobStop.departureY);
 
+                const bool nullStopDuration = qFuzzyCompare(top.y(), bottom.y());
+
                 if(drawSelection && selectedJob.jobId == jobStop.stop.jobId)
                 {
                     //Draw selection around segment
                     painter->setPen(selectedJobPen);
-                    painter->drawLine(top, bottom);
+
+                    if(nullStopDuration)
+                        painter->drawPoint(top);
+                    else
+                        painter->drawLine(top, bottom);
 
                     //Reset pen
                     painter->setPen(jobPen);
@@ -289,7 +295,10 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                     lastJobCategory = jobStop.stop.category;
                 }
 
-                painter->drawLine(top, bottom);
+                if(nullStopDuration)
+                    painter->drawPoint(top);
+                else
+                    painter->drawLine(top, bottom);
             }
 
             top.rx() += platfOffset;
