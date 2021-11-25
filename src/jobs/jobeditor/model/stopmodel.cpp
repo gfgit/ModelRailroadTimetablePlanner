@@ -1843,7 +1843,8 @@ bool StopModel::updateStopTime(StopItem &item, int row, bool propagate, const QT
     {
         int msecOffset = oldDep.msecsTo(item.departure); //Calculate shift amount
 
-        for(int i = row + 1; i < stops.count() - 2; i++)
+        //Loop until Last stop (before AddHere)
+        for(int i = row + 1; i < stops.count() - 1; i++)
         {
             StopItem& s = stops[i];
             s.arrival = s.arrival.addMSecs(msecOffset);
@@ -1863,6 +1864,7 @@ bool StopModel::updateStopTime(StopItem &item, int row, bool propagate, const QT
 void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg)
 {
     const int row = idx.row();
+    int lastUpdatedRow = row;
 
     if(!idx.isValid() && row >= stops.count())
         return;
@@ -1925,6 +1927,7 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
             //Succeded, store new sanitized values
             s.arrival = newStop.arrival;
             s.departure = newStop.departure;
+            lastUpdatedRow = stops.count() - 2;
         }
     }
 
@@ -1953,7 +1956,14 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         StopItem& nextStop = stops[row + 1];
         nextStop.fromGate.gateConnId = 0; //Reset to trigger update
         updateCurrentInGate(nextStop, s.nextSegment);
+        if(lastUpdatedRow == row)
+            lastUpdatedRow++; //We updated also next row
     }
+
+    //Tell view to update
+    const QModelIndex firstIdx = index(row, 0);
+    const QModelIndex lastIdx = index(lastUpdatedRow, 0);
+    emit dataChanged(firstIdx, lastIdx);
 }
 
 void StopModel::removeStop(const QModelIndex &idx)
