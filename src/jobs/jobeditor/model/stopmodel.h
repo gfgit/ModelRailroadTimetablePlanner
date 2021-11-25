@@ -100,6 +100,7 @@ public:
     bool isAddHere(const QModelIndex& idx);
 
     bool updateCurrentInGate(StopItem& curStop, const StopItem::Segment& prevSeg);
+    bool updateStopTime(StopItem& item, int row, bool propagate, const QTime &oldArr, const QTime &oldDep);
     void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
 
     void setArrival(const QModelIndex &idx, const QTime &time, bool setDepTime);

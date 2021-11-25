@@ -1784,6 +1784,82 @@ bool StopModel::updateCurrentInGate(StopItem &curStop, const StopItem::Segment &
     return ret == SQLITE_OK;
 }
 
+bool StopModel::updateStopTime(StopItem &item, int row, bool propagate, const QTime& oldArr, const QTime& oldDep)
+{
+    //Update Arrival and Departure
+    //NOTE: they must be set togheter so CHECK constraint fires at the end
+    //Otherwise it would be impossible to set arrival > departure and then update departure
+
+    //Check time values and fix them if necessary
+    if(item.type == First)
+        item.arrival = item.departure; //We set departure, arrival follows same value
+    else if(item.type == Last || item.type == Transit)
+        item.departure = item.arrival; //We set arrival, departure follows same value
+
+    if(item.type != First && row > 0)
+    {
+        //Check minimum arrival
+        /* Next stop must be at least one minute after
+         * This is to prevent contemporary stops that will break ORDER BY arrival queries */
+        const StopItem& prevStop = stops.at(row - 1);
+        const QTime minArr = prevStop.departure.addSecs(60);
+        if(item.arrival < minArr)
+            item.arrival = minArr;
+    }
+
+    QTime minDep = item.arrival;
+    if(item.type == Normal)
+        minDep = minDep.addSecs(60); //At least stop for 1 minute
+
+    if(item.departure < minDep)
+        item.departure = minDep;
+
+    //Update stops
+    if(row < stops.count() - 2) //Not last stop or AddHere
+    {
+        const QTime minNextArr = item.departure.addSecs(60);
+        const StopItem& nextStop = stops.at(row + 1);
+        if(nextStop.arrival < minNextArr)
+            propagate = true; //We need to shift stops after current
+    }
+    else
+    {
+        propagate = false; //We are last stop, nothing to propagate
+    }
+
+    if(propagate)
+        shiftStopsBy24hoursFrom(oldArr);
+
+    command cmd(mDb);
+    cmd.prepare("UPDATE stops SET arrival=?,departure=? WHERE id=?");
+    cmd.bind(1, item.arrival);
+    cmd.bind(2, item.departure);
+    cmd.bind(3, item.stopId);
+
+    if(cmd.execute() != SQLITE_OK)
+        return false;
+
+    if(propagate)
+    {
+        int msecOffset = oldDep.msecsTo(item.departure); //Calculate shift amount
+
+        for(int i = row + 1; i < stops.count() - 2; i++)
+        {
+            StopItem& s = stops[i];
+            s.arrival = s.arrival.addMSecs(msecOffset);
+            s.departure = s.departure.addMSecs(msecOffset);
+
+            cmd.reset();
+            cmd.bind(1, s.arrival);
+            cmd.bind(2, s.departure);
+            cmd.bind(3, s.stopId);
+            cmd.execute();
+        }
+    }
+
+    return true;
+}
+
 void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg)
 {
     const int row = idx.row();
@@ -1844,20 +1920,12 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
     if(s.arrival != newStop.arrival || s.departure != newStop.departure)
     {
-        //Update Arrival and Departure
-        //NOTE: they must be set togheter so CHECK constraint fires at the end
-        //Otherwise it would be impossible to set arrival > departure and then update departure
-
-        cmd.prepare("UPDATE stops SET arrival=?,departure=? WHERE id=?");
-        cmd.bind(1, newStop.arrival);
-        cmd.bind(2, newStop.departure);
-        cmd.bind(3, s.stopId);
-
-        if(cmd.execute() != SQLITE_OK)
-            return;
-
-        s.arrival = newStop.arrival;
-        s.departure = newStop.departure;
+        if(updateStopTime(newStop, row, true, s.arrival, s.departure))
+        {
+            //Succeded, store new sanitized values
+            s.arrival = newStop.arrival;
+            s.departure = newStop.departure;
+        }
     }
 
     const db_id oldSegConnId = s.nextSegment.segConnId;
