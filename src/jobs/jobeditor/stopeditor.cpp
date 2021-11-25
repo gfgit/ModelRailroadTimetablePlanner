@@ -168,19 +168,13 @@ void StopEditor::onStationSelected()
     }
 
     //Update prev segment
-    prevItem.nextSegment.segConnId = 0; //Reset, will be reloaded by model
-    prevItem.nextSegment.inTrackNum = -1;
-    prevItem.nextSegment.outTrackNum = -1;
-    prevItem.nextSegment.segmentId = 0;
+    prevItem.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
 
     //Update next segment
     segmentMatchModel->setFilter(oldItem.stationId, 0, 0);
     mSegmentEdit->setData(0); //Reset, user must choose again
 
-    oldItem.nextSegment.segConnId = 0;
-    oldItem.nextSegment.segmentId = 0;
-    oldItem.nextSegment.inTrackNum = -1;
-    oldItem.nextSegment.outTrackNum = -1;
+    oldItem.nextSegment = StopItem::Segment{};
 }
 
 void StopEditor::onTrackSelected()

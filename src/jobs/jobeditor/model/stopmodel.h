@@ -21,15 +21,15 @@ public:
     {
         db_id gateConnId = 0;
         db_id gateId = 0;
-        int trackNum = 0;
+        int trackNum = -1;
     };
 
     struct Segment
     {
         db_id segConnId = 0;
         db_id segmentId = 0;
-        int inTrackNum = 0;
-        int outTrackNum = 0;
+        int inTrackNum = -1;
+        int outTrackNum = -1;
         bool reversed = false;
     };
 

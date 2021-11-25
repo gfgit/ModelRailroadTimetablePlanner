@@ -1860,6 +1860,7 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         s.departure = newStop.departure;
     }
 
+    const db_id oldSegConnId = s.nextSegment.segConnId;
     if(s.toGate.gateConnId != newStop.toGate.gateConnId)
     {
         //Update next stop
@@ -1877,10 +1878,10 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         s.nextSegment = newStop.nextSegment;
     }
 
-    if(row < stops.count() - 2 && s.nextSegment.segConnId)
+    if(row < stops.count() - 2 && s.nextSegment.segConnId && s.nextSegment.segmentId != oldSegConnId)
     {
         //Before Last and AddHere, so there is a stop after this
-        //Update next station
+        //Update next station beause next segment changed
         StopItem& nextStop = stops[row + 1];
         nextStop.fromGate.gateConnId = 0; //Reset to trigger update
         updateCurrentInGate(nextStop, s.nextSegment);
@@ -2492,9 +2493,8 @@ bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *o
             item.toGate.gateConnId = q.getRows().get<db_id>(0);
         }else{
             //Connection not found, inform user and reset out gate
-            item.toGate.gateConnId = 0;
-            item.toGate.gateId = 0;
-            item.toGate.trackNum = -1;
+            item.toGate = StopItem::Gate{};
+            item.nextSegment = StopItem::Segment{}; //Reset next segment
 
             if(outErr)
                 *outErr = tr("Track is not connected to selected out gate track.\n"
