@@ -180,7 +180,7 @@ bool OdtDocument::saveTo(const QString& fileName)
     //Add possible images
     QString imgBasePath = dir.filePath("Pictures") + QLatin1String("/%1");
     QString imgNewBasePath = QLatin1String("Pictures/%1");
-    for(const auto& img : imageList)
+    for(const auto& img : qAsConst(imageList))
     {
         source = zip_source_file(zipper, imgBasePath.arg(img.first).toUtf8(), 0, 0);
         if (source == nullptr)
@@ -271,7 +271,7 @@ void OdtDocument::saveManifest(const QString& path)
     writeFileEntry(xml, metaFileName, xmlMime);
 
     //Add possible images
-    for(const auto& img : imageList)
+    for(const auto& img : qAsConst(imageList))
     {
         writeFileEntry(xml, "Pictures/" + img.first, img.second);
     }
