@@ -2934,19 +2934,23 @@ bool StopModel::revertChanges()
         //Reload info and stops
         needsStopReload = true;
     }
+    else
+    {
+        //Just reset info in case of InfoEditing
+        //StopsEditing triggers stop loading so already resets info
 
-    //Reset info
-    mNewJobId = mJobId;
-    emit jobIdChanged(mJobId);
+        mNewJobId = mJobId;
+        emit jobIdChanged(mJobId);
 
-    category = oldCategory;
-    emit categoryChanged(int(category));
+        category = oldCategory;
+        emit categoryChanged(int(category));
 
-    newShiftId = jobShiftId;
-    emit jobShiftChanged(jobShiftId);
+        newShiftId = jobShiftId;
+        emit jobShiftChanged(jobShiftId);
 
-    rsToUpdate.clear();
-    stationsToUpdate.clear();
+        rsToUpdate.clear();
+        stationsToUpdate.clear();
+    }
 
     bool ret = endStopsEditing();
     if(!ret)
