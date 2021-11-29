@@ -27,7 +27,7 @@ public:
 
     bool hasEngineAfterStop(bool *isElectricOnNonElectrifiedLine = nullptr);
 
-    LineType getLineType() const;
+    bool isRailwayElectrified() const;
 
     db_id getJobId() const;
 

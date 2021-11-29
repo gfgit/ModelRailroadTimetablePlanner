@@ -123,32 +123,32 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
 
         if(checkTractionType)
         {
-            LineType lineType = stopsModel->getLineTypeAfterStop(m_stopId);
-            if(lineType == LineType::NonElectric)
+            //Query RS type
+            query q_getRSType(mDb, "SELECT rs_models.type,rs_models.sub_type"
+                                   " FROM rs_list"
+                                   " JOIN rs_models ON rs_models.id=rs_list.model_id"
+                                   " WHERE rs_list.id=?");
+            q_getRSType.bind(1, rsId);
+            if(q_getRSType.step() != SQLITE_ROW)
             {
-                //Query RS type
-                query q_getRSType(mDb, "SELECT rs_models.type,rs_models.sub_type"
-                                       " FROM rs_list"
-                                       " JOIN rs_models ON rs_models.id=rs_list.model_id"
-                                       " WHERE rs_list.id=?");
-                q_getRSType.bind(1, rsId);
-                if(q_getRSType.step() != SQLITE_ROW)
-                {
-                    qWarning() << "RS seems to not exist, ID:" << rsId;
-                }
+                qWarning() << "RS seems to not exist, ID:" << rsId;
+            }
 
-                auto rs = q_getRSType.getRows();
-                RsType type = RsType(rs.get<int>(0));
-                RsEngineSubType subType = RsEngineSubType(rs.get<int>(1));
+            auto rs = q_getRSType.getRows();
+            RsType type = RsType(rs.get<int>(0));
+            RsEngineSubType subType = RsEngineSubType(rs.get<int>(1));
 
-                if(type == RsType::Engine && subType == RsEngineSubType::Electric)
+            if(type == RsType::Engine && subType == RsEngineSubType::Electric)
+            {
+                bool electrified = stopsModel->isRailwayElectrifiedAfterStop(m_stopId);
+                if(!electrified)
                 {
                     int but = QMessageBox::warning(qApp->activeWindow(),
                                                    tr("Warning"),
                                                    tr("Rollingstock %1 is an Electric engine but the line is not electrified\n"
                                                       "This engine will not be albe to move a train.\n"
                                                       "Do you still want to couple it?")
-                                                   .arg(rsName),
+                                                       .arg(rsName),
                                                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
                     if(but == QMessageBox::No)
                         return false; //Abort
@@ -173,7 +173,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
         coupled.append(rsId);
 
         //Check if there is a next coupling operation in the same job
-        query q(mDb, "SELECT s2.id, s2.arrival, s2.stationId, stations.name"
+        query q(mDb, "SELECT s2.id, s2.arrival, s2.station_id, stations.name"
                      " FROM coupling"
                      " JOIN stops s2 ON s2.id=coupling.stop_id"
                      " JOIN stops s1 ON s1.id=?"
@@ -423,14 +423,14 @@ bool RSCouplingInterface::hasEngineAfterStop(bool *isElectricOnNonElectrifiedLin
     if(isElectricOnNonElectrifiedLine)
     {
         RsEngineSubType subType = RsEngineSubType(q_hasEngine.getRows().get<int>(1));
-        *isElectricOnNonElectrifiedLine = (subType == RsEngineSubType::Electric) && (getLineType() != LineType::Electric);
+        *isElectricOnNonElectrifiedLine = (subType == RsEngineSubType::Electric) && (!isRailwayElectrified());
     }
     return true;
 }
 
-LineType RSCouplingInterface::getLineType() const
+bool RSCouplingInterface::isRailwayElectrified() const
 {
-    return stopsModel->getLineTypeAfterStop(m_stopId);
+    return stopsModel->isRailwayElectrifiedAfterStop(m_stopId);
 }
 
 db_id RSCouplingInterface::getJobId() const

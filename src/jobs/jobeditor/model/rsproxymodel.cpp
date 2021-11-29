@@ -51,7 +51,7 @@ QVariant RSProxyModel::data(const QModelIndex &idx, int role) const
             //Error: RS is not in this station
             return QBrush(qRgb(255, 61, 67)); //Solid light red #FF3d43
         }
-        if(targetType == RsType::Engine && item.engineType == RsEngineSubType::Electric && couplingMgr->getLineType() == LineType::NonElectric)
+        if(targetType == RsType::Engine && item.engineType == RsEngineSubType::Electric && !couplingMgr->isRailwayElectrified())
         {
             //Warn Electric traction not possible
             return QBrush(qRgb(0, 0, 255), Qt::FDiagPattern); //Blue
@@ -96,7 +96,7 @@ QVariant RSProxyModel::data(const QModelIndex &idx, int role) const
             return tr("Rollingstock <b>%1</b> cannot be coupled here because it is not in this station.<br>"
                       "Please remove the tick").arg(item.rsName);
         }
-        if(targetType == RsType::Engine && item.engineType == RsEngineSubType::Electric && couplingMgr->getLineType() == LineType::NonElectric)
+        if(targetType == RsType::Engine && item.engineType == RsEngineSubType::Electric && !couplingMgr->isRailwayElectrified())
         {
             //Warn Electric traction not possible
             return tr("Engine <b>%1</b> is electric but the line is not electrified!").arg(item.rsName);
