@@ -90,58 +90,58 @@ void RSCoupleDialog::loadProxyModels(sqlite3pp::database& db, db_id jobId, db_id
          * - Possible wrong operations to let the user remove them
          */
 
-        q.prepare("SELECT MAX(sub.p), sub.rsId, rs_list.number, rs_models.name, rs_models.suffix, rs_models.type, rs_models.sub_type, sub.arr, sub.jobId, jobs.category FROM ("
+        q.prepare("SELECT MAX(sub.p), sub.rs_id, rs_list.number, rs_models.name, rs_models.suffix, rs_models.type, rs_models.sub_type, sub.arr, sub.job_id, jobs.category FROM ("
 
                   //Select possible wrong operations to let user remove (un-check) them
-                  " SELECT 1 AS p, coupling.rsId AS rsId, NULL AS arr, NULL AS jobId FROM coupling WHERE coupling.stopId=?3 AND coupling.operation=1"
+                  " SELECT 1 AS p, coupling.rs_id AS rs_id, NULL AS arr, NULL AS job_id FROM coupling WHERE coupling.stop_id=?3 AND coupling.operation=1"
                   " UNION ALL"
 
                   //Select RS uncoupled before our arrival (included RS uncoupled at exact same time) (except uncoupled by us)
-                  " SELECT 2 AS p, coupling.rsId AS rsId, MAX(stops.arrival) AS arr, stops.jobId AS jobId"
+                  " SELECT 2 AS p, coupling.rs_id AS rs_id, MAX(stops.arrival) AS arr, stops.job_id AS job_id"
                   " FROM stops"
-                  " JOIN coupling ON coupling.stopId=stops.id"
-                  " WHERE stops.stationId=?1 AND stops.arrival <= ?2 AND stops.id<>?3"
-                  " GROUP BY coupling.rsId"
+                  " JOIN coupling ON coupling.stop_id=stops.id"
+                  " WHERE stops.station_id=?1 AND stops.arrival <= ?2 AND stops.id<>?3"
+                  " GROUP BY coupling.rs_id"
                   " HAVING coupling.operation=0"
                   " UNION ALL"
 
                   //Select RS coupled after our arrival (excluded RS coupled at exact same time)
-                  " SELECT 3 AS p, coupling.rsId, MIN(stops.arrival) AS arr, stops.jobId AS jobId"
+                  " SELECT 3 AS p, coupling.rs_id, MIN(stops.arrival) AS arr, stops.job_id AS job_id"
                   " FROM coupling"
-                  " JOIN stops ON stops.id=coupling.stopId"
-                  " WHERE stops.stationId=?1 AND stops.arrival > ?2"
-                  " GROUP BY coupling.rsId"
+                  " JOIN stops ON stops.id=coupling.stop_id"
+                  " WHERE stops.station_id=?1 AND stops.arrival > ?2"
+                  " GROUP BY coupling.rs_id"
                   " HAVING coupling.operation=1"
                   " UNION ALL"
 
                   //Select coupled RS for first time
-                  " SELECT 4 AS p, rs_list.id AS rsId, NULL AS arr, NULL AS jobId"
+                  " SELECT 4 AS p, rs_list.id AS rs_id, NULL AS arr, NULL AS job_id"
                   " FROM rs_list"
                   " WHERE NOT EXISTS ("
-                  " SELECT coupling.rsId FROM coupling"
-                  " JOIN stops ON stops.id=coupling.stopId WHERE coupling.rsId=rs_list.id AND stops.arrival<?2)"
+                  " SELECT coupling.rs_id FROM coupling"
+                  " JOIN stops ON stops.id=coupling.stop_id WHERE coupling.rs_id=rs_list.id AND stops.arrival<?2)"
                   " UNION ALL"
 
                   //Select unused RS (RS without any operation)
-                  " SELECT 5 AS p, rs_list.id AS rsId, NULL AS arr, NULL AS jobId"
+                  " SELECT 5 AS p, rs_list.id AS rs_id, NULL AS arr, NULL AS job_id"
                   " FROM rs_list"
-                  " WHERE NOT EXISTS (SELECT coupling.rsId FROM coupling WHERE coupling.rsId=rs_list.id)"
+                  " WHERE NOT EXISTS (SELECT coupling.rs_id FROM coupling WHERE coupling.rs_id=rs_list.id)"
                   " UNION ALL"
 
                   //Select RS coupled before our arrival (already coupled by this job or occupied by other job)
-                  " SELECT 7 AS p, c1.rsId, MAX(s1.arrival) AS arr, s1.jobId AS jobId"
+                  " SELECT 7 AS p, c1.rs_id, MAX(s1.arrival) AS arr, s1.job_id AS job_id"
                   " FROM coupling c1"
-                  " JOIN coupling c2 ON c2.rsId=c1.rsId"
-                  " JOIN stops s1 ON s1.id=c2.stopId"
-                  " WHERE c1.stopId=?3 AND c1.operation=1 AND s1.arrival<?2"
-                  " GROUP BY c1.rsId"
+                  " JOIN coupling c2 ON c2.rs_id=c1.rs_id"
+                  " JOIN stops s1 ON s1.id=c2.stop_id"
+                  " WHERE c1.stop_id=?3 AND c1.operation=1 AND s1.arrival<?2"
+                  " GROUP BY c1.rs_id"
                   " HAVING c2.operation=1"
                   " ) AS sub"
 
-                  " JOIN rs_list ON rs_list.id=sub.rsId"    //FIXME: it seems it is better to join in the subquery directly, also avoids some LEFT in joins
+                  " JOIN rs_list ON rs_list.id=sub.rs_id"    //FIXME: it seems it is better to join in the subquery directly, also avoids some LEFT in joins
                   " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                  " LEFT JOIN jobs ON jobs.id=sub.jobId"
-                  " GROUP BY sub.rsId"
+                  " LEFT JOIN jobs ON jobs.id=sub.job_id"
+                  " GROUP BY sub.rs_id"
                   " ORDER BY rs_models.name, rs_list.number");
 
         q.bind(1, stationId);
@@ -157,21 +157,21 @@ void RSCoupleDialog::loadProxyModels(sqlite3pp::database& db, db_id jobId, db_id
          * - Show possible wrong operations to let user remove them
          */
 
-        q.prepare("SELECT MAX(sub.p), sub.rsId, rs_list.number, rs_models.name, rs_models.suffix, rs_models.type, rs_models.sub_type, sub.arr, NULL AS jobId, NULL AS category FROM("
-                  "SELECT 8 AS p, coupling.rsId AS rsId, MAX(stops.arrival) AS arr"
+        q.prepare("SELECT MAX(sub.p), sub.rs_id, rs_list.number, rs_models.name, rs_models.suffix, rs_models.type, rs_models.sub_type, sub.arr, NULL AS job_id, NULL AS category FROM("
+                  "SELECT 8 AS p, coupling.rs_id AS rs_id, MAX(stops.arrival) AS arr"
                   " FROM stops"
-                  " JOIN coupling ON coupling.stopId=stops.id"
+                  " JOIN coupling ON coupling.stop_id=stops.id"
                   " WHERE stops.arrival<?2"
-                  " GROUP BY coupling.rsId"
-                  " HAVING coupling.operation=1 AND stops.jobId=?1"
+                  " GROUP BY coupling.rs_id"
+                  " HAVING coupling.operation=1 AND stops.job_id=?1"
                   " UNION ALL"
 
                   //Select possible wrong operations to let user remove them
-                  " SELECT 6 AS p, coupling.rsId AS rsId, NULL AS arr FROM coupling WHERE coupling.stopId=?3 AND coupling.operation=0"
+                  " SELECT 6 AS p, coupling.rs_id AS rs_id, NULL AS arr FROM coupling WHERE coupling.stop_id=?3 AND coupling.operation=0"
                   ") AS sub"
-                  " JOIN rs_list ON rs_list.id=sub.rsId"    //FIXME: it seems it is better to join in the subquery directly, also avoids some LEFT in joins
+                  " JOIN rs_list ON rs_list.id=sub.rs_id"    //FIXME: it seems it is better to join in the subquery directly, also avoids some LEFT in joins
                   " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                  " GROUP BY sub.rsId"
+                  " GROUP BY sub.rs_id"
                   " ORDER BY rs_models.name, rs_list.number");
 
         q.bind(1, jobId);
