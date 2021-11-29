@@ -1,7 +1,5 @@
 #include "stationwriter.h"
 
-#include "utils/platform_utils.h"
-
 #include "jobs/jobsmanager/model/jobshelper.h"
 
 #include "utils/jobcategorystrings.h"

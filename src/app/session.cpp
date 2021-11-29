@@ -1,6 +1,5 @@
 #include "app/session.h"
 #include "info.h"
-#include "utils/platform_utils.h"
 
 #include <QCoreApplication>
 
