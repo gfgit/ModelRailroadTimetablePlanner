@@ -104,3 +104,53 @@ bool JobsHelper::removeAllJobs(sqlite3pp::database &db)
 
     return true;
 }
+
+JobStopDirectionHelper::JobStopDirectionHelper(sqlite3pp::database &db) :
+    mDb(db),
+    m_query(new sqlite3pp::query(mDb))
+{
+    int ret = m_query->prepare("SELECT g1.side,g2.side"
+                               " FROM stops"
+                               " LEFT JOIN station_gate_connections c1 ON c1.id=stops.in_gate_conn"
+                               " LEFT JOIN station_gate_connections c2 ON c2.id=stops.out_gate_conn"
+                               " LEFT JOIN station_gates g1 ON g1.id=c1.gate_id"
+                               " LEFT JOIN station_gates g2 ON g2.id=c2.gate_id"
+                               " WHERE stops.id=?");
+    if(ret != SQLITE_OK)
+        qWarning() << "JobStopDirectionHelper cannot prepare query";
+}
+
+JobStopDirectionHelper::~JobStopDirectionHelper()
+{
+    delete m_query;
+    m_query = nullptr;
+}
+
+utils::Side JobStopDirectionHelper::getStopOutSide(db_id stopId)
+{
+    m_query->bind(1, stopId);
+    if(m_query->step() != SQLITE_ROW)
+    {
+        //Stop doesn't exist
+        return utils::Side::NSides;
+    }
+
+    utils::Side in_side = utils::Side::NSides;
+    utils::Side out_side = utils::Side::NSides;
+
+    auto r = m_query->getRows();
+    if(r.column_type(0) != SQLITE_NULL)
+        in_side = utils::Side(r.get<int>(0));
+    if(r.column_type(1) != SQLITE_NULL)
+        out_side = utils::Side(r.get<int>(1));
+
+    //Prefer out side
+    if(out_side != utils::Side::NSides)
+        return out_side;
+
+    //We only have in side, invert it
+    if(in_side == utils::Side::NSides)
+        return in_side;
+
+    return in_side == utils::Side::East ? utils::Side::West : utils::Side::East;
+}
