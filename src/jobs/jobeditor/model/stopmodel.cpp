@@ -475,9 +475,6 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
     if(type == First || type == Last)
         return ErrorInvalidArgument;
 
-    if(type == TransitLineChange)
-        type = Transit;
-
     int defaultStopMsec = qMax(60, defaultStopTimeSec()) * 1000; //At least 1 minute
 
     StopType destType = type;
@@ -485,7 +482,7 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
     shiftStopsBy24hoursFrom(stops.at(firstRow).arrival);
 
     command q_setArrDep(mDb, "UPDATE stops SET arrival=?,departure=? WHERE id=?");
-    command q_setTransitType(mDb, "UPDATE stops SET transit=? WHERE id=?");
+    command q_setTransitType(mDb, "UPDATE stops SET type=? WHERE id=?");
 
     int msecOffset = 0;
 
