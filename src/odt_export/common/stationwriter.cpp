@@ -2,7 +2,7 @@
 
 #include "utils/platform_utils.h"
 
-#include "app/session.h"
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include "utils/jobcategorystrings.h"
 #include "utils/rs_utils.h"
@@ -284,6 +284,11 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
 
     query q_getStName(mDb, "SELECT name,short_name FROM stations WHERE id=?");
 
+    query q_getPrevStop(mDb, "SELECT id, station_id, MAX(departure) FROM stops"
+                             " WHERE job_id=? AND departure<?");
+    query q_getNextStop(mDb, "SELECT id, station_id, MIN(arrival) FROM stops"
+                             " WHERE job_id=? AND arrival>?");
+
     QString stationName;
     QString shortName;
     q_getStName.bind(1, stationId);
@@ -383,10 +388,12 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         //then it shouldn't be duplicated in 2 rows
 
         //Proviene, Parte
-        db_id tmpStId, unusedLine;
-        if(Session->getPrevStop(stopId, tmpStId, unusedLine))
+        q_getPrevStop.bind(1, stop.jobId);
+        q_getPrevStop.bind(2, stop.arrival);
+        if(q_getPrevStop.step() == SQLITE_ROW)
         {
-            q_getStName.bind(1, tmpStId);
+            db_id prevStId = q_getPrevStop.getRows().get<db_id>(1);
+            q_getStName.bind(1, prevStId);
             if(q_getStName.step() == SQLITE_ROW)
             {
                 stop.prevSt = q_getStName.getRows().get<QString>(0);
@@ -394,9 +401,13 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
             q_getStName.reset();
         }
 
-        if(Session->getNextStop(stopId, tmpStId, unusedLine))
+
+        q_getNextStop.bind(1, stop.jobId);
+        q_getNextStop.bind(2, stop.arrival);
+        if(q_getNextStop.step() == SQLITE_ROW)
         {
-            q_getStName.bind(1, tmpStId);
+            db_id nextStId = q_getNextStop.getRows().get<db_id>(1);
+            q_getStName.bind(1, nextStId);
             if(q_getStName.step() == SQLITE_ROW)
             {
                 stop.nextSt = q_getStName.getRows().get<QString>(0);
@@ -509,7 +520,8 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
 
         //Crossings, Passings
         QVector<JobEntry> passings;
-        Direction myDirection = Session->getStopDirection(stopId, stationId);
+        JobStopDirectionHelper dirHelper(mDb);
+        utils::Side myDirection = dirHelper.getStopOutSide(stopId);
 
         q_selectPassings.bind(1, stationId);
         q_selectPassings.bind(2, stop.arrival);
@@ -528,7 +540,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
             //QTime otherArr = pass.get<QTime>(3);
             //QTime otherDep = pass.get<QTime>(4);
 
-            Direction otherDir = Session->getStopDirection(otherStopId, stationId);
+            utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
             if(myDirection == otherDir)
                 passings.append({otherJobId, otherJobCat});

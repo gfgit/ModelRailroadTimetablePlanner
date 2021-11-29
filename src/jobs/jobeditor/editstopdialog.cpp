@@ -16,8 +16,6 @@
 
 #include <QtMath>
 
-#include "utils/platform_utils.h"
-
 #include "rscoupledialog.h"
 #include "model/rscouplinginterface.h"
 
@@ -25,6 +23,7 @@
 #include "model/stopcouplingmodel.h"
 #include "model/trainassetmodel.h"
 #include "model/jobpassingsmodel.h"
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include "utils/sqldelegate/modelpageswitcher.h"
 #include "utils/sqldelegate/customcompletionlineedit.h"
@@ -331,7 +330,8 @@ void EditStopDialog::calcPassings()
 {
     DEBUG_ENTRY;
 
-    Direction myDirection = Session->getStopDirection(curStop.stopId, curStop.stationId);
+    JobStopDirectionHelper dirHelper(Session->m_Db);
+    utils::Side myDirection = dirHelper.getStopOutSide(curStop.stopId);
 
     query q(Session->m_Db, "SELECT s.id, s.jobid, j.category, s.arrival, s.departure, s.platform"
                            " FROM stops s"
@@ -356,7 +356,7 @@ void EditStopDialog::calcPassings()
         e.departure = r.get<QTime>(4);
         e.platform = r.get<int>(5);
 
-        Direction otherDir = Session->getStopDirection(otherStopId, curStop.stationId);
+        utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
         if(myDirection == otherDir)
             passings.append(e); //Same direction -> Passing

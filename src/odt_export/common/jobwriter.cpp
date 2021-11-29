@@ -3,10 +3,10 @@
 #include "odtutils.h"
 #include <QXmlStreamWriter>
 
-#include "app/session.h"
-
 #include "utils/rs_utils.h"
 #include "utils/jobcategorystrings.h"
+
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include <QDebug>
 
@@ -777,7 +777,10 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         stopsRS.append({stationName, rsAsset});
 
         //Crossings / Passings
-        Direction myDir = Session->getStopDirection(stopId, stationId);
+
+        JobStopDirectionHelper dirHelper(mDb);
+
+        utils::Side myDir = dirHelper.getStopOutSide(stopId);
 
         QVector<JobEntry> passings;
 
@@ -798,7 +801,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
             //QTime otherArr = pass.get<QTime>(3);
             //QTime otherDep = pass.get<QTime>(4);
 
-            Direction otherDir = Session->getStopDirection(otherStopId, stationId);
+            utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
             if(myDir == otherDir)
                 passings.append({otherJobId, otherJobCat});
