@@ -32,11 +32,11 @@ public:
         db_id rsId;
         db_id jobId;
         db_id stationOrOwnerId;
-        int parentIdx;
-        int platform;
-        QTime time;
+        QString platform;
         QString rsName;
         QString stationOrOwnerName;
+        int parentIdx;
+        QTime time;
         JobCategory jobCategory;
     } RSItem;
 
