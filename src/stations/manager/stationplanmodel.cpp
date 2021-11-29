@@ -1,6 +1,5 @@
 #include "stationplanmodel.h"
 
-#include "utils/platform_utils.h"
 #include "utils/jobcategorystrings.h"
 
 #include <QColor>
@@ -8,18 +7,23 @@
 StationPlanModel::StationPlanModel(sqlite3pp::database &db, QObject *parent) :
     QAbstractTableModel(parent),
     mDb(db),
-    q_countPlanItems(mDb, "SELECT COUNT(id) FROM stops WHERE stationId=?"),
+    q_countPlanItems(mDb, "SELECT COUNT(id) FROM stops WHERE station_id=?"),
     q_selectPlan(mDb, "SELECT stops.id,"
+                      "stops.job_id,"
                       "jobs.category,"
-                      "jobs.id,"
                       "stops.arrival,"
                       "stops.departure,"
-                      "stops.platform,"
-                      "stops.transit"
+                      "stops.type,"
+                      "t1.name,"
+                      "t2.name"
                       " FROM stops"
-                      " JOIN jobs ON jobs.id=stops.jobId"
-                      " WHERE stops.stationId=?"
-                      " ORDER BY stops.arrival,stops.platform")
+                      " JOIN jobs ON jobs.id=stops.job_id"
+                      " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                      " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                      " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+                      " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
+                      " WHERE stops.station_id=?"
+                      " ORDER BY stops.arrival,stops.job_id")
 {
 }
 
@@ -79,7 +83,7 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
         case Departure:
             return item.departure;
         case Platform:
-            return utils::platformName(item.platform);
+            return item.platform;
         case Job:
             return JobCategoryName::jobName(item.jobId, item.cat);
         case Notes:
@@ -131,19 +135,23 @@ void StationPlanModel::loadPlan(db_id stId)
     if(count > 0)
     {
         QMap<QTime, StPlanItem> stopMap; //Order by Departure ASC
+        m_data.reserve(count);
 
         q_selectPlan.bind(1, stId);
         for(auto r : q_selectPlan)
         {
             StPlanItem curStop;
             curStop.stopId = r.get<db_id>(0);
-            curStop.cat = JobCategory(r.get<int>(1));
-            curStop.jobId = r.get<db_id>(2);
+            curStop.jobId = r.get<db_id>(1);
+            curStop.cat = JobCategory(r.get<int>(2));
             curStop.arrival = r.get<QTime>(3);
             curStop.departure = r.get<QTime>(4);
-            curStop.platform = r.get<int>(5);
             curStop.type = StPlanItem::ItemType::Normal;
-            int stopType = r.get<int>(6);
+            int stopType = r.get<int>(5);
+
+            curStop.platform = r.get<QString>(6);
+            if(curStop.platform.isEmpty())
+                curStop.platform = r.get<QString>(7); //Use out gate to get track name
 
             for(auto stop = stopMap.begin(); stop != stopMap.end(); /*nothing because of erase */)
             {

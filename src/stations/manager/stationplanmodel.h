@@ -15,7 +15,7 @@ typedef struct StPlanItem_
     db_id jobId;
     QTime arrival;
     QTime departure;
-    int platform;
+    QString platform;
 
     QString description;
 
