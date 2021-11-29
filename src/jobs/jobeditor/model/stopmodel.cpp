@@ -405,17 +405,11 @@ int StopModel::setStopType(const QModelIndex& idx, StopType type)
         return ErrorFirstLastTransit;
     }
 
-    //Fix possible wrong transit types
-    if(s.nextLine && type == Transit)
-        type = TransitLineChange;
-    else if (s.nextLine == 0 && type == TransitLineChange)
-        type = Transit;
-
     if(s.type == type)
         return NoError;
 
     //Cannot couple or uncouple in transits
-    if(type == Transit || type == TransitLineChange)
+    if(type == Transit)
     {
         q_getCoupled.bind(1, s.stopId);
         int res = q_getCoupled.step();
@@ -440,9 +434,9 @@ int StopModel::setStopType(const QModelIndex& idx, StopType type)
     stationsToUpdate.insert(s.stationId);
 
 
-    command q_setTransitType(mDb, "UPDATE stops SET transit=? WHERE id=?");
+    command q_setTransitType(mDb, "UPDATE stops SET type=? WHERE id=?");
 
-    if(type == Transit || type == TransitLineChange)
+    if(type == Transit)
         q_setTransitType.bind(1, Transit); //1 = Transit
     else
         q_setTransitType.bind(1, Normal); //0 = Normal
@@ -452,7 +446,7 @@ int StopModel::setStopType(const QModelIndex& idx, StopType type)
 
     s.type = type;
 
-    if(s.type == Transit || s.type == TransitLineChange)
+    if(s.type == Transit)
     {
         //Transit don't stop so departure is the same of arrival -> stop time = 0 minutes
         setDeparture(idx, s.arrival, true);
