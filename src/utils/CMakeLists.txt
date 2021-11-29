@@ -6,7 +6,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
   utils/colorview.h
   utils/colordelegate.h
-  utils/directiontype.h
   utils/file_format_names.h
   utils/imageviewer.h
   utils/jobcategorystrings.h

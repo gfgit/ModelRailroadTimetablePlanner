@@ -37,12 +37,7 @@ MeetingSession::MeetingSession() :
 
     jobLineWidth(6),
 
-    m_Db(nullptr),
-
-    q_getPrevStop(m_Db),
-    q_getNextStop(m_Db),
-
-    q_getKmDirection(m_Db)
+    m_Db(nullptr)
 {
     session = this; //Global singleton pointer
 
@@ -642,44 +637,12 @@ void MeetingSession::prepareQueryes()
 {
     DEBUG_COLOR_ENTRY(SHELL_YELLOW);
 
-    //FIXME: remove queries from MeetingSession
-//    if(q_getPrevStop.prepare("SELECT MAX(prev.departure),"
-//                              "prev.stationId,"
-//                              "seg.lineId"
-//                              " FROM stops prev"
-//                              " JOIN stops s ON s.jobId=prev.jobId AND prev.departure<s.arrival"
-//                              " JOIN jobsegments seg ON seg.id=s.segmentId"
-//                              " WHERE s.id=?") != SQLITE_OK)
-//    {
-//        throw database_error(m_Db);
-//    }
-
-//    if(q_getNextStop.prepare("SELECT MIN(nextS.arrival),"
-//                              "nextS.stationId,"
-//                              "seg.lineId"
-//                              " FROM stops nextS"
-//                              " JOIN stops s ON s.jobId=nextS.jobId AND nextS.arrival>s.departure"
-//                              " JOIN jobsegments seg ON seg.id=nextS.segmentId"
-//                              " WHERE s.id=?") != SQLITE_OK)
-//    {
-//        throw database_error(m_Db);
-//    }
-
-//    if(q_getKmDirection.prepare("SELECT pos_meters, direction FROM railways WHERE lineId=? AND stationId=?") != SQLITE_OK)
-//    {
-//        throw database_error(m_Db);
-//    }
-
+    //FIXME: remove queries from ViewManager
     viewManager->prepareQueries();
 }
 
 void MeetingSession::finalizeStatements()
 {
-    q_getPrevStop.finish();
-    q_getNextStop.finish();
-
-    q_getKmDirection.finish();
-
     viewManager->finalizeQueries();
 }
 
@@ -767,7 +730,7 @@ bool MeetingSession::releaseAllSavepoints()
 
 bool MeetingSession::revertAll()
 {
-    for(const QString& point : savepointList)
+    for(const QString& point : qAsConst(savepointList))
     {
         if(!revertToSavepoint(point))
             return false;
@@ -781,116 +744,6 @@ QColor MeetingSession::colorForCat(JobCategory cat)
     if(col.isValid())
         return col;
     return QColor(Qt::gray); //Error
-}
-
-bool MeetingSession::getPrevStop(db_id stopId, db_id& prevSt, db_id& lineId)
-{
-    bool ret = false;
-    q_getPrevStop.bind(1, stopId);
-    int rc = q_getPrevStop.step();
-    if(rc == SQLITE_ROW)
-    {
-        //MAX() always return a row but if type is NULL we ignore it
-        auto r = q_getPrevStop.getRows();
-        if(r.column_type(0) != SQLITE_NULL)
-        {
-            prevSt = r.get<db_id>(1);
-            lineId = r.get<db_id>(2);
-            ret = true;
-        }
-        else
-        {
-            prevSt = 0;
-            lineId = 0;
-        }
-    }
-    else
-    {
-        qWarning() << m_Db.error_code() << m_Db.error_msg();
-    }
-
-    q_getPrevStop.reset();
-    return ret;
-}
-
-bool MeetingSession::getNextStop(db_id stopId, db_id& nextSt, db_id& lineId)
-{
-    bool ret = false;
-    q_getNextStop.bind(1, stopId);
-    int rc = q_getNextStop.step();
-    if(rc == SQLITE_ROW)
-    {
-        //MAX() always return a row but if type is NULL we ignore it
-        auto r = q_getNextStop.getRows();
-        if(r.column_type(0) != SQLITE_NULL)
-        {
-            nextSt = r.get<db_id>(1);
-            lineId = r.get<db_id>(2);
-            ret = true;
-        }
-        else
-        {
-            nextSt = 0;
-            lineId = 0;
-        }
-    }
-    else
-    {
-        qWarning() << m_Db.error_code() << m_Db.error_msg();
-    }
-
-    q_getNextStop.reset();
-    return ret;
-}
-
-Direction MeetingSession::getStopDirection(db_id stopId, db_id stId)
-{
-    db_id otherSt = 0;
-    db_id lineId = 0;
-    bool isNext = false;
-
-    if(!getPrevStop(stopId, otherSt, lineId))
-    {
-        getNextStop(stopId, otherSt, lineId);
-        isNext = true;
-    }
-
-    Direction dir;
-    int kmInMetersA;
-    int kmInMetersB;
-
-    {
-        q_getKmDirection.bind(1, lineId);
-        q_getKmDirection.bind(2, stId);
-        q_getKmDirection.step();
-        auto r = q_getKmDirection.getRows();
-        kmInMetersA = r.get<int>(0);
-        dir = Direction(r.get<int>(1));
-        q_getKmDirection.reset();
-    }
-    {
-        q_getKmDirection.bind(1, lineId);
-        q_getKmDirection.bind(2, otherSt);
-        q_getKmDirection.step();
-        auto r = q_getKmDirection.getRows();
-        kmInMetersB = r.get<int>(0);
-        q_getKmDirection.reset();
-    }
-
-    bool absDir = (kmInMetersA > kmInMetersB);
-
-    bool ret = false;
-
-    if(isNext)
-        ret = !ret;
-
-    if(absDir)
-        ret = !ret;
-
-    if(dir == Direction::Right)
-        ret = !ret;
-
-    return Direction(ret);
 }
 
 void MeetingSession::locateAppdata()

@@ -2,7 +2,6 @@
 #define MEETINGSESSION_H
 
 #include "utils/types.h"
-#include "utils/directiontype.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
@@ -90,13 +89,6 @@ signals:
     void lineSegmentsChanged(db_id lineId);
     void lineRemoved(db_id lineId);
 
-//TODO: old methods, remove them
-public:
-
-    bool getPrevStop(db_id stopId, db_id &prevSt, db_id &lineId);
-    bool getNextStop(db_id stopId, db_id &nextSt, db_id &lineId);
-    Direction getStopDirection(db_id stopId, db_id stId);
-
 private:
     std::unique_ptr<ViewManager> viewManager;
 
@@ -121,14 +113,9 @@ public:
 
     int jobLineWidth;
 
-//Queries TODO: remove
+//Database
 public:
     database m_Db;
-
-    query q_getPrevStop;
-    query q_getNextStop;
-
-    query q_getKmDirection;
 
 //Categories:
 public:
