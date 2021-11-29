@@ -1,6 +1,5 @@
 #include "sessionrswriter.h"
 
-#include "utils/platform_utils.h"
 #include "utils/jobcategorystrings.h"
 #include "utils/rs_utils.h"
 #include "odtutils.h"
@@ -19,16 +18,20 @@ SessionRSWriter::SessionRSWriter(database &db, SessionRSMode mode, SessionRSOrde
     const auto sql = QStringLiteral("SELECT %1,"
                                     " %2, %3, %4,"
                                     " rs_list.id, rs_list.number, rs_models.name, rs_models.suffix, rs_models.type,"
-                                    " stops.platform,"
-                                    " stops.jobId, jobs.category, coupling.operation"
+                                    " t1.name,t2.name,"
+                                    " stops.job_id, jobs.category, coupling.operation"
                                     " FROM rs_list"
-                                    " JOIN coupling ON coupling.rsId=rs_list.id"
-                                    " JOIN stops ON stops.id=coupling.stopId"
-                                    " JOIN jobs ON jobs.id=stops.jobId"
+                                    " JOIN coupling ON coupling.rs_id=rs_list.id"
+                                    " JOIN stops ON stops.id=coupling.stop_id"
+                                    " JOIN jobs ON jobs.id=stops.job_id"
                                     " JOIN rs_models ON rs_models.id=rs_list.model_id"
+                                    " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                                    " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                                    " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+                                    " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
                                     " JOIN %5"
                                     " GROUP BY rs_list.id"
-                                    " ORDER BY %6, stops.arrival, stops.jobId, rs_list.model_id");
+                                    " ORDER BY %6, stops.arrival, stops.job_id, rs_list.model_id");
 
     QString temp = sql.arg(m_mode == SessionRSMode::StartOfSession ? "MIN(stops.arrival)" : "MAX(stops.departure)");
     if(m_order == SessionRSOrder::ByStation)
@@ -36,19 +39,19 @@ SessionRSWriter::SessionRSWriter(database &db, SessionRSMode mode, SessionRSOrde
         temp = temp
                 .arg("rs_list.owner_id")
                 .arg("rs_owners.name")
-                .arg("stops.stationId")
+                .arg("stops.station_id")
                 .arg("rs_owners ON rs_owners.id=rs_list.owner_id")
-                .arg("stops.stationId");
+                .arg("stops.station_id");
 
         q_getParentName.prepare("SELECT name FROM stations WHERE id=?");
     }
     else
     {
         temp = temp
-                .arg("stops.stationId")
+                .arg("stops.station_id")
                 .arg("stations.name")
                 .arg("rs_list.owner_id")
-                .arg("stations ON stations.id=stops.stationId")
+                .arg("stations ON stations.id=stops.station_id")
                 .arg("rs_list.owner_id");
 
         q_getParentName.prepare("SELECT name FROM rs_owners WHERE id=?");
@@ -271,9 +274,12 @@ db_id SessionRSWriter::writeTable(QXmlStreamWriter &xml, const QString& parentNa
 
         QString rsName = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix, modelSuffixLen, type);
 
-        int platform = rs.get<int>(9);
-        db_id jobId = rs.get<db_id>(10);
-        JobCategory jobCat = JobCategory(rs.get<int>(11));
+        QString platform = rs.get<QString>(9);
+        if(platform.isEmpty())
+            platform = rs.get<QString>(10); //Use out gate to get track name
+
+        db_id jobId = rs.get<db_id>(11);
+        JobCategory jobCat = JobCategory(rs.get<int>(12));
 
         if(parentId != lastParentId)
         {
@@ -285,7 +291,7 @@ db_id SessionRSWriter::writeTable(QXmlStreamWriter &xml, const QString& parentNa
 
         writeCell(xml, "rs_5f_table.A2", P5_style, rsName);
         writeCell(xml, "rs_5f_table.A2", P5_style, JobCategoryName::jobName(jobId, jobCat));
-        writeCell(xml, "rs_5f_table.A2", P5_style, utils::shortPlatformName(platform));
+        writeCell(xml, "rs_5f_table.A2", P5_style, platform);
         writeCell(xml, "rs_5f_table.A2", P5_style, time.toString("HH:mm"));
         writeCell(xml, "rs_5f_table.E2", P5_style, name);
 
