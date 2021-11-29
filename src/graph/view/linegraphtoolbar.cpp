@@ -15,6 +15,8 @@
 
 #include "app/session.h"
 
+#include <QEvent>
+
 #include <QHBoxLayout>
 
 LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
