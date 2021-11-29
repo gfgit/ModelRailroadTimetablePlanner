@@ -27,7 +27,7 @@ public:
         db_id jobId;
         QTime arrival;
         QTime departure;
-        int platform;
+        QString platform;
         JobCategory category;
     } Entry;
 

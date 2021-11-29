@@ -4,7 +4,6 @@
 
 #include "utils/model_roles.h"
 #include "utils/jobcategorystrings.h"
-#include "utils/platform_utils.h"
 
 JobPassingsModel::JobPassingsModel(QObject *parent) :
     QAbstractTableModel(parent)
@@ -68,7 +67,7 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
         case DepartureCol:
             return e.departure;
         case PlatformCol:
-            return utils::platformName(e.platform);
+            return e.platform;
         }
         break;
     }
