@@ -6,6 +6,8 @@
 
 #include "app/session.h"
 
+#include "stations/station_utils.h"
+
 #include <QtMath>
 
 StopModel::StopModel(database &db, QObject *parent) :
@@ -74,24 +76,23 @@ const QSet<db_id> &StopModel::getStationsToUpdate() const
     return stationsToUpdate;
 }
 
-LineType StopModel::getLineTypeAfterStop(db_id stopId) const
+bool StopModel::isRailwayElectrifiedAfterStop(db_id stopId) const
 {
     int row = getStopRow(stopId);
     if(row == -1)
-        return LineType(-1); //Error
+        return true; //Error
 
     const StopItem& item = stops.at(row);
-    query q(mDb, "SELECT type FROM lines WHERE id=?");
+    if(!item.nextSegment.segmentId)
+        return true;
 
-    if(item.nextLine)
-        q.bind(1, item.nextLine);
-    else
-        q.bind(1, item.curLine);
+    query q(mDb, "SELECT type FROM railway_segments WHERE id=?");
+    q.bind(1, item.nextSegment.segmentId);
     if(q.step() != SQLITE_ROW)
-        return LineType(-1); //Error
+        return true; //Error
 
-    LineType type = LineType(q.getRows().get<int>(0));
-    return type;
+    QFlags<utils::RailwaySegmentType> type = utils::RailwaySegmentType(q.getRows().get<int>(0));
+    return type.testFlag(utils::RailwaySegmentType::Electrified);
 }
 
 void StopModel::uncoupleStillCoupledAtLastStop()

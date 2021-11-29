@@ -131,7 +131,7 @@ public:
     const QSet<db_id> &getStationsToUpdate() const;
     inline void markRsToUpdate(db_id rsId) { rsToUpdate.insert(rsId); }
 
-    LineType getLineTypeAfterStop(db_id stopId) const;
+    bool isRailwayElectrifiedAfterStop(db_id stopId) const;
 
     inline StopItem getItemAt(int row) const { return stops.at(row); }
     inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
