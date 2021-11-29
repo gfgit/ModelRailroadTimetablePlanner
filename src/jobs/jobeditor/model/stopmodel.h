@@ -111,7 +111,7 @@ public:
     QString getDescription(const StopItem &s) const;
     void setDescription(const QModelIndex &idx, const QString &descr);
 
-    int calcTimeBetweenStInSecs(db_id stA, db_id stB, db_id lineId);
+    int calcTravelTime(db_id segmentId);
     int defaultStopTimeSec();
 
     std::pair<QTime, QTime> getFirstLastTimes() const;

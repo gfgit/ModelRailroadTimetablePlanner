@@ -903,18 +903,21 @@ void StopModel::addStop()
                 setDeparture(index(prevIdx, 0), s.arrival.addSecs(secs), false);
             }
         }
-        else
-        {
-            //First has olny NextLine
-            last.curLine = s.nextLine;
-        }
 
         /* Next stop must be at least one minute after
          * This is to prevent contemporary stops that will break ORDER BY arrival queries */
-        const QTime time = s.departure.addSecs(60);
+
+        int travelSecs = 60;
+        if(s.nextSegment.segmentId)
+            travelSecs = calcTravelTime(s.nextSegment.segmentId);
+
+        const QTime time = s.departure.addSecs(travelSecs);
         last.arrival = time;
         last.departure = last.arrival;
         last.stopId = createStop(mJobId, last.arrival, last.departure, 0);
+
+        if(s.nextSegment.segConnId)
+            updateCurrentInGate(last, s.nextSegment);
 
         if(autoMoveUncoupleToNewLast)
         {
@@ -1171,7 +1174,7 @@ void StopModel::setStation(const QPersistentModelIndex& idx, db_id stId)
             QTime arrival = prev.departure;
 
             //Add travel duration (At least 60 secs)
-            arrival = arrival.addSecs(qMax(60, calcTimeBetweenStInSecs(prev.stationId, stId, s.curLine)));
+            arrival = arrival.addSecs(qMax(60, calcTravelTime(prev.nextSegment.segmentId)));
             int secs = arrival.second();
             if(secs > 10)
             {
@@ -1447,9 +1450,32 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         //Update next station beause next segment changed
         StopItem& nextStop = stops[row + 1];
         nextStop.fromGate.gateConnId = 0; //Reset to trigger update
-        updateCurrentInGate(nextStop, s.nextSegment);
+        if(!updateCurrentInGate(nextStop, s.nextSegment))
+            return;
+
         if(lastUpdatedRow == row)
             lastUpdatedRow++; //We updated also next row
+
+        if(timeCalcEnabled)
+        {
+            const int secs = calcTravelTime(s.nextSegment.segmentId);
+            const QTime oldNextArr = nextStop.arrival;
+            const QTime oldNextDep = nextStop.departure;
+
+            nextStop.arrival = s.departure.addSecs(secs);
+
+            if(oldNextArr != nextStop.arrival)
+            {
+                if(!updateStopTime(nextStop, row + 1, true, oldNextArr, oldNextDep))
+                {
+                    //Failed, Reset to old values
+                    nextStop.arrival = oldNextArr;
+                    nextStop.departure = oldNextDep;
+                }
+
+                lastUpdatedRow = stops.count() - 2;
+            }
+        }
     }
 
     //Tell view to update
@@ -1543,16 +1569,19 @@ void StopModel::removeStop(const QModelIndex &idx)
             }
         }
 
-        if(prev.type != First)
-        {
-            //Set previous stop to be Last
-            //unless it's First: First remains of type Fisrt obviuosly
+        //Clear previous 'out' gate and next segment, set type to Normal, reset Departure so it's equal to Arrival
+        command cmd(mDb, "UPDATE stops SET out_gate_conn=NULL,next_segment_conn_id=NULL,type=0,departure=arrival WHERE id=?");
+        cmd.bind(1, prev.stopId);
+        cmd.execute();
 
-            //Reset Departure so it's equal to Arrival
-            //Before setting stop type = Last, otherwise setDeparture doesn't work
-            setDeparture(prevIdx, prev.arrival, false);
-            setStopType(prevIdx, Last);
-        }
+        prev.toGate = StopItem::Gate{};
+        prev.nextSegment = StopItem::Segment{};
+        prev.departure = prev.arrival;
+
+        //Set previous stop to be Last
+        //unless it's First: First remains of type Fisrt obviuosly
+        if(prev.type != First)
+            prev.type = Last;
 
         beginRemoveRows(QModelIndex(), row, row);
         deleteStop(s.stopId);
@@ -1807,26 +1836,24 @@ void StopModel::setTimeCalcEnabled(bool value)
     timeCalcEnabled = value;
 }
 
-int StopModel::calcTimeBetweenStInSecs(db_id stA, db_id stB, db_id lineId)
+int StopModel::calcTravelTime(db_id segmentId)
 {
     DEBUG_IMPORTANT_ENTRY;
 
-    query q(mDb, "SELECT max_speed FROM lines WHERE id=?");
-    q.bind(1, lineId);
+    query q(mDb, "SELECT max_speed_kmh,distance_meters FROM railway_segments WHERE id=?");
+    q.bind(1, segmentId);
     if(q.step() != SQLITE_ROW)
-        return 0; //Error
-    const double speedKmH = q.getRows().get<double>(0);
+        return 60; //Error
 
-    const double meters = 0; //lines::getStationsDistanceInMeters(mDb, lineId, stA, stB);
+    auto r = q.getRows();
+    const int speedKmH = r.get<int>(0);
+    const int meters = r.get<int>(1);
 
-    qDebug() << "Km:" << meters/1000.0 << "Speed:" << speedKmH;
-
-    if(qFuzzyIsNull(meters) || speedKmH < 1.0)
-        return 0; //Error
+    if(meters == 0 || speedKmH < 1.0)
+        return 60; //Error
 
     const double secs = (meters + accelerationDistMeters)/speedKmH * 3.6;
-    qDebug() << "Time:" << secs;
-    return qCeil(secs);
+    return qMin(60, qCeil(secs));
 }
 
 int StopModel::defaultStopTimeSec()
