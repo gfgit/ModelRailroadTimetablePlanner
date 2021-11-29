@@ -12,9 +12,9 @@ RSCouplingInterface::RSCouplingInterface(database &db, QObject *parent) :
     QObject(parent),
     stopsModel(nullptr),
     mDb(db),
-    q_deleteCoupling(mDb, "DELETE FROM coupling WHERE stopId=? AND rsId=?"),
+    q_deleteCoupling(mDb, "DELETE FROM coupling WHERE stop_id=? AND rs_id=?"),
     q_addCoupling(mDb, "INSERT INTO"
-                       " coupling(stopId,rsId,operation)"
+                       " coupling(stop_id,rs_id,operation)"
                        " VALUES(?, ?, ?)")
 {
 
@@ -31,7 +31,7 @@ void RSCouplingInterface::loadCouplings(StopModel *model, db_id stopId, db_id jo
     coupled.clear();
     uncoupled.clear();
 
-    query q(mDb, "SELECT rsId, operation FROM coupling WHERE stopId=?");
+    query q(mDb, "SELECT rs_id, operation FROM coupling WHERE stop_id=?");
     q.bind(1, m_stopId);
 
     for(auto rs : q)
@@ -69,11 +69,11 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
 
         db_id jobId = 0;
 
-        query q_RS_lastOp(mDb, "SELECT MAX(stops.arrival), coupling.operation, stops.jobId"
+        query q_RS_lastOp(mDb, "SELECT MAX(stops.arrival), coupling.operation, stops.job_id"
                                " FROM stops"
                                " JOIN coupling"
-                               " ON coupling.stopId=stops.id"
-                               " AND coupling.rsId=?"
+                               " ON coupling.stop_id=stops.id"
+                               " AND coupling.rs_id=?"
                                " AND stops.arrival<?");
         q_RS_lastOp.bind(1, rsId);
         q_RS_lastOp.bind(2, arrival);
@@ -175,10 +175,10 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
         //Check if there is a next coupling operation in the same job
         query q(mDb, "SELECT s2.id, s2.arrival, s2.stationId, stations.name"
                      " FROM coupling"
-                     " JOIN stops s2 ON s2.id=coupling.stopId"
+                     " JOIN stops s2 ON s2.id=coupling.stop_id"
                      " JOIN stops s1 ON s1.id=?"
-                     " JOIN stations ON stations.id=s2.stationId"
-                     " WHERE coupling.rsId=? AND coupling.operation=? AND s1.jobId=s2.jobId AND s1.arrival < s2.arrival");
+                     " JOIN stations ON stations.id=s2.station_id"
+                     " WHERE coupling.rs_id=? AND coupling.operation=? AND s1.job_id=s2.job_id AND s1.arrival < s2.arrival");
         q.bind(1, m_stopId);
         q.bind(2, rsId);
         q.bind(3, RsOp::Coupled);
@@ -245,12 +245,12 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
         coupled.removeAt(row);
 
         //Check if there is a next uncoupling operation
-        query q(mDb, "SELECT s2.id, MIN(s2.arrival), s2.stationId, stations.name"
+        query q(mDb, "SELECT s2.id, MIN(s2.arrival), s2.station_id, stations.name"
                      " FROM coupling"
-                     " JOIN stops s2 ON s2.id=coupling.stopId"
+                     " JOIN stops s2 ON s2.id=coupling.stop_id"
                      " JOIN stops s1 ON s1.id=?"
-                     " JOIN stations ON stations.id=s2.stationId"
-                     " WHERE coupling.rsId=? AND coupling.operation=? AND s2.arrival > s1.arrival AND s2.jobId=s1.jobId");
+                     " JOIN stations ON stations.id=s2.station_id"
+                     " WHERE coupling.rs_id=? AND coupling.operation=? AND s2.arrival > s1.arrival AND s2.job_id=s1.job_id");
         q.bind(1, m_stopId);
         q.bind(2, rsId);
         q.bind(3, RsOp::Uncoupled);
@@ -329,12 +329,12 @@ bool RSCouplingInterface::uncoupleRS(db_id rsId, const QString& rsName, bool on)
         uncoupled.append(rsId);
 
         //Check if there is a next uncoupling operation
-        query q(mDb, "SELECT s2.id, MIN(s2.arrival), s2.stationId, stations.name"
+        query q(mDb, "SELECT s2.id, MIN(s2.arrival), s2.station_id, stations.name"
                      " FROM coupling"
-                     " JOIN stops s2 ON s2.id=coupling.stopId"
+                     " JOIN stops s2 ON s2.id=coupling.stop_id"
                      " JOIN stops s1 ON s1.id=?"
-                     " JOIN stations ON stations.id=s2.stationId"
-                     " WHERE coupling.rsId=? AND coupling.operation=? AND s2.arrival > s1.arrival AND s2.jobId=s1.jobId");
+                     " JOIN stations ON stations.id=s2.station_id"
+                     " WHERE coupling.rs_id=? AND coupling.operation=? AND s2.arrival > s1.arrival AND s2.job_id=s1.job_id");
         q.bind(1, m_stopId);
         q.bind(2, rsId);
         q.bind(3, RsOp::Uncoupled);
@@ -406,13 +406,13 @@ bool RSCouplingInterface::uncoupleRS(db_id rsId, const QString& rsName, bool on)
 
 bool RSCouplingInterface::hasEngineAfterStop(bool *isElectricOnNonElectrifiedLine)
 {
-    query q_hasEngine(mDb, "SELECT coupling.rsId,MAX(rs_models.sub_type),MAX(stops.arrival)"
+    query q_hasEngine(mDb, "SELECT coupling.rs_id,MAX(rs_models.sub_type),MAX(stops.arrival)"
                            " FROM stops"
-                           " JOIN coupling ON coupling.stopId=stops.id"
-                           " JOIN rs_list ON rs_list.id=coupling.rsId"
+                           " JOIN coupling ON coupling.stop_id=stops.id"
+                           " JOIN rs_list ON rs_list.id=coupling.rs_id"
                            " JOIN rs_models ON rs_models.id=rs_list.model_id"
-                           " WHERE stops.jobId=? AND stops.arrival<=? AND rs_models.type=0"
-                           " GROUP BY coupling.rsId"
+                           " WHERE stops.job_id=? AND stops.arrival<=? AND rs_models.type=0"
+                           " GROUP BY coupling.rs_id"
                            " HAVING coupling.operation=1"
                            " LIMIT 1");
     q_hasEngine.bind(1, m_jobId);
