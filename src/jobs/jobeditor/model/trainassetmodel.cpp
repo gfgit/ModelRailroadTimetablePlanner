@@ -20,11 +20,11 @@ TrainAssetModel::TrainAssetModel(database& db, QObject *parent) :
 qint64 TrainAssetModel::recalcTotalItemCount()
 {
     query q(mDb, "SELECT COUNT(1) FROM("
-                 "SELECT coupling.rsId,MAX(stops.arrival)"
+                 "SELECT coupling.rs_id,MAX(stops.arrival)"
                  " FROM stops"
-                 " JOIN coupling ON coupling.stopId=stops.id"
-                 " WHERE stops.jobId=? AND stops.arrival<?"
-                 " GROUP BY coupling.rsId"
+                 " JOIN coupling ON coupling.stop_id=stops.id"
+                 " WHERE stops.job_id=? AND stops.arrival<?"
+                 " GROUP BY coupling.rs_id"
                  " HAVING coupling.operation=1)");
     q.bind(1, m_jobId);
     //HACK: 1 minute is the min interval between stops,
@@ -56,14 +56,14 @@ void TrainAssetModel::internalFetch(int first, int sortCol, int valRow, const QV
 
     //const char *whereCol;
 
-    QByteArray sql = "SELECT sub.rsId,sub.number,sub.name,sub.suffix,sub.type FROM("
-                     "SELECT coupling.rsId,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,MAX(stops.arrival)"
+    QByteArray sql = "SELECT sub.rs_id,sub.number,sub.name,sub.suffix,sub.type FROM("
+                     "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,MAX(stops.arrival)"
                      " FROM stops"
-                     " JOIN coupling ON coupling.stopId=stops.id"
-                     " JOIN rs_list ON rs_list.id=rsId"
+                     " JOIN coupling ON coupling.stop_id=stops.id"
+                     " JOIN rs_list ON rs_list.id=rs_id"
                      " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                     " WHERE stops.jobId=?3 AND stops.arrival<?4"
-                     " GROUP BY coupling.rsId"
+                     " WHERE stops.job_id=?3 AND stops.arrival<?4"
+                     " GROUP BY coupling.rs_id"
                      " HAVING coupling.operation=1) AS sub"
                      " ORDER BY sub.type,sub.name,sub.number,sub.suffix";
     //    switch (sortCol)
