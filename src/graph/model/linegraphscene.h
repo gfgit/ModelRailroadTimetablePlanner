@@ -276,7 +276,7 @@ private:
      * If selected stop got removed or doesn't belong to selected job it's cleared
      * Category of selected job gets updated if changed in the meantime
      */
-    void updateJobSelection();
+    static void updateJobSelection(sqlite3pp::database &db, JobStopEntry &job);
 
 private:
     friend class BackgroundHelper;

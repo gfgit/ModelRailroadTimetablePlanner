@@ -232,7 +232,9 @@ bool LineGraphScene::reloadJobs()
         lastSt = toSt;
     }
 
-    updateJobSelection();
+    JobStopEntry newSelection = selectedJob;
+    updateJobSelection(mDb, newSelection);
+    setSelectedJob(newSelection);
 
     return true;
 }
@@ -694,45 +696,45 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
     return true;
 }
 
-void LineGraphScene::updateJobSelection()
+void LineGraphScene::updateJobSelection(sqlite3pp::database &db, JobStopEntry &job)
 {
-    if(!selectedJob.jobId)
+    if(!job.jobId)
         return;
 
-    query q(mDb);
+    query q(db);
 
-    if(selectedJob.stopId)
+    if(job.stopId)
     {
         //Check if stop is valid
         q.prepare("SELECT job_id FROM stops WHERE id=?");
-        q.bind(1, selectedJob.stopId);
+        q.bind(1, job.stopId);
         if(q.step() == SQLITE_ROW)
         {
             db_id jobId = q.getRows().get<db_id>(0);
-            if(jobId != selectedJob.jobId)
-                selectedJob.stopId = 0; //Stop doesn't belong to this job
+            if(jobId != job.jobId)
+                job.stopId = 0; //Stop doesn't belong to this job
         }
         else
         {
             //This stop doesn't exist anymore
-            selectedJob.stopId = 0;
+            job.stopId = 0;
         }
     }
 
     q.prepare("SELECT category FROM jobs WHERE id=?");
-    q.bind(1, selectedJob.jobId);
+    q.bind(1, job.jobId);
     if(q.step() != SQLITE_ROW)
     {
         //Job doesn't exist anymore, clear selection
-        setSelectedJob(JobStopEntry{});
+        job = JobStopEntry{};
         return;
     }
 
     JobCategory newCategory = JobCategory(q.getRows().get<int>(0));
 
-    if(newCategory != selectedJob.category)
+    if(newCategory != job.category)
     {
-        selectedJob.category = newCategory;
+        job.category = newCategory;
     }
 }
 
