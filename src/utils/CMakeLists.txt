@@ -17,7 +17,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/types.h
   utils/combodelegate.h
   utils/model_roles.h
-  utils/platform_utils.h
   utils/worker_event_types.h
 
   utils/colordelegate.cpp
