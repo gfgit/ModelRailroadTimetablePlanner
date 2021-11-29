@@ -79,17 +79,17 @@ void RsPlanModel::loadPlan(db_id rsId)
     //TODO: load in thread with same query prepared form many models
     query q_selectOps(mDb,
                      "SELECT stops.id,"
-                     "stops.jobId,"
+                     "stops.job_id,"
                      "jobs.category,"
-                     "stops.stationId,"
+                     "stops.station_id,"
                      "stops.arrival,"
                      "stops.departure,"
                      "coupling.operation,"
                      "stations.name"
                      " FROM stops"
-                     " JOIN coupling ON coupling.stopId=stops.id AND coupling.rsId=?"
-                     " JOIN jobs ON jobs.id=stops.jobId"
-                     " JOIN stations ON stations.id=stops.stationId"
+                     " JOIN coupling ON coupling.stop_id=stops.id AND coupling.rs_id=?"
+                     " JOIN jobs ON jobs.id=stops.job_id"
+                     " JOIN stations ON stations.id=stops.station_id"
                      " ORDER BY stops.arrival");
 
     q_selectOps.bind(1, rsId);
