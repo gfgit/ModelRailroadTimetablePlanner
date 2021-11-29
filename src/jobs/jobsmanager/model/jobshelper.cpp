@@ -58,6 +58,15 @@ bool JobsHelper::removeJob(sqlite3pp::database &db, db_id jobId)
 
     if(ret == SQLITE_OK || ret == SQLITE_DONE)
     {
+        //Remove possible left over from editing
+        q.prepare("DELETE FROM old_stops WHERE job_id=?");
+        q.bind(1, jobId);
+        ret = q.step();
+        q.reset();
+    }
+
+    if(ret == SQLITE_OK || ret == SQLITE_DONE)
+    {
         q.prepare("DELETE FROM jobs WHERE id=?");
         q.bind(1, jobId);
         ret = q.step();
