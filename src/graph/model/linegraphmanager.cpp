@@ -29,6 +29,9 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     connect(session, &MeetingSession::lineSegmentsChanged, this, &LineGraphManager::onLineSegmentsChanged);
     connect(session, &MeetingSession::lineRemoved, this, &LineGraphManager::onLineRemoved);
 
+    //Jobs
+    connect(session, &MeetingSession::jobChanged, this, &LineGraphManager::onJobChanged);
+
     //Settings
     connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
     m_followJobOnGraphChange = AppSettings.getFollowSelectionOnGraphChange();
@@ -263,6 +266,41 @@ void LineGraphManager::onLineSegmentsChanged(db_id lineId)
 void LineGraphManager::onLineRemoved(db_id lineId)
 {
     clearGraphsOfObject(lineId, LineGraphType::RailwayLine);
+}
+
+void LineGraphManager::onJobChanged(db_id jobId, db_id oldJobId)
+{
+    //If job changed ID or category, update all scenes which had it selected
+
+    JobStopEntry selectedJob;
+    selectedJob.jobId = jobId;
+
+    LineGraphScene::updateJobSelection(Session->m_Db, selectedJob);
+
+    if(!selectedJob.jobId)
+        return; //Invalid job ID
+
+    if(activeScene)
+    {
+        JobStopEntry oldSelectedJob = activeScene->getSelectedJob();
+        if(oldSelectedJob.jobId == oldJobId)
+        {
+            activeScene->setSelectedJob(selectedJob);
+            activeScene->reloadJobs();
+        }
+    }
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        JobStopEntry oldSelectedJob = scene->getSelectedJob();
+        if(oldSelectedJob.jobId == oldJobId)
+        {
+            scene->setSelectedJob(selectedJob);
+        }
+
+        if(scene->getSelectedJob().jobId == selectedJob.jobId)
+            scene->reloadJobs();
+    }
 }
 
 void LineGraphManager::updateGraphOptions()
