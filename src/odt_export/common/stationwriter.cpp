@@ -37,7 +37,7 @@ void StationWriter::insertStop(QXmlStreamWriter &xml, const Stop& stop, bool fir
         writeCell(xml, "stationtable.A2", "P4", stop.departure.toString("HH:mm")); //Departure in bold
     }
     writeCell(xml, "stationtable.A2", P3_style, JobCategoryName::jobName(stop.jobId, stop.jobCat));
-    writeCell(xml, "stationtable.A2", P3_style, utils::shortPlatformName(stop.platform));
+    writeCell(xml, "stationtable.A2", P3_style, stop.platform);
     writeCell(xml, "stationtable.A2", P3_style, stop.prevSt);
     writeCell(xml, "stationtable.A2", P3_style, stop.nextSt);
 
@@ -54,28 +54,33 @@ void StationWriter::insertStop(QXmlStreamWriter &xml, const Stop& stop, bool fir
 StationWriter::StationWriter(database &db) :
     mDb(db),
     q_getJobsByStation(mDb, "SELECT stops.id,"
-                            "stops.jobId,"
+                            "stops.job_id,"
                             "jobs.category,"
                             "stops.arrival,"
                             "stops.departure,"
-                            "stops.platform,"
-                            "stops.transit,"
-                            "stops.description"
+                            "stops.type,"
+                            "stops.description,"
+                            "t1.name,"
+                            "t2.name"
                             " FROM stops"
-                            " JOIN jobs ON jobs.id=stops.jobId"
-                            " WHERE stops.stationId=?"
-                            " ORDER BY stops.arrival,stops.platform"),
+                            " JOIN jobs ON jobs.id=stops.job_id"
+                            " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                            " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                            " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+                            " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
+                            " WHERE stops.station_id=?"
+                            " ORDER BY stops.arrival,stops.job_id"),
 
-    q_selectPassings(mDb, "SELECT stops.id,stops.jobid,jobs.category"
-                        " FROM stops"
-                        " JOIN jobs ON jobs.id=stops.jobId"
-                        " WHERE stops.stationId=? AND stops.departure>=? AND stops.arrival<=? AND stops.jobId<>?"),
-    q_getStopCouplings(mDb, "SELECT coupling.rsId,"
+    q_selectPassings(mDb, "SELECT stops.id,stops.job_id,jobs.category"
+                          " FROM stops"
+                          " JOIN jobs ON jobs.id=stops.job_id"
+                          " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? AND stops.job_id<>?"),
+    q_getStopCouplings(mDb, "SELECT coupling.rs_id,"
                             "rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
                             " FROM coupling"
-                            " JOIN rs_list ON rs_list.id=coupling.rsId"
+                            " JOIN rs_list ON rs_list.id=coupling.rs_id"
                             " JOIN rs_models ON rs_models.id=rs_list.model_id"
-                            " WHERE coupling.stopId=? AND coupling.operation=?")
+                            " WHERE coupling.stop_id=? AND coupling.operation=?")
 {
 
 }
@@ -306,10 +311,10 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeCharacters(Odt::tr("Station: %1%2")
-                        .arg(stationName)
-                        .arg(shortName.isEmpty() ?
-                                 QString() :
-                                 Odt::tr(" (%1)").arg(shortName)));
+                            .arg(stationName)
+                            .arg(shortName.isEmpty() ?
+                                     QString() :
+                                     Odt::tr(" (%1)").arg(shortName)));
     xml.writeEndElement();
 
     //Vertical space
@@ -380,9 +385,14 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         stop.jobCat = JobCategory(r.get<int>(2));
         stop.arrival = r.get<QTime>(3);
         stop.departure = r.get<QTime>(4);
-        stop.platform = r.get<int>(5);
-        bool isTransit = r.get<bool>(6);
-        stop.description = r.get<QString>(7);
+        const int stopType = r.get<int>(5);
+        stop.description = r.get<QString>(6);
+
+        stop.platform = r.get<QString>(7);
+        if(stop.platform.isEmpty())
+            stop.platform = r.get<QString>(8); //Use out gate to get track name
+
+        const bool isTransit = stopType == 1;
 
         //BIG TODO: if this is First or Last stop of this job
         //then it shouldn't be duplicated in 2 rows
