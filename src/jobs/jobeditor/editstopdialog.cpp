@@ -333,10 +333,15 @@ void EditStopDialog::calcPassings()
     JobStopDirectionHelper dirHelper(Session->m_Db);
     utils::Side myDirection = dirHelper.getStopOutSide(curStop.stopId);
 
-    query q(Session->m_Db, "SELECT s.id, s.jobid, j.category, s.arrival, s.departure, s.platform"
+    query q(Session->m_Db, "SELECT s.id, s.job_id, jobs.category, s.arrival, s.departure,"
+                           "t1.name,t2.name"
                            " FROM stops s"
-                           " JOIN jobs j ON j.id=s.jobId"
-                           " WHERE s.stationId=? AND s.departure >=? AND s.arrival<=? AND s.jobId <> ?");
+                           " JOIN jobs ON jobs.id=s.job_id"
+                           " LEFT JOIN station_gate_connections g1 ON g1.id=s.in_gate_conn"
+                           " LEFT JOIN station_gate_connections g2 ON g2.id=s.out_gate_conn"
+                           " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+                           " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
+                           " WHERE s.station_id=? AND s.departure >=? AND s.arrival<=? AND s.job_id <> ?");
 
     q.bind(1, curStop.stationId);
     q.bind(2, curStop.arrival);
@@ -355,6 +360,10 @@ void EditStopDialog::calcPassings()
         e.arrival = r.get<QTime>(3);
         e.departure = r.get<QTime>(4);
         e.platform = r.get<int>(5);
+
+        e.platform = r.get<QString>(6);
+        if(e.platform.isEmpty())
+            e.platform = r.get<QString>(7); //Use out gate to get track name
 
         utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
