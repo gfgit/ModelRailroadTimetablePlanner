@@ -19,6 +19,8 @@
 #include <QMenu>
 #include <QAction>
 
+#include <QTimerEvent>
+
 #include "viewmanager/viewmanager.h"
 
 
@@ -98,9 +100,9 @@ void RsErrorsWidget::taskFinished()
     timerId = startTimer(1000); //Hide progressBar after 1 second
 }
 
-void RsErrorsWidget::timerEvent(QTimerEvent *event)
+void RsErrorsWidget::timerEvent(QTimerEvent *e)
 {
-    if(event->timerId() == timerId)
+    if(e->timerId() == timerId)
     {
         killTimer(timerId);
         timerId = 0;

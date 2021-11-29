@@ -16,7 +16,7 @@ public:
     explicit RsErrorsWidget(QWidget *parent = nullptr);
 
 protected:
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent *e) override;
 
 private slots:
     void startTask();
