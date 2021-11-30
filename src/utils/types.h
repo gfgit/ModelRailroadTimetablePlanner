@@ -23,14 +23,13 @@ enum class RsEngineSubType : qint8
     NTypes
 };
 
-typedef enum {
+enum class StopType {
     ToggleType = -1, //Used as flag in StopModel::setStopTypeRange()
     Normal = 0,
     Transit,
-    TransitLineChange, //FIXME: remove
     First,
     Last
-} StopType;
+};
 
 typedef enum {
     Uncoupled = 0,

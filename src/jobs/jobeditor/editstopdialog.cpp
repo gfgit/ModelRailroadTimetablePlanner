@@ -182,7 +182,7 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
         QTime minArrival = prevStop.departure.addSecs(60);
         ui->arrivalTimeEdit->setMinimumTime(minArrival);
 
-        if(curStop.type == Normal)
+        if(curStop.type == StopType::Normal)
             minArrival = minArrival.addSecs(60); //At least 1 minute stop for normal stops
         ui->departureTimeEdit->setMinimumTime(minArrival);
 
@@ -240,12 +240,12 @@ void EditStopDialog::updateInfo()
 
     ui->descriptionEdit->setPlainText(descr);
 
-    if(curStop.type == First)
+    if(curStop.type == StopType::First)
     {
         ui->arrivalTimeEdit->setEnabled(false);
         ui->departureTimeEdit->setEnabled(true);
     }
-    else if (curStop.type == Last || curStop.type == Transit || curStop.type == TransitLineChange)
+    else if (curStop.type == StopType::Last || curStop.type == StopType::Transit)
     {
         ui->departureTimeEdit->setEnabled(false);
         ui->arrivalTimeEdit->setEnabled(true);
@@ -256,7 +256,7 @@ void EditStopDialog::updateInfo()
         ui->departureTimeEdit->setEnabled(true);
     }
 
-    if(curStop.type == Transit || curStop.type == TransitLineChange)
+    if(curStop.type == StopType::Transit)
     {
         //On transit you cannot couple/uncouple rollingstock
         ui->editCoupledBut->setEnabled(false);

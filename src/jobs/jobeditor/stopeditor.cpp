@@ -67,15 +67,14 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     arrEdit->setToolTip(QString());
     switch (item.type)
     {
-    case Normal:
+    case StopType::Normal:
     {
         arrEdit->setToolTip(tr("Press shift if you don't want to change also departure time."));
         arrEdit->setEnabled(true);
         depEdit->setEnabled(true);
         break;
     }
-    case Transit:
-    case TransitLineChange:
+    case StopType::Transit:
     {
         arrEdit->setEnabled(true);
 
@@ -83,13 +82,13 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         depEdit->setVisible(false);
         break;
     }
-    case First:
+    case StopType::First:
     {
         arrEdit->setEnabled(false);
         arrEdit->setVisible(false);
         break;
     }
-    case Last:
+    case StopType::Last:
     {
         depEdit->setEnabled(false);
         depEdit->setVisible(false);
@@ -103,7 +102,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         break;
     }
 
-    if(item.type == First)
+    if(item.type == StopType::First)
         stationsMatchModel->setFilter(0);
     else
         stationsMatchModel->setFilter(prevItem.stationId);
@@ -123,7 +122,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
 
     depEdit->setTime(item.departure);
 
-    if(item.type != First)
+    if(item.type != StopType::First)
     {
         /* Next stop must be at least one minute after
          * This is to prevent contemporary stops that will break ORDER BY arrival queries */
@@ -136,7 +135,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         //Normal stop: at least 1 minute stop
         //Transit, Last: departure = arrival
         QTime minDep = arrEdit->time();
-        if(item.type == Normal)
+        if(item.type == StopType::Normal)
             depEdit->setMinimumTime(minDep.addSecs(60));
         else
             depEdit->setMinimumTime(minDep);
@@ -227,7 +226,7 @@ void StopEditor::arrivalChanged(const QTime& arrival)
         dep = dep.addMSecs(diff);
     }
     QTime minDep = arrival;
-    if(oldItem.type == Normal)
+    if(oldItem.type == StopType::Normal)
     {
         minDep = arrival.addSecs(60); //At least stop for 1 minute in Normal stops
     }

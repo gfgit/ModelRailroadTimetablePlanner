@@ -147,7 +147,7 @@ void StationPlanModel::loadPlan(db_id stId)
             curStop.arrival = r.get<QTime>(3);
             curStop.departure = r.get<QTime>(4);
             curStop.type = StPlanItem::ItemType::Normal;
-            int stopType = r.get<int>(5);
+            StopType stopType = StopType(r.get<int>(5));
 
             curStop.platform = r.get<QString>(6);
             if(curStop.platform.isEmpty())
@@ -168,7 +168,7 @@ void StationPlanModel::loadPlan(db_id stId)
             }
 
             m_data.append(curStop);
-            if(stopType == Transit)
+            if(stopType == StopType::Transit)
             {
                 m_data.last().type = StPlanItem::ItemType::Transit;
             }
