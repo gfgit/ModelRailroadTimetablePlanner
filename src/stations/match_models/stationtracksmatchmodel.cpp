@@ -39,6 +39,21 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
 
         return items[idx.row()].name;
     }
+    case Qt::ToolTipRole:
+    {
+        if(!emptyRow && !ellipsesRow)
+        {
+            QString typeStr;
+            if(items[idx.row()].passenger && items[idx.row()].freight)
+                typeStr = tr("All");
+            else if(items[idx.row()].passenger)
+                typeStr = tr("Passenger");
+            else if(items[idx.row()].freight)
+                typeStr = tr("Freight");
+            return tr("Track <b>%1</b> for %2 traffic.").arg(items[idx.row()].name, typeStr);
+        }
+        break;
+    }
     case Qt::FontRole:
     {
         if(emptyRow)
