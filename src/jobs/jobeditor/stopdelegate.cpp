@@ -118,6 +118,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                 if(!nextSegmentElectrified)
                 {
                     //Next railway is not electrified, cross the lightning
+                    //Then keep red pen to draw next segment name
                     painter->setPen(QPen(Qt::red, 4));
                     painter->drawLine(lightningRect.topLeft(), lightningRect.bottomRight());
                 }
