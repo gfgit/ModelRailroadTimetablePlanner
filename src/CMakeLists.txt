@@ -1,4 +1,6 @@
 
+include(GNUInstallDirs)
+
 function(get_dll_library_from_import_library LIB_VAR OUT_VAR)
     # Locate DLL file
     # Sometimes we link to import libraries '*.dll.a' or '*.lib'
@@ -311,33 +313,31 @@ endforeach()
 ## Install and Deploy ##
 
 # Copy executable
-install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET}
-    RUNTIME
-    DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET})
 
 # Copy SVG icon
 install(FILES ${CMAKE_SOURCE_DIR}/files/icons/lightning/lightning.svg
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/icons)
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/icons)
 
 # For each .ts file install corrensponding .qm file
 foreach(TS_FILE ${MR_TIMETABLE_PLANNER_TS_FILES})
     get_filename_component(QM_FILE_NAME ${TS_FILE} NAME_WLE)
     install(FILES
         "${CMAKE_BINARY_DIR}/src/translations/${QM_FILE_NAME}.qm"
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/translations OPTIONAL)
+        DESTINATION ${CMAKE_INSTALL_BINDIR}/translations OPTIONAL)
 endforeach()
 
 if(WIN32)
     # Copy SQlite3 DLL
     get_dll_library_from_import_library(${SQLite3_LIBRARIES} SQLite3_LIBRARY_TO_INSTALL)
-    install(PROGRAMS ${SQLite3_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${SQLite3_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     # Copy ZLib DLL
     get_dll_library_from_import_library(${ZLIB_LIBRARIES} ZLIB_LIBRARY_TO_INSTALL)
-    install(PROGRAMS ${ZLIB_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${ZLIB_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     # Copy libzip DLL
-    install(PROGRAMS ${LibZip_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_PREFIX})
+    install(PROGRAMS ${LibZip_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     if(RUN_WINDEPLOYQT)
         if(NOT WINDEPLOYQT_EXE)
@@ -347,8 +347,8 @@ if(WIN32)
         # Use [[...]] to delay variable expansion
         install(CODE "
             message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE}\")
-            execute_process(COMMAND ${WINDEPLOYQT_EXE} [[${CMAKE_INSTALL_PREFIX}]]
-                WORKING_DIRECTORY [[${CMAKE_INSTALL_PREFIX}]]
+            execute_process(COMMAND ${WINDEPLOYQT_EXE} [[${CMAKE_INSTALL_BINDIR}]]
+                WORKING_DIRECTORY [[${CMAKE_INSTALL_BINDIR}]]
                 OUTPUT_VARIABLE WINDEPLOYQT_EXE_RESULT
                 ERROR_VARIABLE WINDEPLOYQT_EXE_RESULT)
 
@@ -358,5 +358,28 @@ if(WIN32)
             ")
     endif()
 endif()
+
+if(UNIX AND NOT APPLE)
+    set(LINUX_ICON_DIR_BASE "/usr/share/icons/hicolor")
+
+    # Install icons
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/256x256/${MR_TIMETABLE_PLANNER_TARGET}.png
+        DESTINATION ${LINUX_ICON_DIR_BASE}/256x256/apps/)
+
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/scalable/${MR_TIMETABLE_PLANNER_TARGET}.svg
+        DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/apps/)
+
+    # Install desktop file
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/${MR_TIMETABLE_PLANNER_TARGET}.desktop
+        DESTINATION /usr/share/applications/)
+
+    # Install mime type association
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.xml #x-mrtplanner-session-sqlite3.xml
+        DESTINATION /usr/share/mime/packages)
+
+    # Install mime type icon
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/application-x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.svg #application-x-mrtplanner-session-sqlite3.svg
+        DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/mimetypes)
+endif(UNIX AND NOT APPLE)
 
 ## Install end ##
