@@ -1,0 +1,14 @@
+[Desktop Entry]
+Name=Model Railroad Timetable Planner
+Comment=Database application to create and manage model railway sessions
+Comment[it]=Applicazione database per creare e gestire sessioni di plastici ferroviari
+Keywords=Train;Trains;Railway;Database;Model;Timetable
+Keywords[it]=Treno;Treni;Ferrovia;Plastico;Database;Orario
+Exec=/opt/mrtplanner/bin/mrtplanner %f
+Icon=mrtplanner
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Categories=Development;Utility;Database;
+MimeType=application/x-mrtplanner-sqlite3
+StartupWMClass=mrtplanner
