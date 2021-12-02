@@ -381,14 +381,15 @@ if(UNIX AND NOT APPLE)
 
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train.svg
         DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/mimetypes/
-        RENAME application-x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.png)
+        RENAME application-vnd.${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.png)
 
     # Install desktop file
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/${MR_TIMETABLE_PLANNER_TARGET}.desktop
         DESTINATION /usr/share/applications/)
 
     # Install mime type association
-    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.xml #x-mrtplanner-session-sqlite3.xml
+    #vnd.trainsoftware.mrtplanner-session-sqlite3.xml
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/vnd.${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.xml
         DESTINATION /usr/share/mime/packages)
 endif(UNIX AND NOT APPLE)
 
