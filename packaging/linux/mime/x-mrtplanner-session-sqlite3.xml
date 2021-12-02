@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mime-info xmlns='http://www.freedesktop.org/standards/shared-mime-info'>
+  <mime-type type="application/x-mrtplanner-session-sqlite3">
+    <comment>MRTPlanner Session database file</comment>
+    <comment xml:lang="it">Sessione Database MRTPlanner</comment>
+    <sub-class-of type="application/x-sqlite3"/>
+    <glob pattern="*.ttt"/>
+  </mime-type>
+</mime-info>
