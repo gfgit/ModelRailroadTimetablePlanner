@@ -388,8 +388,8 @@ if(UNIX AND NOT APPLE)
         DESTINATION /usr/share/applications/)
 
     # Install mime type association
-    #vnd.trainsoftware.mrtplanner-session-sqlite3.xml
-    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/vnd.${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.xml
+    #vnd.trainsoftware-mrtplanner.xml
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/vnd.${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}.xml
         DESTINATION /usr/share/mime/packages)
 endif(UNIX AND NOT APPLE)
 
