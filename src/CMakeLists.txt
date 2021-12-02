@@ -362,12 +362,26 @@ endif()
 if(UNIX AND NOT APPLE)
     set(LINUX_ICON_DIR_BASE "/usr/share/icons/hicolor")
 
-    # Install icons
-    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/256x256/${MR_TIMETABLE_PLANNER_TARGET}.png
-        DESTINATION ${LINUX_ICON_DIR_BASE}/256x256/apps/)
+    # Install PNG icons
+    set(MY_ICON_SIZES "16;24;32;64;128;256;512")
+    foreach(ICON_SIZE ${MY_ICON_SIZES})
+        install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train_${ICON_SIZE}.png
+            DESTINATION ${LINUX_ICON_DIR_BASE}/${ICON_SIZE}x${ICON_SIZE}/apps/
+            RENAME ${MR_TIMETABLE_PLANNER_TARGET}.png)
 
-    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/scalable/${MR_TIMETABLE_PLANNER_TARGET}.svg
-        DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/apps/)
+        install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train_${ICON_SIZE}.png
+            DESTINATION ${LINUX_ICON_DIR_BASE}/${ICON_SIZE}x${ICON_SIZE}/mimetypes/
+            RENAME application-x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.png)
+    endforeach()
+
+    # Install SVG icon
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train.svg
+        DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/apps/
+        RENAME ${MR_TIMETABLE_PLANNER_TARGET}.png)
+
+    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train.svg
+        DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/mimetypes/
+        RENAME application-x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.png)
 
     # Install desktop file
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/${MR_TIMETABLE_PLANNER_TARGET}.desktop
@@ -376,10 +390,6 @@ if(UNIX AND NOT APPLE)
     # Install mime type association
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.xml #x-mrtplanner-session-sqlite3.xml
         DESTINATION /usr/share/mime/packages)
-
-    # Install mime type icon
-    install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/mime/application-x-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.svg #application-x-mrtplanner-session-sqlite3.svg
-        DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/mimetypes)
 endif(UNIX AND NOT APPLE)
 
 ## Install end ##
