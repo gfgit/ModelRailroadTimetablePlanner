@@ -5,6 +5,6 @@
     <comment xml:lang="it">Sessione Database MRTPlanner</comment>
     <sub-class-of type="application/x-sqlite3"/>
     <glob pattern="*.ttt"/>
-  <alias type="application/x-mrtplanner-session-sqlite3"/>
+    <alias type="application/x-mrtplanner-session-sqlite3"/>
   </mime-type>
 </mime-info>
