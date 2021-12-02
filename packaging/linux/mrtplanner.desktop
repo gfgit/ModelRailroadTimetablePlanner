@@ -10,5 +10,5 @@ Terminal=false
 X-MultipleArgs=false
 Type=Application
 Categories=Development;Utility;Database;
-MimeType=application/x-mrtplanner-sqlite3
+MimeType=application/x-mrtplanner-session-sqlite3
 StartupWMClass=mrtplanner
