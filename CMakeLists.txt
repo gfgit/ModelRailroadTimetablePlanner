@@ -18,7 +18,7 @@ set(DB_FORMAT_VERSION 8)
 set(APP_PRODUCT_NAME "ModelRailroadTimetablePlanner")
 set(APP_DISPLAY_NAME "Model Railroad Timetable Planner")
 set(APP_COMPANY_NAME "Train Software")
-set(APP_COMPANY_NAME_DASHED "trainsoftware")
+set(APP_COMPANY_NAME_LOWER "trainsoftware")
 
 set(PROJECT_HOMEPAGE_URL "https://github.com/gfgit/ModelRailroadTimetablePlanner")
 set(APP_HELP_URL ${PROJECT_HOMEPAGE_URL})

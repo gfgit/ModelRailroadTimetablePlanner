@@ -6,7 +6,7 @@ set(MY_PACKAGE_MAINTAINER_EMAIL "gentilefilippo01@gmail.com")
 
 # these are cache variables, so they could be overwritten with -D,
 # ${namespace}-... could be your main project name, or company, or whatever
-set(CPACK_PACKAGE_NAME "${APP_COMPANY_NAME_DASHED}-${PROJECT_NAME}"
+set(CPACK_PACKAGE_NAME "${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}"
     CACHE STRING "The resulting package name"
 )
 # which is useful in case of packing only selected components instead of the whole thing
