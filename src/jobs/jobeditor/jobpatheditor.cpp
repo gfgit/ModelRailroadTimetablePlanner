@@ -496,7 +496,7 @@ void JobPathEditor::discardChanges()
 #endif
 
     //Update station views
-    emit Session->stationPlanChanged(stopModel->getStationsToUpdate());
+    emit Session->stationPlanChanged(stToUpdate);
 }
 
 db_id JobPathEditor::currentJobId() const
