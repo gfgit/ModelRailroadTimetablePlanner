@@ -750,7 +750,7 @@ void MeetingSession::locateAppdata()
     appDataPath = QDir::cleanPath(QStringLiteral("%1/%2/%3"))
                       .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
                       .arg(AppCompany)
-                      .arg(AppDisplayName);
+                      .arg(AppProductShort);
     qDebug() << appDataPath;
 }
 
