@@ -226,7 +226,7 @@ Section "Start Menu Shortcuts" sm_shorcuts
 	# Start Menu
 	SetShellVarContext current
         CreateDirectory "$SMPROGRAMS\${COMPANY_NAME}"
-        CreateShortCut "$SMPROGRAMS\${COMPANY_NAME}\${APP_PRODUCT}.lnk" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}" "" "$INSTDIR\icon.ico"
+        CreateShortCut "$SMPROGRAMS\${COMPANY_NAME}\${APP_NAME}.lnk" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}" "" "$INSTDIR\icon.ico"
 SectionEnd
 
 ; Open a section to register file type
@@ -321,7 +321,7 @@ FunctionEnd
 Section un.main_program
 
 	# Remove Start Menu launcher
-        Delete "$SMPROGRAMS\${COMPANY_NAME}\${APP_PRODUCT}.lnk"
+        Delete "$SMPROGRAMS\${COMPANY_NAME}\${APP_NAME}.lnk"
 	# Try to remove the Start Menu folder - this will only happen if it is empty
         RMDir "$SMPROGRAMS\${COMPANY_NAME}"
  
