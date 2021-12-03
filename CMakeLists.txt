@@ -33,21 +33,6 @@ set(MR_TIMETABLE_PLANNER_TARGET "mrtplanner")
 
 ## defines end ##
 
-# NSIS Installer
-if(WIN32)
-    configure_file(packaging/windows/NSIS/constants.nsh.in ${CMAKE_BINARY_DIR}/NSIS/constants.nsh @ONLY)
-    configure_file(packaging/windows/NSIS/installer.nsi ${CMAKE_BINARY_DIR}/NSIS/installer.nsi COPYONLY)
-endif()
-
-add_custom_target(NSIS
-    DEPENDS ${MR_TIMETABLE_PLANNER_TARGET}
-    #COMMAND TODO add NSIS compiler
-    SOURCES
-    packaging/windows/NSIS/constants.nsh.in
-    packaging/windows/NSIS/installer.nsi
-    packaging/windows/resources.rc.in
-    VERBATIM)
-
 ## CUSTOM CONFIGURATION ##
 
 option(CONFIG_GLOBAL_TRY_CATCH "Global try/catch at main()" OFF)

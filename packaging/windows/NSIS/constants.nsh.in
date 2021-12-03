@@ -19,7 +19,7 @@
 # This is the size (in kB) of all the files copied into "Program Files"
 !define INSTALLSIZE 8000
 
-!define MR_TIMETABLE_PLANNER_PATH "@CMAKE_BINARY_DIR@\debug\"
+!define MR_TIMETABLE_PLANNER_PATH "@CMAKE_INSTALL_PREFIX@\@CMAKE_INSTALL_BINDIR@"
 !define MR_TIMETABLE_PLANNER_EXTRA "@CMAKE_SOURCE_DIR@\files"
 !define MR_TIMETABLE_PLANNER_EXE "@MR_TIMETABLE_PLANNER_TARGET@.exe"
 !define MR_TIMETABLE_PLANNER_SETTINGS "mrtp_settings.ini"

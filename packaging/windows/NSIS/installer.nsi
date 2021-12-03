@@ -27,10 +27,10 @@ Unicode True
 SetCompressor /SOLID /FINAL lzma
   
 ;Default installation folder
-InstallDir "$PROGRAMFILES64\${COMPANY_NAME}\${APP_NAME}" ; x86_64 64-bit
+InstallDir "$PROGRAMFILES64\${COMPANY_NAME}\${APP_PRODUCT}" ; x86_64 64-bit
 
 ;Get installation folder from registry if available
-InstallDirRegKey HKCU "Software\${COMPANY_NAME} ${APP_NAME}" ""
+InstallDirRegKey HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}" ""
 
 ;Request application privileges for Windows Vista
 RequestExecutionLevel admin ;Require admin rights on NT6+ (When UAC is turned on)
@@ -53,7 +53,7 @@ ManifestDPIAware True
 #!define MUI_WELCOMEPAGE_TEXT "$(welcome_text)"
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE ${MR_TIMETABLE_PLANNER_LICENSE}
+!insertmacro MUI_PAGE_LICENSE "${MR_TIMETABLE_PLANNER_LICENSE}"
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -64,7 +64,7 @@ ManifestDPIAware True
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 
-!define MUI_FINISHPAGE_SHOWREADME ${MR_TIMETABLE_PLANNER_README}
+!define MUI_FINISHPAGE_SHOWREADME "${MR_TIMETABLE_PLANNER_README}"
 !define MUI_FINISHPAGE_SHOWREADME_TEXT "$(show_readme_label)"
 
 !insertmacro MUI_PAGE_FINISH
@@ -174,7 +174,7 @@ Section "Application" main_program
 	SetOutPath $INSTDIR\translations
         File ${MR_TIMETABLE_PLANNER_PATH}\translations\*.qm
   
-        SetOutPath "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}"
+        SetOutPath "$LOCALAPPDATA\${COMPANY_NAME}\${APP_PRODUCT}"
 	; Create empty settings file
         FileOpen $0 $OUTDIR\${MR_TIMETABLE_PLANNER_SETTINGS} w
 	FileClose $0
@@ -195,29 +195,29 @@ Section "Application" main_program
 	WriteUninstaller "$INSTDIR\uninstall.exe"
 
 	# Registry information for add/remove programs
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "DisplayName" "${COMPANY_NAME} - ${APP_NAME} - ${DESCRIPTION}"
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "InstallLocation" "$\"$INSTDIR$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "DisplayIcon" "$\"$INSTDIR\icon.ico$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "Publisher" "$\"${COMPANY_NAME}$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "HelpLink" "$\"${HELPURL}$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "URLUpdateInfo" "$\"${UPDATEURL}$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "URLInfoAbout" "$\"${ABOUTURL}$\""
-        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "DisplayVersion" "$\"${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}$\""
-        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "VersionMajor" ${VERSIONMAJOR}
-        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "VersionMinor" ${VERSIONMINOR}
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "DisplayName" "${COMPANY_NAME} - ${APP_PRODUCT} - ${DESCRIPTION}"
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "UninstallString" "$\"$INSTDIR\uninstall.exe$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "QuietUninstallString" "$\"$INSTDIR\uninstall.exe$\" /S"
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "InstallLocation" "$\"$INSTDIR$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "DisplayIcon" "$\"$INSTDIR\icon.ico$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "Publisher" "$\"${COMPANY_NAME}$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "HelpLink" "$\"${HELPURL}$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "URLUpdateInfo" "$\"${UPDATEURL}$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "URLInfoAbout" "$\"${ABOUTURL}$\""
+        WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "DisplayVersion" "$\"${VERSIONMAJOR}.${VERSIONMINOR}.${VERSIONBUILD}$\""
+        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "VersionMajor" ${VERSIONMAJOR}
+        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "VersionMinor" ${VERSIONMINOR}
 	# There is no option for modifying or repairing the install
-        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "NoModify" 1
-        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "NoRepair" 1
+        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "NoModify" 1
+        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "NoRepair" 1
 	# Set the INSTALLSIZE constant (!defined at the top of this script) so Add/Remove Programs can accurately report the size
-        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "EstimatedSize" ${INSTALLSIZE}
+        WriteRegDWORD HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "EstimatedSize" ${INSTALLSIZE}
 	
-        WriteRegStr HKCU "Software\${COMPANY_NAME} ${APP_NAME}" "" $INSTDIR
-        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_NAME}" "VersionMajor" "${VERSIONMAJOR}"
-        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_NAME}" "VersionMinor" "${VERSIONMINOR}"
-        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_NAME}" "VersionRevision" "77"
-        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_NAME}" "VersionBuild" "${VERSIONBUILD}"
+        WriteRegStr HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}" "" $INSTDIR
+        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}" "VersionMajor" "${VERSIONMAJOR}"
+        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}" "VersionMinor" "${VERSIONMINOR}"
+        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}" "VersionRevision" "77"
+        WriteRegDWORD HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}" "VersionBuild" "${VERSIONBUILD}"
 
 SectionEnd
 
@@ -226,7 +226,7 @@ Section "Start Menu Shortcuts" sm_shorcuts
 	# Start Menu
 	SetShellVarContext current
         CreateDirectory "$SMPROGRAMS\${COMPANY_NAME}"
-        CreateShortCut "$SMPROGRAMS\${COMPANY_NAME}\${APP_NAME}.lnk" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}" "" "$INSTDIR\icon.ico"
+        CreateShortCut "$SMPROGRAMS\${COMPANY_NAME}\${APP_PRODUCT}.lnk" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE}" "" "$INSTDIR\icon.ico"
 SectionEnd
 
 ; Open a section to register file type
@@ -236,7 +236,7 @@ Section "File associations" file_ass
   
         WriteRegStr HKCU "Software\Classes\.ttt" "" "MR_TIMETABLE_PLANNER.session"
         WriteRegStr HKCU "Software\Classes\.ttt" "PerceivedType" "document"
-        WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session" "" "Train Timetable Session File"
+        WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session" "" "MRTPlanner Timetable Session File"
         WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session\DefaultIcon" "" "$INSTDIR\${MR_TIMETABLE_PLANNER_EXE},0"
         WriteRegStr HKCU "Software\Classes\MR_TIMETABLE_PLANNER.session\shell\open\command" "" '$INSTDIR\${MR_TIMETABLE_PLANNER_EXE} "%1"'
   
@@ -294,7 +294,7 @@ Function .onInit
 
 	!insertmacro MUI_LANGDLL_DISPLAY
 
-        ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}" "UninstallString"
+        ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}" "UninstallString"
 	${If} $0 != ""
 	${AndIf} ${Cmd} `MessageBox MB_YESNO|MB_ICONQUESTION "$(unist_previous_msg)" /SD IDYES IDYES`
 		!insertmacro UninstallExisting $0 $0
@@ -321,7 +321,7 @@ FunctionEnd
 Section un.main_program
 
 	# Remove Start Menu launcher
-        Delete "$SMPROGRAMS\${COMPANY_NAME}\${APP_NAME}.lnk"
+        Delete "$SMPROGRAMS\${COMPANY_NAME}\${APP_PRODUCT}.lnk"
 	# Try to remove the Start Menu folder - this will only happen if it is empty
         RMDir "$SMPROGRAMS\${COMPANY_NAME}"
  
@@ -337,11 +337,11 @@ Section un.main_program
 	
 	# Ask user if they want to delete or keep log files. If they choose to keep them AppData folder is not removed
 	MessageBox MB_YESNO "$(keep_logs_message)" IDYES delete_settings
-                RMDir /r "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}\logs"
+                RMDir /r "$LOCALAPPDATA\${COMPANY_NAME}\${APP_PRODUCT}\logs"
 	
 delete_settings:	
-        Delete "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}\${MR_TIMETABLE_PLANNER_SETTINGS}"
-        RMDir "$LOCALAPPDATA\${COMPANY_NAME}\${APP_NAME}"
+        Delete "$LOCALAPPDATA\${COMPANY_NAME}\${APP_PRODUCT}\${MR_TIMETABLE_PLANNER_SETTINGS}"
+        RMDir "$LOCALAPPDATA\${COMPANY_NAME}\${APP_PRODUCT}"
         RMDir "$LOCALAPPDATA\${COMPANY_NAME}"
 
 	Delete $INSTDIR\*.dll
@@ -361,8 +361,8 @@ delete_settings:
 	RMDir /r $INSTDIR\imageformats
  
 	# Remove uninstaller information from the registry
-        DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_NAME}"
-        DeleteRegKey HKCU "Software\${COMPANY_NAME} ${APP_NAME}"
+        DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\${COMPANY_NAME} ${APP_PRODUCT}"
+        DeleteRegKey HKCU "Software\${COMPANY_NAME} ${APP_PRODUCT}"
 	
 	; Unregister file associations in uninstall.exe
 	!macro AssocDeleteFileExtAndProgId _hkey _dotext _pid

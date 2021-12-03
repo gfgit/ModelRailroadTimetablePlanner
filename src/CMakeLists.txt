@@ -157,7 +157,7 @@ if(TARGET libzip::zip)
         libzip::zip
         )
 
-    get_target_property(LibZip_LIBRARY_TO_INSTALL libzip::zip IMPORT_LOCATION)
+    get_target_property(LibZip_LIBRARY_TO_INSTALL libzip::zip LOCATION)
 else()
     # LibZip was found with our Find Module
     # Set include directories manually
@@ -346,13 +346,13 @@ if(WIN32)
 
         # Use [[...]] to delay variable expansion
         install(CODE "
-            message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE}\")
-            execute_process(COMMAND ${WINDEPLOYQT_EXE} [[${CMAKE_INSTALL_BINDIR}]]
-                WORKING_DIRECTORY [[${CMAKE_INSTALL_BINDIR}]]
+            message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
+            execute_process(COMMAND ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
+                WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
                 OUTPUT_VARIABLE WINDEPLOYQT_EXE_RESULT
                 ERROR_VARIABLE WINDEPLOYQT_EXE_RESULT)
 
-            message(STATUS \${WINDEPLOYQT_EXE_RESULT})
+            message(STATUS \"${WINDEPLOYQT_EXE_RESULT}\")
 
             message(STATUS \"windeployqt Done.\")
             ")
