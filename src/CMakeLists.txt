@@ -377,11 +377,11 @@ if(UNIX AND NOT APPLE)
     # Install SVG icon
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train.svg
         DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/apps/
-        RENAME ${MR_TIMETABLE_PLANNER_TARGET}.png)
+        RENAME ${MR_TIMETABLE_PLANNER_TARGET}.svg)
 
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/icons/train.svg
         DESTINATION ${LINUX_ICON_DIR_BASE}/scalable/mimetypes/
-        RENAME application-vnd.${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.png)
+        RENAME application-vnd.${APP_COMPANY_NAME_LOWER}-${MR_TIMETABLE_PLANNER_TARGET}-session-sqlite3.svg)
 
     # Install desktop file
     install(FILES ${CMAKE_SOURCE_DIR}/packaging/linux/${MR_TIMETABLE_PLANNER_TARGET}.desktop
