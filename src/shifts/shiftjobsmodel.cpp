@@ -74,12 +74,10 @@ void ShiftJobsModel::loadShiftJobs(db_id shiftId)
 
     m_data.clear();
 
-    query q(mDb, "SELECT jobs.id,"
-                 " jobs.category,"
-                 " s1.arrival, s1.station_id,"
-                 " s2.departure, s2.station_id,"
-                 " st1.name,st2.name,"
-                 " MIN(s1.arrival), MAX(s1.departure)"
+    query q(mDb, "SELECT jobs.id, jobs.category,"
+                 " MIN(s1.arrival), s1.station_id,"
+                 " MAX(s2.departure), s2.station_id,"
+                 " st1.name,st2.name"
                  " FROM jobs"
                  " JOIN stops s1 ON s1.job_id=jobs.id"
                  " JOIN stops s2 ON s2.job_id=jobs.id"
