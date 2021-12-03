@@ -422,19 +422,23 @@ bool JobPathEditor::saveChanges()
         }
     }
 
+    //Store before they are cleared on commitChanges()
+    const auto stationsToUpdate = stopModel->getStationsToUpdate();
+    const auto rsToUpdate = stopModel->getRsToUpdate();
+
+    stopModel->commitChanges();
+
     //Update views
-    Session->getViewManager()->updateRSPlans(stopModel->getRsToUpdate());
+    Session->getViewManager()->updateRSPlans(rsToUpdate);
 
 #ifdef ENABLE_RS_CHECKER
     //Check RS for errors
     if(AppSettings.getCheckRSOnJobEdit())
-        Session->getBackgroundManager()->getRsChecker()->checkRs(stopModel->getRsToUpdate());
+        Session->getBackgroundManager()->getRsChecker()->checkRs(rsToUpdate);
 #endif
 
     //Update station views
-    emit Session->stationPlanChanged(stopModel->getStationsToUpdate());
-
-    stopModel->commitChanges();
+    emit Session->stationPlanChanged(stationsToUpdate);
 
     //TODO: redraw graphs
 
