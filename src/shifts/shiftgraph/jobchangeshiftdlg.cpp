@@ -56,13 +56,13 @@ void JobChangeShiftDlg::done(int ret)
         if(shiftId && shiftId != originalShiftId) //FIXME: allow unset shift (choose empty shift, shiftId==0)
         {
             sqlite3pp::query q(mDb);
-            q.prepare("SELECT MIN(arrival) FROM stops WHERE jobId=?");
+            q.prepare("SELECT MIN(departure) FROM stops WHERE job_id=?");
             q.bind(1, mJobId);
             q.step();
             QTime start = q.getRows().get<QTime>(0);
             q.reset();
 
-            q.prepare("SELECT MAX(arrival) FROM stops WHERE jobId=?");
+            q.prepare("SELECT MAX(arrival) FROM stops WHERE job_id=?");
             q.bind(1, mJobId);
             q.step();
             QTime end = q.getRows().get<QTime>(0);
@@ -78,7 +78,7 @@ void JobChangeShiftDlg::done(int ret)
                 return;
             }
 
-            q.prepare("UPDATE jobs SET shiftId=? WHERE id=?");
+            q.prepare("UPDATE jobs SET shift_id=? WHERE id=?");
             q.bind(1, shiftId);
             q.bind(2, mJobId);
             ret = q.step();
@@ -111,7 +111,7 @@ void JobChangeShiftDlg::onJobChanged(db_id jobId, db_id oldJobId)
 
 void JobChangeShiftDlg::setJob(db_id jobId)
 {
-    query q_getJobInfo(mDb, "SELECT shiftId,category FROM jobs WHERE id=?");
+    query q_getJobInfo(mDb, "SELECT shift_id,category FROM jobs WHERE id=?");
     q_getJobInfo.bind(1, jobId);
     if(q_getJobInfo.step() != SQLITE_ROW)
         return;
