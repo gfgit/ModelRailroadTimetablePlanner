@@ -30,6 +30,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
     const StopModel *model = static_cast<const StopModel *>(index.model());
     const StopItem item = model->getItemAt(index.row());
+    const bool isTransit = item.type == StopType::Transit;
 
     query q(mDb, "SELECT name FROM stations WHERE id=?");
     q.bind(1, item.stationId);
@@ -47,18 +48,15 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     if (option.state & QStyle::State_Selected)
         painter->fillRect(option.rect, option.palette.highlight());
 
-
     painter->setPen(QPen(option.palette.text(), 3));
 
     QFont font = option.font;
     font.setPointSize(12);
-    font.setBold(item.type != StopType::Transit); //TransitLineChange is bold too to notify the line change
+    font.setBold(!isTransit);
 
     painter->setFont(font);
 
     painter->setBrush(option.palette.text());
-
-    const bool isTransit = (item.type == StopType::Transit || item.type == StopType::TransitLineChange);
 
     const double top = rect.top();
     const double bottom = rect.bottom();
@@ -67,7 +65,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     const double height = rect.height();
 
     const double stHeight = top + (isTransit ? 0.0 : height * 0.1);
-    const double timeHeight = top + height * (item.type == TransitLineChange ? 0.3 : 0.4);
+    const double timeHeight = top + height * 0.4;
     const double lineHeight = top + height * (isTransit ? 0.6 : 0.7);
 
     const double arrX = left + width * (isTransit ? 0.4 : 0.2);
@@ -75,8 +73,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     const double lineX = left + (isTransit ? width * 0.1 : 0.0);
 
 
-    int addHere = index.data(ADDHERE_ROLE).toInt();
-    if(addHere == 0)
+    if(item.addHere == 0)
     {
         //Draw item
         //Station name
@@ -84,59 +81,60 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                           station,
                           QTextOption(Qt::AlignHCenter));
 
-        if(item.type != First)
+        if(item.type != StopType::First)
         {
             //Arrival
             painter->drawText(QRectF(arrX, timeHeight, width, bottom - timeHeight),
                               item.arrival.toString("HH:mm"));
         }
 
-        if(item.type == First || item.type == Normal) //Last, Transit, TransitLineChange don't have a separate departure
+        if(item.type == StopType::First || item.type == StopType::Normal) //Last, Transit, TransitLineChange don't have a separate departure
         {
             //Departure
             painter->drawText(QRectF(depX, timeHeight, width, bottom - timeHeight),
                               item.departure.toString("HH:mm"));
         }
 
-        if(item.nextLine != 0 || item.type == TransitLineChange || item.type == First)
+        if(item.type != StopType::Last && item.nextSegment.segmentId)
         {
-            q.prepare("SELECT type,name FROM lines WHERE id=?");
-            q.bind(1, item.nextLine);
-            q.step();
-            auto r = q.getRows();
-            LineType nextLineType = LineType(r.get<int>(0));
-            QString lineName = r.get<QString>(1);
-            q.reset();
+            //Last has no next segment so do not draw lightning
 
-            //Line name (on First or on line change)
-            painter->drawText(QRectF(lineX, lineHeight, width, bottom - lineHeight),
-                              tr("Line: %1").arg(lineName),
-                              QTextOption(Qt::AlignHCenter));
+            bool nextSegmentElectrified = model->isRailwayElectrifiedAfterRow(index.row());
+            bool prevSegmentElectrified = !nextSegmentElectrified; //Trigger change on First stop
 
-            if(item.type != Last)
+            if(item.type != StopType::First && index.row() >= 0)
             {
-                LineType oldLineType = LineType(-1);
-                if(item.type != First)
-                {
-                    q.bind(1, item.curLine);
-                    q.step();
-                    oldLineType = LineType(q.getRows().get<int>(0));
-                    q.reset();
-                }
+                //Get real previous railway type
+                prevSegmentElectrified = model->isRailwayElectrifiedAfterRow(index.row() - 1);
+            }
 
-                if(oldLineType != nextLineType)
-                {
-                    QSizeF s = QSizeF(renderer->defaultSize()).scaled(width, height / 2, Qt::KeepAspectRatio);
-                    QRectF lightningRect(left, top + height / 4, s.width(), s.height());
-                    renderer->render(painter, lightningRect);
+            if(nextSegmentElectrified != prevSegmentElectrified)
+            {
+                //Railway type changed, draw a lightning
+                QSizeF s = QSizeF(renderer->defaultSize()).scaled(width, height / 2, Qt::KeepAspectRatio);
+                QRectF lightningRect(left, top + height / 4, s.width(), s.height());
+                renderer->render(painter, lightningRect);
 
-                    if(nextLineType != LineType::Electric)
-                    {
-                        painter->setPen(QPen(Qt::red, 4));
-                        painter->drawLine(lightningRect.topLeft(), lightningRect.bottomRight());
-                    }
+                if(!nextSegmentElectrified)
+                {
+                    //Next railway is not electrified, cross the lightning
+                    //Then keep red pen to draw next segment name
+                    painter->setPen(QPen(Qt::red, 4));
+                    painter->drawLine(lightningRect.topLeft(), lightningRect.bottomRight());
                 }
             }
+
+            //Draw next segment name
+            q.prepare("SELECT name FROM railway_segments WHERE id=?");
+            q.bind(1, item.nextSegment.segmentId);
+            q.step();
+            auto r = q.getRows();
+            QString segName = r.get<QString>(0);
+            q.reset();
+
+            painter->drawText(QRectF(lineX, lineHeight, width, bottom - lineHeight),
+                              tr("Seg: %1").arg(segName),
+                              QTextOption(Qt::AlignHCenter));
         }
 
         if(isTransit)
@@ -152,7 +150,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
         }
 
     }
-    else if (addHere == 1)
+    else if (item.addHere == 1)
     {
         painter->drawText(rect, "Add Here", QTextOption(Qt::AlignCenter));
     }
@@ -170,12 +168,13 @@ QSize StopDelegate::sizeHint(const QStyleOptionViewItem &/*option*/,
     int w = 200;
     int h = 100;
     const StopModel *model = static_cast<const StopModel *>(index.model());
-    StopType type = model->getItemTypeAt(index.row());
-    if(type == Transit)
-        h = 60;
-    else if(type == TransitLineChange)
+    if(index.row() < 0 || index.row() >= model->rowCount())
+        return QSize(w, 30);
+
+    const StopItem& item = model->getItemAt(index.row());
+    if(item.type == StopType::Transit)
         h = 80;
-    if(index.data(ADDHERE_ROLE).toInt() != 0)
+    if(item.addHere != 0)
         h = 30;
     return QSize(w, h);
 }

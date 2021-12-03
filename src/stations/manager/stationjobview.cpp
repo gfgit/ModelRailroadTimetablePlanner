@@ -1,8 +1,6 @@
 #include "stationjobview.h"
 #include "ui_stationjobview.h"
 
-#include "utils/platform_utils.h"
-
 #include "app/session.h"
 
 #include "viewmanager/viewmanager.h"

@@ -194,13 +194,13 @@ void JobPathEditor::toggleTransit(const QModelIndex& index)
         return;
 
     StopType type = stopModel->getItemTypeAt(index.row());
-    if(type == First || type == Last)
+    if(type == StopType::First || type == StopType::Last)
         return;
 
-    if(type == Transit)
-        type = Normal;
+    if(type == StopType::Transit)
+        type = StopType::Normal;
     else
-        type = Transit;
+        type = StopType::Transit;
 
     int err = stopModel->setStopType(index, type);
 

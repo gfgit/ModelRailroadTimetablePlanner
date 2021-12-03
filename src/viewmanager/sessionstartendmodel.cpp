@@ -6,7 +6,6 @@
 
 #include "utils/jobcategorystrings.h"
 
-#include "utils/platform_utils.h"
 #include "utils/rs_utils.h"
 
 #include <QDebug>

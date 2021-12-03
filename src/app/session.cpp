@@ -1,6 +1,5 @@
 #include "app/session.h"
 #include "info.h"
-#include "utils/platform_utils.h"
 
 #include <QCoreApplication>
 
@@ -113,34 +112,34 @@ DB_Error MeetingSession::openDB(const QString &str, bool ignoreVersion)
 
     prepareQueryes();
 
-    //    }catch(const char *msg)
-    //    {
-    //        QMessageBox::warning(nullptr,
-    //                             QObject::tr("Error"),
-    //                             QObject::tr("Error while opening file:\n%1\n'%2'")
-    //                             .arg(str)
-    //                             .arg(msg));
-    //        throw;
-    //        return false;
-    //    }
-    //    catch(std::exception& e)
-    //    {
-    //        QMessageBox::warning(nullptr,
-    //                             QObject::tr("Error"),
-    //                             QObject::tr("Error while opening file:\n%1\n'%2'")
-    //                             .arg(str)
-    //                             .arg(e.what()));
-    //        throw;
-    //        return false;
-    //    }
-    //    catch(...)
-    //    {
-    //        QMessageBox::warning(nullptr,
-    //                             QObject::tr("Error"),
-    //                             QObject::tr("Unknown error while opening file:\n%1").arg(str));
-    //        throw;
-    //        return false;
-    //    }
+//    }catch(const char *msg)
+//    {
+//        QMessageBox::warning(nullptr,
+//                             QObject::tr("Error"),
+//                             QObject::tr("Error while opening file:\n%1\n'%2'")
+//                             .arg(str)
+//                             .arg(msg));
+//        throw;
+//        return false;
+//    }
+//    catch(std::exception& e)
+//    {
+//        QMessageBox::warning(nullptr,
+//                             QObject::tr("Error"),
+//                             QObject::tr("Error while opening file:\n%1\n'%2'")
+//                             .arg(str)
+//                             .arg(e.what()));
+//        throw;
+//        return false;
+//    }
+//    catch(...)
+//    {
+//        QMessageBox::warning(nullptr,
+//                             QObject::tr("Error"),
+//                             QObject::tr("Unknown error while opening file:\n%1").arg(str));
+//        throw;
+//        return false;
+//    }
 
 #ifdef ENABLE_RS_CHECKER
     if(settings.getCheckRSWhenOpeningDB())
@@ -575,7 +574,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "END");
     CHECK(result);
 
-    //FIXME: if setting default gate track but then delete track connection -> invalid state
+//FIXME: if setting default gate track but then delete track connection -> invalid state
 
 
 #undef CHECK
@@ -748,10 +747,11 @@ QColor MeetingSession::colorForCat(JobCategory cat)
 
 void MeetingSession::locateAppdata()
 {
-    appDataPath = QDir::cleanPath(QStringLiteral("%1/%2/%3"))
+    appDataPath = QStringLiteral("%1/%2/%3")
                       .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
                       .arg(AppCompany)
-                      .arg(AppDisplayName);
+                      .arg(AppProductShort);
+    appDataPath = QDir::cleanPath(appDataPath);
     qDebug() << appDataPath;
 }
 

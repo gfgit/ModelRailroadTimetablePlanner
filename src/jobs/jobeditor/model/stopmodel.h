@@ -28,33 +28,25 @@ public:
     {
         db_id segConnId = 0;
         db_id segmentId = 0;
-        int inTrackNum = -1;
+        int inTrackNum  = -1;
         int outTrackNum = -1;
         bool reversed = false;
     };
 
-    db_id stopId       = 0;
-    db_id stationId    = 0;
-
-    db_id trackId      = 0;
+    db_id stopId    = 0;
+    db_id stationId = 0;
+    db_id trackId   = 0;
 
     Gate fromGate;
     Gate toGate;
     Segment nextSegment;
 
-
-    db_id segment      = 0;
-    db_id nextSegment_  = 0;
-
-    db_id curLine      = 0;
-    db_id nextLine     = 0;
-
-    int addHere = 0;
-
     QTime arrival;
     QTime departure;
 
-    StopType type = Normal;
+    int addHere = 0;
+
+    StopType type = StopType::Normal;
 };
 
 //BIG TODO: when changing arrival to a station where a RS is (un)coupled, the station is marked for update but not the RS
@@ -132,6 +124,7 @@ public:
     inline void markRsToUpdate(db_id rsId) { rsToUpdate.insert(rsId); }
 
     bool isRailwayElectrifiedAfterStop(db_id stopId) const;
+    bool isRailwayElectrifiedAfterRow(int row) const;
 
     inline StopItem getItemAt(int row) const { return stops.at(row); }
     inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
@@ -220,7 +213,7 @@ private:
 
 private:
     void insertAddHere(int row, int type);
-    db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, int type = 0);
+    db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, StopType type);
     void deleteStop(db_id stopId);
 
     int propageteTimeOffset(int row, const int msecOffset);
