@@ -1743,6 +1743,9 @@ void StopModel::onExternalShiftChange(db_id shiftId, db_id jobId)
 {
     if(jobId == mJobId)
     {
+        if(shiftId == jobShiftId && shiftId != newShiftId)
+            return; //This happens when notifying job was removed from previous shift, do nothing
+
         //Don't start stop/info editing because the change was already made by JobsModel
         //Prevent discarding the change by updating also original shift
         jobShiftId = newShiftId = shiftId;
@@ -2389,7 +2392,8 @@ bool StopModel::commitChanges()
 
     oldCategory = category;
 
-    emit Session->shiftJobsChanged(jobShiftId, oldJobId);
+    if(jobShiftId != newShiftId)
+        emit Session->shiftJobsChanged(jobShiftId, oldJobId);
     emit Session->shiftJobsChanged(newShiftId, mNewJobId);
     jobShiftId = newShiftId;
 
