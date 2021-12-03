@@ -1,6 +1,6 @@
 #include "shiftmanager.h"
 
-#include "shiftsqlmodel.h"
+#include "shiftsmodel.h"
 #include "utils/sqldelegate/modelpageswitcher.h"
 
 #include "app/session.h"
