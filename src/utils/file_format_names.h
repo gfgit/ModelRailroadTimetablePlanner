@@ -13,7 +13,7 @@ public:
     static constexpr const char *allFiles = QT_TRANSLATE_NOOP("FileFormats", "All Files (*.*)");
     static constexpr const char *odsFormat = QT_TRANSLATE_NOOP("FileFormats", "OpenDocument Sheet (*.ods)");
     static constexpr const char *odtFormat = QT_TRANSLATE_NOOP("FileFormats", "OpenDocument Text (*.odt)");
-    static constexpr const char *tttFormat = QT_TRANSLATE_NOOP("FileFormats", "Train Timetable Session (*.ttt)");
+    static constexpr const char *tttFormat = QT_TRANSLATE_NOOP("FileFormats", "MRTPlanner Session (*.ttt)");
     static constexpr const char *sqliteFormat = QT_TRANSLATE_NOOP("FileFormats", "SQLite 3 Database (*.db *.sqlite *.sqlite3 *.db3)");
     static constexpr const char *svgFile = QT_TRANSLATE_NOOP("FileFormats", "SVG vectorial image (*.svg)");
     static constexpr const char *pdfFile = QT_TRANSLATE_NOOP("FileFormats", "Portable Document Format (*.pdf)");
