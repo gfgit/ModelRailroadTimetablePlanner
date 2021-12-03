@@ -11,7 +11,7 @@ using namespace sqlite3pp;
 
 class QToolBar;
 class QTableView;
-class ShiftSQLModel;
+class ShiftsModel;
 
 class QActionGroup;
 
@@ -37,7 +37,7 @@ private:
     QToolBar *toolBar;
     QTableView *view;
 
-    ShiftSQLModel *model;
+    ShiftsModel *model;
 
     QAction *act_New;
     QAction *act_Remove;

@@ -9,8 +9,7 @@
 
 #include "shiftitem.h"
 
-//FIXME: remove old shift model
-class ShiftSQLModel : public IPagedItemModel
+class ShiftsModel : public IPagedItemModel
 {
     Q_OBJECT
 
@@ -23,7 +22,7 @@ public:
 
     enum { BatchSize = 100 };
 
-    ShiftSQLModel(sqlite3pp::database &db, QObject *parent = nullptr);
+    ShiftsModel(sqlite3pp::database &db, QObject *parent = nullptr);
     bool event(QEvent *e) override;
 
     // QAbstractTableModel
