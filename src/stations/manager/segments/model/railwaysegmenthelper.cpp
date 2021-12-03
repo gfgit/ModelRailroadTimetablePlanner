@@ -109,7 +109,10 @@ bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
     }
 
     if(create)
+    {
         segmentId = mDb.last_insert_rowid();
+        emit Session->segmentAdded(segmentId);
+    }
 
     return true;
 }
@@ -129,4 +132,27 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
     emit Session->segmentRemoved(segmentId);
 
     return true;
+}
+
+bool RailwaySegmentHelper::findFirstLineOrSegment(db_id &graphObjId, bool &isLine)
+{
+    //Try to find first Railway Line
+    query q(mDb, "SELECT id, MIN(name) FROM lines");
+    if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+    {
+        isLine = true;
+        graphObjId = q.getRows().get<db_id>(0);
+        return true;
+    }
+
+    //Try with Railway Segment
+    q.prepare("SELECT id, MIN(name) FROM railway_segments");
+    if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+    {
+        isLine = false;
+        graphObjId = q.getRows().get<db_id>(0);
+        return true;
+    }
+
+    return false;
 }

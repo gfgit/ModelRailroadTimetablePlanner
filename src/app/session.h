@@ -80,11 +80,13 @@ signals:
     void stationRemoved(db_id stationId);
 
     //Segments
+    void segmentAdded(db_id segmentId);
     void segmentNameChanged(db_id segmentId);
     void segmentStationsChanged(db_id segmentId);
     void segmentRemoved(db_id segmentId);
 
     //Lines
+    void lineAdded(db_id lineId);
     void lineNameChanged(db_id lineId);
     void lineSegmentsChanged(db_id lineId);
     void lineRemoved(db_id lineId);

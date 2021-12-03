@@ -13,15 +13,15 @@ class database;
 class RailwaySegmentHelper
 {
 public:
-    typedef struct
+    struct GateInfo
     {
         db_id gateId = 0;
         db_id stationId = 0;
         QString stationName;
         QChar gateLetter;
-    } GateInfo;
+    };
 
-    typedef struct
+    struct SegmentInfo
     {
         db_id segmentId = 0;
         QString segmentName;
@@ -31,7 +31,7 @@ public:
 
         GateInfo from;
         GateInfo to;
-    } SegmentInfo;
+    };
 
 
     RailwaySegmentHelper(sqlite3pp::database &db);
@@ -47,6 +47,8 @@ public:
                         QString *outErrMsg);
 
     bool removeSegment(db_id segmentId, QString *outErrMsg);
+
+    bool findFirstLineOrSegment(db_id &graphObjId, bool &isLine);
 
 private:
     sqlite3pp::database &mDb;

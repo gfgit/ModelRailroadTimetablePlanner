@@ -121,11 +121,11 @@ bool LinesModel::addLine(const QString &name, db_id *outLineId)
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
     int ret = q_newStation.execute();
-    db_id stationId = mDb.last_insert_rowid();
+    db_id lineId = mDb.last_insert_rowid();
     sqlite3_mutex_leave(mutex);
     q_newStation.reset();
 
-    if((ret != SQLITE_OK && ret != SQLITE_DONE) || stationId == 0)
+    if((ret != SQLITE_OK && ret != SQLITE_DONE) || lineId == 0)
     {
         //Error
         if(outLineId)
@@ -143,11 +143,13 @@ bool LinesModel::addLine(const QString &name, db_id *outLineId)
     }
 
     if(outLineId)
-        *outLineId = stationId;
+        *outLineId = lineId;
 
     refreshData(); //Recalc row count
     setSortingColumn(NameCol);
     switchToPage(0); //Reset to first page and so it is shown as first row
+
+    emit Session->lineAdded(lineId);
 
     return true;
 }

@@ -34,3 +34,11 @@ LineGraphWidget::LineGraphWidget(QWidget *parent) :
     connect(view, &LineGraphView::syncToolbarToScene, toolBar, &LineGraphToolbar::resetToolbarToScene);
     connect(toolBar, &LineGraphToolbar::requestRedraw, m_scene, &LineGraphScene::reload);
 }
+
+bool LineGraphWidget::tryLoadGraph(db_id graphObjId, LineGraphType type)
+{
+    if(!m_scene)
+        return false;
+
+    return m_scene->loadGraph(graphObjId, type);
+}
