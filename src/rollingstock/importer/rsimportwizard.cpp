@@ -75,7 +75,13 @@ RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     setPage(ImportRsIdx,     importPage);
 
     if(resume)
+    {
         setStartId(SelectOwnersIdx);
+        setWindowTitle(tr("Continue Rollingstock Importation"));
+    }else
+    {
+        setWindowTitle(tr("Import Rollingstock"));
+    }
 
     resize(700, 500);
 }
