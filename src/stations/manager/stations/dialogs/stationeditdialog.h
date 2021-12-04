@@ -70,7 +70,7 @@ private slots:
 
 private:
     void addTrackConnInternal(int mode);
-    void updateSVGButtons(bool hasImage);
+    void updateSVGButtons(bool hasImage, bool canEdit = true);
 
 private:
     enum Tabs
