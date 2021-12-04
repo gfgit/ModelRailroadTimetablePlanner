@@ -53,44 +53,52 @@ void JobChangeShiftDlg::done(int ret)
         db_id shiftId = 0;
         QString shiftName;
         shiftCombo->getData(shiftId, shiftName);
-        if(shiftId && shiftId != originalShiftId) //FIXME: allow unset shift (choose empty shift, shiftId==0)
+
+        if(shiftId != originalShiftId)
         {
-            sqlite3pp::query q(mDb);
-            q.prepare("SELECT MIN(departure) FROM stops WHERE job_id=?");
-            q.bind(1, mJobId);
-            q.step();
-            QTime start = q.getRows().get<QTime>(0);
-            q.reset();
-
-            q.prepare("SELECT MAX(arrival) FROM stops WHERE job_id=?");
-            q.bind(1, mJobId);
-            q.step();
-            QTime end = q.getRows().get<QTime>(0);
-            q.reset();
-
-            ShiftBusyModel model(mDb);
-            model.loadData(shiftId, mJobId, start, end);
-            if(model.hasConcurrentJobs())
+            if(shiftId)
             {
-                OwningQPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
-                dlg->setModel(&model);
-                dlg->exec();
-                return;
+                //Setting a new shift, check if we overlap with other jobs
+                sqlite3pp::query q(mDb);
+                q.prepare("SELECT MIN(departure) FROM stops WHERE job_id=?");
+                q.bind(1, mJobId);
+                q.step();
+                QTime start = q.getRows().get<QTime>(0);
+                q.reset();
+
+                q.prepare("SELECT MAX(arrival) FROM stops WHERE job_id=?");
+                q.bind(1, mJobId);
+                q.step();
+                QTime end = q.getRows().get<QTime>(0);
+                q.reset();
+
+                ShiftBusyModel model(mDb);
+                model.loadData(shiftId, mJobId, start, end);
+                if(model.hasConcurrentJobs())
+                {
+                    OwningQPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
+                    dlg->setModel(&model);
+                    dlg->exec();
+                    return;
+                }
             }
 
-            q.prepare("UPDATE jobs SET shift_id=? WHERE id=?");
-            q.bind(1, shiftId);
-            q.bind(2, mJobId);
-            ret = q.step();
-            if(ret != SQLITE_OK && ret != SQLITE_DONE)
+            sqlite3pp::command cmd(mDb, "UPDATE jobs SET shift_id=? WHERE id=?");
+            if(shiftId)
+                cmd.bind(1, shiftId);
+            else
+                cmd.bind(1); //Bind NULL
+            cmd.bind(2, mJobId);
+            ret = cmd.execute();
+            if(ret != SQLITE_OK)
             {
                 //Error
                 QMessageBox::warning(this, tr("Shift Error"),
                                      tr("Error while setting shift <b>%1</b> to job <b>%2</b>.<br>"
                                         "Msg: %3")
-                                     .arg(shiftName)
-                                     .arg(JobCategoryName::jobName(mJobId, mCategory))
-                                     .arg(mDb.error_msg()));
+                                         .arg(shiftName)
+                                         .arg(JobCategoryName::jobName(mJobId, mCategory))
+                                         .arg(mDb.error_msg()));
                 return;
             }
 
