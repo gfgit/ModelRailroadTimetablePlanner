@@ -440,9 +440,7 @@ bool JobPathEditor::saveChanges()
     //Update station views
     emit Session->stationPlanChanged(stationsToUpdate);
 
-    //TODO: redraw graphs
-
-    //When updating the path selection gets cleared so we restore it FIXME CRASH
+    //When updating the path selection gets cleared so we restore it
     Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
 
     canSetJob = true;
