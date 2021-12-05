@@ -14,6 +14,15 @@ class database;
 
 class StopEditor;
 
+/*!
+ * \brief The StopDelegate class
+ *
+ * Item delegate to draw job stops in JobPathEditor
+ *
+ * \sa JobPathEditor
+ * \sa StopEditor
+ * \sa StopModel
+ */
 class StopDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
@@ -34,6 +43,28 @@ public:
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const override;
 
     void loadIcon(const QString& fileName);
+
+signals:
+    /*!
+     * \brief popupEditorSegmentCombo
+     *
+     * Tell editor to popup segment combo
+     * \sa StopEditor::popupSegmentCombo()
+     */
+    void popupEditorSegmentCombo();
+
+private slots:
+    /*!
+     * \brief onEditorSegmentChosen
+     * \param editor the instance which needs to be closed
+     *
+     * User has chosen a valid next segment for current stop
+     * If editor should be closed, close it and edit next stop if available
+     *
+     * \sa StopEditor::closeOnSegmentChosen()
+     * \sa StopEditor::nextSegmentChosen()
+     */
+    void onEditorSegmentChosen(StopEditor *editor);
 
 private:
     QSvgRenderer *renderer;

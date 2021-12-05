@@ -51,6 +51,14 @@ public:
 
 //BIG TODO: when changing arrival to a station where a RS is (un)coupled, the station is marked for update but not the RS
 //          if a stop is removed, couplings get removed too but RS are not marked for update, also if Job is removed, needs also RsErrorCheck
+/*!
+ * \brief The StopModel class
+ *
+ * Item model to load and manage job stops
+ *
+ * \sa JobPathEditor
+ * \sa StopEditor
+ */
 class StopModel : public QAbstractListModel
 {
     Q_OBJECT

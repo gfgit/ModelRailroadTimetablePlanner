@@ -19,7 +19,8 @@
 
 StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     QFrame(parent),
-    model(m)
+    model(m),
+    m_closeOnSegmentChosen(false)
 {
     stationsMatchModel = new StationsMatchModel(db, this);
     stationTrackMatchModel = new StationTracksMatchModel(db, this);
@@ -148,6 +149,46 @@ void StopEditor::updateStopArrDep()
     oldItem.departure = depEdit->time();
 }
 
+void StopEditor::setCloseOnSegmentChosen(bool value)
+{
+    m_closeOnSegmentChosen = value;
+}
+
+void StopEditor::popupSegmentCombo()
+{
+    //This code is used when adding a new stop.
+    //When user clicks on 'AddHere' a new stop is added
+    //but before editing it, user must choose the railway segment
+    //that the job will take from former Last Stop.
+    //(It was Last Stop before we added this stop, so it didn't have a 'next segment')
+
+    //1 - We popup lines combo from former last stop
+    //2 - When user chooses a line we close the editor (emit lineChosen())
+    //3 - We edit edit new Last Stop (EditNextItem)
+    setCloseOnSegmentChosen(true);
+
+    //Look for all possible segments
+    segmentMatchModel->autoSuggest(QString());
+
+    const int count = segmentMatchModel->rowCount();
+    if(count > 1 && !segmentMatchModel->isEmptyRow(0)
+        && (segmentMatchModel->isEmptyRow(1) || segmentMatchModel->isEllipsesRow(1)))
+    {
+        //Only 1 segment available, use it
+        db_id newSegId = segmentMatchModel->getIdAtRow(0);
+
+        db_id outGateId = 0;
+        if(model->trySelectNextSegment(oldItem, newSegId, 0, outGateId))
+        {
+            //Success, close editor
+            emit nextSegmentChosen(this);
+        }
+    }
+
+    //We have multiple segments, let the user choose
+    mSegmentEdit->showPopup();
+}
+
 void StopEditor::onStationSelected()
 {
     db_id newStId = 0;
@@ -208,10 +249,17 @@ void StopEditor::onNextSegmentSelected()
     if(!mSegmentEdit->getData(newSegId, segmentName))
         return;
 
+    const db_id oldSegId = oldItem.nextSegment.segmentId;
     db_id outGateId = 0;
-    if(!model->trySelectNextSegment(oldItem, newSegId, 0, outGateId))
+    if(model->trySelectNextSegment(oldItem, newSegId, 0, outGateId))
     {
+        emit nextSegmentChosen(this);
+    }
+    else
+    {
+        //Warn user and reset to previous chosen segment if any
         QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment '%1'").arg(segmentName));
+        mSegmentEdit->setData(oldSegId);
     }
 }
 

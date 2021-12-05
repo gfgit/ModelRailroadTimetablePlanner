@@ -200,6 +200,10 @@ QWidget *StopDelegate::createEditor(QWidget *parent,
     //Prevent JobPathEditor context menu in table view during stop editing
     editor->setContextMenuPolicy(Qt::PreventContextMenu);
 
+    //See 'StopEditor::popupLinesCombo'
+    connect(this, &StopDelegate::popupEditorSegmentCombo, editor, &StopEditor::popupSegmentCombo);
+    connect(editor, &StopEditor::nextSegmentChosen, this, &StopDelegate::onEditorSegmentChosen);
+
     return editor;
 }
 
@@ -247,4 +251,13 @@ void StopDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewI
 void StopDelegate::loadIcon(const QString &fileName)
 {
     renderer->load(fileName);
+}
+
+void StopDelegate::onEditorSegmentChosen(StopEditor *editor)
+{
+    if(editor->closeOnSegmentChosen())
+    {
+        emit commitData(editor);
+        emit closeEditor(editor, StopDelegate::EditNextItem);
+    }
 }

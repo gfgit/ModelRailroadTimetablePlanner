@@ -18,6 +18,14 @@ namespace Ui {
 class JobPathEditor;
 }
 
+/*!
+ * \brief The JobPathEditor class
+ *
+ * Widget to edit jobs info and travel path
+ *
+ * \sa StopModel
+ * \sa StopDelegate
+ */
 class JobPathEditor : public QDialog
 {
     Q_OBJECT

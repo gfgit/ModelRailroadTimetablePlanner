@@ -920,6 +920,7 @@ void StopModel::addStop()
         last.departure = last.arrival;
         last.stopId = createStop(mJobId, last.arrival, last.departure, last.type);
 
+        //Set station if previous stop has a next segment selected
         if(s.nextSegment.segConnId)
             updateCurrentInGate(last, s.nextSegment);
 
