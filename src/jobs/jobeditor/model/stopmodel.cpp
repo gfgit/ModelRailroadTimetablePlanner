@@ -1173,7 +1173,7 @@ void StopModel::setStation(const QPersistentModelIndex& idx, db_id stId)
             QTime arrival = prev.departure;
 
             //Add travel duration (At least 60 secs)
-            arrival = arrival.addSecs(qMax(60, calcTravelTime(prev.nextSegment.segmentId)));
+            arrival = arrival.addSecs(calcTravelTime(prev.nextSegment.segmentId));
             int secs = arrival.second();
             if(secs > 10)
             {
@@ -1846,7 +1846,7 @@ int StopModel::calcTravelTime(db_id segmentId)
         return 60; //Error
 
     const double secs = (meters + accelerationDistMeters)/speedKmH * 3.6;
-    return qMin(60, qCeil(secs));
+    return qMax(60, qCeil(secs));
 }
 
 int StopModel::defaultStopTimeSec()
