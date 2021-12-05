@@ -429,7 +429,7 @@ bool JobPathEditor::saveChanges()
     stopModel->commitChanges();
 
     //Update views
-    Session->getViewManager()->updateRSPlans(rsToUpdate);
+    emit Session->rollingStockPlanChanged(rsToUpdate);
 
 #ifdef ENABLE_RS_CHECKER
     //Check RS for errors
@@ -460,7 +460,7 @@ void JobPathEditor::discardChanges()
 
     //Save them before reverting changes
     QSet<db_id> rsToUpdate = stopModel->getRsToUpdate();
-    QSet<db_id> stToUpdate = stopModel->getStationsToUpdate();
+    QSet<db_id> stationsToUpdate = stopModel->getStationsToUpdate();
 
     stopModel->revertChanges(); //Re-load old job from db
 
@@ -485,7 +485,7 @@ void JobPathEditor::discardChanges()
     //After possible job deletion update views
 
     //Update RS views
-    Session->getViewManager()->updateRSPlans(rsToUpdate);
+    emit Session->rollingStockPlanChanged(rsToUpdate);
 
 #ifdef ENABLE_RS_CHECKER
     //Check RS for errors
@@ -494,7 +494,7 @@ void JobPathEditor::discardChanges()
 #endif
 
     //Update station views
-    emit Session->stationPlanChanged(stToUpdate);
+    emit Session->stationPlanChanged(stationsToUpdate);
 }
 
 db_id JobPathEditor::currentJobId() const

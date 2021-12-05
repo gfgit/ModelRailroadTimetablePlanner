@@ -129,18 +129,7 @@ void ViewManager::onRSRemoved(db_id rsId)
     }
 }
 
-void ViewManager::onRSPlanChanged(db_id rsId)
-{
-    auto it = rsHash.constFind(rsId);
-    if(it != rsHash.cend())
-    {
-        RSJobViewer *viewer = it.value();
-        viewer->updatePlan();
-        viewer->update();
-    }
-}
-
-void ViewManager::updateRSPlans(QSet<db_id> set)
+void ViewManager::onRSPlanChanged(QSet<db_id> set)
 {
     for(auto rsId : set)
     {

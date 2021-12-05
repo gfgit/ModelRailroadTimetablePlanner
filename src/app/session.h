@@ -65,7 +65,7 @@ signals:
 
     //Rollingstock SYNC: wire them from models
     void rollingstockRemoved(db_id rsId);
-    void rollingStockPlanChanged(db_id rsId);
+    void rollingStockPlanChanged(QSet<db_id> rsIds);
     void rollingStockModified(db_id rsId);
 
     //Jobs

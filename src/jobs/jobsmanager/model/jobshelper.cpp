@@ -48,6 +48,31 @@ bool JobsHelper::removeJob(sqlite3pp::database &db, db_id jobId)
         emit Session->shiftJobsChanged(shiftId, jobId);
     }
 
+    //Get stations in which job stopped or transited
+    QSet<db_id> stationsToUpdate;
+    q.prepare("SELECT station_id FROM stops WHERE job_id=?"
+              " UNION "
+              "SELECT station_id FROM old_stops WHERE job_id=?");
+    q.bind(1, jobId);
+    for(auto st : q)
+    {
+        stationsToUpdate.insert(st.get<db_id>(0));
+    }
+
+    //Get Rollingstock used by job
+    QSet<db_id> rsToUpdate;
+    q.prepare("SELECT coupling.rs_id FROM stops JOIN coupling ON coupling.stop_id=stops.id"
+              " WHERE stops.job_id=?"
+              " UNION "
+              "SELECT old_coupling.rs_id FROM old_stops JOIN old_coupling ON old_coupling.stop_id=old_stops.id"
+              " WHERE old_stops.job_id=?");
+    q.bind(1, jobId);
+    for(auto rs : q)
+    {
+        rsToUpdate.insert(rs.get<db_id>(0));
+    }
+
+    //Remove job
     db.execute("BEGIN TRANSACTION");
 
     q.prepare("DELETE FROM stops WHERE job_id=?");
@@ -85,6 +110,12 @@ bool JobsHelper::removeJob(sqlite3pp::database &db, db_id jobId)
     }
 
     emit Session->jobRemoved(jobId);
+
+    //Refresh graphs and station views
+    emit Session->stationPlanChanged(stationsToUpdate);
+
+    //Refresh Rollingstock views
+    emit Session->rollingStockPlanChanged(rsToUpdate);
 
     return true;
 }

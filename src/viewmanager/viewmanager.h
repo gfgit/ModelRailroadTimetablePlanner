@@ -60,8 +60,6 @@ public:
      */
     bool requestJobShowPrevNextSegment(bool prev, bool absolute);
 
-    void updateRSPlans(QSet<db_id> set);
-
     void requestRSInfo(db_id rsId);
     void requestStJobViewer(db_id stId);
     void requestStSVGPlan(db_id stId);
@@ -81,7 +79,7 @@ public:
 private slots:
 
     void onRSRemoved(db_id rsId);
-    void onRSPlanChanged(db_id rsId);
+    void onRSPlanChanged(QSet<db_id> set);
     void onRSInfoChanged(db_id rsId);
 
     void onStRemoved(db_id stId);
