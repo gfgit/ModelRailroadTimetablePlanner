@@ -26,7 +26,7 @@ public:
     void abortTasks();
     inline bool isRunning() { return m_mainWorker || m_workers.size() > 0; }
 
-    void checkRs(QSet<db_id> set);
+    void checkRs(const QSet<db_id> &rsIds);
 
     RsErrorTreeModel *getErrorsModel() const;
 
@@ -36,6 +36,9 @@ signals:
     void progressMax(int max);
     void progress(int val);
     void taskFinished();
+
+public slots:
+    void onRSPlanChanged(const QSet<db_id> &rsIds);
 
 private:
     RsErrWorker *m_mainWorker; //Checks all rollingstock

@@ -27,11 +27,6 @@
 
 #include "odt_export/jobsheetexport.h"
 
-#ifdef ENABLE_RS_CHECKER
-#include "backgroundmanager/backgroundmanager.h"
-#include "rollingstock/rs_checker/rscheckermanager.h"
-#endif
-
 #include "utils/file_format_names.h"
 
 #include "utils/sqldelegate/customcompletionlineedit.h"
@@ -431,12 +426,6 @@ bool JobPathEditor::saveChanges()
     //Update views
     emit Session->rollingStockPlanChanged(rsToUpdate);
 
-#ifdef ENABLE_RS_CHECKER
-    //Check RS for errors
-    if(AppSettings.getCheckRSOnJobEdit())
-        Session->getBackgroundManager()->getRsChecker()->checkRs(rsToUpdate);
-#endif
-
     //Update station views
     emit Session->stationPlanChanged(stationsToUpdate);
 
@@ -486,12 +475,6 @@ void JobPathEditor::discardChanges()
 
     //Update RS views
     emit Session->rollingStockPlanChanged(rsToUpdate);
-
-#ifdef ENABLE_RS_CHECKER
-    //Check RS for errors
-    if(AppSettings.getCheckRSOnJobEdit())
-        Session->getBackgroundManager()->getRsChecker()->checkRs(rsToUpdate);
-#endif
 
     //Update station views
     emit Session->stationPlanChanged(stationsToUpdate);
