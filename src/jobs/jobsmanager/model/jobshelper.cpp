@@ -145,6 +145,94 @@ bool JobsHelper::removeAllJobs(sqlite3pp::database &db)
     return true;
 }
 
+bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJobId, int secsOffset, bool copyRsOps)
+{
+    query q_getStops(db, "SELECT id,station_id,arrival,departure,type,"
+                         "description,in_gate_conn,out_gate_conn,next_segment_conn_id"
+                         " FROM stops WHERE job_id=?");
+    query q_getRsOp(db, "SELECT rs_id,operation WHERE stop_id=?");
+
+    command q_setStop(db, "INSERT INTO stops(id,job_id,station_id,arrival,departure,type,"
+                          "description,in_gate_conn,out_gate_conn,next_segment_conn_id)"
+                          "VALUES(NULL,?,?,?,?,?,?,?,?,?)");
+    command q_setRsOp(db, "INSERT INTO coupling(id,stop_id,rs_id,operation) VALUES(NULL,?,?,?)");
+
+    QSet<db_id> stationsToUpdate;
+    QSet<db_id> rsToUpdate;
+
+    q_getStops.bind(1, fromJobId);
+    for(auto stop : q_getStops)
+    {
+        db_id origStopId = stop.get<db_id>(0);
+        db_id stationId = stop.get<db_id>(1);
+        QTime arrival = stop.get<QTime>(2);
+        QTime departure = stop.get<QTime>(3);
+        int type = stop.get<int>(4);
+
+        //Avoid memory copy
+        const unsigned char *description = sqlite3_column_text(q_getStops.stmt(), 5);
+        const int descrLen = sqlite3_column_bytes(q_getStops.stmt(), 5);
+
+        db_id in_gate_conn = stop.get<db_id>(6);
+        db_id out_gate_conn = stop.get<db_id>(7);
+        db_id next_seg_conn = stop.get<db_id>(8);
+
+        //Apply time shift
+        arrival = arrival.addSecs(secsOffset);
+        departure = departure.addSecs(secsOffset);
+
+        q_setStop.bind(1, toJobId);
+        q_setStop.bindOrNull(2, stationId);
+        q_setStop.bind(3, arrival);
+        q_setStop.bind(4, departure);
+        q_setStop.bind(5, type);
+        //Pass SQLITE_STATIC because description is valid until next loop cycle, so avoid copy
+        sqlite3_bind_text(q_setStop.stmt(), 6, reinterpret_cast<const char *>(description), descrLen, SQLITE_STATIC);
+        q_setStop.bind(7, in_gate_conn);
+        q_setStop.bind(8, out_gate_conn);
+        q_setStop.bind(9, next_seg_conn);
+        if(q_setStop.execute() != SQLITE_OK)
+        {
+            qWarning() << "JobsHelper::copyStops() error setting stop" << origStopId << "To:" << toJobId << secsOffset
+                       << db.error_msg();
+            continue; //Skip stop
+        }
+        db_id newStopId = db.last_insert_rowid();
+
+        if(copyRsOps)
+        {
+            q_getRsOp.bind(1, origStopId);
+            for(auto rs : q_getRsOp)
+            {
+                db_id rsId = rs.get<db_id>(0);
+                int op = rs.get<int>(1);
+
+                q_setRsOp.bind(1, newStopId);
+                q_setRsOp.bind(2, rsId);
+                q_setRsOp.bind(3, op);
+                q_setRsOp.execute();
+                q_setRsOp.reset();
+
+                //Store rollingstock ID to update it later
+                rsToUpdate.insert(rsId);
+            }
+        }
+
+        //Store station to update it later
+        stationsToUpdate.insert(stationId);
+
+        q_setStop.reset();
+    }
+
+    //Refresh graphs and station views
+    emit Session->stationPlanChanged(stationsToUpdate);
+
+    //Refresh Rollingstock views
+    emit Session->rollingStockPlanChanged(rsToUpdate);
+
+    return true;
+}
+
 JobStopDirectionHelper::JobStopDirectionHelper(sqlite3pp::database &db) :
     mDb(db),
     m_query(new sqlite3pp::query(mDb))

@@ -15,6 +15,9 @@ public:
     static bool createNewJob(sqlite3pp::database &db, db_id &outJobId);
     static bool removeJob(sqlite3pp::database &db, db_id jobId);
     static bool removeAllJobs(sqlite3pp::database &db);
+
+    static bool copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJobId,
+                          int secsOffset, bool copyRsOps);
 };
 
 class JobStopDirectionHelper
