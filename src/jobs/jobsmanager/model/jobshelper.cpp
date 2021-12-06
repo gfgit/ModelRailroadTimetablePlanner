@@ -150,7 +150,7 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
     query q_getStops(db, "SELECT id,station_id,arrival,departure,type,"
                          "description,in_gate_conn,out_gate_conn,next_segment_conn_id"
                          " FROM stops WHERE job_id=?");
-    query q_getRsOp(db, "SELECT rs_id,operation WHERE stop_id=?");
+    query q_getRsOp(db, "SELECT rs_id,operation FROM coupling WHERE stop_id=?");
 
     command q_setStop(db, "INSERT INTO stops(id,job_id,station_id,arrival,departure,type,"
                           "description,in_gate_conn,out_gate_conn,next_segment_conn_id)"
@@ -188,9 +188,9 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
         q_setStop.bind(5, type);
         //Pass SQLITE_STATIC because description is valid until next loop cycle, so avoid copy
         sqlite3_bind_text(q_setStop.stmt(), 6, reinterpret_cast<const char *>(description), descrLen, SQLITE_STATIC);
-        q_setStop.bind(7, in_gate_conn);
-        q_setStop.bind(8, out_gate_conn);
-        q_setStop.bind(9, next_seg_conn);
+        q_setStop.bindOrNull(7, in_gate_conn);
+        q_setStop.bindOrNull(8, out_gate_conn);
+        q_setStop.bindOrNull(9, next_seg_conn);
         if(q_setStop.execute() != SQLITE_OK)
         {
             qWarning() << "JobsHelper::copyStops() error setting stop" << origStopId << "To:" << toJobId << secsOffset
