@@ -107,9 +107,7 @@ void RSJobViewer::updateRsInfo()
     const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
     RsType type = RsType(rs.get<int>(3));
 
-
-    int ownerLen = sqlite3_column_bytes(stmt, 4);
-    const char *owner = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 4));
+    QString owner = rs.get<QString>(4);
 
     const QString name = rs_utils::formatNameRef(modelName, modelNameLen,
                                                  number,
@@ -120,7 +118,7 @@ void RSJobViewer::updateRsInfo()
     const QString info = tr("Type:  <b>%1</b><br>"
                             "Owner: <b>%2</b>").arg(RsTypeNames::name(type));
 
-    infoLabel->setText(owner ? info.arg(QLatin1String(owner, ownerLen)) : info.arg(tr("Not set!")));
+    infoLabel->setText(owner.isEmpty() ? info.arg(tr("Not set!")) : info.arg(owner));
 }
 
 void RSJobViewer::updateInfo()
