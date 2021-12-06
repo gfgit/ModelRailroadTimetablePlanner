@@ -22,8 +22,12 @@ NewJobSamePathDlg::NewJobSamePathDlg(QWidget *parent) :
     lay->addWidget(startTimeEdit);
 
     copyRsCheck = new QCheckBox(tr("Copy Rollingstock items"));
-    copyRsCheck->setChecked(true);
+    copyRsCheck->setChecked(true); //Enabled by default
     lay->addWidget(copyRsCheck);
+
+    reversePathCheck = new QCheckBox(tr("Reverse path"));
+    reversePathCheck->setChecked(false); //Disabled by default
+    lay->addWidget(reversePathCheck);
 
     QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     lay->addWidget(box);
@@ -64,6 +68,11 @@ QTime NewJobSamePathDlg::getNewStartTime() const
 bool NewJobSamePathDlg::shouldCopyRs() const
 {
     return copyRsCheck->isChecked();
+}
+
+bool NewJobSamePathDlg::shouldReversePath() const
+{
+    return reversePathCheck->isChecked();
 }
 
 void NewJobSamePathDlg::checkTimeIsValid()

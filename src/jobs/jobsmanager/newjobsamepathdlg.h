@@ -20,14 +20,16 @@ public:
 
     QTime getNewStartTime() const;
     bool shouldCopyRs() const;
+    bool shouldReversePath() const;
 
 private slots:
     void checkTimeIsValid();
 
 private:
     QLabel *label;
-    QCheckBox *copyRsCheck;
     QTimeEdit *startTimeEdit;
+    QCheckBox *copyRsCheck;
+    QCheckBox *reversePathCheck;
 
     db_id sourceJobId = 0;
     JobCategory sourceJobCat = JobCategory::NCategories;

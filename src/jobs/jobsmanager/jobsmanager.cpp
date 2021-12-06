@@ -131,7 +131,8 @@ void JobsManager::onNewJobSamePath()
     if(!JobsHelper::createNewJob(Session->m_Db, newJobId, jobCat))
         return;
 
-    JobsHelper::copyStops(Session->m_Db, jobId, newJobId, secsOffset, dlg->shouldCopyRs());
+    JobsHelper::copyStops(Session->m_Db, jobId, newJobId, secsOffset,
+                          dlg->shouldCopyRs(), dlg->shouldReversePath());
 
     //Let user edit newly created job
     Session->getViewManager()->requestJobEditor(newJobId);
