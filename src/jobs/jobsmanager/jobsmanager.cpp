@@ -128,7 +128,7 @@ void JobsManager::onNewJobSamePath()
     const int secsOffset = times.first.secsTo(newStart);
 
     db_id newJobId = 0;
-    if(!JobsHelper::createNewJob(Session->m_Db, newJobId))
+    if(!JobsHelper::createNewJob(Session->m_Db, newJobId, jobCat))
         return;
 
     JobsHelper::copyStops(Session->m_Db, jobId, newJobId, secsOffset, dlg->shouldCopyRs());
