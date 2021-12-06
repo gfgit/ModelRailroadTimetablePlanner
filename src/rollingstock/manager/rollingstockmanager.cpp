@@ -364,7 +364,7 @@ void RollingStockManager::onViewRSPlanSearch()
 
     int ret = dlg->exec();
 
-    if(ret != QDialog::Rejected || !dlg)
+    if(ret != QDialog::Accepted || !dlg)
         return;
 
     Session->getViewManager()->requestRSInfo(dlg->getItemId());
