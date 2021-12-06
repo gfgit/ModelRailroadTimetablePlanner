@@ -132,4 +132,7 @@ void JobsManager::onNewJobSamePath()
         return;
 
     JobsHelper::copyStops(Session->m_Db, jobId, newJobId, secsOffset, dlg->shouldCopyRs());
+
+    //Let user edit newly created job
+    Session->getViewManager()->requestJobEditor(newJobId);
 }
