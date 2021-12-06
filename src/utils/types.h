@@ -31,10 +31,10 @@ enum class StopType {
     Last
 };
 
-typedef enum {
+enum class RsOp {
     Uncoupled = 0,
     Coupled   = 1
-} RsOp;
+};
 
 enum class JobCategory : qint8
 {

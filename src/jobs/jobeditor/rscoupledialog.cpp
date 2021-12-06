@@ -79,7 +79,7 @@ void RSCoupleDialog::loadProxyModels(sqlite3pp::database& db, db_id jobId, db_id
 
     sqlite3pp::query q(db);
 
-    if(op == Coupled)
+    if(op == RsOp::Coupled)
     {
         /* Show Couple-able RS:
          * - RS free in this station

@@ -20,7 +20,7 @@ qint64 StopCouplingModel::recalcTotalItemCount()
 {
     query q(mDb, "SELECT COUNT(1) FROM coupling WHERE stop_id=? AND operation=?");
     q.bind(1, m_stopId);
-    q.bind(2, m_operation);
+    q.bind(2, int(m_operation));
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
@@ -87,7 +87,7 @@ void StopCouplingModel::internalFetch(int first, int sortCol, int valRow, const 
     q.prepare(sql);
     q.bind(1, BatchSize);
     q.bind(2, m_stopId);
-    q.bind(3, m_operation);
+    q.bind(3, int(m_operation));
     if(offset)
         q.bind(2, offset);
 

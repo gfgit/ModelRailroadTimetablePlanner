@@ -453,7 +453,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         //Coupled rollingstock
         bool firstCoupRow = true;
         q_getStopCouplings.bind(1, stopId);
-        q_getStopCouplings.bind(2, RsOp::Coupled);
+        q_getStopCouplings.bind(2, int(RsOp::Coupled));
         for(auto coup : q_getStopCouplings)
         {
             //db_id rsId = coup.get<db_id>(0);
@@ -489,7 +489,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         //Unoupled rollingstock
         bool firstUncoupRow = true;
         q_getStopCouplings.bind(1, stopId);
-        q_getStopCouplings.bind(2, RsOp::Uncoupled);
+        q_getStopCouplings.bind(2, int(RsOp::Uncoupled));
         for(auto coup : q_getStopCouplings)
         {
             //db_id rsId = coup.get<db_id>(0);

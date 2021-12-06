@@ -37,7 +37,7 @@ void RSCouplingInterface::loadCouplings(StopModel *model, db_id stopId, db_id jo
     for(auto rs : q)
     {
         db_id rsId = rs.get<db_id>(0);
-        int op = rs.get<int>(1);
+        RsOp op = RsOp(rs.get<int>(1));
 
         if(op == RsOp::Coupled)
             coupled.append(rsId);
@@ -158,7 +158,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
 
         q_addCoupling.bind(1, m_stopId);
         q_addCoupling.bind(2, rsId);
-        q_addCoupling.bind(3, RsOp::Coupled);
+        q_addCoupling.bind(3, int(RsOp::Coupled));
         ret = q_addCoupling.execute();
         q_addCoupling.reset();
 
@@ -181,7 +181,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
                      " WHERE coupling.rs_id=? AND coupling.operation=? AND s1.job_id=s2.job_id AND s1.arrival < s2.arrival");
         q.bind(1, m_stopId);
         q.bind(2, rsId);
-        q.bind(3, RsOp::Coupled);
+        q.bind(3, int(RsOp::Coupled));
 
         if(q.step() == SQLITE_ROW)
         {
@@ -253,7 +253,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
                      " WHERE coupling.rs_id=? AND coupling.operation=? AND s2.arrival > s1.arrival AND s2.job_id=s1.job_id");
         q.bind(1, m_stopId);
         q.bind(2, rsId);
-        q.bind(3, RsOp::Uncoupled);
+        q.bind(3, int(RsOp::Uncoupled));
 
         if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
         {
@@ -314,7 +314,7 @@ bool RSCouplingInterface::uncoupleRS(db_id rsId, const QString& rsName, bool on)
 
         q_addCoupling.bind(1, m_stopId);
         q_addCoupling.bind(2, rsId);
-        q_addCoupling.bind(3, RsOp::Uncoupled);
+        q_addCoupling.bind(3, int(RsOp::Uncoupled));
         int ret = q_addCoupling.execute();
         q_addCoupling.reset();
 
@@ -337,7 +337,7 @@ bool RSCouplingInterface::uncoupleRS(db_id rsId, const QString& rsName, bool on)
                      " WHERE coupling.rs_id=? AND coupling.operation=? AND s2.arrival > s1.arrival AND s2.job_id=s1.job_id");
         q.bind(1, m_stopId);
         q.bind(2, rsId);
-        q.bind(3, RsOp::Uncoupled);
+        q.bind(3, int(RsOp::Uncoupled));
 
         if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
         {

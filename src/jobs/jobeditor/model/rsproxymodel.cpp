@@ -117,7 +117,7 @@ QVariant RSProxyModel::data(const QModelIndex &idx, int role) const
         }
         if(item.flag == FirstUseOfRS)
         {
-            if(op == Coupled && couplingMgr->contains(item.rsId, Coupled))
+            if(op == RsOp::Coupled && couplingMgr->contains(item.rsId, RsOp::Coupled))
                 return tr("This is the first use of this rollingstock <b>%1</b>").arg(item.rsName);
             return tr("This would be the first use of this rollingstock <b>%1</b>").arg(item.rsName);
         }

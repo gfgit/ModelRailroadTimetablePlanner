@@ -933,7 +933,7 @@ void StopModel::addStop()
                 command q_moveUncoupled(mDb, "UPDATE OR IGNORE coupling SET stop_id=? WHERE stop_id=? AND operation=?");
                 q_moveUncoupled.bind(1, last.stopId);
                 q_moveUncoupled.bind(2, s.stopId);
-                q_moveUncoupled.bind(3, RsOp::Uncoupled);
+                q_moveUncoupled.bind(3, int(RsOp::Uncoupled));
                 int ret = q_moveUncoupled.execute();
                 if(ret != SQLITE_OK)
                 {

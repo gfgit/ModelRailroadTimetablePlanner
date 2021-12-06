@@ -229,13 +229,13 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
             rs.errors.append(err);
         }
 
-        if(op == Coupled && prevOp == Uncoupled && err.stationId != prevStation && prevStation != 0)
+        if(op == RsOp::Coupled && prevOp == RsOp::Uncoupled && err.stationId != prevStation && prevStation != 0)
         {
             err.errorType = CoupledInDifferentStation;
             rs.errors.append(err);
         }
 
-        if(op == Uncoupled && prevOp == Coupled && err.jobId != prevJobId && prevJobId != 0)
+        if(op == RsOp::Uncoupled && prevOp == RsOp::Coupled && err.jobId != prevJobId && prevJobId != 0)
         {
             err.errorType = UncoupledWhenNotCoupled;
             rs.errors.append(err);
