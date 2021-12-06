@@ -12,7 +12,7 @@ class query;
 class JobsHelper
 {
 public:
-    static bool createNewJob(sqlite3pp::database &db, db_id &outJobId);
+    static bool createNewJob(sqlite3pp::database &db, db_id &outJobId, JobCategory cat = JobCategory::FREIGHT);
     static bool removeJob(sqlite3pp::database &db, db_id jobId);
     static bool removeAllJobs(sqlite3pp::database &db);
 

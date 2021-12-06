@@ -6,9 +6,10 @@
 
 #include <QDebug>
 
-bool JobsHelper::createNewJob(sqlite3pp::database &db, db_id &outJobId)
+bool JobsHelper::createNewJob(sqlite3pp::database &db, db_id &outJobId, JobCategory cat)
 {
-    sqlite3pp::command q_newJob(db, "INSERT INTO jobs(id,category,shift_id) VALUES(NULL,0,NULL)");
+    sqlite3pp::command q_newJob(db, "INSERT INTO jobs(id,category,shift_id) VALUES(NULL,?,NULL)");
+    q_newJob.bind(1, int(cat));
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(db.db());
     sqlite3_mutex_enter(mutex);
