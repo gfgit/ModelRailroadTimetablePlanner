@@ -146,11 +146,17 @@ bool JobsHelper::removeAllJobs(sqlite3pp::database &db)
     return true;
 }
 
-bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJobId, int secsOffset, bool copyRsOps)
+QTime calcReversedTime(const QTime& start, const QTime& end, const QTime& value)
+{
+    const int msecsFromStart = start.msecsTo(value);
+    return end.addMSecs(-msecsFromStart);
+}
+
+bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJobId, int secsOffset, bool copyRsOps, bool reversePath)
 {
     query q_getStops(db, "SELECT id,station_id,arrival,departure,type,"
                          "description,in_gate_conn,out_gate_conn,next_segment_conn_id"
-                         " FROM stops WHERE job_id=?");
+                         " FROM stops WHERE job_id=? ORDER BY arrival ASC");
     query q_getRsOp(db, "SELECT rs_id,operation FROM coupling WHERE stop_id=?");
 
     command q_setStop(db, "INSERT INTO stops(id,job_id,station_id,arrival,departure,type,"
@@ -160,6 +166,24 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
 
     QSet<db_id> stationsToUpdate;
     QSet<db_id> rsToUpdate;
+
+    QTime start, end;
+    if(reversePath)
+    {
+        //Get first departure and last arrival to compute reversed time
+        query q(db, "SELECT MIN(departure) FROM stops WHERE job_id=?");
+        q.bind(1, fromJobId);
+        q.step();
+        start = q.getRows().get<QTime>(0);
+
+        q.prepare("SELECT MAX(arrival) FROM stops WHERE job_id=?");
+        q.bind(1, fromJobId);
+        q.step();
+        end = q.getRows().get<QTime>(0);
+    }
+
+    //Store last next segment when reversing path
+    db_id lastNextSegmentConn = 0;
 
     q_getStops.bind(1, fromJobId);
     for(auto stop : q_getStops)
@@ -177,6 +201,32 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
         db_id in_gate_conn = stop.get<db_id>(6);
         db_id out_gate_conn = stop.get<db_id>(7);
         db_id next_seg_conn = stop.get<db_id>(8);
+
+        if(reversePath)
+        {
+            //Calculate reversed time
+            const QTime origArr = arrival;
+            const QTime origDep = departure;
+
+            //Arrival and departure get swapped
+            arrival = calcReversedTime(start, end, origDep);
+            departure = calcReversedTime(start, end, origArr);
+
+            //Swap current next segment with the one of previous stop
+            qSwap(lastNextSegmentConn, next_seg_conn);
+
+            //Swap gate connections
+            qSwap(in_gate_conn, out_gate_conn);
+
+            //First stop, set in_gate = out_gate so track matches
+            //TODO: this shouldn't be needed but seems to not cause harm
+            if(!in_gate_conn)
+                in_gate_conn = out_gate_conn;
+
+            //If we do not go past this station (Last stop) then we do not set out gate
+            if(!next_seg_conn)
+                out_gate_conn = 0;
+        }
 
         //Apply time shift
         arrival = arrival.addSecs(secsOffset);
@@ -207,11 +257,20 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
             for(auto rs : q_getRsOp)
             {
                 db_id rsId = rs.get<db_id>(0);
-                int op = rs.get<int>(1);
+                RsOp op = RsOp(rs.get<int>(1));
+
+                if(reversePath)
+                {
+                    //Reverse operations (Couple -> Uncouple and viceversa)
+                    if(op == RsOp::Coupled)
+                        op = RsOp::Uncoupled;
+                    else if(op == RsOp::Uncoupled)
+                        op = RsOp::Coupled;
+                }
 
                 q_setRsOp.bind(1, newStopId);
                 q_setRsOp.bind(2, rsId);
-                q_setRsOp.bind(3, op);
+                q_setRsOp.bind(3, int(op));
                 q_setRsOp.execute();
                 q_setRsOp.reset();
 

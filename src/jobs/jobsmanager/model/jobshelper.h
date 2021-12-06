@@ -17,7 +17,7 @@ public:
     static bool removeAllJobs(sqlite3pp::database &db);
 
     static bool copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJobId,
-                          int secsOffset, bool copyRsOps);
+                          int secsOffset, bool copyRsOps, bool reversePath);
 };
 
 class JobStopDirectionHelper
