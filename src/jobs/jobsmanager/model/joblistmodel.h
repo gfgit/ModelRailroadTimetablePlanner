@@ -74,6 +74,15 @@ public:
         return {item.shiftId, item.category};
     }
 
+    inline QPair<QTime, QTime> getOrigAndDestTimeAtRow(int row) const
+    {
+        if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+            return {}; //Invalid
+
+        const JobItem& item = cache.at(row - cacheFirstRow);
+        return {item.originTime, item.destTime};
+    }
+
 private slots:
     void onJobAddedOrRemoved();
 

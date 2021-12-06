@@ -18,6 +18,8 @@ private slots:
     void onRemove();
     void onRemoveAllJobs();
 
+    void onNewJobSamePath();
+
 private:
     QTableView *view;
     JobListModel *jobsModel;

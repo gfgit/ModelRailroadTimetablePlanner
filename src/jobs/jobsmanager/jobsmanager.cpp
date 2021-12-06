@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QHeaderView>
+#include <QToolBar>
 
 #include "model/joblistmodel.h"
 #include "model/jobshelper.h"
@@ -16,7 +17,8 @@
 #include "viewmanager/viewmanager.h"
 
 #include <QMessageBox>
-#include <QToolBar>
+#include "newjobsamepathdlg.h"
+#include "utils/owningqpointer.h"
 
 JobsManager::JobsManager(QWidget *parent) :
     QWidget(parent)
@@ -28,6 +30,7 @@ JobsManager::JobsManager(QWidget *parent) :
     toolBar->addAction(tr("New Job"), this, &JobsManager::onNewJob);
     toolBar->addAction(tr("Remove"), this, &JobsManager::onRemove);
     toolBar->addAction(tr("Remove All"), this, &JobsManager::onRemoveAllJobs);
+    toolBar->addAction(tr("New Same Path"), this, &JobsManager::onNewJobSamePath);
     l->addWidget(toolBar);
 
     view = new QTableView;
@@ -101,4 +104,32 @@ void JobsManager::onRemoveAllJobs()
                                     tr("Are you really sure you want to delete all jobs from this session?"));
     if(ret == QMessageBox::Yes)
         JobsHelper::removeAllJobs(Session->m_Db);
+}
+
+void JobsManager::onNewJobSamePath()
+{
+    QModelIndex idx = view->currentIndex();
+    if(!idx.isValid())
+        return;
+
+    db_id jobId = jobsModel->getIdAtRow(idx.row());
+    if(!jobId)
+        return;
+    JobCategory jobCat = jobsModel->getShiftAnCatAtRow(idx.row()).second;
+    auto times = jobsModel->getOrigAndDestTimeAtRow(idx.row());
+
+    OwningQPointer<NewJobSamePathDlg> dlg = new NewJobSamePathDlg(this);
+    dlg->setSourceJob(jobId, jobCat, times.first, times.second);
+
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return;
+
+    const QTime newStart = dlg->getNewStartTime();
+    const int secsOffset = times.first.secsTo(newStart);
+
+    db_id newJobId = 0;
+    if(!JobsHelper::createNewJob(Session->m_Db, newJobId))
+        return;
+
+    JobsHelper::copyStops(Session->m_Db, jobId, newJobId, secsOffset, dlg->shouldCopyRs());
 }
