@@ -199,6 +199,7 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
             continue; //Skip stop
         }
         db_id newStopId = db.last_insert_rowid();
+        q_setStop.reset();
 
         if(copyRsOps)
         {
@@ -217,12 +218,11 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
                 //Store rollingstock ID to update it later
                 rsToUpdate.insert(rsId);
             }
+            q_getRsOp.reset();
         }
 
         //Store station to update it later
         stationsToUpdate.insert(stationId);
-
-        q_setStop.reset();
     }
 
     //Refresh graphs and station views
