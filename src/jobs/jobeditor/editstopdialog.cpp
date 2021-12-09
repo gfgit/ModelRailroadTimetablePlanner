@@ -222,6 +222,21 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     calcPassings();
 }
 
+inline QString getGateName(StationGatesMatchModel *m, db_id gateId, bool reversed)
+{
+    QString str = QLatin1String("<b>");
+    if(gateId)
+    {
+        str += m->getName(gateId);
+        if(reversed)
+            str += EditStopDialog::tr(" (reversed)");
+    }else{
+        str += EditStopDialog::tr("Not set!");
+    }
+    str.append(QLatin1String("</b>"));
+    return str;
+}
+
 void EditStopDialog::updateInfo()
 {
     ui->arrivalTimeEdit->setTime(curStop.arrival);
@@ -231,17 +246,38 @@ void EditStopDialog::updateInfo()
     mStTrackEdit->setData(curStop.trackId);
     mOutGateEdit->setData(curStop.toGate.gateId);
 
-    //Show previous station if any
-    if(prevStop.stationId)
+    ui->inGateEdit->setText(getGateName(stationOutGateMatchModel,
+                                        curStop.fromGate.gateId,
+                                        prevStop.nextSegment.reversed));
+
+    if(curStop.type == StopType::First)
     {
-        query q(Session->m_Db, "SELECT name FROM stations WHERE id=?");
-        q.bind(1, prevStop.stationId);
-        q.step();
-        ui->prevStEdit->setText(q.getRows().get<QString>(0));
+        //Hide box of previous stop
+        ui->prevStopBox->setVisible(false);
+        ui->curStopBox->setTitle(tr("First Stop"));
+    }
+    else
+    {
+        //Show box of previous stop
+        ui->prevStopBox->setVisible(true);
+        ui->curStopBox->setTitle(curStop.type == StopType::Last ? tr("Last Stop") : tr("Current Stop"));
+
+        QString prevStName;
+        if(prevStop.stationId)
+        {
+            query q(Session->m_Db, "SELECT name FROM stations WHERE id=?");
+            q.bind(1, prevStop.stationId);
+            q.step();
+            prevStName = q.getRows().get<QString>(0);
+        }
+        ui->prevStEdit->setText(prevStName);
+
+        ui->prevOutGateEdit->setText(getGateName(stationOutGateMatchModel,
+                                                 prevStop.toGate.gateId,
+                                                 prevStop.nextSegment.reversed));
     }
 
     const QString descr = stopModel->getDescription(curStop);
-
     ui->descriptionEdit->setPlainText(descr);
 
     if(curStop.type == StopType::First)
@@ -277,7 +313,7 @@ void EditStopDialog::saveDataToModel()
     if(ui->descriptionEdit->document()->isModified())
     {
         stopModel->setDescription(stopIdx,
-                           ui->descriptionEdit->toPlainText());
+                                  ui->descriptionEdit->toPlainText());
     }
 
     stopModel->setStopInfo(stopIdx, curStop, prevStop.nextSegment);
@@ -422,9 +458,10 @@ void EditStopDialog::onStationSelected()
 
     //Update prev segment
     prevStop.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
+    ui->prevOutGateEdit->setText(QString()); //Clear UI field
 
     //Update next segment
-    //segmentMatchModel->setFilter(curStop.stationId, 0, 0);
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, 0, true);
     mOutGateEdit->setData(0); //Reset, user must choose again
 
     curStop.nextSegment = StopItem::Segment{};
@@ -571,7 +608,7 @@ void EditStopDialog::done(int val)
                                                 tr("Train speed after this stop has changed from a value of %1 km/h to <b>%2 km/h</b>\n"
                                                    "Do you want to rebase travel times to this new speed?\n"
                                                    "NOTE: this doesn't affect stop times but you will lose manual adjustments to travel times")
-                                                .arg(speedBefore).arg(speedAfter),
+                                                    .arg(speedBefore).arg(speedAfter),
                                                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
 
                 if(ret == QMessageBox::Cancel)
