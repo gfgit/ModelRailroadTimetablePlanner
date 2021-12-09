@@ -177,8 +177,8 @@ void StopEditor::popupSegmentCombo()
         //Only 1 segment available, use it
         db_id newSegId = segmentMatchModel->getIdAtRow(0);
 
-        db_id outGateId = 0;
-        if(model->trySelectNextSegment(curStop, newSegId, 0, outGateId))
+        db_id segOutGateId = 0;
+        if(model->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
         {
             //Success, close editor
             emit nextSegmentChosen(this);
@@ -250,9 +250,10 @@ void StopEditor::onNextSegmentSelected()
         return;
 
     const db_id oldSegId = curStop.nextSegment.segmentId;
-    db_id outGateId = 0;
-    if(model->trySelectNextSegment(curStop, newSegId, 0, outGateId))
+    db_id segOutGateId = 0;
+    if(model->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
     {
+        //Success, close editor
         emit nextSegmentChosen(this);
     }
     else

@@ -2061,7 +2061,7 @@ bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *o
     return true;
 }
 
-bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id nextStationId, db_id &out_gateId)
+bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id nextStationId, db_id &seg_out_gateId)
 {
     bool reversed = false;
     query q(mDb, "SELECT s.in_gate_id,g1.station_id,s.out_gate_id,g2.station_id"
@@ -2074,15 +2074,15 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id next
         return false;
 
     auto seg = q.getRows();
-    db_id in_gateId = seg.get<db_id>(0);
+    db_id seg_in_gateId = seg.get<db_id>(0);
     db_id in_stationId = seg.get<db_id>(1);
-    out_gateId = seg.get<db_id>(2);
+    seg_out_gateId = seg.get<db_id>(2);
     db_id out_stationId = seg.get<db_id>(3);
 
     if(out_stationId == item.stationId)
     {
         //Segment is reversed
-        qSwap(in_gateId, out_gateId);
+        qSwap(seg_in_gateId, seg_out_gateId);
         qSwap(in_stationId, out_stationId);
         reversed = true;
     }
@@ -2099,7 +2099,7 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id next
     }
 
     //Station out gate = segment in gate
-    if(in_gateId != item.toGate.gateId || item.toGate.trackNum != item.nextSegment.inTrackNum)
+    if(seg_in_gateId != item.toGate.gateId || item.toGate.trackNum != item.nextSegment.inTrackNum)
     {
         //Try to find a gate connected to previous track_id
         QByteArray sql = "SELECT c.id,c.gate_track,sc.id,sc.%2_track"
@@ -2112,7 +2112,7 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id next
 
         q.prepare(sql);
         q.bind(1, item.trackId);
-        q.bind(2, in_gateId);
+        q.bind(2, seg_in_gateId);
         q.bind(3, segmentId);
         if(q.step() != SQLITE_ROW)
         {
@@ -2123,7 +2123,7 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, db_id next
 
         auto conn = q.getRows();
         item.toGate.gateConnId = conn.get<db_id>(0);
-        item.toGate.gateId = in_gateId;
+        item.toGate.gateId = seg_in_gateId;
         item.toGate.trackNum = conn.get<int>(1);
         item.nextSegment.segConnId = conn.get<db_id>(2);
         item.nextSegment.segmentId = segmentId;
