@@ -3,7 +3,6 @@
 
 #include <QStyledItemDelegate>
 
-#include "utils/model_roles.h"
 #include "utils/types.h"
 
 #include <QSvgRenderer>

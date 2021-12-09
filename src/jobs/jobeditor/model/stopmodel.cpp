@@ -6,6 +6,8 @@
 
 #include "app/session.h"
 
+#include "utils/model_roles.h"
+
 #include "stations/station_utils.h"
 
 #include <QtMath>

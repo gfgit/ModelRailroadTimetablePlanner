@@ -7,8 +7,6 @@
 #include <QVector>
 #include <QSet>
 
-#include "utils/model_roles.h"
-
 #include "utils/types.h"
 
 #include "sqlite3pp/sqlite3pp.h"
