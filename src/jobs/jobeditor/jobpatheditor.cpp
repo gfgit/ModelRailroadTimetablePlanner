@@ -657,8 +657,7 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
     if(m_readOnly)
         return;
 
-    int addHere = index.data(ADDHERE_ROLE).toInt();
-    if(addHere == 1)
+    if(stopModel->isAddHere(index))
     {
         qDebug() << index << "AddHere";
 
