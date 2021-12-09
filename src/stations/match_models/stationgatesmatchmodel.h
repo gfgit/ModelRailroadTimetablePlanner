@@ -30,10 +30,12 @@ public:
     QString getNameAtRow(int row) const override;
 
     // StationsMatchModel:
-    void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId);
+    void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId, bool showOnlySegments = false);
 
     int getOutTrackCount(db_id gateId) const;
     utils::Side getGateSide(db_id gateId) const;
+
+    db_id getSegmentIdAtRow(int row);
 
 private:
     struct GateItem
@@ -55,6 +57,7 @@ private:
     db_id m_stationId;
     db_id m_excludeSegmentId;
     bool m_markConnectedGates;
+    bool m_showOnlySegments;
     QByteArray mQuery;
 };
 

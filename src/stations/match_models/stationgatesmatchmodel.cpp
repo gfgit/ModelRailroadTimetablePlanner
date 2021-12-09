@@ -14,7 +14,8 @@ StationGatesMatchModel::StationGatesMatchModel(sqlite3pp::database &db, QObject 
                       " ORDER BY side,name"),
     m_stationId(0),
     m_excludeSegmentId(0),
-    m_markConnectedGates(false)
+    m_markConnectedGates(false),
+    m_showOnlySegments(false)
 {
 }
 
@@ -40,7 +41,14 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
             return ellipsesString;
         }
 
-        return items[idx.row()].gateLetter;
+        QString str = items[idx.row()].gateLetter;
+        if(m_showOnlySegments)
+        {
+            str.reserve(3 + items[idx.row()].segmentName.size());
+            str.append(QLatin1String(": "));
+            str.append(items[idx.row()].segmentName);
+        }
+        return str;
     }
     case Qt::ToolTipRole:
     {
@@ -166,8 +174,13 @@ void StationGatesMatchModel::refreshData()
         if(m_markConnectedGates)
         {
             items[i].segmentId = track.get<db_id>(5);
+            if(m_showOnlySegments && !items[i].segmentId)
+                i--; //Skip this gate because it is not connected to a segment
+
             items[i].segmentName = track.get<QString>(6);
-        }else{
+        }
+        else
+        {
             items[i].segmentId = 0;
             items[i].segmentName.clear();
         }
@@ -213,7 +226,7 @@ QString StationGatesMatchModel::getNameAtRow(int row) const
     return items[row].gateLetter;
 }
 
-void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId)
+void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId, bool showOnlySegments)
 {
     m_stationId = stationId;
     m_markConnectedGates = markConnectedGates;
@@ -257,6 +270,13 @@ utils::Side StationGatesMatchModel::getGateSide(db_id gateId) const
             return item.side;
     }
     return utils::Side::West;
+}
+
+db_id StationGatesMatchModel::getSegmentIdAtRow(int row)
+{
+    if(row < 0 || row >= size)
+        return 0;
+    return items[row].segmentId;
 }
 
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :
