@@ -2027,6 +2027,7 @@ bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *o
                              "Please choose a new track or change previous segment.");
             return false;
         }
+        q.reset();
     }
 
     if(item.toGate.gateConnId)
