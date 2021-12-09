@@ -69,6 +69,7 @@ public slots:
     void updateSpinColor();
 
 protected:
+    virtual void timerEvent(QTimerEvent *e) override;
     virtual void closeEvent(QCloseEvent *e) override;
 
 private slots:
@@ -78,7 +79,7 @@ private slots:
     void onIndexClicked(const QModelIndex &index);
     void onJobRemoved(db_id jobId);
 
-    void onIdSpinValueChanged(int jobId);
+    void startJobNumberTimer();
     void onJobIdChanged(db_id jobId);
 
     void onCategoryChanged(int newCat);
@@ -90,6 +91,9 @@ private:
 
     bool setJob_internal(db_id jobId);
 
+    void stopJobNumberTimer();
+    void checkJobNumberValid();
+
 private:
     Ui::JobPathEditor *ui;
 
@@ -97,6 +101,8 @@ private:
 
     StopModel *stopModel;
     StopDelegate *delegate;
+
+    int jobNumberTimerId;
 
     //TODO: there are too many bools
     bool isClear;

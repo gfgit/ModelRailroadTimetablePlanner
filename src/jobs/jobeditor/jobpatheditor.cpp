@@ -36,6 +36,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::JobPathEditor),
     stopModel(nullptr),
+    jobNumberTimerId(0),
     isClear(true),
     canSetJob(true),
     m_readOnly(false)
@@ -71,7 +72,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     connect(ui->categoryCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), stopModel, &StopModel::setCategory);
     connect(stopModel, &StopModel::categoryChanged, this, &JobPathEditor::onCategoryChanged);
 
-    connect(ui->jobIdSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &JobPathEditor::onIdSpinValueChanged);
+    connect(ui->jobIdSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &JobPathEditor::startJobNumberTimer);
     connect(stopModel, &StopModel::jobIdChanged, this, &JobPathEditor::onJobIdChanged);
 
     connect(stopModel, &StopModel::edited, this, &JobPathEditor::setEdited);
@@ -97,7 +98,6 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
 JobPathEditor::~JobPathEditor()
 {
     clearJob();
-
     delete ui;
 }
 
@@ -130,12 +130,46 @@ bool JobPathEditor::setJob_internal(db_id jobId)
 
     isClear = false;
 
+    stopJobNumberTimer();
+
     stopModel->loadJobStops(jobId); //Load from database
 
     //If read-only hide 'AddHere' row (last one)
     ui->view->setRowHidden(stopModel->rowCount() - 1, m_readOnly);
 
     return true;
+}
+
+void JobPathEditor::startJobNumberTimer()
+{
+    //Give user a small time to scroll values in ID QSpinBox
+    //This will skip eventual non available IDs (already existent)
+    //On timeout check ID and reset to old value if not available
+    stopJobNumberTimer();
+    jobNumberTimerId = startTimer(700);
+}
+
+void JobPathEditor::stopJobNumberTimer()
+{
+    if(jobNumberTimerId)
+    {
+        killTimer(jobNumberTimerId);
+        jobNumberTimerId = 0;
+    }
+}
+
+void JobPathEditor::checkJobNumberValid()
+{
+    //Kill timer
+    stopJobNumberTimer();
+
+    db_id jobId = ui->jobIdSpin->value();
+    if(!stopModel->setNewJobId(jobId))
+    {
+        QMessageBox::warning(this, tr("Invalid"),
+                             tr("Job number <b>%1</b> is already exists.<br>"
+                                "Please choose a different number.").arg(jobId));
+    }
 }
 
 bool JobPathEditor::createNewJob(db_id *out)
@@ -323,6 +357,8 @@ bool JobPathEditor::clearJob()
 
     stopModel->clearJob();
 
+    stopJobNumberTimer();
+
     return true;
 }
 
@@ -368,6 +404,8 @@ bool JobPathEditor::saveChanges()
     canSetJob = false;
 
     closeStopEditor();
+
+    checkJobNumberValid();
 
     stopModel->removeLastIfEmpty();
     stopModel->uncoupleStillCoupledAtLastStop();
@@ -447,6 +485,8 @@ void JobPathEditor::discardChanges()
 
     closeStopEditor(); //Close before rolling savepoint
 
+    stopJobNumberTimer();
+
     //Save them before reverting changes
     QSet<db_id> rsToUpdate = stopModel->getRsToUpdate();
     QSet<db_id> stationsToUpdate = stopModel->getStationsToUpdate();
@@ -515,6 +555,16 @@ void JobPathEditor::updateSpinColor()
     }
 }
 
+void JobPathEditor::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == jobNumberTimerId)
+    {
+        checkJobNumberValid();
+    }
+
+    QDialog::timerEvent(e);
+}
+
 void JobPathEditor::onJobRemoved(db_id jobId)
 {
     //If the job shown is about to be removed clear JobPathEditor
@@ -522,16 +572,6 @@ void JobPathEditor::onJobRemoved(db_id jobId)
     {
         if(clearJob())
             setEnabled(false);
-    }
-}
-
-void JobPathEditor::onIdSpinValueChanged(int jobId)
-{
-    if(!stopModel->setNewJobId(jobId))
-    {
-        QMessageBox::warning(this, tr("Invalid"),
-                             tr("Job number <b>%1</b> is already exists.<br>"
-                                "Please choose a different number.").arg(jobId));
     }
 }
 
