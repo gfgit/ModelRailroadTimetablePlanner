@@ -229,7 +229,7 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     setToTransitAct->setEnabled(!m_readOnly);
     unsetTransit->setEnabled(!m_readOnly);
     removeStopAct->setEnabled(!m_readOnly);
-    insertBeforeAct->setEnabled(!m_readOnly);
+    insertBeforeAct->setEnabled(false /*!m_readOnly*/); //TODO: rework StopModel first
 
     const db_id stationId = stopModel->getItemStationAt(index.row());
     showStationSVG->setEnabled(stationId != 0); //Enable only if station is set
