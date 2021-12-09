@@ -90,8 +90,8 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::TextAlignmentRole:
     {
-        if(!emptyRow && !ellipsesRow)
-            return Qt::AlignRight + Qt::AlignVCenter;
+        if(!emptyRow && !ellipsesRow && !m_showOnlySegments)
+            return Qt::AlignRight + Qt::AlignVCenter; //Segments will be Left aligned
         break;
     }
     case Qt::BackgroundRole:
