@@ -12,7 +12,9 @@ class QGridLayout;
 
 class StationsMatchModel;
 class StationTracksMatchModel;
-class RailwaySegmentMatchModel;
+class StationGatesMatchModel;
+
+class QModelIndex;
 
 namespace sqlite3pp {
 class database;
@@ -72,7 +74,7 @@ public slots:
 private slots:
     void onStationSelected();
     void onTrackSelected();
-    void onNextSegmentSelected();
+    void onOutGateSelected(const QModelIndex &idx);
 
     void arrivalChanged(const QTime &arrival);
 
@@ -80,13 +82,13 @@ private:
     QGridLayout *lay;
     CustomCompletionLineEdit *mStationEdit;
     CustomCompletionLineEdit *mStTrackEdit;
-    CustomCompletionLineEdit *mSegmentEdit;
+    CustomCompletionLineEdit *mOutGateEdit;
     QTimeEdit *arrEdit;
     QTimeEdit *depEdit;
 
     StationsMatchModel *stationsMatchModel;
     StationTracksMatchModel *stationTrackMatchModel;
-    RailwaySegmentMatchModel *segmentMatchModel;
+    StationGatesMatchModel *stationOutGateMatchModel;
 
     StopModel *model;
     StopItem curStop;

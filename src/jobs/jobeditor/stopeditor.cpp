@@ -4,7 +4,7 @@
 
 #include "stations/match_models/stationsmatchmodel.h"
 #include "stations/match_models/stationtracksmatchmodel.h"
-#include "stations/match_models/railwaysegmentmatchmodel.h"
+#include "stations/match_models/stationgatesmatchmodel.h"
 
 #include <QTimeEdit>
 #include <QAbstractItemView>
@@ -24,7 +24,7 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
 {
     stationsMatchModel = new StationsMatchModel(db, this);
     stationTrackMatchModel = new StationTracksMatchModel(db, this);
-    segmentMatchModel = new RailwaySegmentMatchModel(db, this);
+    stationOutGateMatchModel = new StationGatesMatchModel(db, this);
 
     mStationEdit = new CustomCompletionLineEdit(stationsMatchModel, this);
     mStationEdit->setPlaceholderText(tr("Station name"));
@@ -34,9 +34,9 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     mStTrackEdit->setPlaceholderText(tr("Track"));
     connect(mStTrackEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditor::onTrackSelected);
 
-    mSegmentEdit = new CustomCompletionLineEdit(segmentMatchModel, this);
-    mSegmentEdit->setPlaceholderText(tr("Next segment"));
-    connect(mSegmentEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditor::onNextSegmentSelected);
+    mOutGateEdit = new CustomCompletionLineEdit(stationOutGateMatchModel, this);
+    mOutGateEdit->setPlaceholderText(tr("Next segment"));
+    connect(mOutGateEdit, &CustomCompletionLineEdit::indexSelected, this, &StopEditor::onOutGateSelected);
 
     arrEdit = new QTimeEdit;
     depEdit = new QTimeEdit;
@@ -53,11 +53,11 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     lay->addWidget(arrEdit, 0, 1);
     lay->addWidget(depEdit, 0, 2);
     lay->addWidget(mStTrackEdit, 1, 0, 1, 3);
-    lay->addWidget(mSegmentEdit, 2, 0, 1, 3);
+    lay->addWidget(mOutGateEdit, 2, 0, 1, 3);
 
     setTabOrder(mStationEdit, arrEdit);
     setTabOrder(arrEdit, depEdit);
-    setTabOrder(depEdit, mSegmentEdit);
+    setTabOrder(depEdit, mOutGateEdit);
 }
 
 void StopEditor::setStop(const StopItem &item, const StopItem &prev)
@@ -94,7 +94,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         depEdit->setEnabled(false);
         depEdit->setVisible(false);
 
-        mSegmentEdit->hide();
+        mOutGateEdit->hide();
         if(item.stationId == 0)
             setFocusProxy(mStationEdit);
         break;
@@ -113,8 +113,8 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     mStTrackEdit->setData(item.trackId);
     mStTrackEdit->setEnabled(item.stationId != 0); //Enable only if station is selected
 
-    segmentMatchModel->setFilter(item.stationId, 0, 0);
-    mSegmentEdit->setData(item.nextSegment.segmentId);
+    stationOutGateMatchModel->setFilter(item.stationId, true, 0, true);
+    mOutGateEdit->setData(item.toGate.gateId);
 
     //Set Arrival and Departure
     arrEdit->blockSignals(true);
@@ -168,14 +168,14 @@ void StopEditor::popupSegmentCombo()
     setCloseOnSegmentChosen(true);
 
     //Look for all possible segments
-    segmentMatchModel->autoSuggest(QString());
+    stationOutGateMatchModel->autoSuggest(QString());
 
-    const int count = segmentMatchModel->rowCount();
-    if(count > 1 && !segmentMatchModel->isEmptyRow(0)
-        && (segmentMatchModel->isEmptyRow(1) || segmentMatchModel->isEllipsesRow(1)))
+    const int count = stationOutGateMatchModel->rowCount();
+    if(count > 1 && !stationOutGateMatchModel->isEmptyRow(0)
+        && (stationOutGateMatchModel->isEmptyRow(1) || stationOutGateMatchModel->isEllipsesRow(1)))
     {
         //Only 1 segment available, use it
-        db_id newSegId = segmentMatchModel->getIdAtRow(0);
+        db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(0);
 
         db_id segOutGateId = 0;
         if(model->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
@@ -186,7 +186,7 @@ void StopEditor::popupSegmentCombo()
     }
 
     //We have multiple segments, let the user choose
-    mSegmentEdit->showPopup();
+    mOutGateEdit->showPopup();
 }
 
 void StopEditor::onStationSelected()
@@ -217,8 +217,8 @@ void StopEditor::onStationSelected()
     prevStop.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
 
     //Update next segment
-    segmentMatchModel->setFilter(curStop.stationId, 0, 0);
-    mSegmentEdit->setData(0); //Reset, user must choose again
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, 0, true);
+    mOutGateEdit->setData(0); //Reset, user must choose again
 
     curStop.nextSegment = StopItem::Segment{};
 }
@@ -242,14 +242,15 @@ void StopEditor::onTrackSelected()
     }
 }
 
-void StopEditor::onNextSegmentSelected()
+void StopEditor::onOutGateSelected(const QModelIndex& idx)
 {
-    db_id newSegId = 0;
-    QString segmentName;
-    if(!mSegmentEdit->getData(newSegId, segmentName))
+    db_id newGateId = 0;
+    QString gateSegmentName;
+    if(!mOutGateEdit->getData(newGateId, gateSegmentName))
         return;
 
-    const db_id oldSegId = curStop.nextSegment.segmentId;
+    const db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(idx.row());
+    const db_id oldGateId = curStop.toGate.gateId;
     db_id segOutGateId = 0;
     if(model->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
     {
@@ -259,8 +260,8 @@ void StopEditor::onNextSegmentSelected()
     else
     {
         //Warn user and reset to previous chosen segment if any
-        QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment '%1'").arg(segmentName));
-        mSegmentEdit->setData(oldSegId);
+        QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment <b>%1</b>").arg(gateSegmentName));
+        mOutGateEdit->setData(oldGateId);
     }
 }
 
