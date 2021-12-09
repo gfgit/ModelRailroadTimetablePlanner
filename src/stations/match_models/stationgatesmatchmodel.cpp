@@ -9,9 +9,7 @@ using namespace sqlite3pp;
 StationGatesMatchModel::StationGatesMatchModel(sqlite3pp::database &db, QObject *parent) :
     ISqlFKMatchModel(parent),
     mDb(db),
-    q_getMatches(mDb, "SELECT id,type,name,side"
-                      " FROM station_gates WHERE station_id=?2 AND name LIKE ?1"
-                      " ORDER BY side,name"),
+    q_getMatches(mDb),
     m_stationId(0),
     m_excludeSegmentId(0),
     m_markConnectedGates(false),
@@ -41,14 +39,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
             return ellipsesString;
         }
 
-        QString str = items[idx.row()].gateLetter;
-        if(m_showOnlySegments)
-        {
-            str.reserve(3 + items[idx.row()].segmentName.size());
-            str.append(QLatin1String(": "));
-            str.append(items[idx.row()].segmentName);
-        }
-        return str;
+        return getNameAtRow(idx.row());
     }
     case Qt::ToolTipRole:
     {
@@ -183,11 +174,14 @@ void StationGatesMatchModel::refreshData()
             }
 
             items[i].segmentName = track.get<QString>(6);
+            const db_id inGateId = track.get<db_id>(7);
+            items[i].segmentReversed = (inGateId != items[i].gateId);
         }
         else
         {
             items[i].segmentId = 0;
             items[i].segmentName.clear();
+            items[i].segmentReversed = false;
         }
 
         ++it;
@@ -240,7 +234,14 @@ db_id StationGatesMatchModel::getIdAtRow(int row) const
 
 QString StationGatesMatchModel::getNameAtRow(int row) const
 {
-    return items[row].gateLetter;
+    QString str = items[row].gateLetter;
+    if(m_showOnlySegments)
+    {
+        str.reserve(3 + items[row].segmentName.size());
+        str.append(QLatin1String(": "));
+        str.append(items[row].segmentName);
+    }
+    return str;
 }
 
 void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId, bool showOnlySegments)
@@ -253,7 +254,7 @@ void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates,
     QByteArray sql = "SELECT g.id,g.out_track_count,g.type,g.name,g.side";
     if(m_markConnectedGates)
     {
-        sql += ",s.id,s.name";
+        sql += ",s.id,s.name,s.in_gate_id";
     }
     sql += " FROM station_gates g";
     if(m_markConnectedGates)
@@ -295,6 +296,13 @@ db_id StationGatesMatchModel::getSegmentIdAtRow(int row)
     if(row < 0 || row >= size)
         return 0;
     return items[row].segmentId;
+}
+
+db_id StationGatesMatchModel::isSegmentReversedAtRow(int row)
+{
+    if(row < 0 || row >= size)
+        return 0;
+    return items[row].segmentReversed;
 }
 
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :

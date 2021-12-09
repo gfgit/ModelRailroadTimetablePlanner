@@ -36,6 +36,7 @@ public:
     utils::Side getGateSide(db_id gateId) const;
 
     db_id getSegmentIdAtRow(int row);
+    db_id isSegmentReversedAtRow(int row);
 
 private:
     struct GateItem
@@ -47,6 +48,7 @@ private:
         int outTrackCount;
         QFlags<utils::GateType> type;
         utils::Side side;
+        bool segmentReversed;
     };
     static const int ItemCount = 30;
     GateItem items[ItemCount];
