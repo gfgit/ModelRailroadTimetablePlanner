@@ -9,6 +9,8 @@
 
 #include <QtMath>
 
+#include <QDebug>
+
 /*!
  * \brief Set font point size
  * \param font
@@ -396,14 +398,18 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
             //Move to line center, it will be rotation pivot
             painter->translate(line.center());
 
-            //Rotate by line angle (minus because QPainter wants clockwise angle)
-            painter->rotate(-line.angle());
+            //Rotate by line angle
+            qreal angle = line.angle();
+            if(job.fromDeparture.x() > job.toArrival.x())
+                angle += 180.0; //Prevent flipping text
+
+            painter->rotate(-angle); //minus because QPainter wants clockwise angle
 
             const double lineLength = line.length();
             QRectF textRect(-lineLength / 2, -30, lineLength, 25);
 
-            //Try to avoid overlapping text of crossing jobs
-            if(job.toArrival.y() > job.fromDeparture.y())
+            //Try to avoid overlapping text of crossing jobs, move text towards arrival
+            if(job.toArrival.x() > job.fromDeparture.x())
                 textRect.moveLeft(textRect.left() + lineLength / 5);
             else
                 textRect.moveLeft(textRect.left() - lineLength / 5);

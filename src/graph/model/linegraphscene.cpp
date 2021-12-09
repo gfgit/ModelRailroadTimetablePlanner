@@ -26,6 +26,9 @@ static inline double stationPlatformPosition(const StationGraphObject& st, const
             return x;
         x += platfOffset;
     }
+
+    //Error: requested platform belongs to different station
+    qWarning() << "Station:" << st.stationName << st.stationId << "No platf:" << platfId;
     return -1;
 }
 
@@ -672,19 +675,15 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
         job.fromPlatfId = stop.get<db_id>(10);
         job.toPlatfId = stop.get<db_id>(11);
 
-        if(toSt.stationId == stId)
-        {
-            //Job goes in opposite direction, reverse stops
-            qSwap(job.fromStopId, job.toStopId);
-            qSwap(job.fromPlatfId, job.toPlatfId);
-            qSwap(departure, arrival);
-        }
+        //NOTE: fromPlatfId and toPlatfId do not need to be reversed because represent correct platforms
+        //Only stations might be reversed
+        bool reverse = toSt.stationId == stId; //If job goes in opposite direction
 
         //Calculate coordinates
-        job.fromDeparture.rx() = stationPlatformPosition(fromSt, job.fromPlatfId, platfOffset);
+        job.fromDeparture.rx() = stationPlatformPosition(reverse ? toSt : fromSt, job.fromPlatfId, platfOffset);
         job.fromDeparture.ry() = vertOffset + timeToHourFraction(departure) * hourOffset;
 
-        job.toArrival.rx() = stationPlatformPosition(toSt, job.toPlatfId, platfOffset);
+        job.toArrival.rx() = stationPlatformPosition(reverse ? fromSt : toSt, job.toPlatfId, platfOffset);
         job.toArrival.ry() = vertOffset + timeToHourFraction(arrival) * hourOffset;
 
         if(job.fromDeparture.x() < 0 || job.toArrival.x() < 0)
