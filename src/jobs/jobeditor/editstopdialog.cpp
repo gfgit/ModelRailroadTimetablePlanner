@@ -41,17 +41,23 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
 
     //Stop
     stationMatchModel = new StationsMatchModel(Session->m_Db, this);
-    stationOutGateMatchModel = new StationGatesMatchModel(Session->m_Db, this);
     stationTrackMatchModel = new StationTracksMatchModel(Session->m_Db, this);
+    stationOutGateMatchModel = new StationGatesMatchModel(Session->m_Db, this);
 
-    stationEdit = new CustomCompletionLineEdit(stationMatchModel, this);
-    ui->curStopLay->setWidget(0, QFormLayout::FieldRole, stationEdit);
+    mStationEdit = new CustomCompletionLineEdit(stationMatchModel, this);
+    mStationEdit->setPlaceholderText(tr("Station name"));
+    connect(mStationEdit, &CustomCompletionLineEdit::completionDone, this, &EditStopDialog::onStationSelected);
+    ui->curStopLay->setWidget(0, QFormLayout::FieldRole, mStationEdit);
 
-    stationTrackEdit = new CustomCompletionLineEdit(stationTrackMatchModel, this);
-    ui->curStopLay->setWidget(2, QFormLayout::FieldRole, stationTrackEdit);
+    mStTrackEdit = new CustomCompletionLineEdit(stationTrackMatchModel, this);
+    mStTrackEdit->setPlaceholderText(tr("Track"));
+    connect(mStTrackEdit, &CustomCompletionLineEdit::completionDone, this, &EditStopDialog::onStTrackSelected);
+    ui->curStopLay->setWidget(2, QFormLayout::FieldRole, mStTrackEdit);
 
-    outGateEdit = new CustomCompletionLineEdit(stationOutGateMatchModel, this);
-    ui->curStopLay->setWidget(3, QFormLayout::FieldRole, outGateEdit);
+    mOutGateEdit = new CustomCompletionLineEdit(stationOutGateMatchModel, this);
+    mOutGateEdit->setPlaceholderText(tr("Out Gate"));
+    connect(mOutGateEdit, &CustomCompletionLineEdit::indexSelected, this, &EditStopDialog::onOutGateSelected);
+    ui->curStopLay->setWidget(3, QFormLayout::FieldRole, mOutGateEdit);
 
     //Coupling
     couplingMgr = new RSCouplingInterface(Session->m_Db, this);
@@ -67,6 +73,9 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
     ps->setModel(uncoupledModel);
     ui->uncoupledView->setModel(uncoupledModel);
     ui->uncoupledLayout->insertWidget(1, ps);
+
+    connect(ui->editCoupledBut, &QPushButton::clicked, this, &EditStopDialog::editCoupled);
+    connect(ui->editUncoupledBut, &QPushButton::clicked, this, &EditStopDialog::editUncoupled);
 
     ui->coupledView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->uncoupledView->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -98,20 +107,15 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
     crossingsModel = new JobPassingsModel(this);
     ui->crossingsView->setModel(crossingsModel);
 
-    connect(stationEdit, &CustomCompletionLineEdit::dataIdChanged, this, &EditStopDialog::onStEditingFinished);
-
-    connect(ui->editCoupledBut, &QPushButton::clicked, this, &EditStopDialog::editCoupled);
-    connect(ui->editUncoupledBut, &QPushButton::clicked, this, &EditStopDialog::editUncoupled);
-
     connect(ui->calcPassingsBut, &QPushButton::clicked, this, &EditStopDialog::calcPassings);
-
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     //BIG TODO: temporarily disable option to Cancel dialog
     //This is because at the moment it doesn't seem Coupling are canceled
     //So you get a mixed state: Arrival/Departure/Descriptio ecc changes are canceled but Coupling changes are still applied
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Ok);
+
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
     setReadOnly(true);
 }
@@ -163,8 +167,8 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
 
     curStop = stopModel->getItemAt(idx.row());
 
-    m_jobId = idx.data(JOB_ID_ROLE).toLongLong();
-    m_jobCat = JobCategory(idx.data(JOB_CATEGORY_ROLE).toInt());
+    m_jobId = stopModel->getJobId();
+    m_jobCat = stopModel->getCategory();
 
     if(idx.row() == 0) //First stop
     {
@@ -205,7 +209,7 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
     //FIXME: filter track by IN GATE, filter out gate by track, filter also by track side
     stationMatchModel->setFilter(prevStop.stationId);
     stationTrackMatchModel->setFilter(curStop.stationId);
-    stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId);
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId, true);
 
     coupledModel->setStop(curStop.stopId, RsOp::Coupled);
     uncoupledModel->setStop(curStop.stopId, RsOp::Uncoupled);
@@ -223,9 +227,9 @@ void EditStopDialog::updateInfo()
     ui->arrivalTimeEdit->setTime(curStop.arrival);
     ui->departureTimeEdit->setTime(curStop.arrival);
 
-    stationEdit->setData(curStop.stationId);
-    stationTrackEdit->setData(curStop.trackId);
-    outGateEdit->setData(curStop.toGate.gateId);
+    mStationEdit->setData(curStop.stationId);
+    mStTrackEdit->setData(curStop.trackId);
+    mOutGateEdit->setData(curStop.toGate.gateId);
 
     //Show previous station if any
     if(prevStop.stationId)
@@ -236,7 +240,7 @@ void EditStopDialog::updateInfo()
         ui->prevStEdit->setText(q.getRows().get<QString>(0));
     }
 
-    const QString descr = stopIdx.data(STOP_DESCR_ROLE).toString();
+    const QString descr = stopModel->getDescription(curStop);
 
     ui->descriptionEdit->setPlainText(descr);
 
@@ -266,24 +270,14 @@ void EditStopDialog::updateInfo()
     couplingMgr->loadCouplings(stopModel, curStop.stopId, m_jobId, curStop.arrival);
 }
 
-void EditStopDialog::onStEditingFinished(db_id stationId)
-{
-    DEBUG_ENTRY;
-
-    curStop.stationId = stationId;
-
-    //TODO: platform
-}
-
 void EditStopDialog::saveDataToModel()
 {
     DEBUG_ENTRY;
 
     if(ui->descriptionEdit->document()->isModified())
     {
-        stopModel->setData(stopIdx,
-                           ui->descriptionEdit->toPlainText(),
-                           STOP_DESCR_ROLE);
+        stopModel->setDescription(stopIdx,
+                           ui->descriptionEdit->toPlainText());
     }
 
     stopModel->setStopInfo(stopIdx, curStop, prevStop.nextSegment);
@@ -402,6 +396,77 @@ void EditStopDialog::couplingCustomContextMenuRequested(const QPoint& pos)
     trainAssetModelAfter->refreshData(true);
 }
 
+void EditStopDialog::onStationSelected()
+{
+    db_id newStId = 0;
+    QString tmp;
+    if(!mStationEdit->getData(newStId, tmp))
+        return;
+
+    if(newStId == curStop.stationId)
+        return;
+
+    curStop.stationId = newStId;
+
+    //Update track
+    stationTrackMatchModel->setFilter(curStop.stationId);
+    mStTrackEdit->setEnabled(curStop.stationId != 0); //Enable only if station is selected
+
+    if(curStop.stationId)
+    {
+        if(!stopModel->trySelectTrackForStop(curStop))
+            curStop.trackId = 0; //Could not find a track
+
+        mStTrackEdit->setData(curStop.trackId);
+    }
+
+    //Update prev segment
+    prevStop.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
+
+    //Update next segment
+    //segmentMatchModel->setFilter(curStop.stationId, 0, 0);
+    mOutGateEdit->setData(0); //Reset, user must choose again
+
+    curStop.nextSegment = StopItem::Segment{};
+}
+
+void EditStopDialog::onStTrackSelected()
+{
+    db_id newTrackId = 0;
+    QString tmp;
+    if(!mStTrackEdit->getData(newTrackId, tmp))
+        return;
+
+    //Check if track is connected to gates
+    if(!stopModel->trySetTrackConnections(curStop, newTrackId, &tmp))
+    {
+        //Show error to the user
+        bool stillSucceded = (curStop.trackId == newTrackId);
+        QMessageBox::warning(this, stillSucceded ? tr("Gate Warning") : tr("Track Error"), tmp);
+
+        if(!stillSucceded)
+            mStTrackEdit->setData(curStop.trackId); //Reset to previous track
+    }
+}
+
+void EditStopDialog::onOutGateSelected(const QModelIndex& idx)
+{
+    db_id newGateId = 0;
+    QString gateSegmentName;
+    if(!mOutGateEdit->getData(newGateId, gateSegmentName))
+        return;
+
+    const db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(idx.row());
+    const db_id oldSegId = curStop.nextSegment.segmentId;
+    db_id segOutGateId = 0;
+    if(!stopModel->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
+    {
+        //Warn user and reset to previous chosen segment if any
+        QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment <b>%1</b>").arg(gateSegmentName));
+        mOutGateEdit->setData(oldSegId);
+    }
+}
+
 QSet<db_id> EditStopDialog::getRsToUpdate() const
 {
     return rsToUpdate; //TODO: fill when coupling/uncoupling/canceling operations
@@ -435,9 +500,9 @@ void EditStopDialog::setReadOnly(bool value)
 {
     readOnly = value;
 
-    stationEdit->setReadOnly(readOnly);
-    stationTrackEdit->setReadOnly(readOnly);
-    outGateEdit->setReadOnly(readOnly);
+    mStationEdit->setReadOnly(readOnly);
+    mStTrackEdit->setReadOnly(readOnly);
+    mOutGateEdit->setReadOnly(readOnly);
 
     ui->arrivalTimeEdit->setReadOnly(readOnly);
     ui->departureTimeEdit->setReadOnly(readOnly);

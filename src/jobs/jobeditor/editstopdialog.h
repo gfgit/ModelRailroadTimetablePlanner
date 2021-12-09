@@ -35,7 +35,6 @@ public:
     ~EditStopDialog() override;
 
     void updateInfo();
-    void onStEditingFinished(db_id stationId);
 
     bool hasEngineAfterStop();
 
@@ -50,12 +49,17 @@ public:
 public slots:
     void done(int val) override;
 
+private slots:
     void editCoupled();
     void editUncoupled();
 
     void calcPassings();
 
     void couplingCustomContextMenuRequested(const QPoint &pos);
+
+    void onStationSelected();
+    void onStTrackSelected();
+    void onOutGateSelected(const QModelIndex &idx);
 
 private:
     void saveDataToModel();
@@ -70,13 +74,13 @@ private:
 private:
     Ui::EditStopDialog *ui;
 
-    CustomCompletionLineEdit *stationEdit;
-    CustomCompletionLineEdit *stationTrackEdit;
-    CustomCompletionLineEdit *outGateEdit;
+    CustomCompletionLineEdit *mStationEdit;
+    CustomCompletionLineEdit *mStTrackEdit;
+    CustomCompletionLineEdit *mOutGateEdit;
 
     StationsMatchModel *stationMatchModel;
-    StationGatesMatchModel *stationOutGateMatchModel;
     StationTracksMatchModel *stationTrackMatchModel;
+    StationGatesMatchModel *stationOutGateMatchModel;
 
     db_id m_jobId;
     JobCategory m_jobCat;
