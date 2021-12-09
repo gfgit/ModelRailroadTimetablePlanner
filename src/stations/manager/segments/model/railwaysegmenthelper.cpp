@@ -119,7 +119,11 @@ bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
 
 bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
 {
-    command cmd(mDb, "DELETE FROM railway_segments WHERE id=?");
+    //Use transaction so if one query fails, the other is restored
+    sqlite3pp::transaction t(mDb);
+
+    //First remove all connections belonging to this segments
+    command cmd(mDb, "DELETE FROM railway_connections WHERE seg_id=?");
     cmd.bind(1, segmentId);
     int ret = cmd.execute();
     if(ret != SQLITE_OK)
@@ -128,6 +132,19 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
             *outErrMsg = mDb.error_msg();
         return false;
     }
+
+    //Then remove actual segment
+    cmd.prepare("DELETE FROM railway_segments WHERE id=?");
+    cmd.bind(1, segmentId);
+    ret = cmd.execute();
+    if(ret != SQLITE_OK)
+    {
+        if(outErrMsg)
+            *outErrMsg = mDb.error_msg();
+        return false;
+    }
+
+    t.commit();
 
     emit Session->segmentRemoved(segmentId);
 
