@@ -28,11 +28,10 @@ typedef struct ErrorData_
     db_id rsId;
     db_id stopId;
     db_id stationId;
-    db_id jobId;
     db_id otherId;
+    JobEntry job;
     QString stationName;
     QTime time;
-    JobCategory jobCategory;
     ErrType errorType;
 } ErrorData;
 

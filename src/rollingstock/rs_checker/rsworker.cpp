@@ -159,7 +159,7 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
     db_id prevCouplingId = 0;
     db_id prevStopId = 0;
     db_id prevStation = 0;
-    db_id prevJobId = 0;
+    JobEntry prevJob;
     QTime prevTime;
 
     q_selectCoupling.bind(1, err.rsId);
@@ -168,8 +168,8 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
         err.couplingId = coup.get<db_id>(0);
         RsOp op = RsOp(coup.get<int>(1));
         err.stopId = coup.get<db_id>(2);
-        err.jobId = coup.get<db_id>(3);
-        err.jobCategory = JobCategory(coup.get<int>(4));
+        err.job.jobId = coup.get<db_id>(3);
+        err.job.category = JobCategory(coup.get<int>(4));
         err.stationId = coup.get<db_id>(5);
         err.stationName = coup.get<QString>(6);
         int transit = coup.get<int>(7);
@@ -184,7 +184,7 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
         {
             if(op == RsOp::Coupled)
             {
-                if(err.jobId != prevJobId && prevJobId != 0)
+                if(err.job.jobId != prevJob.jobId && prevJob.jobId != 0)
                 {
                     //Rs was not uncoupled at the end of the job
                     //Or it was coupled by another job before prevJob uncouples it
@@ -205,7 +205,7 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
                     e.rsId = rs.rsId;
                     e.stopId = prevStopId;
                     e.stationId = prevStation;
-                    e.jobId = prevJobId;
+                    e.job = prevJob;
                     e.otherId = e.couplingId;
                     e.time = prevTime;
                     e.errorType = NotUncoupledAtJobEnd;
@@ -235,7 +235,7 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
             rs.errors.append(err);
         }
 
-        if(op == RsOp::Uncoupled && prevOp == RsOp::Coupled && err.jobId != prevJobId && prevJobId != 0)
+        if(op == RsOp::Uncoupled && prevOp == RsOp::Coupled && err.job.jobId != prevJob.jobId && prevJob.jobId != 0)
         {
             err.errorType = UncoupledWhenNotCoupled;
             rs.errors.append(err);
@@ -251,7 +251,7 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
         prevCouplingId = err.couplingId;
         prevStopId = err.stopId;
         prevStation = err.stationId;
-        prevJobId = err.jobId;
+        prevJob = err.job;
         prevTime = err.time;
     }
     q_selectCoupling.reset();

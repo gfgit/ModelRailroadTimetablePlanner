@@ -132,7 +132,7 @@ void RsErrorsWidget::showContextMenu(const QPoint& pos)
     QAction *act = menu.exec(view->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
-        Session->getViewManager()->requestJobEditor(item->jobId, item->stopId);
+        Session->getViewManager()->requestJobEditor(item->job.jobId, item->stopId);
     }
     else if(act == showRsPlan)
     {
