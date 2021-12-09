@@ -175,7 +175,12 @@ void StationGatesMatchModel::refreshData()
         {
             items[i].segmentId = track.get<db_id>(5);
             if(m_showOnlySegments && !items[i].segmentId)
-                i--; //Skip this gate because it is not connected to a segment
+            {
+                //Skip this gate because it is not connected to a segment
+                i--; //Overwrite with new item
+                ++it; //Step query to next record
+                continue;
+            }
 
             items[i].segmentName = track.get<QString>(6);
         }
