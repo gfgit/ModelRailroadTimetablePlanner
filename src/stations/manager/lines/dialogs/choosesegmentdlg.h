@@ -12,7 +12,7 @@ class database;
 class CustomCompletionLineEdit;
 
 class StationsMatchModel;
-class RailwaySegmentMatchModel;
+class StationGatesMatchModel;
 
 class ChooseSegmentDlg : public QDialog
 {
@@ -28,26 +28,24 @@ public:
 
     virtual void done(int res) override;
 
-    void setFilter(db_id fromStationId, db_id toStationId, db_id exceptSegment);
+    void setFilter(db_id fromStationId, db_id exceptSegment);
 
     bool getData(db_id& outSegId, QString& segName, bool &outIsReversed);
 
 private slots:
     void onStationChanged();
-    void onSegmentSelected(db_id segmentId);
+    void onSegmentSelected(const QModelIndex &idx);
 
 private:
     CustomCompletionLineEdit *fromStationEdit;
-    CustomCompletionLineEdit *toStationEdit;
-    CustomCompletionLineEdit *segmentEdit;
+    CustomCompletionLineEdit *outGateEdit;
 
     StationsMatchModel *fromStationMatch;
-    StationsMatchModel *toStationMatch;
-    RailwaySegmentMatchModel *segmentMatch;
+    StationGatesMatchModel *gateMatch;
 
     db_id lockFromStationId;
-    db_id lockToStationId;
     db_id excludeSegmentId;
+    db_id selectedSegmentId;
     bool isReversed;
 };
 

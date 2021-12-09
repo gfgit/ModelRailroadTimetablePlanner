@@ -142,7 +142,7 @@ void EditLineDlg::addStation()
     db_id lastSegmentId = model->getLastRailwaySegment();
 
     OwningQPointer<ChooseSegmentDlg> dlg(new ChooseSegmentDlg(mDb, this));
-    dlg->setFilter(lastStationId, ChooseSegmentDlg::DoNotLock, lastSegmentId);
+    dlg->setFilter(lastStationId, lastSegmentId);
     int ret = dlg->exec();
     if(ret != QDialog::Accepted || !dlg)
         return;

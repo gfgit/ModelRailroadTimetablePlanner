@@ -5,15 +5,15 @@
 #include <QDialogButtonBox>
 
 #include "stations/match_models/stationsmatchmodel.h"
-#include "stations/match_models/railwaysegmentmatchmodel.h"
+#include "stations/match_models/stationgatesmatchmodel.h"
 
 #include <QMessageBox>
 
 ChooseSegmentDlg::ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
     lockFromStationId(0),
-    lockToStationId(0),
     excludeSegmentId(0),
+    selectedSegmentId(0),
     isReversed(false)
 {
     QFormLayout *lay = new QFormLayout(this);
@@ -23,15 +23,10 @@ ChooseSegmentDlg::ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     fromStationEdit->setPlaceholderText(tr("Filter..."));
     lay->addRow(tr("From station:"), fromStationEdit);
 
-    toStationMatch = new StationsMatchModel(db, this);
-    toStationEdit = new CustomCompletionLineEdit(fromStationMatch);
-    toStationEdit->setPlaceholderText(tr("Filter..."));
-    lay->addRow(tr("To station:"), toStationEdit);
-
-    segmentMatch = new RailwaySegmentMatchModel(db, this);
-    segmentEdit = new CustomCompletionLineEdit(segmentMatch);
-    segmentEdit->setPlaceholderText(tr("Select..."));
-    lay->addRow(tr("Segment:"), segmentEdit);
+    gateMatch = new StationGatesMatchModel(db, this);
+    outGateEdit = new CustomCompletionLineEdit(gateMatch);
+    outGateEdit->setPlaceholderText(tr("Select..."));
+    lay->addRow(tr("Segment:"), outGateEdit);
 
     QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok, Qt::Horizontal);
     lay->addWidget(box);
@@ -40,8 +35,7 @@ ChooseSegmentDlg::ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     connect(box, &QDialogButtonBox::rejected, this, &ChooseSegmentDlg::reject);
 
     connect(fromStationEdit, &CustomCompletionLineEdit::dataIdChanged, this, &ChooseSegmentDlg::onStationChanged);
-    connect(toStationEdit, &CustomCompletionLineEdit::dataIdChanged, this, &ChooseSegmentDlg::onStationChanged);
-    connect(segmentEdit, &CustomCompletionLineEdit::dataIdChanged, this, &ChooseSegmentDlg::onSegmentSelected);
+    connect(outGateEdit, &CustomCompletionLineEdit::indexSelected, this, &ChooseSegmentDlg::onSegmentSelected);
 
     setWindowTitle(tr("Choose Railway Segment"));
     setMinimumSize(300, 100);
@@ -53,7 +47,7 @@ void ChooseSegmentDlg::done(int res)
     {
         db_id segmentId = 0;
         QString tmp;
-        if(!segmentEdit->getData(segmentId, tmp))
+        if(!outGateEdit->getData(segmentId, tmp))
         {
             QMessageBox::warning(this, tr("Error"),
                                  tr("Invalid railway segment."));
@@ -64,28 +58,24 @@ void ChooseSegmentDlg::done(int res)
     QDialog::done(res);
 }
 
-void ChooseSegmentDlg::setFilter(db_id fromStationId, db_id toStationId, db_id exceptSegment)
+void ChooseSegmentDlg::setFilter(db_id fromStationId, db_id exceptSegment)
 {
     lockFromStationId = fromStationId;
-    lockToStationId = toStationId;
-    if(!lockFromStationId)
-        lockToStationId = DoNotLock; //NOTE: do not lock only destination
     excludeSegmentId = exceptSegment;
+    selectedSegmentId = 0;
 
     fromStationEdit->setData(lockFromStationId);
     fromStationEdit->setReadOnly(lockFromStationId != DoNotLock);
 
-    toStationEdit->setData(lockToStationId);
-    toStationEdit->setReadOnly(lockToStationId != DoNotLock);
-
     fromStationMatch->setFilter(0);
-    toStationMatch->setFilter(0);
-    segmentMatch->setFilter(lockFromStationId, lockToStationId, excludeSegmentId);
+    gateMatch->setFilter(lockFromStationId, true, excludeSegmentId, true);
 }
 
 bool ChooseSegmentDlg::getData(db_id &outSegId, QString &segName, bool &outIsReversed)
 {
-    segmentEdit->getData(outSegId, segName);
+    db_id tmpGateId = 0;
+    outGateEdit->getData(tmpGateId, segName);
+    outSegId = selectedSegmentId;
     outIsReversed = isReversed;
     return outSegId != 0;
 }
@@ -93,44 +83,18 @@ bool ChooseSegmentDlg::getData(db_id &outSegId, QString &segName, bool &outIsRev
 void ChooseSegmentDlg::onStationChanged()
 {
     QString tmp;
-    db_id fromStationId = 0;
-    db_id toStationId = 0;
-
-    fromStationEdit->getData(fromStationId, tmp);
-    toStationEdit->getData(toStationId, tmp);
-
-    if(!fromStationId && !toStationEdit->isReadOnly())
-    {
-        //Do not filter only by destination
-        toStationEdit->setReadOnly(true);
-        toStationEdit->setPlaceholderText(tr("Set From station"));
-
-        if(toStationId != 0)
-        {
-            //This will recurse so return
-            toStationEdit->setData(0);
-            return;
-        }
-    }
-    else if(fromStationId && toStationEdit->isReadOnly())
-    {
-        //Re enable
-        toStationEdit->setReadOnly(lockToStationId != DoNotLock);
-        toStationEdit->setPlaceholderText(tr("Filter..."));
-    }
+    fromStationEdit->getData(lockFromStationId, tmp);
 
     //Reset segment
-    segmentEdit->setData(0);
-    segmentMatch->setFilter(fromStationId, toStationId, excludeSegmentId);
+    outGateEdit->setData(0);
+    gateMatch->setFilter(lockFromStationId, true, excludeSegmentId, true);
     isReversed = false;
 }
 
-void ChooseSegmentDlg::onSegmentSelected(db_id segmentId)
+void ChooseSegmentDlg::onSegmentSelected(const QModelIndex& idx)
 {
-    //NOTE HACK:
-    //CustomCompletionLineEdit doesn't allow getting custom data
-    //Ask model directly before it's cleared by CustomCompletionLineEdit
     isReversed = false;
-    if(segmentId)
-        isReversed = segmentMatch->isReversed(segmentId);
+    selectedSegmentId = gateMatch->getSegmentIdAtRow(idx.row());
+    if(selectedSegmentId)
+        isReversed = gateMatch->isSegmentReversedAtRow(idx.row());
 }
