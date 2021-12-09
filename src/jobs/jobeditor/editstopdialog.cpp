@@ -461,7 +461,7 @@ void EditStopDialog::onStationSelected()
     ui->prevOutGateEdit->setText(QString()); //Clear UI field
 
     //Update next segment
-    stationOutGateMatchModel->setFilter(curStop.stationId, true, 0, true);
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId, true);
     mOutGateEdit->setData(0); //Reset, user must choose again
 
     curStop.nextSegment = StopItem::Segment{};

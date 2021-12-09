@@ -66,7 +66,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     prevStop = prev;
 
     arrEdit->setToolTip(QString());
-    switch (item.type)
+    switch (curStop.type)
     {
     case StopType::Normal:
     {
@@ -95,7 +95,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         depEdit->setVisible(false);
 
         mOutGateEdit->hide();
-        if(item.stationId == 0)
+        if(curStop.stationId == 0)
             setFocusProxy(mStationEdit);
         break;
     }
@@ -103,27 +103,27 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         break;
     }
 
-    if(item.type == StopType::First)
+    if(curStop.type == StopType::First)
         stationsMatchModel->setFilter(0);
     else
         stationsMatchModel->setFilter(prevStop.stationId);
-    mStationEdit->setData(item.stationId);
+    mStationEdit->setData(curStop.stationId);
 
-    stationTrackMatchModel->setFilter(item.stationId);
-    mStTrackEdit->setData(item.trackId);
-    mStTrackEdit->setEnabled(item.stationId != 0); //Enable only if station is selected
+    stationTrackMatchModel->setFilter(curStop.stationId);
+    mStTrackEdit->setData(curStop.trackId);
+    mStTrackEdit->setEnabled(curStop.stationId != 0); //Enable only if station is selected
 
-    stationOutGateMatchModel->setFilter(item.stationId, true, 0, true);
-    mOutGateEdit->setData(item.toGate.gateId);
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId, true);
+    mOutGateEdit->setData(curStop.toGate.gateId);
 
     //Set Arrival and Departure
     arrEdit->blockSignals(true);
-    arrEdit->setTime(item.arrival);
+    arrEdit->setTime(curStop.arrival);
     arrEdit->blockSignals(false);
 
-    depEdit->setTime(item.departure);
+    depEdit->setTime(curStop.departure);
 
-    if(item.type != StopType::First)
+    if(curStop.type != StopType::First)
     {
         /* Next stop must be at least one minute after
          * This is to prevent contemporary stops that will break ORDER BY arrival queries */
@@ -136,7 +136,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
         //Normal stop: at least 1 minute stop
         //Transit, Last: departure = arrival
         QTime minDep = arrEdit->time();
-        if(item.type == StopType::Normal)
+        if(curStop.type == StopType::Normal)
             depEdit->setMinimumTime(minDep.addSecs(60));
         else
             depEdit->setMinimumTime(minDep);
@@ -217,7 +217,7 @@ void StopEditor::onStationSelected()
     prevStop.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
 
     //Update next segment
-    stationOutGateMatchModel->setFilter(curStop.stationId, true, 0, true);
+    stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId, true);
     mOutGateEdit->setData(0); //Reset, user must choose again
 
     curStop.nextSegment = StopItem::Segment{};
