@@ -79,7 +79,7 @@ private slots:
 private:
     QGridLayout *lay;
     CustomCompletionLineEdit *mStationEdit;
-    CustomCompletionLineEdit *mTrackEdit;
+    CustomCompletionLineEdit *mStTrackEdit;
     CustomCompletionLineEdit *mSegmentEdit;
     QTimeEdit *arrEdit;
     QTimeEdit *depEdit;

@@ -30,9 +30,9 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     mStationEdit->setPlaceholderText(tr("Station name"));
     connect(mStationEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditor::onStationSelected);
 
-    mTrackEdit = new CustomCompletionLineEdit(stationTrackMatchModel, this);
-    mTrackEdit->setPlaceholderText(tr("Track"));
-    connect(mTrackEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditor::onTrackSelected);
+    mStTrackEdit = new CustomCompletionLineEdit(stationTrackMatchModel, this);
+    mStTrackEdit->setPlaceholderText(tr("Track"));
+    connect(mStTrackEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditor::onTrackSelected);
 
     mSegmentEdit = new CustomCompletionLineEdit(segmentMatchModel, this);
     mSegmentEdit->setPlaceholderText(tr("Next segment"));
@@ -52,7 +52,7 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     lay->addWidget(mStationEdit, 0, 0);
     lay->addWidget(arrEdit, 0, 1);
     lay->addWidget(depEdit, 0, 2);
-    lay->addWidget(mTrackEdit, 1, 0, 1, 3);
+    lay->addWidget(mStTrackEdit, 1, 0, 1, 3);
     lay->addWidget(mSegmentEdit, 2, 0, 1, 3);
 
     setTabOrder(mStationEdit, arrEdit);
@@ -110,8 +110,8 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     mStationEdit->setData(item.stationId);
 
     stationTrackMatchModel->setFilter(item.stationId);
-    mTrackEdit->setData(item.trackId);
-    mTrackEdit->setEnabled(item.stationId != 0); //Enable only if station is selected
+    mStTrackEdit->setData(item.trackId);
+    mStTrackEdit->setEnabled(item.stationId != 0); //Enable only if station is selected
 
     segmentMatchModel->setFilter(item.stationId, 0, 0);
     mSegmentEdit->setData(item.nextSegment.segmentId);
@@ -203,14 +203,14 @@ void StopEditor::onStationSelected()
 
     //Update track
     stationTrackMatchModel->setFilter(curStop.stationId);
-    mTrackEdit->setEnabled(curStop.stationId != 0); //Enable only if station is selected
+    mStTrackEdit->setEnabled(curStop.stationId != 0); //Enable only if station is selected
 
     if(curStop.stationId)
     {
         if(!model->trySelectTrackForStop(curStop))
             curStop.trackId = 0; //Could not find a track
 
-        mTrackEdit->setData(curStop.trackId);
+        mStTrackEdit->setData(curStop.trackId);
     }
 
     //Update prev segment
@@ -227,7 +227,7 @@ void StopEditor::onTrackSelected()
 {
     db_id newTrackId = 0;
     QString tmp;
-    if(!mTrackEdit->getData(newTrackId, tmp))
+    if(!mStTrackEdit->getData(newTrackId, tmp))
         return;
 
     //Check if track is connected to gates
@@ -238,7 +238,7 @@ void StopEditor::onTrackSelected()
         QMessageBox::warning(this, stillSucceded ? tr("Gate Warning") : tr("Track Error"), tmp);
 
         if(!stillSucceded)
-            mTrackEdit->setData(curStop.trackId); //Reset to previous track
+            mStTrackEdit->setData(curStop.trackId); //Reset to previous track
     }
 }
 
