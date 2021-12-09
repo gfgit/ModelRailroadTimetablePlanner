@@ -3,6 +3,7 @@
 #include "app/session.h"
 
 #include  "graph/model/linegraphscene.h"
+#include "utils/jobcategorystrings.h"
 
 #include <QPainter>
 
@@ -311,6 +312,13 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
 {
     const double stationOffset = Session->stationOffset;
 
+    QFont jobNameFont;
+    setFontPointSizeDPI(jobNameFont, 20, painter);
+    painter->setFont(jobNameFont);
+
+    QColor textBackground(Qt::white);
+    textBackground.setAlpha(100);
+
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
 
@@ -357,12 +365,13 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
             if(job.fromDeparture.y() > rect.bottom() || job.toArrival.y() < rect.top())
                 continue; //Skip, job not visible
 
+            const QLineF line(job.fromDeparture, job.toArrival);
 
             if(drawSelection && selectedJob.jobId == job.jobId)
             {
                 //Draw selection around segment
                 painter->setPen(selectedJobPen);
-                painter->drawLine(job.fromDeparture, job.toArrival);
+                painter->drawLine(line);
 
                 //Reset pen
                 painter->setPen(jobPen);
@@ -376,7 +385,37 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
                 lastJobCategory = job.category;
             }
 
-            painter->drawLine(job.fromDeparture, job.toArrival);
+            painter->drawLine(line);
+
+            QTextOption textOption(Qt::AlignCenter);
+            QString jobName = JobCategoryName::jobName(job.jobId, job.category);
+
+            //Save old transformation to reset it after drawing text
+            const QTransform oldTransf = painter->transform();
+
+            //Move to line center, it will be rotation pivot
+            painter->translate(line.center());
+
+            //Rotate by line angle (minus because QPainter wants clockwise angle)
+            painter->rotate(-line.angle());
+
+            const double lineLength = line.length();
+            QRectF textRect(-lineLength / 2, -30, lineLength, 25);
+
+            //Try to avoid overlapping text of crossing jobs
+            if(job.toArrival.y() > job.fromDeparture.y())
+                textRect.moveLeft(textRect.left() + lineLength / 5);
+            else
+                textRect.moveLeft(textRect.left() - lineLength / 5);
+
+            textRect = painter->boundingRect(textRect, jobName, textOption);
+
+            //Draw a semi transparent background to ease text reading
+            painter->fillRect(textRect, textBackground);
+            painter->drawText(textRect, jobName, QTextOption(Qt::AlignCenter));
+
+            //Reset to old transformation
+            painter->setTransform(oldTransf);
         }
     }
 }
