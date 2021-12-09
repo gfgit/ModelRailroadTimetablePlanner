@@ -494,13 +494,13 @@ void EditStopDialog::onOutGateSelected(const QModelIndex& idx)
         return;
 
     const db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(idx.row());
-    const db_id oldSegId = curStop.nextSegment.segmentId;
+    const db_id oldGateId = curStop.toGate.gateId;
     db_id segOutGateId = 0;
     if(!stopModel->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
     {
         //Warn user and reset to previous chosen segment if any
         QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment <b>%1</b>").arg(gateSegmentName));
-        mOutGateEdit->setData(oldSegId);
+        mOutGateEdit->setData(oldGateId);
     }
 }
 
