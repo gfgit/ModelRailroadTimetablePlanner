@@ -211,9 +211,21 @@ QString StationGatesMatchModel::getName(db_id id) const
 
     query q(mDb, "SELECT name FROM station_gates WHERE id=?");
     q.bind(1, id);
-    if(q.step() == SQLITE_ROW)
-        return q.getRows().get<QString>(0);
-    return QString();
+    if(q.step() != SQLITE_ROW)
+        return QString();
+
+    QString str = q.getRows().get<QString>(0);
+    if(m_showOnlySegments)
+    {
+        q.prepare("SELECT name FROM railway_segments WHERE in_gate_id=?1 OR out_gate_id=?");
+        q.bind(1, id);
+        if(q.step() == SQLITE_ROW)
+        {
+            str.append(QLatin1String(": "));
+            str.append(q.getRows().get<QString>(0));
+        }
+    }
+    return str;
 }
 
 db_id StationGatesMatchModel::getIdAtRow(int row) const
@@ -231,6 +243,7 @@ void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates,
     m_stationId = stationId;
     m_markConnectedGates = markConnectedGates;
     m_excludeSegmentId = m_markConnectedGates ? excludeSegmentId : 0;
+    m_showOnlySegments = showOnlySegments;
 
     QByteArray sql = "SELECT g.id,g.out_track_count,g.type,g.name,g.side";
     if(m_markConnectedGates)
