@@ -66,7 +66,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
     const double stHeight = top + (isTransit ? 0.0 : height * 0.1);
     const double timeHeight = top + height * 0.4;
-    const double lineHeight = top + height * (isTransit ? 0.6 : 0.7);
+    const double lineHeight = top + height * 0.65;
 
     const double arrX = left + width * (isTransit ? 0.4 : 0.2);
     const double depX = left + width * 0.6;
@@ -88,7 +88,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                               item.arrival.toString("HH:mm"));
         }
 
-        if(item.type == StopType::First || item.type == StopType::Normal) //Last, Transit, TransitLineChange don't have a separate departure
+        if(item.type == StopType::First || item.type == StopType::Normal) //Last, Transit don't have a separate departure
         {
             //Departure
             painter->drawText(QRectF(depX, timeHeight, width, bottom - timeHeight),
