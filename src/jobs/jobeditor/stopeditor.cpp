@@ -62,8 +62,8 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
 
 void StopEditor::setStop(const StopItem &item, const StopItem &prev)
 {
-    oldItem = item;
-    prevItem = prev;
+    curStop = item;
+    prevStop = prev;
 
     arrEdit->setToolTip(QString());
     switch (item.type)
@@ -106,7 +106,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     if(item.type == StopType::First)
         stationsMatchModel->setFilter(0);
     else
-        stationsMatchModel->setFilter(prevItem.stationId);
+        stationsMatchModel->setFilter(prevStop.stationId);
     mStationEdit->setData(item.stationId);
 
     stationTrackMatchModel->setFilter(item.stationId);
@@ -127,7 +127,7 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
     {
         /* Next stop must be at least one minute after
          * This is to prevent contemporary stops that will break ORDER BY arrival queries */
-        const QTime minArr = prevItem.departure.addSecs(60);
+        const QTime minArr = prevStop.departure.addSecs(60);
         arrEdit->blockSignals(true);
         arrEdit->setMinimumTime(minArr);
         arrEdit->blockSignals(false);
@@ -145,8 +145,8 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
 
 void StopEditor::updateStopArrDep()
 {
-    oldItem.arrival = arrEdit->time();
-    oldItem.departure = depEdit->time();
+    curStop.arrival = arrEdit->time();
+    curStop.departure = depEdit->time();
 }
 
 void StopEditor::setCloseOnSegmentChosen(bool value)
@@ -178,7 +178,7 @@ void StopEditor::popupSegmentCombo()
         db_id newSegId = segmentMatchModel->getIdAtRow(0);
 
         db_id outGateId = 0;
-        if(model->trySelectNextSegment(oldItem, newSegId, 0, outGateId))
+        if(model->trySelectNextSegment(curStop, newSegId, 0, outGateId))
         {
             //Success, close editor
             emit nextSegmentChosen(this);
@@ -196,31 +196,31 @@ void StopEditor::onStationSelected()
     if(!mStationEdit->getData(newStId, tmp))
         return;
 
-    if(newStId == oldItem.stationId)
+    if(newStId == curStop.stationId)
         return;
 
-    oldItem.stationId = newStId;
+    curStop.stationId = newStId;
 
     //Update track
-    stationTrackMatchModel->setFilter(oldItem.stationId);
-    mTrackEdit->setEnabled(oldItem.stationId != 0); //Enable only if station is selected
+    stationTrackMatchModel->setFilter(curStop.stationId);
+    mTrackEdit->setEnabled(curStop.stationId != 0); //Enable only if station is selected
 
-    if(oldItem.stationId)
+    if(curStop.stationId)
     {
-        if(!model->trySelectTrackForStop(oldItem))
-            oldItem.trackId = 0; //Could not find a track
+        if(!model->trySelectTrackForStop(curStop))
+            curStop.trackId = 0; //Could not find a track
 
-        mTrackEdit->setData(oldItem.trackId);
+        mTrackEdit->setData(curStop.trackId);
     }
 
     //Update prev segment
-    prevItem.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
+    prevStop.nextSegment = StopItem::Segment{}; //Reset, will be reloaded by model
 
     //Update next segment
-    segmentMatchModel->setFilter(oldItem.stationId, 0, 0);
+    segmentMatchModel->setFilter(curStop.stationId, 0, 0);
     mSegmentEdit->setData(0); //Reset, user must choose again
 
-    oldItem.nextSegment = StopItem::Segment{};
+    curStop.nextSegment = StopItem::Segment{};
 }
 
 void StopEditor::onTrackSelected()
@@ -231,14 +231,14 @@ void StopEditor::onTrackSelected()
         return;
 
     //Check if track is connected to gates
-    if(!model->trySetTrackConnections(oldItem, newTrackId, &tmp))
+    if(!model->trySetTrackConnections(curStop, newTrackId, &tmp))
     {
         //Show error to the user
-        bool stillSucceded = (oldItem.trackId == newTrackId);
+        bool stillSucceded = (curStop.trackId == newTrackId);
         QMessageBox::warning(this, stillSucceded ? tr("Gate Warning") : tr("Track Error"), tmp);
 
         if(!stillSucceded)
-            mTrackEdit->setData(oldItem.trackId); //Reset to previous track
+            mTrackEdit->setData(curStop.trackId); //Reset to previous track
     }
 }
 
@@ -249,9 +249,9 @@ void StopEditor::onNextSegmentSelected()
     if(!mSegmentEdit->getData(newSegId, segmentName))
         return;
 
-    const db_id oldSegId = oldItem.nextSegment.segmentId;
+    const db_id oldSegId = curStop.nextSegment.segmentId;
     db_id outGateId = 0;
-    if(model->trySelectNextSegment(oldItem, newSegId, 0, outGateId))
+    if(model->trySelectNextSegment(curStop, newSegId, 0, outGateId))
     {
         emit nextSegmentChosen(this);
     }
@@ -270,11 +270,11 @@ void StopEditor::arrivalChanged(const QTime& arrival)
     if(!shiftPressed)
     {
         //Shift departure by the same amount if SHIFT NOT pressed
-        int diff = oldItem.arrival.msecsTo(arrival);
+        int diff = curStop.arrival.msecsTo(arrival);
         dep = dep.addMSecs(diff);
     }
     QTime minDep = arrival;
-    if(oldItem.type == StopType::Normal)
+    if(curStop.type == StopType::Normal)
     {
         minDep = arrival.addSecs(60); //At least stop for 1 minute in Normal stops
     }

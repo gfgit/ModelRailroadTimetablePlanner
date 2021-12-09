@@ -36,8 +36,8 @@ public:
 
     void updateStopArrDep();
 
-    inline const StopItem& getCurItem() const { return oldItem; }
-    inline const StopItem& getPrevItem() const { return prevItem; }
+    inline const StopItem& getCurItem() const { return curStop; }
+    inline const StopItem& getPrevItem() const { return prevStop; }
 
     /*!
      * \brief closeOnSegmentChosen
@@ -89,8 +89,8 @@ private:
     RailwaySegmentMatchModel *segmentMatchModel;
 
     StopModel *model;
-    StopItem oldItem;
-    StopItem prevItem;
+    StopItem curStop;
+    StopItem prevStop;
 
     bool m_closeOnSegmentChosen;
 };
