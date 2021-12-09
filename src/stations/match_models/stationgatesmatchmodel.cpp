@@ -222,7 +222,7 @@ QString StationGatesMatchModel::getName(db_id id) const
     QString str = q.getRows().get<QString>(0);
     if(m_showOnlySegments)
     {
-        q.prepare("SELECT name FROM railway_segments WHERE in_gate_id=?1 OR out_gate_id=?");
+        q.prepare("SELECT name FROM railway_segments WHERE in_gate_id=?1 OR out_gate_id=?1");
         q.bind(1, id);
         if(q.step() == SQLITE_ROW)
         {
