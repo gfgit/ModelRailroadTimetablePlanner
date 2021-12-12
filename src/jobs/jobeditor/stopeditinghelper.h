@@ -33,6 +33,8 @@ public:
 
     void popupSegmentCombo();
 
+    QString getGateString(db_id gateId, bool reversed);
+
     inline CustomCompletionLineEdit *getStationEdit() const { return mStationEdit; }
     inline CustomCompletionLineEdit *getStTrackEdit() const { return mStTrackEdit; }
     inline CustomCompletionLineEdit *getOutGateEdit() const { return mOutGateEdit; }
@@ -55,11 +57,11 @@ private slots:
     void arrivalChanged(const QTime &arrival);
     void departureChanged(const QTime &dep);
 
+public slots:
     void startOutTrackTimer();
-
-private:
     void stopOutTrackTimer();
 
+private:
     void updateGateTrackSpin(const StopItem::Gate& toGate);
 
 private:

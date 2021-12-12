@@ -59,70 +59,24 @@ void StopEditingHelper::setStop(const StopItem &item, const StopItem &prev)
     curStop = item;
     prevStop = prev;
 
-    arrEdit->setToolTip(QString());
-    switch (curStop.type)
-    {
-    case StopType::Normal:
-    {
-        arrEdit->setToolTip(tr("Press shift if you don't want to change also departure time."));
-        arrEdit->setEnabled(true);
-        depEdit->setEnabled(true);
-        break;
-    }
-    case StopType::Transit:
-    {
-        arrEdit->setEnabled(true);
-
-        depEdit->setEnabled(false);
-        depEdit->setVisible(false);
-        break;
-    }
-    case StopType::First:
-    {
-        arrEdit->setEnabled(false);
-        arrEdit->setVisible(false);
-        break;
-    }
-    case StopType::Last:
-    {
-        depEdit->setEnabled(false);
-        depEdit->setVisible(false);
-
-        mOutGateEdit->hide();
-        break;
-    }
-    default:
-        break;
-    }
-
-    if(curStop.type == StopType::First)
-        stationsMatchModel->setFilter(0);
-    else
-        stationsMatchModel->setFilter(prevStop.stationId);
-    mStationEdit->setData(curStop.stationId);
-
+    //Update match models
+    stationsMatchModel->setFilter(prevStop.stationId);
     stationTrackMatchModel->setFilter(curStop.stationId);
-    mStTrackEdit->setData(curStop.trackId);
-    mStTrackEdit->setEnabled(curStop.stationId != 0); //Enable only if station is selected
-
     stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId, true);
-    mOutGateEdit->setData(curStop.toGate.gateId);
-
-    updateGateTrackSpin(curStop.toGate);
 
     //Check Arrival and Departure
-    arrEdit->blockSignals(true);
-    depEdit->blockSignals(true);
+    QTime minArr, minDep;
     if(curStop.type != StopType::First)
     {
-        /* Next stop must be at least one minute after
-         * This is to prevent contemporary stops that will break ORDER BY arrival queries */
-        const QTime minArr = prevStop.departure.addSecs(60);
-
         //First stop: arrival is hidden, you can change only departure so do not set a minimum
+
+        //Next stop must be at least one minute after previous (minimum travel duration)
+        //This is to prevent contemporary stops that will break ORDER BY arrival queries
+        minArr = prevStop.departure.addSecs(60);
+
         //Normal stop: at least 1 minute stop
         //Transit, Last: departure = arrival
-        QTime minDep = arrEdit->time();
+        minDep = curStop.arrival;
         if(curStop.type == StopType::Normal)
             minDep = minDep.addSecs(60);
 
@@ -131,16 +85,44 @@ void StopEditingHelper::setStop(const StopItem &item, const StopItem &prev)
 
         if(curStop.departure < minDep)
             curStop.arrival = minDep;
-
-        arrEdit->setMinimumTime(minArr);
-        depEdit->setMinimumTime(minDep);
     }
 
-    //Set Arrival and Departure
-    arrEdit->setTime(curStop.arrival);
-    depEdit->setTime(curStop.departure);
+    //Show/Hide relevant fields for current stop
 
+    //First stop has no Arrival, only Departure
+    arrEdit->setEnabled(curStop.type != StopType::First);
+    arrEdit->setVisible(curStop.type != StopType::First);
+
+    QString arrTootlip; //No tooltip by default
+    if(curStop.type == StopType::Normal)
+        arrTootlip = tr("Press shift if you don't want to change also departure time.");
+    arrEdit->setToolTip(arrTootlip);
+
+    //Transit and Last stop only have Arrival
+    depEdit->setEnabled(curStop.type != StopType::Last && curStop.type != StopType::Transit);
+    depEdit->setVisible(curStop.type != StopType::Last && curStop.type != StopType::Transit);
+
+    //Last stop has no Out Gate because there's no stop after last
+    mOutGateEdit->setVisible(curStop.type != StopType::Last);
+
+    //Enable track edit only if station is selected
+    mStTrackEdit->setEnabled(curStop.stationId != 0);
+
+    //Update UI fields
+    mStationEdit->setData(curStop.stationId);
+    mStTrackEdit->setData(curStop.trackId);
+    mOutGateEdit->setData(curStop.toGate.gateId);
+    updateGateTrackSpin(curStop.toGate);
+
+    //Set Arrival and Departure
+    arrEdit->blockSignals(true);
+    arrEdit->setMinimumTime(minArr);
+    arrEdit->setTime(curStop.arrival);
     arrEdit->blockSignals(false);
+
+    depEdit->blockSignals(true);
+    depEdit->setMinimumTime(minDep);
+    depEdit->setTime(curStop.departure);
     depEdit->blockSignals(false);
 }
 
@@ -167,6 +149,21 @@ void StopEditingHelper::popupSegmentCombo()
 
     //We have multiple segments, let the user choose
     mOutGateEdit->showPopup();
+}
+
+QString StopEditingHelper::getGateString(db_id gateId, bool reversed)
+{
+    QString str = QLatin1String("<b>");
+    if(gateId)
+    {
+        str += stationOutGateMatchModel->getName(gateId);
+        if(reversed)
+            str += tr(" (reversed)");
+    }else{
+        str += tr("Not set!");
+    }
+    str.append(QLatin1String("</b>"));
+    return str;
 }
 
 void StopEditingHelper::timerEvent(QTimerEvent *e)
