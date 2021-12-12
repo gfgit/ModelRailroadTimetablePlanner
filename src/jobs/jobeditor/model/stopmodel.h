@@ -85,32 +85,35 @@ public:
     bool commitChanges();
     bool revertChanges();
 
+    // Editing
     void addStop();
     void removeStop(const QModelIndex& idx);
     void removeLastIfEmpty();
 
-    bool isAddHere(const QModelIndex& idx);
+    void uncoupleStillCoupledAtLastStop();
+    void uncoupleStillCoupledAtStop(const StopItem &s);
 
-    bool updateCurrentInGate(StopItem& curStop, const StopItem::Segment& prevSeg);
-    bool updateStopTime(StopItem& item, int row, bool propagate, const QTime &oldArr, const QTime &oldDep);
-    void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
-
-    bool setStopTypeRange(int firstRow, int lastRow, StopType type);
-
-    QString getDescription(const StopItem &s) const;
-    void setDescription(const QModelIndex &idx, const QString &descr);
-
-    int calcTravelTime(db_id segmentId);
-    int defaultStopTimeSec();
-
-    std::pair<QTime, QTime> getFirstLastTimes() const;
-
+    // Getters
     JobCategory getCategory() const;
     db_id getJobId() const;
     db_id getJobShiftId() const;
     db_id getNewShiftId() const;
 
+    // Setters
+    void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
+
+    bool setStopTypeRange(int firstRow, int lastRow, StopType type);
+
+    // Stop Description
+    QString getDescription(const StopItem &s) const;
+    void setDescription(const QModelIndex &idx, const QString &descr);
+
+    // Convinience
     int getStopRow(db_id stopId) const;
+
+    bool isAddHere(const QModelIndex& idx);
+
+    std::pair<QTime, QTime> getFirstLastTimes() const;
 
     const QSet<db_id> &getRsToUpdate() const;
     const QSet<db_id> &getStationsToUpdate() const;
@@ -123,16 +126,11 @@ public:
     inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
     inline db_id getItemStationAt(int row) const { return stops.at(row).stationId; }
 
-    void uncoupleStillCoupledAtLastStop();
-    void uncoupleStillCoupledAtStop(const StopItem &s);
 
 #ifdef ENABLE_AUTO_TIME_RECALC
     void rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep);
 #endif
 
-
-
-    //Convinience for StopEditor
     bool trySelectTrackForStop(StopItem &item);
 
     bool trySetTrackConnections(StopItem &item, db_id trackId,
@@ -166,6 +164,12 @@ private:
     void insertAddHere(int row, int type);
     db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, StopType type);
     void deleteStop(db_id stopId);
+
+    bool updateCurrentInGate(StopItem& curStop, const StopItem::Segment& prevSeg);
+    bool updateStopTime(StopItem& item, int row, bool propagate, const QTime &oldArr, const QTime &oldDep);
+
+    int calcTravelTime(db_id segmentId);
+    int defaultStopTimeSec();
 
     void shiftStopsBy24hoursFrom(const QTime& startTime);
 
