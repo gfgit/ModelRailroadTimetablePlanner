@@ -35,6 +35,7 @@
 EditStopDialog::EditStopDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::EditStopDialog),
+    mTimerOutTrack(0),
     readOnly(false)
 {
     ui->setupUi(this);
@@ -58,6 +59,10 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
     mOutGateEdit->setPlaceholderText(tr("Out Gate"));
     connect(mOutGateEdit, &CustomCompletionLineEdit::indexSelected, this, &EditStopDialog::onOutGateSelected);
     ui->curStopLay->setWidget(3, QFormLayout::FieldRole, mOutGateEdit);
+
+    ui->outGateTrackSpin->setMaximum(0);
+    connect(ui->outGateTrackSpin, qOverload<int>(&QSpinBox::valueChanged), this, &EditStopDialog::startOutTrackTimer);
+    connect(ui->outGateTrackSpin, &QSpinBox::editingFinished, this, &EditStopDialog::checkOutGateTrack);
 
     //Coupling
     couplingMgr = new RSCouplingInterface(Session->m_Db, this);
@@ -122,11 +127,14 @@ EditStopDialog::EditStopDialog(QWidget *parent) :
 
 EditStopDialog::~EditStopDialog()
 {
+    stopOutTrackTimer();
     delete ui;
 }
 
 void EditStopDialog::clearUi()
 {
+    stopOutTrackTimer();
+
     stopIdx = QModelIndex();
     curStop = StopItem();
     prevStop = StopItem();
@@ -161,6 +169,8 @@ void EditStopDialog::setStop(StopModel *stops, const QModelIndex& idx)
         clearUi();
         return;
     }
+
+    stopOutTrackTimer();
 
     stopIdx = idx;
     stopModel = stops;
@@ -245,6 +255,8 @@ void EditStopDialog::updateInfo()
     mStationEdit->setData(curStop.stationId);
     mStTrackEdit->setData(curStop.trackId);
     mOutGateEdit->setData(curStop.toGate.gateId);
+
+    updateGateTrackSpin(curStop.toGate);
 
     ui->inGateEdit->setText(getGateName(stationOutGateMatchModel,
                                         curStop.fromGate.gateId,
@@ -496,12 +508,97 @@ void EditStopDialog::onOutGateSelected(const QModelIndex& idx)
     const db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(idx.row());
     const db_id oldGateId = curStop.toGate.gateId;
     db_id segOutGateId = 0;
-    if(!stopModel->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
+    if(stopModel->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId))
+    {
+        //Update gate track
+        updateGateTrackSpin(curStop.toGate);
+    }
+    else
     {
         //Warn user and reset to previous chosen segment if any
         QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment <b>%1</b>").arg(gateSegmentName));
         mOutGateEdit->setData(oldGateId);
     }
+}
+
+void EditStopDialog::checkOutGateTrack()
+{
+    stopOutTrackTimer();
+
+    if(!curStop.nextSegment.segmentId)
+        return; //First we need to have a segment
+
+    int trackNum = ui->outGateTrackSpin->value();
+    curStop.toGate.trackNum = trackNum; //Trigger checking of railway segment connections
+
+    db_id segOutGateId = 0;
+    if(stopModel->trySelectNextSegment(curStop, curStop.nextSegment.segmentId, trackNum, 0, segOutGateId))
+    {
+        //Update gate track
+        updateGateTrackSpin(curStop.toGate);
+
+        if(curStop.toGate.trackNum != trackNum)
+        {
+            //It wasn't possible to set requested track
+            QMessageBox::warning(this, tr("Stop Error"),
+                                 tr("Requested gate out track <b>%1</b> is not connected to segment <b>%2</b>.<br>"
+                                    "Out track <b>%3</b> was chosen instead.<br>"
+                                    "Look segment track connection from Stations Manager for more information"
+                                    " on available tracks.")
+                                     .arg(trackNum)
+                                     .arg(mOutGateEdit->text())
+                                     .arg(curStop.toGate.trackNum));
+        }
+    }
+    else
+    {
+        //Warn user and reset to previous chosen segment if any
+        QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment track!"));
+    }
+}
+
+void EditStopDialog::startOutTrackTimer()
+{
+    //Give user a small time to scroll values in out gate track QSpinBox
+    //This will skip eventual non available tracks (not connected)
+    //On timeout check track and reset to old value if not available
+    stopOutTrackTimer();
+    mTimerOutTrack = startTimer(700);
+}
+
+void EditStopDialog::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == mTimerOutTrack)
+    {
+        checkOutGateTrack();
+        return;
+    }
+
+    QDialog::timerEvent(e);
+}
+
+void EditStopDialog::stopOutTrackTimer()
+{
+    if(mTimerOutTrack)
+    {
+        killTimer(mTimerOutTrack);
+        mTimerOutTrack = 0;
+    }
+}
+
+void EditStopDialog::updateGateTrackSpin(const StopItem::Gate &toGate)
+{
+    stopOutTrackTimer();
+
+    int outTrackCount = 0;
+    if(toGate.gateId)
+        outTrackCount = stationOutGateMatchModel->getGateTrackCount(toGate.gateId);
+
+    //Prevent trigger valueChanged() signal
+    ui->outGateTrackSpin->blockSignals(true);
+    ui->outGateTrackSpin->setMaximum(qMax(1, outTrackCount - 1)); //At least one track
+    ui->outGateTrackSpin->setValue(toGate.trackNum);
+    ui->outGateTrackSpin->blockSignals(false);
 }
 
 QSet<db_id> EditStopDialog::getRsToUpdate() const

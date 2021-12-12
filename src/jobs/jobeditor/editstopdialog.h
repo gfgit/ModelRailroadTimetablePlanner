@@ -60,8 +60,18 @@ private slots:
     void onStationSelected();
     void onStTrackSelected();
     void onOutGateSelected(const QModelIndex &idx);
+    void checkOutGateTrack();
+
+    void startOutTrackTimer();
+
+protected:
+    void timerEvent(QTimerEvent *e) override;
 
 private:
+    void stopOutTrackTimer();
+
+    void updateGateTrackSpin(const StopItem::Gate& toGate);
+
     void saveDataToModel();
 
     void showBeforeAsset(bool val);
@@ -104,6 +114,7 @@ private:
     StopItem curStop;
     StopItem prevStop;
 
+    int mTimerOutTrack;
     bool readOnly;
 };
 
