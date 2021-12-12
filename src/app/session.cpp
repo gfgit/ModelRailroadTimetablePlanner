@@ -110,8 +110,6 @@ DB_Error MeetingSession::openDB(const QString &str, bool ignoreVersion)
     m_Db.enable_foreign_keys(true);
     m_Db.enable_extended_result_codes(true);
 
-    prepareQueryes();
-
 //    }catch(const char *msg)
 //    {
 //        QMessageBox::warning(nullptr,
@@ -173,9 +171,6 @@ DB_Error MeetingSession::closeDB()
 
     releaseAllSavepoints();
 
-    finalizeStatements();
-
-
     //Calls sqlite3_close(), not forcing closing db like sqlite3_close_v2
     //So in case the database is still used by some background task (returns SQLITE_BUSY)
     //we abort closing and return. It's like nevere having closed, database is 100% working
@@ -186,7 +181,6 @@ DB_Error MeetingSession::closeDB()
 
         if(rc == SQLITE_BUSY)
         {
-            prepareQueryes(); //Try to reprepare queries
             return DB_Error::DbBusyWhenClosing;
         }
         //return false;
@@ -582,8 +576,6 @@ DB_Error MeetingSession::createNewDB(const QString& file)
     metaDataMgr->setInt64(FormatVersion, false, MetaDataKey::FormatVersionKey);
     metaDataMgr->setString(AppVersion, false, MetaDataKey::ApplicationString);
 
-    prepareQueryes();
-
     return DB_Error::NoError;
 }
 
@@ -630,19 +622,6 @@ bool MeetingSession::clearImportRSTables()
         return false;
 
     return true;
-}
-
-void MeetingSession::prepareQueryes()
-{
-    DEBUG_COLOR_ENTRY(SHELL_YELLOW);
-
-    //FIXME: remove queries from ViewManager
-    viewManager->prepareQueries();
-}
-
-void MeetingSession::finalizeStatements()
-{
-    viewManager->finalizeQueries();
 }
 
 bool MeetingSession::setSavepoint(const QString &pointname)
@@ -749,8 +728,7 @@ void MeetingSession::locateAppdata()
 {
     appDataPath = QStringLiteral("%1/%2/%3")
                       .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-                      .arg(AppCompany)
-                      .arg(AppProductShort);
+                      .arg(AppCompany, AppProductShort);
     appDataPath = QDir::cleanPath(appDataPath);
     qDebug() << appDataPath;
 }

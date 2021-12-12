@@ -144,9 +144,6 @@ public:
     bool checkImportRSTablesEmpty();
     bool clearImportRSTables();
 
-    void prepareQueryes();
-    void finalizeStatements();
-
     QString fileName; //TODO: re organize variables
 
 //AppData

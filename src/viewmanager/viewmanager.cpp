@@ -677,15 +677,3 @@ void ViewManager::requestShiftGraphEditor()
     shiftGraphEditor->update();
     shiftGraphEditor->raise();
 }
-
-void ViewManager::prepareQueries()
-{
-    if(jobEditor)
-        jobEditor->prepareQueries();
-}
-
-void ViewManager::finalizeQueries()
-{
-    if(jobEditor)
-        jobEditor->finalizeQueries();
-}

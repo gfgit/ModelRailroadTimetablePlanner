@@ -34,9 +34,6 @@ public:
     explicit JobPathEditor(QWidget *parent = nullptr);
     ~JobPathEditor()override;
 
-    void prepareQueries();
-    void finalizeQueries();
-
     bool setJob(db_id jobId);
     bool createNewJob(db_id *out = nullptr);
 
@@ -52,7 +49,6 @@ public:
 
     bool maybeSave();
 
-    void toggleTransit(const QModelIndex &index);
     void closeStopEditor();
     void setReadOnly(bool readOnly);
 

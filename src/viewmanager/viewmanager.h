@@ -34,9 +34,6 @@ class ViewManager : public QObject
 public:
     explicit ViewManager(QObject *parent = nullptr);
 
-    void prepareQueries();
-    void finalizeQueries();
-
     bool closeEditors();
     void clearAllLineGraphs();
 

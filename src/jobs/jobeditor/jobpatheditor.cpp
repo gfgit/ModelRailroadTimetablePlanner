@@ -212,36 +212,6 @@ bool JobPathEditor::createNewJob(db_id *out)
     return true;
 }
 
-void JobPathEditor::toggleTransit(const QModelIndex& index)
-{
-    DEBUG_ENTRY;
-
-    if(m_readOnly)
-        return;
-
-    if(!index.isValid() || index.row() >= stopModel->rowCount())
-        return;
-
-    StopType type = stopModel->getItemTypeAt(index.row());
-    if(type == StopType::First || type == StopType::Last)
-        return;
-
-    if(type == StopType::Transit)
-        type = StopType::Normal;
-    else
-        type = StopType::Transit;
-
-    int err = stopModel->setStopType(index, type);
-
-    if(err == StopModel::ErrorTransitWithCouplings)
-    {
-        QMessageBox::warning(this,
-                             tr("Invalid Operation"),
-                             tr("Transit cannot have coupling or uncoupling operations.\n"
-                                "Remove theese operation to set Transit on this stop."));
-    }
-}
-
 void JobPathEditor::showContextMenu(const QPoint& pos)
 {
     QModelIndex index = ui->view->indexAt(pos);
@@ -257,13 +227,11 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     QAction *showStationSVG = menu->addAction(tr("Station SVG Plan"));
     menu->insertSeparator(editStopAct);
     QAction *removeStopAct = menu->addAction(tr("Remove"));
-    QAction *insertBeforeAct = menu->addAction(tr("Insert before"));
 
     toggleTransitAct->setEnabled(!m_readOnly);
     setToTransitAct->setEnabled(!m_readOnly);
     unsetTransit->setEnabled(!m_readOnly);
     removeStopAct->setEnabled(!m_readOnly);
-    insertBeforeAct->setEnabled(false /*!m_readOnly*/); //TODO: rework StopModel first
 
     const db_id stationId = stopModel->getItemStationAt(index.row());
     showStationSVG->setEnabled(stationId != 0); //Enable only if station is set
@@ -321,19 +289,10 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
             return;
         }
     }
-    else if(act == toggleTransitAct)
-    {
-        toggleTransit(index);
-        return;
-    }
 
     if(act == removeStopAct)
     {
         stopModel->removeStop(index);
-    }
-    else if(act == insertBeforeAct)
-    {
-        stopModel->insertStopBefore(index);
     }
 }
 
@@ -360,16 +319,6 @@ bool JobPathEditor::clearJob()
     stopJobNumberTimer();
 
     return true;
-}
-
-void JobPathEditor::prepareQueries()
-{
-    stopModel->prepareQueries();
-}
-
-void JobPathEditor::finalizeQueries()
-{
-    stopModel->finalizeQueries();
 }
 
 void JobPathEditor::done(int res)
