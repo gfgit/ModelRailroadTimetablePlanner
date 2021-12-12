@@ -285,9 +285,9 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
 
     if(act == editStopAct)
     {
-        OwningQPointer<EditStopDialog> dlg = new EditStopDialog(this);
+        OwningQPointer<EditStopDialog> dlg = new EditStopDialog(stopModel, this);
         dlg->setReadOnly(m_readOnly);
-        dlg->setStop(stopModel, index);
+        dlg->setStop(index);
         dlg->exec();
         return;
     }
