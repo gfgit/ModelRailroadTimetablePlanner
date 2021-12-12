@@ -562,13 +562,20 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
         platf.jobStops.clear();
     }
 
+    sqlite3pp::query q_prevSegment(mDb, "SELECT c.seg_id, MAX(stops.departure)"
+                                        " FROM stops"
+                                        " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
+                                        " WHERE stops.job_id=? AND stops.departure<?");
+
     sqlite3pp::query q(mDb, "SELECT stops.id, stops.job_id, jobs.category,"
                             "stops.arrival, stops.departure,"
-                            "g_in.track_id, g_out.track_id"
+                            "g_in.track_id, g_out.track_id,"
+                            "c.seg_id"
                             " FROM stops"
                             " JOIN jobs ON stops.job_id=jobs.id"
                             " LEFT JOIN station_gate_connections g_in ON g_in.id=stops.in_gate_conn"
                             " LEFT JOIN station_gate_connections g_out ON g_out.id=stops.out_gate_conn"
+                            " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
                             " WHERE stops.station_id=?"
                             " ORDER BY stops.arrival");
     q.bind(1, st.stationId);
@@ -586,6 +593,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
         QTime departure = stop.get<QTime>(4);
         db_id trackId = stop.get<db_id>(5);
         db_id outTrackId = stop.get<db_id>(6);
+        db_id nextSegId = stop.get<db_id>(7);
 
         if(trackId && outTrackId && trackId != outTrackId)
         {
@@ -621,6 +629,48 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
             qWarning() << "Stop:" << jobStop.stop.stopId << "Track is not in this station";
             continue; //Skip this stop
         }
+
+        //Check if we need job label
+        bool isSegmentVisible = false;
+        if(graphType == LineGraphType::SingleStation)
+            isSegmentVisible = true; //Skip checking, always draw label
+
+        if(!isSegmentVisible && nextSegId)
+        {
+            for(const StationPosEntry& stPos : qAsConst(stationPositions))
+            {
+                if(stPos.segmentId == nextSegId)
+                {
+                    isSegmentVisible = true;
+                    break;
+                }
+            }
+        }
+
+        if(!isSegmentVisible)
+        {
+            //Check if previous segment is visible
+            q_prevSegment.bind(1, jobStop.stop.jobId);
+            q_prevSegment.bind(2, arrival);
+            q_prevSegment.step();
+            auto seg = q_prevSegment.getRows();
+            if(seg.column_type(0) != SQLITE_NULL)
+            {
+                db_id prevSegId = seg.get<db_id>(0);
+                for(const StationPosEntry& stPos : qAsConst(stationPositions))
+                {
+                    if(stPos.segmentId == prevSegId)
+                    {
+                        isSegmentVisible = true;
+                        break;
+                    }
+                }
+            }
+            q_prevSegment.reset();
+        }
+
+        //Draw only if neither segment is visible or when graph is SignleStation
+        jobStop.drawLabel = !isSegmentVisible || graphType == LineGraphType::SingleStation;
 
         //Calculate coordinates
         jobStop.arrivalY = vertOffset + timeToHourFraction(arrival) * hourOffset;

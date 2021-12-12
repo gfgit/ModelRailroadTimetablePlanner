@@ -29,12 +29,13 @@ public:
      *
      * Contains informations to draw job line on top of the PlatformGraph
      */
-    typedef struct
+    struct JobStopGraph
     {
         JobStopEntry stop;
         double arrivalY;
         double departureY;
-    } JobStopGraph;
+        bool drawLabel;
+    };
 
     /*!
      * \brief Graph of a station track (platform)
@@ -42,14 +43,14 @@ public:
      * Contains informations to draw platform line and header name
      * \sa JobStopGraph
      */
-    typedef struct
+    struct PlatformGraph
     {
         db_id platformId;
         QString platformName;
         QRgb color;
         QFlags<utils::StationTrackType> platformType;
         QVector<JobStopGraph> jobStops;
-    } PlatformGraph;
+    };
 
     QVector<PlatformGraph> platforms;
 
