@@ -8,6 +8,7 @@
 
 class CustomCompletionLineEdit;
 class QTimeEdit;
+class QSpinBox;
 class QGridLayout;
 
 class StationsMatchModel;
@@ -33,6 +34,7 @@ class StopEditor : public QFrame
     Q_OBJECT
 public:
     StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent = nullptr);
+    ~StopEditor();
 
     void setStop(const StopItem& item, const StopItem& prev);
 
@@ -75,8 +77,19 @@ private slots:
     void onStationSelected();
     void onTrackSelected();
     void onOutGateSelected(const QModelIndex &idx);
+    void checkOutGateTrack();
 
     void arrivalChanged(const QTime &arrival);
+
+    void startOutTrackTimer();
+
+protected:
+    void timerEvent(QTimerEvent *e) override;
+
+private:
+    void stopOutTrackTimer();
+
+    void updateGateTrackSpin(const StopItem::Gate& toGate);
 
 private:
     QGridLayout *lay;
@@ -85,6 +98,7 @@ private:
     CustomCompletionLineEdit *mOutGateEdit;
     QTimeEdit *arrEdit;
     QTimeEdit *depEdit;
+    QSpinBox *mOutGateTrackSpin;
 
     StationsMatchModel *stationsMatchModel;
     StationTracksMatchModel *stationTrackMatchModel;
@@ -94,6 +108,7 @@ private:
     StopItem curStop;
     StopItem prevStop;
 
+    int mTimerOutTrack;
     bool m_closeOnSegmentChosen;
 };
 

@@ -7,6 +7,7 @@
 #include "stations/match_models/stationgatesmatchmodel.h"
 
 #include <QTimeEdit>
+#include <QSpinBox>
 #include <QAbstractItemView>
 #include <QGridLayout>
 #include <QMenu>
@@ -20,6 +21,7 @@
 StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     QFrame(parent),
     model(m),
+    mTimerOutTrack(0),
     m_closeOnSegmentChosen(false)
 {
     stationsMatchModel = new StationsMatchModel(db, this);
@@ -38,6 +40,11 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     mOutGateEdit->setPlaceholderText(tr("Next segment"));
     connect(mOutGateEdit, &CustomCompletionLineEdit::indexSelected, this, &StopEditor::onOutGateSelected);
 
+    mOutGateTrackSpin = new QSpinBox;
+    mOutGateTrackSpin->setMaximum(0);
+    connect(mOutGateTrackSpin, qOverload<int>(&QSpinBox::valueChanged), this, &StopEditor::startOutTrackTimer);
+    connect(mOutGateTrackSpin, &QSpinBox::editingFinished, this, &StopEditor::checkOutGateTrack);
+
     arrEdit = new QTimeEdit;
     depEdit = new QTimeEdit;
     connect(arrEdit, &QTimeEdit::timeChanged, this, &StopEditor::arrivalChanged);
@@ -53,11 +60,17 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     lay->addWidget(arrEdit, 0, 1);
     lay->addWidget(depEdit, 0, 2);
     lay->addWidget(mStTrackEdit, 1, 0, 1, 3);
-    lay->addWidget(mOutGateEdit, 2, 0, 1, 3);
+    lay->addWidget(mOutGateEdit, 2, 0, 1, 2);
+    lay->addWidget(mOutGateTrackSpin, 2, 2);
 
     setTabOrder(mStationEdit, arrEdit);
     setTabOrder(arrEdit, depEdit);
     setTabOrder(depEdit, mOutGateEdit);
+}
+
+StopEditor::~StopEditor()
+{
+    stopOutTrackTimer();
 }
 
 void StopEditor::setStop(const StopItem &item, const StopItem &prev)
@@ -115,6 +128,8 @@ void StopEditor::setStop(const StopItem &item, const StopItem &prev)
 
     stationOutGateMatchModel->setFilter(curStop.stationId, true, prevStop.nextSegment.segmentId, true);
     mOutGateEdit->setData(curStop.toGate.gateId);
+
+    updateGateTrackSpin(curStop.toGate);
 
     //Set Arrival and Departure
     arrEdit->blockSignals(true);
@@ -178,10 +193,11 @@ void StopEditor::popupSegmentCombo()
         db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(0);
 
         db_id segOutGateId = 0;
-        if(model->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
+        if(model->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId))
         {
             //Success, close editor
             emit nextSegmentChosen(this);
+            return;
         }
     }
 
@@ -252,8 +268,11 @@ void StopEditor::onOutGateSelected(const QModelIndex& idx)
     const db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(idx.row());
     const db_id oldGateId = curStop.toGate.gateId;
     db_id segOutGateId = 0;
-    if(model->trySelectNextSegment(curStop, newSegId, 0, segOutGateId))
+    if(model->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId))
     {
+        //Update gate track
+        updateGateTrackSpin(curStop.toGate);
+
         //Success, close editor
         emit nextSegmentChosen(this);
     }
@@ -262,6 +281,45 @@ void StopEditor::onOutGateSelected(const QModelIndex& idx)
         //Warn user and reset to previous chosen segment if any
         QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment <b>%1</b>").arg(gateSegmentName));
         mOutGateEdit->setData(oldGateId);
+    }
+}
+
+void StopEditor::checkOutGateTrack()
+{
+    stopOutTrackTimer();
+
+    if(!curStop.nextSegment.segmentId)
+        return; //First we need to have a segment
+
+    int trackNum = mOutGateTrackSpin->value();
+    curStop.toGate.trackNum = trackNum; //Trigger checking of railway segment connections
+
+    db_id segOutGateId = 0;
+    if(model->trySelectNextSegment(curStop, curStop.nextSegment.segmentId, trackNum, 0, segOutGateId))
+    {
+        //Update gate track
+        updateGateTrackSpin(curStop.toGate);
+
+        if(curStop.toGate.trackNum != trackNum)
+        {
+            //It wasn't possible to set requested track
+            QMessageBox::warning(this, tr("Stop Error"),
+                                 tr("Requested gate out track <b>%1</b> is not connected to segment <b>%2</b>.<br>"
+                                    "Out track <b>%3</b> was chosen instead.<br>"
+                                    "Look segment track connection from Stations Manager for more information"
+                                    " on available tracks.")
+                                 .arg(trackNum)
+                                 .arg(mOutGateEdit->text())
+                                 .arg(curStop.toGate.trackNum));
+        }
+
+        //Success, close editor
+        emit nextSegmentChosen(this);
+    }
+    else
+    {
+        //Warn user and reset to previous chosen segment if any
+        QMessageBox::warning(this, tr("Stop Error"), tr("Cannot set segment track!"));
     }
 }
 
@@ -282,4 +340,48 @@ void StopEditor::arrivalChanged(const QTime& arrival)
     }
     depEdit->setMinimumTime(minDep);
     depEdit->setTime(dep); //Set after setting minimum time
+}
+
+void StopEditor::startOutTrackTimer()
+{
+    //Give user a small time to scroll values in out gate track QSpinBox
+    //This will skip eventual non available tracks (not connected)
+    //On timeout check track and reset to old value if not available
+    stopOutTrackTimer();
+    mTimerOutTrack = startTimer(700);
+}
+
+void StopEditor::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == mTimerOutTrack)
+    {
+        checkOutGateTrack();
+        return;
+    }
+
+    QFrame::timerEvent(e);
+}
+
+void StopEditor::stopOutTrackTimer()
+{
+    if(mTimerOutTrack)
+    {
+        killTimer(mTimerOutTrack);
+        mTimerOutTrack = 0;
+    }
+}
+
+void StopEditor::updateGateTrackSpin(const StopItem::Gate &toGate)
+{
+    stopOutTrackTimer();
+
+    int outTrackCount = 0;
+    if(toGate.gateId)
+        outTrackCount = stationOutGateMatchModel->getGateTrackCount(toGate.gateId);
+
+    //Prevent trigger valueChanged() signal
+    mOutGateTrackSpin->blockSignals(true);
+    mOutGateTrackSpin->setMaximum(qMax(1, outTrackCount - 1)); //At least one track
+    mOutGateTrackSpin->setValue(toGate.trackNum);
+    mOutGateTrackSpin->blockSignals(false);
 }
