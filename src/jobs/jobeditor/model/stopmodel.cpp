@@ -34,8 +34,8 @@ StopModel::StopModel(database &db, QObject *parent) :
     connect(Session, &MeetingSession::shiftJobsChanged, this, &StopModel::onExternalShiftChange);
     connect(Session, &MeetingSession::shiftNameChanged, this, &StopModel::onShiftNameChanged);
 
-    connect(Session, &MeetingSession::lineNameChanged, this, &StopModel::onStationLineNameChanged);
-    connect(Session, &MeetingSession::stationNameChanged, this, &StopModel::onStationLineNameChanged);
+    connect(Session, &MeetingSession::segmentNameChanged, this, &StopModel::onStationSegmentNameChanged);
+    connect(Session, &MeetingSession::stationNameChanged, this, &StopModel::onStationSegmentNameChanged);
 }
 
 QVariant StopModel::data(const QModelIndex &index, int role) const
@@ -1298,9 +1298,9 @@ void StopModel::onShiftNameChanged(db_id shiftId)
     }
 }
 
-void StopModel::onStationLineNameChanged()
+void StopModel::onStationSegmentNameChanged()
 {
-    //Stations and line names are fetched by delegate while painting
+    //Station and segment names are fetched by delegate while painting
     //We just need to repaint
     QModelIndex start = index(0, 0);
     QModelIndex end = index(stops.count(), 0);

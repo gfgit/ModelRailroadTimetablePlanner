@@ -160,7 +160,7 @@ private slots:
     void onExternalShiftChange(db_id shiftId, db_id jobId);
     void onShiftNameChanged(db_id shiftId);
 
-    void onStationLineNameChanged();
+    void onStationSegmentNameChanged();
 
 private:
     void insertAddHere(int row, int type);
