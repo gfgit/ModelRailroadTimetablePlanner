@@ -35,8 +35,10 @@ public:
     int getOutTrackCount(db_id gateId) const;
     utils::Side getGateSide(db_id gateId) const;
 
-    db_id getSegmentIdAtRow(int row);
-    db_id isSegmentReversedAtRow(int row);
+    db_id getSegmentIdAtRow(int row) const;
+    db_id isSegmentReversedAtRow(int row) const;
+
+    int getGateTrackCount(db_id gateId) const;
 
 private:
     struct GateItem

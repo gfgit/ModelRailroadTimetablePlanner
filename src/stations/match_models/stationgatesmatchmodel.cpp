@@ -291,18 +291,30 @@ utils::Side StationGatesMatchModel::getGateSide(db_id gateId) const
     return utils::Side::West;
 }
 
-db_id StationGatesMatchModel::getSegmentIdAtRow(int row)
+db_id StationGatesMatchModel::getSegmentIdAtRow(int row) const
 {
     if(row < 0 || row >= size)
         return 0;
     return items[row].segmentId;
 }
 
-db_id StationGatesMatchModel::isSegmentReversedAtRow(int row)
+db_id StationGatesMatchModel::isSegmentReversedAtRow(int row) const
 {
     if(row < 0 || row >= size)
         return 0;
     return items[row].segmentReversed;
+}
+
+int StationGatesMatchModel::getGateTrackCount(db_id gateId) const
+{
+    if(!mDb.db())
+        return 0;
+
+    query q(mDb, "SELECT out_track_count FROM station_gates WHERE id=?");
+    q.bind(1, gateId);
+    if(q.step() != SQLITE_ROW)
+        return 0;
+    return q.getRows().get<int>(0);
 }
 
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :
