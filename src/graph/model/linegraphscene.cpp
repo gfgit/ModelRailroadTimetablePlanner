@@ -108,14 +108,13 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     {
         StationGraphObject st;
         st.stationId = objectId;
-        if(!loadStation(st))
+        if(!loadStation(st, graphObjectName))
             return false;
 
         //Register a single station at start position
         st.xPos = curPos;
         stations.insert(st.stationId, st);
         stationPositions = {{st.stationId, 0, st.xPos, {}}};
-        graphObjectName = st.stationName;
     }
     else if(type == LineGraphType::RailwaySegment)
     {
@@ -149,7 +148,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         stA.stationId = r.get<db_id>(6);
         stB.stationId = r.get<db_id>(7);
 
-        if(!loadStation(stA) || !loadStation(stB))
+        QString unusedStFullName;
+        if(!loadStation(stA, unusedStFullName) || !loadStation(stB, unusedStFullName))
             return false;
 
         stA.xPos = curPos;
@@ -420,7 +420,7 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
     return job;
 }
 
-bool LineGraphScene::loadStation(StationGraphObject& st)
+bool LineGraphScene::loadStation(StationGraphObject& st, QString& outFullName)
 {
     sqlite3pp::query q(mDb);
 
@@ -435,11 +435,12 @@ bool LineGraphScene::loadStation(StationGraphObject& st)
     //Load station
     auto row = q.getRows();
 
+    outFullName = row.get<QString>(0);
     st.stationName = row.get<QString>(1);
     if(st.stationName.isEmpty())
     {
         //Empty short name, fallback to full name
-        st.stationName = row.get<QString>(0);
+        st.stationName = outFullName;
     }
     st.stationType = utils::StationType(row.get<int>(2));
 
@@ -493,6 +494,8 @@ bool LineGraphScene::loadFullLine(db_id lineId)
     db_id lastStationId = 0;
     double curPos = Session->horizOffset + Session->stationOffset / 2;
 
+    QString unusedStFullName;
+
     for(auto seg : q)
     {
         db_id lineSegmentId = seg.get<db_id>(0);
@@ -521,7 +524,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
             //First line station
             StationGraphObject st;
             st.stationId = fromStationId;
-            if(!loadStation(st))
+            if(!loadStation(st, unusedStFullName))
                 return false;
 
             st.xPos = curPos;
@@ -538,7 +541,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 
         StationGraphObject stB;
         stB.stationId = otherStationId;
-        if(!loadStation(stB))
+        if(!loadStation(stB, unusedStFullName))
             return false;
 
         stB.xPos = curPos;

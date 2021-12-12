@@ -242,7 +242,7 @@ private:
      * Loads station name and tracks (color, attributes, names)
      * It does NOT load jobs, only tracks
      */
-    bool loadStation(StationGraphObject &st);
+    bool loadStation(StationGraphObject &st, QString &outFullName);
 
     /*!
      * \brief Load all stations in a railway line
