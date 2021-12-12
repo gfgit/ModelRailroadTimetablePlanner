@@ -560,6 +560,7 @@ void JobPathEditor::timerEvent(QTimerEvent *e)
     if(e->timerId() == jobNumberTimerId)
     {
         checkJobNumberValid();
+        return;
     }
 
     QDialog::timerEvent(e);
