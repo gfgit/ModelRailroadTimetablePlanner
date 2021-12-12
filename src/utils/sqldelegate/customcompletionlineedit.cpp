@@ -45,11 +45,7 @@ CustomCompletionLineEdit::CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget 
 
 CustomCompletionLineEdit::~CustomCompletionLineEdit()
 {
-    if(suggestionsTimerId)
-    {
-        killTimer(suggestionsTimerId);
-        suggestionsTimerId = 0;
-    }
+    stopSuggestionsTimer();
     delete popup;
 }
 
@@ -115,8 +111,7 @@ void CustomCompletionLineEdit::timerEvent(QTimerEvent *e)
 {
     if(suggestionsTimerId && e->timerId() == suggestionsTimerId)
     {
-        killTimer(suggestionsTimerId);
-        suggestionsTimerId = 0;
+        stopSuggestionsTimer();
 
         if(model)
         {
@@ -195,11 +190,7 @@ bool CustomCompletionLineEdit::eventFilter(QObject *obj, QEvent *ev)
 
 void CustomCompletionLineEdit::doneCompletion(const QModelIndex& idx)
 {
-    if(suggestionsTimerId)
-    {
-        killTimer(suggestionsTimerId);
-        suggestionsTimerId = 0;
-    }
+    stopSuggestionsTimer();
 
     if(model)
     {
@@ -224,9 +215,17 @@ void CustomCompletionLineEdit::doneCompletion(const QModelIndex& idx)
 
 void CustomCompletionLineEdit::startSuggestionsTimer()
 {
-    if(suggestionsTimerId)
-        killTimer(suggestionsTimerId);
+    stopSuggestionsTimer();
     suggestionsTimerId = startTimer(250);
+}
+
+void CustomCompletionLineEdit::stopSuggestionsTimer()
+{
+    if(suggestionsTimerId)
+    {
+        killTimer(suggestionsTimerId);
+        suggestionsTimerId = 0;
+    }
 }
 
 void CustomCompletionLineEdit::resultsReady(bool forceFirst)

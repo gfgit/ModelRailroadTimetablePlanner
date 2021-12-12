@@ -43,6 +43,7 @@ protected:
 private slots:
     void doneCompletion(const QModelIndex &idx);
     void startSuggestionsTimer();
+    void stopSuggestionsTimer();
     void resultsReady(bool forceFirst);
 
 private:
