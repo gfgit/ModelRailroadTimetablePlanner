@@ -1,5 +1,4 @@
 #include "shiftbusymodel.h"
-#include "utils/model_roles.h"
 
 #include "utils/jobcategorystrings.h"
 
@@ -64,10 +63,6 @@ QVariant ShiftBusyModel::data(const QModelIndex &idx, int role) const
             return info.end;
         }
         break;
-    }
-    case JOB_ID_ROLE:
-    {
-        return info.jobId;
     }
     }
 

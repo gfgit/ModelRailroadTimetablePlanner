@@ -143,8 +143,6 @@ QVariant RSModelsSQLModel::data(const QModelIndex &idx, int role) const
             return Qt::AlignRight + Qt::AlignVCenter;
         break;
     }
-    case RS_MODEL_ID:
-        return item.modelId;
     case RS_TYPE_ROLE:
         return int(item.type);
     case RS_SUB_TYPE_ROLE:

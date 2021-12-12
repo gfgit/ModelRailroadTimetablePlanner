@@ -2,7 +2,6 @@
 
 #include <QFont>
 
-#include "utils/model_roles.h"
 #include "utils/jobcategorystrings.h"
 
 JobPassingsModel::JobPassingsModel(QObject *parent) :
@@ -82,10 +81,6 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
         if(idx.column() == JobNameCol)
             f.setBold(true);
         return f;
-    }
-    case JOB_ID_ROLE:
-    {
-        return e.jobId;
     }
     }
     return QVariant();

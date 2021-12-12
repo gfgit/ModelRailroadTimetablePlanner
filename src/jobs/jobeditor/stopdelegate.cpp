@@ -2,8 +2,6 @@
 
 #include "stopeditor.h"
 
-#include "utils/model_roles.h"
-
 #include <QPainter>
 
 #include <QDebug>
@@ -193,14 +191,12 @@ QWidget *StopDelegate::createEditor(QWidget *parent,
                                     const QModelIndex &index) const
 
 {
-    int addHere = index.data(ADDHERE_ROLE).toInt();
-    if( addHere != 0)
+    StopModel *model = const_cast<StopModel*>(static_cast<const StopModel *>(index.model()));
+    if(model->isAddHere(index))
     {
         qDebug() << index << "is AddHere";
         return nullptr;
     }
-
-    StopModel *model = const_cast<StopModel*>(static_cast<const StopModel *>(index.model()));
 
     StopEditor *editor = new StopEditor(mDb, model, parent);
     editor->setAutoFillBackground(true);

@@ -2,8 +2,6 @@
 
 #include "../rsimportstrings.h"
 
-#include "utils/model_roles.h"
-
 #include <QEvent>
 #include "utils/worker_event_types.h"
 
@@ -124,7 +122,7 @@ void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, co
 
     qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
 
-    const char *whereCol;
+    const char *whereCol = nullptr;
 
     QByteArray sql = "SELECT imp.id,imp.name,imp.import,imp.new_name,imp.match_existing_id,imp.sheet_idx,rs_owners.name"
                      " FROM imported_rs_owners imp LEFT JOIN rs_owners ON rs_owners.id=imp.match_existing_id";

@@ -7,8 +7,6 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/model_roles.h"
-
 #include "utils/jobcategorystrings.h"
 
 #include <QDebug>
