@@ -2,24 +2,18 @@
 #define STOPEDITOR_H
 
 #include <QFrame>
-#include <QTime>
+class StopModel;
+class StopItem;
 
-#include "jobs/jobeditor/model/stopmodel.h"
-
-class CustomCompletionLineEdit;
 class QTimeEdit;
 class QSpinBox;
 class QGridLayout;
 
-class StationsMatchModel;
-class StationTracksMatchModel;
-class StationGatesMatchModel;
-
-class QModelIndex;
-
 namespace sqlite3pp {
 class database;
 }
+
+class StopEditingHelper;
 
 /*!
  * \brief The StopEditor class
@@ -38,10 +32,8 @@ public:
 
     void setStop(const StopItem& item, const StopItem& prev);
 
-    void updateStopArrDep();
-
-    inline const StopItem& getCurItem() const { return curStop; }
-    inline const StopItem& getPrevItem() const { return prevStop; }
+    const StopItem& getCurItem() const;
+    const StopItem& getPrevItem() const;
 
     /*!
      * \brief closeOnSegmentChosen
@@ -74,41 +66,17 @@ public slots:
     void popupSegmentCombo();
 
 private slots:
-    void onStationSelected();
-    void onTrackSelected();
-    void onOutGateSelected(const QModelIndex &idx);
-    void checkOutGateTrack();
-
-    void arrivalChanged(const QTime &arrival);
-
-    void startOutTrackTimer();
-
-protected:
-    void timerEvent(QTimerEvent *e) override;
-
-private:
-    void stopOutTrackTimer();
-
-    void updateGateTrackSpin(const StopItem::Gate& toGate);
+    void onHelperSegmentChoosen();
 
 private:
     QGridLayout *lay;
-    CustomCompletionLineEdit *mStationEdit;
-    CustomCompletionLineEdit *mStTrackEdit;
-    CustomCompletionLineEdit *mOutGateEdit;
+
+    StopEditingHelper *helper;
+
     QTimeEdit *arrEdit;
     QTimeEdit *depEdit;
     QSpinBox *mOutGateTrackSpin;
 
-    StationsMatchModel *stationsMatchModel;
-    StationTracksMatchModel *stationTrackMatchModel;
-    StationGatesMatchModel *stationOutGateMatchModel;
-
-    StopModel *model;
-    StopItem curStop;
-    StopItem prevStop;
-
-    int mTimerOutTrack;
     bool m_closeOnSegmentChosen;
 };
 
