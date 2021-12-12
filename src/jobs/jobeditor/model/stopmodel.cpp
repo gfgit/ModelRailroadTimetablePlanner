@@ -1175,6 +1175,33 @@ const QSet<db_id> &StopModel::getStationsToUpdate() const
     return stationsToUpdate;
 }
 
+bool StopModel::isRailwayElectrifiedAfterStop(db_id stopId) const
+{
+    int row = getStopRow(stopId);
+    if(row == -1)
+        return true; //Error
+
+    return isRailwayElectrifiedAfterRow(row);
+}
+
+bool StopModel::isRailwayElectrifiedAfterRow(int row) const
+{
+    if(row < 0 || row >= stops.count())
+        return true; //Error
+
+    const StopItem& item = stops.at(row);
+    if(!item.nextSegment.segmentId)
+        return true; //Error
+
+    query q(mDb, "SELECT type FROM railway_segments WHERE id=?");
+    q.bind(1, item.nextSegment.segmentId);
+    if(q.step() != SQLITE_ROW)
+        return true; //Error
+
+    QFlags<utils::RailwaySegmentType> type = utils::RailwaySegmentType(q.getRows().get<int>(0));
+    return type.testFlag(utils::RailwaySegmentType::Electrified);
+}
+
 bool StopModel::trySelectTrackForStop(StopItem &item)
 {
     query q(mDb);
