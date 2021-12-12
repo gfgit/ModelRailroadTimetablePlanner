@@ -5,18 +5,19 @@
 
 #include "utils/types.h"
 
-#include <sqlite3pp/sqlite3pp.h>
-using namespace sqlite3pp;
+namespace sqlite3pp {
+class database;
+}
 
 class ShiftSheetExport
 {
 public:
-    ShiftSheetExport(db_id shiftId);
+    ShiftSheetExport(sqlite3pp::database &db, db_id shiftId);
 
     void write();
     void save(const QString& fileName);
 
-    inline void setShiftId(db_id shiftId) { m_shiftd = shiftId; }
+    inline void setShiftId(db_id shiftId) { m_shiftId = shiftId; }
 
 private:
     void writeCoverStyles(QXmlStreamWriter &xml, bool hasImage);
@@ -25,11 +26,10 @@ private:
     void writeCover(QXmlStreamWriter &xml, const QString &shiftName, bool hasLogo);
 
 private:
+    sqlite3pp::database &mDb;
+    db_id m_shiftId;
+
     OdtDocument odt;
-
-    db_id m_shiftd;
-
-    query q_getShiftJobs;
 
     double logoWidthCm;
     double logoHeightCm;

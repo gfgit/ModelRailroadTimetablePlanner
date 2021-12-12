@@ -1,21 +1,33 @@
-#ifndef JOBSSQLMODEL_H
-#define JOBSSQLMODEL_H
+#ifndef JOBLISTMODEL_H
+#define JOBLISTMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/sqldelegate/pageditemmodelhelper.h"
 
 #include "utils/types.h"
 
-#include <QVector>
-
 #include <QTime>
 
-class JobsSQLModel : public IPagedItemModel
+struct JobListModelItem
+{
+    db_id jobId;
+    db_id shiftId;
+    db_id originStId;
+    db_id destStId;
+    QTime originTime;
+    QTime destTime;
+    QString shiftName;
+    QString origStName;
+    QString destStName;
+    JobCategory category;
+};
+
+class JobListModel : public IPagedItemModelImpl<JobListModel, JobListModelItem>
 {
     Q_OBJECT
 public:
     enum { BatchSize = 100 };
 
-    typedef enum {
+    enum Columns {
         IdCol = 0,
         Category,
         ShiftCol,
@@ -24,42 +36,21 @@ public:
         DestinationSt,
         DestinationTime,
         NCols
-    } Columns;
+    };
 
-    typedef struct JobItem_
-    {
-        db_id jobId;
-        db_id shiftId;
-        db_id originStId;
-        db_id destStId;
-        QTime originTime;
-        QTime destTime;
-        QString shiftName;
-        QString origStName;
-        QString destStName;
-        JobCategory category;
-    } JobItem;
+    typedef JobListModelItem JobItem;
+    typedef IPagedItemModelImpl<JobListModel, JobListModelItem> BaseClass;
 
-
-    JobsSQLModel(sqlite3pp::database &db, QObject *parent = nullptr);
-
-    bool event(QEvent *e) override;
+    JobListModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // QAbstractTableModel
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // IPagedItemModel
-
-    // Cached rows management
-    virtual void clearCache() override;
 
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
@@ -83,6 +74,15 @@ public:
         return {item.shiftId, item.category};
     }
 
+    inline QPair<QTime, QTime> getOrigAndDestTimeAtRow(int row) const
+    {
+        if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+            return {}; //Invalid
+
+        const JobItem& item = cache.at(row - cacheFirstRow);
+        return {item.originTime, item.destTime};
+    }
+
 private slots:
     void onJobAddedOrRemoved();
 
@@ -90,15 +90,8 @@ protected:
     virtual qint64 recalcTotalItemCount() override;
 
 private:
-    void fetchRow(int row);
+    friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
-    void handleResult(const QVector<JobItem> &items, int firstRow);
-
-private:
-    QVector<JobItem> cache;
-
-    int cacheFirstRow;
-    int firstPendingRow;
 };
 
-#endif // JOBSSQLMODEL_H
+#endif // JOBLISTMODEL_H

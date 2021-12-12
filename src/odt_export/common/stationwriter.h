@@ -27,11 +27,11 @@ private:
         QString nextSt;
 
         QString description;
+        QString platform;
 
         QTime arrival;
         QTime departure;
 
-        int platform;
         JobCategory jobCat;
     } Stop;
 

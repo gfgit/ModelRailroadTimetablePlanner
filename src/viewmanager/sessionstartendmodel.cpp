@@ -6,7 +6,6 @@
 
 #include "utils/jobcategorystrings.h"
 
-#include "utils/platform_utils.h"
 #include "utils/rs_utils.h"
 
 #include <QDebug>
@@ -152,7 +151,7 @@ QVariant SessionStartEndModel::data(const QModelIndex &idx, int role) const
                 //return item.jobId;
                 return JobCategoryName::jobName(item.jobId, item.jobCategory);
             case PlatfCol:
-                return utils::platformName(item.platform);
+                return item.platform;
             case DepartureCol:
                 return item.time;
             case StationOrOwnerCol:
@@ -235,7 +234,7 @@ void SessionStartEndModel::setMode(SessionRSMode m, SessionRSOrder o, bool force
 
     sqlite3pp::query q(mDb);
 
-    q.prepare("SELECT COUNT(DISTINCT rsId) FROM coupling");
+    q.prepare("SELECT COUNT(DISTINCT rs_id) FROM coupling");
     q.step();
     int count = q.getRows().get<int>(0);
     q.reset();
@@ -245,23 +244,27 @@ void SessionStartEndModel::setMode(SessionRSMode m, SessionRSOrder o, bool force
     //TODO: fetch departure instead of arrival for start session
 
     //Query template: MIN/MAX to get RS at start/end of session then order by station/s_owner
-    const auto sql = QStringLiteral("SELECT %1(stops.arrival), stops.stationId, rs_list.owner_id,"
+    const auto sql = QStringLiteral("SELECT %1(stops.arrival), stops.station_id, rs_list.owner_id,"
                                     " stations.name, rs_owners.name,"
                                     " rs_list.id, rs_models.name, rs_models.suffix, rs_list.number, rs_models.type,"
-                                    " stops.jobId, jobs.category,"
-                                    " stops.platform, coupling.operation"
+                                    " stops.job_id, jobs.category,"
+                                    " coupling.operation, t1.name,t2.name"
                                     " FROM rs_list"
-                                    " JOIN coupling ON coupling.rsId=rs_list.id"
-                                    " JOIN stops ON stops.id=coupling.stopId"
-                                    " JOIN stations ON stations.id=stops.stationId"
-                                    " JOIN jobs ON jobs.id=stops.jobId"
+                                    " JOIN coupling ON coupling.rs_id=rs_list.id"
+                                    " JOIN stops ON stops.id=coupling.stop_id"
+                                    " JOIN stations ON stations.id=stops.station_id"
+                                    " JOIN jobs ON jobs.id=stops.job_id"
+                                    " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                                    " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                                    " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+                                    " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
                                     " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
                                     " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id" //It might be null
                                     " GROUP BY rs_list.id"
-                                    " ORDER BY %2, stops.arrival, stops.jobId, rs_list.model_id");
+                                    " ORDER BY %2, stops.arrival, stops.job_id, rs_list.model_id");
 
     QByteArray query = sql.arg(m_mode == SessionRSMode::StartOfSession ? "MIN" : "MAX")
-            .arg(m_order == SessionRSOrder::ByStation ? "stops.stationId" : "rs_list.owner_id")
+            .arg(m_order == SessionRSOrder::ByStation ? "stops.station_id" : "rs_list.owner_id")
             .toUtf8();
 
     q.prepare(query.constData());
@@ -321,9 +324,11 @@ void SessionStartEndModel::setMode(SessionRSMode m, SessionRSOrder o, bool force
         item.jobId = rs.get<db_id>(10);
         item.jobCategory = JobCategory(rs.get<int>(11));
 
-        item.platform = rs.get<int>(12);
+        //TODO: check operation (12)
 
-        //TODO: check operation
+        item.platform = rs.get<QString>(13);
+        if(item.platform.isEmpty())
+            item.platform = rs.get<QString>(14); //Use out gate to get track name
 
         rsData.append(item);
 

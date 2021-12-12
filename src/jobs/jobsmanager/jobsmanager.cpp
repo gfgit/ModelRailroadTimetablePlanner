@@ -5,9 +5,10 @@
 #include <QVBoxLayout>
 #include <QTableView>
 #include <QHeaderView>
+#include <QToolBar>
 
-#include "jobssqlmodel.h"
-#include "jobstorage.h"
+#include "model/joblistmodel.h"
+#include "model/jobshelper.h"
 #include "utils/jobcategorystrings.h"
 
 #include "utils/sqldelegate/modelpageswitcher.h"
@@ -16,7 +17,8 @@
 #include "viewmanager/viewmanager.h"
 
 #include <QMessageBox>
-#include <QToolBar>
+#include "newjobsamepathdlg.h"
+#include "utils/owningqpointer.h"
 
 JobsManager::JobsManager(QWidget *parent) :
     QWidget(parent)
@@ -28,13 +30,14 @@ JobsManager::JobsManager(QWidget *parent) :
     toolBar->addAction(tr("New Job"), this, &JobsManager::onNewJob);
     toolBar->addAction(tr("Remove"), this, &JobsManager::onRemove);
     toolBar->addAction(tr("Remove All"), this, &JobsManager::onRemoveAllJobs);
+    toolBar->addAction(tr("New Same Path"), this, &JobsManager::onNewJobSamePath);
     l->addWidget(toolBar);
 
     view = new QTableView;
     connect(view, &QTableView::doubleClicked, this, &JobsManager::onIndexClicked);
     l->addWidget(view);
 
-    jobsModel = new JobsSQLModel(Session->m_Db, this);
+    jobsModel = new JobListModel(Session->m_Db, this);
     view->setModel(jobsModel);
 
     auto ps = new ModelPageSwitcher(false, this);
@@ -87,7 +90,7 @@ void JobsManager::onRemove()
                                     QMessageBox::Yes | QMessageBox::Cancel);
     if(ret == QMessageBox::Yes)
     {
-        if(!Session->mJobStorage->removeJob(jobId))
+        if(!JobsHelper::removeJob(Session->m_Db, jobId))
         {
             qWarning() << "Error while deleting job:" << jobId << "from JobManager" << Session->m_Db.error_msg();
             //ERRORMSG: message box or statusbar
@@ -100,5 +103,37 @@ void JobsManager::onRemoveAllJobs()
     int ret = QMessageBox::question(this, tr("Delete all jobs?"),
                                     tr("Are you really sure you want to delete all jobs from this session?"));
     if(ret == QMessageBox::Yes)
-        Session->mJobStorage->removeAllJobs();
+        JobsHelper::removeAllJobs(Session->m_Db);
+}
+
+void JobsManager::onNewJobSamePath()
+{
+    QModelIndex idx = view->currentIndex();
+    if(!idx.isValid())
+        return;
+
+    db_id jobId = jobsModel->getIdAtRow(idx.row());
+    if(!jobId)
+        return;
+    JobCategory jobCat = jobsModel->getShiftAnCatAtRow(idx.row()).second;
+    auto times = jobsModel->getOrigAndDestTimeAtRow(idx.row());
+
+    OwningQPointer<NewJobSamePathDlg> dlg = new NewJobSamePathDlg(this);
+    dlg->setSourceJob(jobId, jobCat, times.first, times.second);
+
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return;
+
+    const QTime newStart = dlg->getNewStartTime();
+    const int secsOffset = times.first.secsTo(newStart);
+
+    db_id newJobId = 0;
+    if(!JobsHelper::createNewJob(Session->m_Db, newJobId, jobCat))
+        return;
+
+    JobsHelper::copyStops(Session->m_Db, jobId, newJobId, secsOffset,
+                          dlg->shouldCopyRs(), dlg->shouldReversePath());
+
+    //Let user edit newly created job
+    Session->getViewManager()->requestJobEditor(newJobId);
 }

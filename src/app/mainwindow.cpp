@@ -5,15 +5,16 @@
 
 #include "viewmanager/viewmanager.h"
 
-#include <QStandardPaths>
-#include <QFileDialog>
-#include "utils/file_format_names.h"
 
 #include "jobs/jobeditor/jobpatheditor.h"
 #include <QDockWidget>
 
 #include "utils/owningqpointer.h"
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include "utils/file_format_names.h"
+
 #include <QPushButton>
 #include <QLabel>
 
@@ -21,9 +22,11 @@
 
 #include "settings/settingsdialog.h"
 
-#include "graph/graphmanager.h" //FIXME: remove
+#include "graph/model/linegraphmanager.h"
 
 #include "graph/view/linegraphwidget.h"
+
+#include "stations/manager/segments/model/railwaysegmenthelper.h"
 
 #include "db_metadata/meetinginformationdialog.h"
 
@@ -76,8 +79,8 @@ MainWindow::MainWindow(QWidget *parent) :
     auto viewMgr = Session->getViewManager();
     viewMgr->m_mainWidget = this;
 
-    auto graphMgr = viewMgr->getGraphMgr();
-    connect(graphMgr, &GraphManager::jobSelected, this, &MainWindow::onJobSelected);
+    auto graphMgr = viewMgr->getLineGraphMgr();
+    connect(graphMgr, &LineGraphManager::jobSelected, this, &MainWindow::onJobSelected);
 
     //view = graphMgr->getView();
     view = new LineGraphWidget(this);
@@ -126,7 +129,7 @@ MainWindow::MainWindow(QWidget *parent) :
     searchEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     searchEdit->setPlaceholderText(tr("Find"));
     searchEdit->setClearButtonEnabled(true);
-    connect(searchEdit, &CustomCompletionLineEdit::dataIdChanged, this, &MainWindow::onJobSearchItemSelected);
+    connect(searchEdit, &CustomCompletionLineEdit::completionDone, this, &MainWindow::onJobSearchItemSelected);
     connect(searchModel, &SearchResultModel::resultsReady, this, &MainWindow::onJobSearchResultsReady);
 
     QWidget* spacer = new QWidget();
@@ -151,6 +154,12 @@ MainWindow::MainWindow(QWidget *parent) :
     updateRecentFileActions();
 
     ui->actionOpen_Recent->setMenu(recentFilesMenu);
+
+    //Listen to changes to display welcomeLabel or view
+    connect(Session, &MeetingSession::segmentAdded, this, &MainWindow::checkLineNumber);
+    connect(Session, &MeetingSession::segmentRemoved, this, &MainWindow::checkLineNumber);
+    connect(Session, &MeetingSession::lineAdded, this, &MainWindow::checkLineNumber);
+    connect(Session, &MeetingSession::lineRemoved, this, &MainWindow::checkLineNumber);
 }
 
 MainWindow::~MainWindow()
@@ -222,13 +231,17 @@ void MainWindow::setup_actions()
 
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
+    ui->actionNext_Job_Segment->setToolTip(tr("Hold shift and click to go to <b>last</b> job stop."));
+    ui->actionPrev_Job_Segment->setToolTip(tr("Hold shift and click to go to <b>first</b> job stop."));
     connect(ui->actionNext_Job_Segment, &QAction::triggered, this, []()
             {
-                Session->getViewManager()->requestJobShowPrevNextSegment(false);
+                bool shiftPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+                Session->getViewManager()->requestJobShowPrevNextSegment(false, shiftPressed);
             });
     connect(ui->actionPrev_Job_Segment, &QAction::triggered, this, []()
             {
-                Session->getViewManager()->requestJobShowPrevNextSegment(true);
+                bool shiftPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+                Session->getViewManager()->requestJobShowPrevNextSegment(true, shiftPressed);
             });
 }
 
@@ -828,23 +841,31 @@ void MainWindow::onOpenSettings()
 
 void MainWindow::checkLineNumber()
 {
-    //FIXME: lines are now optional, you can work using only segments
-    //Segments are now more important than lines, check segments
-    db_id firstLineId = 0; //FIXME
-    if(/*firstLineId &&*/ m_mode != CentralWidgetMode::ViewSessionMode)
+    RailwaySegmentHelper helper(Session->m_Db);
+
+    bool isLine = false;
+    db_id graphObjId = 0;
+
+    if(!helper.findFirstLineOrSegment(graphObjId, isLine))
+        graphObjId = 0;
+    if(graphObjId && m_mode != CentralWidgetMode::ViewSessionMode)
     {
         //First line was added or newly opened file -> Session has at least one line
         ui->actionAddJob->setEnabled(true);
         ui->actionAddJob->setToolTip(tr("Add train job"));
         ui->actionRemoveJob->setEnabled(true);
         setCentralWidgetMode(CentralWidgetMode::ViewSessionMode);
+
+        //Load first line or segment
+        view->tryLoadGraph(graphObjId,
+                           isLine ? LineGraphType::RailwayLine : LineGraphType::RailwaySegment);
     }
-    else if(firstLineId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
+    else if(graphObjId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
     {
         //Last line removed -> Session has no line
         //If there aren't lines prevent from creating jobs
         ui->actionAddJob->setEnabled(false);
-        ui->actionAddJob->setToolTip(tr("You must create at least one line before adding job to this session"));
+        ui->actionAddJob->setToolTip(tr("You must create at least one railway segment before adding job to this session"));
         ui->actionRemoveJob->setEnabled(false);
         setCentralWidgetMode(CentralWidgetMode::NoLinesWarningMode);
     }
@@ -894,8 +915,13 @@ void MainWindow::onSessionRSViewer()
     Session->getViewManager()->showSessionStartEndRSViewer();
 }
 
-void MainWindow::onJobSearchItemSelected(db_id jobId)
+void MainWindow::onJobSearchItemSelected()
 {
+    db_id jobId = 0;
+    QString tmp;
+    if(!searchEdit->getData(jobId, tmp))
+        return;
+
     searchEdit->clear(); //Clear text
     Session->getViewManager()->requestJobSelection(jobId, true, true);
 }

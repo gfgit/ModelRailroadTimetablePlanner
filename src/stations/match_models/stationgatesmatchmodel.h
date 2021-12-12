@@ -30,10 +30,15 @@ public:
     QString getNameAtRow(int row) const override;
 
     // StationsMatchModel:
-    void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId);
+    void setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId, bool showOnlySegments = false);
 
     int getOutTrackCount(db_id gateId) const;
     utils::Side getGateSide(db_id gateId) const;
+
+    db_id getSegmentIdAtRow(int row) const;
+    db_id isSegmentReversedAtRow(int row) const;
+
+    int getGateTrackCount(db_id gateId) const;
 
 private:
     struct GateItem
@@ -45,6 +50,7 @@ private:
         int outTrackCount;
         QFlags<utils::GateType> type;
         utils::Side side;
+        bool segmentReversed;
     };
     static const int ItemCount = 30;
     GateItem items[ItemCount];
@@ -55,6 +61,7 @@ private:
     db_id m_stationId;
     db_id m_excludeSegmentId;
     bool m_markConnectedGates;
+    bool m_showOnlySegments;
     QByteArray mQuery;
 };
 

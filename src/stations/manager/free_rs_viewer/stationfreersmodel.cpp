@@ -96,6 +96,29 @@ void StationFreeRSModel::setTime(QTime time)
     reloadData();
 }
 
+template <typename Container, typename ItemType, typename LessThan>
+void insertSorted(Container &vec, const ItemType& item, const LessThan& cmp)
+{
+    std::ptrdiff_t len = vec.size();
+    auto first = vec.begin();
+
+    while (len > 0)
+    {
+        std::ptrdiff_t half = len >> 1;
+        auto middle = first + half;
+        if (cmp(item, *middle))
+            len = half;
+        else
+        {
+            first = middle;
+            ++first;
+            len = len - half - 1;
+        }
+    }
+
+    vec.insert(first, item);
+}
+
 void StationFreeRSModel::reloadData()
 {
     beginResetModel();
@@ -103,15 +126,15 @@ void StationFreeRSModel::reloadData()
     m_data.clear();
     QHash<db_id, Item> tempLookup;
 
-    query q(mDb, "SELECT coupling.rsId,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
-                 "MAX(stops.arrival),stops.jobId,jobs.category,stops.id"
+    query q(mDb, "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
+                 "MAX(stops.arrival),stops.job_id,jobs.category,stops.id"
                  " FROM coupling"
-                 " JOIN stops ON stops.id=coupling.stopId"
-                 " JOIN jobs ON jobs.id=stops.jobId"
-                 " JOIN rs_list ON rs_list.id=coupling.rsId"
+                 " JOIN stops ON stops.id=coupling.stop_id"
+                 " JOIN jobs ON jobs.id=stops.job_id"
+                 " JOIN rs_list ON rs_list.id=coupling.rs_id"
                  " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                 " WHERE stops.stationId=? AND stops.arrival<=?" //Less than OR equal (this includes RS uncoupled exactly at that time)
-            " GROUP BY coupling.rsId"
+                 " WHERE stops.station_id=? AND stops.arrival<=?" //Less than OR equal (this includes RS uncoupled exactly at that time)
+            " GROUP BY coupling.rs_id"
             " HAVING coupling.operation=0");
     q.bind(1, m_stationId);
     q.bind(2, m_time);
@@ -139,15 +162,15 @@ void StationFreeRSModel::reloadData()
         tempLookup.insert(item.rsId, item);
     }
 
-    q.prepare("SELECT coupling.rsId,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
-              "MIN(stops.arrival),stops.jobId,jobs.category,stops.id"
+    q.prepare("SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
+              "MIN(stops.arrival),stops.job_id,jobs.category,stops.id"
               " FROM coupling"
-              " JOIN stops ON stops.id=coupling.stopId"
-              " JOIN jobs ON jobs.id=stops.jobId"
-              " JOIN rs_list ON rs_list.id=coupling.rsId"
+              " JOIN stops ON stops.id=coupling.stop_id"
+              " JOIN jobs ON jobs.id=stops.job_id"
+              " JOIN rs_list ON rs_list.id=coupling.rs_id"
               " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-              " WHERE stops.stationId=? AND stops.arrival>?" //Greater than NOT equal (this exclude RS coupled at exactly that time)
-              " GROUP BY coupling.rsId"
+              " WHERE stops.station_id=? AND stops.arrival>?" //Greater than NOT equal (this exclude RS coupled at exactly that time)
+              " GROUP BY coupling.rs_id"
               " HAVING coupling.operation=1");
     q.bind(1, m_stationId);
     q.bind(2, m_time);
@@ -185,126 +208,86 @@ void StationFreeRSModel::reloadData()
     default:
     case RSNameCol:
     {
-        for(auto it : qAsConst(tempLookup))
+        class NameLessThan
         {
-            std::ptrdiff_t len = m_data.size();
-            QVector<Item>::iterator first = m_data.begin();
-
-            while (len > 0)
+        public:
+            inline bool operator()(const Item& lhs, const Item& rhs) const
             {
-                std::ptrdiff_t half = len >> 1;
-                QVector<Item>::iterator middle = first + half;
-                if (it.name < middle->name)
-                    len = half;
-                else
-                {
-                    first = middle;
-                    ++first;
-                    len = len - half - 1;
-                }
+                return lhs.name < rhs.name;
             }
+        };
 
-            m_data.insert(first, it);
+        for(const Item &it : qAsConst(tempLookup))
+        {
+            insertSorted(m_data, it, NameLessThan());
         }
         break;
     }
     case FreeFromTimeCol:
     {
-        for(auto it : qAsConst(tempLookup))
+        class FromTimeLessThan
         {
-            std::ptrdiff_t len = m_data.size();
-            QVector<Item>::iterator first = m_data.begin();
-
-            while (len > 0)
+        public:
+            inline bool operator()(const Item& lhs, const Item& rhs) const
             {
-                std::ptrdiff_t half = len >> 1;
-                QVector<Item>::iterator middle = first + half;
-                if (it.from < middle->from || (it.from == middle->from && it.name < middle->name))
-                    len = half;
-                else
-                {
-                    first = middle;
-                    ++first;
-                    len = len - half - 1;
-                }
+                return lhs.from < rhs.from || (lhs.from == rhs.from && lhs.name < rhs.name);
             }
+        };
 
-            m_data.insert(first, it);
+        for(const Item &it : qAsConst(tempLookup))
+        {
+            insertSorted(m_data, it, FromTimeLessThan());
         }
         break;
     }
     case FreeUpToTimeCol:
     {
-        for(auto it : qAsConst(tempLookup))
+        class UpToTimeLessThan
         {
-            std::ptrdiff_t len = m_data.size();
-            QVector<Item>::iterator first = m_data.begin();
-
-            while (len > 0)
+        public:
+            inline bool operator()(const Item& lhs, const Item& rhs) const
             {
-                std::ptrdiff_t half = len >> 1;
-                QVector<Item>::iterator middle = first + half;
-                if (it.to < middle->to || (it.to == middle->to && it.name < middle->name))
-                    len = half;
-                else
-                {
-                    first = middle;
-                    ++first;
-                    len = len - half - 1;
-                }
+                return lhs.to < rhs.to || (lhs.to == rhs.to && lhs.name < rhs.name);
             }
+        };
 
-            m_data.insert(first, it);
+        for(const Item &it : qAsConst(tempLookup))
+        {
+            insertSorted(m_data, it, UpToTimeLessThan());
         }
         break;
     }
     case FromJobCol:
     {
-        for(auto it : qAsConst(tempLookup))
+        class FromJobLessThan
         {
-            std::ptrdiff_t len = m_data.size();
-            QVector<Item>::iterator first = m_data.begin();
-
-            while (len > 0)
+        public:
+            inline bool operator()(const Item& lhs, const Item& rhs) const
             {
-                std::ptrdiff_t half = len >> 1;
-                QVector<Item>::iterator middle = first + half;
-                if (it.fromJob < middle->fromJob || (it.fromJob == middle->fromJob && it.name < middle->name))
-                    len = half;
-                else
-                {
-                    first = middle;
-                    ++first;
-                    len = len - half - 1;
-                }
+                return lhs.fromJob < rhs.fromJob || (lhs.fromJob == rhs.fromJob && lhs.name < rhs.name);
             }
+        };
 
-            m_data.insert(first, it);
+        for(const Item &it : qAsConst(tempLookup))
+        {
+            insertSorted(m_data, it, FromJobLessThan());
         }
         break;
     }
     case ToJobCol:
     {
-        for(auto it : qAsConst(tempLookup))
+        class ToJobLessThan
         {
-            std::ptrdiff_t len = m_data.size();
-            QVector<Item>::iterator first = m_data.begin();
-
-            while (len > 0)
+        public:
+            inline bool operator()(const Item& lhs, const Item& rhs) const
             {
-                std::ptrdiff_t half = len >> 1;
-                QVector<Item>::iterator middle = first + half;
-                if (it.toJob < middle->toJob || (it.toJob == middle->toJob && it.name < middle->name))
-                    len = half;
-                else
-                {
-                    first = middle;
-                    ++first;
-                    len = len - half - 1;
-                }
+                return lhs.toJob < rhs.toJob || (lhs.toJob == rhs.toJob && lhs.name < rhs.name);
             }
+        };
 
-            m_data.insert(first, it);
+        for(const Item &it : qAsConst(tempLookup))
+        {
+            insertSorted(m_data, it, ToJobLessThan());
         }
         break;
     }
@@ -342,9 +325,9 @@ StationFreeRSModel::ErrorCodes StationFreeRSModel::getNextOpTime(QTime &time)
 {
     ErrorCodes err = NoError;
 
-    query q_getNextOpTime(mDb, "SELECT coupling.rsId, MIN(stops.arrival) FROM coupling"
-                               " JOIN stops ON stops.id=coupling.stopId"
-                               " WHERE stops.stationId=? AND stops.arrival>?");
+    query q_getNextOpTime(mDb, "SELECT coupling.rs_id, MIN(stops.arrival) FROM coupling"
+                               " JOIN stops ON stops.id=coupling.stop_id"
+                               " WHERE stops.station_id=? AND stops.arrival>?");
     q_getNextOpTime.bind(1, m_stationId);
     q_getNextOpTime.bind(2, m_time);
 
@@ -377,9 +360,9 @@ StationFreeRSModel::ErrorCodes StationFreeRSModel::getPrevOpTime(QTime &time)
     //TODO: if on last/first operation increment by 1 to see after/before prev, last operation
     ErrorCodes err = NoError;
 
-    query q_getPrevOpTime(mDb, "SELECT coupling.rsId, MAX(stops.arrival) FROM coupling"
-                               " JOIN stops ON stops.id=coupling.stopId"
-                               " WHERE stops.stationId=? AND stops.arrival<?");
+    query q_getPrevOpTime(mDb, "SELECT coupling.rs_id, MAX(stops.arrival) FROM coupling"
+                               " JOIN stops ON stops.id=coupling.stop_id"
+                               " WHERE stops.station_id=? AND stops.arrival<?");
     q_getPrevOpTime.bind(1, m_stationId);
     q_getPrevOpTime.bind(2, m_time);
 

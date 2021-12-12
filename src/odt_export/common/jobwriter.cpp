@@ -3,11 +3,10 @@
 #include "odtutils.h"
 #include <QXmlStreamWriter>
 
-#include "utils/platform_utils.h"
-#include "app/session.h"
-
 #include "utils/rs_utils.h"
 #include "utils/jobcategorystrings.h"
+
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include <QDebug>
 
@@ -74,47 +73,51 @@ void writeJobSummary(QXmlStreamWriter& xml,
 JobWriter::JobWriter(database &db) :
     mDb(db),
     q_getJobStops(mDb, "SELECT stops.id,"
-                       "stops.stationId,"
+                       "stops.station_id,"
                        "stations.name,"
                        "stops.arrival,"
                        "stops.departure,"
-                       "stops.platform,"
-                       "stops.transit,"
-                       "stops.description "
-                       "FROM stops "
-                       "JOIN stations ON stations.id=stops.stationId "
-                       "WHERE stops.jobId=? ORDER BY stops.arrival"),
+                       "stops.type,"
+                       "stops.description,"
+                       "t1.name,"
+                       "t2.name"
+                       " FROM stops"
+                       " JOIN stations ON stations.id=stops.station_id"
+                       " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
+                       " LEFT JOIN station_gate_connections g2 ON g2.id=stops.out_gate_conn"
+                       " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+                       " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
+                       " WHERE stops.job_id=? ORDER BY stops.arrival"),
 
-    q_getFirstLastStops(mDb, "SELECT s1.id,"
-                             " st1.name,"
-                             " s1.departure,"
-                             " s2.id,"
-                             " st2.name,"
-                             " s2.arrival"
-                             " FROM jobs"
-                             " JOIN stops s1 ON s1.id=jobs.firstStop"
-                             " JOIN stops s2 ON s2.id=jobs.lastStop"
-                             " JOIN stations st1 ON st1.id=s1.stationId"
-                             " JOIN stations st2 ON st2.id=s2.stationId"
-                             " WHERE jobs.id=?"),
+    q_getFirstStop(mDb, "SELECT stops.id, stations.name, MIN(stops.departure)"
+                        " FROM stops"
+                        " JOIN stations ON stations.id=stops.station_id"
+                        " WHERE stops.job_id=?"),
+
+    q_getLastStop(mDb, "SELECT stops.id, stations.name, MAX(stops.arrival)"
+                       " FROM stops"
+                       " JOIN stations ON stations.id=stops.station_id"
+                       " WHERE stops.job_id=?"),
 
     q_initialJobAxes(mDb, "SELECT SUM(rs_models.axes)"
                           " FROM coupling"
-                          " JOIN rs_list ON rs_list.id=coupling.rsId"
+                          " JOIN rs_list ON rs_list.id=coupling.rs_id"
                           " JOIN rs_models ON rs_models.id=rs_list.model_id"
-                          " WHERE stopId=?"),
-    q_selectPassings(mDb, "SELECT stops.id,stops.jobId,jobs.category,stops.arrival,stops.departure,stops.platform"
-                        " FROM stops"
-                        " JOIN jobs ON jobs.id=stops.jobId"
-                        " WHERE stops.stationId=? AND stops.departure>=? AND stops.arrival<=? AND stops.jobId<>?"),
-    q_getStopCouplings(mDb, "SELECT coupling.rsId,"
+                          " WHERE stop_id=?"),
+
+    q_selectPassings(mDb, "SELECT stops.id,stops.job_id,jobs.category,"
+                          "stops.arrival,stops.departure"
+                          " FROM stops"
+                          " JOIN jobs ON jobs.id=stops.job_id"
+                          " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? AND stops.job_id<>?"),
+
+    q_getStopCouplings(mDb, "SELECT coupling.rs_id,"
                             "rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
                             " FROM coupling"
-                            " JOIN rs_list ON rs_list.id=coupling.rsId"
+                            " JOIN rs_list ON rs_list.id=coupling.rs_id"
                             " JOIN rs_models ON rs_models.id=rs_list.model_id"
-                            " WHERE coupling.stopId=? AND coupling.operation=?")
+                            " WHERE coupling.stop_id=? AND coupling.operation=?")
 {
-
 }
 
 void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
@@ -550,36 +553,52 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
     db_id firstStopId = 0;
     db_id lastStopId = 0;
 
+    QTime start, end;
+    QString fromStation, toStation;
+    int axesCount = 0;
+
     //Job summary
-    q_getFirstLastStops.bind(1, jobId);
-    if(q_getFirstLastStops.step() == SQLITE_ROW)
+    q_getFirstStop.bind(1, jobId);
+    if(q_getFirstStop.step() == SQLITE_ROW && q_getFirstStop.getRows().column_type(0) != SQLITE_NULL)
     {
-        auto r = q_getFirstLastStops.getRows();
+        auto r = q_getFirstStop.getRows();
 
         firstStopId = r.get<db_id>(0);
-        QString  from = r.get<QString>(1);
-        QTime    dep  = r.get<QTime>(2);
-        lastStopId = r.get<db_id>(3);
-        QString  to   = r.get<QString>(4);
-        QTime    arr  = r.get<QTime>(5);
+        fromStation = r.get<QString>(1);
+        start = r.get<QTime>(2);
 
         q_initialJobAxes.bind(1, firstStopId);
         q_initialJobAxes.step();
-        int axes = q_initialJobAxes.getRows().get<int>(0);
+        axesCount = q_initialJobAxes.getRows().get<int>(0);
         q_initialJobAxes.reset();
+    }
+    q_getFirstStop.reset();
 
+    q_getLastStop.bind(1, jobId);
+    if(q_getLastStop.step() == SQLITE_ROW && q_getLastStop.getRows().column_type(0) != SQLITE_NULL)
+    {
+        auto r = q_getLastStop.getRows();
+
+        lastStopId = r.get<db_id>(0);
+        toStation = r.get<QString>(1);
+        end = r.get<QTime>(2);
+    }
+    q_getLastStop.reset();
+
+    if(firstStopId && lastStopId)
+    {
         writeJobSummary(xml,
-                        from, dep.toString("HH:mm"),
-                        to, arr.toString("HH:mm"),
-                        axes);
+                        fromStation, start.toString("HH:mm"),
+                        toStation, end.toString("HH:mm"),
+                        axesCount);
     }
     else
     {
         qDebug() << "Error: getting first/last stations names FAILED\n"
                  << mDb.error_code() << mDb.error_msg();
-        writeJobSummary(xml, "err", "err", "err", "err", 0);
+        const QString err = QLatin1String("err");
+        writeJobSummary(xml, err, err, err, err, 0);
     }
-    q_getFirstLastStops.reset();
 
     //Vertical space
     xml.writeStartElement("text:p");
@@ -645,9 +664,14 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         QString stationName = stop.get<QString>(2);
         QTime arr = stop.get<QTime>(3);
         QTime dep = stop.get<QTime>(4);
-        int platf = stop.get<int>(5);
-        int isTransit = stop.get<int>(6);
-        QString descr = stop.get<QString>(7);
+        const int stopType = stop.get<int>(5);
+        QString descr = stop.get<QString>(6);
+
+        QString trackName = stop.get<QString>(7);
+        if(trackName.isEmpty())
+            trackName = stop.get<QString>(8); //Use out gate to get track name
+
+        const bool isTransit = stopType == 1;
 
         qDebug() << "(Loop) Job:" << jobId << "Stop:" << stopId;
 
@@ -667,7 +691,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         writeCell(xml, "job_5f_stops.A2", styleName, (stopId == lastStopId || (isTransit && arr == dep)) ? QString() : dep.toString("HH:mm"));
 
         //Platform
-        writeCell(xml, "job_5f_stops.A2", styleName, utils::platformName(platf));
+        writeCell(xml, "job_5f_stops.A2", styleName, trackName);
 
         //Rollingstock
         sqlite3_stmt *stmt = q_getStopCouplings.stmt();
@@ -676,7 +700,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         //Coupled rollingstock
         bool firstCoupRow = true;
         q_getStopCouplings.bind(1, stopId);
-        q_getStopCouplings.bind(2, RsOp::Coupled);
+        q_getStopCouplings.bind(2, int(RsOp::Coupled));
         for(auto coup : q_getStopCouplings)
         {
             db_id rsId = coup.get<db_id>(0);
@@ -713,7 +737,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         //Unoupled rollingstock
         bool firstUncoupRow = true;
         q_getStopCouplings.bind(1, stopId);
-        q_getStopCouplings.bind(2, RsOp::Uncoupled);
+        q_getStopCouplings.bind(2, int(RsOp::Uncoupled));
         for(auto coup : q_getStopCouplings)
         {
             db_id rsId = coup.get<db_id>(0);
@@ -753,7 +777,10 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         stopsRS.append({stationName, rsAsset});
 
         //Crossings / Passings
-        Direction myDir = Session->getStopDirection(stopId, stationId);
+
+        JobStopDirectionHelper dirHelper(mDb);
+
+        utils::Side myDir = dirHelper.getStopOutSide(stopId);
 
         QVector<JobEntry> passings;
 
@@ -774,7 +801,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
             //QTime otherArr = pass.get<QTime>(3);
             //QTime otherDep = pass.get<QTime>(4);
 
-            Direction otherDir = Session->getStopDirection(otherStopId, stationId);
+            utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
             if(myDir == otherDir)
                 passings.append({otherJobId, otherJobCat});

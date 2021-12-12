@@ -1,5 +1,4 @@
 #include "shiftbusymodel.h"
-#include "utils/model_roles.h"
 
 #include "utils/jobcategorystrings.h"
 
@@ -65,10 +64,6 @@ QVariant ShiftBusyModel::data(const QModelIndex &idx, int role) const
         }
         break;
     }
-    case JOB_ID_ROLE:
-    {
-        return info.jobId;
-    }
     }
 
     return QVariant();
@@ -94,11 +89,12 @@ void ShiftBusyModel::loadData(db_id shiftId, db_id jobId, const QTime &start, co
 
     m_shiftName = q.getRows().get<QString>(0);
 
-    q.prepare("SELECT COUNT(1)"
+    q.prepare("SELECT COUNT(jobs.id), MIN(s1.arrival), MAX(s1.departure)"
               " FROM jobs"
-              " JOIN stops s1 ON s1.id=jobs.firstStop"
-              " JOIN stops s2 ON s2.id=jobs.lastStop"
-              " WHERE jobs.shiftId=? AND s2.departure>? AND s1.arrival<?");
+              " JOIN stops s1 ON s1.job_id=jobs.id"
+              " JOIN stops s2 ON s2.job_id=jobs.id"
+              " WHERE jobs.shift_id=? AND s2.departure>? AND s1.arrival<?"
+              " GROUP BY jobs.id");
     q.bind(1, m_shiftId);
     q.bind(2, m_start);
     q.bind(3, m_end);
@@ -106,14 +102,14 @@ void ShiftBusyModel::loadData(db_id shiftId, db_id jobId, const QTime &start, co
     int count = q.getRows().get<int>(0) - 1; //Do not count ourself
     m_data.reserve(count);
 
-    q.prepare("SELECT jobs.id,jobs.category,"
-              " s1.arrival,"
-              " s2.departure"
+    q.prepare("SELECT jobs.id, jobs.category,"
+              " MIN(s1.arrival), MAX(s1.departure)"
               " FROM jobs"
-              " JOIN stops s1 ON s1.id=jobs.firstStop"
-              " JOIN stops s2 ON s2.id=jobs.lastStop"
-              " WHERE jobs.shiftId=? AND s2.departure>? AND s1.arrival<?"
-              " ORDER BY s1.arrival, jobs.id");
+              " JOIN stops s1 ON s1.job_id=jobs.id"
+              " JOIN stops s2 ON s2.job_id=jobs.id"
+              " WHERE jobs.shift_id=? AND s2.departure>? AND s1.arrival<?"
+              " GROUP BY jobs.id"
+              " ORDER BY s1.arrival,jobs.id ASC");
     q.bind(1, m_shiftId);
     q.bind(2, m_start);
     q.bind(3, m_end);

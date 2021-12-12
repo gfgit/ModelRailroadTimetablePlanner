@@ -6,6 +6,7 @@
 #include "utils/types.h"
 
 class QTreeView;
+class QModelIndex;
 class ISqlFKMatchModel;
 
 class CustomCompletionLineEdit : public QLineEdit
@@ -29,6 +30,7 @@ public:
 signals:
     void completionDone(CustomCompletionLineEdit *self);
     void dataIdChanged(db_id id);
+    void indexSelected(const QModelIndex& idx);
 
 public slots:
     void setData_slot(db_id id);
@@ -41,6 +43,7 @@ protected:
 private slots:
     void doneCompletion(const QModelIndex &idx);
     void startSuggestionsTimer();
+    void stopSuggestionsTimer();
     void resultsReady(bool forceFirst);
 
 private:

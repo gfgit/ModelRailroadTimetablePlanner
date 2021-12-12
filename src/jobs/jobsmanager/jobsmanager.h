@@ -4,7 +4,7 @@
 #include <QWidget>
 
 class QTableView;
-class JobsSQLModel;
+class JobListModel;
 
 class JobsManager : public QWidget
 {
@@ -18,9 +18,11 @@ private slots:
     void onRemove();
     void onRemoveAllJobs();
 
+    void onNewJobSamePath();
+
 private:
     QTableView *view;
-    JobsSQLModel *jobsModel;
+    JobListModel *jobsModel;
 };
 
 #endif // JOBSVIEWER_H

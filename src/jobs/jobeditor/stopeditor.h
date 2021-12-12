@@ -2,86 +2,82 @@
 #define STOPEDITOR_H
 
 #include <QFrame>
-#include <QTime>
+class StopModel;
+class StopItem;
 
-#include "utils/types.h"
-
-class QComboBox;
-class CustomCompletionLineEdit;
 class QTimeEdit;
+class QSpinBox;
 class QGridLayout;
-
-class StationsMatchModel;
-class StationLinesListModel;
 
 namespace sqlite3pp {
 class database;
 }
 
+class StopEditingHelper;
+
+/*!
+ * \brief The StopEditor class
+ *
+ * Widget to edit job stops inside JobPathEditor
+ *
+ * \sa JobPathEditor
+ * \sa StopModel
+ */
 class StopEditor : public QFrame
 {
     Q_OBJECT
 public:
-    StopEditor(sqlite3pp::database &db, QWidget *parent = nullptr);
+    StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent = nullptr);
+    ~StopEditor();
 
-    virtual bool eventFilter(QObject *watched, QEvent *ev) override;
+    void setStop(const StopItem& item, const StopItem& prev);
 
-    void setPrevDeparture(const QTime& prevTime);
-    void setArrival(const QTime& arr);
-    void setDeparture(const QTime& dep);
-    void setStation(db_id stId);
-    void setCurLine(db_id lineId);
-    void setNextLine(db_id lineId);
-    void setStopType(int type);
-    void setPrevSt(db_id stId);
+    const StopItem& getCurItem() const;
+    const StopItem& getPrevItem() const;
 
-    void calcInfo();
-
-    QTime getArrival();
-    QTime getDeparture();
-    db_id getCurLine();
-
-    db_id getNextLine();
-    db_id getStation();
-
-    bool closeOnLineChosen() const;
-    void setCloseOnLineChosen(bool value);
+    /*!
+     * \brief closeOnSegmentChosen
+     * \return true if editor should be closed after user has chosen a valid next segment
+     */
+    inline bool closeOnSegmentChosen() const { return m_closeOnSegmentChosen; };
+    void setCloseOnSegmentChosen(bool value);
 
 signals:
-    void lineChosen(StopEditor *ed);
+    /*!
+     * \brief nextSegmentChosen
+     * \param ed self instance
+     *
+     * Emitted when user has chosen next segment
+     * And it is succesfully applied (it passes checks)
+     */
+    void nextSegmentChosen(StopEditor *ed);
 
 public slots:
-    void popupLinesCombo();
+    /*!
+     * \brief Popup next segment combo
+     *
+     * Popoup suggestions if there are multiple opptions available
+     * If only one segment can be set as next segment, choose it automatically
+     * and close editor.
+     * This is done because QAbstractItemView::edit() does not let you pass additional arguments
+     *
+     * \sa nextSegmentChosen()
+     */
+    void popupSegmentCombo();
 
 private slots:
-    void onStationSelected(db_id stId);
-    void onNextLineChanged(int index);
-
-    void comboBoxViewContextMenu(const QPoint &pos);
-    void linesLoaded();
-
-    void arrivalChanged(const QTime &arrival);
+    void onHelperSegmentChoosen();
 
 private:
     QGridLayout *lay;
-    CustomCompletionLineEdit *mLineEdit;
+
+    StopEditingHelper *helper;
+
     QTimeEdit *arrEdit;
     QTimeEdit *depEdit;
-    QComboBox *linesCombo;
+    QSpinBox *mOutGateTrackSpin;
 
-    StationsMatchModel *stationsMatchModel;
-    StationLinesListModel *linesModel;
-
-    db_id curLineId;
-    db_id nextLineId;
-    db_id stopId;
-    db_id stationId;
-    db_id mPrevSt;
-
-    QTime lastArrival;
-
-    int stopType;
-    bool m_closeOnLineChosen;
+    bool m_closeOnSegmentChosen;
 };
 
 #endif // STOPEDITOR_H

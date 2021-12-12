@@ -18,9 +18,9 @@ StopCouplingModel::StopCouplingModel(sqlite3pp::database &db, QObject *parent) :
 
 qint64 StopCouplingModel::recalcTotalItemCount()
 {
-    query q(mDb, "SELECT COUNT(1) FROM coupling WHERE stopId=? AND operation=?");
+    query q(mDb, "SELECT COUNT(1) FROM coupling WHERE stop_id=? AND operation=?");
     q.bind(1, m_stopId);
-    q.bind(2, m_operation);
+    q.bind(2, int(m_operation));
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
@@ -49,11 +49,11 @@ void StopCouplingModel::internalFetch(int first, int sortCol, int valRow, const 
 
     //const char *whereCol;
 
-    QByteArray sql = "SELECT coupling.rsId,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
+    QByteArray sql = "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
                      " FROM coupling"
-                     " JOIN rs_list ON rs_list.id=coupling.rsId"
+                     " JOIN rs_list ON rs_list.id=coupling.rs_id"
                      " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                     " WHERE coupling.stopId=?2 AND coupling.operation=?3"
+                     " WHERE coupling.stop_id=?2 AND coupling.operation=?3"
                      " ORDER BY rs_models.type,rs_models.name,rs_list.number,rs_models.suffix";
     //    switch (sortCol)
     //    {
@@ -87,7 +87,7 @@ void StopCouplingModel::internalFetch(int first, int sortCol, int valRow, const 
     q.prepare(sql);
     q.bind(1, BatchSize);
     q.bind(2, m_stopId);
-    q.bind(3, m_operation);
+    q.bind(3, int(m_operation));
     if(offset)
         q.bind(2, offset);
 

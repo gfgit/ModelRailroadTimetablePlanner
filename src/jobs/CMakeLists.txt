@@ -1,15 +1,8 @@
 add_subdirectory(jobeditor)
+add_subdirectory(jobsmanager)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  jobs/jobssqlmodel.h
-  jobs/jobssqlmodel.cpp
-  jobs/jobstorage.h
-  jobs/jobstorage.cpp
-  jobs/traingraphics.h
-  jobs/traingraphics.cpp
-  jobs/jobsmanager.h
-  jobs/jobsmanager.cpp
   PARENT_SCOPE
 )
 

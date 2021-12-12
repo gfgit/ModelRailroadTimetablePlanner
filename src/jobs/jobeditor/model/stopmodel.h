@@ -7,130 +7,137 @@
 #include <QVector>
 #include <QSet>
 
-#include "utils/model_roles.h"
-
 #include "utils/types.h"
 
-#include "sqlite3pp/sqlite3pp.h"
-using namespace sqlite3pp;
+namespace sqlite3pp {
+class database;
+}
 
 class StopItem
 {
 public:
-    db_id stopId       = 0;
-    db_id stationId    = 0;
+    struct Gate
+    {
+        db_id gateConnId = 0;
+        db_id gateId = 0;
+        int trackNum = -1;
+    };
 
-    db_id segment      = 0;
-    db_id nextSegment  = 0;
+    struct Segment
+    {
+        db_id segConnId = 0;
+        db_id segmentId = 0;
+        int inTrackNum  = -1;
+        int outTrackNum = -1;
+        bool reversed = false;
+    };
 
-    db_id curLine      = 0;
-    db_id nextLine     = 0;
+    db_id stopId    = 0;
+    db_id stationId = 0;
+    db_id trackId   = 0;
 
-    db_id possibleLine = 0;
-    int addHere           = 0;
-    int platform          = 0;
+    Gate fromGate;
+    Gate toGate;
+    Segment nextSegment;
 
     QTime arrival;
     QTime departure;
 
-    QSet<db_id> coupled;  //TODO: really needed???
-    QSet<db_id> uncoupled;
+    int addHere = 0;
 
-    StopType type         = Normal;
+    StopType type = StopType::Normal;
 };
 
 //BIG TODO: when changing arrival to a station where a RS is (un)coupled, the station is marked for update but not the RS
 //          if a stop is removed, couplings get removed too but RS are not marked for update, also if Job is removed, needs also RsErrorCheck
+/*!
+ * \brief The StopModel class
+ *
+ * Item model to load and manage job stops
+ *
+ * \sa JobPathEditor
+ * \sa StopEditor
+ */
 class StopModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
     StopModel(sqlite3pp::database& db, QObject *parent = nullptr);
 
+    // QAbstractListModel
     QVariant data(const QModelIndex &index, int role) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    typedef enum
-    {
-        NoError = 0,
-        GenericError = 1,
-        ErrorInvalidIndex,
-        ErrorInvalidArgument,
-        ErrorFirstLastTransit,
-        ErrorTransitWithCouplings
-    } ErrorCodes;
-
+    // Options
     void setTimeCalcEnabled(bool value);
     void setAutoInsertTransits(bool value);
     void setAutoMoveUncoupleToNewLast(bool value);
+    void setAutoUncoupleAtLast(bool value);
 
-    void prepareQueries();
-    void finalizeQueries();
-
+    // Loading
     void loadJobStops(db_id jobId);
     void clearJob();
 
-    void addStop();
-    void insertStopBefore(const QModelIndex& idx);
-    void removeStop(const QModelIndex& idx);
-    void removeLastIfEmpty();
-
-    bool isAddHere(const QModelIndex& idx);
-
-    void setArrival(const QModelIndex &idx, const QTime &time, bool setDepTime);
-    void setDeparture(const QModelIndex &index, QTime time, bool propagate);
-    int setStopType(const QModelIndex &idx, StopType type);
-    int setStopTypeRange(int firstRow, int lastRow, StopType type);
-    void setLine(const QModelIndex &idx, db_id lineId);
-    bool lineHasSt(db_id lineId, db_id stId);
-    void setStation(const QPersistentModelIndex &idx, db_id stId);
-    void setPlatform(const QModelIndex &idx, int platf);
-
-    QString getDescription(const StopItem &s) const;
-    void setDescription(const QModelIndex &idx, const QString &descr);
-
-    int calcTimeBetweenStInSecs(db_id stA, db_id stB, db_id lineId);
-    int defaultStopTimeSec();
-
-    std::pair<QTime, QTime> getFirstLastTimes() const;
-
-    //TODO: seems useless
-    QSet<db_id> getCoupled(int row) const;
-    QSet<db_id> getUncoupled(int row) const;
-
+    // Saving
     bool isEdited() const;
     bool commitChanges();
     bool revertChanges();
 
+    // Editing
+    void addStop();
+    void removeStop(const QModelIndex& idx);
+    void removeLastIfEmpty();
+
+    void uncoupleStillCoupledAtLastStop();
+    void uncoupleStillCoupledAtStop(const StopItem &s);
+
+    // Getters
     JobCategory getCategory() const;
     db_id getJobId() const;
     db_id getJobShiftId() const;
     db_id getNewShiftId() const;
 
+    // Setters
+    void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
+
+    bool setStopTypeRange(int firstRow, int lastRow, StopType type);
+
+    // Stop Description
+    QString getDescription(const StopItem &s) const;
+    void setDescription(const QModelIndex &idx, const QString &descr);
+
+    // Convinience
     int getStopRow(db_id stopId) const;
+
+    bool isAddHere(const QModelIndex& idx);
+
+    std::pair<QTime, QTime> getFirstLastTimes() const;
 
     const QSet<db_id> &getRsToUpdate() const;
     const QSet<db_id> &getStationsToUpdate() const;
     inline void markRsToUpdate(db_id rsId) { rsToUpdate.insert(rsId); }
 
-    LineType getLineTypeAfterStop(db_id stopId) const;
+    bool isRailwayElectrifiedAfterStop(db_id stopId) const;
+    bool isRailwayElectrifiedAfterRow(int row) const;
 
     inline StopItem getItemAt(int row) const { return stops.at(row); }
+    inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
+    inline db_id getItemStationAt(int row) const { return stops.at(row).stationId; }
 
-    void uncoupleStillCoupledAtLastStop();
-    void uncoupleStillCoupledAtStop(const StopItem &s);
-
-    bool getStationPlatfCount(db_id stationId, int &platfCount, int &depotCount);
 
 #ifdef ENABLE_AUTO_TIME_RECALC
     void rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep);
 #endif
 
+    bool trySelectTrackForStop(StopItem &item);
 
-    void setAutoUncoupleAtLast(bool value);
+    bool trySetTrackConnections(StopItem &item, db_id trackId,
+                               QString *outErr);
+
+    bool trySelectNextSegment(StopItem &item, db_id segmentId, int suggestedOutGateTrk,
+                              db_id nextStationId, db_id &out_gateId);
 
 signals:
     void edited(bool val);
@@ -151,11 +158,31 @@ private slots:
     void onExternalShiftChange(db_id shiftId, db_id jobId);
     void onShiftNameChanged(db_id shiftId);
 
-    void onStationLineNameChanged();
+    void onStationSegmentNameChanged();
+
+private:
+    void insertAddHere(int row, int type);
+    db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, StopType type);
+    void deleteStop(db_id stopId);
+
+    bool updateCurrentInGate(StopItem& curStop, const StopItem::Segment& prevSeg);
+    bool updateStopTime(StopItem& item, int row, bool propagate, const QTime &oldArr, const QTime &oldDep);
+
+    int calcTravelTime(db_id segmentId);
+    int defaultStopTimeSec();
+
+    void shiftStopsBy24hoursFrom(const QTime& startTime);
+
+    friend class RSCouplingInterface;
+    bool startInfoEditing();
+    bool startStopsEditing();
+    bool endStopsEditing();
 
 private:
     //To simulate acceleration/braking we add 4 km to distance
     static constexpr double accelerationDistMeters = 4000.0;
+
+    sqlite3pp::database& mDb;
 
     QVector<StopItem> stops;
 
@@ -180,50 +207,10 @@ private:
 
     EditState editState;
 
-    database& mDb;
-
-    //TODO: do not store queries, prepare them when needed
-    query q_segPos;
-    query q_getRwNode;
-    query q_lineHasSt;
-    query q_getCoupled;
-
-    command q_setArrival;
-    command q_setDeparture;
-
-    command q_setSegPos;
-    command q_setSegLine;
-    command q_setStopSeg;
-    command q_setNextSeg;
-    command q_setStopSt;
-    command q_removeSeg;
-    command q_setPlatform;
-
     bool timeCalcEnabled;
     bool autoInsertTransits;
     bool autoMoveUncoupleToNewLast;
     bool autoUncoupleAtLast;
-
-private:
-    void insertAddHere(int row, int type);
-    db_id createStop(db_id jobId, db_id segId, const QTime &time, int transit = 0);
-    db_id createSegment(db_id jobId, int num);
-    db_id createSegmentAfter(db_id jobId, db_id prevSeg);
-    void setStopSeg(StopItem &s, db_id segId);
-    void setNextSeg(StopItem &s, db_id nextSeg);
-    void destroySegment(db_id segId, db_id jobId);
-    void resetStopsLine(int idx, StopItem &s);
-    void propagateLineChange(int idx, StopItem &s, db_id lineId);
-    void deleteStop(db_id stopId);
-    int propageteTimeOffset(int row, const int msecOffset);
-    void insertTransitsBefore(const QPersistentModelIndex &stop);
-    void setStation_internal(StopItem &item, db_id stId, db_id nodeId);
-    void shiftStopsBy24hoursFrom(const QTime& startTime);
-
-    friend class RSCouplingInterface;
-    bool startInfoEditing();
-    bool startStopsEditing();
-    bool endStopsEditing();
 };
 
 #endif // STOPMODEL_H

@@ -16,21 +16,16 @@
 
 #include "model/stopmodel.h"
 #include "stopdelegate.h"
+#include "jobs/jobsmanager/model/jobshelper.h"
 
 #include "jobs/jobeditor/editstopdialog.h"
 
-#include "jobs/jobstorage.h"
 #include "utils/jobcategorystrings.h"
 
 #include "shiftbusy/shiftbusydialog.h"
 #include "shiftbusy/shiftbusymodel.h"
 
 #include "odt_export/jobsheetexport.h"
-
-#ifdef ENABLE_RS_CHECKER
-#include "backgroundmanager/backgroundmanager.h"
-#include "rollingstock/rs_checker/rscheckermanager.h"
-#endif
 
 #include "utils/file_format_names.h"
 
@@ -41,6 +36,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::JobPathEditor),
     stopModel(nullptr),
+    jobNumberTimerId(0),
     isClear(true),
     canSetJob(true),
     m_readOnly(false)
@@ -76,7 +72,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     connect(ui->categoryCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), stopModel, &StopModel::setCategory);
     connect(stopModel, &StopModel::categoryChanged, this, &JobPathEditor::onCategoryChanged);
 
-    connect(ui->jobIdSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &JobPathEditor::onIdSpinValueChanged);
+    connect(ui->jobIdSpin, static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &JobPathEditor::startJobNumberTimer);
     connect(stopModel, &StopModel::jobIdChanged, this, &JobPathEditor::onJobIdChanged);
 
     connect(stopModel, &StopModel::edited, this, &JobPathEditor::setEdited);
@@ -90,12 +86,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     connect(ui->view, &QListView::customContextMenuRequested, this, &JobPathEditor::showContextMenu);
     connect(ui->view, &QListView::clicked, this, &JobPathEditor::onIndexClicked);
 
-    //Connect to stationsModel to update station views
-    //NOTE: here we use queued connections to avoid freezing the UI if there are many stations to update
-    //      with queued connections they are update one at a time and the UI stays responsive
-    connect(this, &JobPathEditor::stationChange, Session, &MeetingSession::stationPlanChanged, Qt::QueuedConnection);
-
-    connect(Session->mJobStorage, &JobStorage::aboutToRemoveJob, this, &JobPathEditor::onJobRemoved);
+    connect(Session, &MeetingSession::jobRemoved, this, &JobPathEditor::onJobRemoved);
     connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
 
     setReadOnly(false);
@@ -107,7 +98,6 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
 JobPathEditor::~JobPathEditor()
 {
     clearJob();
-
     delete ui;
 }
 
@@ -140,12 +130,46 @@ bool JobPathEditor::setJob_internal(db_id jobId)
 
     isClear = false;
 
+    stopJobNumberTimer();
+
     stopModel->loadJobStops(jobId); //Load from database
 
     //If read-only hide 'AddHere' row (last one)
     ui->view->setRowHidden(stopModel->rowCount() - 1, m_readOnly);
 
     return true;
+}
+
+void JobPathEditor::startJobNumberTimer()
+{
+    //Give user a small time to scroll values in ID QSpinBox
+    //This will skip eventual non available IDs (already existent)
+    //On timeout check ID and reset to old value if not available
+    stopJobNumberTimer();
+    jobNumberTimerId = startTimer(700);
+}
+
+void JobPathEditor::stopJobNumberTimer()
+{
+    if(jobNumberTimerId)
+    {
+        killTimer(jobNumberTimerId);
+        jobNumberTimerId = 0;
+    }
+}
+
+void JobPathEditor::checkJobNumberValid()
+{
+    //Kill timer
+    stopJobNumberTimer();
+
+    db_id jobId = ui->jobIdSpin->value();
+    if(!stopModel->setNewJobId(jobId))
+    {
+        QMessageBox::warning(this, tr("Invalid"),
+                             tr("Job number <b>%1</b> is already exists.<br>"
+                                "Please choose a different number.").arg(jobId));
+    }
 }
 
 bool JobPathEditor::createNewJob(db_id *out)
@@ -169,12 +193,8 @@ bool JobPathEditor::createNewJob(db_id *out)
     if(!clearJob())
         return false; //Busy JobPathEditor
 
-    JobStorage *jobs = Session->mJobStorage;
-
     db_id jobId = 0;
-    jobs->addJob(&jobId); //Request add job
-
-    if(jobId == 0)
+    if(!JobsHelper::createNewJob(Session->m_Db, jobId) || jobId == 0)
     {
         return false; //An error occurred in database, abort
     }
@@ -182,77 +202,41 @@ bool JobPathEditor::createNewJob(db_id *out)
     if(!setJob_internal(jobId))
     {
         //If we fail opening JobPathEditor remove the job
-        //Call directly to the model.
-        jobs->removeJob(jobId);
+        JobsHelper::removeJob(Session->m_Db, jobId);
         return false;
     }
 
     if(out)
         *out = jobId;
 
-
     return true;
-}
-
-void JobPathEditor::toggleTransit(const QModelIndex& index)
-{
-    DEBUG_ENTRY;
-
-    if(m_readOnly)
-        return;
-
-    StopType type = StopDelegate::getStopType(index);
-    if(type == First || type == Last)
-        return;
-
-    if(type == Transit || type == TransitLineChange)
-    {
-        type = Normal;
-    }
-    else
-    {
-        db_id nextLineId = index.data(NEXT_LINE_ROLE).toLongLong();
-        if (nextLineId != 0) {
-            type = TransitLineChange;
-        }
-        else
-        {
-            type = Transit;
-        }
-    }
-
-    int err = stopModel->setStopType(index, type);
-
-    if(err == StopModel::ErrorTransitWithCouplings)
-    {
-        QMessageBox::warning(this,
-                             tr("Invalid Operation"),
-                             tr("Transit cannot have coupling or uncoupling operations.\n"
-                                "Remove theese operation to set Transit on this stop."));
-    }
 }
 
 void JobPathEditor::showContextMenu(const QPoint& pos)
 {
     QModelIndex index = ui->view->indexAt(pos);
-    if(!index.isValid() || stopModel->isAddHere(index))
+    if(!index.isValid() || index.row()>= stopModel->rowCount() || stopModel->isAddHere(index))
         return;
 
-    QMenu menu(this);
-    QAction *toggleTransitAct = menu.addAction(tr("Toggle transit"));
-    QAction *setToTransitAct = menu.addAction(tr("Set transit"));
-    QAction *unsetTransit = menu.addAction(tr("Unset transit"));
-    QAction *removeStopAct = menu.addAction(tr("Remove"));
-    QAction *insertBeforeAct = menu.addAction(tr("Insert before"));
-    QAction *editStopAct = menu.addAction(tr("Edit stop"));
+    OwningQPointer<QMenu> menu = new QMenu(this);
+    QAction *toggleTransitAct = menu->addAction(tr("Toggle transit"));
+    QAction *setToTransitAct = menu->addAction(tr("Set transit"));
+    QAction *unsetTransit = menu->addAction(tr("Unset transit"));
+    menu->insertSeparator(unsetTransit);
+    QAction *editStopAct = menu->addAction(tr("Edit stop"));
+    QAction *showStationSVG = menu->addAction(tr("Station SVG Plan"));
+    menu->insertSeparator(editStopAct);
+    QAction *removeStopAct = menu->addAction(tr("Remove"));
 
     toggleTransitAct->setEnabled(!m_readOnly);
     setToTransitAct->setEnabled(!m_readOnly);
     unsetTransit->setEnabled(!m_readOnly);
     removeStopAct->setEnabled(!m_readOnly);
-    insertBeforeAct->setEnabled(!m_readOnly);
 
-    QAction *act = menu.exec(ui->view->viewport()->mapToGlobal(pos));
+    const db_id stationId = stopModel->getItemStationAt(index.row());
+    showStationSVG->setEnabled(stationId != 0); //Enable only if station is set
+
+    QAction *act = menu->exec(ui->view->viewport()->mapToGlobal(pos));
 
     QItemSelectionModel *sm = ui->view->selectionModel();
 
@@ -269,11 +253,16 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
 
     if(act == editStopAct)
     {
-        OwningQPointer<EditStopDialog> dlg = new EditStopDialog(this);
+        OwningQPointer<EditStopDialog> dlg = new EditStopDialog(stopModel, this);
         dlg->setReadOnly(m_readOnly);
-        dlg->setStop(stopModel, index);
+        dlg->setStop(index);
         dlg->exec();
         return;
+    }
+
+    if(act == showStationSVG)
+    {
+        Session->getViewManager()->requestStSVGPlan(stationId);
     }
 
     if(m_readOnly)
@@ -300,19 +289,10 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
             return;
         }
     }
-    else if(act == toggleTransitAct)
-    {
-        toggleTransit(index);
-        return;
-    }
 
     if(act == removeStopAct)
     {
         stopModel->removeStop(index);
-    }
-    else if(act == insertBeforeAct)
-    {
-        stopModel->insertStopBefore(index);
     }
 }
 
@@ -336,17 +316,9 @@ bool JobPathEditor::clearJob()
 
     stopModel->clearJob();
 
+    stopJobNumberTimer();
+
     return true;
-}
-
-void JobPathEditor::prepareQueries()
-{
-    stopModel->prepareQueries();
-}
-
-void JobPathEditor::finalizeQueries()
-{
-    stopModel->finalizeQueries();
 }
 
 void JobPathEditor::done(int res)
@@ -382,6 +354,8 @@ bool JobPathEditor::saveChanges()
 
     closeStopEditor();
 
+    checkJobNumberValid();
+
     stopModel->removeLastIfEmpty();
     stopModel->uncoupleStillCoupledAtLastStop();
 
@@ -397,7 +371,7 @@ bool JobPathEditor::saveChanges()
         {
             qDebug() << "User wants to delete job:" << stopModel->getJobId();
             stopModel->commitChanges();
-            Session->mJobStorage->removeJob(stopModel->getJobId());
+            JobsHelper::removeJob(Session->m_Db, stopModel->getJobId());
             canSetJob = true;
             clearJob();
             setEnabled(false);
@@ -430,28 +404,17 @@ bool JobPathEditor::saveChanges()
         }
     }
 
-    JobStorage *jobs = Session->mJobStorage;
-    jobs->updateFirstLast(stopModel->getJobId());
-
-    //Update views
-    Session->getViewManager()->updateRSPlans(stopModel->getRsToUpdate());
-
-#ifdef ENABLE_RS_CHECKER
-    //Check RS for errors
-    if(AppSettings.getCheckRSOnJobEdit())
-        Session->getBackgroundManager()->getRsChecker()->checkRs(stopModel->getRsToUpdate());
-#endif
-
-    //Update station views
-    auto stations = stopModel->getStationsToUpdate();
-    for(db_id stId : stations)
-    {
-        emit stationChange(stId);
-    }
+    //Store before they are cleared on commitChanges()
+    const auto stationsToUpdate = stopModel->getStationsToUpdate();
+    const auto rsToUpdate = stopModel->getRsToUpdate();
 
     stopModel->commitChanges();
 
-    //TODO: redraw graphs
+    //Update views
+    emit Session->rollingStockPlanChanged(rsToUpdate);
+
+    //Update station views
+    emit Session->stationPlanChanged(stationsToUpdate);
 
     //When updating the path selection gets cleared so we restore it
     Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
@@ -471,9 +434,11 @@ void JobPathEditor::discardChanges()
 
     closeStopEditor(); //Close before rolling savepoint
 
+    stopJobNumberTimer();
+
     //Save them before reverting changes
     QSet<db_id> rsToUpdate = stopModel->getRsToUpdate();
-    QSet<db_id> stToUpdate = stopModel->getStationsToUpdate();
+    QSet<db_id> stationsToUpdate = stopModel->getStationsToUpdate();
 
     stopModel->revertChanges(); //Re-load old job from db
 
@@ -490,7 +455,7 @@ void JobPathEditor::discardChanges()
         //This usually happens when you create a new job but then you change your mind and press 'Discard'
         qDebug() << "User wants to delete job:" << stopModel->getJobId();
         stopModel->commitChanges();
-        Session->mJobStorage->removeJob(stopModel->getJobId());
+        JobsHelper::removeJob(Session->m_Db, stopModel->getJobId());
         clearJob();
         setEnabled(false);
     }
@@ -498,19 +463,10 @@ void JobPathEditor::discardChanges()
     //After possible job deletion update views
 
     //Update RS views
-    Session->getViewManager()->updateRSPlans(rsToUpdate);
-
-#ifdef ENABLE_RS_CHECKER
-    //Check RS for errors
-    if(AppSettings.getCheckRSOnJobEdit())
-        Session->getBackgroundManager()->getRsChecker()->checkRs(rsToUpdate);
-#endif
+    emit Session->rollingStockPlanChanged(rsToUpdate);
 
     //Update station views
-    for(db_id stId : stToUpdate)
-    {
-        emit stationChange(stId);
-    }
+    emit Session->stationPlanChanged(stationsToUpdate);
 }
 
 db_id JobPathEditor::currentJobId() const
@@ -548,6 +504,17 @@ void JobPathEditor::updateSpinColor()
     }
 }
 
+void JobPathEditor::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == jobNumberTimerId)
+    {
+        checkJobNumberValid();
+        return;
+    }
+
+    QDialog::timerEvent(e);
+}
+
 void JobPathEditor::onJobRemoved(db_id jobId)
 {
     //If the job shown is about to be removed clear JobPathEditor
@@ -555,16 +522,6 @@ void JobPathEditor::onJobRemoved(db_id jobId)
     {
         if(clearJob())
             setEnabled(false);
-    }
-}
-
-void JobPathEditor::onIdSpinValueChanged(int jobId)
-{
-    if(!stopModel->setNewJobId(jobId))
-    {
-        QMessageBox::warning(this, tr("Invalid"),
-                             tr("Job number <b>%1</b> is already exists.<br>"
-                                "Please choose a different number.").arg(jobId));
     }
 }
 
@@ -690,15 +647,15 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
     if(m_readOnly)
         return;
 
-    int addHere = index.data(ADDHERE_ROLE).toInt();
-    if(addHere == 1)
+    if(stopModel->isAddHere(index))
     {
         qDebug() << index << "AddHere";
 
         stopModel->addStop();
 
         int row = index.row();
-        if(row > 0 && AppSettings.getChooseLineOnAddStop())
+
+        if(row > 0)
         {
             //idx - 1 is former Last Stop (now it became a normal Stop)
             //idx     is new Last Stop (former AddHere)
@@ -714,7 +671,7 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
             //QAbstractItemView::edit doesn't let you pass additional arguments
             //So we work around by emitting a signal
             //See 'StopDelegate::createEditor()'
-            delegate->popupEditorLinesCombo();
+            emit delegate->popupEditorSegmentCombo();
         }
         else
         {
@@ -737,8 +694,8 @@ void JobPathEditor::closeStopEditor()
     QWidget *ed = ui->view->indexWidget(idx);
     if(ed == nullptr)
         return;
-    delegate->commitData(ed);
-    delegate->closeEditor(ed);
+    emit delegate->commitData(ed);
+    emit delegate->closeEditor(ed);
 }
 
 void JobPathEditor::closeEvent(QCloseEvent *e)

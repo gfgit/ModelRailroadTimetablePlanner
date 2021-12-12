@@ -23,25 +23,17 @@ enum class RsEngineSubType : qint8
     NTypes
 };
 
-typedef enum {
+enum class StopType {
     ToggleType = -1, //Used as flag in StopModel::setStopTypeRange()
     Normal = 0,
     Transit,
-    TransitLineChange,
     First,
     Last
-} StopType;
+};
 
-typedef enum {
+enum class RsOp {
     Uncoupled = 0,
     Coupled   = 1
-} RsOp;
-
-//FIXME: remove, use utils::RailwaySegmentType
-enum class LineType
-{
-    NonElectric = 0,
-    Electric = 1
 };
 
 enum class JobCategory : qint8
@@ -64,17 +56,17 @@ enum class JobCategory : qint8
 constexpr JobCategory LastFreightCategory = JobCategory::POSTAL;
 constexpr JobCategory FirstPassengerCategory = JobCategory::REGIONAL;
 
-typedef struct JobEntry_
+struct JobEntry
 {
     db_id jobId;
     JobCategory category;
-} JobEntry;
+};
 
-typedef struct
+struct JobStopEntry
 {
     db_id stopId = 0;
     db_id jobId = 0;
-    JobCategory category = JobCategory::FREIGHT;
-} JobStopEntry;
+    JobCategory category = JobCategory::NCategories;
+};
 
 #endif // TYPES_H

@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>550</width>
-    <height>512</height>
+    <width>849</width>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
-  <layout class="QVBoxLayout" name="dialogLayout">
+  <layout class="QGridLayout" name="mainLay">
    <property name="leftMargin">
     <number>4</number>
    </property>
@@ -26,56 +26,208 @@
    <property name="bottomMargin">
     <number>4</number>
    </property>
-   <item>
+   <item row="1" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="mainTab">
+     <widget class="QWidget" name="stopTab">
       <attribute name="title">
        <string>Stop</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_3">
+      <layout class="QGridLayout" name="stopTabLay">
        <property name="leftMargin">
         <number>9</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="mainBox">
+       <item row="2" column="0">
+        <widget class="QGroupBox" name="timeBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Time</string>
          </property>
-         <layout class="QGridLayout" name="stopBoxLayout">
-          <item row="1" column="1">
-           <widget class="QTimeEdit" name="arrivalTimeEdit"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_2">
+         <layout class="QFormLayout" name="timeLay">
+          <item row="0" column="0">
+           <widget class="QLabel" name="arrivalLabel">
             <property name="text">
              <string>Arrival</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>Station</string>
-            </property>
-           </widget>
+          <item row="0" column="1">
+           <widget class="QTimeEdit" name="arrivalTimeEdit"/>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_3">
+          <item row="1" column="0">
+           <widget class="QLabel" name="departureLabel">
             <property name="text">
              <string>Departure</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="1" column="1">
            <widget class="QTimeEdit" name="departureTimeEdit"/>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="0" column="1" rowspan="4">
+        <widget class="QGroupBox" name="descrBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Description</string>
+         </property>
+         <layout class="QVBoxLayout" name="descriptionLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QPlainTextEdit" name="descriptionEdit"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="prevStopBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Previous Stop</string>
+         </property>
+         <layout class="QFormLayout" name="prevStopLay">
+          <item row="0" column="0">
+           <widget class="QLabel" name="prevStLabel">
+            <property name="text">
+             <string>Prev. Station:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="prevStEdit">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="prevOutGateLabel">
+            <property name="text">
+             <string>Out Gate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="prevOutGateEdit">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QGroupBox" name="curStopBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="title">
+          <string>Current Stop</string>
+         </property>
+         <layout class="QFormLayout" name="curStopLay">
+          <item row="0" column="0">
+           <widget class="QLabel" name="stationLabel">
+            <property name="text">
+             <string>Station:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="stationTrackLabel">
+            <property name="text">
+             <string>Track:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="outGateLabel">
+            <property name="text">
+             <string>Out Gate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="outGateTrackLabel">
+            <property name="text">
+             <string>Out Gate Track:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="inGateLabel">
+            <property name="text">
+             <string>In Gate:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QLabel" name="inGateEdit">
+            <property name="text">
+             <string>TextLabel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="outGateTrackSpin"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="rsTab">
+      <attribute name="title">
+       <string>Rollingstock</string>
+      </attribute>
+      <layout class="QGridLayout" name="rsTabLay">
+       <item row="0" column="0">
         <widget class="QGroupBox" name="coupledBox">
          <property name="title">
           <string>Coupled</string>
@@ -109,7 +261,7 @@
          </layout>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="0" column="1">
         <widget class="QGroupBox" name="uncoupledBox">
          <property name="title">
           <string>Uncoupled</string>
@@ -143,209 +295,73 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QGroupBox" name="platfBox">
+       <item row="1" column="0" colspan="2">
+        <widget class="QGroupBox" name="rollingstockBox">
          <property name="title">
-          <string>Platform</string>
+          <string>Job Asset</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
+         <layout class="QGridLayout" name="trainAssetGridLayout">
           <item row="0" column="1">
-           <widget class="QRadioButton" name="platfRadio">
-            <property name="text">
-             <string>Main</string>
+           <widget class="QLabel" name="assetBeforeLabel">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QRadioButton" name="depotRadio">
             <property name="text">
-             <string>Depot</string>
+             <string>Asset Before Stop</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="QSpinBox" name="mainPlatfSpin">
-            <property name="minimum">
-             <number>1</number>
+           <widget class="QListView" name="assetBeforeView">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QSpinBox" name="depotSpin">
-            <property name="minimum">
-             <number>1</number>
+          <item row="1" column="0">
+           <widget class="QListView" name="assetAfterView">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+              <weight>50</weight>
+              <bold>false</bold>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="assetAfterLabel">
+            <property name="font">
+             <font>
+              <pointsize>10</pointsize>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Asset After Stop</string>
             </property>
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item row="0" column="1" rowspan="2">
-        <widget class="QGroupBox" name="descrBox">
-         <property name="title">
-          <string>Description</string>
-         </property>
-         <layout class="QVBoxLayout" name="descriptionLayout">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <property name="leftMargin">
-           <number>3</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <widget class="QPlainTextEdit" name="descriptionEdit"/>
-          </item>
-         </layout>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="timeTab">
-      <attribute name="title">
-       <string>Time</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout">
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_10">
-         <property name="text">
-          <string>Arrival</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLineEdit" name="prevStEdit">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Previous Station</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Line Max.Speed</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_9">
-         <property name="text">
-          <string>Speed</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QLabel" name="label_8">
-         <property name="text">
-          <string>Train Max.Speed</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0">
-        <widget class="QLabel" name="label_11">
-         <property name="text">
-          <string>Departure</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QTimeEdit" name="calcTimeArr"/>
-       </item>
-       <item row="5" column="2">
-        <widget class="QTimeEdit" name="calcTimeDep"/>
-       </item>
-       <item row="4" column="4">
-        <widget class="QPushButton" name="calcTimeBut">
-         <property name="text">
-          <string>Re-Calc</string>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="4">
-        <widget class="QPushButton" name="applyTimeBut">
-         <property name="text">
-          <string>Apply</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QSpinBox" name="speedEdit">
-         <property name="suffix">
-          <string> Km/h</string>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QSpinBox" name="lineSpeedBox">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::NoButtons</enum>
-         </property>
-         <property name="suffix">
-          <string> Km/h</string>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QSpinBox" name="trainSpeedBox">
-         <property name="wrapping">
-          <bool>false</bool>
-         </property>
-         <property name="frame">
-          <bool>true</bool>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-         <property name="buttonSymbols">
-          <enum>QAbstractSpinBox::NoButtons</enum>
-         </property>
-         <property name="showGroupSeparator" stdset="0">
-          <bool>false</bool>
-         </property>
-         <property name="suffix">
-          <string> Km/h</string>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Line</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QLineEdit" name="currentLineText">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
         </widget>
        </item>
       </layout>
@@ -354,7 +370,7 @@
       <attribute name="title">
        <string>Info</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QVBoxLayout" name="infoTabLay">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -389,99 +405,11 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>515</width>
-            <height>553</height>
+            <width>837</width>
+            <height>589</height>
            </rect>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_3">
-           <item>
-            <widget class="QLabel" name="infoLabel">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Infos here...</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QGroupBox" name="rollingstockBox">
-             <property name="title">
-              <string>Rollingstock</string>
-             </property>
-             <layout class="QGridLayout" name="trainAssetGridLayout">
-              <item row="0" column="0">
-               <widget class="QLabel" name="assetAfterLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Asset After Stop</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="assetBeforeLabel">
-                <property name="font">
-                 <font>
-                  <pointsize>10</pointsize>
-                  <weight>75</weight>
-                  <bold>true</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Asset Before Stop</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QListView" name="assetAfterView">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                  <weight>50</weight>
-                  <bold>false</bold>
-                 </font>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QListView" name="assetBeforeView">
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>100</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>12</pointsize>
-                 </font>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
+          <layout class="QVBoxLayout" name="infoScrollLay">
            <item>
             <widget class="QGroupBox" name="passingsBox">
              <property name="font">
@@ -492,7 +420,7 @@
              <property name="title">
               <string>Passings / Crossings</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
+             <layout class="QVBoxLayout" name="passingsLay">
               <item>
                <widget class="QPushButton" name="calcPassingsBut">
                 <property name="text">
@@ -501,7 +429,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QLabel" name="label_4">
+               <widget class="QLabel" name="passingsLabel">
                 <property name="text">
                  <string>Passings</string>
                 </property>
@@ -511,7 +439,7 @@
                <widget class="QTableView" name="passingsView"/>
               </item>
               <item>
-               <widget class="QLabel" name="label_12">
+               <widget class="QLabel" name="crossingsLabel">
                 <property name="text">
                  <string>Crossings</string>
                 </property>
@@ -529,16 +457,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>

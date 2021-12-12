@@ -1,6 +1,5 @@
 #include "app/session.h"
 #include "info.h"
-#include "utils/platform_utils.h"
 
 #include <QCoreApplication>
 
@@ -8,10 +7,7 @@
 #include "app/scopedebug.h"
 
 #include "viewmanager/viewmanager.h"
-#include "graph/graphmanager.h"
 #include "db_metadata/metadatamanager.h"
-
-#include "jobs/jobstorage.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 #include "backgroundmanager/backgroundmanager.h"
@@ -40,12 +36,7 @@ MeetingSession::MeetingSession() :
 
     jobLineWidth(6),
 
-    m_Db(nullptr),
-
-    q_getPrevStop(m_Db),
-    q_getNextStop(m_Db),
-
-    q_getKmDirection(m_Db)
+    m_Db(nullptr)
 {
     session = this; //Global singleton pointer
 
@@ -58,8 +49,6 @@ MeetingSession::MeetingSession() :
 
     loadSettings(settings_file);
 
-    mJobStorage = new JobStorage(m_Db);
-
     viewManager.reset(new ViewManager);
 
     metaDataMgr.reset(new MetaDataManager(m_Db));
@@ -71,8 +60,7 @@ MeetingSession::MeetingSession() :
 
 MeetingSession::~MeetingSession()
 {
-    //JobStorage refers to LineStorage so delete it first
-    delete mJobStorage;
+
 }
 
 MeetingSession *MeetingSession::Get()
@@ -122,36 +110,34 @@ DB_Error MeetingSession::openDB(const QString &str, bool ignoreVersion)
     m_Db.enable_foreign_keys(true);
     m_Db.enable_extended_result_codes(true);
 
-    prepareQueryes();
-
-    //    }catch(const char *msg)
-    //    {
-    //        QMessageBox::warning(nullptr,
-    //                             QObject::tr("Error"),
-    //                             QObject::tr("Error while opening file:\n%1\n'%2'")
-    //                             .arg(str)
-    //                             .arg(msg));
-    //        throw;
-    //        return false;
-    //    }
-    //    catch(std::exception& e)
-    //    {
-    //        QMessageBox::warning(nullptr,
-    //                             QObject::tr("Error"),
-    //                             QObject::tr("Error while opening file:\n%1\n'%2'")
-    //                             .arg(str)
-    //                             .arg(e.what()));
-    //        throw;
-    //        return false;
-    //    }
-    //    catch(...)
-    //    {
-    //        QMessageBox::warning(nullptr,
-    //                             QObject::tr("Error"),
-    //                             QObject::tr("Unknown error while opening file:\n%1").arg(str));
-    //        throw;
-    //        return false;
-    //    }
+//    }catch(const char *msg)
+//    {
+//        QMessageBox::warning(nullptr,
+//                             QObject::tr("Error"),
+//                             QObject::tr("Error while opening file:\n%1\n'%2'")
+//                             .arg(str)
+//                             .arg(msg));
+//        throw;
+//        return false;
+//    }
+//    catch(std::exception& e)
+//    {
+//        QMessageBox::warning(nullptr,
+//                             QObject::tr("Error"),
+//                             QObject::tr("Error while opening file:\n%1\n'%2'")
+//                             .arg(str)
+//                             .arg(e.what()));
+//        throw;
+//        return false;
+//    }
+//    catch(...)
+//    {
+//        QMessageBox::warning(nullptr,
+//                             QObject::tr("Error"),
+//                             QObject::tr("Unknown error while opening file:\n%1").arg(str));
+//        throw;
+//        return false;
+//    }
 
 #ifdef ENABLE_RS_CHECKER
     if(settings.getCheckRSWhenOpeningDB())
@@ -185,9 +171,6 @@ DB_Error MeetingSession::closeDB()
 
     releaseAllSavepoints();
 
-    finalizeStatements();
-
-
     //Calls sqlite3_close(), not forcing closing db like sqlite3_close_v2
     //So in case the database is still used by some background task (returns SQLITE_BUSY)
     //we abort closing and return. It's like nevere having closed, database is 100% working
@@ -198,13 +181,10 @@ DB_Error MeetingSession::closeDB()
 
         if(rc == SQLITE_BUSY)
         {
-            prepareQueryes(); //Try to reprepare queries
             return DB_Error::DbBusyWhenClosing;
         }
         //return false;
     }
-
-    mJobStorage->clear();
 
 #ifdef ENABLE_RS_CHECKER
     backgroundManager->getRsChecker()->clearModel();
@@ -419,7 +399,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "UNIQUE(stop_id,rs_id))");
     CHECK(result);
 
-    //Create also backup tables to save old jobsegments stops and couplings before editing a job and restore them if user cancels the edits.
+    //Create also backup tables to save old stops and couplings before editing a job and restore them if user cancels the edits.
     //NOTE: the structure of the table must be the same, remember to update theese if updating stops or couplings
 
     result = m_Db.execute("CREATE TABLE old_stops ("
@@ -588,15 +568,13 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "END");
     CHECK(result);
 
-    //FIXME: if setting default gate track but then delete track connection -> invalid state
+//FIXME: if setting default gate track but then delete track connection -> invalid state
 
 
 #undef CHECK
 
     metaDataMgr->setInt64(FormatVersion, false, MetaDataKey::FormatVersionKey);
     metaDataMgr->setString(AppVersion, false, MetaDataKey::ApplicationString);
-
-    prepareQueryes();
 
     return DB_Error::NoError;
 }
@@ -644,51 +622,6 @@ bool MeetingSession::clearImportRSTables()
         return false;
 
     return true;
-}
-
-void MeetingSession::prepareQueryes()
-{
-    DEBUG_COLOR_ENTRY(SHELL_YELLOW);
-
-    //FIXME: remove queries from MeetingSession
-//    if(q_getPrevStop.prepare("SELECT MAX(prev.departure),"
-//                              "prev.stationId,"
-//                              "seg.lineId"
-//                              " FROM stops prev"
-//                              " JOIN stops s ON s.jobId=prev.jobId AND prev.departure<s.arrival"
-//                              " JOIN jobsegments seg ON seg.id=s.segmentId"
-//                              " WHERE s.id=?") != SQLITE_OK)
-//    {
-//        throw database_error(m_Db);
-//    }
-
-//    if(q_getNextStop.prepare("SELECT MIN(nextS.arrival),"
-//                              "nextS.stationId,"
-//                              "seg.lineId"
-//                              " FROM stops nextS"
-//                              " JOIN stops s ON s.jobId=nextS.jobId AND nextS.arrival>s.departure"
-//                              " JOIN jobsegments seg ON seg.id=nextS.segmentId"
-//                              " WHERE s.id=?") != SQLITE_OK)
-//    {
-//        throw database_error(m_Db);
-//    }
-
-//    if(q_getKmDirection.prepare("SELECT pos_meters, direction FROM railways WHERE lineId=? AND stationId=?") != SQLITE_OK)
-//    {
-//        throw database_error(m_Db);
-//    }
-
-    viewManager->prepareQueries();
-}
-
-void MeetingSession::finalizeStatements()
-{
-    q_getPrevStop.finish();
-    q_getNextStop.finish();
-
-    q_getKmDirection.finish();
-
-    viewManager->finalizeQueries();
 }
 
 bool MeetingSession::setSavepoint(const QString &pointname)
@@ -775,34 +708,12 @@ bool MeetingSession::releaseAllSavepoints()
 
 bool MeetingSession::revertAll()
 {
-    for(const QString& point : savepointList)
+    for(const QString& point : qAsConst(savepointList))
     {
         if(!revertToSavepoint(point))
             return false;
     }
     return true;
-}
-
-qreal MeetingSession::getStationGraphPos(db_id lineId, db_id stId, int platf)
-{
-    qreal x = horizOffset;
-
-    query q(Session->m_Db, "SELECT s.id,s.platforms,s.depot_platf FROM railways"
-                           " JOIN stations s ON s.id=railways.stationId"
-                           " WHERE railways.lineId=? ORDER BY railways.pos_meters ASC");
-    q.bind(1, lineId);
-
-    for(auto station : q)
-    {
-        if(station.get<db_id>(0) == stId)
-            return x + platf * platformOffset;
-
-        int platfCount = station.get<int>(1);
-        platfCount += station.get<int>(2);
-
-        x += stationOffset + platfCount * platformOffset;
-    }
-    return x;
 }
 
 QColor MeetingSession::colorForCat(JobCategory cat)
@@ -813,122 +724,12 @@ QColor MeetingSession::colorForCat(JobCategory cat)
     return QColor(Qt::gray); //Error
 }
 
-bool MeetingSession::getPrevStop(db_id stopId, db_id& prevSt, db_id& lineId)
-{
-    bool ret = false;
-    q_getPrevStop.bind(1, stopId);
-    int rc = q_getPrevStop.step();
-    if(rc == SQLITE_ROW)
-    {
-        //MAX() always return a row but if type is NULL we ignore it
-        auto r = q_getPrevStop.getRows();
-        if(r.column_type(0) != SQLITE_NULL)
-        {
-            prevSt = r.get<db_id>(1);
-            lineId = r.get<db_id>(2);
-            ret = true;
-        }
-        else
-        {
-            prevSt = 0;
-            lineId = 0;
-        }
-    }
-    else
-    {
-        qWarning() << m_Db.error_code() << m_Db.error_msg();
-    }
-
-    q_getPrevStop.reset();
-    return ret;
-}
-
-bool MeetingSession::getNextStop(db_id stopId, db_id& nextSt, db_id& lineId)
-{
-    bool ret = false;
-    q_getNextStop.bind(1, stopId);
-    int rc = q_getNextStop.step();
-    if(rc == SQLITE_ROW)
-    {
-        //MAX() always return a row but if type is NULL we ignore it
-        auto r = q_getNextStop.getRows();
-        if(r.column_type(0) != SQLITE_NULL)
-        {
-            nextSt = r.get<db_id>(1);
-            lineId = r.get<db_id>(2);
-            ret = true;
-        }
-        else
-        {
-            nextSt = 0;
-            lineId = 0;
-        }
-    }
-    else
-    {
-        qWarning() << m_Db.error_code() << m_Db.error_msg();
-    }
-
-    q_getNextStop.reset();
-    return ret;
-}
-
-Direction MeetingSession::getStopDirection(db_id stopId, db_id stId)
-{
-    db_id otherSt = 0;
-    db_id lineId = 0;
-    bool isNext = false;
-
-    if(!getPrevStop(stopId, otherSt, lineId))
-    {
-        getNextStop(stopId, otherSt, lineId);
-        isNext = true;
-    }
-
-    Direction dir;
-    int kmInMetersA;
-    int kmInMetersB;
-
-    {
-        q_getKmDirection.bind(1, lineId);
-        q_getKmDirection.bind(2, stId);
-        q_getKmDirection.step();
-        auto r = q_getKmDirection.getRows();
-        kmInMetersA = r.get<int>(0);
-        dir = Direction(r.get<int>(1));
-        q_getKmDirection.reset();
-    }
-    {
-        q_getKmDirection.bind(1, lineId);
-        q_getKmDirection.bind(2, otherSt);
-        q_getKmDirection.step();
-        auto r = q_getKmDirection.getRows();
-        kmInMetersB = r.get<int>(0);
-        q_getKmDirection.reset();
-    }
-
-    bool absDir = (kmInMetersA > kmInMetersB);
-
-    bool ret = false;
-
-    if(isNext)
-        ret = !ret;
-
-    if(absDir)
-        ret = !ret;
-
-    if(dir == Direction::Right)
-        ret = !ret;
-
-    return Direction(ret);
-}
-
 void MeetingSession::locateAppdata()
 {
-    appDataPath = QDir::cleanPath(QStringLiteral("%1/%2/%3"))
+    appDataPath = QStringLiteral("%1/%2/%3")
                       .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-                      .arg(AppCompany)
-                      .arg(AppDisplayName);
+                      .arg(AppCompany, AppProductShort);
+    appDataPath = QDir::cleanPath(appDataPath);
     qDebug() << appDataPath;
 }
 

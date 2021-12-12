@@ -4,6 +4,8 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
+#include <QRectF>
+
 #include <QDebug>
 
 //TODO: maybe move to utils?
@@ -24,6 +26,9 @@ static inline double stationPlatformPosition(const StationGraphObject& st, const
             return x;
         x += platfOffset;
     }
+
+    //Error: requested platform belongs to different station
+    qWarning() << "Station:" << st.stationName << st.stationId << "No platf:" << platfId;
     return -1;
 }
 
@@ -78,7 +83,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     if(type == LineGraphType::NoGraph)
     {
         //Nothing to load
-        emit graphChanged(int(graphType), graphObjectId);
+        emit graphChanged(int(graphType), graphObjectId, this);
         emit redrawGraph();
         return true;
     }
@@ -103,14 +108,13 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     {
         StationGraphObject st;
         st.stationId = objectId;
-        if(!loadStation(st))
+        if(!loadStation(st, graphObjectName))
             return false;
 
         //Register a single station at start position
         st.xPos = curPos;
         stations.insert(st.stationId, st);
         stationPositions = {{st.stationId, 0, st.xPos, {}}};
-        graphObjectName = st.stationName;
     }
     else if(type == LineGraphType::RailwaySegment)
     {
@@ -144,7 +148,8 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
         stA.stationId = r.get<db_id>(6);
         stB.stationId = r.get<db_id>(7);
 
-        if(!loadStation(stA) || !loadStation(stB))
+        QString unusedStFullName;
+        if(!loadStation(stA, unusedStFullName) || !loadStation(stB, unusedStFullName))
             return false;
 
         stA.xPos = curPos;
@@ -173,7 +178,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     reloadJobs();
 
-    emit graphChanged(int(graphType), graphObjectId);
+    emit graphChanged(int(graphType), graphObjectId, this);
     emit redrawGraph();
 
     return true;
@@ -230,17 +235,121 @@ bool LineGraphScene::reloadJobs()
         lastSt = toSt;
     }
 
+    JobStopEntry newSelection = selectedJob;
+    updateJobSelection(mDb, newSelection);
+    setSelectedJob(newSelection);
+
     return true;
 }
 
-JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+JobStopEntry LineGraphScene::getJobStopAt(const StationGraphObject *prevSt, const StationGraphObject *nextSt,
+                                          const QPointF &pos, const double tolerance)
 {
     const double platformOffset = Session->platformOffset;
 
     JobStopEntry job;
-    job.stopId = 0;
-    job.jobId = 0;
-    job.category = JobCategory::FREIGHT;
+
+    //Find nearest station
+    const StationGraphObject *nearestSt = nullptr;
+
+    double nextStDistance = 0;
+    if(nextSt)
+    {
+        nextStDistance = qAbs(nextSt->xPos - pos.x());
+        if(nextStDistance <= tolerance)
+        {
+            //Next station is a good candidate
+            nearestSt = nextSt;
+        }
+    }
+
+    if(prevSt)
+    {
+        const double prevStRight = prevSt->xPos + prevSt->platforms.count() * platformOffset;
+        if(pos.x() >= prevSt->xPos && pos.x() <= prevStRight)
+        {
+            //Requested pos is inside this station
+            nearestSt = prevSt;
+        }
+        else if(pos.x() >= prevStRight)
+        {
+            //Requested position is between prevSt and nextSt, find nearest
+            const double prevStDistance = pos.x() - prevStRight;
+            if(prevStDistance <= tolerance
+                && (!nearestSt || prevStDistance < nextStDistance))
+            {
+                nearestSt = prevSt;
+            }
+        }
+    }
+
+    if(!nearestSt)
+        return job; //Both stations exceed tolerance, null selection
+
+
+    const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
+    const StationGraphObject::PlatformGraph *nextPlatf = nullptr;
+    double prevPos = 0;
+    double nextPos = 0;
+
+    double xPos = nearestSt->xPos;
+    for(const StationGraphObject::PlatformGraph& platf : nearestSt->platforms)
+    {
+        if(xPos >= pos.x())
+        {
+            //We went past the requested position
+            nextPlatf = &platf;
+            nextPos = xPos;
+            break;
+        }
+
+        prevPlatf = &platf;
+        prevPos = xPos;
+
+        xPos += platformOffset;
+    }
+
+    //Find nearest platform
+    const StationGraphObject::PlatformGraph *resultPlatf = nullptr;
+
+    const double prevDistance = qAbs(prevPos - pos.x());
+    if(prevPlatf && prevDistance <= tolerance)
+    {
+        //Previous platform is a good candidate
+        resultPlatf = prevPlatf;
+    }
+
+    const double nextDistance = qAbs(nextPos - pos.x());
+    if(nextPlatf && nextDistance <= tolerance)
+    {
+        //Next platform is a good candidate
+        if(!resultPlatf || nextDistance < prevDistance)
+        {
+            //We are the nearest
+            resultPlatf = nextPlatf;
+        }
+    }
+
+    if(!resultPlatf)
+        return job; //No match
+
+    for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
+    {
+        //NOTE: in stops arrival comes BEFORE departure
+        if(jobStop.arrivalY <= pos.y() + tolerance && jobStop.departureY >= pos.y() - tolerance)
+        {
+            //Found match
+            job = jobStop.stop;
+            break;
+        }
+    }
+
+    return job;
+}
+
+JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance)
+{
+    JobStopEntry job;
 
     if(stationPositions.isEmpty())
         return job;
@@ -248,10 +357,15 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
     db_id prevStId = 0;
     db_id nextStId = 0;
 
+    const StationPosEntry *entry = nullptr;
+
     for(const StationPosEntry& stPos : qAsConst(stationPositions))
     {
         if(stPos.xPos <= pos.x())
+        {
             prevStId = stPos.stationId;
+            entry = &stPos;
+        }
 
         if(stPos.xPos >= pos.x())
         {
@@ -264,98 +378,49 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
     auto prevSt = stations.constFind(prevStId);
     auto nextSt = stations.constFind(nextStId);
 
-    if(prevSt == stations.constEnd() && nextSt == stations.constEnd())
+    const StationGraphObject *prevStPtr = prevSt == stations.constEnd() ? nullptr : &prevSt.value();
+    const StationGraphObject *nextStPtr = nextSt == stations.constEnd() ? nullptr : &nextSt.value();
+
+    if(!prevStPtr && !nextStPtr)
         return job; //Error
 
-    const StationGraphObject::PlatformGraph *prevPlatf = nullptr;
-    const StationGraphObject::PlatformGraph *nextPlatf = nullptr;
-    double prevPos = 0;
-    double nextPos = 0;
+    job = getJobStopAt(prevStPtr, nextStPtr, pos, tolerance);
+    if(job.jobId)
+        return job; //Found match
 
-    double xPos = 0;
-    if(prevSt != stations.constEnd())
+    //Check job segments
+    if(!entry)
+        return job; //Error, no match
+
+    double prevSegDistance = -1;
+    for(const JobSegmentGraph& segment : qAsConst(entry->nextSegmentJobGraphs))
     {
-        xPos = prevSt->xPos;
-        for(const StationGraphObject::PlatformGraph& platf : prevSt->platforms)
+        //NOTE: in segments arrival comes AFTER departure
+        const QRectF r = QRectF(segment.fromDeparture, segment.toArrival).normalized();
+        if(r.contains(pos))
         {
-            if(xPos <= pos.x())
+            //Requested position is inside bounds, might be a match
+            const double resultingY = r.top() + (pos.x() - r.left()) * r.height() / r.width();
+            const double segDistance = qAbs(resultingY - pos.y());
+            if(prevSegDistance < 0 || segDistance < prevSegDistance)
             {
-                prevPlatf = &platf;
-                prevPos = xPos;
+                //We are a better match than previous, replace it
+                //Use departure station ('from') because arrival station might be last one
+                //So there might be no segments after arrival
+                job.stopId = segment.fromStopId;
+                job.jobId = segment.jobId;
+                job.category = segment.category;
+
+                //Store new minimum distance
+                prevSegDistance = segDistance;
             }
-            if(xPos >= pos.x())
-            {
-                //We went past the requested position
-                nextPlatf = &platf;
-                nextPos = xPos;
-                break;
-            }
-
-            xPos += platformOffset;
-        }
-    }
-
-    const double prevDistance = qAbs(prevPos - pos.x());
-    if(prevPlatf && prevDistance > tolerance)
-    {
-        //Discard because too distant
-        prevPlatf = nullptr;
-    }
-
-    if(!nextPlatf && nextSt != stations.constEnd())
-    {
-        //Use second station
-        xPos = nextSt->xPos;
-        for(const StationGraphObject::PlatformGraph& platf : nextSt->platforms)
-        {
-            if(xPos >= pos.x())
-            {
-                nextPlatf = &platf;
-                nextPos = xPos;
-                break;
-            }
-
-            xPos += platformOffset;
-        }
-    }
-
-    const double nextDistance = qAbs(nextPos - pos.x());
-    if(nextPlatf && nextDistance > tolerance)
-    {
-        //Discard because too distant
-        nextPlatf = nullptr;
-    }
-
-    const StationGraphObject::PlatformGraph *resultPlatf = nullptr;
-    if(!prevPlatf)
-        resultPlatf = nextPlatf;
-    else if(!nextPlatf)
-        resultPlatf = prevPlatf;
-    else
-    {
-        if(prevDistance < nextDistance)
-            resultPlatf = prevPlatf;
-        else
-            resultPlatf = nextPlatf;
-    }
-
-    if(!resultPlatf)
-        return job; //No match
-
-    for(const StationGraphObject::JobStopGraph& jobStop : resultPlatf->jobStops)
-    {
-        if(jobStop.arrivalY <= pos.y() && jobStop.departureY >= pos.y())
-        {
-            //Found match
-            job = jobStop.stop;
-            break;
         }
     }
 
     return job;
 }
 
-bool LineGraphScene::loadStation(StationGraphObject& st)
+bool LineGraphScene::loadStation(StationGraphObject& st, QString& outFullName)
 {
     sqlite3pp::query q(mDb);
 
@@ -370,11 +435,12 @@ bool LineGraphScene::loadStation(StationGraphObject& st)
     //Load station
     auto row = q.getRows();
 
+    outFullName = row.get<QString>(0);
     st.stationName = row.get<QString>(1);
     if(st.stationName.isEmpty())
     {
         //Empty short name, fallback to full name
-        st.stationName = row.get<QString>(0);
+        st.stationName = outFullName;
     }
     st.stationType = utils::StationType(row.get<int>(2));
 
@@ -428,6 +494,8 @@ bool LineGraphScene::loadFullLine(db_id lineId)
     db_id lastStationId = 0;
     double curPos = Session->horizOffset + Session->stationOffset / 2;
 
+    QString unusedStFullName;
+
     for(auto seg : q)
     {
         db_id lineSegmentId = seg.get<db_id>(0);
@@ -456,7 +524,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
             //First line station
             StationGraphObject st;
             st.stationId = fromStationId;
-            if(!loadStation(st))
+            if(!loadStation(st, unusedStFullName))
                 return false;
 
             st.xPos = curPos;
@@ -473,7 +541,7 @@ bool LineGraphScene::loadFullLine(db_id lineId)
 
         StationGraphObject stB;
         stB.stationId = otherStationId;
-        if(!loadStation(stB))
+        if(!loadStation(stB, unusedStFullName))
             return false;
 
         stB.xPos = curPos;
@@ -497,13 +565,20 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
         platf.jobStops.clear();
     }
 
+    sqlite3pp::query q_prevSegment(mDb, "SELECT c.seg_id, MAX(stops.departure)"
+                                        " FROM stops"
+                                        " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
+                                        " WHERE stops.job_id=? AND stops.departure<?");
+
     sqlite3pp::query q(mDb, "SELECT stops.id, stops.job_id, jobs.category,"
                             "stops.arrival, stops.departure,"
-                            "g_in.track_id, g_out.track_id"
+                            "g_in.track_id, g_out.track_id,"
+                            "c.seg_id"
                             " FROM stops"
                             " JOIN jobs ON stops.job_id=jobs.id"
                             " LEFT JOIN station_gate_connections g_in ON g_in.id=stops.in_gate_conn"
                             " LEFT JOIN station_gate_connections g_out ON g_out.id=stops.out_gate_conn"
+                            " LEFT JOIN railway_connections c ON c.id=stops.next_segment_conn_id"
                             " WHERE stops.station_id=?"
                             " ORDER BY stops.arrival");
     q.bind(1, st.stationId);
@@ -521,6 +596,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
         QTime departure = stop.get<QTime>(4);
         db_id trackId = stop.get<db_id>(5);
         db_id outTrackId = stop.get<db_id>(6);
+        db_id nextSegId = stop.get<db_id>(7);
 
         if(trackId && outTrackId && trackId != outTrackId)
         {
@@ -556,6 +632,48 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
             qWarning() << "Stop:" << jobStop.stop.stopId << "Track is not in this station";
             continue; //Skip this stop
         }
+
+        //Check if we need job label
+        bool isSegmentVisible = false;
+        if(graphType == LineGraphType::SingleStation)
+            isSegmentVisible = true; //Skip checking, always draw label
+
+        if(!isSegmentVisible && nextSegId)
+        {
+            for(const StationPosEntry& stPos : qAsConst(stationPositions))
+            {
+                if(stPos.segmentId == nextSegId)
+                {
+                    isSegmentVisible = true;
+                    break;
+                }
+            }
+        }
+
+        if(!isSegmentVisible)
+        {
+            //Check if previous segment is visible
+            q_prevSegment.bind(1, jobStop.stop.jobId);
+            q_prevSegment.bind(2, arrival);
+            q_prevSegment.step();
+            auto seg = q_prevSegment.getRows();
+            if(seg.column_type(0) != SQLITE_NULL)
+            {
+                db_id prevSegId = seg.get<db_id>(0);
+                for(const StationPosEntry& stPos : qAsConst(stationPositions))
+                {
+                    if(stPos.segmentId == prevSegId)
+                    {
+                        isSegmentVisible = true;
+                        break;
+                    }
+                }
+            }
+            q_prevSegment.reset();
+        }
+
+        //Draw only if neither segment is visible or when graph is SignleStation
+        jobStop.drawLabel = !isSegmentVisible || graphType == LineGraphType::SingleStation;
 
         //Calculate coordinates
         jobStop.arrivalY = vertOffset + timeToHourFraction(arrival) * hourOffset;
@@ -610,19 +728,15 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
         job.fromPlatfId = stop.get<db_id>(10);
         job.toPlatfId = stop.get<db_id>(11);
 
-        if(toSt.stationId == stId)
-        {
-            //Job goes in opposite direction, reverse stops
-            qSwap(job.fromStopId, job.toStopId);
-            qSwap(job.fromPlatfId, job.toPlatfId);
-            qSwap(departure, arrival);
-        }
+        //NOTE: fromPlatfId and toPlatfId do not need to be reversed because represent correct platforms
+        //Only stations might be reversed
+        bool reverse = toSt.stationId == stId; //If job goes in opposite direction
 
         //Calculate coordinates
-        job.fromDeparture.rx() = stationPlatformPosition(fromSt, job.fromPlatfId, platfOffset);
+        job.fromDeparture.rx() = stationPlatformPosition(reverse ? toSt : fromSt, job.fromPlatfId, platfOffset);
         job.fromDeparture.ry() = vertOffset + timeToHourFraction(departure) * hourOffset;
 
-        job.toArrival.rx() = stationPlatformPosition(toSt, job.toPlatfId, platfOffset);
+        job.toArrival.rx() = stationPlatformPosition(reverse ? fromSt : toSt, job.toPlatfId, platfOffset);
         job.toArrival.ry() = vertOffset + timeToHourFraction(arrival) * hourOffset;
 
         if(job.fromDeparture.x() < 0 || job.toArrival.x() < 0)
@@ -634,18 +748,117 @@ bool LineGraphScene::loadSegmentJobs(LineGraphScene::StationPosEntry& stPos, con
     return true;
 }
 
+void LineGraphScene::updateJobSelection(sqlite3pp::database &db, JobStopEntry &job)
+{
+    if(!job.jobId)
+        return;
+
+    query q(db);
+
+    if(job.stopId)
+    {
+        //Check if stop is valid
+        q.prepare("SELECT job_id FROM stops WHERE id=?");
+        q.bind(1, job.stopId);
+        if(q.step() == SQLITE_ROW)
+        {
+            db_id jobId = q.getRows().get<db_id>(0);
+            if(jobId != job.jobId)
+                job.stopId = 0; //Stop doesn't belong to this job
+        }
+        else
+        {
+            //This stop doesn't exist anymore
+            job.stopId = 0;
+        }
+    }
+
+    q.prepare("SELECT category FROM jobs WHERE id=?");
+    q.bind(1, job.jobId);
+    if(q.step() != SQLITE_ROW)
+    {
+        //Job doesn't exist anymore, clear selection
+        job = JobStopEntry{};
+        return;
+    }
+
+    JobCategory newCategory = JobCategory(q.getRows().get<int>(0));
+
+    if(newCategory != job.category)
+    {
+        job.category = newCategory;
+    }
+}
+
 JobStopEntry LineGraphScene::getSelectedJob() const
 {
     return selectedJob;
 }
 
-void LineGraphScene::setSelectedJobId(JobStopEntry stop)
+void LineGraphScene::setSelectedJob(JobStopEntry stop, bool sendChange)
 {
     //TODO: draw box around selected job or highlight in graph view
-    const db_id oldJobId = selectedJob.jobId;
+    const JobStopEntry oldJob = selectedJob;
 
     selectedJob = stop;
+    if(!selectedJob.jobId)
+    {
+        //Clear other members too
+        selectedJob.stopId = 0;
+        selectedJob.category = JobCategory::NCategories;
+    }
 
-    if(selectedJob.jobId != oldJobId)
-        emit jobSelected(selectedJob.jobId);
+    if(sendChange && (selectedJob.jobId != oldJob.jobId || selectedJob.category != oldJob.category))
+    {
+        emit redrawGraph();
+        emit jobSelected(selectedJob.jobId, int(selectedJob.category), selectedJob.stopId);
+    }
+}
+
+bool LineGraphScene::requestShowZone(db_id stationId, db_id segmentId, QTime from, QTime to)
+{
+    //TODO: when we will load incrementally, ensure relevant items are loaded
+
+    const double vertOffset = Session->vertOffset;
+    const double hourOffset = Session->hourOffset;
+    const double platfOffset = Session->platformOffset;
+
+    QRectF result;
+    result.setTop(vertOffset + timeToHourFraction(from) * hourOffset);
+    result.setBottom(vertOffset + timeToHourFraction(to) * hourOffset);
+
+    //NOTE: Initially left() is 0 which will always be less than any station position
+    //So the first station must set it's position regardless of left() value
+    bool leftEdgeSet = false;
+
+    for(const StationPosEntry& entry : qAsConst(stationPositions))
+    {
+        //Match the requested station or both station in the segment
+        if(entry.stationId == stationId || entry.segmentId == segmentId)
+        {
+            auto st = stations.constFind(entry.stationId);
+            if(st == stations.constEnd())
+                continue;
+
+            if(result.left() > entry.xPos || !leftEdgeSet)
+            {
+                result.setLeft(entry.xPos);
+                leftEdgeSet = true;
+            }
+
+            const int platfCount = st->platforms.count();
+            const double rightPos = entry.xPos + platfCount * platfOffset;
+
+            if(result.right() < rightPos)
+                result.setRight(rightPos);
+        }
+    }
+
+    //Set a margin around the selection so it douesn't end up at view edges
+    const double margin = hourOffset / 4;
+    result.adjust(-margin, -margin, margin, margin);
+
+    emit requestShowRect(result);
+
+    return true;
 }

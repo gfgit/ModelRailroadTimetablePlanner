@@ -18,6 +18,7 @@ set(DB_FORMAT_VERSION 8)
 set(APP_PRODUCT_NAME "ModelRailroadTimetablePlanner")
 set(APP_DISPLAY_NAME "Model Railroad Timetable Planner")
 set(APP_COMPANY_NAME "Train Software")
+set(APP_COMPANY_NAME_LOWER "trainsoftware")
 
 set(PROJECT_HOMEPAGE_URL "https://github.com/gfgit/ModelRailroadTimetablePlanner")
 set(APP_HELP_URL ${PROJECT_HOMEPAGE_URL})
@@ -31,21 +32,6 @@ set(APP_ICON ${CMAKE_SOURCE_DIR}/files/icons/icon.ico)
 set(MR_TIMETABLE_PLANNER_TARGET "mrtplanner")
 
 ## defines end ##
-
-# NSIS Installer
-if(WIN32)
-    configure_file(packaging/windows/NSIS/constants.nsh.in ${CMAKE_BINARY_DIR}/NSIS/constants.nsh @ONLY)
-    configure_file(packaging/windows/NSIS/installer.nsi ${CMAKE_BINARY_DIR}/NSIS/installer.nsi COPYONLY)
-endif()
-
-add_custom_target(NSIS
-    DEPENDS ${MR_TIMETABLE_PLANNER_TARGET}
-    #COMMAND TODO add NSIS compiler
-    SOURCES
-    packaging/windows/NSIS/constants.nsh.in
-    packaging/windows/NSIS/installer.nsi
-    packaging/windows/resources.rc.in
-    VERBATIM)
 
 ## CUSTOM CONFIGURATION ##
 
@@ -158,3 +144,4 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_subdirectory(src)
 add_subdirectory(packaging)
 
+include(Packing)

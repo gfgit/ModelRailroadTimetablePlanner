@@ -18,7 +18,7 @@ RollingstockMatchModel::RollingstockMatchModel(database &db, QObject *parent) :
                          " JOIN rs_models ON rs_models.id=rs_list.model_id"
                          " JOIN rs_owners ON rs_owners.id=rs_list.owner_id"
                          " ORDER BY s DESC LIMIT " QT_STRINGIFY(MaxMatchItems + 1));
-    //FIXME: //FIXME: non funziona bene, i risultati sembrano casuali
+    //FIXME: non funziona bene, i risultati sembrano casuali
 }
 
 int RollingstockMatchModel::columnCount(const QModelIndex &parent) const

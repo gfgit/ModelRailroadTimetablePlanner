@@ -5,23 +5,22 @@
 #include "common/odtutils.h"
 
 #include "app/session.h"
+
+#include <sqlite3pp/sqlite3pp.h>
+using namespace sqlite3pp;
+
 #include "db_metadata/metadatamanager.h"
 #include "db_metadata/imagemetadata.h"
-
-#include <QDebug>
 
 #include <QImage>
 
 #include <QImageReader>
 
-ShiftSheetExport::ShiftSheetExport(db_id shiftId) :
-    m_shiftd(shiftId),
+#include <QDebug>
 
-    q_getShiftJobs(Session->m_Db,
-                   "SELECT jobs.id,jobs.category,s1.arrival"
-                   " FROM jobs"
-                   " JOIN stops s1 ON s1.id=jobs.firstStop"
-                   " WHERE jobs.shiftId=? ORDER BY s1.arrival ASC"),
+ShiftSheetExport::ShiftSheetExport(sqlite3pp::database &db, db_id shiftId) :
+    mDb(db),
+    m_shiftId(shiftId),
     logoWidthCm(0),
     logoHeightCm(0)
 {
@@ -94,20 +93,26 @@ void ShiftSheetExport::write()
     odt.startBody();
 
     QString shiftName;
-    {
-        query q_getShiftName(Session->m_Db, "SELECT name FROM jobshifts WHERE id=?");
-        q_getShiftName.bind(1, m_shiftd);
-        if(q_getShiftName.step() == SQLITE_ROW)
-            shiftName = q_getShiftName.getRows().get<QString>(0);
-    }
+
+    query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
+    q.bind(1, m_shiftId);
+    if(q.step() != SQLITE_ROW)
+        qWarning() << "ShiftSheetExport: shift does not exist, id" << m_shiftId;
+
+    shiftName = q.getRows().get<QString>(0);
+
     odt.setTitle(Odt::tr("Shift %1").arg(shiftName));
 
     writeCover(odt.contentXml, shiftName, hasLogo);
 
-    JobWriter w(Session->m_Db);
+    JobWriter w(mDb);
 
-    q_getShiftJobs.bind(1, m_shiftd);
-    for(auto r : q_getShiftJobs)
+    q.prepare("SELECT jobs.id,jobs.category,s1.arrival"
+              " FROM jobs"
+              " JOIN stops s1 ON s1.id=jobs.firstStop"
+              " WHERE jobs.shiftId=? ORDER BY s1.arrival ASC");
+    q.bind(1, m_shiftId);
+    for(auto r : q)
     {
         db_id jobId = r.get<db_id>(0);
         JobCategory cat = JobCategory(r.get<int>(1));

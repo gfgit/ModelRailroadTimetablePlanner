@@ -3,10 +3,13 @@
 #include "app/session.h"
 
 #include  "graph/model/linegraphscene.h"
+#include "utils/jobcategorystrings.h"
 
 #include <QPainter>
 
 #include <QtMath>
+
+#include <QDebug>
 
 /*!
  * \brief Set font point size
@@ -225,15 +228,35 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
     }
 }
 
-void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
 {
     const double platfOffset = Session->platformOffset;
+
+    QFont jobNameFont;
+    setFontPointSizeDPI(jobNameFont, 20, painter);
+    painter->setFont(jobNameFont);
 
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
 
+    QPen selectedJobPen;
+
+    const JobStopEntry selectedJob = scene->getSelectedJob();
+    if(drawSelection && selectedJob.jobId)
+    {
+        selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
+        selectedJobPen.setCapStyle(Qt::RoundCap);
+
+        QColor color = Session->colorForCat(selectedJob.category);
+        color.setAlpha(SelectedJobAlphaFactor);
+        selectedJobPen.setColor(color);
+    }
+
     QPointF top;
     QPointF bottom;
+
+    JobCategory lastJobCategory = JobCategory::NCategories;
+    QTextOption textOption(Qt::AlignTop | Qt::AlignLeft);
 
     for(const StationGraphObject &st : qAsConst(scene->stations))
     {
@@ -253,13 +276,44 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
                     continue; //Skip, job not visible
 
-                jobPen.setColor(Session->colorForCat(jobStop.stop.category));
-                painter->setPen(jobPen);
-
                 top.setY(jobStop.arrivalY);
                 bottom.setY(jobStop.departureY);
 
-                painter->drawLine(top, bottom);
+                const bool nullStopDuration = qFuzzyCompare(top.y(), bottom.y());
+
+                if(drawSelection && selectedJob.jobId == jobStop.stop.jobId)
+                {
+                    //Draw selection around segment
+                    painter->setPen(selectedJobPen);
+
+                    if(nullStopDuration)
+                        painter->drawPoint(top);
+                    else
+                        painter->drawLine(top, bottom);
+
+                    //Reset pen
+                    painter->setPen(jobPen);
+                }
+
+                if(lastJobCategory != jobStop.stop.category)
+                {
+                    QColor color = Session->colorForCat(jobStop.stop.category);
+                    jobPen.setColor(color);
+                    painter->setPen(jobPen);
+                    lastJobCategory = jobStop.stop.category;
+                }
+
+                if(nullStopDuration)
+                    painter->drawPoint(top);
+                else
+                    painter->drawLine(top, bottom);
+
+                if(jobStop.drawLabel)
+                {
+                    const QString jobName = JobCategoryName::jobName(jobStop.stop.jobId, jobStop.stop.category);
+                    QRectF r(top.x() + platfOffset / 2, top.y(), platfOffset * 4, 25);
+                    painter->drawText(r, jobName, textOption);
+                }
             }
 
             top.rx() += platfOffset;
@@ -268,12 +322,35 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     }
 }
 
-void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
 {
     const double stationOffset = Session->stationOffset;
 
+    QFont jobNameFont;
+    setFontPointSizeDPI(jobNameFont, 20, painter);
+    painter->setFont(jobNameFont);
+
+    QColor textBackground(Qt::white);
+    textBackground.setAlpha(100);
+
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
+
+    QPen selectedJobPen;
+
+    const JobStopEntry selectedJob = scene->getSelectedJob();
+    if(drawSelection && selectedJob.jobId)
+    {
+        selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
+        selectedJobPen.setCapStyle(Qt::RoundCap);
+
+        QColor color = Session->colorForCat(selectedJob.category);
+        color.setAlpha(SelectedJobAlphaFactor);
+        selectedJobPen.setColor(color);
+    }
+
+    JobCategory lastJobCategory = JobCategory::NCategories;
+    QTextOption textOption(Qt::AlignCenter);
 
     //Iterate until one but last
     //This way we can always acces next station
@@ -303,10 +380,60 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
             if(job.fromDeparture.y() > rect.bottom() || job.toArrival.y() < rect.top())
                 continue; //Skip, job not visible
 
-            jobPen.setColor(Session->colorForCat(job.category));
-            painter->setPen(jobPen);
+            const QLineF line(job.fromDeparture, job.toArrival);
 
-            painter->drawLine(job.fromDeparture, job.toArrival);
+            if(drawSelection && selectedJob.jobId == job.jobId)
+            {
+                //Draw selection around segment
+                painter->setPen(selectedJobPen);
+                painter->drawLine(line);
+
+                //Reset pen
+                painter->setPen(jobPen);
+            }
+
+            if(lastJobCategory != job.category)
+            {
+                QColor color = Session->colorForCat(job.category);
+                jobPen.setColor(color);
+                painter->setPen(jobPen);
+                lastJobCategory = job.category;
+            }
+
+            painter->drawLine(line);
+
+            const QString jobName = JobCategoryName::jobName(job.jobId, job.category);
+
+            //Save old transformation to reset it after drawing text
+            const QTransform oldTransf = painter->transform();
+
+            //Move to line center, it will be rotation pivot
+            painter->translate(line.center());
+
+            //Rotate by line angle
+            qreal angle = line.angle();
+            if(job.fromDeparture.x() > job.toArrival.x())
+                angle += 180.0; //Prevent flipping text
+
+            painter->rotate(-angle); //minus because QPainter wants clockwise angle
+
+            const double lineLength = line.length();
+            QRectF textRect(-lineLength / 2, -30, lineLength, 25);
+
+            //Try to avoid overlapping text of crossing jobs, move text towards arrival
+            if(job.toArrival.x() > job.fromDeparture.x())
+                textRect.moveLeft(textRect.left() + lineLength / 5);
+            else
+                textRect.moveLeft(textRect.left() - lineLength / 5);
+
+            textRect = painter->boundingRect(textRect, jobName, textOption);
+
+            //Draw a semi transparent background to ease text reading
+            painter->fillRect(textRect, textBackground);
+            painter->drawText(textRect, jobName, QTextOption(Qt::AlignCenter));
+
+            //Reset to old transformation
+            painter->setTransform(oldTransf);
         }
     }
 }

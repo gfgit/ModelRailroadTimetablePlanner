@@ -180,7 +180,7 @@ bool OdtDocument::saveTo(const QString& fileName)
     //Add possible images
     QString imgBasePath = dir.filePath("Pictures") + QLatin1String("/%1");
     QString imgNewBasePath = QLatin1String("Pictures/%1");
-    for(const auto& img : imageList)
+    for(const auto& img : qAsConst(imageList))
     {
         source = zip_source_file(zipper, imgBasePath.arg(img.first).toUtf8(), 0, 0);
         if (source == nullptr)
@@ -195,7 +195,11 @@ bool OdtDocument::saveTo(const QString& fileName)
         }
     }
 
-    zip_close(zipper);
+    if(zip_close(zipper) != 0)
+    {
+        qDebug() << "Failed to close zip:" << zip_strerror(zipper);
+    }
+
     return true;
 }
 
@@ -249,7 +253,7 @@ void OdtDocument::saveManifest(const QString& path)
     if(!manifestDir.exists())
         manifestDir.mkpath(".");
 
-    QFile manifest(dir.filePath(manifestFileName));
+    QFile manifest(manifestDir.filePath(manifestFileName));
     manifest.open(QFile::WriteOnly | QFile::Truncate);
     QXmlStreamWriter xml(&manifest);
     writeStartDoc(xml);
@@ -271,7 +275,7 @@ void OdtDocument::saveManifest(const QString& path)
     writeFileEntry(xml, metaFileName, xmlMime);
 
     //Add possible images
-    for(const auto& img : imageList)
+    for(const auto& img : qAsConst(imageList))
     {
         writeFileEntry(xml, "Pictures/" + img.first, img.second);
     }
@@ -360,7 +364,7 @@ void OdtDocument::saveMeta(const QString& path)
 
     //Language
     xml.writeStartElement("dc:language");
-    xml.writeCharacters(AppSettings.getLanguage().name());
+    xml.writeCharacters(AppSettings.getLanguage().bcp47Name());
     xml.writeEndElement(); //dc:language
 
     //Generator

@@ -2,9 +2,7 @@
 
 #include <QFont>
 
-#include "utils/model_roles.h"
 #include "utils/jobcategorystrings.h"
-#include "utils/platform_utils.h"
 
 JobPassingsModel::JobPassingsModel(QObject *parent) :
     QAbstractTableModel(parent)
@@ -68,7 +66,7 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
         case DepartureCol:
             return e.departure;
         case PlatformCol:
-            return utils::platformName(e.platform);
+            return e.platform;
         }
         break;
     }
@@ -83,10 +81,6 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
         if(idx.column() == JobNameCol)
             f.setBold(true);
         return f;
-    }
-    case JOB_ID_ROLE:
-    {
-        return e.jobId;
     }
     }
     return QVariant();

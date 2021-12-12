@@ -7,6 +7,7 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
+#include "utils/owningqpointer.h"
 #include <QMenu>
 
 #include "viewmanager/viewmanager.h"
@@ -67,12 +68,12 @@ void ShiftViewer::showContextMenu(const QPoint& pos)
 
     db_id jobId = model->getJobAt(idx.row());
 
-    QMenu menu(this);
+    OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), &menu);
-    menu.addAction(showInJobEditor);
+    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
+    menu->addAction(showInJobEditor);
 
-    QAction *act = menu.exec(view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(view->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
         //TODO: requestJobEditor() doesn't select item in graph

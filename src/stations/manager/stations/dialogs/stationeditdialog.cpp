@@ -240,12 +240,16 @@ void StationEditDialog::setStationInternalEditingEnabled(bool enable)
     ui->shortNameEdit->setEnabled(enable);
     ui->stationTypeCombo->setEnabled(enable);
 
-    //TODO: also SVG
+    //SVG Image
+    updateSVGButtons(false, false);
 }
 
 void StationEditDialog::setStationExternalEditingEnabled(bool enable)
 {
-    //TODO: Gate connections
+    //Gate connections
+    ui->addGateConnBut->setEnabled(enable);
+    ui->editGateConnBut->setEnabled(enable);
+    ui->removeGateConnBut->setEnabled(enable);
 
     //Phone number
     ui->phoneEdit->setEnabled(enable);
@@ -519,11 +523,11 @@ void StationEditDialog::addTrackConnInternal(int mode)
     while (true);
 }
 
-void StationEditDialog::updateSVGButtons(bool hasImage)
+void StationEditDialog::updateSVGButtons(bool hasImage, bool canEdit)
 {
-    ui->addSVGBut->setEnabled(!hasImage);
-    ui->remSVGBut->setEnabled(hasImage);
-    ui->saveSVGBut->setEnabled(hasImage);
+    ui->addSVGBut->setEnabled(!hasImage && canEdit);
+    ui->remSVGBut->setEnabled(hasImage && canEdit);
+    ui->saveSVGBut->setEnabled(hasImage && canEdit);
 }
 
 void StationEditDialog::removeSelectedTrackConn()

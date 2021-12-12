@@ -6,6 +6,8 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QGridLayout>
+
+#include "utils/owningqpointer.h"
 #include <QMessageBox>
 #include <QMenu>
 
@@ -158,15 +160,15 @@ void StationFreeRSViewer::showContextMenu(const QPoint& pos)
 
     const StationFreeRSModel::Item *item = model->getItemAt(idx.row());
 
-    QMenu menu(this);
-    QAction *showRSPlan = menu.addAction(tr("Show RS Plan"));
-    QAction *showFromJobInEditor = menu.addAction(tr("Show Job A in JobEditor"));
-    QAction *showToJobInEditor = menu.addAction(tr("Show Job B in JobEditor"));
+    OwningQPointer<QMenu> menu = new QMenu(this);
+    QAction *showRSPlan = menu->addAction(tr("Show RS Plan"));
+    QAction *showFromJobInEditor = menu->addAction(tr("Show Job A in JobEditor"));
+    QAction *showToJobInEditor = menu->addAction(tr("Show Job B in JobEditor"));
 
     showFromJobInEditor->setEnabled(item->fromJob);
     showToJobInEditor->setEnabled(item->toJob);
 
-    QAction *act = menu.exec(view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(view->viewport()->mapToGlobal(pos));
     if(act == showRSPlan)
     {
         Session->getViewManager()->requestRSInfo(item->rsId);

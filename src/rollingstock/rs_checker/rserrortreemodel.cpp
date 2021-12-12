@@ -146,7 +146,7 @@ QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case JobName:
-            return JobCategoryName::jobName(item->jobId, item->jobCategory);
+            return JobCategoryName::jobName(item->job.jobId, item->job.category);
         case StationName:
             return item->stationName;
         case Arrival:

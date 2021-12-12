@@ -22,7 +22,6 @@ class ShiftGraphEditor;
 
 class JobsManager;
 class JobPathEditor;
-class GraphManager; //FIXME: remove
 
 class LineGraphManager;
 
@@ -35,13 +34,8 @@ class ViewManager : public QObject
 public:
     explicit ViewManager(QObject *parent = nullptr);
 
-    void prepareQueries();
-    void finalizeQueries();
-
     bool closeEditors();
     void clearAllLineGraphs();
-
-    GraphManager *getGraphMgr() const;
 
     inline LineGraphManager *getLineGraphMgr() const { return lineGraphManager; }
 
@@ -51,9 +45,17 @@ public:
     bool requestClearJob(bool evenIfEditing = false);
     bool removeSelectedJob();
 
-    bool requestJobShowPrevNextSegment(bool prev, bool select = true, bool ensureVisible = true);
-
-    void updateRSPlans(QSet<db_id> set);
+    /*!
+     * \brief requestJobShowPrevNextSegment
+     * \param prev if true go to previous otherwise go to next
+     * \param absolute if true go to first or last segment instead of prev/next
+     * \return true on success
+     *
+     * Ensures prev/next segment of the job is visible.
+     * If there is not segment before/after current in this graph then returns false.
+     * Otherwise it will load a new graph and ensure prev/next segment is visible.
+     */
+    bool requestJobShowPrevNextSegment(bool prev, bool absolute);
 
     void requestRSInfo(db_id rsId);
     void requestStJobViewer(db_id stId);
@@ -74,12 +76,12 @@ public:
 private slots:
 
     void onRSRemoved(db_id rsId);
-    void onRSPlanChanged(db_id rsId);
+    void onRSPlanChanged(QSet<db_id> set);
     void onRSInfoChanged(db_id rsId);
 
     void onStRemoved(db_id stId);
     void onStNameChanged(db_id stId);
-    void onStPlanChanged(db_id stId);
+    void onStPlanChanged(const QSet<db_id> &stationIds);
 
     void onShiftRemoved(db_id shiftId);
     void onShiftEdited(db_id shiftId);
@@ -93,7 +95,6 @@ private:
     ShiftViewer *createShiftViewer(db_id id);
 
 private:
-    GraphManager *mGraphMgr;
     LineGraphManager *lineGraphManager;
 
     QWidget *m_mainWidget;

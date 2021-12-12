@@ -27,9 +27,13 @@ public:
 
     static void drawStations(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
 
-    static void drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
+    static void drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF& rect, bool drawSelection);
 
-    static void drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect);
+    static void drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection);
+
+public:
+    static constexpr double SelectedJobWidthFactor = 3.0;
+    static constexpr int SelectedJobAlphaFactor = 127;
 };
 
 #endif // BACKGROUNDHELPER_H

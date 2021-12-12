@@ -14,6 +14,8 @@ RsCheckerManager::RsCheckerManager(QObject *parent) :
     m_mainWorker(nullptr)
 {
     errorsModel = new RsErrorTreeModel(this);
+
+    connect(Session, &MeetingSession::rollingStockPlanChanged, this, &RsCheckerManager::onRSPlanChanged);
 }
 
 RsCheckerManager::~RsCheckerManager()
@@ -25,7 +27,7 @@ RsCheckerManager::~RsCheckerManager()
         m_mainWorker = nullptr;
     }
 
-    for(RsErrWorker *task : m_workers)
+    for(RsErrWorker *task : qAsConst(m_workers))
     {
         task->stop();
         task->cleanup();
@@ -99,7 +101,7 @@ bool RsCheckerManager::startWorker()
 
     QThreadPool::globalInstance()->start(m_mainWorker);
 
-    for(RsErrWorker *task : m_workers)
+    for(RsErrWorker *task : qAsConst(m_workers))
     {
         if(!QThreadPool::globalInstance()->tryTake(task))
             task->stop();
@@ -115,19 +117,19 @@ void RsCheckerManager::abortTasks()
         m_mainWorker->stop();
     }
 
-    for(RsErrWorker *task : m_workers)
+    for(RsErrWorker *task : qAsConst(m_workers))
     {
         task->stop();
     }
 }
 
-void RsCheckerManager::checkRs(QSet<db_id> set)
+void RsCheckerManager::checkRs(const QSet<db_id> &rsIds)
 {
-    if(set.isEmpty() || !Session->m_Db.db())
+    if(rsIds.isEmpty() || !Session->m_Db.db())
         return;
 
-    QVector<db_id> vec(set.size());
-    for(db_id rsId : set)
+    QVector<db_id> vec(rsIds.size());
+    for(db_id rsId : rsIds)
         vec.append(rsId);
 
     RsErrWorker *task = new RsErrWorker(Session->m_Db, this, vec);
@@ -144,6 +146,14 @@ RsErrorTreeModel *RsCheckerManager::getErrorsModel() const
 void RsCheckerManager::clearModel()
 {
     errorsModel->clear();
+}
+
+void RsCheckerManager::onRSPlanChanged(const QSet<db_id> &rsIds)
+{
+    if(!AppSettings.getCheckRSOnJobEdit())
+        return;
+
+    checkRs(rsIds);
 }
 
 #endif // ENABLE_RS_CHECKER

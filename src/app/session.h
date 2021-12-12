@@ -2,7 +2,6 @@
 #define MEETINGSESSION_H
 
 #include "utils/types.h"
-#include "utils/directiontype.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
@@ -15,7 +14,6 @@ using namespace sqlite3pp;
 
 #include <settings/appsettings.h>
 
-class JobStorage;
 
 class ViewManager;
 class MetaDataManager;
@@ -67,35 +65,31 @@ signals:
 
     //Rollingstock SYNC: wire them from models
     void rollingstockRemoved(db_id rsId);
-    void rollingStockPlanChanged(db_id rsId);
+    void rollingStockPlanChanged(QSet<db_id> rsIds);
     void rollingStockModified(db_id rsId);
 
     //Jobs
+    void jobAdded(db_id jobId);
     void jobChanged(db_id jobId, db_id oldJobId); //Updated id/category/stops
+    void jobRemoved(db_id jobId);
 
     //Stations
     void stationNameChanged(db_id stationId);
     //TODO: separate job stop changes (time plan) from track changes (track plan)
-    void stationPlanChanged(db_id stationId);
+    void stationPlanChanged(const QSet<db_id>& stationIds);
     void stationRemoved(db_id stationId);
 
     //Segments
+    void segmentAdded(db_id segmentId);
     void segmentNameChanged(db_id segmentId);
     void segmentStationsChanged(db_id segmentId);
     void segmentRemoved(db_id segmentId);
 
     //Lines
+    void lineAdded(db_id lineId);
     void lineNameChanged(db_id lineId);
     void lineSegmentsChanged(db_id lineId);
     void lineRemoved(db_id lineId);
-
-//TODO: old methods, remove them
-public:
-    qreal getStationGraphPos(db_id lineId, db_id stId, int platf = 0);
-
-    bool getPrevStop(db_id stopId, db_id &prevSt, db_id &lineId);
-    bool getNextStop(db_id stopId, db_id &nextSt, db_id &lineId);
-    Direction getStopDirection(db_id stopId, db_id stId);
 
 private:
     std::unique_ptr<ViewManager> viewManager;
@@ -105,9 +99,6 @@ private:
 #ifdef ENABLE_BACKGROUND_MANAGER
     std::unique_ptr<BackgroundManager> backgroundManager;
 #endif
-
-public:
-    JobStorage *mJobStorage;
 
 //Settings TODO: remove
 public:
@@ -124,14 +115,9 @@ public:
 
     int jobLineWidth;
 
-//Queries TODO: remove
+//Database
 public:
     database m_Db;
-
-    query q_getPrevStop;
-    query q_getNextStop;
-
-    query q_getKmDirection;
 
 //Categories:
 public:
@@ -157,9 +143,6 @@ public:
 
     bool checkImportRSTablesEmpty();
     bool clearImportRSTables();
-
-    void prepareQueryes();
-    void finalizeStatements();
 
     QString fileName; //TODO: re organize variables
 

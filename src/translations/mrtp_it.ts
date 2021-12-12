@@ -567,12 +567,12 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
     <message>
         <location filename="../utils/file_format_names.h" line="14"/>
         <source>OpenDocument Sheet (*.ods)</source>
-        <translation type="unfinished"></translation>
+        <translation>Foglio di calcolo OpenDocument (*.ods)</translation>
     </message>
     <message>
         <location filename="../utils/file_format_names.h" line="15"/>
         <source>OpenDocument Text (*.odt)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../utils/file_format_names.h" line="16"/>
@@ -4013,22 +4013,22 @@ Estensione: (*.ods)</translation>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="116"/>
         <source>SVG Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Imagine SVG</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="122"/>
         <source>Add Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Aggiungi immagine</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="129"/>
         <source>Remove Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Rimuovi immagine</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="136"/>
         <source>Save to file</source>
-        <translation type="unfinished"></translation>
+        <translation>Salva su file</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="143"/>
@@ -4038,7 +4038,7 @@ Estensione: (*.ods)</translation>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="167"/>
         <source>Gates</source>
-        <translation type="unfinished"></translation>
+        <translation>Gate</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="175"/>
@@ -4131,7 +4131,7 @@ Lasciare vuoto se si vuole usare il nome completo in tutti i posti.</translation
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="287"/>
         <source>Cannot cancel changes. Changes will be applied.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="295"/>

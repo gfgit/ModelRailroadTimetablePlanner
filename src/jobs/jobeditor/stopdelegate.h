@@ -3,7 +3,6 @@
 
 #include <QStyledItemDelegate>
 
-#include "utils/model_roles.h"
 #include "utils/types.h"
 
 #include <QSvgRenderer>
@@ -14,22 +13,20 @@ class database;
 
 class StopEditor;
 
+/*!
+ * \brief The StopDelegate class
+ *
+ * Item delegate to draw job stops in JobPathEditor
+ *
+ * \sa JobPathEditor
+ * \sa StopEditor
+ * \sa StopModel
+ */
 class StopDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
-
-    static inline StopType getStopType(const QModelIndex& idx)
-    {
-        return static_cast<StopType>(idx.data(STOP_TYPE_ROLE).toInt());
-    }
-
-    static inline void setStopType(QAbstractItemModel *m, const QModelIndex& idx, StopType type)
-    {
-        m->setData(idx, int(type), STOP_TYPE_ROLE);
-    }
-
     StopDelegate(sqlite3pp::database &db, QObject *parent = nullptr);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -47,10 +44,26 @@ public:
     void loadIcon(const QString& fileName);
 
 signals:
-    void popupEditorLinesCombo();
+    /*!
+     * \brief popupEditorSegmentCombo
+     *
+     * Tell editor to popup segment combo
+     * \sa StopEditor::popupSegmentCombo()
+     */
+    void popupEditorSegmentCombo();
 
 private slots:
-    void onLineChosen(StopEditor *editor);
+    /*!
+     * \brief onEditorSegmentChosen
+     * \param editor the instance which needs to be closed
+     *
+     * User has chosen a valid next segment for current stop
+     * If editor should be closed, close it and edit next stop if available
+     *
+     * \sa StopEditor::closeOnSegmentChosen()
+     * \sa StopEditor::nextSegmentChosen()
+     */
+    void onEditorSegmentChosen(StopEditor *editor);
 
 private:
     QSvgRenderer *renderer;

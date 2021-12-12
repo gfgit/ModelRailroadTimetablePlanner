@@ -1,6 +1,6 @@
 #include "shiftmanager.h"
 
-#include "shiftsqlmodel.h"
+#include "shiftsmodel.h"
 #include "utils/sqldelegate/modelpageswitcher.h"
 
 #include "app/session.h"
@@ -43,7 +43,7 @@ ShiftManager::ShiftManager(QWidget *parent) :
     f.setPointSize(12);
     view->setFont(f);
 
-    model = new ShiftSQLModel(Session->m_Db, this);
+    model = new ShiftsModel(Session->m_Db, this);
     model->refreshData();
     ps->setModel(model);
     view->setModel(model);
@@ -105,7 +105,7 @@ void ShiftManager::onNewShift()
         return;
     }
 
-    QModelIndex index = model->index(row, ShiftSQLModel::ShiftName);
+    QModelIndex index = model->index(row, ShiftsModel::ShiftName);
     view->setCurrentIndex(index);
     view->scrollTo(index);
     view->edit(index); //FIXME: item is not yet fetched so editing fails, maybe queue edit?
@@ -172,7 +172,7 @@ void ShiftManager::onSaveSheet()
     if(fileName.isEmpty())
         return;
 
-    ShiftSheetExport w(shiftId);
+    ShiftSheetExport w(Session->m_Db, shiftId);
     w.write();
     w.save(fileName);
 }

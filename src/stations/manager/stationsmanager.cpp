@@ -364,7 +364,7 @@ void StationsManager::onEditStation()
 
     //FIXME: check if actually changed
     emit Session->stationNameChanged(stId);
-    emit Session->stationPlanChanged(stId);
+    emit Session->stationPlanChanged({stId});
 
     //Refresh segments
     int &segmentsTimer = clearModelTimers[RailwaySegmentsTab];

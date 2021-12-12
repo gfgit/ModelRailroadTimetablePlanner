@@ -1,4 +1,4 @@
-#include "shiftsqlmodel.h"
+#include "shiftsmodel.h"
 
 #include "app/session.h"
 
@@ -7,14 +7,14 @@
 #include <QCoreApplication>
 #include "shiftresultevent.h"
 
-ShiftSQLModel::ShiftSQLModel(database &db, QObject *parent) :
+ShiftsModel::ShiftsModel(database &db, QObject *parent) :
     IPagedItemModel(500, db, parent),
     cacheFirstRow(0),
     firstPendingRow(-BatchSize)
 {
 }
 
-bool ShiftSQLModel::event(QEvent *e)
+bool ShiftsModel::event(QEvent *e)
 {
     if(e->type() == ShiftResultEvent::_Type)
     {
@@ -29,7 +29,7 @@ bool ShiftSQLModel::event(QEvent *e)
     return QAbstractTableModel::event(e);
 }
 
-QVariant ShiftSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ShiftsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
@@ -42,17 +42,17 @@ QVariant ShiftSQLModel::headerData(int section, Qt::Orientation orientation, int
     return QAbstractTableModel::headerData(section, orientation, role);
 }
 
-int ShiftSQLModel::rowCount(const QModelIndex &parent) const
+int ShiftsModel::rowCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : curItemCount;
 }
 
-int ShiftSQLModel::columnCount(const QModelIndex &parent) const
+int ShiftsModel::columnCount(const QModelIndex &parent) const
 {
     return parent.isValid() ? 0 : NCols;
 }
 
-QVariant ShiftSQLModel::data(const QModelIndex &idx, int role) const
+QVariant ShiftsModel::data(const QModelIndex &idx, int role) const
 {
     const int row = idx.row();
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
@@ -61,7 +61,7 @@ QVariant ShiftSQLModel::data(const QModelIndex &idx, int role) const
     if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
         //Fetch above or below current cach
-        const_cast<ShiftSQLModel *>(this)->fetchRow(row);
+        const_cast<ShiftsModel *>(this)->fetchRow(row);
 
         //Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
@@ -85,7 +85,7 @@ QVariant ShiftSQLModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-bool ShiftSQLModel::setData(const QModelIndex &idx, const QVariant &value, int role)
+bool ShiftsModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
     const int row = idx.row();
     if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
@@ -142,7 +142,7 @@ bool ShiftSQLModel::setData(const QModelIndex &idx, const QVariant &value, int r
     return true;
 }
 
-Qt::ItemFlags ShiftSQLModel::flags(const QModelIndex &idx) const
+Qt::ItemFlags ShiftsModel::flags(const QModelIndex &idx) const
 {
     if (!idx.isValid())
         return Qt::NoItemFlags;
@@ -154,7 +154,7 @@ Qt::ItemFlags ShiftSQLModel::flags(const QModelIndex &idx) const
     return f | Qt::ItemIsEditable;
 }
 
-qint64 ShiftSQLModel::recalcTotalItemCount()
+qint64 ShiftsModel::recalcTotalItemCount()
 {
     query q(mDb);
     if(mQuery.size() <= 2) // '%%' -> '%<name>%'
@@ -169,14 +169,14 @@ qint64 ShiftSQLModel::recalcTotalItemCount()
     return count;
 }
 
-void ShiftSQLModel::clearCache()
+void ShiftsModel::clearCache()
 {
     cache.clear();
     cache.squeeze();
     cacheFirstRow = 0;
 }
 
-void ShiftSQLModel::fetchRow(int row)
+void ShiftsModel::fetchRow(int row)
 {
     if(firstPendingRow != -BatchSize)
         return; //Currently fetching another batch, wait for it to finish first
@@ -223,7 +223,7 @@ void ShiftSQLModel::fetchRow(int row)
     internalFetch(firstPendingRow, valRow, val);
 }
 
-void ShiftSQLModel::internalFetch(int first, int valRow, const QString& val)
+void ShiftsModel::internalFetch(int first, int valRow, const QString& val)
 {
     query q(mDb);
 
@@ -320,7 +320,7 @@ void ShiftSQLModel::internalFetch(int first, int valRow, const QString& val)
     qApp->postEvent(this, ev);
 }
 
-void ShiftSQLModel::handleResult(const QVector<ShiftItem> items, int firstRow)
+void ShiftsModel::handleResult(const QVector<ShiftItem> items, int firstRow)
 {
     if(firstRow == cacheFirstRow + cache.size())
     {
@@ -369,7 +369,7 @@ void ShiftSQLModel::handleResult(const QVector<ShiftItem> items, int firstRow)
     qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
 }
 
-db_id ShiftSQLModel::shiftAtRow(int row) const
+db_id ShiftsModel::shiftAtRow(int row) const
 {
     if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return 0; //Not fetched yet or invalid
@@ -377,7 +377,7 @@ db_id ShiftSQLModel::shiftAtRow(int row) const
     return cache.at(row - cacheFirstRow).shiftId;
 }
 
-QString ShiftSQLModel::shiftNameAtRow(int row) const
+QString ShiftsModel::shiftNameAtRow(int row) const
 {
     if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return QString(); //Not fetched yet or invalid
@@ -385,7 +385,7 @@ QString ShiftSQLModel::shiftNameAtRow(int row) const
     return cache.at(row - cacheFirstRow).shiftName;
 }
 
-void ShiftSQLModel::setQuery(const QString &text)
+void ShiftsModel::setQuery(const QString &text)
 {
     QString tmp = '%' + text + '%';
     if(mQuery == tmp)
@@ -395,7 +395,7 @@ void ShiftSQLModel::setQuery(const QString &text)
     refreshData(true);
 }
 
-bool ShiftSQLModel::removeShift(db_id shiftId)
+bool ShiftsModel::removeShift(db_id shiftId)
 {
     if(!shiftId)
         return false;
@@ -415,7 +415,7 @@ bool ShiftSQLModel::removeShift(db_id shiftId)
     return true;
 }
 
-bool ShiftSQLModel::removeShiftAt(int row)
+bool ShiftsModel::removeShiftAt(int row)
 {
     if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false; //Not fetched yet or invalid
@@ -423,7 +423,7 @@ bool ShiftSQLModel::removeShiftAt(int row)
     return removeShift(cache.at(row - cacheFirstRow).shiftId);
 }
 
-db_id ShiftSQLModel::addShift(int *outRow)
+db_id ShiftsModel::addShift(int *outRow)
 {
     db_id shiftId = 0;
 

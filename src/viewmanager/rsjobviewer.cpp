@@ -17,6 +17,7 @@
 
 #include "viewmanager/viewmanager.h"
 
+#include "utils/owningqpointer.h"
 #include <QMenu>
 
 RSJobViewer::RSJobViewer(QWidget *parent) :
@@ -68,13 +69,13 @@ void RSJobViewer::showContextMenu(const QPoint &pos)
 
     RsPlanItem item = model->getItem(idx.row());
 
-    QMenu menu(this);
+    OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), &menu);
+    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
 
-    menu.addAction(showInJobEditor);
+    menu->addAction(showInJobEditor);
 
-    QAction *act = menu.exec(view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(view->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
         Session->getViewManager()->requestJobEditor(item.jobId, item.stopId);
@@ -107,9 +108,7 @@ void RSJobViewer::updateRsInfo()
     const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
     RsType type = RsType(rs.get<int>(3));
 
-
-    int ownerLen = sqlite3_column_bytes(stmt, 4);
-    const char *owner = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 4));
+    QString owner = rs.get<QString>(4);
 
     const QString name = rs_utils::formatNameRef(modelName, modelNameLen,
                                                  number,
@@ -120,7 +119,7 @@ void RSJobViewer::updateRsInfo()
     const QString info = tr("Type:  <b>%1</b><br>"
                             "Owner: <b>%2</b>").arg(RsTypeNames::name(type));
 
-    infoLabel->setText(owner ? info.arg(QLatin1String(owner, ownerLen)) : info.arg(tr("Not set!")));
+    infoLabel->setText(owner.isEmpty() ? info.arg(tr("Not set!")) : info.arg(owner));
 }
 
 void RSJobViewer::updateInfo()

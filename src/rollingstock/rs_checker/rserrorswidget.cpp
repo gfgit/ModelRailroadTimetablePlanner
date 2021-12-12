@@ -16,8 +16,11 @@
 #include "backgroundmanager/backgroundmanager.h"
 #include "rscheckermanager.h"
 
+#include "utils/owningqpointer.h"
 #include <QMenu>
 #include <QAction>
+
+#include <QTimerEvent>
 
 #include "viewmanager/viewmanager.h"
 
@@ -98,9 +101,9 @@ void RsErrorsWidget::taskFinished()
     timerId = startTimer(1000); //Hide progressBar after 1 second
 }
 
-void RsErrorsWidget::timerEvent(QTimerEvent *event)
+void RsErrorsWidget::timerEvent(QTimerEvent *e)
 {
-    if(event->timerId() == timerId)
+    if(e->timerId() == timerId)
     {
         killTimer(timerId);
         timerId = 0;
@@ -119,18 +122,18 @@ void RsErrorsWidget::showContextMenu(const QPoint& pos)
     if(!item)
         return;
 
-    QMenu menu(this);
+    OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), &menu);
-    QAction *showRsPlan = new QAction(tr("Show rollingstock plan"), &menu);
+    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
+    QAction *showRsPlan = new QAction(tr("Show rollingstock plan"), menu);
 
-    menu.addAction(showInJobEditor);
-    menu.addAction(showRsPlan);
+    menu->addAction(showInJobEditor);
+    menu->addAction(showRsPlan);
 
-    QAction *act = menu.exec(view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(view->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
-        Session->getViewManager()->requestJobEditor(item->jobId, item->stopId);
+        Session->getViewManager()->requestJobEditor(item->job.jobId, item->stopId);
     }
     else if(act == showRsPlan)
     {

@@ -9,12 +9,11 @@ using namespace sqlite3pp;
 StationGatesMatchModel::StationGatesMatchModel(sqlite3pp::database &db, QObject *parent) :
     ISqlFKMatchModel(parent),
     mDb(db),
-    q_getMatches(mDb, "SELECT id,type,name,side"
-                      " FROM station_gates WHERE station_id=?2 AND name LIKE ?1"
-                      " ORDER BY side,name"),
+    q_getMatches(mDb),
     m_stationId(0),
     m_excludeSegmentId(0),
-    m_markConnectedGates(false)
+    m_markConnectedGates(false),
+    m_showOnlySegments(false)
 {
 }
 
@@ -40,7 +39,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
             return ellipsesString;
         }
 
-        return items[idx.row()].gateLetter;
+        return getNameAtRow(idx.row());
     }
     case Qt::ToolTipRole:
     {
@@ -82,8 +81,8 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::TextAlignmentRole:
     {
-        if(!emptyRow && !ellipsesRow)
-            return Qt::AlignRight + Qt::AlignVCenter;
+        if(!emptyRow && !ellipsesRow && !m_showOnlySegments)
+            return Qt::AlignRight + Qt::AlignVCenter; //Segments will be Left aligned
         break;
     }
     case Qt::BackgroundRole:
@@ -166,10 +165,23 @@ void StationGatesMatchModel::refreshData()
         if(m_markConnectedGates)
         {
             items[i].segmentId = track.get<db_id>(5);
+            if(m_showOnlySegments && !items[i].segmentId)
+            {
+                //Skip this gate because it is not connected to a segment
+                i--; //Overwrite with new item
+                ++it; //Step query to next record
+                continue;
+            }
+
             items[i].segmentName = track.get<QString>(6);
-        }else{
+            const db_id inGateId = track.get<db_id>(7);
+            items[i].segmentReversed = (inGateId != items[i].gateId);
+        }
+        else
+        {
             items[i].segmentId = 0;
             items[i].segmentName.clear();
+            items[i].segmentReversed = false;
         }
 
         ++it;
@@ -198,9 +210,21 @@ QString StationGatesMatchModel::getName(db_id id) const
 
     query q(mDb, "SELECT name FROM station_gates WHERE id=?");
     q.bind(1, id);
-    if(q.step() == SQLITE_ROW)
-        return q.getRows().get<QString>(0);
-    return QString();
+    if(q.step() != SQLITE_ROW)
+        return QString();
+
+    QString str = q.getRows().get<QString>(0);
+    if(m_showOnlySegments)
+    {
+        q.prepare("SELECT name FROM railway_segments WHERE in_gate_id=?1 OR out_gate_id=?1");
+        q.bind(1, id);
+        if(q.step() == SQLITE_ROW)
+        {
+            str.append(QLatin1String(": "));
+            str.append(q.getRows().get<QString>(0));
+        }
+    }
+    return str;
 }
 
 db_id StationGatesMatchModel::getIdAtRow(int row) const
@@ -210,19 +234,27 @@ db_id StationGatesMatchModel::getIdAtRow(int row) const
 
 QString StationGatesMatchModel::getNameAtRow(int row) const
 {
-    return items[row].gateLetter;
+    QString str = items[row].gateLetter;
+    if(m_showOnlySegments)
+    {
+        str.reserve(3 + items[row].segmentName.size());
+        str.append(QLatin1String(": "));
+        str.append(items[row].segmentName);
+    }
+    return str;
 }
 
-void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId)
+void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId, bool showOnlySegments)
 {
     m_stationId = stationId;
     m_markConnectedGates = markConnectedGates;
     m_excludeSegmentId = m_markConnectedGates ? excludeSegmentId : 0;
+    m_showOnlySegments = showOnlySegments;
 
     QByteArray sql = "SELECT g.id,g.out_track_count,g.type,g.name,g.side";
     if(m_markConnectedGates)
     {
-        sql += ",s.id,s.name";
+        sql += ",s.id,s.name,s.in_gate_id";
     }
     sql += " FROM station_gates g";
     if(m_markConnectedGates)
@@ -257,6 +289,32 @@ utils::Side StationGatesMatchModel::getGateSide(db_id gateId) const
             return item.side;
     }
     return utils::Side::West;
+}
+
+db_id StationGatesMatchModel::getSegmentIdAtRow(int row) const
+{
+    if(row < 0 || row >= size)
+        return 0;
+    return items[row].segmentId;
+}
+
+db_id StationGatesMatchModel::isSegmentReversedAtRow(int row) const
+{
+    if(row < 0 || row >= size)
+        return 0;
+    return items[row].segmentReversed;
+}
+
+int StationGatesMatchModel::getGateTrackCount(db_id gateId) const
+{
+    if(!mDb.db())
+        return 0;
+
+    query q(mDb, "SELECT out_track_count FROM station_gates WHERE id=?");
+    q.bind(1, gateId);
+    if(q.step() != SQLITE_ROW)
+        return 0;
+    return q.getRows().get<int>(0);
 }
 
 StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent) :

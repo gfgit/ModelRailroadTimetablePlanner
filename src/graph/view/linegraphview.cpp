@@ -51,12 +51,14 @@ void LineGraphView::setScene(LineGraphScene *newScene)
     if(m_scene)
     {
         disconnect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphView::redrawGraph);
+        disconnect(m_scene, &LineGraphScene::requestShowRect, this, &LineGraphView::ensureRectVisible);
         disconnect(m_scene, &QObject::destroyed, this, &LineGraphView::onSceneDestroyed);
     }
     m_scene = newScene;
     if(m_scene)
     {
         connect(m_scene, &LineGraphScene::redrawGraph, this, &LineGraphView::redrawGraph);
+        connect(m_scene, &LineGraphScene::requestShowRect, this, &LineGraphView::ensureRectVisible);
         connect(m_scene, &QObject::destroyed, this, &LineGraphView::onSceneDestroyed);
     }
     redrawGraph();
@@ -67,6 +69,13 @@ void LineGraphView::redrawGraph()
     updateScrollBars();
 
     viewport()->update();
+}
+
+void LineGraphView::ensureRectVisible(const QRectF &r)
+{
+    QRect r2 = r.toRect();
+    const QPoint c = r2.center();
+    ensureVisible(c.x(), c.y(), r2.width() / 2, r2.height() / 2);
 }
 
 bool LineGraphView::event(QEvent *e)
@@ -141,8 +150,8 @@ void LineGraphView::paintEvent(QPaintEvent *e)
         return; //Nothing to draw
 
     BackgroundHelper::drawStations(&painter, m_scene, exposedRect);
-    BackgroundHelper::drawJobStops(&painter, m_scene, exposedRect);
-    BackgroundHelper::drawJobSegments(&painter, m_scene, exposedRect);
+    BackgroundHelper::drawJobStops(&painter, m_scene, exposedRect, true);
+    BackgroundHelper::drawJobSegments(&painter, m_scene, exposedRect, true);
 }
 
 void LineGraphView::resizeEvent(QResizeEvent *)
@@ -176,7 +185,15 @@ void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
     pos -= origin;
 
     JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
-    m_scene->setSelectedJobId(job);
+    m_scene->setSelectedJob(job);
+}
+
+void LineGraphView::focusInEvent(QFocusEvent *e)
+{
+    if(m_scene)
+        m_scene->activateScene();
+
+    QAbstractScrollArea::focusInEvent(e);
 }
 
 void LineGraphView::onSceneDestroyed()
@@ -231,15 +248,30 @@ void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)
     auto vbar = verticalScrollBar();
     auto vp = viewport();
 
+    const int horizOffset = hourPanel->width() + 5;
+    const int vertOffset = stationHeader->height() + 5;
+
     int logicalX = x;
-    if (logicalX - xmargin < hbar->value()) {
-        hbar->setValue(qMax(0, logicalX - xmargin));
-    } else if (logicalX > hbar->value() + vp->width() - xmargin) {
-        hbar->setValue(qMin(logicalX - vp->width() + xmargin, hbar->maximum()));
+
+    int val = hbar->value();
+    if (logicalX - xmargin < hbar->value() + horizOffset)
+    {
+        val = qMax(0, logicalX - xmargin - horizOffset);
     }
-    if (y - ymargin < vbar->value()) {
-        vbar->setValue(qMax(0, y - ymargin));
-    } else if (y > vbar->value() + vp->height() - ymargin) {
-        vbar->setValue(qMin(y - vp->height() + ymargin, vbar->maximum()));
+    else if (logicalX > hbar->value() + vp->width() - xmargin)
+    {
+        val = qMin(logicalX - vp->width() + xmargin, hbar->maximum());
     }
+    hbar->setValue(val);
+
+    val = vbar->value();
+    if (y - ymargin < vbar->value() + vertOffset)
+    {
+        val = qMax(0, y - ymargin - vertOffset);
+    }
+    else if (y > vbar->value() + vp->height() - ymargin)
+    {
+        val = qMin(y - vp->height() + ymargin, vbar->maximum());
+    }
+    vbar->setValue(val);
 }

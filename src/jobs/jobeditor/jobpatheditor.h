@@ -18,6 +18,14 @@ namespace Ui {
 class JobPathEditor;
 }
 
+/*!
+ * \brief The JobPathEditor class
+ *
+ * Widget to edit jobs info and travel path
+ *
+ * \sa StopModel
+ * \sa StopDelegate
+ */
 class JobPathEditor : public QDialog
 {
     Q_OBJECT
@@ -25,9 +33,6 @@ class JobPathEditor : public QDialog
 public:
     explicit JobPathEditor(QWidget *parent = nullptr);
     ~JobPathEditor()override;
-
-    void prepareQueries();
-    void finalizeQueries();
 
     bool setJob(db_id jobId);
     bool createNewJob(db_id *out = nullptr);
@@ -44,16 +49,12 @@ public:
 
     bool maybeSave();
 
-    void toggleTransit(const QModelIndex &index);
     void closeStopEditor();
     void setReadOnly(bool readOnly);
 
     bool getCanSetJob() const;
 
     void selectStop(db_id stopId);
-
-signals:
-    void stationChange(db_id stId);
 
 public slots:
     void done(int) override;
@@ -64,6 +65,7 @@ public slots:
     void updateSpinColor();
 
 protected:
+    virtual void timerEvent(QTimerEvent *e) override;
     virtual void closeEvent(QCloseEvent *e) override;
 
 private slots:
@@ -73,7 +75,7 @@ private slots:
     void onIndexClicked(const QModelIndex &index);
     void onJobRemoved(db_id jobId);
 
-    void onIdSpinValueChanged(int jobId);
+    void startJobNumberTimer();
     void onJobIdChanged(db_id jobId);
 
     void onCategoryChanged(int newCat);
@@ -85,6 +87,9 @@ private:
 
     bool setJob_internal(db_id jobId);
 
+    void stopJobNumberTimer();
+    void checkJobNumberValid();
+
 private:
     Ui::JobPathEditor *ui;
 
@@ -92,6 +97,8 @@ private:
 
     StopModel *stopModel;
     StopDelegate *delegate;
+
+    int jobNumberTimerId;
 
     //TODO: there are too many bools
     bool isClear;
