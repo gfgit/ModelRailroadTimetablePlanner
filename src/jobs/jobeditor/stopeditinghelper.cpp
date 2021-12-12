@@ -355,7 +355,7 @@ void StopEditingHelper::updateGateTrackSpin(const StopItem::Gate &toGate)
 
     //Prevent trigger valueChanged() signal
     mOutGateTrackSpin->blockSignals(true);
-    mOutGateTrackSpin->setMaximum(qMax(1, outTrackCount - 1)); //At least one track
+    mOutGateTrackSpin->setMaximum(qMax(0, outTrackCount - 1)); //At least one track numbered 0
     mOutGateTrackSpin->setValue(toGate.trackNum);
     mOutGateTrackSpin->blockSignals(false);
 }
