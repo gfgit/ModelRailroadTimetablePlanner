@@ -17,6 +17,7 @@
 
 #include "viewmanager/viewmanager.h"
 
+#include "utils/owningqpointer.h"
 #include <QMenu>
 
 RSJobViewer::RSJobViewer(QWidget *parent) :
@@ -68,13 +69,13 @@ void RSJobViewer::showContextMenu(const QPoint &pos)
 
     RsPlanItem item = model->getItem(idx.row());
 
-    QMenu menu(this);
+    OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), &menu);
+    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
 
-    menu.addAction(showInJobEditor);
+    menu->addAction(showInJobEditor);
 
-    QAction *act = menu.exec(view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(view->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
         Session->getViewManager()->requestJobEditor(item.jobId, item.stopId);

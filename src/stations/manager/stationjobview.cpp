@@ -7,14 +7,10 @@
 
 #include "app/scopedebug.h"
 
-#include <QTime>
-#include <QMap>
-
-#include <QMenu>
-
+#include "utils/owningqpointer.h"
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "utils/owningqpointer.h"
+#include <QMenu>
 
 #include "odt_export/stationsheetexport.h"
 
@@ -89,14 +85,14 @@ void StationJobView::showContextMenu(const QPoint& pos)
 
     std::pair<db_id, db_id> item = model->getJobAndStopId(idx.row());
 
-    QMenu menu(this);
+    OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), &menu);
-    QAction *selectJobInGraph = new QAction(tr("Show job in graph"), &menu);
-    menu.addAction(showInJobEditor);
-    menu.addAction(selectJobInGraph);
+    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
+    QAction *selectJobInGraph = new QAction(tr("Show job in graph"), menu);
+    menu->addAction(showInJobEditor);
+    menu->addAction(selectJobInGraph);
 
-    QAction *act = menu.exec(ui->tableView->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(ui->tableView->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
         Session->getViewManager()->requestJobEditor(item.first, item.second);

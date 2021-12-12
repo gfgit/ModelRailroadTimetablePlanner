@@ -361,15 +361,15 @@ void EditStopDialog::calcPassings()
 
 void EditStopDialog::couplingCustomContextMenuRequested(const QPoint& pos)
 {
-    QMenu menu(this);
-    QAction *act = menu.addAction(tr("Refresh"));
+    OwningQPointer<QMenu> menu = new QMenu(this);
+    QAction *act = menu->addAction(tr("Refresh"));
 
     //HACK: could be ui->coupledView or ui->uncoupledView or ui->assetBeforeView or ui->assetAfterView
     QAbstractItemView *view = qobject_cast<QAbstractItemView *>(sender());
     if(!view)
         return; //Error: not called by the view?
 
-    if(menu.exec(view->viewport()->mapToGlobal(pos)) != act)
+    if(menu->exec(view->viewport()->mapToGlobal(pos)) != act)
         return; //User didn't select 'Refresh' action
 
     //Refresh data

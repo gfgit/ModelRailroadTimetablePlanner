@@ -248,16 +248,16 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     if(!index.isValid() || index.row()>= stopModel->rowCount() || stopModel->isAddHere(index))
         return;
 
-    QMenu menu(this);
-    QAction *toggleTransitAct = menu.addAction(tr("Toggle transit"));
-    QAction *setToTransitAct = menu.addAction(tr("Set transit"));
-    QAction *unsetTransit = menu.addAction(tr("Unset transit"));
-    menu.insertSeparator(unsetTransit);
-    QAction *editStopAct = menu.addAction(tr("Edit stop"));
-    QAction *showStationSVG = menu.addAction(tr("Station SVG Plan"));
-    menu.insertSeparator(editStopAct);
-    QAction *removeStopAct = menu.addAction(tr("Remove"));
-    QAction *insertBeforeAct = menu.addAction(tr("Insert before"));
+    OwningQPointer<QMenu> menu = new QMenu(this);
+    QAction *toggleTransitAct = menu->addAction(tr("Toggle transit"));
+    QAction *setToTransitAct = menu->addAction(tr("Set transit"));
+    QAction *unsetTransit = menu->addAction(tr("Unset transit"));
+    menu->insertSeparator(unsetTransit);
+    QAction *editStopAct = menu->addAction(tr("Edit stop"));
+    QAction *showStationSVG = menu->addAction(tr("Station SVG Plan"));
+    menu->insertSeparator(editStopAct);
+    QAction *removeStopAct = menu->addAction(tr("Remove"));
+    QAction *insertBeforeAct = menu->addAction(tr("Insert before"));
 
     toggleTransitAct->setEnabled(!m_readOnly);
     setToTransitAct->setEnabled(!m_readOnly);
@@ -268,7 +268,7 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     const db_id stationId = stopModel->getItemStationAt(index.row());
     showStationSVG->setEnabled(stationId != 0); //Enable only if station is set
 
-    QAction *act = menu.exec(ui->view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(ui->view->viewport()->mapToGlobal(pos));
 
     QItemSelectionModel *sm = ui->view->selectionModel();
 
