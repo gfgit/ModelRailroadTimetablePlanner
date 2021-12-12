@@ -151,7 +151,9 @@ public:
 
     bool trySetTrackConnections(StopItem &item, db_id trackId,
                                QString *outErr);
-    bool trySelectNextSegment(StopItem &item, db_id segmentId, db_id nextStationId, db_id &out_gateId);
+
+    bool trySelectNextSegment(StopItem &item, db_id segmentId, int suggestedOutGateTrk,
+                              db_id nextStationId, db_id &out_gateId);
 
 signals:
     void edited(bool val);
