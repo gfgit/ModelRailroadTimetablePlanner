@@ -232,6 +232,10 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
 {
     const double platfOffset = Session->platformOffset;
 
+    QFont jobNameFont;
+    setFontPointSizeDPI(jobNameFont, 20, painter);
+    painter->setFont(jobNameFont);
+
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
 
@@ -252,6 +256,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     QPointF bottom;
 
     JobCategory lastJobCategory = JobCategory::NCategories;
+    QTextOption textOption(Qt::AlignTop | Qt::AlignLeft);
 
     for(const StationGraphObject &st : qAsConst(scene->stations))
     {
@@ -302,6 +307,13 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                     painter->drawPoint(top);
                 else
                     painter->drawLine(top, bottom);
+
+                if(jobStop.drawLabel)
+                {
+                    const QString jobName = JobCategoryName::jobName(jobStop.stop.jobId, jobStop.stop.category);
+                    QRectF r(top.x() + platfOffset / 2, top.y(), platfOffset * 4, 25);
+                    painter->drawText(r, jobName, textOption);
+                }
             }
 
             top.rx() += platfOffset;
@@ -338,6 +350,7 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
     }
 
     JobCategory lastJobCategory = JobCategory::NCategories;
+    QTextOption textOption(Qt::AlignCenter);
 
     //Iterate until one but last
     //This way we can always acces next station
@@ -389,8 +402,7 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
 
             painter->drawLine(line);
 
-            QTextOption textOption(Qt::AlignCenter);
-            QString jobName = JobCategoryName::jobName(job.jobId, job.category);
+            const QString jobName = JobCategoryName::jobName(job.jobId, job.category);
 
             //Save old transformation to reset it after drawing text
             const QTransform oldTransf = painter->transform();
