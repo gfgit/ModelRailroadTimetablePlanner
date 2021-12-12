@@ -6,7 +6,8 @@
 
 #include "app/session.h"
 
-#include "utils/model_roles.h"
+#include <sqlite3pp/sqlite3pp.h>
+using namespace sqlite3pp;
 
 #include "stations/station_utils.h"
 
@@ -14,6 +15,7 @@
 
 StopModel::StopModel(database &db, QObject *parent) :
     QAbstractListModel(parent),
+    mDb(db),
     mJobId(0),
     mNewJobId(0),
     jobShiftId(0),
@@ -21,12 +23,6 @@ StopModel::StopModel(database &db, QObject *parent) :
     category(JobCategory::FREIGHT),
     oldCategory(JobCategory::FREIGHT),
     editState(NotEditing),
-    mDb(db),
-    q_getRwNode(mDb),
-    q_getCoupled(mDb),
-    q_setArrival(mDb),
-    q_setDeparture(mDb),
-    q_setStopSt(mDb),
     timeCalcEnabled(true),
     autoInsertTransits(false),
     autoMoveUncoupleToNewLast(true),
@@ -42,28 +38,9 @@ StopModel::StopModel(database &db, QObject *parent) :
     connect(Session, &MeetingSession::stationNameChanged, this, &StopModel::onStationLineNameChanged);
 }
 
-void StopModel::prepareQueries()
+QVariant StopModel::data(const QModelIndex &index, int role) const
 {
-    q_getRwNode.prepare("SELECT railways.id FROM railways"
-                        " JOIN jobsegments ON jobsegments.id=?"
-                        " WHERE railways.stationId=? AND railways.lineId=jobsegments.lineId");
-
-    q_getCoupled.prepare("SELECT rs_id, operation FROM coupling WHERE stop_id=?");
-
-    q_setArrival.prepare("UPDATE stops SET arrival=? WHERE id=?");
-    q_setDeparture.prepare("UPDATE stops SET departure=? WHERE id=?");
-
-    q_setStopSt.prepare("UPDATE stops SET stationId=?, rw_node=? WHERE id=?");
-}
-
-void StopModel::finalizeQueries()
-{
-    q_getRwNode.finish();
-    q_getCoupled.finish();
-
-    q_setArrival.finish();
-    q_setDeparture.finish();
-    q_setStopSt.finish();
+    return QVariant(); //Use setters and getters instead of data() and setData()
 }
 
 void StopModel::reloadSettings()
@@ -167,321 +144,14 @@ Qt::ItemFlags StopModel::flags(const QModelIndex &index) const
     return QAbstractListModel::flags(index) | Qt::ItemIsEditable;
 }
 
-QVariant StopModel::data(const QModelIndex &index, int role) const
-{
-    if(!index.isValid() || index.row() >= stops.count() || index.column() > 0)
-        return QVariant();
-
-    const StopItem& s = stops.at(index.row());
-
-    switch (role) {
-    case JOB_ID_ROLE:
-        return mJobId;
-    case JOB_SHIFT_ID:
-        return jobShiftId;
-    case JOB_CATEGORY_ROLE:
-        return int(category);
-    case STATION_ID:
-        return s.stationId;
-    case ARR_ROLE:
-        return s.arrival;
-    case DEP_ROLE:
-        return s.departure;
-    case ADDHERE_ROLE:
-        return s.addHere;
-    case STOP_DESCR_ROLE:
-        return getDescription(s);
-    default:
-        break;
-    }
-
-    return QVariant();
-}
-
-bool StopModel::setData(const QModelIndex &index, const QVariant &value, int role)
-{
-    //DEBUG_ENTRY;
-    if(!index.isValid() || index.row() >= stops.count() || index.column() > 0)
-        return false;
-
-    switch (role)
-    {
-    case STATION_ID:
-        setStation(index, value.toLongLong());
-        break;
-    case STOP_TYPE_ROLE:
-        setStopType(index, StopType(value.toInt()));
-        break;
-    case ARR_ROLE:
-        setArrival(index, value.toTime(), false);
-        break;
-    case DEP_ROLE:
-        setDeparture(index, value.toTime(), true);
-        break;
-    case STOP_DESCR_ROLE:
-        setDescription(index, value.toString());
-        break;
-    default:
-        return false;
-    }
-
-    return true;
-}
-
-void StopModel::setArrival(const QModelIndex& idx, const QTime& time, bool setDepTime)
-{
-    StopItem& s = stops[idx.row()];
-    if(s.type == StopType::First || s.arrival == time)
-        return;
-
-    //Cannot arrive at the same time (or even before) the departure from previous station
-    //You shouldn't get here because StopEditor and EditStopDialog already check this
-    //but it's correct to have it checked also in the model
-    QTime minArrival = stops[idx.row() - 1].departure.addSecs(60);
-    if(time < minArrival)
-        return;
-
-    startStopsEditing();
-
-    //Mark the station for update
-    stationsToUpdate.insert(s.stationId);
-
-    const QTime oldArr = s.arrival;
-    s.arrival = time;
-
-    if(s.type == StopType::Last && s.departure != time)
-    {
-        s.departure = time;
-
-        q_setDeparture.bind(1, time);
-        q_setDeparture.bind(2, s.stopId);
-        q_setDeparture.execute();
-        q_setDeparture.reset();
-    }
-    else
-    {
-        if(setDepTime || s.arrival >= s.departure || s.type == StopType::Transit)
-            shiftStopsBy24hoursFrom(oldArr);
-    }
-
-    q_setArrival.bind(1, time);
-    q_setArrival.bind(2, s.stopId);
-    q_setArrival.execute();
-    q_setArrival.reset();
-
-
-    if(s.type == StopType::Transit)
-    {
-        setDeparture(idx, s.arrival, true);
-    }
-    else if(setDepTime)
-    {
-        //Shift Departure by the same amount of time to preserve same stop time
-        const int diff = oldArr.secsTo(time);
-        setDeparture(idx, s.departure.addSecs(diff), true);
-    }
-
-    if(s.arrival > s.departure || (s.arrival == s.departure && s.type != StopType::Transit))
-    {
-        int secs = defaultStopTimeSec();
-
-        if(secs == 0 && s.type != StopType::Last)
-        {
-            //If secs is 0, trasform stop in Transit unless it's Last stop
-            setStopType(idx, StopType::Transit);
-        }
-        else
-        {
-            setDeparture(idx, time.addSecs(secs), true);
-        }
-    }
-
-    emit dataChanged(idx, idx);
-}
-
-void StopModel::setDeparture(const QModelIndex& idx, QTime time, bool propagate)
-{
-    StopItem& s = stops[idx.row()];
-    //Don't allow departure < arrival unless it's First Stop:
-    //In First stops setting departure sets also arrival
-    //So initially departure < arrival but then arrival = departure
-    //And the proble disappears
-    if(s.type == StopType::Last || s.departure == time)
-        return;
-
-    if(s.type != StopType::First) //Allow to set Departure on First stop (which updates Arrival)
-    {
-        QTime minDep = s.arrival; //For transits
-        if(s.type == StopType::Normal)
-            minDep = minDep.addSecs(60); //Normal stops, stop for at least 1 minute
-        if(time < minDep)
-            return; //Invalid Departure time
-    }
-
-    startStopsEditing();
-
-    //Mark the station for update
-    stationsToUpdate.insert(s.stationId);
-
-    if(s.type == StopType::Transit)
-        time = s.arrival; //On transits stop time is 0 minutes so Departure is same of Arrival
-
-    if(s.type == StopType::First && s.arrival != time)
-    {
-        s.arrival = time;
-
-        q_setArrival.bind(1, time);
-        q_setArrival.bind(2, s.stopId);
-        q_setArrival.execute();
-        q_setArrival.reset();
-    }
-
-    if(idx.row() < stops.count() - 1) //Not last stop
-    {
-        StopItem& next = stops[idx.row() + 1];
-        if(next.addHere == 0 && time >= s.arrival)
-            propagate = true;
-    }
-
-    if(propagate)
-        shiftStopsBy24hoursFrom(s.arrival);
-
-    q_setDeparture.bind(1, time);
-    q_setDeparture.bind(2, s.stopId);
-    q_setDeparture.execute();
-    q_setDeparture.reset();
-
-    int offset = s.departure.msecsTo(time);
-    s.departure = time;
-
-    QModelIndex finalIdx;
-    if(propagate)
-    {
-        int r = propageteTimeOffset(idx.row() + 1, offset);
-        finalIdx = index(r - 1, 0);
-    }
-    if(!finalIdx.isValid())
-        finalIdx = idx;
-
-    emit dataChanged(idx, finalIdx);
-}
-
-int StopModel::propageteTimeOffset(int row, const int msecOffset)
-{
-    if(row >= stops.count() || msecOffset == 0)
-        return row;
-
-    if(row > 0) //Not first
-        shiftStopsBy24hoursFrom(stops.at(row - 1).arrival);
-
-    while (row < stops.count())
-    {
-        StopItem& s = stops[row];
-        if(s.addHere != 0)
-        {
-            row++;
-            continue;
-        }
-
-        s.arrival = s.arrival.addMSecs(msecOffset);
-
-        q_setArrival.bind(1, s.arrival);
-        q_setArrival.bind(2, s.stopId);
-        q_setArrival.execute();
-        q_setArrival.reset();
-
-        s.departure = s.departure.addMSecs(msecOffset);
-
-        q_setDeparture.bind(1, s.departure);
-        q_setDeparture.bind(2, s.stopId);
-        q_setDeparture.execute();
-        q_setDeparture.reset();
-
-        row++;
-    }
-
-    return row;
-}
-
 //Returns error codes of type ErrorCodes
-int StopModel::setStopType(const QModelIndex& idx, StopType type)
-{
-    if(!idx.isValid() || idx.row() >= stops.count())
-        return ErrorInvalidIndex;
-    StopItem& s = stops[idx.row()];
-
-    if(s.type == StopType::First || s.type == StopType::Last)
-    {
-        qWarning() << "Error: tried change type of First/Last stop:" << idx << s.stopId << "Job:" << mJobId;
-        return ErrorFirstLastTransit;
-    }
-
-    if(s.type == type)
-        return NoError;
-
-    //Cannot couple or uncouple in transits
-    if(type == StopType::Transit)
-    {
-        q_getCoupled.bind(1, s.stopId);
-        int res = q_getCoupled.step();
-        q_getCoupled.reset();
-
-        if(res == SQLITE_ROW)
-        {
-            qWarning() << "Error: trying to set Transit on stop:" << s.stopId << "Job:" << mJobId
-                       << "while having coupling operation for this stop";
-            return ErrorTransitWithCouplings;
-        }
-        if(res != SQLITE_OK && res != SQLITE_DONE)
-        {
-            qWarning() << "Error while setting stopType for stop:" << s.stopId << "Job:" << mJobId
-                       << "DB Err:" << res << mDb.error_msg() << mDb.extended_error_code();
-        }
-    }
-
-    startStopsEditing();
-
-    //Mark the station for update
-    stationsToUpdate.insert(s.stationId);
-
-
-    command q_setTransitType(mDb, "UPDATE stops SET type=? WHERE id=?");
-
-    q_setTransitType.bind(1, int(type));
-    q_setTransitType.bind(2, s.stopId);
-    q_setTransitType.execute();
-    q_setTransitType.finish();
-
-    s.type = type;
-
-    if(s.type == StopType::Transit)
-    {
-        //Transit don't stop so departure is the same of arrival -> stop time = 0 minutes
-        setDeparture(idx, s.arrival, true);
-    }
-    else
-    {
-        if(s.arrival == s.departure)
-        {
-            int stopSecs = qMax(60, defaultStopTimeSec()); //Default stop time but at least 1 minute
-            setDeparture(idx, s.arrival.addSecs(stopSecs), true);
-        }
-    }
-
-    //TODO: should be already emitted by setDeparture()
-    emit dataChanged(idx, idx);
-
-    return NoError;
-}
-
-//Returns error codes of type ErrorCodes
-int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
+bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
 {
     if(firstRow < 0 || firstRow > lastRow || lastRow >= stops.count())
-        return ErrorInvalidIndex;
+        return false;
 
     if(type == StopType::First || type == StopType::Last)
-        return ErrorInvalidArgument;
+        return false;
 
     int defaultStopMsec = qMax(60, defaultStopTimeSec()) * 1000; //At least 1 minute
 
@@ -489,8 +159,8 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
 
     shiftStopsBy24hoursFrom(stops.at(firstRow).arrival);
 
-    command q_setArrDep(mDb, "UPDATE stops SET arrival=?,departure=? WHERE id=?");
-    command q_setTransitType(mDb, "UPDATE stops SET type=? WHERE id=?");
+    query q_getCoupled(mDb, "SELECT rs_id, operation FROM coupling WHERE stop_id=?");
+    command cmd(mDb, "UPDATE stops SET arrival=?,departure=?,type=? WHERE id=?");
 
     int msecOffset = 0;
 
@@ -505,11 +175,12 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
             //Always update time even if msecOffset == 0, because they have been shifted
             s.arrival = s.arrival.addMSecs(msecOffset);
             s.departure = s.departure.addMSecs(msecOffset);
-            q_setArrDep.bind(1, s.arrival);
-            q_setArrDep.bind(2, s.departure);
-            q_setArrDep.bind(3, s.stopId);
-            q_setArrDep.execute();
-            q_setArrDep.reset();
+            cmd.bind(1, s.arrival);
+            cmd.bind(2, s.departure);
+            cmd.bind(3, int(StopType::Normal));
+            cmd.bind(4, s.stopId);
+            cmd.execute();
+            cmd.reset();
             continue;
         }
 
@@ -538,7 +209,7 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
             {
                 qWarning() << "Error while setting stopType for stop:" << s.stopId << "Job:" << mJobId
                            << "DB Err:" << res << mDb.error_msg() << mDb.extended_error_code();
-                return ErrorInvalidArgument;
+                return false;
             }
         }
 
@@ -546,11 +217,6 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
 
         //Mark the station for update
         stationsToUpdate.insert(s.stationId);
-
-        q_setTransitType.bind(1, int(destType));
-        q_setTransitType.bind(2, s.stopId);
-        q_setTransitType.execute();
-        q_setTransitType.reset();
 
         s.arrival = s.arrival.addMSecs(msecOffset);
         s.departure = s.departure.addMSecs(msecOffset);
@@ -572,11 +238,12 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
             msecOffset -= s.arrival.msecsTo(s.departure);
             s.departure = s.arrival;
         }
-        q_setArrDep.bind(1, s.arrival);
-        q_setArrDep.bind(2, s.departure);
-        q_setArrDep.bind(3, s.stopId);
-        q_setArrDep.execute();
-        q_setArrDep.reset();
+        cmd.bind(1, s.arrival);
+        cmd.bind(2, s.departure);
+        cmd.bind(3, int(destType));
+        cmd.bind(4, s.stopId);
+        cmd.execute();
+        cmd.reset();
     }
 
     QModelIndex firstIdx = index(firstRow, 0);
@@ -586,21 +253,23 @@ int StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
     for(int r = lastRow + 1; r < stops.count(); r++)
     {
         StopItem& s = stops[r];
+        destType = s.type;
+        if(destType == StopType::First || type == StopType::Last)
+            destType = StopType::Normal;
+
         s.arrival = s.arrival.addMSecs(msecOffset);
         s.departure = s.departure.addMSecs(msecOffset);
-        q_setArrDep.bind(1, s.arrival);
-        q_setArrDep.bind(2, s.departure);
-        q_setArrDep.bind(3, s.stopId);
-        q_setArrDep.execute();
-        q_setArrDep.reset();
+        cmd.bind(1, s.arrival);
+        cmd.bind(2, s.departure);
+        cmd.bind(3, int(destType));
+        cmd.bind(4, s.stopId);
+        cmd.execute();
+        cmd.reset();
     }
 
-
-
-    //TODO: should be already emitted by setDeparture()
     emit dataChanged(firstIdx, lastIdx);
 
-    return NoError;
+    return true;
 }
 
 void StopModel::loadJobStops(db_id jobId)
@@ -894,20 +563,20 @@ void StopModel::addStop()
         StopItem& s = stops[prevIdx];
         if(prevIdx > 0)
         {
+            //Update stop time and type
             s.type = StopType::Normal;
 
             int secs = defaultStopTimeSec();
+            if(secs == 0)
+                s.type = StopType::Transit;
 
-            if(secs == 0 && s.type != StopType::Last)
-            {
-                //If secs is 0, trasform stop in Transit unless it's Last stop
-                setStopType(index(prevIdx, 0), StopType::Transit);
-            }
-            else
-            {
-                //Don't propagate because we have to initialize last stop before
-                setDeparture(index(prevIdx, 0), s.arrival.addSecs(secs), false);
-            }
+            s.departure = s.arrival.addSecs(secs);
+
+            command cmd(mDb, "UPDATE stops SET departure=?,type=? WHERE id=?");
+            cmd.bind(1, s.departure);
+            cmd.bind(2, int(s.type));
+            cmd.bind(3, s.stopId);
+            cmd.execute();
         }
 
         /* Next stop must be at least one minute after
@@ -1108,26 +777,6 @@ void StopModel::rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep)
 }
 #endif
 
-void StopModel::setStation_internal(StopItem& item, db_id stId, db_id nodeId)
-{
-    //Mark for update both old and new station
-    if(item.stationId)
-        stationsToUpdate.insert(item.stationId);
-    if(stId)
-        stationsToUpdate.insert(stId);
-
-    item.stationId = stId;
-
-    q_setStopSt.bind(1, stId);
-    if(nodeId)
-        q_setStopSt.bind(2, nodeId);
-    else
-        q_setStopSt.bind(2, null_type{}); //Bind NULL instead of 0
-    q_setStopSt.bind(3, item.stopId);
-    q_setStopSt.execute();
-    q_setStopSt.reset();
-}
-
 void StopModel::shiftStopsBy24hoursFrom(const QTime &startTime)
 {
     //HACK: when applying msecOffset to stops query might not work because there might be a (next) stop with the same arrival
@@ -1142,55 +791,6 @@ void StopModel::shiftStopsBy24hoursFrom(const QTime &startTime)
     q_shiftArrDep.bind(3, startTime);
     q_shiftArrDep.execute();
     q_shiftArrDep.finish();
-}
-
-void StopModel::setStation(const QPersistentModelIndex& idx, db_id stId)
-{
-    if(!idx.isValid() || idx.row() >= stops.count())
-        return;
-
-    StopItem& s = stops[idx.row()];
-    if(s.stationId == stId)
-        return;
-
-    startStopsEditing();
-
-    setStation_internal(s, stId, 0);
-
-    emit dataChanged(idx, idx);
-
-    //NOTE: Here 'idx' may change so we use QPersistentModelIndex
-    if(autoInsertTransits)
-    {
-        insertTransitsBefore(idx);
-    }
-
-    //Calculate time after transits have been inserted in beetween
-    if(timeCalcEnabled)
-    {
-        int prevIdx = idx.row() - 1;
-        if(prevIdx >= 0)
-        {
-            const StopItem& prev = stops[prevIdx];
-            QTime arrival = prev.departure;
-
-            //Add travel duration (At least 60 secs)
-            arrival = arrival.addSecs(calcTravelTime(prev.nextSegment.segmentId));
-            int secs = arrival.second();
-            if(secs > 10)
-            {
-                //Round seconds to next minute
-                arrival = arrival.addSecs(60 - secs);
-            }
-            else
-            {
-                //Round seconds to previous minute
-                arrival = arrival.addSecs(-secs);
-            }
-
-            setArrival(idx, arrival, true);
-        }
-    }
 }
 
 bool StopModel::isAddHere(const QModelIndex &idx)
@@ -1609,80 +1209,6 @@ void StopModel::removeStop(const QModelIndex &idx)
     }
 }
 
-void StopModel::insertStopBefore(const QModelIndex &idx)
-{
-    if(!idx.isValid() && idx.row() >= stops.count())
-        return;
-
-    const int row = idx.row();
-
-    //Use a pointer because QVector may realloc so a reference would became invalid
-    StopItem* s = &stops[row];
-    if(s->addHere != 0)
-        return;
-
-    startStopsEditing();
-
-    //Handle special case: insert before First  BIG TODO
-    if(s->type == StopType::First)
-    {
-        beginInsertRows(QModelIndex(), 0, 0);
-        stops.insert(0, StopItem());
-        endInsertRows();
-
-        const QModelIndex oldFirstIdx = index(1, 0);
-
-        StopItem& oldFirst = stops[1];
-        StopItem& first = stops[0];
-
-        first.type = StopType::First;
-        oldFirst.type = StopType::Normal;
-
-        first.addHere = 0;
-        first.arrival = oldFirst.arrival;
-
-        first.stopId = createStop(mJobId, first.arrival, first.departure, first.type);
-
-        //Shift next stops by 1 minute
-        setArrival(oldFirstIdx, first.arrival.addSecs(60), true);
-
-        emit dataChanged(index(0, 0),
-                         oldFirstIdx);
-    }
-    else
-    {
-        beginInsertRows(QModelIndex(), row, row);
-        stops.insert(row, StopItem());
-        endInsertRows();
-        s = &stops[row + 1];
-        StopItem& new_stop = stops[row];
-        const StopItem& prev = stops[row - 1];
-
-        const QTime arr = prev.departure.addSecs(60);
-        new_stop.arrival = arr;
-
-        new_stop.type = StopType::Normal;
-        new_stop.stopId = createStop(mJobId, new_stop.arrival, new_stop.departure, new_stop.type);
-        new_stop.addHere = 0;
-
-        //Set stop time and shift next stops
-        int secs = defaultStopTimeSec();
-
-        if(secs == 0)
-        {
-            //If secs is 0, trasform stop in Transit
-            setStopType(idx, StopType::Transit);
-        }
-        else
-        {
-            setDeparture(idx, arr.addSecs(secs), true);
-        }
-
-        emit dataChanged(idx,
-                         idx);
-    }
-}
-
 JobCategory StopModel::getCategory() const
 {
     return category;
@@ -1830,7 +1356,7 @@ void StopModel::setDescription(const QModelIndex& idx, const QString& descr)
     q_setDescr.execute();
     q_setDescr.finish();
 
-    emit dataChanged(idx, idx, {STOP_DESCR_ROLE});
+    emit dataChanged(idx, idx);
 }
 
 void StopModel::setTimeCalcEnabled(bool value)
@@ -2148,138 +1674,6 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, int sugges
     }
 
     return true;
-}
-
-void StopModel::insertTransitsBefore(const QPersistentModelIndex& stop)
-{
-    //TODO: should ask user when deleting transits to replace them
-    //TODO: to change path user could also change 'NextLine' in previous
-
-    if(stop.row() == 0) //It's First Stop, there is nothing before it.
-        return;
-    const StopItem to = stops.at(stop.row()); //Make a deep copy
-    db_id prevStId = 0;
-    QTime prevDep;
-
-    //Find previous stop (ignore transits in beetween)
-    int prevRow = stop.row();
-    for(; prevRow >= 0; prevRow--)
-    {
-        StopType t = stops.at(prevRow).type;
-        if(t == StopType::Normal || t == StopType::First)
-        {
-            prevStId = stops.at(prevRow).stationId;
-            prevDep = stops.at(prevRow).departure;
-            break;
-        }
-    }
-
-    int oldLastTransitRow = stop.row() - 1;
-    if(prevRow < oldLastTransitRow)
-    {
-        //Remove old transits in between
-        beginRemoveRows(QModelIndex(), prevRow + 1, oldLastTransitRow);
-
-        for(int i = prevRow + 1; i <= oldLastTransitRow; i++)
-        {
-            deleteStop(stops.at(i).stopId);
-        }
-
-        auto it = stops.begin() + prevRow + 1;
-        auto end = stops.begin() + oldLastTransitRow;
-        stops.erase(it, end + 1);
-
-        endRemoveRows();
-    }
-
-    //Count transits first
-    int count = 0;
-
-    if(count == 0)
-        return; //No transits to insert
-
-    const double speedKmH = 100;
-
-    int curRow = prevRow + 1;
-    beginInsertRows(QModelIndex(), curRow, curRow + count - 1);
-
-    stops.insert(curRow, count, StopItem());
-
-    query q(mDb);
-    q.prepare("SELECT r.id, r.pos_meters, r.stationId, fromSt.pos_meters"
-              " FROM railways r"
-              " JOIN railways fromSt ON fromSt.stationId=? AND fromSt.lineId=r.lineId"
-              " JOIN railways toSt ON toSt.stationId=? AND toSt.lineId=r.lineId"
-              " WHERE r.lineId=? AND"
-              " CASE WHEN fromSt.pos_meters < toSt.pos_meters"
-              " THEN (r.pos_meters < toSt.pos_meters AND r.pos_meters > fromSt.pos_meters)"
-              " ELSE (r.pos_meters > toSt.pos_meters AND r.pos_meters < fromSt.pos_meters)"
-              " END"
-              " ORDER BY"
-              " CASE WHEN fromSt.pos_meters > toSt.pos_meters THEN r.pos_meters END DESC,"
-              " CASE WHEN fromSt.pos_meters < toSt.pos_meters THEN r.pos_meters END ASC");
-
-    q.bind(1, prevStId);
-    q.bind(2, to.stationId);
-
-    auto it = q.begin();
-
-    int oldKmMeters = (*it).get<int>(3);
-
-    autoInsertTransits = false; //Prevent recursion from setStaton()
-    for(; it != q.end(); ++it)
-    {
-        auto r = *it;
-        db_id nodeId = r.get<db_id>(0);
-        int kmInMeters = r.get<int>(1);
-        db_id stId = r.get<db_id>(2);
-
-        //qDebug() << "Km:" << km << "St:" << stationsModel->getStName(stId) << stId;
-
-        if(timeCalcEnabled)
-        {
-            int distanceMeters = qAbs(oldKmMeters - kmInMeters);
-            //Add travel duration (At least 60 secs)
-            const double secs = (distanceMeters + accelerationDistMeters)/speedKmH * 3.6;
-            prevDep = prevDep.addSecs(qMax(60, qCeil(secs)));
-
-            int reminder = prevDep.second();
-            if(reminder > 10)
-            {
-                //Round seconds to next minute
-                prevDep = prevDep.addSecs(60 - reminder);
-            }
-            else
-            {
-                //Round seconds to previous minute
-                prevDep = prevDep.addSecs(-reminder);
-            }
-
-        }
-        else
-        {
-            prevDep = prevDep.addSecs(60);
-        }
-
-        oldKmMeters = kmInMeters;
-
-        StopItem &item = stops[curRow];
-        item.type = StopType::Transit;
-        item.addHere = 0;
-        item.stationId = 0;
-        item.arrival = item.departure = prevDep;
-        item.stopId = createStop(mJobId, item.arrival, item.departure, item.type);
-
-        setStation_internal(item, stId, nodeId);
-
-        curRow++;
-    }
-    q.finish();
-    autoInsertTransits = true; //Re-enable flag
-
-    endInsertRows();
-
-    qDebug() << "End";
 }
 
 bool StopModel::startInfoEditing() //Faster than 'startStopEditing()' use this if change doesen.t affect stops

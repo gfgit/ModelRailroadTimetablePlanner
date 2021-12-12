@@ -9,8 +9,9 @@
 
 #include "utils/types.h"
 
-#include "sqlite3pp/sqlite3pp.h"
-using namespace sqlite3pp;
+namespace sqlite3pp {
+class database;
+}
 
 class StopItem
 {
@@ -63,34 +64,28 @@ class StopModel : public QAbstractListModel
 public:
     StopModel(sqlite3pp::database& db, QObject *parent = nullptr);
 
+    // QAbstractListModel
     QVariant data(const QModelIndex &index, int role) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
 
-    typedef enum
-    {
-        NoError = 0,
-        GenericError = 1,
-        ErrorInvalidIndex,
-        ErrorInvalidArgument,
-        ErrorFirstLastTransit,
-        ErrorTransitWithCouplings
-    } ErrorCodes;
-
+    // Options
     void setTimeCalcEnabled(bool value);
     void setAutoInsertTransits(bool value);
     void setAutoMoveUncoupleToNewLast(bool value);
+    void setAutoUncoupleAtLast(bool value);
 
-    void prepareQueries();
-    void finalizeQueries();
-
+    // Loading
     void loadJobStops(db_id jobId);
     void clearJob();
 
+    // Saving
+    bool isEdited() const;
+    bool commitChanges();
+    bool revertChanges();
+
     void addStop();
-    void insertStopBefore(const QModelIndex& idx);
     void removeStop(const QModelIndex& idx);
     void removeLastIfEmpty();
 
@@ -100,11 +95,7 @@ public:
     bool updateStopTime(StopItem& item, int row, bool propagate, const QTime &oldArr, const QTime &oldDep);
     void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
 
-    void setArrival(const QModelIndex &idx, const QTime &time, bool setDepTime);
-    void setDeparture(const QModelIndex &index, QTime time, bool propagate);
-    int setStopType(const QModelIndex &idx, StopType type);
-    int setStopTypeRange(int firstRow, int lastRow, StopType type);
-    void setStation(const QPersistentModelIndex &idx, db_id stId);
+    bool setStopTypeRange(int firstRow, int lastRow, StopType type);
 
     QString getDescription(const StopItem &s) const;
     void setDescription(const QModelIndex &idx, const QString &descr);
@@ -113,10 +104,6 @@ public:
     int defaultStopTimeSec();
 
     std::pair<QTime, QTime> getFirstLastTimes() const;
-
-    bool isEdited() const;
-    bool commitChanges();
-    bool revertChanges();
 
     JobCategory getCategory() const;
     db_id getJobId() const;
@@ -144,7 +131,6 @@ public:
 #endif
 
 
-    void setAutoUncoupleAtLast(bool value);
 
     //Convinience for StopEditor
     bool trySelectTrackForStop(StopItem &item);
@@ -177,8 +163,22 @@ private slots:
     void onStationLineNameChanged();
 
 private:
+    void insertAddHere(int row, int type);
+    db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, StopType type);
+    void deleteStop(db_id stopId);
+
+    void shiftStopsBy24hoursFrom(const QTime& startTime);
+
+    friend class RSCouplingInterface;
+    bool startInfoEditing();
+    bool startStopsEditing();
+    bool endStopsEditing();
+
+private:
     //To simulate acceleration/braking we add 4 km to distance
     static constexpr double accelerationDistMeters = 4000.0;
+
+    sqlite3pp::database& mDb;
 
     QVector<StopItem> stops;
 
@@ -203,36 +203,10 @@ private:
 
     EditState editState;
 
-    database& mDb;
-
-    //TODO: do not store queries, prepare them when needed
-    query q_getRwNode;
-    query q_getCoupled;
-
-    command q_setArrival;
-    command q_setDeparture;
-
-    command q_setStopSt;
-
     bool timeCalcEnabled;
     bool autoInsertTransits;
     bool autoMoveUncoupleToNewLast;
     bool autoUncoupleAtLast;
-
-private:
-    void insertAddHere(int row, int type);
-    db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, StopType type);
-    void deleteStop(db_id stopId);
-
-    int propageteTimeOffset(int row, const int msecOffset);
-    void insertTransitsBefore(const QPersistentModelIndex &stop);
-    void setStation_internal(StopItem &item, db_id stId, db_id nodeId);
-    void shiftStopsBy24hoursFrom(const QTime& startTime);
-
-    friend class RSCouplingInterface;
-    bool startInfoEditing();
-    bool startStopsEditing();
-    bool endStopsEditing();
 };
 
 #endif // STOPMODEL_H
