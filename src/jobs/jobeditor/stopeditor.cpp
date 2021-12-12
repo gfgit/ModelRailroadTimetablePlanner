@@ -340,6 +340,7 @@ void StopEditor::arrivalChanged(const QTime& arrival)
     }
     depEdit->setMinimumTime(minDep);
     depEdit->setTime(dep); //Set after setting minimum time
+    curStop.arrival = arrival; //Reset diff to 0 for next call
 }
 
 void StopEditor::startOutTrackTimer()
