@@ -129,12 +129,21 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             q.bind(1, item.nextSegment.segmentId);
             q.step();
             auto r = q.getRows();
-            QString segName = r.get<QString>(0);
+            const QString segName = r.get<QString>(0);
             q.reset();
 
-            painter->drawText(QRectF(lineX, lineHeight, width, bottom - lineHeight),
+            const double lineRightX = left + width * 0.8;
+            painter->drawText(QRectF(lineX, lineHeight, lineRightX - left, bottom - lineHeight),
                               tr("Seg: %1").arg(segName),
                               QTextOption(Qt::AlignHCenter));
+
+            if(item.toGate.trackNum != 0)
+            {
+                painter->setPen(QPen(Qt::red, 4));
+                painter->drawText(QRectF(lineRightX, lineHeight, left + width - lineRightX, bottom - lineHeight),
+                                  QString::number(item.toGate.trackNum),
+                                  QTextOption(Qt::AlignHCenter));
+            }
         }
 
         if(isTransit)
