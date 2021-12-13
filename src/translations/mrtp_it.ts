@@ -4354,7 +4354,7 @@ Lasciare vuoto se si vuole usare il nome completo in tutti i posti.</translation
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="290"/>
         <source>Check station &lt;b&gt;name&lt;/b&gt;, &lt;b&gt;short name&lt;/b&gt; and &lt;b&gt;phone number&lt;/b&gt; to be &lt;b&gt;unique&lt;/b&gt; for this station.</source>
-        <translation>Comtrolla che il &lt;b&gt;nome&lt;/b&gt;, il &lt;b&gt;nome abbreviato&lt;/b&gt; e il &lt;b&gt; numero di telefono&lt;/b&gt; di questa stazione siano unici.</translation>
+        <translation type="unfinished">Controlla che il &lt;b&gt;nome&lt;/b&gt;, il &lt;b&gt;nome abbreviato&lt;/b&gt; e il &lt;b&gt; numero di telefono&lt;/b&gt; di questa stazione siano unici.</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="297"/>
