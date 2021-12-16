@@ -117,7 +117,6 @@ public:
 
     const QSet<db_id> &getRsToUpdate() const;
     const QSet<db_id> &getStationsToUpdate() const;
-    inline void markRsToUpdate(db_id rsId) { rsToUpdate.insert(rsId); }
 
     bool isRailwayElectrifiedAfterStop(db_id stopId) const;
     bool isRailwayElectrifiedAfterRow(int row) const;
@@ -177,6 +176,7 @@ private:
     bool startInfoEditing();
     bool startStopsEditing();
     bool endStopsEditing();
+    inline void markRsToUpdate(db_id rsId) { rsToUpdate.insert(rsId); }
 
 private:
     //To simulate acceleration/braking we add 4 km to distance
