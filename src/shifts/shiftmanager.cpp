@@ -136,7 +136,7 @@ void ShiftManager::onRemoveShift()
 
     //Ask confirmation
     int ret = QMessageBox::question(this, tr("Remove Shift?"),
-                                    tr("Are you sure you want to remove Job Shift <b>%1</b>?<br>")
+                                    tr("Are you sure you want to remove Job Shift <b>%1</b>?")
                                         .arg(model->shiftNameAtRow(idx.row())));
     if(ret != QMessageBox::Yes)
         return;
