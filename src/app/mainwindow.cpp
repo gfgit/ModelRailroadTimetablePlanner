@@ -876,6 +876,12 @@ void MainWindow::onJobSelected(db_id jobId)
     const bool selected = jobId != 0;
     ui->actionPrev_Job_Segment->setEnabled(selected);
     ui->actionNext_Job_Segment->setEnabled(selected);
+    ui->actionRemoveJob->setEnabled(selected);
+
+    QString removeJobTooltip;
+    if(!selected)
+        removeJobTooltip = tr("First select a Job by double click on graph or type in search box");
+    ui->actionRemoveJob->setToolTip(removeJobTooltip);
 }
 
 //QT-BUG 69922: If user closes a floating dock widget, when shown again it cannot dock anymore
