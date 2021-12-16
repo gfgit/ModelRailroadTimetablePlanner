@@ -33,7 +33,7 @@ enum class DB_Error
     FormatTooNew
 };
 
-//TODO: reorder functions
+
 class MeetingSession : public QObject
 {
     Q_OBJECT
@@ -63,7 +63,7 @@ signals:
     //A job was added/removed/modified belonging to this shift
     void shiftJobsChanged(db_id shiftId, db_id jobId);
 
-    //Rollingstock SYNC: wire them from models
+    //Rollingstock
     void rollingstockRemoved(db_id rsId);
     void rollingStockPlanChanged(QSet<db_id> rsIds);
     void rollingStockModified(db_id rsId);
@@ -119,7 +119,7 @@ public:
 public:
     database m_Db;
 
-//Categories:
+//Job Categories:
 public:
     QColor colorForCat(JobCategory cat);
 
@@ -144,7 +144,7 @@ public:
     bool checkImportRSTablesEmpty();
     bool clearImportRSTables();
 
-    QString fileName; //TODO: re organize variables
+    QString fileName;
 
 //AppData
 public:
