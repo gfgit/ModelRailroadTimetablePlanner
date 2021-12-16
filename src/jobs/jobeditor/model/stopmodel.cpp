@@ -558,8 +558,6 @@ void StopModel::removeStop(const QModelIndex &idx)
 
     //BIG TODO: refactor code (Too many if/else) and emit dataChanged signal
 
-    //Handle special cases: remove First or remove Last  BIG TODO
-
     if(stops.count() == 2) //First + AddHere
     {
         //Special case:
@@ -581,10 +579,16 @@ void StopModel::removeStop(const QModelIndex &idx)
 
         QModelIndex nextIdx = index(row + 1, 0);
         StopItem& next = stops[nextIdx.row()];
-        next.type = StopType::First; //FIXME: remove transit flag if set
+        next.type = StopType::First;
         const QTime oldArr = next.arrival;
         const QTime oldDep = next.arrival;
         updateStopTime(next, row + 1, true, oldArr, oldDep);
+
+        //Set type to Normal
+        command cmd(mDb, "UPDATE stops SET type=? WHERE id=?");
+        cmd.bind(1, int(StopType::Normal));
+        cmd.bind(2, next.stopId);
+        cmd.execute();
 
         deleteStop(s.stopId);
         stops.removeAt(row);
@@ -625,8 +629,9 @@ void StopModel::removeStop(const QModelIndex &idx)
         }
 
         //Clear previous 'out' gate and next segment, set type to Normal, reset Departure so it's equal to Arrival
-        command cmd(mDb, "UPDATE stops SET out_gate_conn=NULL,next_segment_conn_id=NULL,type=0,departure=arrival WHERE id=?");
-        cmd.bind(1, prev.stopId);
+        command cmd(mDb, "UPDATE stops SET out_gate_conn=NULL,next_segment_conn_id=NULL,type=?,departure=arrival WHERE id=?");
+        cmd.bind(1, int(StopType::Normal));
+        cmd.bind(2, prev.stopId);
         cmd.execute();
 
         prev.toGate = StopItem::Gate{};
@@ -658,7 +663,7 @@ void StopModel::removeStop(const QModelIndex &idx)
 
 void StopModel::removeLastIfEmpty()
 {
-    if(stops.count() < 2) //Empty stop + AddHere TODO: count < 3
+    if(stops.count() < 2) //Empty stop + AddHere
         return;
 
     int row = stops.count() - 2; //Last index (size - 1) is AddHere so we need 'size() - 2'
@@ -696,16 +701,9 @@ void StopModel::uncoupleStillCoupledAtLastStop()
         const StopItem& s = stops.at(i);
         if(s.addHere != 0 || !s.stationId)
             continue;
-        uncoupleStillCoupledAtStop(s);
 
-        //Select them to update them
-        query q_selectMoved(mDb, "SELECT rs_id FROM coupling WHERE stop_id=?");
-        q_selectMoved.bind(1, s.stopId);
-        for(auto rs : q_selectMoved)
-        {
-            db_id rsId = rs.get<db_id>(0);
-            rsToUpdate.insert(rsId);
-        }
+        //Found last stop with a station set
+        uncoupleStillCoupledAtStop(s);
         break;
     }
 }
@@ -1644,7 +1642,6 @@ bool StopModel::updateCurrentInGate(StopItem &curStop, const StopItem::Segment &
         const db_id oldGateId = curStop.fromGate.gateId;
         const db_id oldTrackNum = curStop.fromGate.trackNum;
 
-        //FIXME: select appropriate gate
         query q(mDb, "SELECT in_gate_id,out_gate_id FROM railway_segments WHERE id=?");
         q.bind(1, prevSeg.segmentId);
         if(q.step() != SQLITE_ROW)
@@ -1750,11 +1747,22 @@ bool StopModel::updateStopTime(StopItem &item, int row, bool propagate, const QT
     if(propagate)
         shiftStopsBy24hoursFrom(oldArr);
 
+    //Update Arrival and Departure in database
     command cmd(mDb);
     cmd.prepare("UPDATE stops SET arrival=?,departure=? WHERE id=?");
     cmd.bind(1, item.arrival);
     cmd.bind(2, item.departure);
     cmd.bind(3, item.stopId);
+
+    //Mark RS to update
+    query q_selectRS(mDb, "SELECT rs_id FROM coupling WHERE stop_id=?");
+    q_selectRS.bind(1, item.stopId);
+    for(auto rs : q_selectRS)
+    {
+        db_id rsId = rs.get<db_id>(0);
+        rsToUpdate.insert(rsId);
+    }
+    q_selectRS.reset();
 
     if(cmd.execute() != SQLITE_OK)
         return false;
@@ -1775,6 +1783,14 @@ bool StopModel::updateStopTime(StopItem &item, int row, bool propagate, const QT
             cmd.bind(2, s.departure);
             cmd.bind(3, s.stopId);
             cmd.execute();
+
+            q_selectRS.bind(1, s.stopId);
+            for(auto rs : q_selectRS)
+            {
+                db_id rsId = rs.get<db_id>(0);
+                rsToUpdate.insert(rsId);
+            }
+            q_selectRS.reset();
 
             stationsToUpdate.insert(s.stationId);
         }
