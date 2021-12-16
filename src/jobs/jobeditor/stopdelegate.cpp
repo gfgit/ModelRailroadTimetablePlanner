@@ -146,12 +146,13 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
         if(isTransit)
         {
+            const double transitLinePos = rect.left() + rect.width() * 0.1;
             painter->setPen(QPen(Qt::red, 5));
             painter->setBrush(Qt::red);
-            painter->drawLine(QLineF(rect.left() + rect.width() * 0.2, rect.top(),
-                                     rect.left() + rect.width() * 0.2, rect.bottom()));
+            painter->drawLine(QLineF(transitLinePos, rect.top(),
+                                     transitLinePos, rect.bottom()));
 
-            painter->drawEllipse(QRectF(rect.left() + rect.width() * 0.2 - 12 / 2,
+            painter->drawEllipse(QRectF(transitLinePos - 12 / 2,
                                         rect.top() + rect.height() * 0.4,
                                         12, 12));
         }
