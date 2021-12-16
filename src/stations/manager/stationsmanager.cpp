@@ -83,6 +83,7 @@ void StationsManager::setup_StationPage()
     vboxLayout->addWidget(stationToolBar);
 
     stationView = new QTableView(ui->stationsTab);
+    stationView->setSelectionMode(QTableView::SingleSelection);
     vboxLayout->addWidget(stationView);
 
     stationsModel = new StationsModel(Session->m_Db, this);
@@ -113,10 +114,23 @@ void StationsManager::setup_StationPage()
 
     act_addSt = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
     act_remSt = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
+    act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
+    stationToolBar->addSeparator();
     act_stJobs = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
     act_stSVG = stationToolBar->addAction(tr("SVG Plan"), this, &StationsManager::showStSVGPlan);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
-    act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
+
+    act_addSt->setToolTip(tr("Create new Station"));
+    act_remSt->setToolTip(tr("Remove current Station"));
+    act_editSt->setToolTip(tr("Edit current Station"));
+    act_stJobs->setToolTip(tr("Show Jobs passing in current Station"));
+    act_stSVG->setToolTip(tr("Show SVG Plan of current Station"));
+    act_freeRs->setToolTip(tr("Show free Rollingstock items in current Station"));
+
+    connect(stationView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &StationsManager::onStationSelectionChanged);
+    connect(stationsModel, &QAbstractItemModel::modelReset,
+            this, &StationsManager::onStationSelectionChanged);
 }
 
 void StationsManager::setup_SegmentPage()
@@ -126,6 +140,7 @@ void StationsManager::setup_SegmentPage()
     vboxLayout->addWidget(segmentsToolBar);
 
     segmentsView = new QTableView;
+    segmentsView->setSelectionMode(QTableView::SingleSelection);
     vboxLayout->addWidget(segmentsView);
 
     segmentsModel = new RailwaySegmentsModel(Session->m_Db, this);
@@ -147,9 +162,18 @@ void StationsManager::setup_SegmentPage()
     header->setSortIndicatorShown(true);
     header->setSortIndicator(segmentsModel->getSortingColumn(), Qt::AscendingOrder);
 
-    segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
-    segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
-    segmentsToolBar->addAction(tr("Edit"), this, &StationsManager::onEditSegment);
+    QAction *act_addSeg = segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
+    act_remSeg = segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
+    act_editSeg = segmentsToolBar->addAction(tr("Edit"), this, &StationsManager::onEditSegment);
+
+    act_addSeg->setToolTip(tr("Create new Railway Segment"));
+    act_remSeg->setToolTip(tr("Delete current Railway Segment"));
+    act_editSeg->setToolTip(tr("Edit current Railway Segment"));
+
+    connect(segmentsView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &StationsManager::onSegmentSelectionChanged);
+    connect(segmentsModel, &QAbstractItemModel::modelReset,
+            this, &StationsManager::onSegmentSelectionChanged);
 }
 
 void StationsManager::setup_LinePage()
@@ -159,6 +183,7 @@ void StationsManager::setup_LinePage()
     vboxLayout->addWidget(linesToolBar);
 
     linesView = new QTableView(ui->linesTab);
+    linesView->setSelectionMode(QTableView::SingleSelection);
     vboxLayout->addWidget(linesView);
 
     linesModel = new LinesModel(Session->m_Db, this);
@@ -180,9 +205,18 @@ void StationsManager::setup_LinePage()
     header->setSortIndicatorShown(true);
     header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
 
-    linesToolBar->addAction(tr("Add"), this, &StationsManager::onNewLine);
-    linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
-    linesToolBar->addAction(tr("Edit"), this, &StationsManager::onEditLine);
+    QAction *act_addLine = linesToolBar->addAction(tr("Add"), this, &StationsManager::onNewLine);
+    act_remLine = linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
+    act_editLine = linesToolBar->addAction(tr("Edit"), this, &StationsManager::onEditLine);
+
+    act_addLine->setToolTip(tr("Create new Railway Line"));
+    act_remLine->setToolTip(tr("Delete current Railway Line"));
+    act_editLine->setToolTip(tr("Edit current Railway Line"));
+
+    connect(linesView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &StationsManager::onLineSelectionChanged);
+    connect(linesModel, &QAbstractItemModel::modelReset,
+            this, &StationsManager::onLineSelectionChanged);
 }
 
 void StationsManager::showEvent(QShowEvent *e)
@@ -555,6 +589,30 @@ void StationsManager::onEditLine()
 
     //Refresh fields
     linesModel->refreshData(true);
+}
+
+void StationsManager::onStationSelectionChanged()
+{
+    const bool hasSel = stationView->selectionModel()->hasSelection();
+    act_remSt->setEnabled(hasSel);
+    act_editSt->setEnabled(hasSel);
+    act_stJobs->setEnabled(hasSel);
+    act_stSVG->setEnabled(hasSel);
+    act_freeRs->setEnabled(hasSel);
+}
+
+void StationsManager::onSegmentSelectionChanged()
+{
+    const bool hasSel = segmentsView->selectionModel()->hasSelection();
+    act_remSeg->setEnabled(hasSel);
+    act_editSeg->setEnabled(hasSel);
+}
+
+void StationsManager::onLineSelectionChanged()
+{
+    const bool hasSel = linesView->selectionModel()->hasSelection();
+    act_remLine->setEnabled(hasSel);
+    act_editLine->setEnabled(hasSel);
 }
 
 void StationsManager::setReadOnly(bool readOnly)

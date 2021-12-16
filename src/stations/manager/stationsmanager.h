@@ -70,6 +70,10 @@ private slots:
     void onRemoveLine();
     void onEditLine();
 
+    void onStationSelectionChanged();
+    void onSegmentSelectionChanged();
+    void onLineSelectionChanged();
+
 private:
     void setup_StationPage();
     void setup_SegmentPage();
@@ -100,6 +104,12 @@ private:
     QAction *act_stJobs;
     QAction *act_stSVG;
     QAction *act_freeRs;
+
+    QAction *act_remSeg;
+    QAction *act_editSeg;
+
+    QAction *act_remLine;
+    QAction *act_editLine;
 
     int oldCurrentTab;
     int clearModelTimers[NTabs];
