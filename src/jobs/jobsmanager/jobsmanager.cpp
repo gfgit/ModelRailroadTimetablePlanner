@@ -27,14 +27,19 @@ JobsManager::JobsManager(QWidget *parent) :
     setMinimumSize(750, 300);
 
     QToolBar *toolBar = new QToolBar(this);
-    toolBar->addAction(tr("New Job"), this, &JobsManager::onNewJob);
-    toolBar->addAction(tr("Remove"), this, &JobsManager::onRemove);
-    toolBar->addAction(tr("Remove All"), this, &JobsManager::onRemoveAllJobs);
-    toolBar->addAction(tr("New Same Path"), this, &JobsManager::onNewJobSamePath);
+    QAction *actNewJob = toolBar->addAction(tr("New Job"), this, &JobsManager::onNewJob);
+    actRemoveJob =       toolBar->addAction(tr("Remove"), this, &JobsManager::onRemove);
+    actNewJobSamePath =  toolBar->addAction(tr("New Same Path"), this, &JobsManager::onNewJobSamePath);
+    toolBar->addSeparator();
+    actEditJob =        toolBar->addAction(tr("Edit"), this, &JobsManager::onEditJob);
+    actShowJobInGraph = toolBar->addAction(tr("Show Graph"), this, &JobsManager::onShowJobGraph);
+    toolBar->addSeparator();
+    QAction *actRemoveAll = toolBar->addAction(tr("Remove All"), this, &JobsManager::onRemoveAllJobs);
     l->addWidget(toolBar);
 
     view = new QTableView;
-    connect(view, &QTableView::doubleClicked, this, &JobsManager::onIndexClicked);
+    view->setSelectionMode(QTableView::SingleSelection);
+    connect(view, &QTableView::doubleClicked, this, &JobsManager::editJobAtRow);
     l->addWidget(view);
 
     jobsModel = new JobListModel(Session->m_Db, this);
@@ -56,14 +61,26 @@ JobsManager::JobsManager(QWidget *parent) :
     header->setSortIndicatorShown(true);
     header->setSortIndicator(jobsModel->getSortingColumn(), Qt::AscendingOrder);
 
+    connect(view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &JobsManager::onSelectionChanged);
+    connect(jobsModel, &QAbstractItemModel::modelReset, this, &JobsManager::onSelectionChanged);
+
     jobsModel->refreshData();
+
+    //Action Tooltips
+    actNewJob->setToolTip(tr("Create new Job and open Job Editor"));
+    actRemoveJob->setToolTip(tr("Delete current Job"));
+    actNewJobSamePath->setToolTip(tr("Create new Job with same path of current one"));
+    actEditJob->setToolTip(tr("Open current Job in Job Editor.<br>"
+                              "<b>You can double click on a row to edit that job.</b>"));
+    actShowJobInGraph->setToolTip(tr("Show current Job in graph"));
+    actRemoveAll->setToolTip(tr("Delete all Jobs of this session"));
 
     setWindowTitle("Jobs Manager");
 }
 
-void JobsManager::onIndexClicked(const QModelIndex& index)
+void JobsManager::editJobAtRow(const QModelIndex& idx)
 {
-    db_id jobId = jobsModel->getIdAtRow(index.row());
+    db_id jobId = jobsModel->getIdAtRow(idx.row());
     if(!jobId)
         return;
     Session->getViewManager()->requestJobEditor(jobId);
@@ -136,4 +153,35 @@ void JobsManager::onNewJobSamePath()
 
     //Let user edit newly created job
     Session->getViewManager()->requestJobEditor(newJobId);
+}
+
+void JobsManager::onEditJob()
+{
+    editJobAtRow(view->currentIndex());
+}
+
+void JobsManager::onShowJobGraph()
+{
+    QModelIndex idx = view->currentIndex();
+    if(!idx.isValid())
+        return;
+
+    db_id jobId = jobsModel->getIdAtRow(idx.row());
+    if(!jobId)
+        return;
+
+    Session->getViewManager()->requestJobSelection(jobId, true, true);
+
+    //Minimize JobsManager to make graph visible
+    showMinimized();
+}
+
+void JobsManager::onSelectionChanged()
+{
+    const bool hasSel = view->selectionModel()->hasSelection();
+
+    actRemoveJob->setEnabled(hasSel);
+    actNewJobSamePath->setEnabled(hasSel);
+    actEditJob->setEnabled(hasSel);
+    actShowJobInGraph->setEnabled(hasSel);
 }

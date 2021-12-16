@@ -13,15 +13,26 @@ public:
     JobsManager(QWidget *parent = nullptr);
 
 private slots:
-    void onIndexClicked(const QModelIndex &index);
+    void editJobAtRow(const QModelIndex &idx);
+
     void onNewJob();
     void onRemove();
+    void onNewJobSamePath();
+    void onEditJob();
+    void onShowJobGraph();
+
     void onRemoveAllJobs();
 
-    void onNewJobSamePath();
+    void onSelectionChanged();
 
 private:
     QTableView *view;
+
+    QAction *actRemoveJob;
+    QAction *actNewJobSamePath;
+    QAction *actEditJob;
+    QAction *actShowJobInGraph;
+
     JobListModel *jobsModel;
 };
 
