@@ -1434,6 +1434,11 @@ Prima di eliminarli, vuoi riprendere l&apos;importazione?&lt;br&gt;&lt;i&gt;(Mi 
         <translation>Task in background</translation>
     </message>
     <message>
+        <location filename="../app/mainwindow.cpp" line="98"/>
+        <source>Job Editor</source>
+        <translation>Editor Servizi</translation>
+    </message>
+    <message>
         <location filename="../app/mainwindow.cpp" line="234"/>
         <source>Hold shift and click to go to &lt;b&gt;last&lt;/b&gt; job stop.</source>
         <translation>Premi shift e clicca per andare all&apos;&lt;b&gt;ultima&lt;/b&gt; fermata del treno.</translation>

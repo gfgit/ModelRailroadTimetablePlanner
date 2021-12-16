@@ -1383,6 +1383,11 @@ The file was not opened. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../app/mainwindow.cpp" line="98"/>
+        <source>Job Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../app/mainwindow.cpp" line="235"/>
         <source>Hold shift and click to go to &lt;b&gt;first&lt;/b&gt; job stop.</source>
         <translation type="unfinished"></translation>
