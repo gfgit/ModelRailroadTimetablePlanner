@@ -73,6 +73,10 @@ private slots:
 
     void showSessionRSViewer();
 
+    void onRollingstockSelectionChanged();
+    void onRsModelSelectionChanged();
+    void onRsOwnerSelectionChanged();
+
 protected:
     virtual void timerEvent(QTimerEvent *e) override;
     virtual void showEvent(QShowEvent *e) override;
@@ -90,25 +94,25 @@ private:
 
     QActionGroup      *editActGroup;
 
-    QAction           *actionNewRs;
-    QAction           *actionDeleteRs;
-    QAction           *actionDeleteAllRs;
+    QAction           *actNewRs;
+    QAction           *actDeleteRs;
+    QAction           *actDeleteAllRs;
 
-    QAction           *actionNewModel;
-    QAction           *actionNewModelWithSuffix;
-    QAction           *actionNewModelWithSuffixSearch;
-    QAction           *actionDeleteModel;
-    QAction           *actionDeleteAllRsModels;
+    QAction           *actNewModel;
+    QAction           *actNewModelWithSuffix;
+    QAction           *actNewModelWithSuffixSearch;
+    QAction           *actDeleteModel;
+    QAction           *actDeleteAllRsModels;
 
-    QAction           *actionNewOwner;
-    QAction           *actionDeleteOwner;
-    QAction           *actionDeleteAllRsOwners;
+    QAction           *actNewOwner;
+    QAction           *actDeleteOwner;
+    QAction           *actDeleteAllRsOwners;
 
-    QAction           *actionMergeModels;
-    QAction           *actionMergeOwners;
+    QAction           *actMergeModels;
+    QAction           *actMergeOwners;
 
-    QAction           *actionViewRSPlan;
-    QAction           *actionViewRSPlanSearch;
+    QAction           *actViewRSPlan;
+    QAction           *actViewRSPlanSearch;
 
     QTableView        *rsView;
     QTableView        *rsModelsView;

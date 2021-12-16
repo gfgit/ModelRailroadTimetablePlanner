@@ -72,25 +72,29 @@ void RollingStockManager::setupPages()
     rsToolBar = new QToolBar;
     rsLay->addWidget(rsToolBar);
 
-    actionNewRs      = rsToolBar->addAction(tr("New Rollingstock"),
+    actNewRs      = rsToolBar->addAction(tr("New Rollingstock"),
                                             this, &RollingStockManager::onNewRs);
-    actionDeleteRs   = rsToolBar->addAction(tr("Remove"),
+    actDeleteRs   = rsToolBar->addAction(tr("Remove"),
                                             this, &RollingStockManager::onRemoveRs);
+    rsToolBar->addSeparator();
 
-    actionViewRSPlan = rsToolBar->addAction(tr("View Plan"),
+    actViewRSPlan = rsToolBar->addAction(tr("View Plan"),
                                             this, &RollingStockManager::onViewRSPlan);
     QMenu *actionRsPlanMenu = new QMenu;
-    actionViewRSPlanSearch = actionRsPlanMenu->addAction(tr("Search rollingstock item"),
+    actViewRSPlanSearch = actionRsPlanMenu->addAction(tr("Search rollingstock item"),
                                                          this, &RollingStockManager::onViewRSPlanSearch);
-    actionViewRSPlan->setMenu(actionRsPlanMenu);
+    actViewRSPlan->setMenu(actionRsPlanMenu);
+    rsToolBar->addSeparator();
 
-    actionDeleteAllRs = rsToolBar->addAction(tr("Delete All Rollingstock"),
+    actDeleteAllRs = rsToolBar->addAction(tr("Delete All Rollingstock"),
                                              this, &RollingStockManager::onRemoveAllRs);
+    rsToolBar->addSeparator();
 
     rsToolBar->addAction(tr("Import"), this, &RollingStockManager::onImportRS);
     rsToolBar->addAction(tr("Session Summary"), this, &RollingStockManager::showSessionRSViewer);
 
     rsView = new QTableView;
+    rsView->setSelectionMode(QTableView::SingleSelection);
     rsLay->addWidget(rsView);
 
     rsSQLModel = new RollingstockSQLModel(Session->m_Db, this);
@@ -112,6 +116,10 @@ void RollingStockManager::setupPages()
     header->setSortIndicatorShown(true);
     header->setSortIndicator(rsSQLModel->getSortingColumn(), Qt::AscendingOrder);
 
+    connect(rsView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &RollingStockManager::onRollingstockSelectionChanged);
+    connect(rsSQLModel, &QAbstractItemModel::modelReset,
+            this, &RollingStockManager::onRollingstockSelectionChanged);
 
     //Models Page
     QWidget *modelsTab = new QWidget;
@@ -122,23 +130,25 @@ void RollingStockManager::setupPages()
     modelToolBar = new QToolBar;
     modelsLay->addWidget(modelToolBar);
 
-    actionNewModel    = modelToolBar->addAction(tr("New Model"),
+    actNewModel    = modelToolBar->addAction(tr("New Model"),
                                                 this, &RollingStockManager::onNewRsModel);
-    actionDeleteModel = modelToolBar->addAction(tr("Remove"),
+    actDeleteModel = modelToolBar->addAction(tr("Remove"),
                                                 this, &RollingStockManager::onRemoveRsModel);
-    actionMergeModels = modelToolBar->addAction(tr("Merge Models"),
+    actMergeModels = modelToolBar->addAction(tr("Merge Models"),
                                                 this, &RollingStockManager::onMergeModels);
-    actionNewModelWithSuffix = modelToolBar->addAction(tr("New with suffix"),
+    actNewModelWithSuffix = modelToolBar->addAction(tr("New with suffix"),
                                                        this, &RollingStockManager::onNewRsModelWithDifferentSuffixFromCurrent);
     QMenu *actionModelSuffixMenu = new QMenu;
-    actionNewModelWithSuffixSearch = actionModelSuffixMenu->addAction(tr("Search rollingstock model"),
+    actNewModelWithSuffixSearch = actionModelSuffixMenu->addAction(tr("Search rollingstock model"),
                                                                       this, &RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch);
-    actionNewModelWithSuffix->setMenu(actionModelSuffixMenu);
+    actNewModelWithSuffix->setMenu(actionModelSuffixMenu);
 
-    actionDeleteAllRsModels = modelToolBar->addAction(tr("Delete All Models"),
+    modelToolBar->addSeparator();
+    actDeleteAllRsModels = modelToolBar->addAction(tr("Delete All Models"),
                                                       this, &RollingStockManager::onRemoveAllRsModels);
 
     rsModelsView = new QTableView;
+    rsModelsView->setSelectionMode(QTableView::SingleSelection);
     modelsLay->addWidget(rsModelsView);
     modelsSQLModel = new RSModelsSQLModel(Session->m_Db, this);
     rsModelsView->setModel(modelsSQLModel);
@@ -159,6 +169,11 @@ void RollingStockManager::setupPages()
     header->setSortIndicatorShown(true);
     header->setSortIndicator(modelsSQLModel->getSortingColumn(), Qt::AscendingOrder);
 
+    connect(rsModelsView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &RollingStockManager::onRsModelSelectionChanged);
+    connect(modelsSQLModel, &QAbstractItemModel::modelReset,
+            this, &RollingStockManager::onRsModelSelectionChanged);
+
     //Owners Page
     QWidget *ownersTab = new QWidget;
     tabWidget->addTab(ownersTab, RsTypeNames::tr("Owners"));
@@ -168,16 +183,18 @@ void RollingStockManager::setupPages()
     ownersToolBar = new QToolBar;
     ownersLay->addWidget(ownersToolBar);
 
-    actionNewOwner    = ownersToolBar->addAction(tr("New Owner"), this,
+    actNewOwner    = ownersToolBar->addAction(tr("New Owner"), this,
                                                  &RollingStockManager::onNewOwner);
-    actionDeleteOwner = ownersToolBar->addAction(tr("Remove"), this,
+    actDeleteOwner = ownersToolBar->addAction(tr("Remove"), this,
                                                  &RollingStockManager::onRemoveOwner);
-    actionMergeOwners = ownersToolBar->addAction(tr("Merge Owners"), this,
+    actMergeOwners = ownersToolBar->addAction(tr("Merge Owners"), this,
                                                  &RollingStockManager::onMergeOwners);
-    actionDeleteAllRsOwners = ownersToolBar->addAction(tr("Delete All Owners"),
+    ownersToolBar->addSeparator();
+    actDeleteAllRsOwners = ownersToolBar->addAction(tr("Delete All Owners"),
                                                        this, &RollingStockManager::onRemoveAllRsOwners);
 
     ownersView = new QTableView;
+    ownersView->setSelectionMode(QTableView::SingleSelection);
     ownersLay->addWidget(ownersView);
 
     ownersSQLModel = new RSOwnersSQLModel(Session->m_Db, this);
@@ -185,6 +202,11 @@ void RollingStockManager::setupPages()
     ps = new ModelPageSwitcher(false, this);
     ownersLay->addWidget(ps);
     ps->setModel(ownersSQLModel);
+
+    connect(ownersView->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &RollingStockManager::onRsOwnerSelectionChanged);
+    connect(ownersSQLModel, &QAbstractItemModel::modelReset,
+            this, &RollingStockManager::onRsOwnerSelectionChanged);
 
     //Setup Delegates
     //auto modelDelegate = new RSModelDelegate(modelsModel, this);
@@ -221,19 +243,19 @@ void RollingStockManager::setupPages()
 
     //Setup actions
     editActGroup = new QActionGroup(this);
-    editActGroup->addAction(actionNewRs);
-    editActGroup->addAction(actionDeleteRs);
-    editActGroup->addAction(actionDeleteAllRs);
-    editActGroup->addAction(actionNewModel);
-    editActGroup->addAction(actionNewModelWithSuffix);
-    editActGroup->addAction(actionNewModelWithSuffixSearch);
-    editActGroup->addAction(actionDeleteModel);
-    editActGroup->addAction(actionDeleteAllRsModels);
-    editActGroup->addAction(actionMergeModels);
-    editActGroup->addAction(actionNewOwner);
-    editActGroup->addAction(actionDeleteOwner);
-    editActGroup->addAction(actionDeleteAllRsOwners);
-    editActGroup->addAction(actionMergeOwners);
+    editActGroup->addAction(actNewRs);
+    editActGroup->addAction(actDeleteRs);
+    editActGroup->addAction(actDeleteAllRs);
+    editActGroup->addAction(actNewModel);
+    editActGroup->addAction(actNewModelWithSuffix);
+    editActGroup->addAction(actNewModelWithSuffixSearch);
+    editActGroup->addAction(actDeleteModel);
+    editActGroup->addAction(actDeleteAllRsModels);
+    editActGroup->addAction(actMergeModels);
+    editActGroup->addAction(actNewOwner);
+    editActGroup->addAction(actDeleteOwner);
+    editActGroup->addAction(actDeleteAllRsOwners);
+    editActGroup->addAction(actMergeOwners);
 }
 
 RollingStockManager::~RollingStockManager()
@@ -633,6 +655,28 @@ void RollingStockManager::onImportRS()
 void RollingStockManager::showSessionRSViewer()
 {
     Session->getViewManager()->showSessionStartEndRSViewer();
+}
+
+void RollingStockManager::onRollingstockSelectionChanged()
+{
+    const bool hasSel = rsView->selectionModel()->hasSelection();
+    actDeleteRs->setEnabled(hasSel);
+    actViewRSPlan->setEnabled(hasSel);
+}
+
+void RollingStockManager::onRsModelSelectionChanged()
+{
+    const bool hasSel = rsModelsView->selectionModel()->hasSelection();
+    actDeleteModel->setEnabled(hasSel);
+    actNewModelWithSuffix->setEnabled(hasSel);
+    actMergeModels->setEnabled(hasSel);
+}
+
+void RollingStockManager::onRsOwnerSelectionChanged()
+{
+    const bool hasSel = ownersView->selectionModel()->hasSelection();
+    actDeleteOwner->setEnabled(hasSel);
+    actMergeOwners->setEnabled(hasSel);
 }
 
 void RollingStockManager::timerEvent(QTimerEvent *e)
