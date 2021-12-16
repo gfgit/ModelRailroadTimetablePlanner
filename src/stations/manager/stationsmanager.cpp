@@ -121,11 +121,11 @@ void StationsManager::setup_StationPage()
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
 
     act_addSt->setToolTip(tr("Create new Station"));
-    act_remSt->setToolTip(tr("Remove current Station"));
-    act_editSt->setToolTip(tr("Edit current Station"));
-    act_stJobs->setToolTip(tr("Show Jobs passing in current Station"));
-    act_stSVG->setToolTip(tr("Show SVG Plan of current Station"));
-    act_freeRs->setToolTip(tr("Show free Rollingstock items in current Station"));
+    act_remSt->setToolTip(tr("Remove selected Station"));
+    act_editSt->setToolTip(tr("Edit selected Station"));
+    act_stJobs->setToolTip(tr("Show Jobs passing in selected Station"));
+    act_stSVG->setToolTip(tr("Show SVG Plan of selected Station"));
+    act_freeRs->setToolTip(tr("Show free Rollingstock items in selected Station"));
 
     connect(stationView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &StationsManager::onStationSelectionChanged);
@@ -167,8 +167,8 @@ void StationsManager::setup_SegmentPage()
     act_editSeg = segmentsToolBar->addAction(tr("Edit"), this, &StationsManager::onEditSegment);
 
     act_addSeg->setToolTip(tr("Create new Railway Segment"));
-    act_remSeg->setToolTip(tr("Delete current Railway Segment"));
-    act_editSeg->setToolTip(tr("Edit current Railway Segment"));
+    act_remSeg->setToolTip(tr("Delete selected Railway Segment"));
+    act_editSeg->setToolTip(tr("Edit selected Railway Segment"));
 
     connect(segmentsView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &StationsManager::onSegmentSelectionChanged);
@@ -210,8 +210,8 @@ void StationsManager::setup_LinePage()
     act_editLine = linesToolBar->addAction(tr("Edit"), this, &StationsManager::onEditLine);
 
     act_addLine->setToolTip(tr("Create new Railway Line"));
-    act_remLine->setToolTip(tr("Delete current Railway Line"));
-    act_editLine->setToolTip(tr("Edit current Railway Line"));
+    act_remLine->setToolTip(tr("Delete selected Railway Line"));
+    act_editLine->setToolTip(tr("Edit selected Railway Line"));
 
     connect(linesView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &StationsManager::onLineSelectionChanged);

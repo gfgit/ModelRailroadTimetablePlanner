@@ -68,11 +68,11 @@ JobsManager::JobsManager(QWidget *parent) :
 
     //Action Tooltips
     actNewJob->setToolTip(tr("Create new Job and open Job Editor"));
-    actRemoveJob->setToolTip(tr("Delete current Job"));
-    actNewJobSamePath->setToolTip(tr("Create new Job with same path of current one"));
-    actEditJob->setToolTip(tr("Open current Job in Job Editor.<br>"
-                              "<b>You can double click on a row to edit that job.</b>"));
-    actShowJobInGraph->setToolTip(tr("Show current Job in graph"));
+    actRemoveJob->setToolTip(tr("Delete selected Job"));
+    actNewJobSamePath->setToolTip(tr("Create new Job with same path of selected one"));
+    actEditJob->setToolTip(tr("Open selected Job in Job Editor.<br>"
+                              "<b>You can double click on a row to edit Job.</b>"));
+    actShowJobInGraph->setToolTip(tr("Show selected Job in graph"));
     actRemoveAll->setToolTip(tr("Delete all Jobs of this session"));
 
     setWindowTitle("Jobs Manager");

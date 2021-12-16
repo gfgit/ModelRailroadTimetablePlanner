@@ -70,9 +70,9 @@ ShiftManager::ShiftManager(QWidget *parent) :
 
     //Action Tooltips
     act_New->setToolTip(tr("Create new Job Shift"));
-    act_Remove->setToolTip(tr("Remove current Job Shift"));
-    act_displayShift->setToolTip(tr("Show current Job Shift plan"));
-    act_Sheet->setToolTip(tr("Save current Job Shift plan on file"));
+    act_Remove->setToolTip(tr("Remove selected Job Shift"));
+    act_displayShift->setToolTip(tr("Show selected Job Shift plan"));
+    act_Sheet->setToolTip(tr("Save selected Job Shift plan on file"));
     act_Graph->setToolTip(tr("Show Job Shift graph"));
 
     setWindowTitle(tr("Shift Manager"));
