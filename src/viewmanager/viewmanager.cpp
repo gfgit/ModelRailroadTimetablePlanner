@@ -19,6 +19,7 @@
 #include "jobs/jobeditor/jobpatheditor.h"
 #include "jobs/jobsmanager/jobsmanager.h"
 #include "jobs/jobsmanager/model/jobshelper.h"
+#include "utils/jobcategorystrings.h"
 
 #include "graph/model/linegraphmanager.h"
 #include "graph/model/linegraphselectionhelper.h"
@@ -640,6 +641,13 @@ bool ViewManager::removeSelectedJob()
 {
     JobStopEntry selectedJob = lineGraphManager->getCurrentSelectedJob();
     if(selectedJob.jobId == 0)
+        return false;
+
+    //Ask user confirmation
+    int ret = QMessageBox::question(m_mainWidget, tr("Remove Job?"),
+                                    tr("Are you sure you want to remove Job <b>%1</b>?")
+                                        .arg(JobCategoryName::jobName(selectedJob.jobId, selectedJob.category)));
+    if(ret != QMessageBox::Yes)
         return false;
 
     if(jobEditor)
