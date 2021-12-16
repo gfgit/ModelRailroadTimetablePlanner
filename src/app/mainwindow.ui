@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>500</width>
+    <height>400</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
-     <height>26</height>
+     <width>500</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -122,7 +122,7 @@
     <string>Remove Job</string>
    </property>
    <property name="toolTip">
-    <string>Remove selected train job</string>
+    <string>Remove Job</string>
    </property>
   </action>
   <action name="actionStations">
@@ -205,7 +205,7 @@
   </action>
   <action name="actionNext_Job_Segment">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Next Job Segment</string>
@@ -213,7 +213,7 @@
   </action>
   <action name="actionPrev_Job_Segment">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Prev Job Segment</string>

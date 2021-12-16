@@ -694,6 +694,8 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
     }
     }
 
+    enableDBActions(mode != CentralWidgetMode::StartPageMode);
+
     if(mode == CentralWidgetMode::ViewSessionMode)
     {
         if(centralWidget() != view)
@@ -703,6 +705,14 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
             view->show();
             welcomeLabel->hide();
         }
+
+        //Enable Job Creation
+        ui->actionAddJob->setEnabled(true);
+        ui->actionAddJob->setToolTip(tr("Add train job"));
+
+        //Update actions based on Job selection
+        JobStopEntry selectedJob = Session->getViewManager()->getLineGraphMgr()->getCurrentSelectedJob();
+        onJobSelected(selectedJob.jobId);
     }
     else
     {
@@ -713,9 +723,12 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
             view->hide();
             welcomeLabel->show();
         }
-    }
 
-    enableDBActions(mode != CentralWidgetMode::StartPageMode);
+        //If there aren't lines prevent from creating jobs
+        ui->actionAddJob->setEnabled(false);
+        ui->actionAddJob->setToolTip(tr("You must create at least one railway segment before adding job to this session"));
+        ui->actionRemoveJob->setEnabled(false);
+    }
 
     m_mode = mode;
 }
@@ -851,9 +864,6 @@ void MainWindow::checkLineNumber()
     if(graphObjId && m_mode != CentralWidgetMode::ViewSessionMode)
     {
         //First line was added or newly opened file -> Session has at least one line
-        ui->actionAddJob->setEnabled(true);
-        ui->actionAddJob->setToolTip(tr("Add train job"));
-        ui->actionRemoveJob->setEnabled(true);
         setCentralWidgetMode(CentralWidgetMode::ViewSessionMode);
 
         //Load first line or segment
@@ -863,10 +873,6 @@ void MainWindow::checkLineNumber()
     else if(graphObjId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
     {
         //Last line removed -> Session has no line
-        //If there aren't lines prevent from creating jobs
-        ui->actionAddJob->setEnabled(false);
-        ui->actionAddJob->setToolTip(tr("You must create at least one railway segment before adding job to this session"));
-        ui->actionRemoveJob->setEnabled(false);
         setCentralWidgetMode(CentralWidgetMode::NoLinesWarningMode);
     }
 }
@@ -879,7 +885,9 @@ void MainWindow::onJobSelected(db_id jobId)
     ui->actionRemoveJob->setEnabled(selected);
 
     QString removeJobTooltip;
-    if(!selected)
+    if(selected)
+        removeJobTooltip = tr("Remove selected Job");
+    else
         removeJobTooltip = tr("First select a Job by double click on graph or type in search box");
     ui->actionRemoveJob->setToolTip(removeJobTooltip);
 }
