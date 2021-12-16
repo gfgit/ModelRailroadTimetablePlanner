@@ -363,7 +363,7 @@ Tutte le tratte successive saranno inoltre rimosse.</translation>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="156"/>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="213"/>
         <source>TextLabel</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="149"/>
@@ -537,27 +537,27 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
     <message>
         <location filename="../utils/file_format_names.h" line="15"/>
         <source>OpenDocument Text (*.odt)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../utils/file_format_names.h" line="16"/>
         <source>MRTPlanner Session (*.ttt)</source>
-        <translation type="unfinished"></translation>
+        <translation>Sessione MRTPlanner (*.ttt)</translation>
     </message>
     <message>
         <location filename="../utils/file_format_names.h" line="17"/>
         <source>SQLite 3 Database (*.db *.sqlite *.sqlite3 *.db3)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../utils/file_format_names.h" line="18"/>
         <source>SVG vectorial image (*.svg)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../utils/file_format_names.h" line="19"/>
         <source>Portable Document Format (*.pdf)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -635,7 +635,7 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
         <location filename="../utils/sqldelegate/pageditemmodelhelper_impl.h" line="113"/>
         <source>Fetching returned less rows than expected.
 %1 instead of %2</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -659,12 +659,12 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
     <message>
         <location filename="../db_metadata/imagemetadata.cpp" line="50"/>
         <source>Cannot query database</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../db_metadata/imagemetadata.cpp" line="75"/>
         <source>Cannot create BLOB</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -956,32 +956,72 @@ Vuoi eliminare questo servizio?</translation>
         <translation>Rimuovi</translation>
     </message>
     <message>
-        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="32"/>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="37"/>
         <source>Remove All</source>
         <translation>Rimuovi Tutti</translation>
     </message>
     <message>
-        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="33"/>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="32"/>
         <source>New Same Path</source>
         <translation>Nuovo Stesso Percorso</translation>
     </message>
     <message>
-        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="88"/>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="34"/>
+        <source>Edit</source>
+        <translation>Modifica</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="35"/>
+        <source>Show Graph</source>
+        <translation>Mostra Grafico</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="70"/>
+        <source>Create new Job and open Job Editor</source>
+        <translation>Crea un nuovo Servizio e apri l&apos;Editor Servizi</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="71"/>
+        <source>Delete selected Job</source>
+        <translation>Elimina il Servizio selezionato</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="72"/>
+        <source>Create new Job with same path of selected one</source>
+        <translation>Crea un nuovo Servizio con stesso percorso di quello selezionato</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="73"/>
+        <source>Open selected Job in Job Editor.&lt;br&gt;&lt;b&gt;You can double click on a row to edit Job.&lt;/b&gt;</source>
+        <translation>Apri il Servizion selezionato nell&apos;Editor Servizi.&lt;br&gt;&lt;b&gt;Puoi fare doppio click su una riga per modificare un Servizio.&lt;/b&gt;</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="75"/>
+        <source>Show selected Job in graph</source>
+        <translation>Mostra il Servizio selezionato nel grafico</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="76"/>
+        <source>Delete all Jobs of this session</source>
+        <translation>Rimuovi tutti i Servizi di questa sessione</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="105"/>
         <source>Job deletion</source>
         <translation>Rimozione Trano</translation>
     </message>
     <message>
-        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="89"/>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="106"/>
         <source>Are you sure to delete job %1?</source>
         <translation>Sei sicuro di voler eliminare il trno %1?</translation>
     </message>
     <message>
-        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="103"/>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="120"/>
         <source>Delete all jobs?</source>
         <translation>Rimuovere tutti i servizi?</translation>
     </message>
     <message>
-        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="104"/>
+        <location filename="../jobs/jobsmanager/jobsmanager.cpp" line="121"/>
         <source>Are you really sure you want to delete all jobs from this session?</source>
         <translation>Sei veramente sicuro di voler rimuovere tutti i servizi da questa sessione?</translation>
     </message>
@@ -1155,6 +1195,7 @@ Message: %3</source>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="122"/>
+        <location filename="../app/mainwindow.ui" line="125"/>
         <source>Remove Job</source>
         <translation>Rimuovi Treno</translation>
     </message>
@@ -1204,14 +1245,9 @@ Message: %3</source>
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="855"/>
+        <location filename="../app/mainwindow.cpp" line="711"/>
         <source>Add train job</source>
         <translation>Aggiungi servizio (Treno)</translation>
-    </message>
-    <message>
-        <location filename="../app/mainwindow.ui" line="125"/>
-        <source>Remove selected train job</source>
-        <translation>Rimuovi servizio selezionato</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="130"/>
@@ -1465,9 +1501,19 @@ Il file non è stato creato. Riprova.</translation>
         <translation>&lt;p&gt;&lt;b&gt;Non ci sono linee in questa sessione&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Inizia creando il layout delle linee ferroviarie per questa sessione:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Crea le stazioni  (&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Crea le linee ferroviarie (&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt; &gt; &lt;b&gt;Pagina Linee&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Aggiungi le stazioni alle linee ferroviarie&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt; &gt; &lt;b&gt;Pagina Linee&lt;/b&gt; &gt; &lt;b&gt;Modifica Linea&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="868"/>
+        <location filename="../app/mainwindow.cpp" line="729"/>
         <source>You must create at least one railway segment before adding job to this session</source>
         <translation>Devi creare almeno una tratta ferroviaria prima di aggiungere un treno alla sessione</translation>
+    </message>
+    <message>
+        <location filename="../app/mainwindow.cpp" line="889"/>
+        <source>Remove selected Job</source>
+        <translation>Rimuovi Servizio selezionato</translation>
+    </message>
+    <message>
+        <location filename="../app/mainwindow.cpp" line="891"/>
+        <source>First select a Job by double click on graph or type in search box</source>
+        <translation>Prima seleziona un Servizio facendo dopppio click sul grafico o scrivendo nella casella di ricerca</translation>
     </message>
 </context>
 <context>
@@ -2066,7 +2112,7 @@ Estensione: (*.ods)</translation>
         <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="46"/>
         <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="93"/>
         <source>Null device</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="79"/>
@@ -2208,7 +2254,7 @@ Estensione: (*.ods)</translation>
     <message>
         <location filename="../printing/selectionpage.cpp" line="107"/>
         <source>%1 items selected.</source>
-        <translation>%1 elementi selezionati</translation>
+        <translation>%1 elementi selezionati.</translation>
     </message>
 </context>
 <context>
@@ -2284,41 +2330,41 @@ Alcuni elementi potrebbero essere già stati stampati.</translation>
         <location filename="../printing/printworker.cpp" line="140"/>
         <source>Cannot iterate items.
 Check database connection.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../printing/printworker.cpp" line="230"/>
         <source>SVG Error: cannot open output file.
 Path: &quot;%1&quot;
 Error: %2</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../printing/printworker.cpp" line="236"/>
         <source>SVG Error: generic error.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../printing/printworker.cpp" line="294"/>
         <source>PDF Error: cannot open output file.
 Path: &quot;%1&quot;
 Error: %2</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../printing/printworker.cpp" line="300"/>
         <source>PDF Error: generic error.</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../printing/printworker.cpp" line="336"/>
         <source>Cannot begin painting</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../printing/printworker.cpp" line="345"/>
         <source>Cannot create new page</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2833,105 +2879,105 @@ If you wish to remove it, please first delete all &lt;b&gt;%1&lt;/b&gt; pieces.<
     </message>
     <message>
         <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="77"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="127"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="173"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="135"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="188"/>
         <source>Remove</source>
         <translation>Rimuovi</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="80"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="81"/>
         <source>View Plan</source>
         <translation>Vedi Piano</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="83"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="84"/>
         <source>Search rollingstock item</source>
         <translation>Cerca rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="87"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="89"/>
         <source>Delete All Rollingstock</source>
         <translation>Rimuovi tutti i Rotabili</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="90"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="93"/>
         <source>Import</source>
         <translation>Importa</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="91"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="94"/>
         <source>Session Summary</source>
         <translation>Riassunto della Sessione</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="125"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="133"/>
         <source>New Model</source>
         <translation>Nuovo Modello</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="129"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="137"/>
         <source>Merge Models</source>
         <translation>Unisci Modelli</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="131"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="139"/>
         <source>New with suffix</source>
         <translation>Nuovo con suffisso</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="134"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="142"/>
         <source>Search rollingstock model</source>
         <translation>Cerca modello rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="138"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="147"/>
         <source>Delete All Models</source>
         <translation>Rimuovere tutti i modelli</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="171"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="186"/>
         <source>New Owner</source>
         <translation>Nuovo Proprietario</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="175"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="190"/>
         <source>Merge Owners</source>
         <translation>Unisci Proprietari</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="177"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="193"/>
         <source>Delete All Owners</source>
         <translation>Rimuovere tutti i proprietari</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="362"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="384"/>
         <source>Please choose a rollingstock item</source>
         <translation>Per favore scegliere un rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="363"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="385"/>
         <source>[model][.][number][:owner]</source>
         <translation>[modello][.][numero][:proprietario]</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="383"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="405"/>
         <source>Error adding rollingstock piece</source>
         <translation>Errore nell&apos;aggiungere un rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="406"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="428"/>
         <source>Delete All Rollingstock?</source>
         <translation>Rimuovi tutti i Rotabili?</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="407"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="429"/>
         <source>Are you really sure you want to delete all rollingstock from this session?
 NOTE: this will not erease model and owners, just rollingstock pieces.</source>
         <translation>Sei veramente sicuro di voler rimuovere tutti i rotabili da questa sessione?
 NOTA: i modelli e i proprietari non verranno rimossi, solo i rotabili.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="414"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="436"/>
         <source>Failed to remove rollingstock.
 Make sure there are no more couplings in this session.
 NOTE: you can remove all jobs at once from the Jobs Manager.</source>
@@ -2940,24 +2986,24 @@ Assicurarsi che non ci siano operazioni di aggancio/sgancio in questa sessione.
 NOTE: puoi rimuovere tutti i servizi in un colpo solo dal Manager Servizi.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="432"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="454"/>
         <source>Error adding model</source>
         <translation>Errore nell&apos;aggiungere un modello rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="522"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="544"/>
         <source>Delete All Rollingstock Models?</source>
         <translation>Rimuovi tutti i Modelli di Rotabili?</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="523"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="545"/>
         <source>Are you really sure you want to delete all rollingstock models from this session?
 NOTE: this can be done only if there are no rollingstock pieces in this session.</source>
         <translation>Sei veramente sicuro di voler rimuovere tutti i modelli di rotabili da questa sessione?
 NOTA: questo può essere fatto solo se non ci sono più rotabili in questa sessione.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="530"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="552"/>
         <source>Failed to remove rollingstock models.
 Make sure there are no more rollingstock pieces in this session.
 NOTE: you can remove all rollinstock pieces at once from the Rollingstock tab.</source>
@@ -2966,19 +3012,19 @@ Assicurarsi che non ci siano più rotabili in questa sessione.
 NOTE: puoi rimuovere tutti i rotabili in un colpo solo dal Manager Rotabili.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="573"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="595"/>
         <source>Delete All Rollingstock Owners?</source>
         <translation>Rimuovi tutti i Proprietari di Rotabili?</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="574"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="596"/>
         <source>Are you really sure you want to delete all rollingstock owners from this session?
 NOTE: this can be done only if there are no rollingstock pieces in this session.</source>
         <translation>Sei veramente sicuro di voler rimuovere tutti i proprietari di rotabili da questa sessione?
 NOTA: questo può essere fatto solo se non ci sono più rotabili in questa sessione.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="581"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="603"/>
         <source>Failed to remove rollingstock owners.
 Make sure there are no more rollingstock pieces in this session.
 NOTE: you can remove all rollingstock pieces at once from the Rollingstock tab.</source>
@@ -2987,35 +3033,35 @@ Assicurarsi che non ci siano più rotabili in questa sessione.
 NOTE: puoi rimuovere tutti i rotabili in un colpo solo dal Manager Rotabili.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="413"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="458"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="529"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="580"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="435"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="480"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="551"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="602"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="473"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="495"/>
         <source>Please choose a rollingstock model</source>
         <translation>Per favore scegli un modello rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="474"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="496"/>
         <source>Model</source>
         <translation>Modello</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="479"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="501"/>
         <source>You must select a valid rollingstock model.</source>
         <translation>Devi selezionare un modello rotabile valido.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="495"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="517"/>
         <source>Please choose an unique suffix for this model, or leave empty</source>
         <translation>Per favore scegli un suffisso unico per questo modello o lascia vuoto</translation>
     </message>
     <message>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="496"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="518"/>
         <source>Choose Suffix</source>
         <translation>Scegli Suffisso</translation>
     </message>
@@ -3529,13 +3575,13 @@ Per importare i rotabili devi importare anche Modelli anche Proprietari.</transl
     </message>
     <message>
         <location filename="../rollingstock/importer/pages/itemselectionpage.cpp" line="26"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="164"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="179"/>
         <source>Owners</source>
         <translation>Proprietari</translation>
     </message>
     <message>
         <location filename="../rollingstock/importer/pages/itemselectionpage.cpp" line="27"/>
-        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="118"/>
+        <location filename="../rollingstock/manager/rollingstockmanager.cpp" line="126"/>
         <source>Models</source>
         <translation>Modelli</translation>
     </message>
@@ -4123,54 +4169,89 @@ Estensione: (*.ods)</translation>
 <context>
     <name>ShiftManager</name>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="51"/>
+        <location filename="../shifts/shiftmanager.cpp" line="52"/>
         <source>New</source>
         <translation>Nuovo</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="52"/>
+        <location filename="../shifts/shiftmanager.cpp" line="53"/>
         <source>Remove</source>
         <translation>Rimuovi</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="53"/>
+        <location filename="../shifts/shiftmanager.cpp" line="55"/>
         <source>View Shift</source>
         <translation>Vedi Turno</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="54"/>
+        <location filename="../shifts/shiftmanager.cpp" line="56"/>
         <source>Sheet</source>
         <translation>Foglio</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="55"/>
+        <location filename="../shifts/shiftmanager.cpp" line="58"/>
         <source>Graph</source>
         <translation>Grafico</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="63"/>
+        <location filename="../shifts/shiftmanager.cpp" line="72"/>
+        <source>Create new Job Shift</source>
+        <translation>Crea nuovo Turno Servizi</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="73"/>
+        <source>Remove selected Job Shift</source>
+        <translation>Rimuovi il Turno Servizi selezionato</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="74"/>
+        <source>Show selected Job Shift plan</source>
+        <translation>Mostra il piano del Turno Servizi selezionato</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="75"/>
+        <source>Save selected Job Shift plan on file</source>
+        <translation>Salva il Turno Servizi selezionato su file</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="76"/>
+        <source>Show Job Shift graph</source>
+        <translation>Mostra grafico Turni Servizi</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="78"/>
         <source>Shift Manager</source>
         <translation>Manager Turno</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="102"/>
+        <location filename="../shifts/shiftmanager.cpp" line="117"/>
         <source>Error Adding Shift</source>
         <translation>Errore nell&apos;aggiungere Turno</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="103"/>
+        <location filename="../shifts/shiftmanager.cpp" line="118"/>
         <source>An error occurred while adding a new shift:
 %1</source>
         <translation>Errore nell&apos;aggiungere un nuovo turno:
 %1</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="158"/>
+        <location filename="../shifts/shiftmanager.cpp" line="138"/>
+        <source>Remove Shift?</source>
+        <translation>Rimuovere Turno?</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="139"/>
+        <source>Are you sure you want to remove Job Shift &lt;b&gt;%1&lt;/b&gt;?</source>
+        <translation>Sei sicuro di voler rimuovere il Turno Servizi &lt;b&gt;%1&lt;/b&gt;?</translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="189"/>
         <source>Save Shift Sheet</source>
         <translation>Salva Foglio Turno</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="162"/>
+        <location filename="../shifts/shiftmanager.cpp" line="193"/>
         <source>shift_%1.odt</source>
         <translation>turno_%1.odt</translation>
     </message>
@@ -4354,7 +4435,7 @@ Lasciare vuoto se si vuole usare il nome completo in tutti i posti.</translation
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="290"/>
         <source>Check station &lt;b&gt;name&lt;/b&gt;, &lt;b&gt;short name&lt;/b&gt; and &lt;b&gt;phone number&lt;/b&gt; to be &lt;b&gt;unique&lt;/b&gt; for this station.</source>
-        <translation type="unfinished">Controlla che il &lt;b&gt;nome&lt;/b&gt;, il &lt;b&gt;nome abbreviato&lt;/b&gt; e il &lt;b&gt; numero di telefono&lt;/b&gt; di questa stazione siano unici.</translation>
+        <translation>Controlla che il &lt;b&gt;nome&lt;/b&gt;, il &lt;b&gt;nome abbreviato&lt;/b&gt; e il &lt;b&gt; numero di telefono&lt;/b&gt; di questa stazione siano &lt;b&gt;unici&lt;/b&gt;.</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="297"/>
@@ -4781,7 +4862,7 @@ Può anche essere entrambi (Bidirezionale) ma non può non essere nessuno dei du
     <message>
         <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="175"/>
         <source>Cannot read data: %1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="214"/>
@@ -4791,12 +4872,12 @@ Può anche essere entrambi (Bidirezionale) ma non può non essere nessuno dei du
     <message>
         <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="215"/>
         <source>Cannot retrive details for gate %1 (%2)</source>
-        <translation type="unfinished"></translation>
+        <translation>Impossibile ottenere i dettagli del gate %1 (%2)</translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="233"/>
         <source>Gate %1</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="236"/>
@@ -5044,86 +5125,146 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
         <translation>Linee</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="114"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="150"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="183"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="115"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="165"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="208"/>
         <source>Add</source>
         <translation>Aggiungi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="115"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="151"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="184"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="116"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="166"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="209"/>
         <source>Remove</source>
         <translation>Rimuovi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="116"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="119"/>
         <source>Jobs</source>
         <translation>Servizi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="117"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="120"/>
         <source>SVG Plan</source>
         <translation>Piano SVG</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="118"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="121"/>
         <source>Free RS</source>
         <translation>Rotabili liberi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="306"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="123"/>
+        <source>Create new Station</source>
+        <translation>Crea una nuova Stazione</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="169"/>
+        <source>Create new Railway Segment</source>
+        <translation>Crea una nuova Tratta Ferroviaria (Segmento)</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="212"/>
+        <source>Create new Railway Line</source>
+        <translation>Crea una nuova Linea Ferroviaria</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="124"/>
+        <source>Remove selected Station</source>
+        <translation>Rimuvi la Stazione selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="125"/>
+        <source>Edit selected Station</source>
+        <translation>Modifica la Stazione selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="126"/>
+        <source>Show Jobs passing in selected Station</source>
+        <translation>Mostra Servizi che passano nella Stazione selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="127"/>
+        <source>Show SVG Plan of selected Station</source>
+        <translation>Mostra Piano SVG della Stazione Selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="128"/>
+        <source>Show free Rollingstock items in selected Station</source>
+        <translation>Mostra Rotabili liberi nella Stazione selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="170"/>
+        <source>Delete selected Railway Segment</source>
+        <translation>Elimina la Tratta Ferroviaria selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="171"/>
+        <source>Edit selected Railway Segment</source>
+        <translation>Modifica la Tratta Ferroviaria selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="213"/>
+        <source>Delete selected Railway Line</source>
+        <translation>Elimina la Linea Ferroviaria selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="214"/>
+        <source>Edit selected Railway Line</source>
+        <translation>Modifica la Linea Ferroviaria selezionata</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="340"/>
         <source>Add Station</source>
         <translation>Aggiungi Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="307"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="341"/>
         <source>Please choose a name for the new station.</source>
         <translation>Per favore scegli un nome per la nuova stazione.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="320"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="503"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="354"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="537"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="320"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="354"/>
         <source>Station name cannot be empty.</source>
         <translation>Il nome della stazione non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="340"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="374"/>
         <source>Station Error</source>
         <translation>Errore Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="438"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="472"/>
         <source>Cannot remove segment:
 %1</source>
         <translation>Impossibile rimuovere tratta:
 %1</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="489"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="523"/>
         <source>Add Line</source>
         <translation>Aggiungi Linea</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="490"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="524"/>
         <source>Please choose a name for the new railway line.</source>
         <translation>Per favore scegli un nome per la nuova linea.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="503"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="537"/>
         <source>Line name cannot be empty.</source>
         <translation>Il nome della linea ferroviaria non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="119"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="152"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="185"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="117"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="167"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="210"/>
         <source>Edit</source>
         <translation>Modifica</translation>
     </message>
@@ -5234,7 +5375,7 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
     <message>
         <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="227"/>
         <source>Gate Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Attenzione Gate</translation>
     </message>
     <message>
         <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="227"/>
@@ -5299,9 +5440,19 @@ Per favore scegli un altro Binario o cambia la Tratta successiva.</translation>
 <context>
     <name>ViewManager</name>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="332"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="333"/>
         <source>Station %1 has no SVG, please add one.</source>
         <translation>La Stazione di %1 non ha un piano SVG, per favore aggiungine uno.</translation>
+    </message>
+    <message>
+        <location filename="../viewmanager/viewmanager.cpp" line="647"/>
+        <source>Remove Job?</source>
+        <translation>Rimuovere Servizio?</translation>
+    </message>
+    <message>
+        <location filename="../viewmanager/viewmanager.cpp" line="648"/>
+        <source>Are you sure you want to remove Job &lt;b&gt;%1&lt;/b&gt;?</source>
+        <translation>Sei sicuro di voler rimuovere il Servizio &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
 </context>
 </TS>
