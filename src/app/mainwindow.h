@@ -79,6 +79,8 @@ private slots:
     void checkLineNumber();
 
 protected:
+    void timerEvent(QTimerEvent *e) override;
+
     void closeEvent(QCloseEvent *e) override;
 
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -94,6 +96,7 @@ private slots:
 private:
     void setup_actions();
     void showCloseWarning();
+    void stopCloseTimer();
 
     enum class CentralWidgetMode
     {
@@ -127,6 +130,8 @@ private:
     QAction* recentFileActs[MaxRecentFiles];
 
     CentralWidgetMode m_mode;
+
+    int closeTimerId;
 };
 
 #endif // MAINWINDOW_H

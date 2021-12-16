@@ -71,7 +71,8 @@ MainWindow::MainWindow(QWidget *parent) :
     searchEdit(nullptr),
     welcomeLabel(nullptr),
     recentFileActs{nullptr},
-    m_mode(CentralWidgetMode::StartPageMode)
+    m_mode(CentralWidgetMode::StartPageMode),
+    closeTimerId(0)
 {
     ui->setupUi(this);
     ui->actionAbout->setText(tr("About %1").arg(qApp->applicationDisplayName()));
@@ -165,6 +166,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     Session->getViewManager()->m_mainWidget = nullptr;
+    stopCloseTimer();
     delete ui;
 }
 
@@ -628,6 +630,15 @@ void MainWindow::showCloseWarning()
                             "Make sure there aren't any background tasks running and try again."));
 }
 
+void MainWindow::stopCloseTimer()
+{
+    if(closeTimerId)
+    {
+        killTimer(closeTimerId);
+        closeTimerId = 0;
+    }
+}
+
 void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
 {
     switch (mode)
@@ -757,7 +768,21 @@ bool MainWindow::closeSession()
     DB_Error err = Session->closeDB();
 
     if(err == DB_Error::DbBusyWhenClosing)
-        showCloseWarning();
+    {
+        if(closeTimerId)
+        {
+            //We already tried again
+
+            stopCloseTimer();
+
+            showCloseWarning();
+            return false;
+        }
+
+        //Start a timer to try again
+        closeTimerId = startTimer(1500);
+        return false;
+    }
 
     if(err != DB_Error::NoError && err != DB_Error::DbNotOpen)
         return false;
@@ -875,6 +900,17 @@ void MainWindow::checkLineNumber()
         //Last line removed -> Session has no line
         setCentralWidgetMode(CentralWidgetMode::NoLinesWarningMode);
     }
+}
+
+void MainWindow::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == closeTimerId)
+    {
+        closeSession();
+        return;
+    }
+
+    QMainWindow::timerEvent(e);
 }
 
 void MainWindow::onJobSelected(db_id jobId)
