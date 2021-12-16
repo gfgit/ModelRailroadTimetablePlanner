@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget *parent) :
     //JobPathEditor dock
     jobEditor = new JobPathEditor(this);
     viewMgr->jobEditor = jobEditor;
-    jobDock = new QDockWidget("JobEditor", this);
+    jobDock = new QDockWidget(tr("Job Editor"), this);
     jobDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     jobDock->setWidget(jobEditor);
     jobDock->installEventFilter(this); //NOTE: see MainWindow::eventFilter() below
