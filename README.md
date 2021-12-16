@@ -9,6 +9,10 @@ A cross-platform C++ application with Qt GUI for model railway timetable schedul
 
 By Filippo Gentile
 
+## Screenshots
+
+![Screenshot of ModelRailroadTimetablePlanner](Screenshot.png "ModelRailroadTimetablePlanner Screenshot")
+
 ## Goals
 
 The goal of the project is to implement
