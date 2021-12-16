@@ -9,6 +9,10 @@ Un programma multipiattaforma C++ con GUI Qt (interfaccia grafica) per creare or
 
 By Filippo Gentile
 
+## Screenshots
+
+![Screenshot di ModelRailroadTimetablePlanner](Screenshot_it.png "ModelRailroadTimetablePlanner Screenshot")
+
 ## Obiettivi
 
 L'obiettivo del progetto è implementare meccanismi
