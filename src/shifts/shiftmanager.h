@@ -33,6 +33,8 @@ private slots:
     void onSaveSheet();
     void displayGraph();
 
+    void onShiftSelectionChanged();
+
 private:
     QToolBar *toolBar;
     QTableView *view;

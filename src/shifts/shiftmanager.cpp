@@ -34,6 +34,7 @@ ShiftManager::ShiftManager(QWidget *parent) :
     l->addWidget(toolBar);
 
     view = new QTableView(this);
+    view->setSelectionMode(QTableView::SingleSelection);
     l->addWidget(view);
 
     auto ps = new ModelPageSwitcher(false, this);
@@ -50,15 +51,29 @@ ShiftManager::ShiftManager(QWidget *parent) :
 
     act_New    = toolBar->addAction(tr("New"), this, &ShiftManager::onNewShift);
     act_Remove = toolBar->addAction(tr("Remove"), this, &ShiftManager::onRemoveShift);
+    toolBar->addSeparator();
     act_displayShift   = toolBar->addAction(tr("View Shift"), this, &ShiftManager::onViewShift);
     act_Sheet  = toolBar->addAction(tr("Sheet"), this, &ShiftManager::onSaveSheet);
+    toolBar->addSeparator();
     act_Graph  = toolBar->addAction(tr("Graph"), this, &ShiftManager::displayGraph);
 
     actionGroup = new QActionGroup(this);
     actionGroup->addAction(act_New);
     actionGroup->addAction(act_Remove);
 
+    connect(view->selectionModel(), &QItemSelectionModel::selectionChanged,
+            this, &ShiftManager::onShiftSelectionChanged);
+    connect(model, &QAbstractItemModel::modelReset,
+            this, &ShiftManager::onShiftSelectionChanged);
+
     setReadOnly(false);
+
+    //Action Tooltips
+    act_New->setToolTip(tr("Create new Job Shift"));
+    act_Remove->setToolTip(tr("Remove current Job Shift"));
+    act_displayShift->setToolTip(tr("Show current Job Shift plan"));
+    act_Sheet->setToolTip(tr("Save current Job Shift plan on file"));
+    act_Graph->setToolTip(tr("Show Job Shift graph"));
 
     setWindowTitle(tr("Shift Manager"));
     setMinimumSize(300, 200);
@@ -118,6 +133,14 @@ void ShiftManager::onRemoveShift()
         return;
 
     QModelIndex idx = view->currentIndex();
+
+    //Ask confirmation
+    int ret = QMessageBox::question(this, tr("Remove Shift?"),
+                                    tr("Are you sure you want to remove Job Shift <b>%1</b>?<br>")
+                                        .arg(model->shiftNameAtRow(idx.row())));
+    if(ret != QMessageBox::Yes)
+        return;
+
     model->removeShiftAt(idx.row());
 }
 
@@ -139,6 +162,14 @@ void ShiftManager::onViewShift()
 void ShiftManager::displayGraph()
 {
     Session->getViewManager()->requestShiftGraphEditor();
+}
+
+void ShiftManager::onShiftSelectionChanged()
+{
+    const bool hasSel = view->selectionModel()->hasSelection();
+    act_Remove->setEnabled(hasSel);
+    act_displayShift->setEnabled(hasSel);
+    act_Sheet->setEnabled(hasSel);
 }
 
 void ShiftManager::onSaveSheet()
