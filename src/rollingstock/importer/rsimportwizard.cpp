@@ -66,8 +66,11 @@ RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     spinFactory->setSpecialValueText(RsImportStrings::tr("Original"));
     spinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
+    ChooseFilePage *chooseFilePage = new ChooseFilePage;
+    connect(chooseFilePage, &ChooseFilePage::fileChosen, this, &RSImportWizard::onFileChosen);
+
     setPage(OptionsPageIdx,  new OptionsPage);
-    setPage(ChooseFileIdx,   new ChooseFilePage);
+    setPage(ChooseFileIdx,   chooseFilePage);
     setPage(LoadFileIdx,     loadFilePage);
     setPage(SelectOwnersIdx, new ItemSelectionPage(this, ownersModel, nullptr, ownersModel,   RSImportedOwnersModel::MatchExisting, ModelModes::Owners));
     setPage(SelectModelsIdx, new ItemSelectionPage(this, modelsModel, nullptr, modelsModel,   RSImportedModelsModel::MatchExisting, ModelModes::Models));
@@ -262,7 +265,10 @@ bool RSImportWizard::event(QEvent *e)
     return QWizard::event(e);
 }
 
-
+void RSImportWizard::onFileChosen(const QString &filename)
+{
+    startLoadTask(filename);
+}
 
 bool RSImportWizard::startLoadTask(const QString& fileName)
 {
@@ -359,6 +365,14 @@ void RSImportWizard::setSource(RSImportWizard::ImportSource source, IOptionsWidg
     importSource = source;
     optionsMap.clear();
     options->saveSettings(optionsMap);
+
+    //Update ChooseFilePage
+    ChooseFilePage *chooseFilePage = static_cast<ChooseFilePage *>(page(ChooseFileIdx));
+    QString dlgTitle;
+    QStringList fileFormats;
+
+    options->getFileDialogOptions(dlgTitle, fileFormats);
+    chooseFilePage->setFileDlgOptions(dlgTitle, fileFormats);
 }
 
 ILoadRSTask *RSImportWizard::createLoadTask(const QMap<QString, QVariant> &arguments, const QString& fileName)

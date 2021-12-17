@@ -84,6 +84,9 @@ public: //Settings
 protected:
     bool event(QEvent *e) override;
 
+private slots:
+    void onFileChosen(const QString& filename);
+
 private:
     RSImportedOwnersModel *ownersModel;
     RSImportedModelsModel *modelsModel;

@@ -1,6 +1,8 @@
 #include "odsoptionswidget.h"
 #include "options.h"
 
+#include "utils/file_format_names.h"
+
 #include <QFormLayout>
 #include <QLabel>
 #include <QSpinBox>
@@ -39,4 +41,13 @@ void ODSOptionsWidget::saveSettings(QMap<QString, QVariant> &settings)
     settings.insert(odsFirstRowKey, odsFirstRowSpin->value());
     settings.insert(odsNumColKey, odsNumColSpin->value());
     settings.insert(odsNameColKey, odsNameColSpin->value());
+}
+
+void ODSOptionsWidget::getFileDialogOptions(QString &title, QStringList &fileFormats)
+{
+    title = tr("Open Spreadsheet");
+
+    fileFormats.reserve(2);
+    fileFormats << FileFormats::tr(FileFormats::odsFormat);
+    fileFormats << FileFormats::tr(FileFormats::allFiles);
 }
