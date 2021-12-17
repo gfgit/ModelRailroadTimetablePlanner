@@ -1,32 +1,45 @@
 #include "optionsmodel.h"
 
-#include "utils/file_format_names.h"
-
-OptionsModel::OptionsModel(QObject *parent) :
+RSImportBackendsModel::RSImportBackendsModel(QObject *parent) :
     QAbstractListModel(parent)
 {
 
 }
 
-int OptionsModel::rowCount(const QModelIndex &parent) const
+RSImportBackendsModel::~RSImportBackendsModel()
 {
-    return parent.isValid() ? 0 : int(RSImportWizard::ImportSource::NSources);
+    qDeleteAll(backends);
+    backends.clear();
 }
 
-QVariant OptionsModel::data(const QModelIndex &idx, int role) const
+int RSImportBackendsModel::rowCount(const QModelIndex &parent) const
 {
-    if(role != Qt::DisplayRole || idx.row() < 0 || idx.row() >= int(RSImportWizard::ImportSource::NSources) || idx.column() != 0)
+    return parent.isValid() ? 0 : backends.size();
+}
+
+QVariant RSImportBackendsModel::data(const QModelIndex &idx, int role) const
+{
+    if(role != Qt::DisplayRole || idx.column() != 0)
         return QVariant();
 
-    RSImportWizard::ImportSource source = RSImportWizard::ImportSource(idx.row());
-    switch (source)
-    {
-    case RSImportWizard::ImportSource::OdsImport:
-        return FileFormats::tr(FileFormats::odsFormat);
-    case RSImportWizard::ImportSource::SQLiteImport:
-        return FileFormats::tr(FileFormats::tttFormat);
-    default:
-        break;
-    }
-    return QVariant();
+    RSImportBackend *back = getBackend(idx.row());
+    if(!back)
+        return QVariant();
+
+    return back->getBackendName();
+}
+
+void RSImportBackendsModel::addBackend(RSImportBackend *backend)
+{
+    const int row = backends.size();
+    beginInsertRows(QModelIndex(), row, row);
+    backends.append(backend);
+    endInsertRows();
+}
+
+RSImportBackend *RSImportBackendsModel::getBackend(int idx) const
+{
+    if(idx < 0 || idx >= backends.size())
+        return nullptr;
+    return backends.at(idx);
 }
