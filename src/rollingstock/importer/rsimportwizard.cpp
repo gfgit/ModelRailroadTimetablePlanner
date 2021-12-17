@@ -15,18 +15,16 @@
 #include "utils/spinbox/spinboxeditorfactory.h"
 #include <QStyledItemDelegate>
 
+#include "backends/rsbackendsmodel.h"
 #include "backends/ioptionswidget.h"
-#include "backends/optionsmodel.h"
 #include "backends/loadtaskutils.h"
 #include "backends/loadprogressevent.h"
 #include "backends/importtask.h"
 #include <QThreadPool>
 
 //Backends
-#include "backends/ods/loadodstask.h"
-#include "backends/ods/odsoptionswidget.h"
-#include "backends/sqlite/loadsqlitetask.h"
-#include "backends/sqlite/sqliteoptionswidget.h"
+#include "backends/ods/rsimportodsbackend.h"
+#include "backends/sqlite/rsimportsqlitebackend.h"
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -41,9 +39,12 @@ RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     defaultSpeed(120),
     defaultRsType(RsType::FreightWagon),
     importMode(RSImportMode::ImportRSPieces),
-    importSource(ImportSource::OdsImport)
+    backendIdx(0)
 {
-    sourcesModel = new OptionsModel(this);
+    //Load backends
+    backends = new RSImportBackendsModel(this);
+    backends->addBackend(new RSImportODSBackend);
+    backends->addBackend(new RSImportSQLiteBackend);
 
     modelsModel = new RSImportedModelsModel(Session->m_Db, this);
     ownersModel = new RSImportedOwnersModel(Session->m_Db, this);
@@ -342,31 +343,29 @@ void RSImportWizard::setImportMode(int m)
     importMode = m;
 }
 
-IOptionsWidget *RSImportWizard::createOptionsWidget(RSImportWizard::ImportSource source, QWidget *parent)
+QAbstractItemModel *RSImportWizard::getBackendsModel() const
 {
-    IOptionsWidget *w = nullptr;
-    switch (source)
-    {
-    case ImportSource::OdsImport:
-        w = new ODSOptionsWidget(parent);
-        break;
-    case ImportSource::SQLiteImport:
-        w = new SQLiteOptionsWidget(parent);
-        break;
-    default:
-        break;
-    }
+    return backends;
+}
 
-    if(w)
-    {
-        w->loadSettings(optionsMap);
-    }
+IOptionsWidget *RSImportWizard::createOptionsWidget(int idx, QWidget *parent)
+{
+    RSImportBackend *back = backends->getBackend(idx);
+    if(!back)
+        return nullptr;
+
+    IOptionsWidget *w = back->createOptionsWidget();
+    if(!w)
+        return nullptr;
+
+    w->setParent(parent);
+    w->loadSettings(optionsMap);
     return w;
 }
 
-void RSImportWizard::setSource(RSImportWizard::ImportSource source, IOptionsWidget *options)
+void RSImportWizard::setSource(int idx, IOptionsWidget *options)
 {
-    importSource = source;
+    backendIdx = idx;
     optionsMap.clear();
     options->saveSettings(optionsMap);
 
@@ -381,21 +380,12 @@ void RSImportWizard::setSource(RSImportWizard::ImportSource source, IOptionsWidg
 
 ILoadRSTask *RSImportWizard::createLoadTask(const QMap<QString, QVariant> &arguments, const QString& fileName)
 {
-    ILoadRSTask *task = nullptr;
-    switch (importSource)
-    {
-    case ImportSource::OdsImport:
-    {
-        task = new LoadODSTask(arguments, Session->m_Db, importMode, defaultSpeed, defaultRsType, fileName, this);
-        break;
-    }
-    case ImportSource::SQLiteImport:
-    {
-        task = new LoadSQLiteTask(Session->m_Db, importMode, fileName, this);
-        break;
-    }
-    default:
-        break;
-    }
+    RSImportBackend *back = backends->getBackend(backendIdx);
+    if(!back)
+        return nullptr;
+
+    ILoadRSTask *task = back->createLoadTask(arguments, Session->m_Db, importMode,
+                                             defaultSpeed, defaultRsType, fileName,
+                                             this);
     return task;
 }

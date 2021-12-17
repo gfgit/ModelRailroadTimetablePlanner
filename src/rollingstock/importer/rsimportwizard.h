@@ -12,12 +12,14 @@ class RSImportedOwnersModel;
 class RSImportedModelsModel;
 class RSImportedRollingstockModel;
 
+class RSImportBackendsModel;
+class IOptionsWidget;
 class ILoadRSTask;
+
 class ImportTask;
 class LoadingPage;
 class SpinBoxEditorFactory;
 class QAbstractItemModel;
-class IOptionsWidget;
 
 class RSImportWizard : public QWizard
 {
@@ -69,15 +71,12 @@ public: //Settings
     inline int getImportMode() const { return importMode; }
     void setImportMode(int m);
 
-    inline ImportSource getImportSource() const { return importSource; }
+    inline int getBackendIdx() const { return backendIdx; }
 
-    inline QAbstractItemModel *getSourcesModel() const
-    {
-        return sourcesModel;
-    }
+    QAbstractItemModel *getBackendsModel() const;
 
-    IOptionsWidget *createOptionsWidget(ImportSource source, QWidget *parent);
-    void setSource(ImportSource source, IOptionsWidget *options);
+    IOptionsWidget *createOptionsWidget(int idx, QWidget *parent);
+    void setSource(int idx, IOptionsWidget *options);
 
     ILoadRSTask *createLoadTask(const QMap<QString, QVariant>& arguments, const QString &fileName);
 
@@ -103,8 +102,8 @@ private:
     int defaultSpeed;
     RsType defaultRsType;
     int importMode;
-    ImportSource importSource;
-    QAbstractItemModel *sourcesModel;
+    int backendIdx;
+    RSImportBackendsModel *backends;
     QMap<QString, QVariant> optionsMap;
 };
 

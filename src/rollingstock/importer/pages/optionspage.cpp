@@ -68,9 +68,9 @@ OptionsPage::OptionsPage(QWidget *parent) :
     //Specific options
     specificBox = new QGroupBox(RsImportStrings::tr("Import options"));
     QFormLayout *specificlLay = new QFormLayout(specificBox);
-    sourceCombo = new QComboBox;
-    connect(sourceCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), this, &OptionsPage::setSource);
-    specificlLay->addRow(RsImportStrings::tr("Import source:"), sourceCombo);
+    backendCombo = new QComboBox;
+    connect(backendCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), this, &OptionsPage::setSource);
+    specificlLay->addRow(RsImportStrings::tr("Import source:"), backendCombo);
     scrollArea = new QScrollArea;
     scrollArea->setWidgetResizable(true);
     scrollArea->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -82,20 +82,20 @@ OptionsPage::OptionsPage(QWidget *parent) :
 void OptionsPage::initializePage()
 {
     const RSImportWizard *w = static_cast<RSImportWizard *>(wizard());
-    sourceCombo->setModel(w->getSourcesModel());
-    setSource(int(w->getImportSource()));
+    backendCombo->setModel(w->getBackendsModel());
+    setSource(w->getBackendIdx());
     setMode(w->getImportMode());
 }
 
 bool OptionsPage::validatePage()
 {
     RSImportWizard *w = static_cast<RSImportWizard *>(wizard());
-    RSImportWizard::ImportSource source = RSImportWizard::ImportSource(sourceCombo->currentIndex());
-    if(sourceCombo->currentIndex() < 0 || !optionsWidget)
+    int backendIdx = backendCombo->currentIndex();
+    if(backendCombo->currentIndex() < 0 || !optionsWidget)
         return false;
 
     w->setDefaultTypeAndSpeed(RsType(defaultTypeCombo->currentIndex()), defaultSpeedSpin->value());
-    w->setSource(source, optionsWidget);
+    w->setSource(backendIdx, optionsWidget);
     w->setImportMode(getMode());
     return true;
 }
@@ -139,9 +139,9 @@ int OptionsPage::getMode()
     return mode;
 }
 
-void OptionsPage::setSource(int s)
+void OptionsPage::setSource(int backendIdx)
 {
-    sourceCombo->setCurrentIndex(s);
+    backendCombo->setCurrentIndex(backendIdx);
     if(optionsWidget)
     {
         scrollArea->takeWidget();
@@ -150,7 +150,7 @@ void OptionsPage::setSource(int s)
     }
 
     RSImportWizard *w = static_cast<RSImportWizard *>(wizard());
-    optionsWidget = w->createOptionsWidget(RSImportWizard::ImportSource(s), this);
+    optionsWidget = w->createOptionsWidget(backendIdx, this);
     scrollArea->setWidget(optionsWidget);
 }
 
