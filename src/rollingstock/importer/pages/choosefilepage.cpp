@@ -52,8 +52,6 @@ bool ChooseFilePage::validatePage()
 {
     QString fileName = pathEdit->text();
 
-    //TODO: allow importing from another session database (*.ttt or *.db)
-
     QFileInfo f(fileName);
     if(f.exists() && f.isFile())
     {
@@ -87,7 +85,7 @@ void ChooseFilePage::onChoose()
     {
         title = RsImportStrings::tr("Open Session");
         filters << FileFormats::tr(FileFormats::tttFormat);
-        filters << FileFormats::tr(FileFormats::sqliteFormat); //TODO: forse nascondere il fatto che usiamo un database sqlite
+        filters << FileFormats::tr(FileFormats::sqliteFormat);
         break;
     }
     default:
