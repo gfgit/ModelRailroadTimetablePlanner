@@ -1,4 +1,4 @@
-#include "optionsmodel.h"
+#include "rsbackendsmodel.h"
 
 RSImportBackendsModel::RSImportBackendsModel(QObject *parent) :
     QAbstractListModel(parent)
