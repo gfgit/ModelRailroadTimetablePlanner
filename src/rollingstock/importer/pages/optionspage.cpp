@@ -93,6 +93,8 @@ bool OptionsPage::validatePage()
     RSImportWizard::ImportSource source = RSImportWizard::ImportSource(sourceCombo->currentIndex());
     if(sourceCombo->currentIndex() < 0 || !optionsWidget)
         return false;
+
+    w->setDefaultTypeAndSpeed(RsType(defaultTypeCombo->currentIndex()), defaultSpeedSpin->value());
     w->setSource(source, optionsWidget);
     w->setImportMode(getMode());
     return true;
