@@ -2,6 +2,39 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="it_IT">
 <context>
+    <name>ChooseFilePage</name>
+    <message>
+        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="21"/>
+        <source>Insert path here or click &apos;Choose&apos; button</source>
+        <translation>Inserire percorso qui o cliccare il bottone &apos;Scegli&apos;</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="25"/>
+        <source>Choose</source>
+        <translation>Scegli</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="29"/>
+        <source>Choose file</source>
+        <translation>Scegli file</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="30"/>
+        <source>Choose a file to import in selected format</source>
+        <translation>Scegli un file da importare del formato selezionato</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="65"/>
+        <source>File doesn&apos;t exist</source>
+        <translation>Il file non esiste</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="66"/>
+        <source>Could not find file &apos;%1&apos;</source>
+        <translation>Impossibile trovare file &apos;%1&apos;</translation>
+    </message>
+</context>
+<context>
     <name>ChooseItemDlg</name>
     <message>
         <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="32"/>
@@ -1245,7 +1278,7 @@ Message: %3</source>
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="711"/>
+        <location filename="../app/mainwindow.cpp" line="722"/>
         <source>Add train job</source>
         <translation>Aggiungi servizio (Treno)</translation>
     </message>
@@ -1340,128 +1373,128 @@ Message: %3</source>
         <translation>Proprietà</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="641"/>
+        <location filename="../app/mainwindow.cpp" line="652"/>
         <source>&lt;p&gt;Open a file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Open&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create new project: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;New&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Apri un file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Apri&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo progetto: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Nuovo&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="130"/>
+        <location filename="../app/mainwindow.cpp" line="131"/>
         <source>Find</source>
         <translation>Trova</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="643"/>
+        <location filename="../app/mainwindow.cpp" line="654"/>
         <source>Open file or create a new one</source>
         <translation>Apri un file o creane uno nuovo</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="284"/>
-        <location filename="../app/mainwindow.cpp" line="500"/>
+        <location filename="../app/mainwindow.cpp" line="286"/>
+        <location filename="../app/mainwindow.cpp" line="502"/>
         <source>Backgroung Task</source>
         <translation>Task in background</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="611"/>
+        <location filename="../app/mainwindow.cpp" line="613"/>
         <source>Error saving copy</source>
         <translation>Errore salvataggio copia</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="627"/>
+        <location filename="../app/mainwindow.cpp" line="629"/>
         <source>There was an error while closing the database.
 Make sure there aren&apos;t any background tasks running and try again.</source>
         <translation>C&apos;è stao un problema nella chiusura del database.
 Assicurarsi che tutte le operazioni in background siano terminate e riprovare.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="465"/>
+        <location filename="../app/mainwindow.cpp" line="467"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="77"/>
-        <location filename="../app/mainwindow.cpp" line="252"/>
+        <location filename="../app/mainwindow.cpp" line="78"/>
+        <location filename="../app/mainwindow.cpp" line="254"/>
         <source>About %1</source>
         <translation>Informazioni su %1</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="285"/>
-        <location filename="../app/mainwindow.cpp" line="501"/>
+        <location filename="../app/mainwindow.cpp" line="287"/>
+        <location filename="../app/mainwindow.cpp" line="503"/>
         <source>Background task for checking rollingstock errors is still running.
 Do you want to cancel it?</source>
         <translation>Il task in background per il controllo errori dei rotabili è ancora in esecuzione.
 Vuoi annullarlo?</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="296"/>
+        <location filename="../app/mainwindow.cpp" line="298"/>
         <source>Open Session</source>
         <translation>Apri sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="348"/>
+        <location filename="../app/mainwindow.cpp" line="350"/>
         <source>Version is old</source>
         <translation>Vecchia versione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="360"/>
+        <location filename="../app/mainwindow.cpp" line="362"/>
         <source>Version is too new</source>
         <translation>Versione troppo recente</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="391"/>
+        <location filename="../app/mainwindow.cpp" line="393"/>
         <source>RS Import</source>
         <translation>Importa Rotabili</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="392"/>
+        <location filename="../app/mainwindow.cpp" line="394"/>
         <source>There is some rollingstock import data left in this file. Probably the application has crashed!&lt;br&gt;Before deleting it would you like to resume importation?&lt;br&gt;&lt;i&gt;(Sorry for the crash, would you like to contact me and share information about it?)&lt;/i&gt;</source>
         <translation>In questo file sono rimasti dei dati relativi all&apos;importazione rotabili. Probabilmente l&apos;applicazione è crashata!&lt;br&gt;
 Prima di eliminarli, vuoi riprendere l&apos;importazione?&lt;br&gt;&lt;i&gt;(Mi dispiace per il crash, vorresti contattarmi per condividere i dettagli del malfunzionamento?)&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="397"/>
+        <location filename="../app/mainwindow.cpp" line="399"/>
         <source>Resume importation</source>
         <translation>Riprendi importazione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="398"/>
+        <location filename="../app/mainwindow.cpp" line="400"/>
         <source>Just delete it</source>
         <translation>Elimina e basta</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="320"/>
-        <location filename="../app/mainwindow.cpp" line="536"/>
+        <location filename="../app/mainwindow.cpp" line="322"/>
+        <location filename="../app/mainwindow.cpp" line="538"/>
         <source>Background Tasks</source>
         <translation>Task in background</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="98"/>
+        <location filename="../app/mainwindow.cpp" line="99"/>
         <source>Job Editor</source>
         <translation>Editor Servizi</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="234"/>
+        <location filename="../app/mainwindow.cpp" line="236"/>
         <source>Hold shift and click to go to &lt;b&gt;last&lt;/b&gt; job stop.</source>
         <translation>Premi shift e clicca per andare all&apos;&lt;b&gt;ultima&lt;/b&gt; fermata del treno.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="235"/>
+        <location filename="../app/mainwindow.cpp" line="237"/>
         <source>Hold shift and click to go to &lt;b&gt;first&lt;/b&gt; job stop.</source>
         <translation>Premi shift e clicca per andare alla &lt;b&gt;prima&lt;/b&gt; fermata del treno.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="255"/>
+        <location filename="../app/mainwindow.cpp" line="257"/>
         <source>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;This program makes it easier to deal with timetables and trains.&lt;/p&gt;&lt;p&gt;Version: &lt;b&gt;%2&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Built: %3&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;%4&apos;&gt;%4&lt;/a&gt;&lt;/p&gt;</source>
         <translation>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;Questo programma rende più facile la gestione di treni e orari.&lt;/p&gt;&lt;p&gt;Versione: &lt;b&gt;%2&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Built: %3&lt;/p&gt;&lt;p&gt;Sito Web: &lt;a href=&apos;%4&apos;&gt;%4&lt;/a&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="321"/>
+        <location filename="../app/mainwindow.cpp" line="323"/>
         <source>Some background tasks are still running.
 The file was not opened. Try again.</source>
         <translation>Alcune operazioni in background devono ancora erminare.
 Il file non è stato aperto. Riprova.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="349"/>
+        <location filename="../app/mainwindow.cpp" line="351"/>
         <source>This file was created by an older version of %1.
 Opening it without conversion might not work and even crash the application.
 Do you want to open it anyway?</source>
@@ -1470,7 +1503,7 @@ Aprirlo senza conversione potrebbe non funzionare o addirittura terminare l&apos
 Vuoi aprirlo comunque?</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="361"/>
+        <location filename="../app/mainwindow.cpp" line="363"/>
         <source>This file was created by a newer version of %1.
 You should update the application first. Opening this file might not work or even crash.
 Do you want to open it anyway?</source>
@@ -1479,44 +1512,44 @@ Dovresti prima aggiornare l&apos;applicazione. L&apos;apertura di questo file po
 Vuoi aprirlo comunque?</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="512"/>
+        <location filename="../app/mainwindow.cpp" line="514"/>
         <source>Create new Session</source>
         <translation>Crea nuova Sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="537"/>
+        <location filename="../app/mainwindow.cpp" line="539"/>
         <source>Some background tasks are still running.
 The new file was not created. Try again.</source>
         <translation>Alcune operazioni in background devono ancora erminare.
 Il file non è stato creato. Riprova.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="576"/>
+        <location filename="../app/mainwindow.cpp" line="578"/>
         <source>Save Session Copy</source>
         <translation>Salva Copia Sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="626"/>
+        <location filename="../app/mainwindow.cpp" line="628"/>
         <source>Error while Closing</source>
         <translation>Errore nella chiusura</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="654"/>
+        <location filename="../app/mainwindow.cpp" line="665"/>
         <source>&lt;p&gt;&lt;b&gt;There are no lines in this session&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Start by creating the railway layout for this session:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Create stations (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Create railway lines (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Add stations to railway lines&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt; &gt; &lt;b&gt;Edit Line&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;&lt;b&gt;Non ci sono linee in questa sessione&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Inizia creando il layout delle linee ferroviarie per questa sessione:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Crea le stazioni  (&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Crea le linee ferroviarie (&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt; &gt; &lt;b&gt;Pagina Linee&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Aggiungi le stazioni alle linee ferroviarie&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt; &gt; &lt;b&gt;Pagina Linee&lt;/b&gt; &gt; &lt;b&gt;Modifica Linea&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="729"/>
+        <location filename="../app/mainwindow.cpp" line="740"/>
         <source>You must create at least one railway segment before adding job to this session</source>
         <translation>Devi creare almeno una tratta ferroviaria prima di aggiungere un treno alla sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="889"/>
+        <location filename="../app/mainwindow.cpp" line="925"/>
         <source>Remove selected Job</source>
         <translation>Rimuovi Servizio selezionato</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="891"/>
+        <location filename="../app/mainwindow.cpp" line="927"/>
         <source>First select a Job by double click on graph or type in search box</source>
         <translation>Prima seleziona un Servizio facendo dopppio click sul grafico o scrivendo nella casella di ricerca</translation>
     </message>
@@ -1903,7 +1936,7 @@ Assicurarsi che sia stato creato da una versione recente dell&apos;applicazione 
 <context>
     <name>ODSOptionsWidget</name>
     <message>
-        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="15"/>
+        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="17"/>
         <source>Import rollingstock pieces, models and owners from a spreadsheet file.
 The file must be a valid Open Document Format Spreadsheet V1.2
 Extension: (*.ods)</source>
@@ -1912,19 +1945,24 @@ Il file deve essere di formato Open Document Format Spreadsheet V1.2 valido
 Estensione: (*.ods)</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="20"/>
+        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="22"/>
         <source>First non-empty row that contains rollingstock piece information</source>
         <translation>Prima riga non vuota che contiene le informazioni di un rotabile</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="23"/>
+        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="25"/>
         <source>Column from which item number is extracted</source>
         <translation>Colonna da cui è estratto il numero</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="26"/>
+        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="28"/>
         <source>Column from which item model name is extracted</source>
         <translation>Colonna da cui è estratto il nome modello</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="48"/>
+        <source>Open Spreadsheet</source>
+        <translation>Apri foglio di calcolo</translation>
     </message>
 </context>
 <context>
@@ -2497,17 +2535,17 @@ Vuoi rimuovere l&apos;altra operazione di sgancio?</translation>
 <context>
     <name>RSImportWizard</name>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="80"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="84"/>
         <source>Continue Rollingstock Importation</source>
         <translation>Continua Importazione Rotabili</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="83"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="87"/>
         <source>Import Rollingstock</source>
         <translation>Importa Rotabili</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="214"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="218"/>
         <source>Completed.</source>
         <translation>Completato.</translation>
     </message>
@@ -3226,46 +3264,6 @@ NOTE: puoi rimuovere tutti i rotabili in un colpo solo dal Manager Rotabili.</tr
         <translation>Mappa a esistente</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="24"/>
-        <source>Insert path here or click &apos;Choose&apos; button</source>
-        <translation>Inserire percorso qui o cliccare il bottone &apos;Scegli&apos;</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="28"/>
-        <source>Choose</source>
-        <translation>Scegli</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="32"/>
-        <source>Choose file</source>
-        <translation>Scegli file</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="33"/>
-        <source>Choose a file to import in *.ods format</source>
-        <translation>Scegli file in formato *.ods da iportare</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="66"/>
-        <source>File doesn&apos;t exist</source>
-        <translation>Il file non esiste</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="67"/>
-        <source>Could not find file &apos;%1&apos;</source>
-        <translation>Impossibile trovare file &apos;%1&apos;</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="82"/>
-        <source>Open Spreadsheet</source>
-        <translation>Apri foglio di calcolo</translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/importer/pages/choosefilepage.cpp" line="88"/>
-        <source>Open Session</source>
-        <translation>Apri sessione</translation>
-    </message>
-    <message>
         <location filename="../rollingstock/importer/pages/fixduplicatesdlg.cpp" line="55"/>
         <source>The file constains some duplicates in item names wich need to be fixed in order to procced.
 There also may be some items with empty name.
@@ -3390,85 +3388,85 @@ Vuoi annullare il processo di importazione?</translation>
         <translation>Sorgente importazione:</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="159"/>
+        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="161"/>
         <source>Invalid option</source>
         <translation>Opzione non valida</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="160"/>
+        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="162"/>
         <source>You must at least import owners or models</source>
         <translation>Devi almeno importare Proprietari o Modelli</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="176"/>
+        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="178"/>
         <source>No rolloingstock imported</source>
         <translation>Nessun rotabile importato</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="177"/>
+        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="179"/>
         <source>No rollingstock piece will be imported.
 In order to import rollingstock pieces you must also import models and owners.</source>
         <translation>Nessun rotabile verrà importato.
 Per importare i rotabili devi importare anche Modelli anche Proprietari.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="183"/>
+        <location filename="../rollingstock/importer/pages/optionspage.cpp" line="185"/>
         <source>In order to import rollingstock pieces you must also import models and owners.</source>
         <translation>Per importare i rotabili devi importare anche Modelli anche Proprietari.</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="54"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="55"/>
         <source>File loading</source>
         <translation>Caricamento file</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="55"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="56"/>
         <source>Parsing file data...</source>
         <translation>Lettura dati file...</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="61"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="62"/>
         <source>Importing</source>
         <translation>Importazione</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="62"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="63"/>
         <source>Importing data...</source>
         <translation>Importazione dati...</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="66"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="67"/>
         <source>Original</source>
         <translation>Originale</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="106"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="110"/>
         <source>Abort import?</source>
         <translation>Annullare importazione?</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="107"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="111"/>
         <source>Do you want to import process? No data will be imported</source>
         <translation>Vuoi annullare l&apos;importazione? Nessun dato sarà importato</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="122"/>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="129"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="126"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="133"/>
         <source>Aborting...</source>
         <translation>Annullamento...</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="225"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="230"/>
         <source>Loading Error</source>
         <translation>Errore di caricamento</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="278"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="287"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="279"/>
+        <location filename="../rollingstock/importer/rsimportwizard.cpp" line="288"/>
         <source>Invalid option selected. Please try again.</source>
         <translation>Operazione non valida selezionata. Per favore riprovare.</translation>
     </message>
@@ -3651,13 +3649,18 @@ Message: %3</source>
 <context>
     <name>SQLiteOptionsWidget</name>
     <message>
-        <location filename="../rollingstock/importer/backends/sqlite/sqliteoptionswidget.cpp" line="11"/>
-        <source>Import rollingstock pieces, models and owners from another Train Timetable session file.
-The file must be a valid Train Timetable session of recent version
+        <location filename="../rollingstock/importer/backends/sqlite/sqliteoptionswidget.cpp" line="13"/>
+        <source>Import rollingstock pieces, models and owners from another MRTPlanner session file.
+The file must be a valid MRTPlanner session of recent version
 Extension: (*.ttt)</source>
-        <translation>Importa rotabili, modelli e proprietari da un&apos;altra sessione Train Timetable.
-Il file deve essere di formato Train Timetable Session valido e recente
-Estensione: (*.ods)</translation>
+        <translation>Importa rotabili, modelli e proprietari da un&apos;altra sessione MRTPlanner.
+Il file deve essere una sessione MRTPlanner valida di versione recente
+Estensione: (*.ttt)</translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/importer/backends/sqlite/sqliteoptionswidget.cpp" line="31"/>
+        <source>Open Session</source>
+        <translation>Apri sessione</translation>
     </message>
 </context>
 <context>
@@ -5413,29 +5416,29 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
 <context>
     <name>StopModel</name>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1259"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1257"/>
         <source>Track belongs to a different station.</source>
         <translation>Il Binario appartiene ad una stazione diversa.</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1264"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1262"/>
         <source>Track doesn&apos;t exist.</source>
         <translation>Binario non esistente.</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1276"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1274"/>
         <source>Track is not connected to any of station gates.</source>
         <translation>Il binario non è connesso a nessuno dei Gate della stazione.</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1302"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1300"/>
         <source>Track is not connected to in gate track.
 Please choose a new track or change previous segment.</source>
         <translation>Il Binario non è connesso al Gate di Entrata.
 Per favore scegli un altro Binario o cambia la Tratta precedente.</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1326"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1324"/>
         <source>Track is not connected to selected out gate track.
 Please choose a new out gate or out track, this might change next segment.</source>
         <translation>Il Binario non è connesso al Gate di Uscita.
