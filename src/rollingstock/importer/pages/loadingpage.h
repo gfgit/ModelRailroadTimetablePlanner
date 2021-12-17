@@ -3,22 +3,22 @@
 
 #include <QWizardPage>
 
-class RSImportWizard;
 class QProgressBar;
 
 class LoadingPage : public QWizardPage
 {
     Q_OBJECT
 public:
-    LoadingPage(RSImportWizard *w, QWidget *parent = nullptr);
+    explicit LoadingPage(QWidget *parent = nullptr);
 
     virtual bool isComplete() const override;
 
     void handleProgress(int pr, int max);
+    void setProgressCompleted(bool val);
 
 private:
-    RSImportWizard *mWizard;
     QProgressBar *progressBar;
+    bool m_isComplete;
 };
 
 #endif // LOADFILEPAGE_H

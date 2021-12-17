@@ -219,6 +219,7 @@ bool RSImportWizard::event(QEvent *e)
                 //Delete task before handling event because otherwise it is detected as still running
                 delete loadTask;
                 loadTask = nullptr;
+                loadFilePage->setProgressCompleted(true);
             }
 
             loadFilePage->handleProgress(ev->progress, ev->max);
@@ -240,6 +241,7 @@ bool RSImportWizard::event(QEvent *e)
                 //Delete task before handling event because otherwise it is detected as still running
                 delete importTask;
                 importTask = nullptr;
+                loadFilePage->setProgressCompleted(true);
             }
 
             importPage->handleProgress(ev->progress, ev->max);
@@ -286,6 +288,7 @@ bool RSImportWizard::startLoadTask(const QString& fileName)
         return false;
     }
 
+    loadFilePage->setProgressCompleted(false);
     QThreadPool::globalInstance()->start(loadTask);
     return true;
 }
@@ -305,6 +308,7 @@ void RSImportWizard::startImportTask()
     abortImportTask();
 
     importTask = new ImportTask(Session->m_Db, this);
+    loadFilePage->setProgressCompleted(false);
     QThreadPool::globalInstance()->start(importTask);
 }
 
