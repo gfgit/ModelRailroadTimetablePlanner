@@ -10,8 +10,8 @@ SQLiteOptionsWidget::SQLiteOptionsWidget(QWidget *parent) :
 {
     //SQLite Option
     QVBoxLayout *lay = new QVBoxLayout(this);
-    lay->addWidget(new QLabel(tr("Import rollingstock pieces, models and owners from another Train Timetable session file.\n"
-                                 "The file must be a valid Train Timetable session of recent version\n"
+    lay->addWidget(new QLabel(tr("Import rollingstock pieces, models and owners from another MRTPlanner session file.\n"
+                                 "The file must be a valid MRTPlanner session of recent version\n"
                                  "Extension: (*.ttt)")));
     lay->setAlignment(Qt::AlignTop | Qt::AlignRight);
 }
