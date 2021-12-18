@@ -22,6 +22,7 @@ SelectStationPage::SelectStationPage(StationImportWizard *w) :
     QVBoxLayout *lay = new QVBoxLayout(this);
 
     stationLineEdit = new CustomCompletionLineEdit(nullptr);
+    connect(stationLineEdit, &CustomCompletionLineEdit::completionDone, this, &SelectStationPage::onCompletionDone);
     lay->addWidget(stationLineEdit);
 
     openDlgBut = new QPushButton(tr("View Station"));
@@ -41,6 +42,9 @@ void SelectStationPage::setupModel(ISqlFKMatchModel *m)
 {
     stationsModel = m;
     stationLineEdit->setModel(m);
+
+    stationLineEdit->setData(0);
+    onCompletionDone(); //Trigger UI update
 }
 
 void SelectStationPage::finalizeModel()
@@ -60,6 +64,7 @@ void SelectStationPage::onCompletionDone()
 
     openDlgBut->setEnabled(mStationId != 0);
     openSvgBut->setEnabled(mStationId != 0);
+    importBut->setEnabled(mStationId != 0);
 }
 
 void SelectStationPage::openStationDlg()
@@ -67,6 +72,7 @@ void SelectStationPage::openStationDlg()
     if(!mStationId)
         return;
 
+    //TODO: avoid loading segments and disable Add Image Button
     OwningQPointer<StationEditDialog> dlg = new StationEditDialog(*mWizard->getTempDB(), this);
     dlg->setStationExternalEditingEnabled(false);
     dlg->setStationInternalEditingEnabled(false);
