@@ -35,6 +35,7 @@
 #include "stations/manager/lines/dialogs/editlinedlg.h"
 
 #include <QInputDialog>
+#include "stations/importer/stationimportwizard.h"
 #include "utils/owningqpointer.h"
 
 StationsManager::StationsManager(QWidget *parent) :
@@ -119,6 +120,8 @@ void StationsManager::setup_StationPage()
     act_stJobs = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
     act_stSVG = stationToolBar->addAction(tr("SVG Plan"), this, &StationsManager::showStSVGPlan);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
+    stationToolBar->addSeparator();
+    QAction *act_ImportSt = stationToolBar->addAction(tr("Import"), this, &StationsManager::onImportStations);
 
     act_addSt->setToolTip(tr("Create new Station"));
     act_remSt->setToolTip(tr("Remove selected Station"));
@@ -126,6 +129,7 @@ void StationsManager::setup_StationPage()
     act_stJobs->setToolTip(tr("Show Jobs passing in selected Station"));
     act_stSVG->setToolTip(tr("Show SVG Plan of selected Station"));
     act_freeRs->setToolTip(tr("Show free Rollingstock items in selected Station"));
+    act_ImportSt->setToolTip(tr("Import Stations"));
 
     connect(stationView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &StationsManager::onStationSelectionChanged);
@@ -613,6 +617,14 @@ void StationsManager::onLineSelectionChanged()
     const bool hasSel = linesView->selectionModel()->hasSelection();
     act_remLine->setEnabled(hasSel);
     act_editLine->setEnabled(hasSel);
+}
+
+void StationsManager::onImportStations()
+{
+    OwningQPointer<StationImportWizard> dlg = new StationImportWizard(this);
+    dlg->exec();
+
+    stationsModel->refreshData();
 }
 
 void StationsManager::setReadOnly(bool readOnly)

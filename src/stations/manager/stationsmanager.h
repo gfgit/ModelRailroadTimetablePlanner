@@ -74,6 +74,8 @@ private slots:
     void onSegmentSelectionChanged();
     void onLineSelectionChanged();
 
+    void onImportStations();
+
 private:
     void setup_StationPage();
     void setup_SegmentPage();
