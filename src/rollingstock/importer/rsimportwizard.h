@@ -25,13 +25,6 @@ class RSImportWizard : public QWizard
 {
     Q_OBJECT
 public:
-    enum class ImportSource
-    {
-        OdsImport = 0,
-        SQLiteImport,
-        NSources
-    };
-
     enum Pages
     {
         OptionsPageIdx = 0,
