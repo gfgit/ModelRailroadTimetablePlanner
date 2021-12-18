@@ -4,3 +4,8 @@ RSImportBackend::RSImportBackend()
 {
 
 }
+
+RSImportBackend::~RSImportBackend()
+{
+
+}

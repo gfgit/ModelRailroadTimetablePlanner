@@ -18,6 +18,7 @@ class RSImportBackend
 {
 public:
     RSImportBackend();
+    virtual ~RSImportBackend();
 
     virtual QString getBackendName() = 0;
 
