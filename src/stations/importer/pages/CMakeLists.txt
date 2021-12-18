@@ -1,10 +1,8 @@
-add_subdirectory(pages)
-
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
 
-  stations/importer/stationimportwizard.h
-  stations/importer/stationimportwizard.cpp
+  stations/importer/pages/selectstationpage.h
+  stations/importer/pages/selectstationpage.cpp
 
   PARENT_SCOPE
 )
