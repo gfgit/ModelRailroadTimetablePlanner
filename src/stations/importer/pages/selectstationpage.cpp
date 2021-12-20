@@ -8,10 +8,13 @@
 #include <QPushButton>
 
 #include "utils/owningqpointer.h"
+#include <QInputDialog>
+#include <QMessageBox>
 #include "stations/manager/stations/dialogs/stationeditdialog.h"
 
 #include "stations/manager/stations/model/stationsvghelper.h"
 #include "stations/manager/stations/dialogs/stationsvgplandlg.h"
+
 
 SelectStationPage::SelectStationPage(StationImportWizard *w) :
     QWizardPage(w),
@@ -43,8 +46,8 @@ void SelectStationPage::setupModel(ISqlFKMatchModel *m)
     stationsModel = m;
     stationLineEdit->setModel(m);
 
-    stationLineEdit->setData(0);
-    onCompletionDone(); //Trigger UI update
+    //Reset station
+    setStation(0, QString());
 }
 
 void SelectStationPage::finalizeModel()
@@ -58,13 +61,25 @@ void SelectStationPage::finalizeModel()
     }
 }
 
-void SelectStationPage::onCompletionDone()
+void SelectStationPage::setStation(db_id stId, const QString &name)
 {
-    stationLineEdit->getData(mStationId, mStName);
+    mStationId = stId;
+    mStName = name;
+
+    stationLineEdit->setData(mStationId, mStName);
 
     openDlgBut->setEnabled(mStationId != 0);
     openSvgBut->setEnabled(mStationId != 0);
     importBut->setEnabled(mStationId != 0);
+}
+
+void SelectStationPage::onCompletionDone()
+{
+    db_id stId = 0;
+    QString name;
+    stationLineEdit->getData(stId, name);
+
+    setStation(stId, name);
 }
 
 void SelectStationPage::openStationDlg()
@@ -109,5 +124,34 @@ void SelectStationPage::importSelectedStation()
 {
     if(!mStationId)
         return;
-    //TODO
+
+    //Allow changing name
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
+    dlg->setWindowTitle(tr("Add Station"));
+    dlg->setLabelText(tr("Please choose a name for the new station."));
+    dlg->setTextValue(mStName); //Initial value to original name
+
+    do{
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
+        {
+            break; //User canceled
+        }
+
+        const QString name = dlg->textValue().simplified();
+        if(name.isEmpty())
+        {
+            QMessageBox::warning(this, tr("Error"), tr("Station name cannot be empty."));
+            continue; //Second chance
+        }
+
+        if(mWizard->addStation(mStationId, name))
+        {
+            break; //Done!
+        }
+    }
+    while (true);
+
+    //Reset station
+    setStation(0, QString());
 }

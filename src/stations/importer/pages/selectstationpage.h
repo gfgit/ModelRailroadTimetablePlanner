@@ -21,6 +21,8 @@ public:
     void setupModel(ISqlFKMatchModel *m);
     void finalizeModel();
 
+    void setStation(db_id stId, const QString& name);
+
 private slots:
     void onCompletionDone();
     void openStationDlg();

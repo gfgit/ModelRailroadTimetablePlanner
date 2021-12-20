@@ -31,6 +31,7 @@ private:
     bool createDatabase(bool inMemory, const QString& fileName);
     bool closeDatabase();
 
+    friend class SelectStationPage;
     bool addStation(db_id sourceStId, const QString& newName);
 
 private:
