@@ -306,7 +306,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="gateConnections">
+     <widget class="QWidget" name="gateConnectionsTab">
       <attribute name="title">
        <string>Gate Connections</string>
       </attribute>

@@ -270,7 +270,7 @@ void StationEditDialog::setStationExternalEditingEnabled(bool enable)
 
 void StationEditDialog::setGateConnectionsVisible(bool enable)
 {
-    int idx = ui->tabWidget->indexOf(ui->gatesTab);
+    int idx = ui->tabWidget->indexOf(ui->gateConnectionsTab);
     ui->tabWidget->setTabVisible(idx, enable);
 
     //Refresh model
