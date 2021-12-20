@@ -35,6 +35,7 @@ public:
 
     void setStationInternalEditingEnabled(bool enable);
     void setStationExternalEditingEnabled(bool enable);
+    void setGateConnectionsVisible(bool enable);
 
 public slots:
     void done(int res) override;

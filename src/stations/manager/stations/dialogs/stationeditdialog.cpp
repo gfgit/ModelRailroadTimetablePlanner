@@ -235,6 +235,19 @@ void StationEditDialog::setStationInternalEditingEnabled(bool enable)
     tracksModel->setEditable(enable);
     trackConnModel->setEditable(enable);
 
+    ui->addGateButton->setEnabled(enable);
+    ui->removeGateButton->setEnabled(enable);
+
+    ui->addTrackButton->setEnabled(enable);
+    ui->removeTrackButton->setEnabled(enable);
+    ui->moveTrackUpBut->setEnabled(enable);
+    ui->moveTrackDownBut->setEnabled(enable);
+
+    ui->addTrackConnBut->setEnabled(enable);
+    ui->removeTrackConnBut->setEnabled(enable);
+    ui->trackToAllGatesBut->setEnabled(enable);
+    ui->gateToAllTracksBut->setEnabled(enable);
+
     //Station Details (but not phone)
     ui->stationNameEdit->setEnabled(enable);
     ui->shortNameEdit->setEnabled(enable);
@@ -253,6 +266,16 @@ void StationEditDialog::setStationExternalEditingEnabled(bool enable)
 
     //Phone number
     ui->phoneEdit->setEnabled(enable);
+}
+
+void StationEditDialog::setGateConnectionsVisible(bool enable)
+{
+    int idx = ui->tabWidget->indexOf(ui->gatesTab);
+    ui->tabWidget->setTabVisible(idx, enable);
+
+    //Refresh model
+    gateConnModel->clearCache();
+    gateConnModel->refreshData();
 }
 
 void StationEditDialog::done(int res)
