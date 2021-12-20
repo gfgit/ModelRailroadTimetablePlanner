@@ -32,7 +32,8 @@ private:
     bool closeDatabase();
 
     friend class SelectStationPage;
-    bool addStation(db_id sourceStId, const QString& newName);
+    bool checkNames(db_id sourceStId, const QString& newName, QString &outShortName);
+    bool addStation(db_id sourceStId, const QString& fullName, const QString &shortName);
 
     bool copySVGData(db_id sourceStId, db_id destStId);
 

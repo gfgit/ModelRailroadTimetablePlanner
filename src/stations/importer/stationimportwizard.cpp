@@ -94,14 +94,14 @@ bool StationImportWizard::closeDatabase()
     return mTempDB->disconnect() == SQLITE_OK;
 }
 
-bool StationImportWizard::addStation(db_id sourceStId, const QString &newName)
+bool StationImportWizard::checkNames(db_id sourceStId, const QString &newName, QString &outShortName)
 {
     if(!mTempDB || !mTempDB->db())
         return false;
 
     database &destDB = Session->m_Db;
 
-    query q(*mTempDB, "SELECT name, short_name, type, phone_number FROM stations WHERE id=?");
+    query q(*mTempDB, "SELECT name, short_name FROM stations WHERE id=?");
     q.bind(1, sourceStId);
     int ret = q.step();
     if(ret != SQLITE_ROW)
@@ -109,9 +109,7 @@ bool StationImportWizard::addStation(db_id sourceStId, const QString &newName)
 
     auto sourceSt = q.getRows();
     QString name = sourceSt.get<QString>(0);
-    QString shortName = sourceSt.get<QString>(1);
-    utils::StationType type = utils::StationType(sourceSt.get<int>(2));
-    int phoneNum = sourceSt.get<int>(3);
+    outShortName = sourceSt.get<QString>(1);
     q.finish();
 
     if(!newName.isEmpty())
@@ -122,27 +120,48 @@ bool StationImportWizard::addStation(db_id sourceStId, const QString &newName)
     if(q_nameExists.step() == SQLITE_ROW)
         return false; //Name exists
 
-    if(!shortName.isEmpty())
+    if(!outShortName.isEmpty())
     {
         q_nameExists.reset();
-        q_nameExists.bind(1, shortName);
+        q_nameExists.bind(1, outShortName);
         if(q_nameExists.step() == SQLITE_ROW)
-            shortName.clear(); //Name exists, remove short name
+            outShortName.clear(); //Name exists, remove short name
     }
     q_nameExists.finish();
+
+    return true;
+}
+
+bool StationImportWizard::addStation(db_id sourceStId, const QString &fullName, const QString& shortName)
+{
+    if(!mTempDB || !mTempDB->db())
+        return false;
+
+    database &destDB = Session->m_Db;
+
+    query q(*mTempDB, "SELECT type FROM stations WHERE id=?");
+    q.bind(1, sourceStId);
+    int ret = q.step();
+    if(ret != SQLITE_ROW)
+        return false;
+
+    utils::StationType type = utils::StationType(q.getRows().get<int>(0));
+    q.finish();
 
     transaction stTranaction(destDB);
 
     //Insert station
+    //NOTE: do not import phone number as it's UNIQUE for our session so it may already exist for a different station
+    //Set phone number to NULL, it can be set by the user afterwards if needed
     command cmd(destDB, "INSERT INTO stations(id,name,short_name,type,phone_number,svg_data)"
                         "VALUES(NULL,?,?,?,?,NULL)");
-    cmd.bind(1, name);
+    cmd.bind(1, fullName);
     if(shortName.isEmpty())
         cmd.bind(2); //Bind NULL
     else
         cmd.bind(2, shortName);
     cmd.bind(3, int(type));
-    cmd.bind(4, phoneNum);
+    cmd.bind(4); //Bind NULL phone number
     ret = cmd.execute();
     if(ret != SQLITE_OK)
         return false;
@@ -181,7 +200,7 @@ bool StationImportWizard::addStation(db_id sourceStId, const QString &newName)
         cmd.bind(1, destStId);
         cmd.bind(2, pos);
         cmd.bind(3, int(trackType));
-        cmd.bind(4, trackLength_cm); //FIXME: def platf
+        cmd.bind(4, trackLength_cm);
         cmd.bind(5, platfLength_cm);
         cmd.bind(6, freightLength_cm);
         cmd.bind(7, maxAxes);
