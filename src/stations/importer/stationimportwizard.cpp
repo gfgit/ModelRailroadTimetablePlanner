@@ -13,6 +13,8 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
+#include <QDebug>
+
 StationImportWizard::StationImportWizard(QWidget *parent) :
     QWizard(parent),
     mInMemory(false)
@@ -264,6 +266,99 @@ bool StationImportWizard::addStation(db_id sourceStId, const QString &newName)
         cmd.reset();
     }
 
+    //Copy SVG blob
+    copySVGData(sourceStId, destStId);
+
     stTranaction.commit();
+    return true;
+}
+
+struct SQLiteBlobDeleter
+{
+    static inline void cleanup(sqlite3_blob *pointer)
+    {
+        if(pointer)
+            sqlite3_blob_close(pointer);
+    }
+};
+
+bool StationImportWizard::copySVGData(db_id sourceStId, db_id destStId)
+{
+    database &destDB = Session->m_Db;
+
+    //Copy SVG blob
+    sqlite3_blob *ptr = nullptr;
+
+    int ret = sqlite3_blob_open(mTempDB->db(), "main", "stations", "svg_data", sourceStId, 0, &ptr);
+    if(ret != SQLITE_OK || !ptr)
+    {
+        qWarning() << "Station Import: cannot open source BLOB" << sourceStId << mTempDB->error_msg() << ret;
+        return false;
+    }
+
+    QScopedPointer<sqlite3_blob, SQLiteBlobDeleter> mSourceBlob(ptr);
+    ptr = nullptr;
+
+    const int svgSize = sqlite3_blob_bytes(mSourceBlob.get());
+    if(svgSize <= 0)
+    {
+        return true; //Nothing to copy
+    }
+
+    //Allocate SVG space
+    command cmd(destDB, "UPDATE stations SET svg_data=? WHERE id=?");
+    sqlite3_bind_zeroblob(cmd.stmt(), 1, svgSize);
+    cmd.bind(2, destStId);
+    ret = cmd.execute();
+    if(ret != SQLITE_OK)
+    {
+        qWarning() << "Station Import: cannot allocate BLOB" << destStId << destDB.error_msg() << ret;
+        return false;
+    }
+
+    ret = sqlite3_blob_open(destDB.db(), "main", "stations", "svg_data", destStId, 1, &ptr);
+    if(ret != SQLITE_OK || !ptr)
+    {
+        qWarning() << "Station Import: cannot open destination BLOB" << destStId << destDB.error_msg() << ret;
+        return false;
+    }
+
+    QScopedPointer<sqlite3_blob, SQLiteBlobDeleter> mDestBlob(ptr);
+    ptr = nullptr;
+
+    constexpr int SVG_BUF_SIZE = 8192;
+    char svgBuf[SVG_BUF_SIZE] = {0};
+    void *svgBufPtr = reinterpret_cast<void *>(svgBuf);
+    int offset = 0;
+    while(true)
+    {
+        int maxLen = SVG_BUF_SIZE;
+        if(maxLen + offset >= svgSize)
+            maxLen = svgSize - offset;
+
+        if(maxLen <= 0)
+            break;
+
+        ret = sqlite3_blob_read(mSourceBlob.get(), svgBufPtr, maxLen, offset);
+        if(ret != SQLITE_OK)
+        {
+            qWarning() << "Station Import: cannot read BLOB" << sourceStId << mTempDB->error_msg() << ret;
+            break;
+        }
+
+        ret = sqlite3_blob_write(mDestBlob.get(), svgBufPtr, maxLen, offset);
+        if(ret != SQLITE_OK || !mDestBlob)
+        {
+            qWarning() << "Station Import: cannot write BLOB" << destStId << destDB.error_msg() << ret;
+            break;
+        }
+
+        offset += maxLen;
+    }
+
+    //Close blobs
+    mSourceBlob.reset();
+    mDestBlob.reset();
+
     return true;
 }

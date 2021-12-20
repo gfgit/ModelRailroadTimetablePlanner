@@ -34,6 +34,8 @@ private:
     friend class SelectStationPage;
     bool addStation(db_id sourceStId, const QString& newName);
 
+    bool copySVGData(db_id sourceStId, db_id destStId);
+
 private:
     sqlite3pp::database *mTempDB;
     bool mInMemory;
