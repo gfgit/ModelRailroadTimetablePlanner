@@ -54,7 +54,8 @@ void setupView(QTableView *view, IPagedItemModel *model)
 StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::StationEditDialog),
-    mDb(db)
+    mDb(db),
+    mEnableInternalEdititing(false)
 {
     ui->setupUi(this);
 
@@ -230,6 +231,8 @@ db_id StationEditDialog::getStation() const
 
 void StationEditDialog::setStationInternalEditingEnabled(bool enable)
 {
+    mEnableInternalEdititing = enable;
+
     //Gates, Tracks, Track connections
     gatesModel->setEditable(enable);
     tracksModel->setEditable(enable);
@@ -254,7 +257,7 @@ void StationEditDialog::setStationInternalEditingEnabled(bool enable)
     ui->stationTypeCombo->setEnabled(enable);
 
     //SVG Image
-    updateSVGButtons(false, false);
+    updateSVGButtons(false);
 }
 
 void StationEditDialog::setStationExternalEditingEnabled(bool enable)
@@ -546,11 +549,11 @@ void StationEditDialog::addTrackConnInternal(int mode)
     while (true);
 }
 
-void StationEditDialog::updateSVGButtons(bool hasImage, bool canEdit)
+void StationEditDialog::updateSVGButtons(bool hasImage)
 {
-    ui->addSVGBut->setEnabled(!hasImage && canEdit);
-    ui->remSVGBut->setEnabled(hasImage && canEdit);
-    ui->saveSVGBut->setEnabled(hasImage && canEdit);
+    ui->addSVGBut->setEnabled(!hasImage && mEnableInternalEdititing);
+    ui->remSVGBut->setEnabled(hasImage && mEnableInternalEdititing);
+    ui->saveSVGBut->setEnabled(hasImage && mEnableInternalEdititing);
 }
 
 void StationEditDialog::removeSelectedTrackConn()
