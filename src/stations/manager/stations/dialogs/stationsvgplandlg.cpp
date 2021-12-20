@@ -94,8 +94,6 @@ void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
     std::sort(m_plan->platforms.begin(), m_plan->platforms.end());
     std::sort(m_plan->trackConnections.begin(), m_plan->trackConnections.end());
 
-    reloadDBData();
-
     dev->reset();
 
     QXmlStreamReader xml(dev);
@@ -107,7 +105,23 @@ void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
 
 void StationSVGPlanDlg::reloadDBData()
 {
-    //Clear previous data
+    clearDBData();
+
+    //Reload from database
+    QString stationName;
+    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, stationName, m_plan))
+    {
+        QMessageBox::warning(this, tr("Error Loading Station"),
+                             tr("Cannot load station from database"));
+        return;
+    }
+
+    setWindowTitle(tr("%1 Station Plan").arg(stationName));
+}
+
+void StationSVGPlanDlg::clearDBData()
+{
+    //Clear previous data obtained from Database
     for(ssplib::LabelItem& item : m_plan->labels)
     {
         item.visible = false;
@@ -139,17 +153,6 @@ void StationSVGPlanDlg::reloadDBData()
         item.info.gateId = 0;
         item.info.trackId = 0;
     }
-
-    //Reload from database
-    QString stationName;
-    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, stationName, m_plan))
-    {
-        QMessageBox::warning(this, tr("Error Loading Station"),
-                             tr("Cannot load station from database"));
-        return;
-    }
-
-    setWindowTitle(tr("%1 Station Plan").arg(stationName));
 }
 
 bool StationSVGPlanDlg::stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut)

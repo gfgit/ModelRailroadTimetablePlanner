@@ -31,6 +31,7 @@ public:
     void setStation(db_id stId);
     void reloadSVG(QIODevice *dev);
     void reloadDBData();
+    void clearDBData();
 
     static bool stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut);
 
