@@ -5,8 +5,7 @@
 
 #include "utils/file_format_names.h"
 
-#include "stations/match_models/stationsmatchmodel.h"
-#include "stations/station_utils.h"
+#include "model/importstationmodel.h"
 
 #include "app/session.h"
 
@@ -76,9 +75,7 @@ bool StationImportWizard::createDatabase(bool inMemory, const QString &fileName)
 
     mInMemory = inMemory;
 
-    StationsMatchModel *m = new StationsMatchModel(*mTempDB, this);
-    m->setFilter(0);
-
+    ImportStationModel *m = new ImportStationModel(*mTempDB, this);
     p->setupModel(m);
     return true;
 }

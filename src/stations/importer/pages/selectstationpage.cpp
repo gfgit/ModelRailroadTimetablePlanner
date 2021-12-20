@@ -2,10 +2,10 @@
 #include "../stationimportwizard.h"
 
 #include <QVBoxLayout>
-#include "utils/sqldelegate/customcompletionlineedit.h"
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
-
-#include <QPushButton>
+#include <QToolBar>
+#include <QLineEdit>
+#include <QTableView>
+#include <QHeaderView>
 
 #include "utils/owningqpointer.h"
 #include <QInputDialog>
@@ -15,44 +15,72 @@
 #include "stations/manager/stations/model/stationsvghelper.h"
 #include "stations/manager/stations/dialogs/stationsvgplandlg.h"
 
+#include "utils/sqldelegate/modelpageswitcher.h"
+#include "stations/importer/model/importstationmodel.h"
+
 
 SelectStationPage::SelectStationPage(StationImportWizard *w) :
     QWizardPage(w),
     mWizard(w),
     stationsModel(nullptr),
-    mStationId(0)
+    filterTimerId(0)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    stationLineEdit = new CustomCompletionLineEdit(nullptr);
-    connect(stationLineEdit, &CustomCompletionLineEdit::completionDone, this, &SelectStationPage::onCompletionDone);
-    lay->addWidget(stationLineEdit);
+    toolBar = new QToolBar;
+    lay->addWidget(toolBar);
 
-    openDlgBut = new QPushButton(tr("View Station"));
-    connect(openDlgBut, &QPushButton::clicked, this, &SelectStationPage::openStationDlg);
-    lay->addWidget(openDlgBut);
+    view = new QTableView;
+    lay->addWidget(view);
 
-    openSvgBut = new QPushButton(tr("View SVG"));
-    connect(openSvgBut, &QPushButton::clicked, this, &SelectStationPage::openStationSVGPlan);
-    lay->addWidget(openSvgBut);
+    auto ps = new ModelPageSwitcher(false, this);
+    lay->addWidget(ps);
+    ps->setModel(stationsModel);
+    //Custom colun sorting
+    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
+    QHeaderView *header = view->horizontalHeader();
+    disconnect(header, SIGNAL(sectionPressed(int)), view, SLOT(selectColumn(int)));
+    disconnect(header, SIGNAL(sectionEntered(int)), view, SLOT(_q_selectColumn(int)));
+    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
+            {
+                if(!stationsModel)
+                    return;
+                stationsModel->setSortingColumn(section);
+                header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
+            });
+    header->setSortIndicatorShown(true);
 
-    importBut = new QPushButton(tr("Import Station"));
-    connect(importBut, &QPushButton::clicked, this, &SelectStationPage::importSelectedStation);
-    lay->addWidget(importBut);
+    filterNameEdit = new QLineEdit(nullptr);
+    filterNameEdit->setPlaceholderText(tr("Filter..."));
+    filterNameEdit->setClearButtonEnabled(true);
+    connect(filterNameEdit, &QLineEdit::textEdited, this, &SelectStationPage::startFilterTimer);
+
+    actOpenStDlg = toolBar->addAction(tr("View Info"), this, &SelectStationPage::openStationDlg);
+    actOpenSVGPlan = toolBar->addAction(tr("SVG Plan"), this, &SelectStationPage::openStationSVGPlan);
+    toolBar->addSeparator();
+    actImportSt = toolBar->addAction(tr("Import"), this, &SelectStationPage::importSelectedStation);
+    toolBar->addSeparator();
+    toolBar->addWidget(filterNameEdit);
 }
 
-void SelectStationPage::setupModel(ISqlFKMatchModel *m)
+void SelectStationPage::setupModel(ImportStationModel *m)
 {
     stationsModel = m;
-    stationLineEdit->setModel(m);
+    view->setModel(m);
 
-    //Reset station
-    setStation(0, QString());
+    //Sync sort indicator
+    view->horizontalHeader()->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
+
+    //Refresh model
+    filterNameEdit->clear();
+    updateFilter();
 }
 
 void SelectStationPage::finalizeModel()
 {
-    stationLineEdit->setModel(nullptr);
+    stopFilterTimer();
+
+    view->setModel(nullptr);
 
     if(stationsModel)
     {
@@ -61,49 +89,49 @@ void SelectStationPage::finalizeModel()
     }
 }
 
-void SelectStationPage::setStation(db_id stId, const QString &name)
+void SelectStationPage::updateFilter()
 {
-    mStationId = stId;
-    mStName = name;
-
-    stationLineEdit->setData(mStationId, mStName);
-
-    openDlgBut->setEnabled(mStationId != 0);
-    openSvgBut->setEnabled(mStationId != 0);
-    importBut->setEnabled(mStationId != 0);
-}
-
-void SelectStationPage::onCompletionDone()
-{
-    db_id stId = 0;
-    QString name;
-    stationLineEdit->getData(stId, name);
-
-    setStation(stId, name);
+    stopFilterTimer();
+    QString nameFilter = filterNameEdit->text();
+    stationsModel->filterByName(nameFilter);
 }
 
 void SelectStationPage::openStationDlg()
 {
-    if(!mStationId)
+    if(!view->selectionModel()->hasSelection())
         return;
 
-    //TODO: avoid loading segments and disable Add Image Button
+    QModelIndex idx = view->currentIndex();
+    db_id stationId = stationsModel->getIdAtRow(idx.row());
+    if(!stationId)
+        return;
+
+    const QString stName = stationsModel->getNameAtRow(idx.row());
+
     OwningQPointer<StationEditDialog> dlg = new StationEditDialog(*mWizard->getTempDB(), this);
     dlg->setStationExternalEditingEnabled(false);
     dlg->setStationInternalEditingEnabled(false);
+    dlg->setGateConnectionsVisible(false);
 
-    dlg->setStation(mStationId);
-    dlg->setWindowTitle(tr("Imported %1").arg(mStName));
+    dlg->setStation(stationId);
+    dlg->setWindowTitle(tr("Imported %1").arg(stName));
     dlg->exec();
 }
 
 void SelectStationPage::openStationSVGPlan()
 {
-    if(!mStationId)
+    if(!view->selectionModel()->hasSelection())
         return;
 
+    QModelIndex idx = view->currentIndex();
+    db_id stationId = stationsModel->getIdAtRow(idx.row());
+    if(!stationId)
+        return;
+
+    const QString stName = stationsModel->getNameAtRow(idx.row());
+
     std::unique_ptr<QIODevice> dev;
-    dev.reset(StationSVGHelper::loadImage(*mWizard->getTempDB(), mStationId));
+    dev.reset(StationSVGHelper::loadImage(*mWizard->getTempDB(), stationId));
     if(!dev || !dev->open(QIODevice::ReadOnly))
         return;
 
@@ -114,7 +142,7 @@ void SelectStationPage::openStationSVGPlan()
     lay->addWidget(svg);
 
     svg->reloadSVG(dev.get());
-    dlg->setWindowTitle(tr("Imported %1 SVG Plan").arg(mStName));
+    dlg->setWindowTitle(tr("Imported %1 SVG Plan").arg(stName));
 
     dlg->resize(300, 200);
     dlg->exec();
@@ -122,14 +150,21 @@ void SelectStationPage::openStationSVGPlan()
 
 void SelectStationPage::importSelectedStation()
 {
-    if(!mStationId)
+    if(!view->selectionModel()->hasSelection())
         return;
+
+    QModelIndex idx = view->currentIndex();
+    db_id stationId = stationsModel->getIdAtRow(idx.row());
+    if(!stationId)
+        return;
+
+    const QString stName = stationsModel->getNameAtRow(idx.row());
 
     //Allow changing name
     OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
     dlg->setWindowTitle(tr("Add Station"));
     dlg->setLabelText(tr("Please choose a name for the new station."));
-    dlg->setTextValue(mStName); //Initial value to original name
+    dlg->setTextValue(stName); //Initial value to original name
 
     do{
         int ret = dlg->exec();
@@ -145,13 +180,61 @@ void SelectStationPage::importSelectedStation()
             continue; //Second chance
         }
 
-        if(mWizard->addStation(mStationId, name))
+        QString shortName;
+        if(!mWizard->checkNames(stationId, name, shortName))
         {
-            break; //Done!
+            QMessageBox::warning(this, tr("Name Already Exists"),
+                                 tr("Station name <b>%1 (%2)</b> already exists in current session.<br>"
+                                    "Please choose a different name.")
+                                     .arg(name, shortName));
+            continue; //Second chance
         }
+
+        if(!mWizard->addStation(stationId, name, shortName))
+        {
+            QMessageBox::warning(this, tr("Import Error"),
+                                 tr("Could not import station <b>%1</b>.").arg(name));
+            continue; //Second chance
+        }
+
+        //Done!
+        QMessageBox::information(this, tr("Importation Done"),
+                                 tr("Station succesfully imported in current session:<br>"
+                                    "Name: <b>%1</b><br>"
+                                    "Short: <b>%2</b><br>"
+                                    "You can now select another station to import.")
+                                     .arg(name, shortName));
+
+        break;
     }
     while (true);
 
-    //Reset station
-    setStation(0, QString());
+    //Reset selection
+    view->clearSelection();
+}
+
+void SelectStationPage::startFilterTimer()
+{
+    stopFilterTimer();
+    filterTimerId = startTimer(500);
+}
+
+void SelectStationPage::stopFilterTimer()
+{
+    if(filterTimerId)
+    {
+        killTimer(filterTimerId);
+        filterTimerId = 0;
+    }
+}
+
+void SelectStationPage::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == filterTimerId)
+    {
+        updateFilter();
+        return;
+    }
+
+    QWizardPage::timerEvent(e);
 }

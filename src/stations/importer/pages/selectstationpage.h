@@ -7,10 +7,11 @@
 
 class StationImportWizard;
 
-class CustomCompletionLineEdit;
-class ISqlFKMatchModel;
-
-class QPushButton;
+class QToolBar;
+class QAction;
+class QLineEdit;
+class QTableView;
+class ImportStationModel;
 
 class SelectStationPage : public QWizardPage
 {
@@ -18,28 +19,38 @@ class SelectStationPage : public QWizardPage
 public:
     explicit SelectStationPage(StationImportWizard *w);
 
-    void setupModel(ISqlFKMatchModel *m);
+
+    void setupModel(ImportStationModel *m);
     void finalizeModel();
 
-    void setStation(db_id stId, const QString& name);
-
 private slots:
-    void onCompletionDone();
+    void updateFilter();
     void openStationDlg();
     void openStationSVGPlan();
     void importSelectedStation();
 
+    void startFilterTimer();
+
+private:
+    void stopFilterTimer();
+
+protected:
+    void timerEvent(QTimerEvent *e) override;
+
 private:
     StationImportWizard *mWizard;
-    CustomCompletionLineEdit *stationLineEdit;
-    QPushButton *openDlgBut;
-    QPushButton *openSvgBut;
-    QPushButton *importBut;
 
-    ISqlFKMatchModel *stationsModel;
+    QToolBar *toolBar;
+    QAction *actOpenStDlg;
+    QAction *actOpenSVGPlan;
+    QAction *actImportSt;
 
-    QString mStName;
-    db_id mStationId;
+    QLineEdit *filterNameEdit;
+    QTableView *view;
+
+    ImportStationModel *stationsModel;
+
+    int filterTimerId;
 };
 
 #endif // SELECTSTATIONPAGE_H
