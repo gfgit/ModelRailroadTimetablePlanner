@@ -2,6 +2,7 @@
 #define STATIONIMPORTWIZARD_H
 
 #include <QWizard>
+#include "utils/types.h"
 
 namespace sqlite3pp {
 class database;
@@ -29,6 +30,8 @@ private slots:
 private:
     bool createDatabase(bool inMemory, const QString& fileName);
     bool closeDatabase();
+
+    bool addStation(db_id sourceStId, const QString& newName);
 
 private:
     sqlite3pp::database *mTempDB;
