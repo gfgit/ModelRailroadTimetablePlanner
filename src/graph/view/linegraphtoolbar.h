@@ -8,6 +8,8 @@
 class LineGraphScene;
 class LineGraphSelectionWidget;
 class QPushButton;
+class QSlider;
+class QSpinBox;
 
 /*!
  * \brief Toolbar to select and refresh graph
@@ -35,9 +37,11 @@ public:
 
 signals:
     void requestRedraw();
+    void requestZoom(int zoom);
 
 public slots:
     void resetToolbarToScene();
+    void updateZoomLevel(int zoom);
 
 private slots:
     void onWidgetGraphChanged(int type, db_id objectId);
@@ -60,6 +64,10 @@ private:
 
     LineGraphSelectionWidget *selectionWidget;
     QPushButton *redrawBut;
+
+    QSlider *zoomSlider;
+    QSpinBox *zoomSpinBox;
+    int mZoom;
 };
 
 #endif // LINEGRAPHTOOLBAR_H

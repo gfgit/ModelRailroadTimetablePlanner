@@ -26,6 +26,7 @@ public:
 
 public slots:
     void setScroll(int value);
+    void setZoom(int val);
 
 private slots:
     void onSceneDestroyed();
@@ -36,6 +37,7 @@ protected:
 private:
     LineGraphScene *m_scene;
     int horizontalScroll;
+    int mZoom;
 };
 
 #endif // STATIONLABELSHEADER_H

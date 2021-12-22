@@ -32,7 +32,7 @@ inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
     font.setPointSizeF(pointSize);
 }
 
-void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int verticalScroll)
+void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, double verticalScroll)
 {
     //TODO: settings
     QFont hourTextFont;
@@ -71,13 +71,13 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, int 
 
 void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &rect)
 {
+    const double horizOffset = Session->horizOffset;
     const double vertOffset = Session->vertOffset;
     const double hourOffset = Session->hourOffset;
-    const double hourHorizOffset = AppSettings.getHourLineOffset();
 
     QPen hourLinePen(AppSettings.getHourLineColor(), AppSettings.getHourLineWidth());
 
-    const qreal x1 = qMax(qreal(hourHorizOffset), rect.left());
+    const qreal x1 = qMax(qreal(horizOffset), rect.left());
     const qreal x2 = rect.right();
     const qreal t = qMax(rect.top(), vertOffset);
     const qreal b = rect.bottom();
@@ -110,7 +110,7 @@ void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &
     delete [] arr;
 }
 
-void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF &rect, int horizontalScroll)
+void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF &rect, double horizontalScroll)
 {
     QFont stationFont;
     stationFont.setBold(true);
@@ -238,6 +238,8 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
 
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
+    jobPen.setCapStyle(Qt::RoundCap);
+    jobPen.setJoinStyle(Qt::RoundJoin);
 
     QPen selectedJobPen;
 
@@ -246,6 +248,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     {
         selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
         selectedJobPen.setCapStyle(Qt::RoundCap);
+        selectedJobPen.setJoinStyle(Qt::RoundJoin);
 
         QColor color = Session->colorForCat(selectedJob.category);
         color.setAlpha(SelectedJobAlphaFactor);
@@ -335,6 +338,8 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
 
     QPen jobPen;
     jobPen.setWidth(AppSettings.getJobLineWidth());
+    jobPen.setCapStyle(Qt::RoundCap);
+    jobPen.setJoinStyle(Qt::RoundJoin);
 
     QPen selectedJobPen;
 
@@ -343,6 +348,7 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
     {
         selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
         selectedJobPen.setCapStyle(Qt::RoundCap);
+        selectedJobPen.setJoinStyle(Qt::RoundJoin);
 
         QColor color = Session->colorForCat(selectedJob.category);
         color.setAlpha(SelectedJobAlphaFactor);

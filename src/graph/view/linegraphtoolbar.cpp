@@ -6,6 +6,8 @@
 
 #include <QComboBox>
 #include <QPushButton>
+#include <QSlider>
+#include <QSpinBox>
 
 #include "utils/sqldelegate/customcompletionlineedit.h"
 
@@ -21,7 +23,8 @@
 
 LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     QWidget(parent),
-    m_scene(nullptr)
+    m_scene(nullptr),
+    mZoom(100)
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
     lay->setContentsMargins(0, 0, 0, 0);
@@ -34,6 +37,23 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     connect(redrawBut, &QPushButton::clicked, this, &LineGraphToolbar::requestRedraw);
     lay->addWidget(redrawBut);
 
+    zoomSlider = new QSlider(Qt::Horizontal);
+    zoomSlider->setRange(25, 400);
+    zoomSlider->setTickPosition(QSlider::TicksBelow);
+    zoomSlider->setTickInterval(50);
+    zoomSlider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    zoomSlider->setValue(mZoom);
+    zoomSlider->setToolTip(tr("Double click to reset zoom"));
+    connect(zoomSlider, &QSlider::valueChanged, this, &LineGraphToolbar::updateZoomLevel);
+    lay->addWidget(zoomSlider);
+
+    zoomSpinBox = new QSpinBox;
+    zoomSpinBox->setRange(25, 400);
+    zoomSpinBox->setValue(mZoom);
+    zoomSpinBox->setSuffix(QChar('%'));
+    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &LineGraphToolbar::updateZoomLevel);
+    lay->addWidget(zoomSpinBox);
+
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
     //Accept focus events by click
@@ -45,6 +65,9 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
         if(child->isWidgetType())
             child->installEventFilter(this);
     }
+
+    //Install event filter on Zoom Slider to catch double click
+    zoomSlider->installEventFilter(this);
 }
 
 LineGraphToolbar::~LineGraphToolbar()
@@ -71,8 +94,15 @@ bool LineGraphToolbar::eventFilter(QObject *watched, QEvent *ev)
 {
     if(ev->type() == QEvent::FocusIn)
     {
+        //If any of our child widgets receives focus, activate our scene
         if(m_scene)
             m_scene->activateScene();
+    }
+
+    if(watched == zoomSlider && ev->type() == QEvent::MouseButtonDblClick)
+    {
+        //Zoom Slider was double clicked, reset zoom level to 100
+        updateZoomLevel(100);
     }
 
     return QWidget::eventFilter(watched, ev);
@@ -93,6 +123,19 @@ void LineGraphToolbar::resetToolbarToScene()
 
     selectionWidget->setGraphType(type);
     selectionWidget->setObjectId(objectId, name);
+}
+
+void LineGraphToolbar::updateZoomLevel(int zoom)
+{
+    if(mZoom == zoom)
+        return;
+
+    mZoom = zoom;
+
+    zoomSlider->setValue(mZoom);
+    zoomSpinBox->setValue(mZoom);
+
+    emit requestZoom(mZoom);
 }
 
 void LineGraphToolbar::onWidgetGraphChanged(int type, db_id objectId)
