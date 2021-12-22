@@ -20,7 +20,8 @@
 
 LineGraphView::LineGraphView(QWidget *parent) :
     QAbstractScrollArea(parent),
-    m_scene(nullptr)
+    m_scene(nullptr),
+    mZoom(100)
 {
     QPalette pal = palette();
     pal.setColor(backgroundRole(), Qt::white);
@@ -78,6 +79,24 @@ void LineGraphView::ensureRectVisible(const QRectF &r)
     ensureVisible(c.x(), c.y(), r2.width() / 2, r2.height() / 2);
 }
 
+void LineGraphView::setZoomLevel(int zoom)
+{
+    if(mZoom == zoom)
+        return;
+
+    //Bound values
+    zoom = qBound(25, zoom, 400);
+
+    mZoom = zoom;
+    hourPanel->setZoom(mZoom);
+    stationHeader->setZoom(mZoom);
+
+    emit zoomLevelChanged(mZoom);
+
+    updateScrollBars();
+    resizeHeaders();
+}
+
 bool LineGraphView::event(QEvent *e)
 {
     if (e->type() == QEvent::StyleChange || e->type() == QEvent::LayoutRequest)
@@ -97,7 +116,7 @@ bool LineGraphView::viewportEvent(QEvent *e)
 
         const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
 
-        QPoint pos = ev->pos();
+        QPointF pos = ev->pos();
         const QRect vp = viewport()->rect();
 
         //Map to viewport
@@ -107,6 +126,7 @@ bool LineGraphView::viewportEvent(QEvent *e)
 
         //Map to scene
         pos -= origin;
+        pos /= mZoom / 100.0;
 
         JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
 
@@ -127,9 +147,10 @@ bool LineGraphView::viewportEvent(QEvent *e)
 
 void LineGraphView::paintEvent(QPaintEvent *e)
 {
+    const double scaleFactor = mZoom / 100.0;
     const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
 
-    QRect exposedRect = e->rect();
+    QRectF exposedRect = e->rect();
     const QRect vp = viewport()->rect();
 
     //Map to viewport
@@ -139,19 +160,23 @@ void LineGraphView::paintEvent(QPaintEvent *e)
     //Map to scene
     exposedRect.moveTopLeft(exposedRect.topLeft() - origin);
 
+    //Set zoom
+    const QRectF sceneRect(exposedRect.topLeft() / scaleFactor, exposedRect.size() / scaleFactor);
+
     QPainter painter(viewport());
 
     //Scroll contents
     painter.translate(origin);
+    painter.scale(scaleFactor, scaleFactor);
 
-    BackgroundHelper::drawBackgroundHourLines(&painter, exposedRect);
+    BackgroundHelper::drawBackgroundHourLines(&painter, sceneRect);
 
     if(!m_scene || m_scene->getGraphType() == LineGraphType::NoGraph)
         return; //Nothing to draw
 
-    BackgroundHelper::drawStations(&painter, m_scene, exposedRect);
-    BackgroundHelper::drawJobStops(&painter, m_scene, exposedRect, true);
-    BackgroundHelper::drawJobSegments(&painter, m_scene, exposedRect, true);
+    BackgroundHelper::drawStations(&painter, m_scene, sceneRect);
+    BackgroundHelper::drawJobStops(&painter, m_scene, sceneRect, true);
+    BackgroundHelper::drawJobSegments(&painter, m_scene, sceneRect, true);
 }
 
 void LineGraphView::resizeEvent(QResizeEvent *)
@@ -173,7 +198,7 @@ void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
 
     const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
 
-    QPoint pos = e->pos();
+    QPointF pos = e->pos();
     const QRect vp = viewport()->rect();
 
     //Map to viewport
@@ -183,6 +208,7 @@ void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
 
     //Map to scene
     pos -= origin;
+    pos /= mZoom / 100.0;
 
     JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
     m_scene->setSelectedJob(job);
@@ -204,17 +230,17 @@ void LineGraphView::onSceneDestroyed()
 
 void LineGraphView::resizeHeaders()
 {
-    const int horizOffset = Session->horizOffset;
-    const int vertOffset = Session->vertOffset;
+    const double horizOffset = (Session->horizOffset - 5.0) * mZoom / 100.0;
+    const double vertOffset = (Session->vertOffset - 5.0) * mZoom / 100.0;
 
     const QRect vg = viewport()->geometry();
 
     hourPanel->move(vg.topLeft());
-    hourPanel->resize(horizOffset - 5, vg.height());
+    hourPanel->resize(qRound(horizOffset), vg.height());
     hourPanel->setScroll(verticalScrollBar()->value());
 
     stationHeader->move(vg.topLeft());
-    stationHeader->resize(vg.width(), vertOffset - 5);
+    stationHeader->resize(vg.width(), qRound(vertOffset));
     stationHeader->setScroll(horizontalScrollBar()->value());
 }
 
@@ -223,9 +249,12 @@ void LineGraphView::updateScrollBars()
     if(!m_scene)
         return;
 
-    const QSize contentSize = m_scene->getContentSize();
+    QSize contentSize = m_scene->getContentSize();
     if(contentSize.isEmpty())
         return;
+
+    //Scale contents
+    contentSize *= mZoom / 100.0;
 
     QSize p = viewport()->size();
     QSize m = maximumViewportSize();
@@ -242,36 +271,43 @@ void LineGraphView::updateScrollBars()
     vbar->setPageStep(p.height());
 }
 
-void LineGraphView::ensureVisible(int x, int y, int xmargin, int ymargin)
+void LineGraphView::ensureVisible(double x, double y, double xmargin, double ymargin)
 {
     auto hbar = horizontalScrollBar();
     auto vbar = verticalScrollBar();
     auto vp = viewport();
 
-    const int horizOffset = hourPanel->width() + 5;
-    const int vertOffset = stationHeader->height() + 5;
+    const double scaleFactor = mZoom / 100.0;
+
+    const double horizOffset = (hourPanel->width() + 5) * scaleFactor;
+    const double vertOffset = (stationHeader->height() + 5) * scaleFactor;
+
+    x *= scaleFactor;
+    y *= scaleFactor;
+    xmargin *= scaleFactor;
+    ymargin *= scaleFactor;
 
     int logicalX = x;
 
-    int val = hbar->value();
+    double val = hbar->value();
     if (logicalX - xmargin < hbar->value() + horizOffset)
     {
-        val = qMax(0, logicalX - xmargin - horizOffset);
+        val = qMax(0.0, logicalX - xmargin - horizOffset);
     }
     else if (logicalX > hbar->value() + vp->width() - xmargin)
     {
-        val = qMin(logicalX - vp->width() + xmargin, hbar->maximum());
+        val = qMin(logicalX - vp->width() + xmargin, double(hbar->maximum()));
     }
-    hbar->setValue(val);
+    hbar->setValue(qRound(val));
 
     val = vbar->value();
     if (y - ymargin < vbar->value() + vertOffset)
     {
-        val = qMax(0, y - ymargin - vertOffset);
+        val = qMax(0.0, y - ymargin - vertOffset);
     }
     else if (y > vbar->value() + vp->height() - ymargin)
     {
-        val = qMin(y - vp->height() + ymargin, vbar->maximum());
+        val = qMin(y - vp->height() + ymargin, double(vbar->maximum()));
     }
-    vbar->setValue(val);
+    vbar->setValue(qRound(val));
 }

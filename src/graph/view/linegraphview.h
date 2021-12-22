@@ -38,7 +38,9 @@ public:
      *
      * Vertical and horizontal headers are excluded from the visible zone
     */
-    void ensureVisible(int x, int y, int xmargin, int ymargin);
+    void ensureVisible(double x, double y, double xmargin, double ymargin);
+
+    inline int getZoomLevel() const { return mZoom; }
 
 signals:
     /*!
@@ -47,6 +49,8 @@ signals:
      * \sa syncToolbarToScene()
      */
     void syncToolbarToScene();
+
+    void zoomLevelChanged(int zoom);
 
 public slots:
     /*!
@@ -62,6 +66,8 @@ public slots:
      * \sa ensureVisible()
      */
     void ensureRectVisible(const QRectF& r);
+
+    void setZoomLevel(int zoom);
 
 protected:
     /*!
@@ -124,6 +130,8 @@ private:
     HourPanel *hourPanel;
 
     LineGraphScene *m_scene;
+
+    int mZoom;
 };
 
 #endif // LINEGRAPHVIEW_H
