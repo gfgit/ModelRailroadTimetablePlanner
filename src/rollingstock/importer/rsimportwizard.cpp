@@ -8,7 +8,7 @@
 #include "app/session.h"
 
 #include "pages/optionspage.h"
-#include "pages/choosefilepage.h"
+#include "utils/wizard/choosefilepage.h"
 #include "pages/loadingpage.h"
 #include "pages/itemselectionpage.h"
 

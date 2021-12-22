@@ -1,6 +1,7 @@
 add_subdirectory(spinbox)
 add_subdirectory(sqldelegate)
 add_subdirectory(thread)
+add_subdirectory(wizard)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}

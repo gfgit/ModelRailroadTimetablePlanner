@@ -1,6 +1,6 @@
 #include "stationimportwizard.h"
 
-#include "rollingstock/importer/pages/choosefilepage.h" //FIXME: move to utils
+#include "utils/wizard/choosefilepage.h"
 #include "pages/selectstationpage.h"
 
 #include "utils/file_format_names.h"
