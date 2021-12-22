@@ -12,7 +12,8 @@
 StationLabelsHeader::StationLabelsHeader(QWidget *parent) :
     QWidget(parent),
     m_scene(nullptr),
-    horizontalScroll(0)
+    horizontalScroll(0),
+    mZoom(100)
 {
 
 }
@@ -20,6 +21,12 @@ StationLabelsHeader::StationLabelsHeader(QWidget *parent) :
 void StationLabelsHeader::setScroll(int value)
 {
     horizontalScroll = value;
+    update();
+}
+
+void StationLabelsHeader::setZoom(int val)
+{
+    mZoom = val;
     update();
 }
 
@@ -38,7 +45,15 @@ void StationLabelsHeader::paintEvent(QPaintEvent *e)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    BackgroundHelper::drawStationHeader(&painter, m_scene, e->rect(), horizontalScroll);
+    const double scaleFactor = mZoom / 100;
+
+    const double sceneScroll = horizontalScroll / scaleFactor;
+    QRectF sceneRect(QPointF(e->rect().topLeft()) / scaleFactor,
+                     QSizeF(e->rect().size()) / scaleFactor);
+
+    painter.scale(scaleFactor, scaleFactor);
+
+    BackgroundHelper::drawStationHeader(&painter, m_scene, sceneRect, sceneScroll);
 }
 
 LineGraphScene *StationLabelsHeader::scene() const
