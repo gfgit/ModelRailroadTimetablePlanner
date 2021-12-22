@@ -33,6 +33,9 @@ LineGraphWidget::LineGraphWidget(QWidget *parent) :
 
     connect(view, &LineGraphView::syncToolbarToScene, toolBar, &LineGraphToolbar::resetToolbarToScene);
     connect(toolBar, &LineGraphToolbar::requestRedraw, m_scene, &LineGraphScene::reload);
+
+    connect(toolBar, &LineGraphToolbar::requestZoom, view, &LineGraphView::setZoomLevel);
+    connect(view, &LineGraphView::zoomLevelChanged, toolBar, &LineGraphToolbar::updateZoomLevel);
 }
 
 bool LineGraphWidget::tryLoadGraph(db_id graphObjId, LineGraphType type)
