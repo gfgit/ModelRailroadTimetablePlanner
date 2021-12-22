@@ -20,12 +20,14 @@ public:
 
 public slots:
     void setScroll(int value);
+    void setZoom(int val);
 
 protected:
     void paintEvent(QPaintEvent *);
 
 private:
     int verticalScroll;
+    int mZoom;
 };
 
 #endif // HOURPANEL_H
