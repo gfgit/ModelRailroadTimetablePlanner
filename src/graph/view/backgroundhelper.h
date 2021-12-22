@@ -19,11 +19,11 @@ class LineGraphScene;
 class BackgroundHelper
 {
 public:
-    static void drawHourPanel(QPainter *painter, const QRectF& rect, int verticalScroll);
+    static void drawHourPanel(QPainter *painter, const QRectF& rect, double verticalScroll);
 
     static void drawBackgroundHourLines(QPainter *painter, const QRectF& rect);
 
-    static void drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF& rect, int horizontalScroll);
+    static void drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF& rect, double horizontalScroll);
 
     static void drawStations(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
 
