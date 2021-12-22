@@ -84,8 +84,17 @@ void LineGraphView::setZoomLevel(int zoom)
     if(mZoom == zoom)
         return;
 
+    auto hbar = horizontalScrollBar();
+    auto vbar = verticalScrollBar();
+    double horizScroll = hbar->value();
+    double vertScroll = vbar->value();
+
     //Bound values
     zoom = qBound(25, zoom, 400);
+
+    //Reposition scrollbars
+    horizScroll *= zoom/double(mZoom);
+    vertScroll *= zoom/double(mZoom);
 
     mZoom = zoom;
     hourPanel->setZoom(mZoom);
@@ -95,6 +104,11 @@ void LineGraphView::setZoomLevel(int zoom)
 
     updateScrollBars();
     resizeHeaders();
+
+    //Try set values
+    hbar->setValue(horizScroll);
+    vbar->setValue(vertScroll);
+
     viewport()->update();
 }
 
