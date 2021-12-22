@@ -65,6 +65,7 @@ private slots:
     void onRemoveSegment();
     void onNewSegment();
     void onEditSegment();
+    void onSplitSegment();
 
     void onNewLine();
     void onRemoveLine();
