@@ -162,7 +162,7 @@ void SelectStationPage::importSelectedStation()
 
     //Allow changing name
     OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
-    dlg->setWindowTitle(tr("Add Station"));
+    dlg->setWindowTitle(tr("Import Station"));
     dlg->setLabelText(tr("Please choose a name for the new station."));
     dlg->setTextValue(stName); //Initial value to original name
 
