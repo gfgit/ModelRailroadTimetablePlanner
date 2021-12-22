@@ -33,13 +33,11 @@ struct RailwaySegmentInfo
 class RailwaySegmentHelper
 {
 public:
-    typedef struct RailwaySegmentInfo SegmentInfo;
-
     RailwaySegmentHelper(sqlite3pp::database &db);
 
-    bool getSegmentInfo(SegmentInfo& info);
+    bool getSegmentInfo(RailwaySegmentInfo &info);
 
-    bool getSegmentInfoFromGate(db_id gateId, SegmentInfo& info);
+    bool getSegmentInfoFromGate(db_id gateId, RailwaySegmentInfo &info);
 
     bool setSegmentInfo(db_id& segmentId, bool create,
                         const QString &name, utils::RailwaySegmentType type,

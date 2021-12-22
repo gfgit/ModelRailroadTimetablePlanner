@@ -12,7 +12,7 @@ RailwaySegmentSplitHelper::RailwaySegmentSplitHelper(database &db, db_id segment
 
 }
 
-void RailwaySegmentSplitHelper::setInfo(const RailwaySegmentHelper::SegmentInfo &info,
+void RailwaySegmentSplitHelper::setInfo(const RailwaySegmentInfo &info,
                                         const db_id newOutGate)
 {
     segInfo = info;

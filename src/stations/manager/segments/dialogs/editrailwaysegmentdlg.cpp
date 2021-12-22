@@ -140,7 +140,7 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     if(m_lockStationId == DoNotLock)
         m_lockGateId = DoNotLock; //Cannot lock gate without locking station
 
-    RailwaySegmentHelper::SegmentInfo info;
+    RailwaySegmentInfo info;
     info.segmentId = m_segmentId;
     info.distanceMeters = 10000; // 10 km
     info.maxSpeedKmH = 120;   // 120 km/h
