@@ -45,7 +45,7 @@ void StationLabelsHeader::paintEvent(QPaintEvent *e)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    const double scaleFactor = mZoom / 100;
+    const double scaleFactor = mZoom / 100.0;
 
     const double sceneScroll = horizontalScroll / scaleFactor;
     QRectF sceneRect(QPointF(e->rect().topLeft()) / scaleFactor,

@@ -32,7 +32,7 @@ void HourPanel::paintEvent(QPaintEvent *)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    const double scaleFactor = mZoom / 100;
+    const double scaleFactor = mZoom / 100.0;
 
     const double sceneScroll = verticalScroll / scaleFactor;
     QRectF sceneRect = rect();
