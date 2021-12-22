@@ -95,6 +95,7 @@ void LineGraphView::setZoomLevel(int zoom)
 
     updateScrollBars();
     resizeHeaders();
+    viewport()->update();
 }
 
 bool LineGraphView::event(QEvent *e)
