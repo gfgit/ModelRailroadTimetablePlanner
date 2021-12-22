@@ -1,13 +1,12 @@
 #include "loadingpage.h"
-#include "../rsimportwizard.h"
 #include "../backends/loadprogressevent.h"
 
 #include <QProgressBar>
 #include <QVBoxLayout>
 
-LoadingPage::LoadingPage(RSImportWizard *w, QWidget *parent) :
+LoadingPage::LoadingPage(QWidget *parent) :
     QWizardPage(parent),
-    mWizard(w)
+    m_isComplete(false)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -17,7 +16,7 @@ LoadingPage::LoadingPage(RSImportWizard *w, QWidget *parent) :
 
 bool LoadingPage::isComplete() const
 {
-    return !mWizard->taskRunning();
+    return m_isComplete;
 }
 
 void LoadingPage::handleProgress(int pr, int max)
@@ -32,4 +31,10 @@ void LoadingPage::handleProgress(int pr, int max)
         progressBar->setMaximum(max);
         progressBar->setValue(pr);
     }
+}
+
+void LoadingPage::setProgressCompleted(bool val)
+{
+    m_isComplete = val;
+    emit completeChanged();
 }

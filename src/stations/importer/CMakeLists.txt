@@ -1,11 +1,11 @@
-add_subdirectory(importer)
-add_subdirectory(manager)
-add_subdirectory(match_models)
+add_subdirectory(model)
+add_subdirectory(pages)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  stations/station_utils.h
-  stations/station_name_utils.h
+
+  stations/importer/stationimportwizard.h
+  stations/importer/stationimportwizard.cpp
 
   PARENT_SCOPE
 )

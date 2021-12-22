@@ -14,6 +14,8 @@ public:
     void loadSettings(const QMap<QString, QVariant> &settings) override;
     void saveSettings(QMap<QString, QVariant> &settings) override;
 
+    void getFileDialogOptions(QString &title, QStringList &fileFormats) override;
+
 private:
     QSpinBox *odsFirstRowSpin;
     QSpinBox *odsNumColSpin;

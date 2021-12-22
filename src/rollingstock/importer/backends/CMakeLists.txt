@@ -8,12 +8,14 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   rollingstock/importer/backends/ioptionswidget.h
   rollingstock/importer/backends/loadprogressevent.h
   rollingstock/importer/backends/loadtaskutils.h
-  rollingstock/importer/backends/optionsmodel.h
+  rollingstock/importer/backends/rsbackendsmodel.h
+  rollingstock/importer/backends/rsimportbackend.h
 
   rollingstock/importer/backends/importtask.cpp
   rollingstock/importer/backends/ioptionswidget.cpp
   rollingstock/importer/backends/loadprogressevent.cpp
   rollingstock/importer/backends/loadtaskutils.cpp
-  rollingstock/importer/backends/optionsmodel.cpp
+  rollingstock/importer/backends/rsbackendsmodel.cpp
+  rollingstock/importer/backends/rsimportbackend.cpp
   PARENT_SCOPE
 )

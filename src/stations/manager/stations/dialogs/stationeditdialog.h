@@ -35,6 +35,7 @@ public:
 
     void setStationInternalEditingEnabled(bool enable);
     void setStationExternalEditingEnabled(bool enable);
+    void setGateConnectionsVisible(bool enable);
 
 public slots:
     void done(int res) override;
@@ -70,7 +71,7 @@ private slots:
 
 private:
     void addTrackConnInternal(int mode);
-    void updateSVGButtons(bool hasImage, bool canEdit = true);
+    void updateSVGButtons(bool hasImage);
 
 private:
     enum Tabs
@@ -95,6 +96,8 @@ private:
     StationTracksModel *tracksModel;
     StationTrackConnectionsModel *trackConnModel;
     RailwaySegmentsModel *gateConnModel;
+
+    bool mEnableInternalEdititing;
 };
 
 #endif // STATIONEDITDIALOG_H

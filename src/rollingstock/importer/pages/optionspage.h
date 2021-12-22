@@ -21,7 +21,7 @@ public:
 
 private slots:
     void updateGeneralCheckBox();
-    void setSource(int s);
+    void setSource(int backendIdx);
 
 private:
     void setMode(int m);
@@ -36,7 +36,7 @@ private:
     QComboBox *defaultTypeCombo;
 
     QGroupBox *specificBox;
-    QComboBox *sourceCombo;
+    QComboBox *backendCombo;
     IOptionsWidget *optionsWidget;
     QScrollArea *scrollArea;
 };
