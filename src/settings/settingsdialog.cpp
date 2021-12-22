@@ -46,7 +46,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(ui->hourOffsetSpin,         static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onJobGraphOptionsChanged);
     connect(ui->stationsOffsetSpin,     static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onJobGraphOptionsChanged);
     connect(ui->platformsOffsetSpin,    static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onJobGraphOptionsChanged);
-    connect(ui->hourLineStartSpinBox,   static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onJobGraphOptionsChanged);
 
     connect(ui->hourLineWidthSpin,      static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onJobGraphOptionsChanged);
     connect(ui->jobLineWidthSpin,       static_cast<void(QSpinBox::*)(int)>(&QSpinBox::valueChanged), this, &SettingsDialog::onJobGraphOptionsChanged);
@@ -155,7 +154,6 @@ void SettingsDialog::loadSettings()
     set(ui->platformsOffsetSpin, settings.getPlatformOffset());
     set(ui->horizOffsetSpin, settings.getHorizontalOffset());
     set(ui->vertOffsetSpin, settings.getVerticalOffset());
-    set(ui->hourLineStartSpinBox, settings.getHourLineOffset());
 
     set(ui->hourLineWidthSpin, settings.getHourLineWidth());
     set(ui->jobLineWidthSpin, settings.getJobLineWidth());
@@ -234,7 +232,6 @@ void SettingsDialog::saveSettings()
     settings.setPlatformOffset(ui->platformsOffsetSpin->value());
     settings.setHorizontalOffset(ui->horizOffsetSpin->value());
     settings.setVerticalOffset(ui->vertOffsetSpin->value());
-    settings.setHourLineOffset(ui->hourLineStartSpinBox->value());
 
     settings.setHourLineWidth(ui->hourLineWidthSpin->value());
     settings.setJobLineWidth(ui->jobLineWidthSpin->value());

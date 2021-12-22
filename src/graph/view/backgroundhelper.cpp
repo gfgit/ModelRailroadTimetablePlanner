@@ -71,13 +71,13 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, doub
 
 void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &rect)
 {
+    const double horizOffset = Session->horizOffset;
     const double vertOffset = Session->vertOffset;
     const double hourOffset = Session->hourOffset;
-    const double hourHorizOffset = AppSettings.getHourLineOffset();
 
     QPen hourLinePen(AppSettings.getHourLineColor(), AppSettings.getHourLineWidth());
 
-    const qreal x1 = qMax(qreal(hourHorizOffset), rect.left());
+    const qreal x1 = qMax(qreal(horizOffset), rect.left());
     const qreal x2 = rect.right();
     const qreal t = qMax(rect.top(), vertOffset);
     const qreal b = rect.bottom();

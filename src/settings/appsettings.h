@@ -60,7 +60,6 @@ public:
 
     //Job Graph
     FIELD(HorizontalOffset,  "job_graph/horizontal_offset", int, 50)
-    FIELD(HourLineOffset,    "job_graph/hour_line_offset",  int, 45)
     FIELD(VerticalOffset,    "job_graph/vertical_offset",   int, 50)
     FIELD(HourOffset,        "job_graph/hour_offset",       int, 100)
     FIELD(StationOffset,     "job_graph/station_offset",    int, 150)
