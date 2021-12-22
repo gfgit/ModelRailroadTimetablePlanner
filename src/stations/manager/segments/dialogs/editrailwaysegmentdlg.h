@@ -14,6 +14,8 @@ class StationGatesMatchModel;
 class RailwaySegmentHelper;
 class RailwaySegmentConnectionsModel;
 
+struct RailwaySegmentInfo;
+
 class QGroupBox;
 class CustomCompletionLineEdit;
 class QSpinBox;
@@ -37,6 +39,13 @@ public:
     virtual void done(int res) override;
 
     void setSegment(db_id segmentId, db_id lockStId, db_id lockGateId);
+
+    bool checkValues();
+    bool applyChanges();
+
+    bool fillSegInfo(RailwaySegmentInfo& info);
+
+    void setManuallyApply(bool val);
 
 private slots:
     void onFromStationChanged(db_id stationId);
@@ -73,6 +82,7 @@ private:
     db_id m_lockStationId;
     db_id m_lockGateId;
     bool reversed;
+    bool manuallyApply;
 };
 
 #endif // EDITRAILWAYSEGMENTDLG_H
