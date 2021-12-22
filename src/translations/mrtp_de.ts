@@ -1072,8 +1072,13 @@ Do you want to delete this job?</source>
 <context>
     <name>LineGraphToolbar</name>
     <message>
-        <location filename="../graph/view/linegraphtoolbar.cpp" line="33"/>
+        <location filename="../graph/view/linegraphtoolbar.cpp" line="36"/>
         <source>Redraw</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../graph/view/linegraphtoolbar.cpp" line="46"/>
+        <source>Double click to reset zoom</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3820,8 +3825,8 @@ Extension: (*.ttt)</source>
     <name>SettingsDialog</name>
     <message>
         <location filename="../settings/settingsdialog.ui" line="32"/>
-        <location filename="../settings/settingsdialog.cpp" line="341"/>
-        <location filename="../settings/settingsdialog.cpp" line="359"/>
+        <location filename="../settings/settingsdialog.cpp" line="338"/>
+        <location filename="../settings/settingsdialog.cpp" line="356"/>
         <source>Settings</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3852,7 +3857,7 @@ Extension: (*.ttt)</source>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="173"/>
-        <location filename="../settings/settingsdialog.ui" line="555"/>
+        <location filename="../settings/settingsdialog.ui" line="545"/>
         <source>Offsets</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3863,236 +3868,231 @@ Extension: (*.ttt)</source>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="193"/>
-        <location filename="../settings/settingsdialog.ui" line="561"/>
+        <location filename="../settings/settingsdialog.ui" line="551"/>
         <source>Hours</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="207"/>
-        <location filename="../settings/settingsdialog.ui" line="297"/>
+        <location filename="../settings/settingsdialog.ui" line="287"/>
         <source>Platforms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="221"/>
-        <location filename="../settings/settingsdialog.ui" line="575"/>
+        <location filename="../settings/settingsdialog.ui" line="565"/>
         <source>Horizontal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="235"/>
-        <location filename="../settings/settingsdialog.ui" line="582"/>
+        <location filename="../settings/settingsdialog.ui" line="572"/>
         <source>Vertical</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="249"/>
-        <source>Hour Line Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../settings/settingsdialog.ui" line="268"/>
+        <location filename="../settings/settingsdialog.ui" line="258"/>
         <source>Line Width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="277"/>
-        <location filename="../settings/settingsdialog.ui" line="595"/>
+        <location filename="../settings/settingsdialog.ui" line="267"/>
+        <location filename="../settings/settingsdialog.ui" line="585"/>
         <source>Job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="287"/>
+        <location filename="../settings/settingsdialog.ui" line="277"/>
         <source>Hour</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="310"/>
+        <location filename="../settings/settingsdialog.ui" line="300"/>
         <source>Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="316"/>
+        <location filename="../settings/settingsdialog.ui" line="306"/>
         <source>Hour Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="339"/>
+        <location filename="../settings/settingsdialog.ui" line="329"/>
         <source>Hour Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="368"/>
+        <location filename="../settings/settingsdialog.ui" line="358"/>
         <source>Main Platform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="391"/>
+        <location filename="../settings/settingsdialog.ui" line="381"/>
         <source>Depot Platform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="414"/>
+        <location filename="../settings/settingsdialog.ui" line="404"/>
         <source>Station Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="440"/>
+        <location filename="../settings/settingsdialog.ui" line="430"/>
         <source>Selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="446"/>
+        <location filename="../settings/settingsdialog.ui" line="436"/>
         <source>Follow Job selection on Graph change</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="453"/>
+        <location filename="../settings/settingsdialog.ui" line="443"/>
         <source>Sync Job selection on all graphs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="468"/>
+        <location filename="../settings/settingsdialog.ui" line="458"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="480"/>
+        <location filename="../settings/settingsdialog.ui" line="470"/>
         <source>Default Stop Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="496"/>
+        <location filename="../settings/settingsdialog.ui" line="486"/>
         <source>Job Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="505"/>
+        <location filename="../settings/settingsdialog.ui" line="495"/>
         <source>Auto insert transits between two stops.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="519"/>
+        <location filename="../settings/settingsdialog.ui" line="509"/>
         <source>Auto uncouple all rollingstock items at last stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="512"/>
+        <location filename="../settings/settingsdialog.ui" line="502"/>
         <source>Auto move uncoupled rollingstock pieces from last stop when adding a new one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="543"/>
+        <location filename="../settings/settingsdialog.ui" line="533"/>
         <source>Shift Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="605"/>
+        <location filename="../settings/settingsdialog.ui" line="595"/>
         <source>Job Box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="615"/>
+        <location filename="../settings/settingsdialog.ui" line="605"/>
         <source>Stations Labels</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="625"/>
+        <location filename="../settings/settingsdialog.ui" line="615"/>
         <source>Hide Same Stations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="652"/>
+        <location filename="../settings/settingsdialog.ui" line="642"/>
         <source>Rollingstock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="664"/>
+        <location filename="../settings/settingsdialog.ui" line="654"/>
         <source>Merge models</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="673"/>
+        <location filename="../settings/settingsdialog.ui" line="663"/>
         <source>Remove source merged model by default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="689"/>
+        <location filename="../settings/settingsdialog.ui" line="679"/>
         <source>Merge owners</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="698"/>
+        <location filename="../settings/settingsdialog.ui" line="688"/>
         <source>Remove sourcemerged owner by default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="708"/>
+        <location filename="../settings/settingsdialog.ui" line="698"/>
         <source>Open Document Spreadsheet Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="714"/>
+        <location filename="../settings/settingsdialog.ui" line="704"/>
         <source>First non-empty row</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="731"/>
+        <location filename="../settings/settingsdialog.ui" line="721"/>
         <source>Number column</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="738"/>
+        <location filename="../settings/settingsdialog.ui" line="728"/>
         <source>Model column</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="782"/>
+        <location filename="../settings/settingsdialog.ui" line="772"/>
         <source>Sheet Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="788"/>
+        <location filename="../settings/settingsdialog.ui" line="778"/>
         <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="794"/>
+        <location filename="../settings/settingsdialog.ui" line="784"/>
         <source>Header</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="801"/>
+        <location filename="../settings/settingsdialog.ui" line="791"/>
         <source>Footer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="817"/>
+        <location filename="../settings/settingsdialog.ui" line="807"/>
         <source>Metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="823"/>
+        <location filename="../settings/settingsdialog.ui" line="813"/>
         <source>Store meeting location and dates in sheet metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="847"/>
+        <location filename="../settings/settingsdialog.ui" line="837"/>
         <source>Background Tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="853"/>
+        <location filename="../settings/settingsdialog.ui" line="843"/>
         <source>Rollingstock Error Checker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="859"/>
+        <location filename="../settings/settingsdialog.ui" line="849"/>
         <source>Check rollingstock when opening a file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="866"/>
+        <location filename="../settings/settingsdialog.ui" line="856"/>
         <source>Check rollingstock when a Job is edeited</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4102,27 +4102,27 @@ Extension: (*.ttt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="80"/>
+        <location filename="../settings/settingsdialog.cpp" line="79"/>
         <source>Job Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="85"/>
+        <location filename="../settings/settingsdialog.cpp" line="84"/>
         <source>Non Passenger</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="97"/>
+        <location filename="../settings/settingsdialog.cpp" line="96"/>
         <source>Passenger</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="342"/>
+        <location filename="../settings/settingsdialog.cpp" line="339"/>
         <source>Do you want to save settings?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="360"/>
+        <location filename="../settings/settingsdialog.cpp" line="357"/>
         <source>Do you want to restore default settings?</source>
         <translation type="unfinished"></translation>
     </message>
