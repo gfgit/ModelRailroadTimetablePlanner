@@ -7,46 +7,43 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-RailwaySegmentSplitHelper::RailwaySegmentSplitHelper(database &db, db_id segmentId) :
-    mDb(db),
-    originalSegmentId(segmentId)
+RailwaySegmentSplitHelper::RailwaySegmentSplitHelper(database &db) :
+    mDb(db)
 {
 
 }
 
-void RailwaySegmentSplitHelper::setInfo(const utils::RailwaySegmentInfo &info,
-                                        const db_id newOutGate)
+void RailwaySegmentSplitHelper::setInfo(const utils::RailwaySegmentInfo &origInfo,
+                                        const utils::RailwaySegmentInfo &newInfo)
 {
-    segInfo = info;
-    m_newOutGate = newOutGate;
+    origSegInfo = origInfo;
+    newSegInfo = newInfo;
 }
 
 bool RailwaySegmentSplitHelper::split()
 {
     transaction t(mDb);
 
-    command cmd(mDb);
+    QString errMsg;
+    RailwaySegmentHelper helper(mDb);
 
-    //Set new Out Gate
-    cmd.prepare("UPDATE railway_segments SET out_gate_id=? WHERE id=?");
-    cmd.bind(1, m_newOutGate);
-    cmd.bind(2, originalSegmentId);
-    int ret = cmd.execute();
-
-    if(ret != SQLITE_OK)
+    //Update previous segment and set Out Gate
+    if(!helper.setSegmentInfo(origSegInfo.segmentId, false,
+                               origSegInfo.segmentName, origSegInfo.type,
+                               origSegInfo.distanceMeters, origSegInfo.maxSpeedKmH,
+                               origSegInfo.from.gateId, origSegInfo.to.gateId,
+                               &errMsg))
     {
-        qWarning() << "RailwaySegmentSplitHelper: cannot set out gate" << m_newOutGate
-                   << mDb.error_msg() << ret;
+        qWarning() << "RailwaySegmentSplitHelper: cannot set out gate" << origSegInfo.to.gateId
+                   << errMsg;
         return false;
     }
 
     //Create new segment
-    QString errMsg;
-    RailwaySegmentHelper helper(mDb);
-    if(!helper.setSegmentInfo(segInfo.segmentId, true,
-                               segInfo.segmentName, segInfo.type,
-                               segInfo.distanceMeters, segInfo.maxSpeedKmH,
-                               segInfo.from.gateId, segInfo.to.gateId,
+    if(!helper.setSegmentInfo(newSegInfo.segmentId, true,
+                               newSegInfo.segmentName, newSegInfo.type,
+                               newSegInfo.distanceMeters, newSegInfo.maxSpeedKmH,
+                               newSegInfo.from.gateId, newSegInfo.to.gateId,
                                &errMsg))
     {
         qWarning() << "RailwaySegmentSplitHelper: cannot create segment" << errMsg;
@@ -61,7 +58,14 @@ bool RailwaySegmentSplitHelper::split()
 
     t.commit();
 
-    emit Session->segmentStationsChanged(originalSegmentId);
+    //Refresh graphs and station views
+    QSet<db_id> stationsToUpdate;
+    stationsToUpdate.insert(origSegInfo.from.stationId);
+    stationsToUpdate.insert(origSegInfo.to.stationId);
+    stationsToUpdate.insert(newSegInfo.to.stationId);
+
+    emit Session->segmentStationsChanged(origSegInfo.segmentId);
+    emit Session->stationPlanChanged(stationsToUpdate);
 
     return true;
 }
@@ -75,7 +79,7 @@ bool RailwaySegmentSplitHelper::updateLines()
                           " VALUES(NULL,?,?,?,?)");
 
     query q(mDb, "SELECT id,line_id,direction,pos FROM line_segments WHERE seg_id=?");
-    q.bind(1, originalSegmentId);
+    q.bind(1, origSegInfo.segmentId);
     for(auto line : q)
     {
         db_id lineSegId = line.get<db_id>(0);
@@ -122,7 +126,7 @@ bool RailwaySegmentSplitHelper::updateLines()
 
         //Create new segment
         q_newSeg.bind(1, lineId);
-        q_newSeg.bind(2, segInfo.segmentId);
+        q_newSeg.bind(2, newSegInfo.segmentId);
         q_newSeg.bind(3, reversed ? 1 : 0);
         q_newSeg.bind(4, newSegPos);
         if(q_newSeg.execute() != SQLITE_OK)

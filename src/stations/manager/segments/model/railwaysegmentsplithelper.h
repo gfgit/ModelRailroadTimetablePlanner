@@ -6,10 +6,10 @@
 class RailwaySegmentSplitHelper
 {
 public:
-    RailwaySegmentSplitHelper(sqlite3pp::database &db, db_id segmentId);
+    RailwaySegmentSplitHelper(sqlite3pp::database &db);
 
-    void setInfo(const utils::RailwaySegmentInfo& info,
-                 const db_id newOutGate);
+    void setInfo(const utils::RailwaySegmentInfo& origInfo,
+                 const utils::RailwaySegmentInfo& newInfo);
 
     bool split();
 
@@ -19,9 +19,8 @@ private:
 private:
     sqlite3pp::database &mDb;
 
-    db_id originalSegmentId;
-    db_id m_newOutGate;
-    utils::RailwaySegmentInfo segInfo;
+    utils::RailwaySegmentInfo origSegInfo;
+    utils::RailwaySegmentInfo newSegInfo;
 
 };
 
