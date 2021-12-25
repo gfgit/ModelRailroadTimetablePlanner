@@ -18,6 +18,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/types.h
   utils/combodelegate.h
   utils/model_roles.h
+  utils/openfileinfolder.h
   utils/worker_event_types.h
 
   utils/colordelegate.cpp
@@ -25,6 +26,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/combodelegate.cpp
   utils/imageviewer.cpp
   utils/kmutils.cpp
+  utils/openfileinfolder.cpp
   utils/rs_utils.cpp
   PARENT_SCOPE
 )
