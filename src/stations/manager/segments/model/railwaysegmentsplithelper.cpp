@@ -107,7 +107,7 @@ bool RailwaySegmentSplitHelper::updateLines()
             //Shift next segments by maxPos
             q_moveSegBy.bind(1, shiftPos);
             q_moveSegBy.bind(2, lineId);
-            q_moveSegBy.bind(3, segPos);
+            q_moveSegBy.bind(3, newSegPos); //Move from newSegPos and after
             q_moveSegBy.bind(4, maxPos);
             if(q_moveSegBy.execute() != SQLITE_OK)
                 return false;
