@@ -168,7 +168,7 @@ void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
     if(middleStName.isEmpty())
         mNewSegName.clear();
     else
-        mNewSegName = middleStName + '-' + toStationLabel->text();
+        setNewSegmentName(middleStName + '-' + toStationLabel->text());
 
     middleStationEdit->setData(stationId, middleStName);
     middleInGateEdit->setData(0);
@@ -180,4 +180,25 @@ void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
     //Allow selectiig Gates only after Station
     middleInGateEdit->setEnabled(stationId != 0);
     middleOutGateEdit->setEnabled(stationId != 0);
+}
+
+void SplitRailwaySegmentDlg::setNewSegmentName(const QString &possibleName)
+{
+    //Find available segment name
+    query q(mDb, "SELECT id FROM railway_segments WHERE name=? LIMIT 1");
+    const QString fmt = QLatin1String("%1_%2");
+    QString name = possibleName;
+    for(int i = 0; i < 10; i++)
+    {
+        if(i != 0)
+            name = fmt.arg(possibleName).arg(i);
+
+        q.bind(1, name);
+        if(q.step() == SQLITE_OK)
+        {
+            //Found available name
+            mNewSegName = name;
+            break;
+        }
+    }
 }

@@ -31,6 +31,7 @@ private slots:
 private:
     void setMainSegment(db_id segmentId);
     void setMiddleStation(db_id stationId);
+    void setNewSegmentName(const QString& possibleName);
 
 private:
     sqlite3pp::database &mDb;
