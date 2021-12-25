@@ -10,34 +10,14 @@ namespace sqlite3pp {
 class database;
 } // namespace sqlite3pp
 
-struct RailwaySegmentGateInfo
-{
-    db_id gateId = 0;
-    db_id stationId = 0;
-    QString stationName;
-    QChar gateLetter;
-};
-
-struct RailwaySegmentInfo
-{
-    db_id segmentId = 0;
-    QString segmentName;
-    int distanceMeters = 10;
-    int maxSpeedKmH = 120;
-    utils::RailwaySegmentType type;
-
-    RailwaySegmentGateInfo from;
-    RailwaySegmentGateInfo to;
-};
-
 class RailwaySegmentHelper
 {
 public:
     RailwaySegmentHelper(sqlite3pp::database &db);
 
-    bool getSegmentInfo(RailwaySegmentInfo &info);
+    bool getSegmentInfo(utils::RailwaySegmentInfo &info);
 
-    bool getSegmentInfoFromGate(db_id gateId, RailwaySegmentInfo &info);
+    bool getSegmentInfoFromGate(db_id gateId, utils::RailwaySegmentInfo &info);
 
     bool setSegmentInfo(db_id& segmentId, bool create,
                         const QString &name, utils::RailwaySegmentType type,

@@ -211,7 +211,7 @@ void StationSVGPlanDlg::zoomToFit()
 void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QString &text)
 {
     RailwaySegmentHelper helper(mDb);
-    RailwaySegmentInfo info;
+    utils::RailwaySegmentInfo info;
     if(!helper.getSegmentInfoFromGate(gateId, info))
     {
         QMessageBox::warning(this, tr("Database Error"),
