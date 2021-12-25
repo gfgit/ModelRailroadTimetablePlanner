@@ -9,12 +9,14 @@ namespace sqlite3pp {
 class database;
 }
 
+namespace utils {
+struct RailwaySegmentInfo;
+}
+
 class StationsMatchModel;
 class StationGatesMatchModel;
 class RailwaySegmentHelper;
 class RailwaySegmentConnectionsModel;
-
-struct RailwaySegmentInfo;
 
 class QGroupBox;
 class CustomCompletionLineEdit;
@@ -39,11 +41,12 @@ public:
     virtual void done(int res) override;
 
     void setSegment(db_id segmentId, db_id lockStId, db_id lockGateId);
+    void setSegmentInfo(const utils::RailwaySegmentInfo& info);
 
     bool checkValues();
     bool applyChanges();
 
-    bool fillSegInfo(RailwaySegmentInfo& info);
+    bool fillSegInfo(utils::RailwaySegmentInfo& info);
 
     void setManuallyApply(bool val);
 

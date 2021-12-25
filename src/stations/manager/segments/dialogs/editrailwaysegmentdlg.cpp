@@ -140,7 +140,7 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     if(m_lockStationId == DoNotLock)
         m_lockGateId = DoNotLock; //Cannot lock gate without locking station
 
-    RailwaySegmentInfo info;
+    utils::RailwaySegmentInfo info;
     info.segmentId = m_segmentId;
     info.distanceMeters = 10000; // 10 km
     info.maxSpeedKmH = 120;   // 120 km/h
@@ -150,15 +150,12 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     info.to.stationId = 0;
     info.to.gateId = 0;
 
-    QFlags<utils::RailwaySegmentType> type;
-
-    if(segmentId)
+    if(m_segmentId)
     {
         if(!helper->getSegmentInfo(info))
         {
             return; //TODO: error reporting
         }
-        type = info.type;
 
         if(m_lockStationId == info.to.stationId)
         {
@@ -184,14 +181,14 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
             //User passed different gate, do not lock
             m_lockGateId = DoNotLock;
         }
+    }
 
-        setWindowTitle(tr("Edit Railway Segment"));
-    }
-    else
-    {
-        //It's a new segment
-        setWindowTitle(tr("New Railway Segment"));
-    }
+    setSegmentInfo(info);
+}
+
+void EditRailwaySegmentDlg::setSegmentInfo(const utils::RailwaySegmentInfo &info)
+{
+    QFlags<utils::RailwaySegmentType> type = info.type;
 
     segmentNameEdit->setText(info.segmentName);
     distanceSpin->setValue(info.distanceMeters);
@@ -223,11 +220,21 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
     fromBox->setTitle(m_lockGateId == DoNotLock ? tr("From") : tr("From (Locked)"));
     toBox->setTitle(reversed ? tr("To (Reversed)") : tr("To"));
+
+    if(m_segmentId)
+    {
+        setWindowTitle(tr("Edit Railway Segment"));
+    }
+    else
+    {
+        //It's a new segment
+        setWindowTitle(tr("New Railway Segment"));
+    }
 }
 
 bool EditRailwaySegmentDlg::checkValues()
 {
-    RailwaySegmentInfo info;
+    utils::RailwaySegmentInfo info;
     fillSegInfo(info);
 
     if(!info.from.stationId)
@@ -267,7 +274,7 @@ bool EditRailwaySegmentDlg::checkValues()
 
 bool EditRailwaySegmentDlg::applyChanges()
 {
-    RailwaySegmentInfo info;
+    utils::RailwaySegmentInfo info;
     fillSegInfo(info);
 
     QString errMsg;
@@ -286,7 +293,7 @@ bool EditRailwaySegmentDlg::applyChanges()
     return true;
 }
 
-bool EditRailwaySegmentDlg::fillSegInfo(RailwaySegmentInfo &info)
+bool EditRailwaySegmentDlg::fillSegInfo(utils::RailwaySegmentInfo &info)
 {
     info.segmentId = m_segmentId;
     info.segmentName = segmentNameEdit->text().simplified();
