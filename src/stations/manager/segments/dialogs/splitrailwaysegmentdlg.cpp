@@ -9,6 +9,9 @@
 #include <QLabel>
 #include <QPushButton>
 
+#include <QMessageBox>
+#include <QDialogButtonBox>
+
 #include "utils/sqldelegate/customcompletionlineedit.h"
 #include "stations/match_models/railwaysegmentmatchmodel.h"
 #include "stations/match_models/stationsmatchmodel.h"
@@ -25,6 +28,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     stationsModel = new StationsMatchModel(mDb, this);
     middleInGateModel = new StationGatesMatchModel(mDb, this);
     middleOutGateModel = new StationGatesMatchModel(mDb, this);
+    stationsModel->setFilter(0);
 
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -76,6 +80,11 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     formLay->addRow(tr("Station:"), toStationLabel);
     lay->addWidget(toBox);
 
+    butBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    connect(butBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    connect(butBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    lay->addWidget(butBox);
+
     connect(selectSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::selectSegment);
     connect(editNewSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::editNewSegment);
     connect(middleStationEdit, &CustomCompletionLineEdit::completionDone,
@@ -87,6 +96,37 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     setMinimumSize(200, 200);
     resize(400, 450);
     setWindowTitle(tr("Split Segment"));
+}
+
+void SplitRailwaySegmentDlg::done(int res)
+{
+    if(res == QDialog::Accepted)
+    {
+        if(!middleInGate.stationId)
+        {
+            QMessageBox::warning(this, tr("No Station"),
+                                 tr("You must choose a station to put in the middle."));
+            return;
+        }
+
+        if(!middleInGate.gateId || !newSegInfo.from.gateId)
+        {
+            QMessageBox::warning(this, tr("No Gates"),
+                                 tr("You must choose in and out gates for middle Station."));
+            return;
+        }
+
+        RailwaySegmentSplitHelper helper(mDb, mOriginalSegmentId);
+        helper.setInfo(newSegInfo, middleInGate.gateId);
+        if(!helper.split())
+        {
+            QMessageBox::warning(this, tr("Error"),
+                                 tr("Split of segment failed."));
+            return;
+        }
+    }
+
+    QDialog::done(res);
 }
 
 void SplitRailwaySegmentDlg::selectSegment()
@@ -154,6 +194,11 @@ void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
 
         newSegInfo.type = info.type;
     }
+    else
+    {
+        //Failed to reteive info
+        mOriginalSegmentId = 0;
+    }
 
     segmentLabel->setText(tr("Segment: <b>%1</b>").arg(info.segmentName));
 
@@ -163,11 +208,13 @@ void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
     toStationLabel->setText(newSegInfo.to.stationName);
     toGateLabel->setText(newSegInfo.to.gateLetter);
 
-    //Reset middle station
-    setMiddleStation(0);
-
     //Allow setting middle station only after settin main segment
     middleStationEdit->setEnabled(mOriginalSegmentId != 0);
+
+    butBox->button(QDialogButtonBox::Ok)->setEnabled(mOriginalSegmentId != 0);
+
+    //Reset middle station
+    setMiddleStation(0);
 }
 
 void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)

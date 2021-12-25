@@ -13,6 +13,7 @@ class database;
 class QGroupBox;
 class QLabel;
 class QPushButton;
+class QDialogButtonBox;
 
 class CustomCompletionLineEdit;
 class StationsMatchModel;
@@ -23,6 +24,8 @@ class SplitRailwaySegmentDlg : public QDialog
     Q_OBJECT
 public:
     SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget *parent = nullptr);
+
+    void done(int res) override;
 
 private slots:
     void selectSegment();
@@ -53,6 +56,8 @@ private:
     QGroupBox *toBox;
     QLabel *toGateLabel;
     QLabel *toStationLabel;
+
+    QDialogButtonBox *butBox;
 
     StationsMatchModel *stationsModel;
     StationGatesMatchModel *middleInGateModel;
