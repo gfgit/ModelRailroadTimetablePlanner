@@ -107,10 +107,12 @@ void ShiftSheetExport::write()
 
     JobWriter w(mDb);
 
-    q.prepare("SELECT jobs.id,jobs.category,s1.arrival"
+    q.prepare("SELECT jobs.id,jobs.category,MIN(s1.arrival)"
               " FROM jobs"
-              " JOIN stops s1 ON s1.id=jobs.firstStop"
-              " WHERE jobs.shiftId=? ORDER BY s1.arrival ASC");
+              " JOIN stops s1 ON s1.job_id=jobs.id"
+              " WHERE jobs.shift_id=?"
+              " GROUP BY jobs.id"
+              " ORDER BY s1.arrival ASC");
     q.bind(1, m_shiftId);
     for(auto r : q)
     {
