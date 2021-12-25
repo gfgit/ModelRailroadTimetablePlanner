@@ -27,6 +27,7 @@ public:
 private slots:
     void selectSegment();
     void onStationSelected();
+    void editNewSegment();
 
 private:
     void setMainSegment(db_id segmentId);
@@ -47,6 +48,7 @@ private:
     CustomCompletionLineEdit *middleStationEdit;
     CustomCompletionLineEdit *middleInGateEdit;
     CustomCompletionLineEdit *middleOutGateEdit;
+    QPushButton *editNewSegBut;
 
     QGroupBox *toBox;
     QLabel *toGateLabel;
@@ -57,20 +59,10 @@ private:
     StationGatesMatchModel *middleOutGateModel;
 
     db_id mOriginalSegmentId;
-    utils::RailwaySegmentType segmentType;
-    QString mNewSegName;
 
-    struct Gate
-    {
-        db_id gateId = 0;
-        db_id stationId = 0;
-        QChar gateLetter;
-    };
-
-    Gate fromGate;
-    Gate middleInGate;
-    Gate middleOutGate;
-    Gate toGate;
+    utils::RailwaySegmentGateInfo fromGate;
+    utils::RailwaySegmentGateInfo middleInGate;
+    utils::RailwaySegmentInfo newSegInfo;
 };
 
 #endif // SPLITRAILWAYSEGMENTDLG_H

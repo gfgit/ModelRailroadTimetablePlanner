@@ -60,6 +60,9 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     //Middle Station Out Gate is New Segment In Gate
     middleOutGateEdit = new CustomCompletionLineEdit(middleOutGateModel);
     formLay->addRow(tr("Out Gate:"), middleOutGateEdit);
+
+    editNewSegBut = new QPushButton(tr("Edit New Segment"));
+    formLay->addWidget(editNewSegBut);
     lay->addWidget(middleBox);
 
     //To:
@@ -74,6 +77,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     lay->addWidget(toBox);
 
     connect(selectSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::selectSegment);
+    connect(editNewSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::editNewSegment);
     connect(middleStationEdit, &CustomCompletionLineEdit::completionDone,
             this, &SplitRailwaySegmentDlg::onStationSelected);
 
@@ -109,16 +113,26 @@ void SplitRailwaySegmentDlg::onStationSelected()
     setMiddleStation(stationId);
 }
 
+void SplitRailwaySegmentDlg::editNewSegment()
+{
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(mDb, this);
+    dlg->setManuallyApply(false);
+    dlg->setSegmentInfo(newSegInfo);
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return;
+
+    //Get info back
+    dlg->fillSegInfo(newSegInfo);
+}
+
 void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
 {
     mOriginalSegmentId = segmentId;
 
     //Reset info
-    fromGate = Gate();
-    toGate = Gate();
+    fromGate = newSegInfo.to = utils::RailwaySegmentGateInfo();
 
-    QString fromStationName, toStationName;
-    RailwaySegmentInfo info;
+    utils::RailwaySegmentInfo info;
     info.segmentId = mOriginalSegmentId;
     RailwaySegmentHelper helper(mDb);
 
@@ -129,25 +143,25 @@ void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
         QString tmp = middleInGateModel->getName(fromGate.gateId);
         if(tmp.size())
             fromGate.gateLetter = tmp.front();
-        fromStationName = stationsModel->getName(fromGate.stationId);
+        fromGate.stationName = stationsModel->getName(fromGate.stationId);
 
-        toGate.gateId = info.to.gateId;
-        toGate.stationId = info.to.stationId;
-        tmp = middleInGateModel->getName(toGate.gateId);
+        newSegInfo.to.gateId = info.to.gateId;
+        newSegInfo.to.stationId = info.to.stationId;
+        tmp = middleInGateModel->getName(newSegInfo.to.gateId);
         if(tmp.size())
-            toGate.gateLetter = tmp.front();
-        toStationName = stationsModel->getName(toGate.stationId);
+            newSegInfo.to.gateLetter = tmp.front();
+        newSegInfo.to.stationName = stationsModel->getName(newSegInfo.to.stationId);
 
-        segmentType = info.type;
+        newSegInfo.type = info.type;
     }
 
     segmentLabel->setText(tr("Segment: <b>%1</b>").arg(info.segmentName));
 
-    fromStationLabel->setText(fromStationName);
+    fromStationLabel->setText(fromGate.stationName);
     fromGateLabel->setText(fromGate.gateLetter);
 
-    toStationLabel->setText(toStationName);
-    toGateLabel->setText(toGate.gateLetter);
+    toStationLabel->setText(newSegInfo.to.stationName);
+    toGateLabel->setText(newSegInfo.to.gateLetter);
 
     //Reset middle station
     setMiddleStation(0);
@@ -159,16 +173,19 @@ void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
 void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
 {
     //Reset station
-    middleInGate = Gate();
-    middleOutGate = Gate();
+    middleInGate = utils::RailwaySegmentGateInfo();
+    newSegInfo.from = utils::RailwaySegmentGateInfo();
 
-    middleInGate.stationId = middleOutGate.stationId = stationId;
+    newSegInfo.from.stationId = middleInGate.stationId = stationId;
 
     const QString middleStName = stationsModel->getName(stationId);
+    newSegInfo.from.stationName = middleInGate.stationName = middleStName;
+
     if(middleStName.isEmpty())
-        mNewSegName.clear();
+        newSegInfo.segmentName.clear();
     else
-        setNewSegmentName(middleStName + '-' + toStationLabel->text());
+        setNewSegmentName(newSegInfo.from.stationName + '-' + newSegInfo.to.stationName);
+
 
     middleStationEdit->setData(stationId, middleStName);
     middleInGateEdit->setData(0);
@@ -197,7 +214,7 @@ void SplitRailwaySegmentDlg::setNewSegmentName(const QString &possibleName)
         if(q.step() == SQLITE_OK)
         {
             //Found available name
-            mNewSegName = name;
+            newSegInfo.segmentName = name;
             break;
         }
     }
