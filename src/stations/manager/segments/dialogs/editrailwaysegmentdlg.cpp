@@ -59,6 +59,7 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
 
     distanceSpin = new KmSpinBox;
     distanceSpin->setPrefix(tr("Km "));
+    distanceSpin->setMinimum(100); //At least 100 meters, 0.1 km
 
     maxSpeedSpin = new QSpinBox;
     maxSpeedSpin->setRange(10, 999);
@@ -142,11 +143,8 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
     utils::RailwaySegmentInfo info;
     info.segmentId = m_segmentId;
-
     info.from.stationId = m_lockStationId;
     info.from.gateId = m_lockGateId;
-    info.to.stationId = 0;
-    info.to.gateId = 0;
 
     if(m_segmentId)
     {
