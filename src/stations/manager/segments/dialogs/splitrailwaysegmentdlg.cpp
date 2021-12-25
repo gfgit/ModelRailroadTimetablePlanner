@@ -161,7 +161,7 @@ void SplitRailwaySegmentDlg::onStationSelected()
 void SplitRailwaySegmentDlg::editNewSegment()
 {
     OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(mDb, this);
-    dlg->setManuallyApply(false);
+    dlg->setManuallyApply(true);
     dlg->setSegmentInfo(newSegInfo);
     if(dlg->exec() != QDialog::Accepted || !dlg)
         return;
