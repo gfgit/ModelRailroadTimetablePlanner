@@ -32,6 +32,9 @@ private slots:
     void onStationSelected();
     void editNewSegment();
 
+    void onMiddleInCompletionDone();
+    void onMiddleOutCompletionDone();
+
 private:
     void setMainSegment(db_id segmentId);
     void setMiddleStation(db_id stationId);

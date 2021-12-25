@@ -87,8 +87,13 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
 
     connect(selectSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::selectSegment);
     connect(editNewSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::editNewSegment);
+
     connect(middleStationEdit, &CustomCompletionLineEdit::completionDone,
             this, &SplitRailwaySegmentDlg::onStationSelected);
+    connect(middleInGateEdit, &CustomCompletionLineEdit::completionDone,
+            this, &SplitRailwaySegmentDlg::onMiddleInCompletionDone);
+    connect(middleOutGateEdit, &CustomCompletionLineEdit::completionDone,
+            this, &SplitRailwaySegmentDlg::onMiddleOutCompletionDone);
 
     //Reset segment
     setMainSegment(0);
@@ -163,6 +168,22 @@ void SplitRailwaySegmentDlg::editNewSegment()
 
     //Get info back
     dlg->fillSegInfo(newSegInfo);
+}
+
+void SplitRailwaySegmentDlg::onMiddleInCompletionDone()
+{
+    QString tmp;
+    middleInGateEdit->getData(middleInGate.gateId, tmp);
+    if(tmp.size())
+        middleInGate.gateLetter = tmp.front();
+}
+
+void SplitRailwaySegmentDlg::onMiddleOutCompletionDone()
+{
+    QString tmp;
+    middleOutGateEdit->getData(newSegInfo.from.gateId, tmp);
+    if(tmp.size())
+        newSegInfo.from.gateLetter = tmp.front();
 }
 
 void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
@@ -259,11 +280,13 @@ void SplitRailwaySegmentDlg::setNewSegmentName(const QString &possibleName)
             name = fmt.arg(possibleName).arg(i);
 
         q.bind(1, name);
-        if(q.step() == SQLITE_OK)
+        int ret = q.step();
+        if(ret == SQLITE_OK || ret == SQLITE_DONE)
         {
             //Found available name
             newSegInfo.segmentName = name;
             break;
         }
+        q.reset();
     }
 }
