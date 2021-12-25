@@ -65,7 +65,7 @@ struct RailwaySegmentInfo
 {
     db_id segmentId = 0;
     QString segmentName;
-    int distanceMeters = 10;
+    int distanceMeters = 10000;
     int maxSpeedKmH = 120;
     utils::RailwaySegmentType type;
 
