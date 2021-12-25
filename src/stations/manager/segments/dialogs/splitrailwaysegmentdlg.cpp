@@ -85,7 +85,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     setMainSegment(0);
 
     setMinimumSize(200, 200);
-    resize(400, 200);
+    resize(400, 450);
     setWindowTitle(tr("Split Segment"));
 }
 
@@ -194,9 +194,10 @@ void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
     middleInGateModel->setFilter(stationId, true, 0);
     middleOutGateModel->setFilter(stationId, true, 0);
 
-    //Allow selectiig Gates only after Station
+    //Allow selectiig Gates and Edit New Segment only after Middle Station is set
     middleInGateEdit->setEnabled(stationId != 0);
     middleOutGateEdit->setEnabled(stationId != 0);
+    editNewSegBut->setEnabled(stationId != 0);
 }
 
 void SplitRailwaySegmentDlg::setNewSegmentName(const QString &possibleName)
