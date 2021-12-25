@@ -51,8 +51,8 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     formLay = new QFormLayout(middleBox);
 
     //Segment Out Gate is Middle Station In Gate
-    middleOutGateEdit = new CustomCompletionLineEdit(middleInGateModel);
-    formLay->addRow(tr("In Gate:"), middleOutGateEdit);
+    middleInGateEdit = new CustomCompletionLineEdit(middleInGateModel);
+    formLay->addRow(tr("In Gate:"), middleInGateEdit);
 
     middleStationEdit = new CustomCompletionLineEdit(stationsModel);
     formLay->addRow(tr("Station:"), middleStationEdit);
@@ -79,11 +79,16 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
 
     //Reset segment
     setMainSegment(0);
+
+    setMinimumSize(200, 200);
+    resize(400, 200);
+    setWindowTitle(tr("Split Segment"));
 }
 
 void SplitRailwaySegmentDlg::selectSegment()
 {
     RailwaySegmentMatchModel segmentMatch(mDb);
+    segmentMatch.setFilter(0, 0, 0);
     OwningQPointer<ChooseItemDlg> dlg = new ChooseItemDlg(&segmentMatch, this);
     dlg->setDescription(tr("Choose a Railway Segment to split in 2 parts.\n"
                            "A station will be inserted in the middle."));
@@ -114,6 +119,7 @@ void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
 
     QString fromStationName, toStationName;
     RailwaySegmentInfo info;
+    info.segmentId = mOriginalSegmentId;
     RailwaySegmentHelper helper(mDb);
 
     if(mOriginalSegmentId && helper.getSegmentInfo(info))
@@ -158,9 +164,18 @@ void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
 
     middleInGate.stationId = middleOutGate.stationId = stationId;
 
-    middleStationEdit->setData(stationId);
+    const QString middleStName = stationsModel->getName(stationId);
+    if(middleStName.isEmpty())
+        mNewSegName.clear();
+    else
+        mNewSegName = middleStName + '-' + toStationLabel->text();
+
+    middleStationEdit->setData(stationId, middleStName);
     middleInGateEdit->setData(0);
     middleOutGateEdit->setData(0);
+
+    middleInGateModel->setFilter(stationId, true, 0);
+    middleOutGateModel->setFilter(stationId, true, 0);
 
     //Allow selectiig Gates only after Station
     middleInGateEdit->setEnabled(stationId != 0);

@@ -57,6 +57,7 @@ private:
 
     db_id mOriginalSegmentId;
     utils::RailwaySegmentType segmentType;
+    QString mNewSegName;
 
     struct Gate
     {
