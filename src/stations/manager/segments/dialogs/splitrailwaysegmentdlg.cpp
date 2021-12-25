@@ -107,22 +107,22 @@ void SplitRailwaySegmentDlg::done(int res)
 {
     if(res == QDialog::Accepted)
     {
-        if(!middleInGate.stationId)
+        if(!origSegInfo.to.stationId)
         {
             QMessageBox::warning(this, tr("No Station"),
                                  tr("You must choose a station to put in the middle."));
             return;
         }
 
-        if(!middleInGate.gateId || !newSegInfo.from.gateId)
+        if(!origSegInfo.to.gateId || !newSegInfo.from.gateId)
         {
             QMessageBox::warning(this, tr("No Gates"),
                                  tr("You must choose in and out gates for middle Station."));
             return;
         }
 
-        RailwaySegmentSplitHelper helper(mDb, mOriginalSegmentId);
-        helper.setInfo(newSegInfo, middleInGate.gateId);
+        RailwaySegmentSplitHelper helper(mDb, origSegInfo.segmentId);
+        helper.setInfo(newSegInfo, origSegInfo.to.gateId);
         if(!helper.split())
         {
             QMessageBox::warning(this, tr("Error"),
@@ -173,9 +173,9 @@ void SplitRailwaySegmentDlg::editNewSegment()
 void SplitRailwaySegmentDlg::onMiddleInCompletionDone()
 {
     QString tmp;
-    middleInGateEdit->getData(middleInGate.gateId, tmp);
+    middleInGateEdit->getData(origSegInfo.to.gateId, tmp);
     if(tmp.size())
-        middleInGate.gateLetter = tmp.front();
+        origSegInfo.to.gateLetter = tmp.front();
 }
 
 void SplitRailwaySegmentDlg::onMiddleOutCompletionDone()
@@ -188,51 +188,59 @@ void SplitRailwaySegmentDlg::onMiddleOutCompletionDone()
 
 void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
 {
-    mOriginalSegmentId = segmentId;
+    origSegInfo.segmentId = segmentId;
 
-    //Reset info
-    fromGate = newSegInfo.to = utils::RailwaySegmentGateInfo();
+    //Reset outer info
+    origSegInfo.from = newSegInfo.to = utils::RailwaySegmentGateInfo();
 
     utils::RailwaySegmentInfo info;
-    info.segmentId = mOriginalSegmentId;
+    info.segmentId = origSegInfo.segmentId;
     RailwaySegmentHelper helper(mDb);
 
-    if(mOriginalSegmentId && helper.getSegmentInfo(info))
+    if(origSegInfo.segmentId && helper.getSegmentInfo(info))
     {
-        fromGate.gateId = info.from.gateId;
-        fromGate.stationId = info.from.stationId;
-        QString tmp = middleInGateModel->getName(fromGate.gateId);
-        if(tmp.size())
-            fromGate.gateLetter = tmp.front();
-        fromGate.stationName = stationsModel->getName(fromGate.stationId);
+        origSegInfo.segmentName = info.segmentName;
+        origSegInfo.distanceMeters = info.distanceMeters;
+        origSegInfo.maxSpeedKmH = info.maxSpeedKmH;
+        origSegInfo.type = info.type;
 
-        newSegInfo.to.gateId = info.to.gateId;
-        newSegInfo.to.stationId = info.to.stationId;
+        //Split segment info in 2 parts
+        origSegInfo.from = info.from;
+        newSegInfo.to = info.to;
+
+        //Get station names
+        origSegInfo.from.stationName = stationsModel->getName(origSegInfo.from.stationId);
+        newSegInfo.to.stationName = stationsModel->getName(newSegInfo.to.stationId);
+
+        //Get gate names
+        QString tmp = middleInGateModel->getName(origSegInfo.from.gateId);
+        if(tmp.size())
+            origSegInfo.from.gateLetter = tmp.front();
+
         tmp = middleInGateModel->getName(newSegInfo.to.gateId);
         if(tmp.size())
             newSegInfo.to.gateLetter = tmp.front();
-        newSegInfo.to.stationName = stationsModel->getName(newSegInfo.to.stationId);
 
-        newSegInfo.type = info.type;
+        newSegInfo.type = origSegInfo.type;
     }
     else
     {
         //Failed to reteive info
-        mOriginalSegmentId = 0;
+        origSegInfo.segmentId = 0;
     }
 
-    segmentLabel->setText(tr("Segment: <b>%1</b>").arg(info.segmentName));
+    segmentLabel->setText(tr("Segment: <b>%1</b>").arg(origSegInfo.segmentName));
 
-    fromStationLabel->setText(fromGate.stationName);
-    fromGateLabel->setText(fromGate.gateLetter);
+    fromStationLabel->setText(origSegInfo.from.stationName);
+    fromGateLabel->setText(origSegInfo.from.gateLetter);
 
     toStationLabel->setText(newSegInfo.to.stationName);
     toGateLabel->setText(newSegInfo.to.gateLetter);
 
     //Allow setting middle station only after settin main segment
-    middleStationEdit->setEnabled(mOriginalSegmentId != 0);
+    middleStationEdit->setEnabled(origSegInfo.segmentId != 0);
 
-    butBox->button(QDialogButtonBox::Ok)->setEnabled(mOriginalSegmentId != 0);
+    butBox->button(QDialogButtonBox::Ok)->setEnabled(origSegInfo.segmentId != 0);
 
     //Reset middle station
     setMiddleStation(0);
@@ -241,13 +249,12 @@ void SplitRailwaySegmentDlg::setMainSegment(db_id segmentId)
 void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
 {
     //Reset station
-    middleInGate = utils::RailwaySegmentGateInfo();
-    newSegInfo.from = utils::RailwaySegmentGateInfo();
+    origSegInfo.to = newSegInfo.from = utils::RailwaySegmentGateInfo();
 
-    newSegInfo.from.stationId = middleInGate.stationId = stationId;
+    origSegInfo.to.stationId = newSegInfo.from.stationId = stationId;
 
     const QString middleStName = stationsModel->getName(stationId);
-    newSegInfo.from.stationName = middleInGate.stationName = middleStName;
+    origSegInfo.to.stationName = newSegInfo.from.stationName = middleStName;
 
     if(middleStName.isEmpty())
         newSegInfo.segmentName.clear();

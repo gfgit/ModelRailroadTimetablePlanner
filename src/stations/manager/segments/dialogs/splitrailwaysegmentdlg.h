@@ -66,10 +66,7 @@ private:
     StationGatesMatchModel *middleInGateModel;
     StationGatesMatchModel *middleOutGateModel;
 
-    db_id mOriginalSegmentId;
-
-    utils::RailwaySegmentGateInfo fromGate;
-    utils::RailwaySegmentGateInfo middleInGate;
+    utils::RailwaySegmentInfo origSegInfo;
     utils::RailwaySegmentInfo newSegInfo;
 };
 
