@@ -130,6 +130,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on left, top, bottom sides
      * Padding: 0.097cm all sides
+     * Vertical Align: middle
      *
      * Usage:
      *  - stationtable table: top left/middle cells (except top right which has L1 style)
@@ -144,6 +145,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "none");
     xml.writeAttribute("fo:border-top", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -152,6 +154,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on all sides
      * Padding: 0.097cm all sides
+     * Vertical Align: middle
      *
      * Usage:
      *  - stationtable table: top right cell
@@ -163,6 +166,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeStartElement("style:table-cell-properties");
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
     xml.writeAttribute("fo:padding", "0.097cm");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -171,6 +175,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on left and bottom sides
      * Padding: 0.097cm all sides
+     * Vertical Align: middle
      *
      * Usage:
      *  - stationtable table: right and middle cells from second row to last row
@@ -185,6 +190,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "none");
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -193,6 +199,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on left, right and bottom sides
      * Padding: 0.097cm all sides
+     * Vertical Align: middle
      *
      * Usage:
      *  - stationtable table: left cells from second row to last row
@@ -207,6 +214,7 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
