@@ -114,7 +114,7 @@ void EditRailwaySegmentDlg::done(int res)
         if(!checkValues())
             return;
 
-        if(manuallyApply)
+        if(!manuallyApply)
         {
             if(!applyChanges())
                 return;
@@ -142,8 +142,6 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
     utils::RailwaySegmentInfo info;
     info.segmentId = m_segmentId;
-    info.distanceMeters = 10000; // 10 km
-    info.maxSpeedKmH = 120;   // 120 km/h
 
     info.from.stationId = m_lockStationId;
     info.from.gateId = m_lockGateId;
@@ -297,44 +295,37 @@ bool EditRailwaySegmentDlg::fillSegInfo(utils::RailwaySegmentInfo &info)
 {
     info.segmentId = m_segmentId;
     info.segmentName = segmentNameEdit->text().simplified();
-
-    QString tmp;
-    db_id fromStId = 0;
-    db_id fromGateId = 0;
-    db_id toStId = 0;
-    db_id toGateId = 0;
-
-    if(!fromStationEdit->getData(fromStId, tmp))
-        return false;
-
-    if(!fromGateEdit->getData(fromGateId, tmp))
-        return false;
-
-    if(!toStationEdit->getData(toStId, tmp))
-        return false;
-
-    if(!toGateEdit->getData(toGateId, tmp))
-        return false;
+    info.distanceMeters = distanceSpin->value();
+    info.maxSpeedKmH = maxSpeedSpin->value();
 
     QFlags<utils::RailwaySegmentType> type;
     if(electifiedCheck->isChecked()) //FIXME: other types also
         type.setFlag(utils::RailwaySegmentType::Electrified);
     info.type = utils::RailwaySegmentType(int(type));
 
-    info.distanceMeters = distanceSpin->value();
-    info.maxSpeedKmH = maxSpeedSpin->value();
+    QString tmp;
+
+    if(!fromStationEdit->getData(info.from.stationId, info.from.stationName))
+        return false;
+
+    if(!fromGateEdit->getData(info.from.gateId, tmp))
+        return false;
+    if(tmp.size())
+        info.from.gateLetter = tmp.front();
+
+    if(!toStationEdit->getData(info.to.stationId, info.to.stationName))
+        return false;
+
+    if(!toGateEdit->getData(info.to.gateId, tmp))
+        return false;
+    if(tmp.size())
+        info.to.gateLetter = tmp.front();
 
     if(reversed)
     {
         //Revert to original
-        qSwap(fromStId, toStId);
-        qSwap(fromGateId, toGateId);
+        qSwap(info.from, info.to);
     }
-
-    info.from.gateId = fromGateId;
-    info.from.stationId = fromStId;
-    info.to.gateId = toGateId;
-    info.to.stationId = toStId;
 
     return true;
 }
