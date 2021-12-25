@@ -595,13 +595,27 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
 
         //Description, Notes
         writeCellListStart(xml, "stationtable.L2", "P3");
+        bool needsLineBreak = false;
         if(isTransit)
         {
             xml.writeCharacters(Odt::tr("Transit"));
+            needsLineBreak = true;
+        }
+        if(stop.prevSt.isEmpty())
+        {
+            if(needsLineBreak)
+                xml.writeEmptyElement("text:line-break");
+
+            //This is Origin (First stop), use Bold font
+            xml.writeStartElement("text:span");
+            xml.writeAttribute("text:style-name", "T1");
+            xml.writeCharacters(Odt::tr("START", "Do not translate this text"));
+            xml.writeEndElement(); //test:span
+            needsLineBreak = true;
         }
         if(!stop.description.isEmpty())
         {
-            if(isTransit) //go to new line after 'Transit' word
+            if(needsLineBreak) //go to new line after 'Transit' word
                 xml.writeEmptyElement("text:line-break");
 
             //Split in lines
@@ -621,9 +635,9 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
 
         xml.writeEndElement(); //table-row
 
-        if(!isTransit)
+        if(!isTransit && !stop.prevSt.isEmpty() && !stop.nextSt.isEmpty())
         {
-            //If it is a normal stop (not a transit)
+            //If it is a normal stop (not a transit and not first stop or last stop)
             //insert two rows: one for arrival and another
             //that reminds the station master (capostazione)
             //the departure of that train
