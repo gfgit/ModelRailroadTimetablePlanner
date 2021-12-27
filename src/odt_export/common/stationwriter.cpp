@@ -319,14 +319,12 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     if(stNameOut)
         *stNameOut = stationName;
 
+    const QString shortNameStr = shortName.isEmpty() ? QString() : Odt::tr(" (%1)").arg(shortName);
+
     //Title
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
-    xml.writeCharacters(Odt::tr("Station: %1%2")
-                            .arg(stationName)
-                            .arg(shortName.isEmpty() ?
-                                     QString() :
-                                     Odt::tr(" (%1)").arg(shortName)));
+    xml.writeCharacters(Odt::tr("Station: %1%2").arg(stationName, shortNameStr));
     xml.writeEndElement();
 
     //Vertical space
@@ -373,15 +371,15 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     xml.writeStartElement("table:table-header-rows");
     xml.writeStartElement("table:table-row");
 
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Arrival"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Departure"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Job N"));
+    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Arr.", "Arrival column"));
+    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Dep.", "Departure column"));
+    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Job Nr"));
     writeCell(xml, "stationtable.A1", "P2", Odt::tr("Platf"));
     writeCell(xml, "stationtable.A1", "P2", Odt::tr("From"));
     writeCell(xml, "stationtable.A1", "P2", Odt::tr("To"));
     writeCell(xml, "stationtable.A1", "P2", Odt::tr("Rollingstock"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Crossings"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Passings"));
+    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Cross", "Crossings column"));
+    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Passings", "Passings column"));
     writeCell(xml, "stationtable.L1", "P2", Odt::tr("Notes")); //Description
 
     xml.writeEndElement(); //end of row
