@@ -905,84 +905,89 @@ NOTE: this doesn&apos;t affect stop times but you will lose manual adjustments t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="222"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="223"/>
         <source>Toggle transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="223"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="224"/>
         <source>Set transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="224"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="225"/>
         <source>Unset transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="229"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="230"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="226"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="227"/>
         <source>Edit stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="365"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="366"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="366"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="367"/>
         <source>You must register at least 2 stops.
 Do you want to delete this job?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="481"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="482"/>
         <source>Save?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="482"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="483"/>
         <source>Do you want to save changes to job %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="169"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="170"/>
         <source>Invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="170"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="171"/>
         <source>Job number &lt;b&gt;%1&lt;/b&gt; is already exists.&lt;br&gt;Please choose a different number.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="227"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="228"/>
         <source>Station SVG Plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="574"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="575"/>
         <source>Empty Job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="575"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="576"/>
         <source>Before setting a shift you should add stops to this job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="620"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="621"/>
         <source>Save Job Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="624"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="625"/>
         <source>job%1_sheet.odt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="643"/>
+        <source>Job Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2005,46 +2010,42 @@ Extension: (*.ods)</source>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="643"/>
         <location filename="../odt_export/common/sessionrswriter.cpp" line="249"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="362"/>
         <source>Arrival</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="644"/>
         <location filename="../odt_export/common/sessionrswriter.cpp" line="249"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="363"/>
         <source>Departure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="645"/>
         <location filename="../odt_export/common/sessionrswriter.cpp" line="248"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="365"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="377"/>
         <source>Platf</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="646"/>
         <location filename="../odt_export/common/sessionrswriter.cpp" line="246"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="368"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="380"/>
         <source>Rollingstock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="647"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="369"/>
         <source>Crossings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="648"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="370"/>
         <source>Passings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../odt_export/common/jobwriter.cpp" line="649"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="371"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="383"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2105,33 +2106,63 @@ Extension: (*.ods)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="311"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="327"/>
         <source>Station: %1%2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="315"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="322"/>
         <source> (%1)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="364"/>
-        <source>Job N</source>
+        <location filename="../odt_export/common/stationwriter.cpp" line="374"/>
+        <source>Arr.</source>
+        <comment>Arrival column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="366"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="375"/>
+        <source>Dep.</source>
+        <comment>Departure column</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/stationwriter.cpp" line="376"/>
+        <source>Job Nr</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/stationwriter.cpp" line="378"/>
         <source>From</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="367"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="379"/>
         <source>To</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="584"/>
+        <location filename="../odt_export/common/stationwriter.cpp" line="381"/>
+        <source>Cross</source>
+        <comment>Crossings column</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/stationwriter.cpp" line="382"/>
+        <source>Passings</source>
+        <comment>Passings column</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/stationwriter.cpp" line="599"/>
         <source>Transit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/stationwriter.cpp" line="610"/>
+        <source>START</source>
+        <comment>Do not translate this text</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -2140,12 +2171,12 @@ Extension: (*.ods)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/shiftsheetexport.cpp" line="420"/>
+        <location filename="../odt_export/shiftsheetexport.cpp" line="422"/>
         <source>From %1 to %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/shiftsheetexport.cpp" line="479"/>
+        <location filename="../odt_export/shiftsheetexport.cpp" line="481"/>
         <source>SHIFT %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3786,38 +3817,43 @@ Extension: (*.ttt)</source>
 <context>
     <name>SessionStartEndRSViewer</name>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="31"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="32"/>
         <source>Show Session Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="32"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="33"/>
         <source>Show Session End</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="36"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="37"/>
         <source>Order By Station</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="37"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="38"/>
         <source>Order By Owner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="43"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="44"/>
         <source>Export Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="60"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="61"/>
         <source>Rollingstock Summary</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="81"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="82"/>
         <source>Expoert RS session plan</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="102"/>
+        <source>Session RS Plan Saved</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4161,33 +4197,38 @@ Extension: (*.ttt)</source>
 <context>
     <name>ShiftGraphEditor</name>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="36"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="37"/>
         <source>Save</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="37"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="38"/>
         <source>Print</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="38"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="39"/>
         <source>Options</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="39"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="40"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="55"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="56"/>
         <source>Shift Graph Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="65"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="66"/>
         <source>Save Shift Graph</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="93"/>
+        <source>Shift Graph Saved</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4231,89 +4272,94 @@ Extension: (*.ttt)</source>
 <context>
     <name>ShiftManager</name>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="52"/>
+        <location filename="../shifts/shiftmanager.cpp" line="53"/>
         <source>New</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="53"/>
+        <location filename="../shifts/shiftmanager.cpp" line="54"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="55"/>
+        <location filename="../shifts/shiftmanager.cpp" line="56"/>
         <source>View Shift</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="56"/>
+        <location filename="../shifts/shiftmanager.cpp" line="57"/>
         <source>Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="58"/>
+        <location filename="../shifts/shiftmanager.cpp" line="59"/>
         <source>Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="72"/>
+        <location filename="../shifts/shiftmanager.cpp" line="73"/>
         <source>Create new Job Shift</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="73"/>
+        <location filename="../shifts/shiftmanager.cpp" line="74"/>
         <source>Remove selected Job Shift</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="74"/>
+        <location filename="../shifts/shiftmanager.cpp" line="75"/>
         <source>Show selected Job Shift plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="75"/>
+        <location filename="../shifts/shiftmanager.cpp" line="76"/>
         <source>Save selected Job Shift plan on file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="76"/>
+        <location filename="../shifts/shiftmanager.cpp" line="77"/>
         <source>Show Job Shift graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="78"/>
+        <location filename="../shifts/shiftmanager.cpp" line="79"/>
         <source>Shift Manager</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="117"/>
+        <location filename="../shifts/shiftmanager.cpp" line="118"/>
         <source>Error Adding Shift</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="118"/>
+        <location filename="../shifts/shiftmanager.cpp" line="119"/>
         <source>An error occurred while adding a new shift:
 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="138"/>
+        <location filename="../shifts/shiftmanager.cpp" line="139"/>
         <source>Remove Shift?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="139"/>
+        <location filename="../shifts/shiftmanager.cpp" line="140"/>
         <source>Are you sure you want to remove Job Shift &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="189"/>
+        <location filename="../shifts/shiftmanager.cpp" line="190"/>
         <source>Save Shift Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="193"/>
+        <location filename="../shifts/shiftmanager.cpp" line="194"/>
         <source>shift_%1.odt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../shifts/shiftmanager.cpp" line="211"/>
+        <source>Shift Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4838,23 +4884,28 @@ It can also be both (Bidirectional) but cannot be neither.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="90"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="91"/>
         <source>Show in Job Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="91"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="92"/>
         <source>Show job in graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="110"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="111"/>
         <source>Save Station Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="114"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="115"/>
         <source>%1_station.odt</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationjobview.cpp" line="133"/>
+        <source>Station Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5530,6 +5581,24 @@ Please choose a new out gate or out track, this might change next segment.</sour
     <message>
         <location filename="../viewmanager/viewmanager.cpp" line="648"/>
         <source>Are you sure you want to remove Job &lt;b&gt;%1&lt;/b&gt;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>utils::OpenFileInFolderDlg</name>
+    <message>
+        <location filename="../utils/openfileinfolder.cpp" line="54"/>
+        <source>Open In App</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../utils/openfileinfolder.cpp" line="55"/>
+        <source>Show Folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../utils/openfileinfolder.cpp" line="84"/>
+        <source>Do you want to open file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
