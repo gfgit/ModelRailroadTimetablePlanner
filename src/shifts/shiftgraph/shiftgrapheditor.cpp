@@ -17,6 +17,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include "utils/file_format_names.h"
+#include "utils/openfileinfolder.h"
 
 #include <QDebug>
 
@@ -88,6 +89,8 @@ void ShiftGraphEditor::onSaveGraph()
     {
         exportSVG(fileName);
     }
+
+    utils::OpenFileInFolderDlg::askUser(tr("Shift Graph Saved"), fileName, this);
 }
 
 void ShiftGraphEditor::onPrintGraph()
