@@ -13,6 +13,7 @@
 #include <QMenu>
 
 #include "odt_export/stationsheetexport.h"
+#include "utils/openfileinfolder.h"
 
 #include "stationplanmodel.h"
 
@@ -128,4 +129,6 @@ void StationJobView::onSaveSheet()
     StationSheetExport sheet(m_stationId);
     sheet.write();
     sheet.save(fileName);
+
+    utils::OpenFileInFolderDlg::askUser(tr("Station Sheet Saved"), fileName, this);
 }

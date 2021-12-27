@@ -26,6 +26,7 @@
 #include "shiftbusy/shiftbusymodel.h"
 
 #include "odt_export/jobsheetexport.h"
+#include "utils/openfileinfolder.h"
 
 #include "utils/file_format_names.h"
 
@@ -638,6 +639,8 @@ void JobPathEditor::onSaveSheet()
     JobSheetExport sheet(stopModel->getJobId(), stopModel->getCategory());
     sheet.write();
     sheet.save(fileName);
+
+    utils::OpenFileInFolderDlg::askUser(tr("Job Sheet Saved"), fileName, this);
 }
 
 void JobPathEditor::onIndexClicked(const QModelIndex& index)
