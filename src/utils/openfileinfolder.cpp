@@ -3,14 +3,16 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QUrl>
+#include <QFileIconProvider>
 
 #include <QProcess>
 #include <QDesktopServices>
 
-#include <QVBoxLayout>
+#include <QGridLayout>
 #include <QPushButton>
 #include <QLabel>
 #include <QDialogButtonBox>
+#include <QStyle>
 
 #include "utils/owningqpointer.h"
 
@@ -43,13 +45,19 @@ static bool openDefAppOrShowFolder(const QFileInfo& info, bool folder)
 OpenFileInFolderDlg::OpenFileInFolderDlg(QWidget *parent) :
     QDialog(parent)
 {
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    QGridLayout *lay = new QGridLayout(this);
 
-    mLabel = new QLabel;
-    lay->addWidget(mLabel);
+    mIconLabel = new QLabel;
+    mIconLabel->setAlignment(Qt::AlignCenter);
+    mIconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    lay->addWidget(mIconLabel, 0, 0, Qt::AlignCenter);
+
+    mDescrLabel = new QLabel;
+    mDescrLabel->setWordWrap(true);
+    lay->addWidget(mDescrLabel, 0, 1);
 
     QDialogButtonBox *box = new QDialogButtonBox(Qt::Horizontal);
-    lay->addWidget(box);
+    lay->addWidget(box, 1, 0, 1, 2);
 
     openFileBut = box->addButton(tr("Open In App"), QDialogButtonBox::AcceptRole);
     openFolderBut = box->addButton(tr("Show Folder"), QDialogButtonBox::AcceptRole);
@@ -69,11 +77,29 @@ void OpenFileInFolderDlg::setFilePath(const QString &newFilePath)
 {
     info.setFile(newFilePath);
     openFileBut->setVisible(info.isFile());
+
+    QFileIconProvider provider;
+    QIcon fileIcon = provider.icon(info);
+
+    QStyle *s = style();
+    const int iconSize = s->pixelMetric(QStyle::PM_MessageBoxIconSize, 0, this);
+    if(fileIcon.isNull())
+        fileIcon = s->standardIcon(QStyle::SP_MessageBoxInformation, 0, this);
+
+    QPixmap pix;
+    if(!fileIcon.isNull())
+    {
+        QWindow *window = nativeParentWidget() ? nativeParentWidget()->windowHandle() : nullptr;
+        pix = fileIcon.pixmap(window, QSize(iconSize, iconSize));
+    }
+
+    mIconLabel->setPixmap(pix);
+    mIconLabel->adjustSize();
 }
 
 void OpenFileInFolderDlg::setLabelText(const QString &text)
 {
-    mLabel->setText(text);
+    mDescrLabel->setText(text);
 }
 
 void OpenFileInFolderDlg::askUser(const QString &title, const QString &filePath, QWidget *parent)

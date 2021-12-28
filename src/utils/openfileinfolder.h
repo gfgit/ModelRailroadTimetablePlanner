@@ -48,7 +48,8 @@ private slots:
     void onOpenFolder();
 
 private:
-    QLabel *mLabel;
+    QLabel *mDescrLabel;
+    QLabel *mIconLabel;
     QPushButton *openFileBut;
     QPushButton *openFolderBut;
 
