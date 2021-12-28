@@ -2120,10 +2120,6 @@ Estensione: (*.ods)</translation>
         <translation></translation>
     </message>
     <message>
-        <source>Job N</source>
-        <translation type="vanished">Treno N</translation>
-    </message>
-    <message>
         <location filename="../odt_export/common/stationwriter.cpp" line="378"/>
         <source>From</source>
         <translation>Da</translation>
@@ -5651,17 +5647,17 @@ Per favore scegli un altro Binario o cambia la Tratta successiva.</translation>
 <context>
     <name>utils::OpenFileInFolderDlg</name>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="54"/>
+        <location filename="../utils/openfileinfolder.cpp" line="62"/>
         <source>Open In App</source>
         <translation>Apri in App</translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="55"/>
+        <location filename="../utils/openfileinfolder.cpp" line="63"/>
         <source>Show Folder</source>
         <translation>Mostra Cartella</translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="84"/>
+        <location filename="../utils/openfileinfolder.cpp" line="110"/>
         <source>Do you want to open file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Vuoi aprire il file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</translation>
     </message>

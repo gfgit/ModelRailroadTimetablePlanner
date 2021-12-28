@@ -5587,17 +5587,17 @@ Please choose a new out gate or out track, this might change next segment.</sour
 <context>
     <name>utils::OpenFileInFolderDlg</name>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="54"/>
+        <location filename="../utils/openfileinfolder.cpp" line="62"/>
         <source>Open In App</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="55"/>
+        <location filename="../utils/openfileinfolder.cpp" line="63"/>
         <source>Show Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="84"/>
+        <location filename="../utils/openfileinfolder.cpp" line="110"/>
         <source>Do you want to open file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
