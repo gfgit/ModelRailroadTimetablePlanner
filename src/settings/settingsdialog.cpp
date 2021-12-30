@@ -125,12 +125,15 @@ void SettingsDialog::setupLanguageBox()
     ui->sheetLanguageCombo->setModel(languageModel);
 }
 
-void SettingsDialog::setSheetLanguage(const QLocale &appLoc, const QLocale &sheetLoc)
+void SettingsDialog::setSheetLanguage(const QLocale &sheetLoc)
 {
     QTranslator *sheetTranslator = nullptr;
-    if(appLoc != sheetLoc || sheetLoc == QLocale(QLocale::English))
+    if(Session->getAppLanguage() != sheetLoc || sheetLoc == QLocale(QLocale::English))
     {
-        //Sheet Export needs a different (non-default) translation
+        //Sheet Language is different from original (currently loaded) App Language
+        //And it's not default (English with default country) which is embedded in executable
+
+        //Sheet Export needs a different translation
         if(Session->getSheetExportLocale() == sheetLoc)
         {
             //Try to re-use old one
@@ -243,12 +246,13 @@ void SettingsDialog::saveSettings()
     auto &settings = AppSettings;
 
     //General
-    QVariant v = ui->appLanguageCombo->currentData();
-    QLocale loc = v.toLocale();
-    settings.setLanguage(loc);
+    int idx = ui->appLanguageCombo->currentIndex();
+    QLocale appLoc = languageModel->getLocaleAt(idx);
+    settings.setLanguage(appLoc);
 
-    v = ui->sheetLanguageCombo->currentData();
-
+    idx = ui->sheetLanguageCombo->currentIndex();
+    QLocale sheetLoc = languageModel->getLocaleAt(idx);
+    setSheetLanguage(sheetLoc);
 
     //Job Graph
     settings.setHourOffset(ui->hourOffsetSpin->value());

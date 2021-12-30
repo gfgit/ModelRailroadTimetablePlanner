@@ -42,7 +42,7 @@ private slots:
 
 private:
     void setupLanguageBox();
-    void setSheetLanguage(const QLocale& appLoc, const QLocale& sheetLoc);
+    void setSheetLanguage(const QLocale& sheetLoc);
 
 private:
     Ui::SettingsDialog *ui;
