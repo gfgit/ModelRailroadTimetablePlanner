@@ -48,7 +48,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     catNames.reserve(int(JobCategory::NCategories));
     for(int cat = 0; cat < int(JobCategory::NCategories); cat++)
     {
-        catNames.append(JobCategoryName::tr(JobCategoryFullNameTable[cat]));
+        catNames.append(JobCategoryName::fullName(JobCategory(cat)));
     }
 
     ui->categoryCombo->addItems(catNames);
