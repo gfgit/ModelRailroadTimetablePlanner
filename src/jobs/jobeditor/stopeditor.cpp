@@ -2,7 +2,7 @@
 
 #include "stopeditinghelper.h"
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include <QTimeEdit>
 #include <QSpinBox>

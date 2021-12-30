@@ -9,7 +9,7 @@
 
 #include <QMessageBox>
 
-#include "utils/spinbox/spinboxeditorfactory.h"
+#include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
 #include <QStyledItemDelegate>
 
 EditRailwayConnectionDlg::EditRailwayConnectionDlg(RailwaySegmentConnectionsModel *m, QWidget *parent) :

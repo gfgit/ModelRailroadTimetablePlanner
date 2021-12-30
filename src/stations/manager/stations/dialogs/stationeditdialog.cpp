@@ -13,13 +13,13 @@
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
 
 #include <QHeaderView>
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 
-#include "utils/combodelegate.h"
-#include "utils/colordelegate.h"
-#include "utils/spinbox/spinboxeditorfactory.h"
+#include "utils/delegates/combobox/combodelegate.h"
+#include "utils/delegates/color/colordelegate.h"
+#include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
 
-#include "utils/sqldelegate/sqlfkfielddelegate.h"
+#include "utils/delegates/sql/sqlfkfielddelegate.h"
 #include "stations/match_models/stationtracksmatchmodel.h"
 #include "stations/match_models/stationgatesmatchmodel.h"
 
@@ -30,7 +30,7 @@
 #include "stations/manager/segments/dialogs/editrailwaysegmentdlg.h"
 
 #include <QFileDialog>
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 #include "utils/owningqpointer.h"
 

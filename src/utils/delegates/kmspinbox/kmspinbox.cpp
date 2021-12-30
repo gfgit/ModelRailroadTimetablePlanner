@@ -1,5 +1,5 @@
 #include "kmspinbox.h"
-#include "utils/kmutils.h"
+#include "utils/delegates/kmspinbox/kmutils.h"
 
 #include <QKeyEvent>
 

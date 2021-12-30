@@ -15,8 +15,8 @@
 #include "../model/duplicatesimportedrsmodel.h" //HACK
 
 #include "fixduplicatesdlg.h"
-#include "utils/sqldelegate/sqlfkfielddelegate.h"
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/sqlfkfielddelegate.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 #include "rollingstock/rsmatchmodelfactory.h"
 
 #include "../rsimportstrings.h"

@@ -11,7 +11,7 @@
 #include "model/jobshelper.h"
 #include "utils/jobcategorystrings.h"
 
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"

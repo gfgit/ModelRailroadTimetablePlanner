@@ -15,7 +15,7 @@
 #include "stations/manager/stations/model/stationsvghelper.h"
 #include "stations/manager/stations/dialogs/stationsvgplandlg.h"
 
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 #include "stations/importer/model/importstationmodel.h"
 
 

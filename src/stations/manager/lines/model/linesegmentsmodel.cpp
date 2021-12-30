@@ -10,7 +10,7 @@ using namespace sqlite3pp;
 #include <QBrush>
 #include <QFont>
 
-#include "utils/kmutils.h"
+#include "utils/delegates/kmspinbox/kmutils.h"
 
 #include <QDebug>
 

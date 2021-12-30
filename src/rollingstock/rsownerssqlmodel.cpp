@@ -1,6 +1,6 @@
 #include "rsownerssqlmodel.h"
 
-#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
+#include "utils/delegates/sql/pageditemmodelhelper_impl.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;

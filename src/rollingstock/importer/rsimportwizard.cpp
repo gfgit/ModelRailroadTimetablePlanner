@@ -12,7 +12,7 @@
 #include "pages/loadingpage.h"
 #include "pages/itemselectionpage.h"
 
-#include "utils/spinbox/spinboxeditorfactory.h"
+#include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
 #include <QStyledItemDelegate>
 
 #include "backends/rsbackendsmodel.h"

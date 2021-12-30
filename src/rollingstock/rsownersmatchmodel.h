@@ -1,7 +1,7 @@
 #ifndef RSOWNERSMATCHMODEL_H
 #define RSOWNERSMATCHMODEL_H
 
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 
 #include "utils/types.h"
 

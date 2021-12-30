@@ -5,7 +5,7 @@
 #include "utils/jobcategorystrings.h"
 
 #include "languagemodel.h"
-#include "utils/languageutils.h"
+#include "utils/localization/languageutils.h"
 
 #include <QMessageBox>
 #include <QCloseEvent>

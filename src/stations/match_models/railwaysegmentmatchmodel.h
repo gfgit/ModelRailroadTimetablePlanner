@@ -1,7 +1,7 @@
 #ifndef RAILWAYSEGMENTMATCHMODEL_H
 #define RAILWAYSEGMENTMATCHMODEL_H
 
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 
 #include "utils/types.h"
 #include "stations/station_utils.h"

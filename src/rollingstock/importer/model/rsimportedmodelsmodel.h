@@ -5,7 +5,7 @@
 #include <QVector>
 
 #include "utils/types.h"
-#include "utils/sqldelegate/IFKField.h"
+#include "utils/delegates/sql/IFKField.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;

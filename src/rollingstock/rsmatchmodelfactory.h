@@ -1,7 +1,7 @@
 #ifndef RSMATCHMODELFACTORY_H
 #define RSMATCHMODELFACTORY_H
 
-#include "utils/sqldelegate/imatchmodelfactory.h"
+#include "utils/delegates/sql/imatchmodelfactory.h"
 
 #include "utils/model_mode.h"
 

@@ -13,11 +13,11 @@
 #include <QMenu>
 
 #include "odt_export/stationsheetexport.h"
-#include "utils/openfileinfolder.h"
+#include "utils/files/openfileinfolder.h"
 
 #include "stationplanmodel.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 StationJobView::StationJobView(QWidget *parent) :
     QWidget(parent),

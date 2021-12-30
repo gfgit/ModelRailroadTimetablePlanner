@@ -1,8 +1,8 @@
 #ifndef ROLLINGSTOCKSQLMODEL_H
 #define ROLLINGSTOCKSQLMODEL_H
 
-#include "utils/sqldelegate/pageditemmodelhelper.h"
-#include "utils/sqldelegate/IFKField.h"
+#include "utils/delegates/sql/pageditemmodelhelper.h"
+#include "utils/delegates/sql/IFKField.h"
 
 #include "utils/types.h"
 

@@ -1,6 +1,6 @@
 #include "joblistmodel.h"
 
-#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
+#include "utils/delegates/sql/pageditemmodelhelper_impl.h"
 
 #include "app/session.h"
 

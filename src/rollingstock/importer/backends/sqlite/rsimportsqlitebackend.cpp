@@ -3,7 +3,7 @@
 #include "sqliteoptionswidget.h"
 #include "loadsqlitetask.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 RSImportSQLiteBackend::RSImportSQLiteBackend()
 {

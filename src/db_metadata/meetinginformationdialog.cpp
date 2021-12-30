@@ -13,7 +13,7 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 
-#include "utils/imageviewer.h"
+#include "utils/delegates/imageviewer/imageviewer.h"
 #include "utils/owningqpointer.h"
 
 #include <QDebug>

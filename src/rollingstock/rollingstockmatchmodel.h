@@ -1,7 +1,7 @@
 #ifndef ROLLINGSTOCKMATCHMODEL_H
 #define ROLLINGSTOCKMATCHMODEL_H
 
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 
 #include "utils/types.h"
 

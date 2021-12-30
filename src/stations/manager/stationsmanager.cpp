@@ -21,10 +21,10 @@
 
 #include "stations/manager/lines/model/linesmodel.h"
 
-#include "utils/combodelegate.h"
+#include "utils/delegates/combobox/combodelegate.h"
 #include "stations/station_name_utils.h"
 
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 
 #include "stations/manager/free_rs_viewer/stationfreersviewer.h" //TODO: move to ViewManager
 

@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 #include <QPushButton>
 #include <QLabel>
@@ -38,7 +38,7 @@
 
 #include <QActionGroup>
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 #include "searchbox/searchresultmodel.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER

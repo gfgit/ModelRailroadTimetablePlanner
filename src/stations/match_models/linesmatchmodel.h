@@ -1,7 +1,7 @@
 #ifndef LINESMATCHMODEL_H
 #define LINESMATCHMODEL_H
 
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 
 #include "utils/types.h"
 

@@ -26,11 +26,11 @@
 #include "shiftbusy/shiftbusymodel.h"
 
 #include "odt_export/jobsheetexport.h"
-#include "utils/openfileinfolder.h"
+#include "utils/files/openfileinfolder.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 #include "shifts/shiftcombomodel.h"
 
 JobPathEditor::JobPathEditor(QWidget *parent) :

@@ -6,7 +6,7 @@
 #include "rollingstock/rsownersmatchmodel.h"
 
 #include <QMessageBox>
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include <QDebug>
 

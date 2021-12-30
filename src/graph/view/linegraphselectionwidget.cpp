@@ -3,7 +3,7 @@
 #include <QComboBox>
 #include <QPushButton>
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include "stations/match_models/stationsmatchmodel.h"
 #include "stations/match_models/railwaysegmentmatchmodel.h"

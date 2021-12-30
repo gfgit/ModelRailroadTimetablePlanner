@@ -1,7 +1,7 @@
 #ifndef RSOWNERSSQLMODEL_H
 #define RSOWNERSSQLMODEL_H
 
-#include "utils/sqldelegate/pageditemmodelhelper.h"
+#include "utils/delegates/sql/pageditemmodelhelper.h"
 
 #include "utils/types.h"
 

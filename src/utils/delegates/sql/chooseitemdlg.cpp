@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 ChooseItemDlg::ChooseItemDlg(ISqlFKMatchModel *matchModel, QWidget *parent) :
     QDialog(parent),

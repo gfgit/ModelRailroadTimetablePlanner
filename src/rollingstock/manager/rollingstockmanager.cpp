@@ -19,21 +19,21 @@
 #include "dialogs/mergemodelsdialog.h"
 #include "dialogs/mergeownersdialog.h"
 
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 #include "../rollingstocksqlmodel.h"
 #include "../rsmodelssqlmodel.h"
 #include "../rsownerssqlmodel.h"
 #include <QHeaderView>
 #include <QDebug>
 #include <QWindow>
-#include "utils/sqldelegate/sqlfkfielddelegate.h"
-#include "utils/sqldelegate/chooseitemdlg.h"
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/sqlfkfielddelegate.h"
+#include "utils/delegates/sql/chooseitemdlg.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 #include "../rsmatchmodelfactory.h"
 
 #include "utils/rs_types_names.h"
 
-#include "utils/spinbox/spinboxeditorfactory.h"
+#include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
 
 #include <QInputDialog>
 #include <QMessageBox>

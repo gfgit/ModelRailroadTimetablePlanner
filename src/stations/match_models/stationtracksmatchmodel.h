@@ -1,8 +1,8 @@
 #ifndef STATIONTRACKSMATCHMODEL_H
 #define STATIONTRACKSMATCHMODEL_H
 
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
-#include "utils/sqldelegate/imatchmodelfactory.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/imatchmodelfactory.h"
 
 #include "utils/types.h"
 #include "stations/station_utils.h"

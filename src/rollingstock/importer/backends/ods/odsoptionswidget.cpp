@@ -1,7 +1,7 @@
 #include "odsoptionswidget.h"
 #include "options.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 #include <QFormLayout>
 #include <QLabel>

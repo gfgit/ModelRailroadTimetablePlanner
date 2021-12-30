@@ -14,9 +14,9 @@
 #include "app/session.h"
 
 #include "odt_export/sessionrsexport.h"
-#include "utils/openfileinfolder.h"
+#include "utils/files/openfileinfolder.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 #include <QDebug>
 

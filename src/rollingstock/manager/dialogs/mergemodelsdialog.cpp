@@ -8,7 +8,7 @@
 #include "utils/rs_types_names.h"
 
 #include <QMessageBox>
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include <QDebug>
 

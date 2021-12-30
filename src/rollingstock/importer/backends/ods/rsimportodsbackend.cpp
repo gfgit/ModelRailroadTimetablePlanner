@@ -3,7 +3,7 @@
 #include "odsoptionswidget.h"
 #include "loadodstask.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 RSImportODSBackend::RSImportODSBackend()
 {

@@ -4,7 +4,7 @@
 #include <QFormLayout>
 
 #include <QLineEdit>
-#include "utils/spinbox/kmspinbox.h"
+#include "utils/delegates/kmspinbox/kmspinbox.h"
 #include <QTableView>
 #include <QToolButton>
 

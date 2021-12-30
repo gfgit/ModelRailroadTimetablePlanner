@@ -1,13 +1,13 @@
 #include "linesmodel.h"
 
-#include "utils/sqldelegate/pageditemmodelhelper_impl.h"
+#include "utils/delegates/sql/pageditemmodelhelper_impl.h"
 
 #include "app/session.h"
 
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-#include "utils/kmutils.h"
+#include "utils/delegates/kmspinbox/kmutils.h"
 
 #include <QDebug>
 

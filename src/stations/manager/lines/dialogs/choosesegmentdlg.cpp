@@ -1,7 +1,7 @@
 #include "choosesegmentdlg.h"
 
 #include <QFormLayout>
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 #include <QDialogButtonBox>
 
 #include "stations/match_models/stationsmatchmodel.h"

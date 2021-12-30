@@ -2,7 +2,7 @@
 #include <QApplication>
 #include "app/session.h"
 
-#include "utils/languageutils.h"
+#include "utils/localization/languageutils.h"
 
 #include <QTextStream>
 #include <QFile>

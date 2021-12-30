@@ -1,7 +1,7 @@
 #include "shiftmanager.h"
 
 #include "shiftsmodel.h"
-#include "utils/sqldelegate/modelpageswitcher.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
 
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"
@@ -20,9 +20,9 @@
 #include <QActionGroup>
 
 #include "odt_export/shiftsheetexport.h"
-#include "utils/openfileinfolder.h"
+#include "utils/files/openfileinfolder.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 ShiftManager::ShiftManager(QWidget *parent) :
     QWidget(parent),

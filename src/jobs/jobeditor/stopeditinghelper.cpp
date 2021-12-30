@@ -1,6 +1,6 @@
 #include "stopeditinghelper.h"
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include "stations/match_models/stationsmatchmodel.h"
 #include "stations/match_models/stationtracksmatchmodel.h"

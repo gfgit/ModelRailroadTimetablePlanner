@@ -18,7 +18,7 @@
 
 #include "stations/manager/stations/model/stationsvghelper.h"
 #include "stations/manager/segments/model/railwaysegmenthelper.h"
-#include "utils/kmutils.h"
+#include "utils/delegates/kmspinbox/kmutils.h"
 
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"

@@ -7,7 +7,7 @@
 #include <QVBoxLayout>
 #include "utils/owningqpointer.h"
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 #include "shifts/shiftcombomodel.h"
 
 #include "jobs/jobeditor/shiftbusy/shiftbusydialog.h"

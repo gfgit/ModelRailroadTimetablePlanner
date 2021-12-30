@@ -3,7 +3,7 @@
 #include "utils/wizard/choosefilepage.h"
 #include "pages/selectstationpage.h"
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 #include "model/importstationmodel.h"
 

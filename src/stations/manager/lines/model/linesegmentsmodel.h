@@ -1,7 +1,7 @@
 #ifndef LINESEGMENTSMODEL_H
 #define LINESEGMENTSMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/delegates/sql/pageditemmodel.h"
 
 #include <QVector>
 

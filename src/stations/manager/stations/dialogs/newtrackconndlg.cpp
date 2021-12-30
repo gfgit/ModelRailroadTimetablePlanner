@@ -11,8 +11,8 @@
 #include <QComboBox>
 #include <QSpinBox>
 
-#include "utils/sqldelegate/customcompletionlineedit.h"
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 
 #include "stations/match_models/stationgatesmatchmodel.h"
 

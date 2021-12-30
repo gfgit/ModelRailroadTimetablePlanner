@@ -17,8 +17,8 @@
 #include "model/jobpassingsmodel.h"
 #include "jobs/jobsmanager/model/jobshelper.h"
 
-#include "utils/sqldelegate/modelpageswitcher.h"
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include <QtMath>
 

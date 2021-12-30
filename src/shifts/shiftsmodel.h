@@ -1,7 +1,7 @@
 #ifndef SHIFTSQLMODEL_H
 #define SHIFTSQLMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/delegates/sql/pageditemmodel.h"
 
 #include "utils/types.h"
 

@@ -7,11 +7,11 @@
 
 #include <QGroupBox>
 #include <QSpinBox>
-#include "utils/spinbox/kmspinbox.h"
+#include "utils/delegates/kmspinbox/kmspinbox.h"
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
-#include "utils/sqldelegate/customcompletionlineedit.h"
+#include "utils/delegates/sql/customcompletionlineedit.h"
 
 #include "utils/owningqpointer.h"
 

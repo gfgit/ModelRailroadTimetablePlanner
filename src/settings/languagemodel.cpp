@@ -1,6 +1,6 @@
 #include "languagemodel.h"
 
-#include "utils/languageutils.h"
+#include "utils/localization/languageutils.h"
 
 LanguageModel::LanguageModel(QObject *parent)
     : QAbstractListModel(parent)

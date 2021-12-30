@@ -10,7 +10,7 @@
 
 #include <QDir>
 
-#include "utils/file_format_names.h"
+#include "utils/files/file_format_names.h"
 
 ChooseFilePage::ChooseFilePage(QWidget *parent) :
     QWizardPage(parent)

@@ -1,8 +1,8 @@
 #ifndef STATIONGATESMODEL_H
 #define STATIONGATESMODEL_H
 
-#include "utils/sqldelegate/pageditemmodelhelper.h"
-#include "utils/sqldelegate/IFKField.h"
+#include "utils/delegates/sql/pageditemmodelhelper.h"
+#include "utils/delegates/sql/IFKField.h"
 
 #include "stations/station_utils.h"
 

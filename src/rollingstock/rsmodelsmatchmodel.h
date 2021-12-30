@@ -1,7 +1,7 @@
 #ifndef RSMODELSMATCHMODEL_H
 #define RSMODELSMATCHMODEL_H
 
-#include "utils/sqldelegate/isqlfkmatchmodel.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
 
 #include "utils/types.h"
 

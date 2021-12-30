@@ -16,8 +16,8 @@
 
 #include <QFileDialog>
 #include <QStandardPaths>
-#include "utils/file_format_names.h"
-#include "utils/openfileinfolder.h"
+#include "utils/files/file_format_names.h"
+#include "utils/files/openfileinfolder.h"
 
 #include <QDebug>
 

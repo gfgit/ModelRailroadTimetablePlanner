@@ -982,7 +982,7 @@
   <customwidget>
    <class>ColorView</class>
    <extends>QWidget</extends>
-   <header>utils/colorview.h</header>
+   <header>utils/delegates/color/colorview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -1,7 +1,7 @@
 #ifndef IRSIMPORTMODEL_H
 #define IRSIMPORTMODEL_H
 
-#include "utils/sqldelegate/pageditemmodel.h"
+#include "utils/delegates/sql/pageditemmodel.h"
 #include "icheckname.h"
 
 class IRsImportModel : public IPagedItemModel, public ICheckName

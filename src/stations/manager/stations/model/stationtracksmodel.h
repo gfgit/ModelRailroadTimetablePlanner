@@ -1,7 +1,7 @@
 #ifndef STATIONTRACKSMODEL_H
 #define STATIONTRACKSMODEL_H
 
-#include "utils/sqldelegate/pageditemmodelhelper.h"
+#include "utils/delegates/sql/pageditemmodelhelper.h"
 
 #include "stations/station_utils.h"
 
