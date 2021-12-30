@@ -13,6 +13,7 @@ class SettingsDialog;
 
 class QSpinBox;
 class ColorView;
+class LanguageModel;
 
 class SettingsDialog : public QDialog
 {
@@ -28,6 +29,9 @@ public slots:
     void restoreDefaults();
 
     void onRestore();
+
+    void resetSheetLanguage();
+
 protected:
     void closeEvent(QCloseEvent *e);
 
@@ -38,10 +42,11 @@ private slots:
 
 private:
     void setupLanguageBox();
-    int findLocaleIdx(const QLocale& loc);
+    void setSheetLanguage(const QLocale& appLoc, const QLocale& sheetLoc);
 
 private:
     Ui::SettingsDialog *ui;
+    LanguageModel *languageModel;
 
     bool updateJobsColors;
     bool updateJobGraphOptions;

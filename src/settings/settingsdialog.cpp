@@ -4,7 +4,7 @@
 #include "app/session.h"
 #include "utils/jobcategorystrings.h"
 
-#include <QLocale>
+#include "languagemodel.h"
 #include "utils/languageutils.h"
 
 #include <QMessageBox>
@@ -25,6 +25,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     connect(this, &QDialog::accepted, this, &SettingsDialog::saveSettings);
     connect(ui->restoreBut, &QPushButton::clicked, this, &SettingsDialog::onRestore);
+    connect(ui->resetSheetLangBut, &QPushButton::clicked, this, &SettingsDialog::resetSheetLanguage);
 
     //Setup default stop time section
     QFormLayout *lay = new QFormLayout(ui->stopDurationBox);
@@ -117,48 +118,30 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::setupLanguageBox()
 {
-    ui->languageCombo->clear();
+    languageModel = new LanguageModel(this);
+    languageModel->loadAvailableLanguages();
 
-    int idx = 0;
-    const QVector<QLocale> vec = utils::language::getAvailableTranslations();
-    for(const QLocale& loc : vec)
-    {
-        QString nativeName = loc.nativeLanguageName();
-        const QString englishName = QLocale::languageToString(loc.language());
-        if(loc == QLocale(QLocale::English))
-            nativeName = englishName; //Show just "English" instead of "American English"
-        ui->languageCombo->addItem(nativeName, loc);
-        ui->languageCombo->setItemData(idx, englishName, Qt::ToolTipRole);
-        idx++;
-    }
+    ui->appLanguageCombo->setModel(languageModel);
+    ui->sheetLanguageCombo->setModel(languageModel);
 }
 
-int SettingsDialog::findLocaleIdx(const QLocale &loc)
+void SettingsDialog::setSheetLanguage(const QLocale &appLoc, const QLocale &sheetLoc)
 {
-    int exactMatchIdx = -1;
-    int partialMatchIdx = -1;
-    for(int i = 0; i < ui->languageCombo->count(); i++)
+    QTranslator *sheetTranslator = nullptr;
+    if(appLoc != sheetLoc || sheetLoc == QLocale(QLocale::English))
     {
-        QLocale item = ui->languageCombo->itemData(i).toLocale();
-        if(item.language() == loc.language())
+        //Sheet Export needs a different (non-default) translation
+        if(Session->getSheetExportLocale() == sheetLoc)
         {
-            partialMatchIdx = i;
-
-            if(item.country() == loc.country())
-            {
-                exactMatchIdx = i;
-                break;
-            }
+            //Try to re-use old one
+            sheetTranslator = Session->getSheetExportTranslator();
         }
+
+        if(!sheetTranslator)
+            sheetTranslator = utils::language::loadAppTranslator(sheetLoc);
     }
 
-    if(exactMatchIdx != -1)
-        return exactMatchIdx;
-
-    if(partialMatchIdx != -1)
-        return partialMatchIdx;
-
-    return 0;
+    Session->setSheetExportTranslator(sheetTranslator, sheetLoc);
 }
 
 inline void set(QSpinBox *spin, int val)
@@ -181,7 +164,10 @@ void SettingsDialog::loadSettings()
 
     //General
     QLocale loc = settings.getLanguage();
-    ui->languageCombo->setCurrentIndex(findLocaleIdx(loc));
+    ui->appLanguageCombo->setCurrentIndex(languageModel->findMatchingRow(loc));
+
+    loc = Session->getSheetExportLocale();
+    ui->sheetLanguageCombo->setCurrentIndex(languageModel->findMatchingRow(loc));
 
     //Job Graph
     set(ui->hourOffsetSpin, settings.getHourOffset());
@@ -257,9 +243,12 @@ void SettingsDialog::saveSettings()
     auto &settings = AppSettings;
 
     //General
-    QVariant v = ui->languageCombo->currentData();
+    QVariant v = ui->appLanguageCombo->currentData();
     QLocale loc = v.toLocale();
     settings.setLanguage(loc);
+
+    v = ui->sheetLanguageCombo->currentData();
+
 
     //Job Graph
     settings.setHourOffset(ui->hourOffsetSpin->value());
@@ -395,6 +384,13 @@ void SettingsDialog::onRestore()
     {
         restoreDefaults();
     }
+}
+
+void SettingsDialog::resetSheetLanguage()
+{
+    //Set Sheet Language to same value of original Application Language
+    QLocale origAppLanguage = Session->getAppLanguage();
+    ui->sheetLanguageCombo->setCurrentIndex(languageModel->findMatchingRow(origAppLanguage));
 }
 
 void SettingsDialog::onJobColorChanged()
