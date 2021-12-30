@@ -60,6 +60,11 @@ public:
     {
         return shortName(cat) + QString::number(jobId); //Example: LIS1234
     }
+
+    static inline QString jobNameSpaced(db_id jobId, JobCategory cat)
+    {
+        return shortName(cat) + QChar(' ') + QString::number(jobId); //Example: LIS1234
+    }
 };
 
 #endif // JOBCATEGORYSTRINGS_H

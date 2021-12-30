@@ -20,6 +20,7 @@
 #include <QActionGroup>
 
 #include "odt_export/shiftsheetexport.h"
+#include "utils/openfileinfolder.h"
 
 #include "utils/file_format_names.h"
 
@@ -206,4 +207,6 @@ void ShiftManager::onSaveSheet()
     ShiftSheetExport w(Session->m_Db, shiftId);
     w.write();
     w.save(fileName);
+
+    utils::OpenFileInFolderDlg::askUser(tr("Shift Sheet Saved"), fileName, this);
 }

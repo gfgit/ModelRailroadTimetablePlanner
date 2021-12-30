@@ -101,16 +101,18 @@ void ShiftSheetExport::write()
 
     shiftName = q.getRows().get<QString>(0);
 
-    odt.setTitle(Odt::tr("Shift %1").arg(shiftName));
+    odt.setTitle(Odt::text(Odt::shiftDocTitle).arg(shiftName));
 
     writeCover(odt.contentXml, shiftName, hasLogo);
 
     JobWriter w(mDb);
 
-    q.prepare("SELECT jobs.id,jobs.category,s1.arrival"
+    q.prepare("SELECT jobs.id,jobs.category,MIN(s1.arrival)"
               " FROM jobs"
-              " JOIN stops s1 ON s1.id=jobs.firstStop"
-              " WHERE jobs.shiftId=? ORDER BY s1.arrival ASC");
+              " JOIN stops s1 ON s1.job_id=jobs.id"
+              " WHERE jobs.shift_id=?"
+              " GROUP BY jobs.id"
+              " ORDER BY s1.arrival ASC");
     q.bind(1, m_shiftId);
     for(auto r : q)
     {
@@ -417,7 +419,7 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
             if(start == end)
                 xml.writeCharacters(start.toString("dd/MM/yyyy"));
             else
-                xml.writeCharacters(Odt::tr("From %1 to %2")
+                xml.writeCharacters(Odt::text(Odt::meetingFromToShort)
                                     .arg(start.toString("dd/MM/yyyy"))
                                     .arg(end.toString("dd/MM/yyyy")));
             xml.writeEndElement();
@@ -476,7 +478,7 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
     //Shift name
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "shift_name_style");
-    xml.writeCharacters(Odt::tr("SHIFT %1").arg(shiftName));
+    xml.writeCharacters(Odt::text(Odt::shiftCoverTitle).arg(shiftName));
     xml.writeEndElement();
     str.clear();
 

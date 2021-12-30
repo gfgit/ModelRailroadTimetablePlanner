@@ -26,6 +26,7 @@
 #include "shiftbusy/shiftbusymodel.h"
 
 #include "odt_export/jobsheetexport.h"
+#include "utils/openfileinfolder.h"
 
 #include "utils/file_format_names.h"
 
@@ -47,7 +48,7 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     catNames.reserve(int(JobCategory::NCategories));
     for(int cat = 0; cat < int(JobCategory::NCategories); cat++)
     {
-        catNames.append(JobCategoryName::tr(JobCategoryFullNameTable[cat]));
+        catNames.append(JobCategoryName::fullName(JobCategory(cat)));
     }
 
     ui->categoryCombo->addItems(catNames);
@@ -638,6 +639,8 @@ void JobPathEditor::onSaveSheet()
     JobSheetExport sheet(stopModel->getJobId(), stopModel->getCategory());
     sheet.write();
     sheet.save(fileName);
+
+    utils::OpenFileInFolderDlg::askUser(tr("Job Sheet Saved"), fileName, this);
 }
 
 void JobPathEditor::onIndexClicked(const QModelIndex& index)

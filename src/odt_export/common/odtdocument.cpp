@@ -344,14 +344,14 @@ void OdtDocument::saveMeta(const QString& path)
             QString description;
             if(start != end)
             {
-                description = Odt::tr("Meeting in %1 from %2 to %3")
+                description = Odt::text(Odt::meetingFromTo)
                         .arg(meetingLocation)
                         .arg(start.toString("dd/MM/yyyy"))
                         .arg(end.toString("dd/MM/yyyy"));
             }
             else
             {
-                description = Odt::tr("Meeting in %1 on %2")
+                description = Odt::text(Odt::meetingOnDate)
                         .arg(meetingLocation)
                         .arg(start.toString("dd/MM/yyyy"));
             }
@@ -364,7 +364,7 @@ void OdtDocument::saveMeta(const QString& path)
 
     //Language
     xml.writeStartElement("dc:language");
-    xml.writeCharacters(AppSettings.getLanguage().bcp47Name());
+    xml.writeCharacters(Session->getSheetExportLocale().bcp47Name());
     xml.writeEndElement(); //dc:language
 
     //Generator
@@ -402,11 +402,12 @@ void OdtDocument::saveMeta(const QString& path)
     xml.writeEndElement(); //meta:keyword
 
     xml.writeStartElement("meta:keyword");
-    xml.writeCharacters(Odt::tr("Meeting"));
+    xml.writeCharacters(Odt::text(Odt::meeting));
     xml.writeEndElement(); //meta:keyword
 
+    //Untranslated version
     xml.writeStartElement("meta:keyword");
-    xml.writeCharacters("Meeting"); //Untranslated version
+    xml.writeCharacters(QString::fromUtf8(Odt::meeting.sourceText));
     xml.writeEndElement(); //meta:keyword
 
     if(storeLocationAndDate && !meetingLocation.isEmpty())

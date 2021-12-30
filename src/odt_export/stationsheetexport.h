@@ -5,7 +5,6 @@
 
 #include "utils/types.h"
 
-//TODO: implement, deprecate MeetingSession API
 class StationSheetExport
 {
 public:

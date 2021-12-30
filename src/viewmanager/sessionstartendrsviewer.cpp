@@ -14,6 +14,7 @@
 #include "app/session.h"
 
 #include "odt_export/sessionrsexport.h"
+#include "utils/openfileinfolder.h"
 
 #include "utils/file_format_names.h"
 
@@ -97,4 +98,6 @@ void SessionStartEndRSViewer::exportSheet()
     SessionRSExport w(model->mode(), model->order());
     w.write();
     w.save(fileName);
+
+    utils::OpenFileInFolderDlg::askUser(tr("Session RS Plan Saved"), fileName, this);
 }

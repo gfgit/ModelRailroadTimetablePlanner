@@ -4,7 +4,8 @@
 #include "app/session.h"
 #include "utils/jobcategorystrings.h"
 
-#include <QLocale>
+#include "languagemodel.h"
+#include "utils/languageutils.h"
 
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -24,6 +25,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     connect(this, &QDialog::accepted, this, &SettingsDialog::saveSettings);
     connect(ui->restoreBut, &QPushButton::clicked, this, &SettingsDialog::onRestore);
+    connect(ui->resetSheetLangBut, &QPushButton::clicked, this, &SettingsDialog::resetSheetLanguage);
 
     //Setup default stop time section
     QFormLayout *lay = new QFormLayout(ui->stopDurationBox);
@@ -116,10 +118,33 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::setupLanguageBox()
 {
-    ui->languageCombo->clear();
+    languageModel = new LanguageModel(this);
+    languageModel->loadAvailableLanguages();
 
-    ui->languageCombo->addItem(QStringLiteral("English"), QLocale::English);
-    ui->languageCombo->addItem(QStringLiteral("Italiano"), QLocale::Italian);
+    ui->appLanguageCombo->setModel(languageModel);
+    ui->sheetLanguageCombo->setModel(languageModel);
+}
+
+void SettingsDialog::setSheetLanguage(const QLocale &sheetLoc)
+{
+    QTranslator *sheetTranslator = nullptr;
+    if(Session->getAppLanguage() != sheetLoc && sheetLoc != MeetingSession::embeddedLocale)
+    {
+        //Sheet Language is different from original (currently loaded) App Language
+        //And it's not default language embedded in executable
+
+        //Sheet Export needs a different translation
+        if(Session->getSheetExportLocale() == sheetLoc)
+        {
+            //Try to re-use old one
+            sheetTranslator = Session->getSheetExportTranslator();
+        }
+
+        if(!sheetTranslator)
+            sheetTranslator = utils::language::loadAppTranslator(sheetLoc);
+    }
+
+    Session->setSheetExportTranslator(sheetTranslator, sheetLoc);
 }
 
 inline void set(QSpinBox *spin, int val)
@@ -141,12 +166,11 @@ void SettingsDialog::loadSettings()
     auto &settings = AppSettings;
 
     //General
-    QLocale locale = settings.getLanguage();
-    int idx = ui->languageCombo->findData(locale.language());
-    if(idx < 0)
-        idx = ui->languageCombo->findData(QLocale::English);
+    QLocale loc = settings.getLanguage();
+    ui->appLanguageCombo->setCurrentIndex(languageModel->findMatchingRow(loc));
 
-    ui->languageCombo->setCurrentIndex(idx);
+    loc = Session->getSheetExportLocale();
+    ui->sheetLanguageCombo->setCurrentIndex(languageModel->findMatchingRow(loc));
 
     //Job Graph
     set(ui->hourOffsetSpin, settings.getHourOffset());
@@ -222,9 +246,13 @@ void SettingsDialog::saveSettings()
     auto &settings = AppSettings;
 
     //General
-    QVariant v = ui->languageCombo->currentData();
-    QLocale::Language lang = v.isValid() ? v.value<QLocale::Language>() : QLocale::English;
-    settings.setLanguage(QLocale(lang));
+    int idx = ui->appLanguageCombo->currentIndex();
+    QLocale appLoc = languageModel->getLocaleAt(idx);
+    settings.setLanguage(appLoc);
+
+    idx = ui->sheetLanguageCombo->currentIndex();
+    QLocale sheetLoc = languageModel->getLocaleAt(idx);
+    setSheetLanguage(sheetLoc);
 
     //Job Graph
     settings.setHourOffset(ui->hourOffsetSpin->value());
@@ -360,6 +388,13 @@ void SettingsDialog::onRestore()
     {
         restoreDefaults();
     }
+}
+
+void SettingsDialog::resetSheetLanguage()
+{
+    //Set Sheet Language to same value of original Application Language
+    QLocale origAppLanguage = Session->getAppLanguage();
+    ui->sheetLanguageCombo->setCurrentIndex(languageModel->findMatchingRow(origAppLanguage));
 }
 
 void SettingsDialog::onJobColorChanged()
