@@ -11,6 +11,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/imageviewer.h
   utils/jobcategorystrings.h
   utils/kmutils.h
+  utils/languageutils.h
   utils/owningqpointer.h
   utils/rs_types_names.h
   utils/rs_utils.h
@@ -26,6 +27,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/combodelegate.cpp
   utils/imageviewer.cpp
   utils/kmutils.cpp
+  utils/languageutils.cpp
   utils/openfileinfolder.cpp
   utils/rs_utils.cpp
   PARENT_SCOPE

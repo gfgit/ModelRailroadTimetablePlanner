@@ -2,17 +2,11 @@
 #include <QApplication>
 #include "app/session.h"
 
-#include <QTranslator>
+#include "utils/languageutils.h"
 
+#include <QTextStream>
 #include <QFile>
 #include <QDir>
-
-#include <QDebug>
-
-#include <QSettings>
-
-#include <QFile>
-#include <QTextStream>
 
 #include <QDateTime>
 
@@ -22,7 +16,7 @@
 
 #include <QMutex>
 
-#include <QStandardPaths>
+#include <QDebug>
 
 Q_GLOBAL_STATIC(QFile, gLogFile)
 static QtMessageHandler defaultHandler;
@@ -56,34 +50,6 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     s << str;
 
     defaultHandler(type, context, msg);
-}
-
-void loadTranslations()
-{
-    QLocale locale = AppSettings.getLanguage();
-
-    qDebug() << "Locale:" << locale << locale.uiLanguages();
-
-    QString path = qApp->applicationDirPath() + QStringLiteral("/translations");
-    qDebug() << path;
-
-    QTranslator *translatorQt = new QTranslator(qApp);
-    if(translatorQt->load(locale,
-                          QStringLiteral("qt"), QStringLiteral("_"),
-                          path))
-    {
-        qDebug() << "Loading Qt translations";
-        qApp->installTranslator(translatorQt);
-    }
-
-    QTranslator *translator = new QTranslator(qApp);
-    if(translator->load(locale,
-                        QStringLiteral("mrtp"), QStringLiteral("_"),
-                        path))
-    {
-        qDebug() << "Loading UI translations";
-        qApp->installTranslator(translator);
-    }
 }
 
 void setupLogger()
@@ -145,7 +111,7 @@ int main(int argc, char *argv[])
     }
 
     MeetingSession meetingSession;
-    loadTranslations();
+    utils::language::loadTranslationsFromSettings();
 
     MainWindow w;
     w.showNormal();
