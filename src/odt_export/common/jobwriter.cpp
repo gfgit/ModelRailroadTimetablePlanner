@@ -37,9 +37,9 @@ void writeJobSummary(QXmlStreamWriter& xml,
     xml.writeStartElement("table:table-row");
 
     //Cells
-    writeCell(xml, "job_5f_summary_cell", "P2", Odt::tr("From:"));
+    writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryFrom));
     writeCell(xml, "job_5f_summary_cell", "P3", from);
-    writeCell(xml, "job_5f_summary_cell", "P2", Odt::tr("Departure:"));
+    writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryDep));
     writeCell(xml, "job_5f_summary_cell", "P3", dep);
 
     xml.writeEndElement(); //table-row
@@ -48,9 +48,9 @@ void writeJobSummary(QXmlStreamWriter& xml,
     xml.writeStartElement("table:table-row");
 
     //Cells
-    writeCell(xml, "job_5f_summary_cell", "P2", Odt::tr("To:"));
+    writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryTo));
     writeCell(xml, "job_5f_summary_cell", "P3", to);
-    writeCell(xml, "job_5f_summary_cell", "P2", Odt::tr("Arrival:"));
+    writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryArr));
     writeCell(xml, "job_5f_summary_cell", "P3", arr);
 
     xml.writeEndElement(); //table-row
@@ -59,7 +59,7 @@ void writeJobSummary(QXmlStreamWriter& xml,
     xml.writeStartElement("table:table-row");
 
     //Cells
-    writeCell(xml, "job_5f_summary_cell", "P2", Odt::tr("Axes:"));
+    writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryAxes));
     writeCell(xml, "job_5f_summary_cell", "P3", QString::number(axes));
     writeCell(xml, "job_5f_summary_cell", "P2", QString());
     writeCell(xml, "job_5f_summary_cell", "P3", QString());
@@ -639,14 +639,14 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
     xml.writeStartElement("table:table-row");
 
     const QString P4_Style = "P4";
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Station"));
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Arrival"));
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Departure"));
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Platf"));
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Rollingstock"));
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Crossings"));
-    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::tr("Passings"));
-    writeCell(xml, "job_5f_stops.H1", P4_Style, Odt::tr("Notes")); //Description
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::station));
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::arrival));
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::departure));
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::jobStopPlatf));
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::rollingstock));
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::jobStopCross));
+    writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::jobStopPassings));
+    writeCell(xml, "job_5f_stops.H1", P4_Style, Odt::text(Odt::notes)); //Description
 
     xml.writeEndElement(); //end of row
     xml.writeEndElement(); //header section
@@ -725,7 +725,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
                 //Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
-                xml.writeCharacters(Odt::tr(Odt::CoupledAbbr));
+                xml.writeCharacters(Odt::text(Odt::CoupledAbbr));
                 xml.writeEndElement(); //test:span
             }
 
@@ -764,7 +764,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
                 //Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
-                xml.writeCharacters(Odt::tr(Odt::UncoupledAbbr));
+                xml.writeCharacters(Odt::text(Odt::UncoupledAbbr));
                 xml.writeEndElement(); //test:span
             }
 

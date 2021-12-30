@@ -243,11 +243,11 @@ db_id SessionRSWriter::writeTable(QXmlStreamWriter &xml, const QString& parentNa
     const QString P4_style = QStringLiteral("P4");
     const QString P5_style = QStringLiteral("P5");
     //Cells (column names, headings)
-    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::tr("Rollingstock"));
-    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::tr("Job"));
-    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::tr("Platf"));
-    writeCell(xml, "rs_5f_table.A1", P4_style, m_mode == SessionRSMode::StartOfSession ? Odt::tr("Departure") : Odt::tr("Arrival"));
-    writeCell(xml, "rs_5f_table.E1", P4_style, m_order == SessionRSOrder::ByStation ? Odt::tr("Owner") : Odt::tr("Station"));
+    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::text(Odt::rollingstock));
+    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::text(Odt::jobNr));
+    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::text(Odt::jobStopPlatf));
+    writeCell(xml, "rs_5f_table.A1", P4_style, Odt::text(m_mode == SessionRSMode::StartOfSession ? Odt::departure : Odt::arrival));
+    writeCell(xml, "rs_5f_table.E1", P4_style, Odt::text(m_order == SessionRSOrder::ByStation ? Odt::genericRSOwner : Odt::station));
 
     xml.writeEndElement(); //end of row
     xml.writeEndElement(); //header section
@@ -334,8 +334,8 @@ void SessionRSWriter::writeContent(QXmlStreamWriter &xml)
 
 QString SessionRSWriter::generateTitle() const
 {
-    QString title = Odt::tr("Rollingstock by %1 at %2 of session")
-            .arg(m_order == SessionRSOrder::ByOwner ? Odt::tr("Owner") : Odt::tr("Station"))
-            .arg(m_mode == SessionRSMode::StartOfSession ? Odt::tr("start") : Odt::tr("end"));
+    QString title = Odt::text(Odt::rsSessionTitle).arg(
+        Odt::text(m_order == SessionRSOrder::ByStation ? Odt::genericRSOwner : Odt::station),
+        Odt::text(m_mode == SessionRSMode::StartOfSession ? Odt::rsSessionStart : Odt::rsSessionEnd));
     return title;
 }

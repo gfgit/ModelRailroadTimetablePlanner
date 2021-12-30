@@ -73,7 +73,7 @@ void StationSheetExport::write()
     StationWriter w(Session->m_Db);
     QString stName;
     w.writeStation(odt.contentXml, m_stationId, &stName);
-    odt.setTitle(Odt::tr("%1 station").arg(stName));
+    odt.setTitle(Odt::text(Odt::stationDocTitle).arg(stName));
 
     odt.endDocument();
 }

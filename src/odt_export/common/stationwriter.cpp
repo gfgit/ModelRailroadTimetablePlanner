@@ -319,12 +319,18 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     if(stNameOut)
         *stNameOut = stationName;
 
-    const QString shortNameStr = shortName.isEmpty() ? QString() : Odt::tr(" (%1)").arg(shortName);
+    QString stationNameStr = stationName;
+    if(!shortName.isEmpty())
+    {
+        stationNameStr.append(QLatin1String(" ("));
+        stationNameStr.append(shortName);
+        stationNameStr.append(')');
+    }
 
     //Title
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
-    xml.writeCharacters(Odt::tr("Station: %1%2").arg(stationName, shortNameStr));
+    xml.writeCharacters(Odt::text(Odt::stationPageTitle).arg(stationNameStr));
     xml.writeEndElement();
 
     //Vertical space
@@ -371,16 +377,16 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     xml.writeStartElement("table:table-header-rows");
     xml.writeStartElement("table:table-row");
 
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Arr.", "Arrival column"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Dep.", "Departure column"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Job Nr"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Platf"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("From"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("To"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Rollingstock"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Cross", "Crossings column"));
-    writeCell(xml, "stationtable.A1", "P2", Odt::tr("Passings", "Passings column"));
-    writeCell(xml, "stationtable.L1", "P2", Odt::tr("Notes")); //Description
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::arrivalShort));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::departureShort));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::jobNr));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::jobStopPlatf));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::stationFromCol));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::stationToCol));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::rollingstock));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::jobStopCrossShort));
+    writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::jobStopPassingsShort));
+    writeCell(xml, "stationtable.L1", "P2", Odt::text(Odt::notes)); //Description
 
     xml.writeEndElement(); //end of row
     xml.writeEndElement(); //header section
@@ -491,7 +497,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
                 //Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
-                xml.writeCharacters(Odt::tr(Odt::CoupledAbbr));
+                xml.writeCharacters(Odt::text(Odt::CoupledAbbr));
                 xml.writeEndElement(); //test:span
             }
 
@@ -530,7 +536,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
                 //Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
-                xml.writeCharacters(Odt::tr(Odt::UncoupledAbbr));
+                xml.writeCharacters(Odt::text(Odt::UncoupledAbbr));
                 xml.writeEndElement(); //test:span
             }
 
@@ -596,7 +602,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         bool needsLineBreak = false;
         if(isTransit)
         {
-            xml.writeCharacters(Odt::tr("Transit"));
+            xml.writeCharacters(Odt::text(Odt::jobStopIsTransit));
             needsLineBreak = true;
         }
         if(stop.prevSt.isEmpty())
@@ -607,7 +613,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
             //This is Origin (First stop), use Bold font
             xml.writeStartElement("text:span");
             xml.writeAttribute("text:style-name", "T1");
-            xml.writeCharacters(Odt::tr("START", "Do not translate this text"));
+            xml.writeCharacters(Odt::text(Odt::jobStopIsFirst));
             xml.writeEndElement(); //test:span
             needsLineBreak = true;
         }
