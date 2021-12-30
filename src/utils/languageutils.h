@@ -4,6 +4,9 @@
 class QTranslator;
 class QLocale;
 
+template<typename T>
+class QVector;
+
 namespace utils {
 
 namespace language {
@@ -11,6 +14,8 @@ namespace language {
 QTranslator *loadAppTranslator(const QLocale& loc);
 
 bool loadTranslationsFromSettings();
+
+QVector<QLocale> getAvailableTranslations();
 
 } // namespace language
 
