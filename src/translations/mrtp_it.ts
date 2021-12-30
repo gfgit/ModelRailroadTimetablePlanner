@@ -1083,6 +1083,14 @@ Vuoi eliminare questo servizio?</translation>
     </message>
 </context>
 <context>
+    <name>LanguageModel</name>
+    <message>
+        <location filename="../settings/languagemodel.cpp" line="15"/>
+        <source>Language</source>
+        <translation type="unfinished">Lingua</translation>
+    </message>
+</context>
+<context>
     <name>LineGraphToolbar</name>
     <message>
         <location filename="../graph/view/linegraphtoolbar.cpp" line="36"/>
@@ -1996,216 +2004,6 @@ Estensione: (*.ods)</translation>
 <context>
     <name>Odt</name>
     <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="40"/>
-        <source>From:</source>
-        <translation>Da:</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="42"/>
-        <source>Departure:</source>
-        <translation>Partenza:</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="51"/>
-        <source>To:</source>
-        <translation>Per:</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="53"/>
-        <source>Arrival:</source>
-        <translation>Arrivo:</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="62"/>
-        <source>Axes:</source>
-        <translation>Assi:</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="642"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="250"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="338"/>
-        <source>Station</source>
-        <translation>Stazione</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="643"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="249"/>
-        <source>Arrival</source>
-        <translation>Arrivo</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="644"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="249"/>
-        <source>Departure</source>
-        <translation>Partenza</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="645"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="248"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="377"/>
-        <source>Platf</source>
-        <translation>Bin</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="646"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="246"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="380"/>
-        <source>Rollingstock</source>
-        <translation>Rotabili</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="647"/>
-        <source>Crossings</source>
-        <translation>Incroci</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="648"/>
-        <source>Passings</source>
-        <translation>Precedenze</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/jobwriter.cpp" line="649"/>
-        <location filename="../odt_export/common/stationwriter.cpp" line="383"/>
-        <source>Notes</source>
-        <translation>Note</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="599"/>
-        <source>Transit</source>
-        <translation>Transito</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="327"/>
-        <source>Station: %1%2</source>
-        <translation>Stazione %1%2</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="322"/>
-        <source> (%1)</source>
-        <translation> (%1)</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="374"/>
-        <source>Arr.</source>
-        <comment>Arrival column</comment>
-        <translation>Arr.</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="375"/>
-        <source>Dep.</source>
-        <comment>Departure column</comment>
-        <translation>Part.</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="376"/>
-        <source>Job Nr</source>
-        <translation>Treno N.</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="381"/>
-        <source>Cross</source>
-        <comment>Crossings column</comment>
-        <translation>Incrocia</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="382"/>
-        <source>Passings</source>
-        <comment>Passings column</comment>
-        <translation>Prec.</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="610"/>
-        <source>START</source>
-        <comment>Do not translate this text</comment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="378"/>
-        <source>From</source>
-        <translation>Da</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/stationwriter.cpp" line="379"/>
-        <source>To</source>
-        <translation>Per</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/shiftsheetexport.cpp" line="104"/>
-        <source>Shift %1</source>
-        <translation>Turno %1</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/odtutils.cpp" line="299"/>
-        <source>Page </source>
-        <translation>Pagina </translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="247"/>
-        <source>Job</source>
-        <translation>Servizio</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="250"/>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="338"/>
-        <source>Owner</source>
-        <translation>Proprietario</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="337"/>
-        <source>Rollingstock by %1 at %2 of session</source>
-        <translation>Rotabili per %1 a %2 sessione</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="339"/>
-        <source>start</source>
-        <translation>inizio</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/sessionrswriter.cpp" line="339"/>
-        <source>end</source>
-        <translation>fine</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/shiftsheetexport.cpp" line="422"/>
-        <source>From %1 to %2</source>
-        <translation>Dal %1 al %2</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/shiftsheetexport.cpp" line="481"/>
-        <source>SHIFT %1</source>
-        <translation>TURNO %1</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/odtdocument.cpp" line="347"/>
-        <source>Meeting in %1 from %2 to %3</source>
-        <translation>Meeting a %1 dal %2 al %3</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/odtdocument.cpp" line="354"/>
-        <source>Meeting in %1 on %2</source>
-        <translation>Meeting a %1 il %2</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/odtdocument.cpp" line="405"/>
-        <source>Meeting</source>
-        <translation>Sessione</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/stationsheetexport.cpp" line="76"/>
-        <source>%1 station</source>
-        <translation>Stazione di %1</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/odtutils.h" line="69"/>
-        <source>Cp:</source>
-        <translation>Ag:</translation>
-    </message>
-    <message>
-        <location filename="../odt_export/common/odtutils.h" line="70"/>
-        <source>Unc:</source>
-        <translation>Sg:</translation>
-    </message>
-    <message>
         <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="46"/>
         <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="93"/>
         <source>Null device</source>
@@ -2220,6 +2018,228 @@ Estensione: (*.ods)</translation>
         <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="100"/>
         <source>Cannot open source: %1</source>
         <translation>Impossibile aprire sorgente: %1</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="73"/>
+        <source>Page </source>
+        <comment>Header page, leave space at end, page number will be added</comment>
+        <translation>Pagina </translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="76"/>
+        <source>Meeting</source>
+        <comment>Document keywords</comment>
+        <translation>Sessione</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="77"/>
+        <source>Meeting in %1 from %2 to %3</source>
+        <comment>Document description, where, from date, to date</comment>
+        <translation>Meeting a %1 dal %2 al %3</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="78"/>
+        <source>Meeting in %1 on %2</source>
+        <comment>Document description, where, when</comment>
+        <translation>Meeting a %1 il %2</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="79"/>
+        <source>From %1 to %2</source>
+        <comment>Shift cover, meeting from date, to date</comment>
+        <translation>Dal %1 al %2</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="82"/>
+        <source>Cp:</source>
+        <comment>Job stop coupled RS</comment>
+        <translation>Ag:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="83"/>
+        <source>Unc:</source>
+        <comment>Job stop uncoupled RS</comment>
+        <translation>Sg:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="84"/>
+        <source>Owner</source>
+        <comment>Rollingstock Owner</comment>
+        <translation>Proprietario</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="86"/>
+        <source>Rollingstock by %1 at %2 of session</source>
+        <comment>Rollingstock Session title, 1 is Owner/Station and 2 is start/end</comment>
+        <translation>Rotabili per %1 a %2 sessione</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="88"/>
+        <source>start</source>
+        <comment>Rollingstock Session start</comment>
+        <translation>inizio</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="89"/>
+        <source>end</source>
+        <comment>Rollingstock Session end</comment>
+        <translation>fine</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="92"/>
+        <source>From:</source>
+        <comment>Job summary</comment>
+        <translation>Da:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="93"/>
+        <source>To:</source>
+        <comment>Job summary</comment>
+        <translation>Per:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="94"/>
+        <source>Departure:</source>
+        <comment>Job summary</comment>
+        <translation>Partenza:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="95"/>
+        <source>Arrival:</source>
+        <comment>Job summary</comment>
+        <translation>Arrivo:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="96"/>
+        <source>Axes:</source>
+        <comment>Job summary</comment>
+        <translation>Assi:</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="99"/>
+        <source>Station</source>
+        <comment>Job stop table</comment>
+        <translation>Stazione</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="100"/>
+        <source>Station: %1</source>
+        <comment>Station title in station sheet</comment>
+        <translation>Stazione di: %1</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="101"/>
+        <source>%1 station</source>
+        <comment>Station sheet title in document metadata</comment>
+        <translation>stazione di %1</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="102"/>
+        <source>Rollingstock</source>
+        <comment>Job stop table</comment>
+        <translation>Rotabili</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="103"/>
+        <source>Job Nr</source>
+        <comment>Job column</comment>
+        <translation>Treno N.</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="105"/>
+        <source>Arrival</source>
+        <comment>Job stop table</comment>
+        <translation>Arrivo</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="106"/>
+        <source>Departure</source>
+        <comment>Job stop table</comment>
+        <translation>Partenza</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="107"/>
+        <source>Arr.</source>
+        <comment>Arrival abbreviated</comment>
+        <translation>Arr.</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="108"/>
+        <source>Dep.</source>
+        <comment>Departure abbreviated</comment>
+        <translation>Part.</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="110"/>
+        <source>From</source>
+        <comment>Station stop table, From previous station column</comment>
+        <translation>Da</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="111"/>
+        <source>To</source>
+        <comment>Station stop table, To next station column</comment>
+        <translation>Per</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="113"/>
+        <source>Platf</source>
+        <comment>Job stop table, platform abbreviated</comment>
+        <translation>Bin</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="114"/>
+        <source>Transit</source>
+        <comment>Job stop table, notes column</comment>
+        <translation>Transito</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="115"/>
+        <source>START</source>
+        <comment>Station stop table, notes column for first job stop, keep in English it&apos;s the same for every sheet</comment>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="119"/>
+        <source>Crossings</source>
+        <comment>Job stop table</comment>
+        <translation>Incroci</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="120"/>
+        <source>Passings</source>
+        <comment>Job stop table</comment>
+        <translation>Precedenze</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="121"/>
+        <source>Cross</source>
+        <comment>Job stop crossings abbreviated column</comment>
+        <translation>Incrocia</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="122"/>
+        <source>Passes</source>
+        <comment>Job stop passings abbreviated column</comment>
+        <translation>Prec.</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="123"/>
+        <source>Notes</source>
+        <comment>Job stop table</comment>
+        <translation>Note</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="126"/>
+        <source>SHIFT %1</source>
+        <comment>Shift title in shift sheet cover</comment>
+        <translation>TURNO %1</translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="127"/>
+        <source>Shift %1</source>
+        <comment>Shift sheet document title for metadata</comment>
+        <translation>Turno %1</translation>
     </message>
 </context>
 <context>
@@ -3912,300 +3932,329 @@ Estensione: (*.ttt)</translation>
         <translation>Generale</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="80"/>
         <source>Language</source>
-        <translation>Lingua</translation>
+        <translation type="vanished">Lingua</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="110"/>
         <source>Language changes will be applied next time you start the application</source>
-        <translation>Le impostazioni della lingua verranno applicate al prossimo avvio dell&apos;applicazione</translation>
+        <translation type="vanished">Le impostazioni della lingua verranno applicate al prossimo avvio dell&apos;applicazione</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="123"/>
+        <location filename="../settings/settingsdialog.ui" line="209"/>
         <source>Restore Default Settings</source>
         <translation>Ripristina Impostazioni Predefinite</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="131"/>
+        <location filename="../settings/settingsdialog.ui" line="230"/>
         <source>Job Graph</source>
         <translation>Grafico Servizi</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="173"/>
-        <location filename="../settings/settingsdialog.ui" line="545"/>
+        <location filename="../settings/settingsdialog.ui" line="272"/>
+        <location filename="../settings/settingsdialog.ui" line="644"/>
         <source>Offsets</source>
         <translation>Distanze</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="179"/>
+        <location filename="../settings/settingsdialog.ui" line="278"/>
         <source>Stations</source>
         <translation>Stazioni</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="193"/>
-        <location filename="../settings/settingsdialog.ui" line="551"/>
+        <location filename="../settings/settingsdialog.ui" line="292"/>
+        <location filename="../settings/settingsdialog.ui" line="650"/>
         <source>Hours</source>
         <translation>Ore</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="207"/>
-        <location filename="../settings/settingsdialog.ui" line="287"/>
+        <location filename="../settings/settingsdialog.ui" line="306"/>
+        <location filename="../settings/settingsdialog.ui" line="386"/>
         <source>Platforms</source>
         <translation>Binari</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="221"/>
-        <location filename="../settings/settingsdialog.ui" line="565"/>
+        <location filename="../settings/settingsdialog.ui" line="320"/>
+        <location filename="../settings/settingsdialog.ui" line="664"/>
         <source>Horizontal</source>
         <translation>Bordo Orizzontale</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="235"/>
-        <location filename="../settings/settingsdialog.ui" line="572"/>
+        <location filename="../settings/settingsdialog.ui" line="334"/>
+        <location filename="../settings/settingsdialog.ui" line="671"/>
         <source>Vertical</source>
         <translation>Bordo Verticale</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="258"/>
+        <location filename="../settings/settingsdialog.ui" line="357"/>
         <source>Line Width</source>
         <translation>Spessore Linea</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="267"/>
-        <location filename="../settings/settingsdialog.ui" line="585"/>
+        <location filename="../settings/settingsdialog.ui" line="366"/>
+        <location filename="../settings/settingsdialog.ui" line="684"/>
         <source>Job</source>
         <translation>Servizio</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="277"/>
+        <location filename="../settings/settingsdialog.ui" line="376"/>
         <source>Hour</source>
         <translation>Ora</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="300"/>
+        <location filename="../settings/settingsdialog.ui" line="399"/>
         <source>Colors</source>
         <translation>Colori</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="306"/>
+        <location filename="../settings/settingsdialog.ui" line="405"/>
         <source>Hour Line</source>
         <translation>Linea Ore</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="329"/>
+        <location filename="../settings/settingsdialog.ui" line="428"/>
         <source>Hour Text</source>
         <translation>Testo Ora</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="358"/>
+        <location filename="../settings/settingsdialog.ui" line="457"/>
         <source>Main Platform</source>
         <translation>Binario Principale</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="381"/>
+        <location filename="../settings/settingsdialog.ui" line="480"/>
         <source>Depot Platform</source>
         <translation>Binario Deposito</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="404"/>
+        <location filename="../settings/settingsdialog.ui" line="503"/>
         <source>Station Text</source>
         <translation>Testo Stazioni</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="430"/>
+        <location filename="../settings/settingsdialog.ui" line="529"/>
         <source>Selection</source>
         <translation>Selezione</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="436"/>
+        <location filename="../settings/settingsdialog.ui" line="535"/>
         <source>Follow Job selection on Graph change</source>
         <translation>Segui il Treno selezionato quando il Grafico cambia</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="443"/>
+        <location filename="../settings/settingsdialog.ui" line="542"/>
         <source>Sync Job selection on all graphs</source>
         <translation>Sincronizza selezione Trano su tutti i grafici</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="495"/>
+        <location filename="../settings/settingsdialog.ui" line="594"/>
         <source>Auto insert transits between two stops.</source>
         <translation>Inserisci automaticamente i transiti tra due fermate.</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="698"/>
+        <location filename="../settings/settingsdialog.ui" line="797"/>
         <source>Open Document Spreadsheet Import</source>
         <translation>Importa Foglio di calcolo OpenDocument</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="704"/>
+        <location filename="../settings/settingsdialog.ui" line="803"/>
         <source>First non-empty row</source>
         <translation>Prima riga non vuota</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="721"/>
+        <location filename="../settings/settingsdialog.ui" line="820"/>
         <source>Number column</source>
         <translation>Colonna numeri</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="728"/>
+        <location filename="../settings/settingsdialog.ui" line="827"/>
         <source>Model column</source>
         <translation>Colonna modelli</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="772"/>
+        <location filename="../settings/settingsdialog.ui" line="871"/>
         <source>Sheet Export</source>
         <translation>Esportazione Fogli</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="778"/>
+        <location filename="../settings/settingsdialog.ui" line="877"/>
         <source>Description</source>
         <translation>Descrizione</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="784"/>
+        <location filename="../settings/settingsdialog.ui" line="883"/>
         <source>Header</source>
         <translation>Intestazione</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="791"/>
+        <location filename="../settings/settingsdialog.ui" line="890"/>
         <source>Footer</source>
         <translation>Piè pagina</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="807"/>
+        <location filename="../settings/settingsdialog.ui" line="906"/>
         <source>Metadata</source>
         <translation>Metadati</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="813"/>
+        <location filename="../settings/settingsdialog.ui" line="912"/>
         <source>Store meeting location and dates in sheet metadata</source>
         <translation>Salva città e date del meeting nei metadati del foglio</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="837"/>
+        <location filename="../settings/settingsdialog.ui" line="936"/>
         <source>Background Tasks</source>
         <translation>Task in background</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="843"/>
+        <location filename="../settings/settingsdialog.ui" line="942"/>
         <source>Rollingstock Error Checker</source>
         <translation>Controllo errori Rotabili</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="849"/>
+        <location filename="../settings/settingsdialog.ui" line="948"/>
         <source>Check rollingstock when opening a file</source>
         <translation>Controlla rotabili quando viene aperto un file</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="856"/>
+        <location filename="../settings/settingsdialog.ui" line="955"/>
         <source>Check rollingstock when a Job is edeited</source>
         <translation>Controlla rotabili quando viene modificato un servizio</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="79"/>
+        <location filename="../settings/settingsdialog.cpp" line="81"/>
         <source>Job Colors</source>
         <translation>Colori Servizi</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="458"/>
+        <location filename="../settings/settingsdialog.ui" line="557"/>
         <source>Stop</source>
         <translation>Fermata</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="470"/>
+        <location filename="../settings/settingsdialog.ui" line="569"/>
         <source>Default Stop Duration</source>
         <translation>Durata Fermata Predefinita</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="486"/>
+        <location filename="../settings/settingsdialog.ui" line="585"/>
         <source>Job Editor</source>
         <translation>Editor Servizi</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="509"/>
+        <location filename="../settings/settingsdialog.ui" line="608"/>
         <source>Auto uncouple all rollingstock items at last stop.</source>
         <translation>Sgancia automaticamente tutti i rotabili nell&apos;ultima fermata.</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="502"/>
+        <location filename="../settings/settingsdialog.ui" line="601"/>
         <source>Auto move uncoupled rollingstock pieces from last stop when adding a new one.</source>
         <translation>Sposta automaticamente i rotabili sganciati dall&apos;ultima fermata quando ne viene aggiunta una nuova.</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="533"/>
+        <location filename="../settings/settingsdialog.ui" line="74"/>
+        <source>Application Language:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="86"/>
+        <location filename="../settings/settingsdialog.ui" line="147"/>
+        <source>Language:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="122"/>
+        <source>Application Language changes will be applied next time you start the application!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="135"/>
+        <source>Sheet Export Language:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="183"/>
+        <source>This is the language for exported sheets. It will be reset at every launch to same language of application.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="193"/>
+        <source>Reset to Application</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="632"/>
         <source>Shift Graph</source>
         <translation>Grafico Turni</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="595"/>
+        <location filename="../settings/settingsdialog.ui" line="694"/>
         <source>Job Box</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="605"/>
+        <location filename="../settings/settingsdialog.ui" line="704"/>
         <source>Stations Labels</source>
         <translation>Etichette stazioni</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="615"/>
+        <location filename="../settings/settingsdialog.ui" line="714"/>
         <source>Hide Same Stations</source>
         <translation>Nascondi stesse stazioni</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="642"/>
+        <location filename="../settings/settingsdialog.ui" line="741"/>
         <source>Rollingstock</source>
         <translation>Rotabili</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="654"/>
+        <location filename="../settings/settingsdialog.ui" line="753"/>
         <source>Merge models</source>
         <translation>Unisci Modelli</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="663"/>
+        <location filename="../settings/settingsdialog.ui" line="762"/>
         <source>Remove source merged model by default</source>
         <translation>Rimuovi di default il proprietario d&apos;origine</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="679"/>
+        <location filename="../settings/settingsdialog.ui" line="778"/>
         <source>Merge owners</source>
         <translation>Unisci Proprietari</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="688"/>
+        <location filename="../settings/settingsdialog.ui" line="787"/>
         <source>Remove sourcemerged owner by default</source>
         <translation>Rimuovi di default il modello d&apos;origine</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="32"/>
-        <location filename="../settings/settingsdialog.cpp" line="338"/>
-        <location filename="../settings/settingsdialog.cpp" line="356"/>
+        <location filename="../settings/settingsdialog.cpp" line="366"/>
+        <location filename="../settings/settingsdialog.cpp" line="384"/>
         <source>Settings</source>
         <translation>Impostazioni</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="30"/>
+        <location filename="../settings/settingsdialog.cpp" line="32"/>
         <source>minutes</source>
         <translation>minuti</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="84"/>
+        <location filename="../settings/settingsdialog.cpp" line="86"/>
         <source>Non Passenger</source>
         <translation>Non Passeggeri</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="96"/>
+        <location filename="../settings/settingsdialog.cpp" line="98"/>
         <source>Passenger</source>
         <translation>Passeggeri</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="339"/>
+        <location filename="../settings/settingsdialog.cpp" line="367"/>
         <source>Do you want to save settings?</source>
         <translation>Vuoi salvare le impostazioni?</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="357"/>
+        <location filename="../settings/settingsdialog.cpp" line="385"/>
         <source>Do you want to restore default settings?</source>
         <translation>Vuoi ripristinare le impostazioni predefinite?</translation>
     </message>
