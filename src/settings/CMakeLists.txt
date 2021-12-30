@@ -1,10 +1,12 @@
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
   settings/appsettings.h
+  settings/languagemodel.h
   settings/settingsdialog.h
   settings/type_utils.h
 
   settings/appsettings.cpp
+  settings/languagemodel.cpp
   settings/settingsdialog.cpp
   PARENT_SCOPE
 )
