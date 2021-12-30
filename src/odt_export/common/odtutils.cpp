@@ -1,5 +1,8 @@
 #include "odtutils.h"
 
+#include "app/session.h"
+#include <QTranslator>
+
 /* writeColumnStyle
  *
  * Helper function to write table column style of a certain width
@@ -296,7 +299,7 @@ void writeHeaderFooter(QXmlStreamWriter &xml, const QString& headerText, const Q
     xml.writeStartElement("text:tab");
     xml.writeEndElement(); //text:tab
 
-    const QString pageStr = Odt::tr("Page ");
+    const QString pageStr = Odt::text(Odt::headerPage);
 
     xml.writeCharacters(pageStr);
 
@@ -357,4 +360,25 @@ void writeLiberationFontFaces(QXmlStreamWriter &xml)
     writeFontFace(xml, liberationSerif, liberationSerif, "roman", variablePitch);
     writeFontFace(xml, liberationSans, liberationSans, "swiss", variablePitch);
     writeFontFace(xml, liberationMono, liberationMono, "modern", "fixed");
+}
+
+QString Odt::text(const char * const str[2])
+{
+    QTranslator *translator = Session->getSheetExportTranslator();
+
+    QString result;
+    if(translator)
+    {
+        //Prefer selected language
+        result = translator->translate("Odt", str[0], str[1]);
+    }
+    else if(Session->getSheetExportLocale() == MeetingSession::embeddedLocale)
+    {
+        //Bypass any translation and use hardcoded string literals
+        return QString::fromUtf8(str[0]);
+    }
+
+    if(result.isNull()) //Fallback to application language
+        result = tr(str[0], str[1]);
+    return result;
 }
