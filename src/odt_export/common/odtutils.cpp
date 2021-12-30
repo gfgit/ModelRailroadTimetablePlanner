@@ -362,7 +362,7 @@ void writeLiberationFontFaces(QXmlStreamWriter &xml)
     writeFontFace(xml, liberationMono, liberationMono, "modern", "fixed");
 }
 
-QString Odt::text(const char * const str[2])
+QString Odt::text(const Text &t)
 {
     QTranslator *translator = Session->getSheetExportTranslator();
 
@@ -370,15 +370,15 @@ QString Odt::text(const char * const str[2])
     if(translator)
     {
         //Prefer selected language
-        result = translator->translate("Odt", str[0], str[1]);
+        result = translator->translate("Odt", t.sourceText, t.disambiguation);
     }
     else if(Session->getSheetExportLocale() == MeetingSession::embeddedLocale)
     {
         //Bypass any translation and use hardcoded string literals
-        return QString::fromUtf8(str[0]);
+        return QString::fromUtf8(t.sourceText);
     }
 
     if(result.isNull()) //Fallback to application language
-        result = tr(str[0], str[1]);
+        result = tr(t.sourceText, t.disambiguation);
     return result;
 }
