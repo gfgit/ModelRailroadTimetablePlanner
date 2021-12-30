@@ -144,6 +144,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Border: 0.05pt solid #000000 on left, top, bottom sides
      * Padding: 0.030cm all sides except bottom
      * padding-bottom: 0.15cm
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_5f_stops table: top left/middle cells (except top right which has H1 style)
@@ -170,6 +171,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Border: 0.05pt solid #000000 on all sides
      * Padding: 0.030cm all sides except bottom
      * padding-bottom: 0.15cm
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_5f_stops table: top right cell
@@ -184,6 +186,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:padding-top", "0.030cm");
     xml.writeAttribute("fo:padding-bottom", "0.15cm");
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -192,6 +195,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on left and bottom sides
      * Padding: 0.049cm all sides
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_5f_stops table: right and middle cells from second row to last row
@@ -206,6 +210,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "none");
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -214,6 +219,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on left, right and bottom sides
      * Padding: 0.049cm all sides
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_5f_stops table: left cells from second row to last row
@@ -228,6 +234,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -240,6 +247,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on left, top, bottom sides
      * Padding: 0.049cm
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_asset table: top left cell
@@ -262,6 +270,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on all sides
      * Padding: 0.049cm
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_asset table: top right cell
@@ -273,6 +282,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeStartElement("style:table-cell-properties");
     xml.writeAttribute("fo:padding", "0.049cm");
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -281,6 +291,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 on right and bottom sides
      * Padding: 0.049cm
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_asset table: bottom left cell
@@ -295,6 +306,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "none");
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 
@@ -303,6 +315,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
      * Type: table-cell
      * Border: 0.05pt solid #000000 all sides except top
      * Padding: 0.049cm
+     * Vertical Align: middle
      *
      * Usage:
      *  - job_asset table: bottom left cell
@@ -317,6 +330,7 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
+    xml.writeAttribute("style:vertical-align", "middle");
     xml.writeEndElement(); //style:table-cell-properties
     xml.writeEndElement(); //style
 }
