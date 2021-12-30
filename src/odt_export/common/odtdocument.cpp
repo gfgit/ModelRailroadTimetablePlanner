@@ -405,8 +405,9 @@ void OdtDocument::saveMeta(const QString& path)
     xml.writeCharacters(Odt::text(Odt::meeting));
     xml.writeEndElement(); //meta:keyword
 
+    //Untranslated version
     xml.writeStartElement("meta:keyword");
-    xml.writeCharacters(Odt::meeting[0]); //Untranslated version
+    xml.writeCharacters(QString::fromUtf8(Odt::meeting.sourceText));
     xml.writeEndElement(); //meta:keyword
 
     if(storeLocationAndDate && !meetingLocation.isEmpty())
