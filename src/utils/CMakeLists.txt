@@ -1,34 +1,22 @@
-add_subdirectory(spinbox)
-add_subdirectory(sqldelegate)
+add_subdirectory(delegates)
+add_subdirectory(files)
+add_subdirectory(localization)
 add_subdirectory(thread)
 add_subdirectory(wizard)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  utils/colorview.h
-  utils/colordelegate.h
-  utils/file_format_names.h
-  utils/imageviewer.h
   utils/jobcategorystrings.h
-  utils/kmutils.h
-  utils/languageutils.h
   utils/owningqpointer.h
   utils/rs_types_names.h
-  utils/rs_utils.h
   utils/session_rs_modes.h
   utils/types.h
-  utils/combodelegate.h
   utils/model_roles.h
-  utils/openfileinfolder.h
+  utils/model_mode.h
   utils/worker_event_types.h
 
-  utils/colordelegate.cpp
-  utils/colorview.cpp
-  utils/combodelegate.cpp
-  utils/imageviewer.cpp
-  utils/kmutils.cpp
-  utils/languageutils.cpp
-  utils/openfileinfolder.cpp
+  utils/rs_utils.h
   utils/rs_utils.cpp
+
   PARENT_SCOPE
 )

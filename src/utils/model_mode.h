@@ -10,5 +10,4 @@ enum Mode
 }; //FIXME: maybe remove
 }
 
-
 #endif // MODEL_MODE_H
