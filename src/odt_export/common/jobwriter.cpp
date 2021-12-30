@@ -556,7 +556,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
     //Title
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
-    xml.writeCharacters(JobCategoryName::jobName(jobId, jobCat));
+    xml.writeCharacters(JobCategoryName::jobNameSpaced(jobId, jobCat));
     xml.writeEndElement();
 
     //Vertical space
