@@ -128,10 +128,10 @@ void SettingsDialog::setupLanguageBox()
 void SettingsDialog::setSheetLanguage(const QLocale &sheetLoc)
 {
     QTranslator *sheetTranslator = nullptr;
-    if(Session->getAppLanguage() != sheetLoc || sheetLoc == QLocale(QLocale::English))
+    if(Session->getAppLanguage() != sheetLoc && sheetLoc != MeetingSession::embeddedLocale)
     {
         //Sheet Language is different from original (currently loaded) App Language
-        //And it's not default (English with default country) which is embedded in executable
+        //And it's not default language embedded in executable
 
         //Sheet Export needs a different translation
         if(Session->getSheetExportLocale() == sheetLoc)

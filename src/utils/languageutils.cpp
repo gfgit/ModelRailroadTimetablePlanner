@@ -38,7 +38,7 @@ bool utils::language::loadTranslationsFromSettings()
 
     //NOTE: If locale is English with default country we do not need translations
     //because they are already embedded in the executable strings so skip it
-    if(loc == QLocale(QLocale::English))
+    if(loc == MeetingSession::embeddedLocale)
         return true;
 
     QTranslator *qtTransl = ::loadTranslatorInternal(loc, path, QLatin1String("qt"));
@@ -61,8 +61,8 @@ QVector<QLocale> utils::language::getAvailableTranslations()
 {
     QVector<QLocale> vec;
 
-    //NOTE: Add English with default country which is embedded  in executable strings
-    vec.append(QLocale(QLocale::English));
+    //NOTE: First add default laguage embedded in executable strings
+    vec.append(MeetingSession::embeddedLocale);
 
     const QString path = qApp->applicationDirPath() + translationsFolder;
     const QString filter = mrtpTranslationName + QStringLiteral("_*.qm");
