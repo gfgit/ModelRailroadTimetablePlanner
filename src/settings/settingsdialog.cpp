@@ -5,6 +5,7 @@
 #include "utils/jobcategorystrings.h"
 
 #include <QLocale>
+#include "utils/languageutils.h"
 
 #include <QMessageBox>
 #include <QCloseEvent>
@@ -118,8 +119,46 @@ void SettingsDialog::setupLanguageBox()
 {
     ui->languageCombo->clear();
 
-    ui->languageCombo->addItem(QStringLiteral("English"), QLocale::English);
-    ui->languageCombo->addItem(QStringLiteral("Italiano"), QLocale::Italian);
+    int idx = 0;
+    const QVector<QLocale> vec = utils::language::getAvailableTranslations();
+    for(const QLocale& loc : vec)
+    {
+        QString nativeName = loc.nativeLanguageName();
+        const QString englishName = QLocale::languageToString(loc.language());
+        if(loc == QLocale(QLocale::English))
+            nativeName = englishName; //Show just "English" instead of "American English"
+        ui->languageCombo->addItem(nativeName, loc);
+        ui->languageCombo->setItemData(idx, englishName, Qt::ToolTipRole);
+        idx++;
+    }
+}
+
+int SettingsDialog::findLocaleIdx(const QLocale &loc)
+{
+    int exactMatchIdx = -1;
+    int partialMatchIdx = -1;
+    for(int i = 0; i < ui->languageCombo->count(); i++)
+    {
+        QLocale item = ui->languageCombo->itemData(i).toLocale();
+        if(item.language() == loc.language())
+        {
+            partialMatchIdx = i;
+
+            if(item.country() == loc.country())
+            {
+                exactMatchIdx = i;
+                break;
+            }
+        }
+    }
+
+    if(exactMatchIdx != -1)
+        return exactMatchIdx;
+
+    if(partialMatchIdx != -1)
+        return partialMatchIdx;
+
+    return 0;
 }
 
 inline void set(QSpinBox *spin, int val)
@@ -141,12 +180,8 @@ void SettingsDialog::loadSettings()
     auto &settings = AppSettings;
 
     //General
-    QLocale locale = settings.getLanguage();
-    int idx = ui->languageCombo->findData(locale.language());
-    if(idx < 0)
-        idx = ui->languageCombo->findData(QLocale::English);
-
-    ui->languageCombo->setCurrentIndex(idx);
+    QLocale loc = settings.getLanguage();
+    ui->languageCombo->setCurrentIndex(findLocaleIdx(loc));
 
     //Job Graph
     set(ui->hourOffsetSpin, settings.getHourOffset());
@@ -223,8 +258,8 @@ void SettingsDialog::saveSettings()
 
     //General
     QVariant v = ui->languageCombo->currentData();
-    QLocale::Language lang = v.isValid() ? v.value<QLocale::Language>() : QLocale::English;
-    settings.setLanguage(QLocale(lang));
+    QLocale loc = v.toLocale();
+    settings.setLanguage(loc);
 
     //Job Graph
     settings.setHourOffset(ui->hourOffsetSpin->value());

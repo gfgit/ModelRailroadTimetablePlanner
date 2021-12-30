@@ -38,6 +38,7 @@ private slots:
 
 private:
     void setupLanguageBox();
+    int findLocaleIdx(const QLocale& loc);
 
 private:
     Ui::SettingsDialog *ui;
