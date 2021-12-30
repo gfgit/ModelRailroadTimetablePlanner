@@ -27,6 +27,7 @@
 
 MeetingSession* MeetingSession::session;
 QString MeetingSession::appDataPath;
+const QLocale MeetingSession::embeddedLocale = QLocale(QLocale::English, QLocale::UnitedStates);
 
 MeetingSession::MeetingSession() :
     hourOffset(140),

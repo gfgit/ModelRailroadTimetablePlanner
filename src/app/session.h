@@ -158,7 +158,7 @@ public:
     static void locateAppdata();
     static QString appDataPath;
 
-public:
+private:
     /*!
      * \brief sheetExportTranslator
      *
@@ -198,6 +198,17 @@ public:
      * Set translator for Sheet Export
      * \sa sheetExportTranslator
      */
+
+public:
+    /*!
+     * \brief Embedded Locale
+     *
+     * This represents the QLocale of embedded strings (American English).
+     * This is the default Application Language if no translations are loaded
+     * If user choose this language no translations need to be loaded.
+     */
+    static const QLocale embeddedLocale;
+
     void setSheetExportTranslator(QTranslator *translator, const QLocale& loc);
 
     inline QTranslator *getSheetExportTranslator() const { return sheetExportTranslator; }
