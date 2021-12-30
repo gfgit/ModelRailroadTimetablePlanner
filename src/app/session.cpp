@@ -23,6 +23,8 @@
 #include <QStandardPaths>
 #include <QDir>
 
+#include <QTranslator>
+
 MeetingSession* MeetingSession::session;
 QString MeetingSession::appDataPath;
 
@@ -36,7 +38,8 @@ MeetingSession::MeetingSession() :
 
     jobLineWidth(6),
 
-    m_Db(nullptr)
+    m_Db(nullptr),
+    sheetExportTranslator(nullptr)
 {
     session = this; //Global singleton pointer
 
@@ -60,7 +63,8 @@ MeetingSession::MeetingSession() :
 
 MeetingSession::~MeetingSession()
 {
-
+    //Delete sheet export translator
+    setSheetExportTranslator(nullptr, sheetExportLocale);
 }
 
 MeetingSession *MeetingSession::Get()
@@ -733,6 +737,19 @@ void MeetingSession::locateAppdata()
     qDebug() << appDataPath;
 }
 
+void MeetingSession::setSheetExportTranslator(QTranslator *translator, const QLocale &loc)
+{
+    //NOTE: if Sheet Language is of Application Language then set a nullptr translator
+    //If translator is valid use it
+    //If translator is nullptr and language is default English locale, use hardcoded strings
+    //If translator is nullptr and language is different from English, use default translations
+
+    if(sheetExportTranslator && sheetExportTranslator != translator)
+        delete sheetExportTranslator;
+    sheetExportTranslator = translator;
+    sheetExportLocale = loc;
+}
+
 void MeetingSession::loadSettings(const QString& settings_file)
 {
     DEBUG_ENTRY;
@@ -749,6 +766,11 @@ void MeetingSession::loadSettings(const QString& settings_file)
     platformOffset = settings.getPlatformOffset();
 
     jobLineWidth = settings.getJobLineWidth();
+
+    originalAppLocale = settings.getLanguage();
+
+    //Default initialize to same value of application language
+    setSheetExportTranslator(nullptr, originalAppLocale);
 }
 
 #ifdef ENABLE_BACKGROUND_MANAGER

@@ -22,6 +22,8 @@ class MetaDataManager;
 class BackgroundManager;
 #endif
 
+class QTranslator;
+
 enum class DB_Error
 {
     NoError = 0,
@@ -33,7 +35,12 @@ enum class DB_Error
     FormatTooNew
 };
 
-
+/*!
+ * \brief The MeetingSession class
+ *
+ * This class is a singleton.
+ * It stores all informations about current loaded session and settings
+ */
 class MeetingSession : public QObject
 {
     Q_OBJECT
@@ -150,6 +157,52 @@ public:
 public:
     static void locateAppdata();
     static QString appDataPath;
+
+public:
+    /*!
+     * \brief sheetExportTranslator
+     *
+     * Custom translator for Sheet Export
+     * When it's valid it should be used before application translations
+     * When it's \c nullptr, application translations should be used
+     * Special case: when it's \c nullptr and \a sheetExportLocale is \c QLocale(QLocale::English)
+     * which is default language, then use hardcoded string literals and bypass any translation.
+     *
+     * \sa sheetExportLocale
+     * \sa setSheetExportTranslator()
+     */
+    QTranslator *sheetExportTranslator;
+
+    /*!
+     * \brief sheetExportLocale
+     *
+     * Locale for Sheet Export
+     * \sa sheetExportTranslator
+     */
+    QLocale sheetExportLocale;
+
+    /*!
+     * \brief originalAppLocale
+     * Store original language in which application was loaded
+     * When user changes Application Language in settings a restart
+     * is required to apply it but settings reports already new language.
+     * So use this variable to get original settings value before restart.
+     */
+    QLocale originalAppLocale;
+
+    /*!
+     * \brief setSheetExportTranslator
+     * \param translator
+     * \param loc
+     *
+     * Set translator for Sheet Export
+     * \sa sheetExportTranslator
+     */
+    void setSheetExportTranslator(QTranslator *translator, const QLocale& loc);
+
+    inline QTranslator *getSheetExportTranslator() const { return sheetExportTranslator; }
+    inline QLocale getSheetExportLocale() const { return sheetExportLocale; }
+    inline QLocale getAppLanguage() const { return originalAppLocale; }
 };
 
 #define Session MeetingSession::Get()
