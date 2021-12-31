@@ -12,7 +12,7 @@
 
 #include <QTableView>
 #include <QFileDialog>
-#include <QStandardPaths>
+#include "utils/files/recentdirstore.h"
 #include <QMessageBox>
 #include "utils/owningqpointer.h"
 
@@ -175,6 +175,8 @@ void ShiftManager::onShiftSelectionChanged()
 
 void ShiftManager::onSaveSheet()
 {
+    const QString shiftSheetDirKey = QLatin1String("shift_sheet_dir");
+
     DEBUG_ENTRY;
     if(!view->selectionModel()->hasSelection())
         return;
@@ -190,7 +192,7 @@ void ShiftManager::onSaveSheet()
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Shift Sheet"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(shiftSheetDirKey, RecentDirStore::Documents));
     dlg->selectFile(tr("shift_%1.odt").arg(shiftName));
 
     QStringList filters;
@@ -203,6 +205,8 @@ void ShiftManager::onSaveSheet()
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(shiftSheetDirKey, fileName);
 
     ShiftSheetExport w(Session->m_Db, shiftId);
     w.write();

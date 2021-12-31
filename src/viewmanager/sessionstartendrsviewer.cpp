@@ -8,7 +8,7 @@
 #include <QComboBox>
 
 #include <QFileDialog>
-#include <QStandardPaths>
+#include "utils/files/recentdirstore.h"
 #include "utils/owningqpointer.h"
 
 #include "app/session.h"
@@ -79,10 +79,12 @@ void SessionStartEndRSViewer::modeChanged()
 
 void SessionStartEndRSViewer::exportSheet()
 {
+    const QLatin1String session_rs_key = QLatin1String("session_rs_dir");
+
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Expoert RS session plan"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(session_rs_key, RecentDirStore::Documents));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::odtFormat);
@@ -94,6 +96,8 @@ void SessionStartEndRSViewer::exportSheet()
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(session_rs_key, fileName);
 
     SessionRSExport w(model->mode(), model->order());
     w.write();

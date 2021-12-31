@@ -9,7 +9,7 @@
 
 #include "utils/owningqpointer.h"
 #include <QFileDialog>
-#include <QStandardPaths>
+#include "utils/files/recentdirstore.h"
 #include <QMenu>
 
 #include "odt_export/stationsheetexport.h"
@@ -108,10 +108,12 @@ void StationJobView::onSaveSheet()
 {
     DEBUG_ENTRY;
 
+    const QLatin1String station_sheet_key = QLatin1String("station_sheet_dir");
+
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Station Sheet"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(station_sheet_key, RecentDirStore::Documents));
     dlg->selectFile(tr("%1_station.odt").arg(windowTitle()));
 
     QStringList filters;
@@ -125,6 +127,8 @@ void StationJobView::onSaveSheet()
 
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(station_sheet_key, fileName);
 
     StationSheetExport sheet(m_stationId);
     sheet.write();

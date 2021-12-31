@@ -7,7 +7,7 @@
 #include "viewmanager/viewmanager.h"
 
 #include <QFileDialog>
-#include <QStandardPaths>
+#include "utils/files/recentdirstore.h"
 
 #include <QMessageBox>
 #include "utils/owningqpointer.h"
@@ -618,10 +618,12 @@ void JobPathEditor::setReadOnly(bool readOnly)
 
 void JobPathEditor::onSaveSheet()
 {
+    const QLatin1String job_sheet_key = QLatin1String("job_sheet_dir");
+
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Job Sheet"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(job_sheet_key, RecentDirStore::Documents));
     dlg->selectFile(tr("job%1_sheet.odt").arg(stopModel->getJobId()));
 
     QStringList filters;
@@ -635,6 +637,8 @@ void JobPathEditor::onSaveSheet()
 
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(job_sheet_key, fileName);
 
     JobSheetExport sheet(stopModel->getJobId(), stopModel->getCategory());
     sheet.write();

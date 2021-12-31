@@ -12,7 +12,7 @@
 #include "utils/owningqpointer.h"
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QStandardPaths>
+#include "utils/files/recentdirstore.h"
 #include "utils/files/file_format_names.h"
 
 #include <QPushButton>
@@ -57,6 +57,12 @@
 #include <QTimer> //HACK: TODO remove
 
 #include "app/scopedebug.h"
+
+namespace directory_key {
+
+const QLatin1String session = QLatin1String("session_dir_key");
+
+} // namespace directory_key
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -298,7 +304,7 @@ void MainWindow::onOpen()
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Open Session"));
     dlg->setFileMode(QFileDialog::ExistingFile);
     dlg->setAcceptMode(QFileDialog::AcceptOpen);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(directory_key::session, RecentDirStore::Documents));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::tttFormat);
@@ -313,6 +319,8 @@ void MainWindow::onOpen()
 
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(directory_key::session, fileName);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -514,7 +522,7 @@ void MainWindow::onNew()
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Create new Session"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(directory_key::session, RecentDirStore::Documents));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::tttFormat);
@@ -529,6 +537,8 @@ void MainWindow::onNew()
 
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(directory_key::session, fileName);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -578,7 +588,7 @@ void MainWindow::onSaveCopyAs()
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Session Copy"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(directory_key::session, RecentDirStore::Documents));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::tttFormat);
@@ -593,6 +603,8 @@ void MainWindow::onSaveCopyAs()
 
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(directory_key::session, fileName);
 
     QFile f(fileName);
     if(f.exists())

@@ -11,7 +11,7 @@
 #include <QBuffer>
 #include <QMessageBox>
 #include <QFileDialog>
-#include <QStandardPaths>
+#include "utils/files/recentdirstore.h"
 
 #include "utils/delegates/imageviewer/imageviewer.h"
 #include "utils/owningqpointer.h"
@@ -217,10 +217,12 @@ void MeetingInformationDialog::showImage()
 
 void MeetingInformationDialog::importImage()
 {
+    const QLatin1String meeting_image_key = QLatin1String("meeting_image_key");
+
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Import image"));
     dlg->setFileMode(QFileDialog::ExistingFile);
     dlg->setAcceptMode(QFileDialog::AcceptOpen);
-    dlg->setDirectory(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
+    dlg->setDirectory(RecentDirStore::getDir(meeting_image_key, RecentDirStore::Images));
 
     QList<QByteArray> mimes = QImageReader::supportedMimeTypes();
     QStringList filters;
@@ -238,6 +240,8 @@ void MeetingInformationDialog::importImage()
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(meeting_image_key, fileName);
 
     QImageReader reader(fileName);
     reader.setQuality(100);

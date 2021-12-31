@@ -31,8 +31,11 @@
 
 #include <QFileDialog>
 #include "utils/files/file_format_names.h"
+#include "utils/files/recentdirstore.h"
 
 #include "utils/owningqpointer.h"
+
+const QLatin1String station_svg_key = QLatin1String("station_svg_dir");
 
 void setupView(QTableView *view, IPagedItemModel *model)
 {
@@ -623,7 +626,7 @@ void StationEditDialog::addSVGImage()
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Open SVG Image"));
     dlg->setFileMode(QFileDialog::ExistingFile);
     dlg->setAcceptMode(QFileDialog::AcceptOpen);
-    //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(station_svg_key, RecentDirStore::Images));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
@@ -637,6 +640,8 @@ void StationEditDialog::addSVGImage()
 
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(station_svg_key, fileName);
 
     QFile f(fileName);
     if(!f.open(QFile::ReadOnly))
@@ -677,7 +682,7 @@ void StationEditDialog::saveSVGToFile()
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save SVG Copy"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
-    //dlg.setDirectory(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation));
+    dlg->setDirectory(RecentDirStore::getDir(station_svg_key, RecentDirStore::Images));
 
     QStringList filters;
     filters << FileFormats::tr(FileFormats::svgFile);
@@ -690,6 +695,8 @@ void StationEditDialog::saveSVGToFile()
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
     if(fileName.isEmpty())
         return;
+
+    RecentDirStore::setPath(station_svg_key, fileName);
 
     QFile f(fileName);
     if(!f.open(QFile::WriteOnly))
