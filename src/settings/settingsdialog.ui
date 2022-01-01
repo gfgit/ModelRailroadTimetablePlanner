@@ -190,7 +190,7 @@
           <item row="2" column="1">
            <widget class="QPushButton" name="resetSheetLangBut">
             <property name="text">
-             <string>Reset to Application</string>
+             <string>Reset to Application Language</string>
             </property>
            </widget>
           </item>
