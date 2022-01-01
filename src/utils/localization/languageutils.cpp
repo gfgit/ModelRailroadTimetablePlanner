@@ -1,6 +1,7 @@
 #include "languageutils.h"
 
 #include <QCoreApplication>
+#include <QLibraryInfo>
 #include <QTranslator>
 
 #include "app/session.h"
@@ -33,7 +34,8 @@ QTranslator *utils::language::loadAppTranslator(const QLocale &loc)
 
 bool utils::language::loadTranslationsFromSettings()
 {
-    const QString path = qApp->applicationDirPath() + translationsFolder;
+    const QString localPath = qApp->applicationDirPath() + translationsFolder;
+    const QString qtLibPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
     QLocale loc = Session->getAppLanguage();
 
     //NOTE: If locale is English with default country we do not need translations
@@ -41,13 +43,13 @@ bool utils::language::loadTranslationsFromSettings()
     if(loc == MeetingSession::embeddedLocale)
         return true;
 
-    QTranslator *qtTransl = ::loadTranslatorInternal(loc, path, QLatin1String("qt"));
+    QTranslator *qtTransl = ::loadTranslatorInternal(loc, qtLibPath, QLatin1String("qt"));
     if(qtTransl)
     {
         QCoreApplication::installTranslator(qtTransl);
     }
 
-    QTranslator *mrtpTransl = ::loadTranslatorInternal(loc, path, QString::fromLatin1(mrtpTranslationName));
+    QTranslator *mrtpTransl = ::loadTranslatorInternal(loc, localPath, QString::fromLatin1(mrtpTranslationName));
     if(mrtpTransl)
     {
         QCoreApplication::installTranslator(mrtpTransl);
