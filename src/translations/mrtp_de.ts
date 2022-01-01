@@ -37,17 +37,17 @@
 <context>
     <name>ChooseItemDlg</name>
     <message>
-        <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="32"/>
+        <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="32"/>
         <source>Insert value</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="53"/>
+        <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="53"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="70"/>
+        <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="70"/>
         <source>In order to proceed you must select a valid item.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -93,7 +93,7 @@
 <context>
     <name>ColorView</name>
     <message>
-        <location filename="../utils/colorview.cpp" line="30"/>
+        <location filename="../utils/delegates/color/colorview.cpp" line="30"/>
         <source>Choose a color</source>
         <translation type="unfinished"></translation>
     </message>
@@ -551,37 +551,37 @@ NOTE: this doesn&apos;t affect stop times but you will lose manual adjustments t
 <context>
     <name>FileFormats</name>
     <message>
-        <location filename="../utils/file_format_names.h" line="13"/>
+        <location filename="../utils/files/file_format_names.h" line="13"/>
         <source>All Files (*.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="14"/>
+        <location filename="../utils/files/file_format_names.h" line="14"/>
         <source>OpenDocument Sheet (*.ods)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="15"/>
+        <location filename="../utils/files/file_format_names.h" line="15"/>
         <source>OpenDocument Text (*.odt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="16"/>
+        <location filename="../utils/files/file_format_names.h" line="16"/>
         <source>MRTPlanner Session (*.ttt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="17"/>
+        <location filename="../utils/files/file_format_names.h" line="17"/>
         <source>SQLite 3 Database (*.db *.sqlite *.sqlite3 *.db3)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="18"/>
+        <location filename="../utils/files/file_format_names.h" line="18"/>
         <source>SVG vectorial image (*.svg)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="19"/>
+        <location filename="../utils/files/file_format_names.h" line="19"/>
         <source>Portable Document Format (*.pdf)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -658,7 +658,7 @@ NOTE: this doesn&apos;t affect stop times but you will lose manual adjustments t
 <context>
     <name>IPagedItemModel</name>
     <message>
-        <location filename="../utils/sqldelegate/pageditemmodelhelper_impl.h" line="113"/>
+        <location filename="../utils/delegates/sql/pageditemmodelhelper_impl.h" line="113"/>
         <source>Fetching returned less rows than expected.
 %1 instead of %2</source>
         <translation type="unfinished"></translation>
@@ -696,7 +696,7 @@ NOTE: this doesn&apos;t affect stop times but you will lose manual adjustments t
 <context>
     <name>ImageViewer</name>
     <message>
-        <location filename="../utils/imageviewer.cpp" line="69"/>
+        <location filename="../utils/delegates/imageviewer/imageviewer.cpp" line="69"/>
         <source>No image</source>
         <translation type="unfinished"></translation>
     </message>
@@ -976,17 +976,17 @@ Do you want to delete this job?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="621"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="623"/>
         <source>Save Job Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="625"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="627"/>
         <source>job%1_sheet.odt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="643"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="647"/>
         <source>Job Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1396,179 +1396,179 @@ Message: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="78"/>
-        <location filename="../app/mainwindow.cpp" line="254"/>
+        <location filename="../app/mainwindow.cpp" line="84"/>
+        <location filename="../app/mainwindow.cpp" line="260"/>
         <source>About %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="131"/>
+        <location filename="../app/mainwindow.cpp" line="137"/>
         <source>Find</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="286"/>
-        <location filename="../app/mainwindow.cpp" line="502"/>
+        <location filename="../app/mainwindow.cpp" line="292"/>
+        <location filename="../app/mainwindow.cpp" line="510"/>
         <source>Backgroung Task</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="287"/>
-        <location filename="../app/mainwindow.cpp" line="503"/>
+        <location filename="../app/mainwindow.cpp" line="293"/>
+        <location filename="../app/mainwindow.cpp" line="511"/>
         <source>Background task for checking rollingstock errors is still running.
 Do you want to cancel it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="298"/>
+        <location filename="../app/mainwindow.cpp" line="304"/>
         <source>Open Session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="322"/>
-        <location filename="../app/mainwindow.cpp" line="538"/>
+        <location filename="../app/mainwindow.cpp" line="330"/>
+        <location filename="../app/mainwindow.cpp" line="548"/>
         <source>Background Tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="323"/>
+        <location filename="../app/mainwindow.cpp" line="331"/>
         <source>Some background tasks are still running.
 The file was not opened. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="350"/>
+        <location filename="../app/mainwindow.cpp" line="358"/>
         <source>Version is old</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="362"/>
+        <location filename="../app/mainwindow.cpp" line="370"/>
         <source>Version is too new</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="236"/>
+        <location filename="../app/mainwindow.cpp" line="242"/>
         <source>Hold shift and click to go to &lt;b&gt;last&lt;/b&gt; job stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="99"/>
+        <location filename="../app/mainwindow.cpp" line="105"/>
         <source>Job Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="237"/>
+        <location filename="../app/mainwindow.cpp" line="243"/>
         <source>Hold shift and click to go to &lt;b&gt;first&lt;/b&gt; job stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="257"/>
+        <location filename="../app/mainwindow.cpp" line="263"/>
         <source>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;This program makes it easier to deal with timetables and trains.&lt;/p&gt;&lt;p&gt;Version: &lt;b&gt;%2&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Built: %3&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;%4&apos;&gt;%4&lt;/a&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="351"/>
+        <location filename="../app/mainwindow.cpp" line="359"/>
         <source>This file was created by an older version of %1.
 Opening it without conversion might not work and even crash the application.
 Do you want to open it anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="363"/>
+        <location filename="../app/mainwindow.cpp" line="371"/>
         <source>This file was created by a newer version of %1.
 You should update the application first. Opening this file might not work or even crash.
 Do you want to open it anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="393"/>
+        <location filename="../app/mainwindow.cpp" line="401"/>
         <source>RS Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="394"/>
+        <location filename="../app/mainwindow.cpp" line="402"/>
         <source>There is some rollingstock import data left in this file. Probably the application has crashed!&lt;br&gt;Before deleting it would you like to resume importation?&lt;br&gt;&lt;i&gt;(Sorry for the crash, would you like to contact me and share information about it?)&lt;/i&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="399"/>
+        <location filename="../app/mainwindow.cpp" line="407"/>
         <source>Resume importation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="400"/>
+        <location filename="../app/mainwindow.cpp" line="408"/>
         <source>Just delete it</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="467"/>
+        <location filename="../app/mainwindow.cpp" line="475"/>
         <source>&amp;%1 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="514"/>
+        <location filename="../app/mainwindow.cpp" line="522"/>
         <source>Create new Session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="539"/>
+        <location filename="../app/mainwindow.cpp" line="549"/>
         <source>Some background tasks are still running.
 The new file was not created. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="578"/>
+        <location filename="../app/mainwindow.cpp" line="588"/>
         <source>Save Session Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="613"/>
+        <location filename="../app/mainwindow.cpp" line="625"/>
         <source>Error saving copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="628"/>
+        <location filename="../app/mainwindow.cpp" line="640"/>
         <source>Error while Closing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="629"/>
+        <location filename="../app/mainwindow.cpp" line="641"/>
         <source>There was an error while closing the database.
 Make sure there aren&apos;t any background tasks running and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="652"/>
+        <location filename="../app/mainwindow.cpp" line="664"/>
         <source>&lt;p&gt;Open a file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Open&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create new project: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;New&lt;/b&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="654"/>
+        <location filename="../app/mainwindow.cpp" line="666"/>
         <source>Open file or create a new one</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="665"/>
+        <location filename="../app/mainwindow.cpp" line="677"/>
         <source>&lt;p&gt;&lt;b&gt;There are no lines in this session&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Start by creating the railway layout for this session:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Create stations (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Create railway lines (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Add stations to railway lines&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt; &gt; &lt;b&gt;Edit Line&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="722"/>
+        <location filename="../app/mainwindow.cpp" line="734"/>
         <source>Add train job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="740"/>
+        <location filename="../app/mainwindow.cpp" line="752"/>
         <source>You must create at least one railway segment before adding job to this session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="925"/>
+        <location filename="../app/mainwindow.cpp" line="937"/>
         <source>Remove selected Job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="927"/>
+        <location filename="../app/mainwindow.cpp" line="939"/>
         <source>First select a Job by double click on graph or type in search box</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1674,27 +1674,27 @@ Make sure it was created by a recent version of the application and was not mani
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="220"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="222"/>
         <source>Import image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="249"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="253"/>
         <source>Importing error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="250"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="254"/>
         <source>The image format is not supported or the file is corrupted.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="262"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="266"/>
         <source>Remove image?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="263"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="267"/>
         <source>Are you sure to remove the image logo?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1819,27 +1819,27 @@ Make sure it was created by a recent version of the application and was not mani
 <context>
     <name>ModelPageSwitcher</name>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="20"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="20"/>
         <source>Prev</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="21"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="21"/>
         <source>Next</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="40"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="40"/>
         <source>Go</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="41"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="41"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="114"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="114"/>
         <source>Page %1/%2 (%3 items)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2000,223 +2000,223 @@ Extension: (*.ods)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="73"/>
+        <location filename="../odt_export/common/odtutils.h" line="79"/>
         <source>Page </source>
         <comment>Header page, leave space at end, page number will be added</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="76"/>
+        <location filename="../odt_export/common/odtutils.h" line="83"/>
         <source>Meeting</source>
         <comment>Document keywords</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="77"/>
+        <location filename="../odt_export/common/odtutils.h" line="84"/>
         <source>Meeting in %1 from %2 to %3</source>
         <comment>Document description, where, from date, to date</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="78"/>
+        <location filename="../odt_export/common/odtutils.h" line="86"/>
         <source>Meeting in %1 on %2</source>
         <comment>Document description, where, when</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="79"/>
+        <location filename="../odt_export/common/odtutils.h" line="88"/>
         <source>From %1 to %2</source>
         <comment>Shift cover, meeting from date, to date</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="82"/>
+        <location filename="../odt_export/common/odtutils.h" line="92"/>
         <source>Cp:</source>
         <comment>Job stop coupled RS</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="83"/>
+        <location filename="../odt_export/common/odtutils.h" line="93"/>
         <source>Unc:</source>
         <comment>Job stop uncoupled RS</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="84"/>
+        <location filename="../odt_export/common/odtutils.h" line="94"/>
         <source>Owner</source>
         <comment>Rollingstock Owner</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="86"/>
+        <location filename="../odt_export/common/odtutils.h" line="96"/>
         <source>Rollingstock by %1 at %2 of session</source>
         <comment>Rollingstock Session title, 1 is Owner/Station and 2 is start/end</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="88"/>
+        <location filename="../odt_export/common/odtutils.h" line="98"/>
         <source>start</source>
         <comment>Rollingstock Session start</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="89"/>
+        <location filename="../odt_export/common/odtutils.h" line="99"/>
         <source>end</source>
         <comment>Rollingstock Session end</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="92"/>
+        <location filename="../odt_export/common/odtutils.h" line="102"/>
         <source>From:</source>
         <comment>Job summary</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="93"/>
+        <location filename="../odt_export/common/odtutils.h" line="103"/>
         <source>To:</source>
         <comment>Job summary</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="94"/>
+        <location filename="../odt_export/common/odtutils.h" line="104"/>
         <source>Departure:</source>
         <comment>Job summary</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="95"/>
+        <location filename="../odt_export/common/odtutils.h" line="105"/>
         <source>Arrival:</source>
         <comment>Job summary</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="96"/>
+        <location filename="../odt_export/common/odtutils.h" line="106"/>
         <source>Axes:</source>
         <comment>Job summary</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="99"/>
+        <location filename="../odt_export/common/odtutils.h" line="109"/>
         <source>Station</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="100"/>
+        <location filename="../odt_export/common/odtutils.h" line="110"/>
         <source>Station: %1</source>
         <comment>Station title in station sheet</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="101"/>
+        <location filename="../odt_export/common/odtutils.h" line="111"/>
         <source>%1 station</source>
         <comment>Station sheet title in document metadata</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="102"/>
+        <location filename="../odt_export/common/odtutils.h" line="112"/>
         <source>Rollingstock</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="103"/>
+        <location filename="../odt_export/common/odtutils.h" line="113"/>
         <source>Job Nr</source>
         <comment>Job column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="105"/>
+        <location filename="../odt_export/common/odtutils.h" line="115"/>
         <source>Arrival</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="106"/>
+        <location filename="../odt_export/common/odtutils.h" line="116"/>
         <source>Departure</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="107"/>
+        <location filename="../odt_export/common/odtutils.h" line="117"/>
         <source>Arr.</source>
         <comment>Arrival abbreviated</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="108"/>
+        <location filename="../odt_export/common/odtutils.h" line="118"/>
         <source>Dep.</source>
         <comment>Departure abbreviated</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="110"/>
+        <location filename="../odt_export/common/odtutils.h" line="120"/>
         <source>From</source>
         <comment>Station stop table, From previous station column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="111"/>
+        <location filename="../odt_export/common/odtutils.h" line="121"/>
         <source>To</source>
         <comment>Station stop table, To next station column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="113"/>
+        <location filename="../odt_export/common/odtutils.h" line="123"/>
         <source>Platf</source>
         <comment>Job stop table, platform abbreviated</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="114"/>
+        <location filename="../odt_export/common/odtutils.h" line="124"/>
         <source>Transit</source>
         <comment>Job stop table, notes column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="115"/>
+        <location filename="../odt_export/common/odtutils.h" line="125"/>
         <source>START</source>
         <comment>Station stop table, notes column for first job stop, keep in English it&apos;s the same for every sheet</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="119"/>
+        <location filename="../odt_export/common/odtutils.h" line="129"/>
         <source>Crossings</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="120"/>
+        <location filename="../odt_export/common/odtutils.h" line="130"/>
         <source>Passings</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="121"/>
+        <location filename="../odt_export/common/odtutils.h" line="131"/>
         <source>Cross</source>
         <comment>Job stop crossings abbreviated column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="122"/>
+        <location filename="../odt_export/common/odtutils.h" line="132"/>
         <source>Passes</source>
         <comment>Job stop passings abbreviated column</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="123"/>
+        <location filename="../odt_export/common/odtutils.h" line="133"/>
         <source>Notes</source>
         <comment>Job stop table</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="126"/>
+        <location filename="../odt_export/common/odtutils.h" line="136"/>
         <source>SHIFT %1</source>
         <comment>Shift title in shift sheet cover</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="127"/>
+        <location filename="../odt_export/common/odtutils.h" line="137"/>
         <source>Shift %1</source>
         <comment>Shift sheet document title for metadata</comment>
         <translation type="unfinished"></translation>
@@ -3867,12 +3867,12 @@ Extension: (*.ttt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="82"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="84"/>
         <source>Expoert RS session plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="102"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="106"/>
         <source>Session RS Plan Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3889,6 +3889,11 @@ Extension: (*.ttt)</source>
     <message>
         <location filename="../settings/settingsdialog.ui" line="68"/>
         <source>General</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="193"/>
+        <source>Reset to Application Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4051,11 +4056,6 @@ Extension: (*.ttt)</source>
     <message>
         <location filename="../settings/settingsdialog.ui" line="183"/>
         <source>This is the language for exported sheets. It will be reset at every launch to same language of application.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../settings/settingsdialog.ui" line="193"/>
-        <source>Reset to Application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4389,17 +4389,17 @@ Extension: (*.ttt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="190"/>
+        <location filename="../shifts/shiftmanager.cpp" line="192"/>
         <source>Save Shift Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="194"/>
+        <location filename="../shifts/shiftmanager.cpp" line="196"/>
         <source>shift_%1.odt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="211"/>
+        <location filename="../shifts/shiftmanager.cpp" line="215"/>
         <source>Shift Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4554,141 +4554,141 @@ Extension: (*.ttt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="129"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="132"/>
         <source>Hold shift to move selected track to the top.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="130"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="133"/>
         <source>Hold shift to move selected track to the bottom.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="220"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="223"/>
         <source>New Station</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="304"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="307"/>
         <source>Station name cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="309"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="312"/>
         <source>Station short name cannot be equal to full name.
 Leave empty if you want to use the full name in all places.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="316"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="319"/>
         <source>Check station &lt;b&gt;name&lt;/b&gt;, &lt;b&gt;short name&lt;/b&gt; and &lt;b&gt;phone number&lt;/b&gt; to be &lt;b&gt;unique&lt;/b&gt; for this station.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="323"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="326"/>
         <source>A station should at least have 1 gate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="329"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="332"/>
         <source>A station should at least have 1 track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="340"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="343"/>
         <source>Cannot cancel changes. Changes will be applied.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="348"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="351"/>
         <source>Station Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="366"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="369"/>
         <source>Add Gate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="367"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="370"/>
         <source>Please choose a letter for the new station gate.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="380"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="434"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="613"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="383"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="437"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="616"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="380"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="383"/>
         <source>Gate name cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="420"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="423"/>
         <source>Add Track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="421"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="424"/>
         <source>Please choose a name for the new station track.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="434"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="437"/>
         <source>Track name cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="614"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="617"/>
         <source>Cannot remove segment:
 %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="623"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="626"/>
         <source>Open SVG Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="644"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="649"/>
         <source>Cannot Read File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="651"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="656"/>
         <source>Error Adding SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="660"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="665"/>
         <source>Delete Image?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="661"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="666"/>
         <source>Are you sure to delete SVG plan of this station?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="668"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="673"/>
         <source>Error Deleting SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="677"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="682"/>
         <source>Save SVG Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="697"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="704"/>
         <source>Cannot Save File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="704"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="711"/>
         <source>Error Saving SVG</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4935,17 +4935,17 @@ It can also be both (Bidirectional) but cannot be neither.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="111"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="113"/>
         <source>Save Station Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="115"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="117"/>
         <source>%1_station.odt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="133"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="137"/>
         <source>Station Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5628,17 +5628,17 @@ Please choose a new out gate or out track, this might change next segment.</sour
 <context>
     <name>utils::OpenFileInFolderDlg</name>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="62"/>
+        <location filename="../utils/files/openfileinfolder.cpp" line="62"/>
         <source>Open In App</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="63"/>
+        <location filename="../utils/files/openfileinfolder.cpp" line="63"/>
         <source>Show Folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="110"/>
+        <location filename="../utils/files/openfileinfolder.cpp" line="110"/>
         <source>Do you want to open file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>

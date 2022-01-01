@@ -37,17 +37,17 @@
 <context>
     <name>ChooseItemDlg</name>
     <message>
-        <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="32"/>
+        <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="32"/>
         <source>Insert value</source>
         <translation>Inserire valore</translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="53"/>
+        <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="53"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/chooseitemdlg.cpp" line="70"/>
+        <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="70"/>
         <source>In order to proceed you must select a valid item.</source>
         <translation>Per procedere devi selezionare un elemento valido.</translation>
     </message>
@@ -93,7 +93,7 @@
 <context>
     <name>ColorView</name>
     <message>
-        <location filename="../utils/colorview.cpp" line="30"/>
+        <location filename="../utils/delegates/color/colorview.cpp" line="30"/>
         <source>Choose a color</source>
         <translation>Scegli un colore</translation>
     </message>
@@ -558,37 +558,37 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
 <context>
     <name>FileFormats</name>
     <message>
-        <location filename="../utils/file_format_names.h" line="13"/>
+        <location filename="../utils/files/file_format_names.h" line="13"/>
         <source>All Files (*.*)</source>
         <translation>Tutti i file (*.*)</translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="14"/>
+        <location filename="../utils/files/file_format_names.h" line="14"/>
         <source>OpenDocument Sheet (*.ods)</source>
         <translation>Foglio di calcolo OpenDocument (*.ods)</translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="15"/>
+        <location filename="../utils/files/file_format_names.h" line="15"/>
         <source>OpenDocument Text (*.odt)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="16"/>
+        <location filename="../utils/files/file_format_names.h" line="16"/>
         <source>MRTPlanner Session (*.ttt)</source>
         <translation>Sessione MRTPlanner (*.ttt)</translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="17"/>
+        <location filename="../utils/files/file_format_names.h" line="17"/>
         <source>SQLite 3 Database (*.db *.sqlite *.sqlite3 *.db3)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="18"/>
+        <location filename="../utils/files/file_format_names.h" line="18"/>
         <source>SVG vectorial image (*.svg)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../utils/file_format_names.h" line="19"/>
+        <location filename="../utils/files/file_format_names.h" line="19"/>
         <source>Portable Document Format (*.pdf)</source>
         <translation></translation>
     </message>
@@ -665,7 +665,7 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
 <context>
     <name>IPagedItemModel</name>
     <message>
-        <location filename="../utils/sqldelegate/pageditemmodelhelper_impl.h" line="113"/>
+        <location filename="../utils/delegates/sql/pageditemmodelhelper_impl.h" line="113"/>
         <source>Fetching returned less rows than expected.
 %1 instead of %2</source>
         <translation></translation>
@@ -703,7 +703,7 @@ NOTA: i tempi di sosta non sono affetti da questa modifica ma perderai gli aggiu
 <context>
     <name>ImageViewer</name>
     <message>
-        <location filename="../utils/imageviewer.cpp" line="69"/>
+        <location filename="../utils/delegates/imageviewer/imageviewer.cpp" line="69"/>
         <source>No image</source>
         <translation>Nessuna immagine</translation>
     </message>
@@ -964,7 +964,7 @@ Vuoi eliminare questo servizio?</translation>
         <translation>Vuoi salvare le modifiche fatte al servizio %1</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="643"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="647"/>
         <source>Job Sheet Saved</source>
         <translation>Foglio Servizio Salvato</translation>
     </message>
@@ -989,12 +989,12 @@ Vuoi eliminare questo servizio?</translation>
         <translation>Prima di selezionare un turno dovresti aggiungere le fermate</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="621"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="623"/>
         <source>Save Job Sheet</source>
         <translation>Salva Foglio Servizio</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="625"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="627"/>
         <source>job%1_sheet.odt</source>
         <translation>foglio_treno%1.odt</translation>
     </message>
@@ -1087,7 +1087,7 @@ Vuoi eliminare questo servizio?</translation>
     <message>
         <location filename="../settings/languagemodel.cpp" line="15"/>
         <source>Language</source>
-        <translation type="unfinished">Lingua</translation>
+        <translation>Lingua</translation>
     </message>
 </context>
 <context>
@@ -1314,7 +1314,7 @@ Message: %3</source>
         <translation>Esci</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="722"/>
+        <location filename="../app/mainwindow.cpp" line="734"/>
         <source>Add train job</source>
         <translation>Aggiungi servizio (Treno)</translation>
     </message>
@@ -1409,128 +1409,128 @@ Message: %3</source>
         <translation>Proprietà</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="652"/>
+        <location filename="../app/mainwindow.cpp" line="664"/>
         <source>&lt;p&gt;Open a file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Open&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create new project: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;New&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Apri un file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Apri&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Crea un nuovo progetto: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Nuovo&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="131"/>
+        <location filename="../app/mainwindow.cpp" line="137"/>
         <source>Find</source>
         <translation>Trova</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="654"/>
+        <location filename="../app/mainwindow.cpp" line="666"/>
         <source>Open file or create a new one</source>
         <translation>Apri un file o creane uno nuovo</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="286"/>
-        <location filename="../app/mainwindow.cpp" line="502"/>
+        <location filename="../app/mainwindow.cpp" line="292"/>
+        <location filename="../app/mainwindow.cpp" line="510"/>
         <source>Backgroung Task</source>
         <translation>Task in background</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="613"/>
+        <location filename="../app/mainwindow.cpp" line="625"/>
         <source>Error saving copy</source>
         <translation>Errore salvataggio copia</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="629"/>
+        <location filename="../app/mainwindow.cpp" line="641"/>
         <source>There was an error while closing the database.
 Make sure there aren&apos;t any background tasks running and try again.</source>
         <translation>C&apos;è stao un problema nella chiusura del database.
 Assicurarsi che tutte le operazioni in background siano terminate e riprovare.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="467"/>
+        <location filename="../app/mainwindow.cpp" line="475"/>
         <source>&amp;%1 %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="78"/>
-        <location filename="../app/mainwindow.cpp" line="254"/>
+        <location filename="../app/mainwindow.cpp" line="84"/>
+        <location filename="../app/mainwindow.cpp" line="260"/>
         <source>About %1</source>
         <translation>Informazioni su %1</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="287"/>
-        <location filename="../app/mainwindow.cpp" line="503"/>
+        <location filename="../app/mainwindow.cpp" line="293"/>
+        <location filename="../app/mainwindow.cpp" line="511"/>
         <source>Background task for checking rollingstock errors is still running.
 Do you want to cancel it?</source>
         <translation>Il task in background per il controllo errori dei rotabili è ancora in esecuzione.
 Vuoi annullarlo?</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="298"/>
+        <location filename="../app/mainwindow.cpp" line="304"/>
         <source>Open Session</source>
         <translation>Apri sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="350"/>
+        <location filename="../app/mainwindow.cpp" line="358"/>
         <source>Version is old</source>
         <translation>Vecchia versione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="362"/>
+        <location filename="../app/mainwindow.cpp" line="370"/>
         <source>Version is too new</source>
         <translation>Versione troppo recente</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="393"/>
+        <location filename="../app/mainwindow.cpp" line="401"/>
         <source>RS Import</source>
         <translation>Importa Rotabili</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="394"/>
+        <location filename="../app/mainwindow.cpp" line="402"/>
         <source>There is some rollingstock import data left in this file. Probably the application has crashed!&lt;br&gt;Before deleting it would you like to resume importation?&lt;br&gt;&lt;i&gt;(Sorry for the crash, would you like to contact me and share information about it?)&lt;/i&gt;</source>
         <translation>In questo file sono rimasti dei dati relativi all&apos;importazione rotabili. Probabilmente l&apos;applicazione è crashata!&lt;br&gt;
 Prima di eliminarli, vuoi riprendere l&apos;importazione?&lt;br&gt;&lt;i&gt;(Mi dispiace per il crash, vorresti contattarmi per condividere i dettagli del malfunzionamento?)&lt;/i&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="399"/>
+        <location filename="../app/mainwindow.cpp" line="407"/>
         <source>Resume importation</source>
         <translation>Riprendi importazione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="400"/>
+        <location filename="../app/mainwindow.cpp" line="408"/>
         <source>Just delete it</source>
         <translation>Elimina e basta</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="322"/>
-        <location filename="../app/mainwindow.cpp" line="538"/>
+        <location filename="../app/mainwindow.cpp" line="330"/>
+        <location filename="../app/mainwindow.cpp" line="548"/>
         <source>Background Tasks</source>
         <translation>Task in background</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="99"/>
+        <location filename="../app/mainwindow.cpp" line="105"/>
         <source>Job Editor</source>
         <translation>Editor Servizi</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="236"/>
+        <location filename="../app/mainwindow.cpp" line="242"/>
         <source>Hold shift and click to go to &lt;b&gt;last&lt;/b&gt; job stop.</source>
         <translation>Premi shift e clicca per andare all&apos;&lt;b&gt;ultima&lt;/b&gt; fermata del treno.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="237"/>
+        <location filename="../app/mainwindow.cpp" line="243"/>
         <source>Hold shift and click to go to &lt;b&gt;first&lt;/b&gt; job stop.</source>
         <translation>Premi shift e clicca per andare alla &lt;b&gt;prima&lt;/b&gt; fermata del treno.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="257"/>
+        <location filename="../app/mainwindow.cpp" line="263"/>
         <source>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;This program makes it easier to deal with timetables and trains.&lt;/p&gt;&lt;p&gt;Version: &lt;b&gt;%2&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Built: %3&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;%4&apos;&gt;%4&lt;/a&gt;&lt;/p&gt;</source>
         <translation>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;Questo programma rende più facile la gestione di treni e orari.&lt;/p&gt;&lt;p&gt;Versione: &lt;b&gt;%2&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Built: %3&lt;/p&gt;&lt;p&gt;Sito Web: &lt;a href=&apos;%4&apos;&gt;%4&lt;/a&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="323"/>
+        <location filename="../app/mainwindow.cpp" line="331"/>
         <source>Some background tasks are still running.
 The file was not opened. Try again.</source>
         <translation>Alcune operazioni in background devono ancora erminare.
 Il file non è stato aperto. Riprova.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="351"/>
+        <location filename="../app/mainwindow.cpp" line="359"/>
         <source>This file was created by an older version of %1.
 Opening it without conversion might not work and even crash the application.
 Do you want to open it anyway?</source>
@@ -1539,7 +1539,7 @@ Aprirlo senza conversione potrebbe non funzionare o addirittura terminare l&apos
 Vuoi aprirlo comunque?</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="363"/>
+        <location filename="../app/mainwindow.cpp" line="371"/>
         <source>This file was created by a newer version of %1.
 You should update the application first. Opening this file might not work or even crash.
 Do you want to open it anyway?</source>
@@ -1548,44 +1548,44 @@ Dovresti prima aggiornare l&apos;applicazione. L&apos;apertura di questo file po
 Vuoi aprirlo comunque?</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="514"/>
+        <location filename="../app/mainwindow.cpp" line="522"/>
         <source>Create new Session</source>
         <translation>Crea nuova Sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="539"/>
+        <location filename="../app/mainwindow.cpp" line="549"/>
         <source>Some background tasks are still running.
 The new file was not created. Try again.</source>
         <translation>Alcune operazioni in background devono ancora erminare.
 Il file non è stato creato. Riprova.</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="578"/>
+        <location filename="../app/mainwindow.cpp" line="588"/>
         <source>Save Session Copy</source>
         <translation>Salva Copia Sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="628"/>
+        <location filename="../app/mainwindow.cpp" line="640"/>
         <source>Error while Closing</source>
         <translation>Errore nella chiusura</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="665"/>
+        <location filename="../app/mainwindow.cpp" line="677"/>
         <source>&lt;p&gt;&lt;b&gt;There are no lines in this session&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Start by creating the railway layout for this session:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Create stations (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Create railway lines (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Add stations to railway lines&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt; &gt; &lt;b&gt;Edit Line&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;&lt;b&gt;Non ci sono linee in questa sessione&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Inizia creando il layout delle linee ferroviarie per questa sessione:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Crea le stazioni  (&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Crea le linee ferroviarie (&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt; &gt; &lt;b&gt;Pagina Linee&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Aggiungi le stazioni alle linee ferroviarie&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Modifica&lt;/b&gt; &gt; &lt;b&gt;Stazioni&lt;/b&gt; &gt; &lt;b&gt;Pagina Linee&lt;/b&gt; &gt; &lt;b&gt;Modifica Linea&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="740"/>
+        <location filename="../app/mainwindow.cpp" line="752"/>
         <source>You must create at least one railway segment before adding job to this session</source>
         <translation>Devi creare almeno una tratta ferroviaria prima di aggiungere un treno alla sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="925"/>
+        <location filename="../app/mainwindow.cpp" line="937"/>
         <source>Remove selected Job</source>
         <translation>Rimuovi Servizio selezionato</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="927"/>
+        <location filename="../app/mainwindow.cpp" line="939"/>
         <source>First select a Job by double click on graph or type in search box</source>
         <translation>Prima seleziona un Servizio facendo dopppio click sul grafico o scrivendo nella casella di ricerca</translation>
     </message>
@@ -1692,27 +1692,27 @@ Assicurarsi che sia stato creato da una versione recente dell&apos;applicazione 
         <translation>Imposta testo personalizzato</translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="220"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="222"/>
         <source>Import image</source>
         <translation>Importa immagine</translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="249"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="253"/>
         <source>Importing error</source>
         <translation>Errore importazione</translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="250"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="254"/>
         <source>The image format is not supported or the file is corrupted.</source>
         <translation>L&apos;immagine non è supportata oppure il file è corrotto.</translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="262"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="266"/>
         <source>Remove image?</source>
         <translation>Rimuovere immagine?</translation>
     </message>
     <message>
-        <location filename="../db_metadata/meetinginformationdialog.cpp" line="263"/>
+        <location filename="../db_metadata/meetinginformationdialog.cpp" line="267"/>
         <source>Are you sure to remove the image logo?</source>
         <translation>Sei sicuo di voler rimuovere l&apos;immagine di logo?</translation>
     </message>
@@ -1837,27 +1837,27 @@ Assicurarsi che sia stato creato da una versione recente dell&apos;applicazione 
 <context>
     <name>ModelPageSwitcher</name>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="20"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="20"/>
         <source>Prev</source>
         <translation>Precedente</translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="21"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="21"/>
         <source>Next</source>
         <translation>Successivo</translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="40"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="40"/>
         <source>Go</source>
         <translation>Vai</translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="41"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="41"/>
         <source>Refresh</source>
         <translation>Ricarica</translation>
     </message>
     <message>
-        <location filename="../utils/sqldelegate/modelpageswitcher.cpp" line="114"/>
+        <location filename="../utils/delegates/sql/modelpageswitcher.cpp" line="114"/>
         <source>Page %1/%2 (%3 items)</source>
         <translation>Pagina %1/%2 (%3 elementi)</translation>
     </message>
@@ -2020,223 +2020,223 @@ Estensione: (*.ods)</translation>
         <translation>Impossibile aprire sorgente: %1</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="73"/>
+        <location filename="../odt_export/common/odtutils.h" line="79"/>
         <source>Page </source>
         <comment>Header page, leave space at end, page number will be added</comment>
         <translation>Pagina </translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="76"/>
+        <location filename="../odt_export/common/odtutils.h" line="83"/>
         <source>Meeting</source>
         <comment>Document keywords</comment>
         <translation>Sessione</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="77"/>
+        <location filename="../odt_export/common/odtutils.h" line="84"/>
         <source>Meeting in %1 from %2 to %3</source>
         <comment>Document description, where, from date, to date</comment>
         <translation>Meeting a %1 dal %2 al %3</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="78"/>
+        <location filename="../odt_export/common/odtutils.h" line="86"/>
         <source>Meeting in %1 on %2</source>
         <comment>Document description, where, when</comment>
         <translation>Meeting a %1 il %2</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="79"/>
+        <location filename="../odt_export/common/odtutils.h" line="88"/>
         <source>From %1 to %2</source>
         <comment>Shift cover, meeting from date, to date</comment>
         <translation>Dal %1 al %2</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="82"/>
+        <location filename="../odt_export/common/odtutils.h" line="92"/>
         <source>Cp:</source>
         <comment>Job stop coupled RS</comment>
         <translation>Ag:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="83"/>
+        <location filename="../odt_export/common/odtutils.h" line="93"/>
         <source>Unc:</source>
         <comment>Job stop uncoupled RS</comment>
         <translation>Sg:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="84"/>
+        <location filename="../odt_export/common/odtutils.h" line="94"/>
         <source>Owner</source>
         <comment>Rollingstock Owner</comment>
         <translation>Proprietario</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="86"/>
+        <location filename="../odt_export/common/odtutils.h" line="96"/>
         <source>Rollingstock by %1 at %2 of session</source>
         <comment>Rollingstock Session title, 1 is Owner/Station and 2 is start/end</comment>
         <translation>Rotabili per %1 a %2 sessione</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="88"/>
+        <location filename="../odt_export/common/odtutils.h" line="98"/>
         <source>start</source>
         <comment>Rollingstock Session start</comment>
         <translation>inizio</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="89"/>
+        <location filename="../odt_export/common/odtutils.h" line="99"/>
         <source>end</source>
         <comment>Rollingstock Session end</comment>
         <translation>fine</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="92"/>
+        <location filename="../odt_export/common/odtutils.h" line="102"/>
         <source>From:</source>
         <comment>Job summary</comment>
         <translation>Da:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="93"/>
+        <location filename="../odt_export/common/odtutils.h" line="103"/>
         <source>To:</source>
         <comment>Job summary</comment>
         <translation>Per:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="94"/>
+        <location filename="../odt_export/common/odtutils.h" line="104"/>
         <source>Departure:</source>
         <comment>Job summary</comment>
         <translation>Partenza:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="95"/>
+        <location filename="../odt_export/common/odtutils.h" line="105"/>
         <source>Arrival:</source>
         <comment>Job summary</comment>
         <translation>Arrivo:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="96"/>
+        <location filename="../odt_export/common/odtutils.h" line="106"/>
         <source>Axes:</source>
         <comment>Job summary</comment>
         <translation>Assi:</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="99"/>
+        <location filename="../odt_export/common/odtutils.h" line="109"/>
         <source>Station</source>
         <comment>Job stop table</comment>
         <translation>Stazione</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="100"/>
+        <location filename="../odt_export/common/odtutils.h" line="110"/>
         <source>Station: %1</source>
         <comment>Station title in station sheet</comment>
         <translation>Stazione di: %1</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="101"/>
+        <location filename="../odt_export/common/odtutils.h" line="111"/>
         <source>%1 station</source>
         <comment>Station sheet title in document metadata</comment>
         <translation>stazione di %1</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="102"/>
+        <location filename="../odt_export/common/odtutils.h" line="112"/>
         <source>Rollingstock</source>
         <comment>Job stop table</comment>
         <translation>Rotabili</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="103"/>
+        <location filename="../odt_export/common/odtutils.h" line="113"/>
         <source>Job Nr</source>
         <comment>Job column</comment>
         <translation>Treno N.</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="105"/>
+        <location filename="../odt_export/common/odtutils.h" line="115"/>
         <source>Arrival</source>
         <comment>Job stop table</comment>
         <translation>Arrivo</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="106"/>
+        <location filename="../odt_export/common/odtutils.h" line="116"/>
         <source>Departure</source>
         <comment>Job stop table</comment>
         <translation>Partenza</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="107"/>
+        <location filename="../odt_export/common/odtutils.h" line="117"/>
         <source>Arr.</source>
         <comment>Arrival abbreviated</comment>
         <translation>Arr.</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="108"/>
+        <location filename="../odt_export/common/odtutils.h" line="118"/>
         <source>Dep.</source>
         <comment>Departure abbreviated</comment>
         <translation>Part.</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="110"/>
+        <location filename="../odt_export/common/odtutils.h" line="120"/>
         <source>From</source>
         <comment>Station stop table, From previous station column</comment>
         <translation>Da</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="111"/>
+        <location filename="../odt_export/common/odtutils.h" line="121"/>
         <source>To</source>
         <comment>Station stop table, To next station column</comment>
         <translation>Per</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="113"/>
+        <location filename="../odt_export/common/odtutils.h" line="123"/>
         <source>Platf</source>
         <comment>Job stop table, platform abbreviated</comment>
         <translation>Bin</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="114"/>
+        <location filename="../odt_export/common/odtutils.h" line="124"/>
         <source>Transit</source>
         <comment>Job stop table, notes column</comment>
         <translation>Transito</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="115"/>
+        <location filename="../odt_export/common/odtutils.h" line="125"/>
         <source>START</source>
         <comment>Station stop table, notes column for first job stop, keep in English it&apos;s the same for every sheet</comment>
         <translation></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="119"/>
+        <location filename="../odt_export/common/odtutils.h" line="129"/>
         <source>Crossings</source>
         <comment>Job stop table</comment>
         <translation>Incroci</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="120"/>
+        <location filename="../odt_export/common/odtutils.h" line="130"/>
         <source>Passings</source>
         <comment>Job stop table</comment>
         <translation>Precedenze</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="121"/>
+        <location filename="../odt_export/common/odtutils.h" line="131"/>
         <source>Cross</source>
         <comment>Job stop crossings abbreviated column</comment>
         <translation>Incrocia</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="122"/>
+        <location filename="../odt_export/common/odtutils.h" line="132"/>
         <source>Passes</source>
         <comment>Job stop passings abbreviated column</comment>
         <translation>Prec.</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="123"/>
+        <location filename="../odt_export/common/odtutils.h" line="133"/>
         <source>Notes</source>
         <comment>Job stop table</comment>
         <translation>Note</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="126"/>
+        <location filename="../odt_export/common/odtutils.h" line="136"/>
         <source>SHIFT %1</source>
         <comment>Shift title in shift sheet cover</comment>
         <translation>TURNO %1</translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="127"/>
+        <location filename="../odt_export/common/odtutils.h" line="137"/>
         <source>Shift %1</source>
         <comment>Shift sheet document title for metadata</comment>
         <translation>Turno %1</translation>
@@ -3914,12 +3914,12 @@ Estensione: (*.ttt)</translation>
         <translation>Riassunto Rotabili</translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="82"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="84"/>
         <source>Expoert RS session plan</source>
         <translation>Esporta il piano rotabili della sessione</translation>
     </message>
     <message>
-        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="102"/>
+        <location filename="../viewmanager/sessionstartendrsviewer.cpp" line="106"/>
         <source>Session RS Plan Saved</source>
         <translation>Piano Ratabili Sessione Salvato</translation>
     </message>
@@ -3932,12 +3932,9 @@ Estensione: (*.ttt)</translation>
         <translation>Generale</translation>
     </message>
     <message>
-        <source>Language</source>
-        <translation type="vanished">Lingua</translation>
-    </message>
-    <message>
-        <source>Language changes will be applied next time you start the application</source>
-        <translation type="vanished">Le impostazioni della lingua verranno applicate al prossimo avvio dell&apos;applicazione</translation>
+        <location filename="../settings/settingsdialog.ui" line="193"/>
+        <source>Reset to Application Language</source>
+        <translation>Resetta a Lingua Applicazione</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="209"/>
@@ -4153,33 +4150,28 @@ Estensione: (*.ttt)</translation>
     <message>
         <location filename="../settings/settingsdialog.ui" line="74"/>
         <source>Application Language:</source>
-        <translation type="unfinished"></translation>
+        <translation>Lingua Applicazione:</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="86"/>
         <location filename="../settings/settingsdialog.ui" line="147"/>
         <source>Language:</source>
-        <translation type="unfinished"></translation>
+        <translation>Lingua:</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="122"/>
         <source>Application Language changes will be applied next time you start the application!</source>
-        <translation type="unfinished"></translation>
+        <translation>Le impostazioni della lingua applicazione verranno applicate al prossimo avvio dell&apos;applicazione!</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="135"/>
         <source>Sheet Export Language:</source>
-        <translation type="unfinished"></translation>
+        <translation>Lingua Esportazione Fogli:</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="183"/>
         <source>This is the language for exported sheets. It will be reset at every launch to same language of application.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../settings/settingsdialog.ui" line="193"/>
-        <source>Reset to Application</source>
-        <translation type="unfinished"></translation>
+        <translation>Questa è la lingua in cui vengono esportati i documenti. Viene resettata ogni avvio alla stessa lingua dell&apos;applicazione.</translation>
     </message>
     <message>
         <location filename="../settings/settingsdialog.ui" line="632"/>
@@ -4445,17 +4437,17 @@ Estensione: (*.ttt)</translation>
         <translation>Sei sicuro di voler rimuovere il Turno Servizi &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="190"/>
+        <location filename="../shifts/shiftmanager.cpp" line="192"/>
         <source>Save Shift Sheet</source>
         <translation>Salva Foglio Turno</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="194"/>
+        <location filename="../shifts/shiftmanager.cpp" line="196"/>
         <source>shift_%1.odt</source>
         <translation>turno_%1.odt</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftmanager.cpp" line="211"/>
+        <location filename="../shifts/shiftmanager.cpp" line="215"/>
         <source>Shift Sheet Saved</source>
         <translation>Foglio Turno Salvato</translation>
     </message>
@@ -4610,143 +4602,143 @@ Estensione: (*.ttt)</translation>
         <translation>Modifica</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="129"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="132"/>
         <source>Hold shift to move selected track to the top.</source>
         <translation>Tenere premuto Shift per spostare il binario selezionato al primo posto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="130"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="133"/>
         <source>Hold shift to move selected track to the bottom.</source>
         <translation>Tenere premuto Shift per spostare il binario selezionato all&apos;ultimo posto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="220"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="223"/>
         <source>New Station</source>
         <translation>Nuova Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="304"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="307"/>
         <source>Station name cannot be empty.</source>
         <translation>Il nome della stazione non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="309"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="312"/>
         <source>Station short name cannot be equal to full name.
 Leave empty if you want to use the full name in all places.</source>
         <translation>Il nome abbreviato della stazione non puù essere uguale al suo nome completo.
 Lasciare vuoto se si vuole usare il nome completo in tutti i posti.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="316"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="319"/>
         <source>Check station &lt;b&gt;name&lt;/b&gt;, &lt;b&gt;short name&lt;/b&gt; and &lt;b&gt;phone number&lt;/b&gt; to be &lt;b&gt;unique&lt;/b&gt; for this station.</source>
         <translation>Controlla che il &lt;b&gt;nome&lt;/b&gt;, il &lt;b&gt;nome abbreviato&lt;/b&gt; e il &lt;b&gt; numero di telefono&lt;/b&gt; di questa stazione siano &lt;b&gt;unici&lt;/b&gt;.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="323"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="326"/>
         <source>A station should at least have 1 gate</source>
         <translation>Una stazione deve avere almeno 1 gate</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="329"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="332"/>
         <source>A station should at least have 1 track</source>
         <translation>Una stazione deve avere almeno 1 binario</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="340"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="343"/>
         <source>Cannot cancel changes. Changes will be applied.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="348"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="351"/>
         <source>Station Error</source>
         <translation>Errore Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="366"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="369"/>
         <source>Add Gate</source>
         <translation>Aggiungi Gate</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="367"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="370"/>
         <source>Please choose a letter for the new station gate.</source>
         <translation>Per favore scegli una lettera per il nuovo gate della stazione.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="380"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="434"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="613"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="383"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="437"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="616"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="380"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="383"/>
         <source>Gate name cannot be empty.</source>
         <translation>Il nome del Gate non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="420"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="423"/>
         <source>Add Track</source>
         <translation>Aggiungi Binario</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="421"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="424"/>
         <source>Please choose a name for the new station track.</source>
         <translation>Per favore scegli un nome per il nuovo binario della stazione.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="434"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="437"/>
         <source>Track name cannot be empty.</source>
         <translation>Il nome del binario non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="614"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="617"/>
         <source>Cannot remove segment:
 %1</source>
         <translation>Impossibile rimuovere tratta:
 %1</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="623"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="626"/>
         <source>Open SVG Image</source>
         <translation>Apri Immagine SVG</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="644"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="649"/>
         <source>Cannot Read File</source>
         <translation>Impossibile leggere il File</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="651"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="656"/>
         <source>Error Adding SVG</source>
         <translation>Errore nell&apos;aggiunta immagine SVG</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="660"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="665"/>
         <source>Delete Image?</source>
         <translation>Rimuovere Immagine?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="661"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="666"/>
         <source>Are you sure to delete SVG plan of this station?</source>
         <translation>Sei sicuro di voler rimuovere il piano SVG di questa stazione?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="668"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="673"/>
         <source>Error Deleting SVG</source>
         <translation>Errore Rimozione SVG</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="677"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="682"/>
         <source>Save SVG Copy</source>
         <translation>Salva Copia SVG</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="697"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="704"/>
         <source>Cannot Save File</source>
         <translation>Impossibile Salvare File</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="704"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="711"/>
         <source>Error Saving SVG</source>
         <translation>Errore Salvataggio File</translation>
     </message>
@@ -4995,17 +4987,17 @@ Può anche essere entrambi (Bidirezionale) ma non può non essere nessuno dei du
         <translation>Mostra nel grafico servizi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="111"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="113"/>
         <source>Save Station Sheet</source>
         <translation>Salva Foglio Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="115"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="117"/>
         <source>%1_station.odt</source>
         <translation>stazione_%1.odt</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="133"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="137"/>
         <source>Station Sheet Saved</source>
         <translation>Foglio Stazione Salvato</translation>
     </message>
@@ -5696,17 +5688,17 @@ Per favore scegli un altro Binario o cambia la Tratta successiva.</translation>
 <context>
     <name>utils::OpenFileInFolderDlg</name>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="62"/>
+        <location filename="../utils/files/openfileinfolder.cpp" line="62"/>
         <source>Open In App</source>
         <translation>Apri in App</translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="63"/>
+        <location filename="../utils/files/openfileinfolder.cpp" line="63"/>
         <source>Show Folder</source>
         <translation>Mostra Cartella</translation>
     </message>
     <message>
-        <location filename="../utils/openfileinfolder.cpp" line="110"/>
+        <location filename="../utils/files/openfileinfolder.cpp" line="110"/>
         <source>Do you want to open file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Vuoi aprire il file?&lt;br&gt;&lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
