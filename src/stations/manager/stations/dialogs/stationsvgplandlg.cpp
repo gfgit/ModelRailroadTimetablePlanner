@@ -155,6 +155,27 @@ void StationSVGPlanDlg::clearDBData()
     }
 }
 
+void StationSVGPlanDlg::clearJobs()
+{
+    for(ssplib::TrackItem& item : m_plan->platforms)
+    {
+        item.visible = false;
+
+        item.jobId = 0;
+        item.color = ssplib::whiteRGB;
+        item.jobName.clear();
+    }
+
+    for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
+    {
+        item.visible = false;
+
+        item.jobId = 0;
+        item.color = ssplib::whiteRGB;
+        item.jobName.clear();
+    }
+}
+
 bool StationSVGPlanDlg::stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut)
 {
     return StationSVGHelper::stationHasSVG(db, stId, stNameOut);

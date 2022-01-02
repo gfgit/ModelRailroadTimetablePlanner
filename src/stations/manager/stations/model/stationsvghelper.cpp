@@ -10,6 +10,10 @@
 
 #include "stations/station_utils.h"
 
+#include "app/session.h"
+
+#include "utils/jobcategorystrings.h"
+
 const char stationTable[] = "stations";
 const char stationSVGCol[] = "svg_data";
 
@@ -329,4 +333,117 @@ bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationI
         return false;
 
     return true;
+}
+
+bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVGJobStops *station)
+{
+    sqlite3pp::query q(db);
+    q.prepare("SELECT stops.id,stops.job_id,jobs.category,stops.arrival,stops.departure,"
+              "c1.track_id,c1.track_side,c1.gate_id,c1.gate_track,"
+              "c2.track_id,c2.track_side,c2.gate_id,c2.gate_track"
+              " FROM stops"
+              " JOIN jobs ON jobs.id=stops.job_id"
+              " LEFT JOIN station_gate_connections c1 ON c1.id=stops.in_gate_conn"
+              " LEFT JOIN station_gate_connections c2 ON c2.id=stops.out_gate_conn"
+              " WHERE stops.station_id=?1 AND stops.arrival<=?2 AND stops.departure>=?2");
+    q.bind(1, station->stationId);
+    q.bind(2, station->time);
+
+    station->stops.clear();
+
+    for(auto stop : q)
+    {
+        StationSVGJobStops::Stop s;
+        s.job.stopId = stop.get<db_id>(0);
+        s.job.jobId = stop.get<db_id>(1);
+        s.job.category = JobCategory(stop.get<int>(2));
+        s.arrival = stop.get<QTime>(3);
+        s.departure = stop.get<QTime>(4);
+
+        s.in_gate.trackId = stop.get<db_id>(5);
+        s.in_gate.trackSide = utils::Side(stop.get<int>(6));
+        s.in_gate.gateId = stop.get<db_id>(7);
+        s.in_gate.gateTrackNum = stop.get<int>(8);
+
+        s.out_gate.trackId = stop.get<db_id>(9);
+        s.out_gate.trackSide = utils::Side(stop.get<int>(10));
+        s.out_gate.gateId = stop.get<db_id>(11);
+        s.out_gate.gateTrackNum = stop.get<int>(12);
+
+        station->stops.append(s);
+    }
+
+    return true;
+}
+
+bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station, ssplib::StationPlan *plan)
+{
+    for(const StationSVGJobStops::Stop& stop : station->stops)
+    {
+        db_id trackId = stop.in_gate.trackId;
+        if(!trackId)
+            trackId = stop.out_gate.trackId;
+
+        const QString jobName = JobCategoryName::jobName(stop.job.jobId, stop.job.category);
+        QRgb color = Session->colorForCat(stop.job.category).rgb();
+
+        for(auto platf : plan->platforms)
+        {
+            if(platf.itemId != trackId)
+                continue;
+
+            platf.visible = true;
+            platf.jobId = stop.job.jobId;
+            platf.jobName = jobName;
+            platf.color = color;
+        }
+
+        if(stop.arrival == station->time)
+        {
+            ssplib::TrackConnectionInfo inConn;
+            inConn.gateId = stop.in_gate.gateId;
+            inConn.gateTrackPos = stop.in_gate.gateTrackNum;
+            inConn.trackId = stop.in_gate.trackId;
+            inConn.trackSide = stop.in_gate.trackSide;
+
+            //Train is arriving at requested time, show path
+            for(auto conn : plan->trackConnections)
+            {
+                if(!conn.info.matchIDs(inConn))
+                    continue;
+
+                conn.visible = true;
+                conn.jobId = stop.job.jobId;
+                conn.jobName = jobName;
+                conn.color = color;
+
+                break;
+            }
+        }
+
+        if(stop.departure == station->time)
+        {
+            ssplib::TrackConnectionInfo outConn;
+            outConn.gateId = stop.in_gate.gateId;
+            outConn.gateTrackPos = stop.in_gate.gateTrackNum;
+            outConn.trackId = stop.in_gate.trackId;
+            outConn.trackSide = stop.in_gate.trackSide;
+
+            //Train is departing at requested time, show path
+            for(auto conn : plan->trackConnections)
+            {
+                if(!conn.info.matchIDs(outConn))
+                    continue;
+
+                conn.visible = true;
+                conn.jobId = stop.job.jobId;
+                conn.jobName = jobName;
+                conn.color = color;
+
+                break;
+            }
+        }
+
+        break;
+    }
 }

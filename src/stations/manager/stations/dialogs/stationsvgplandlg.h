@@ -33,6 +33,8 @@ public:
     void reloadDBData();
     void clearDBData();
 
+    void clearJobs();
+
     static bool stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut);
 
 signals:
