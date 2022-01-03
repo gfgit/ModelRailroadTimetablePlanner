@@ -24,6 +24,7 @@ struct StationSVGJobStops
     {
         struct Gate
         {
+            db_id connId = 0;
             db_id gateId = 0;
             db_id gateTrackNum = 0;
             db_id trackId = 0;
