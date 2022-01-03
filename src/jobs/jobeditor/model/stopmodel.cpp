@@ -907,6 +907,13 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
         s.toGate = newStop.toGate;
         s.nextSegment = newStop.nextSegment;
+
+        if(s.type == StopType::First && s.toGate.gateConnId)
+        {
+            //No need to fake an in gate to set station track, we already have out gate
+            cmd.prepare("UPDATE stops SET in_gate_conn=NULL WHERE id=?");
+            cmd.bind(1, s.stopId);
+        }
     }
 
     if(row < stops.count() - 2 && s.nextSegment.segConnId && s.nextSegment.segConnId != oldSegConnId)
