@@ -5,6 +5,8 @@
 
 #include <QHash>
 
+#include <QTime>
+
 #include "utils/types.h"
 
 class RollingStockManager;
