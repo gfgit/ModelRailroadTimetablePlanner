@@ -74,6 +74,8 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
 
     toolBar->addSeparator();
     act_showJobs = toolBar->addAction(tr("Show Jobs At:"));
+    act_showJobs->setToolTip(tr("Show Jobs in this station at requested time.\n"
+                                "Click to enable and enter time."));
     act_showJobs->setCheckable(true);
     connect(act_showJobs, &QAction::toggled, this, &StationSVGPlanDlg::showJobs);
 
@@ -82,6 +84,16 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     connect(mTimeEdit, &QTimeEdit::editingFinished, this, &StationSVGPlanDlg::applyJobTime);
     act_timeEdit = toolBar->addWidget(mTimeEdit);
     act_timeEdit->setVisible(m_showJobs);
+
+    act_prevTime = toolBar->addAction(tr("Previous"));
+    act_prevTime->setToolTip(tr("Update time to go to <b>previous</b> Job arrival or departure in this station"));
+    connect(act_prevTime, &QAction::triggered, this, &StationSVGPlanDlg::goToPrevStop);
+    act_prevTime->setVisible(m_showJobs);
+
+    act_nextTime = toolBar->addAction(tr("Next"));
+    act_nextTime->setToolTip(tr("Update time to go to <b>next</b> Job arrival or departure in this station"));
+    connect(act_nextTime, &QAction::triggered, this, &StationSVGPlanDlg::goToNextStop);
+    act_nextTime->setVisible(m_showJobs);
 
     setMinimumSize(400, 300);
     resize(600, 500);
@@ -223,6 +235,8 @@ void StationSVGPlanDlg::showJobs(bool val)
     m_showJobs = val;
     act_showJobs->setChecked(m_showJobs);
     act_timeEdit->setVisible(m_showJobs);
+    act_prevTime->setVisible(m_showJobs);
+    act_nextTime->setVisible(m_showJobs);
     reloadJobs();
 }
 
@@ -454,6 +468,36 @@ void StationSVGPlanDlg::stopJobTimer()
 void StationSVGPlanDlg::applyJobTime()
 {
     setJobTime(mTimeEdit->time());
+}
+
+void StationSVGPlanDlg::goToPrevStop()
+{
+    QTime time = m_station->time;
+    if(!StationSVGHelper::getPrevNextStop(mDb, stationId, false, time))
+    {
+        QMessageBox::warning(this, tr("No Stop Found"),
+                             tr("No Jobs found to arrive or depart from station <b>%1</b>"
+                                " before <b>%2</b>")
+                                 .arg(mStationName, m_station->time.toString("HH:mm")));
+        return;
+    }
+
+    setJobTime(time);
+}
+
+void StationSVGPlanDlg::goToNextStop()
+{
+    QTime time = m_station->time;
+    if(!StationSVGHelper::getPrevNextStop(mDb, stationId, true, time))
+    {
+        QMessageBox::warning(this, tr("No Stop Found"),
+                             tr("No Jobs found to arrive or depart from station <b>%1</b>"
+                                " after <b>%2</b>")
+                                 .arg(mStationName, m_station->time.toString("HH:mm")));
+        return;
+    }
+
+    setJobTime(time);
 }
 
 void StationSVGPlanDlg::showEvent(QShowEvent *)

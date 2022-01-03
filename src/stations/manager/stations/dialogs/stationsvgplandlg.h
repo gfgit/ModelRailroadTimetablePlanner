@@ -61,6 +61,9 @@ private slots:
     void stopJobTimer();
     void applyJobTime();
 
+    void goToPrevStop();
+    void goToNextStop();
+
 protected:
     void showEvent(QShowEvent *) override;
     void timerEvent(QTimerEvent *e) override;
@@ -72,6 +75,8 @@ private:
     QToolBar *toolBar;
     QAction  *act_showJobs;
     QAction  *act_timeEdit;
+    QAction  *act_prevTime;
+    QAction  *act_nextTime;
     QTimeEdit *mTimeEdit;
 
     QScrollArea *scrollArea;
