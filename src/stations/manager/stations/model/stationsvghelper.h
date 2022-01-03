@@ -38,8 +38,8 @@ struct StationSVGJobStops
     };
 
     db_id stationId = 0;
-    QTime time;
     QVector<Stop> stops;
+    QTime time;
 };
 
 //FIXME: compress SVG on saving and uncompress on loading?

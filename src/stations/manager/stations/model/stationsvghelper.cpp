@@ -282,13 +282,11 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
         ssplib::TrackConnectionInfo info;
         db_id connId = r.get<db_id>(0);
         info.trackId = r.get<db_id>(1);
-        utils::Side trackSide = utils::Side(r.get<int>(2));
+        info.trackSide = ssplib::Side(r.get<int>(2));
         info.stationTrackPos = r.get<int>(3);
         info.gateId = r.get<db_id>(4);
         info.gateLetter = r.get<const char *>(5)[0];
         info.gateTrackPos = r.get<int>(6);
-
-        Q_UNUSED(trackSide)
 
         int i = 0;
         for(; i < trackConnections.size(); i++)
@@ -387,7 +385,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
         const QString jobName = JobCategoryName::jobName(stop.job.jobId, stop.job.category);
         QRgb color = Session->colorForCat(stop.job.category).rgb();
 
-        for(auto platf : plan->platforms)
+        for(ssplib::TrackItem &platf : plan->platforms)
         {
             if(platf.itemId != trackId)
                 continue;
@@ -396,6 +394,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
             platf.jobId = stop.job.jobId;
             platf.jobName = jobName;
             platf.color = color;
+            break;
         }
 
         if(stop.arrival == station->time)
@@ -407,7 +406,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
             inConn.trackSide    = ssplib::Side(stop.in_gate.trackSide);
 
             //Train is arriving at requested time, show path
-            for(auto conn : plan->trackConnections)
+            for(ssplib::TrackConnectionItem &conn : plan->trackConnections)
             {
                 if(!conn.info.matchIDs(inConn))
                     continue;
@@ -416,7 +415,6 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
                 conn.jobId = stop.job.jobId;
                 conn.jobName = jobName;
                 conn.color = color;
-
                 break;
             }
         }
@@ -430,7 +428,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
             outConn.trackSide    = ssplib::Side(stop.out_gate.trackSide);
 
             //Train is departing at requested time, show path
-            for(auto conn : plan->trackConnections)
+            for(ssplib::TrackConnectionItem &conn : plan->trackConnections)
             {
                 if(!conn.info.matchIDs(outConn))
                     continue;
@@ -439,11 +437,12 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
                 conn.jobId = stop.job.jobId;
                 conn.jobName = jobName;
                 conn.color = color;
-
                 break;
             }
         }
 
         break;
     }
+
+    return true;
 }
