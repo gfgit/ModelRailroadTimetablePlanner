@@ -1984,19 +1984,45 @@ Extension: (*.ods)</source>
 <context>
     <name>Odt</name>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="46"/>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="93"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="50"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="97"/>
         <source>Null device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="79"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="83"/>
         <source>Cannot remove SVG: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="100"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="104"/>
         <source>Cannot open source: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="422"/>
+        <source>&lt;b&gt;%1&lt;/b&gt; from &lt;b&gt;%2&lt;/b&gt; to &lt;b&gt;%3&lt;/b&gt;&lt;br&gt;Platform: %4&lt;br&gt;&lt;b&gt;%5&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="425"/>
+        <source>Arriving</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="426"/>
+        <source>Departing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="427"/>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="457"/>
+        <source>Not found</source>
+        <comment>Station platform was not found in SVG</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4935,17 +4961,22 @@ It can also be both (Bidirectional) but cannot be neither.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="113"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="93"/>
+        <source>Show Station SVG Plan</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationjobview.cpp" line="119"/>
         <source>Save Station Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="117"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="123"/>
         <source>%1_station.odt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationjobview.cpp" line="137"/>
+        <location filename="../stations/manager/stationjobview.cpp" line="143"/>
         <source>Station Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4987,74 +5018,142 @@ It can also be both (Bidirectional) but cannot be neither.</source>
 <context>
     <name>StationSVGPlanDlg</name>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="52"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="62"/>
         <source>Reload</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="61"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="71"/>
         <source>Zoom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="63"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="73"/>
         <source>Fit To Window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="114"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="76"/>
+        <source>Show Jobs At:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="77"/>
+        <source>Show Jobs in this station at requested time.
+Click to enable and enter time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="88"/>
+        <source>Previous</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="89"/>
+        <source>Update time to go to &lt;b&gt;previous&lt;/b&gt; Job arrival or departure in this station</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="93"/>
+        <source>Next</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="94"/>
+        <source>Update time to go to &lt;b&gt;next&lt;/b&gt; Job arrival or departure in this station</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="152"/>
         <source>Error Loading Station</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="115"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="153"/>
         <source>Cannot load station from database</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="119"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="157"/>
         <source>%1 Station Plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="170"/>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="177"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="276"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="283"/>
         <source>Error Loading SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="171"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="277"/>
         <source>Cannot find SVG data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="178"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="284"/>
         <source>Cannot read data: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="217"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="323"/>
         <source>Database Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="218"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="324"/>
         <source>Cannot retrive details for gate %1 (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="236"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="342"/>
         <source>Gate %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="239"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="345"/>
         <source>&lt;h3&gt;Railway Segment Details&lt;/h3&gt;&lt;p&gt;Segment: &lt;b&gt;%1&lt;/b&gt;&lt;br&gt;From: &lt;b&gt;%2&lt;/b&gt; (Gate: %3)&lt;br&gt;To:   &lt;b&gt;%4&lt;/b&gt; (Gate: %5)&lt;br&gt;Distance: &lt;b&gt;%6 Km&lt;/b&gt;&lt;br&gt;Max. Speed: &lt;b&gt;%7 km/h&lt;/b&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="259"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="365"/>
         <source>Show SVG</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="386"/>
+        <source>Job %1</source>
+        <comment>Message box title on double click</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="399"/>
+        <source>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;Job: &lt;b&gt;%2&lt;/b&gt;&lt;br&gt;From: &lt;b&gt;%3&lt;/b&gt;&lt;br&gt;To:   &lt;b&gt;%4&lt;/b&gt;&lt;br&gt;Platform: &lt;b&gt;%5&lt;/b&gt;&lt;/p&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="414"/>
+        <source>Show in Job Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="415"/>
+        <source>Show Station Jobs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="482"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="497"/>
+        <source>No Stop Found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="483"/>
+        <source>No Jobs found to arrive or depart from station &lt;b&gt;%1&lt;/b&gt; before &lt;b&gt;%2&lt;/b&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="498"/>
+        <source>No Jobs found to arrive or depart from station &lt;b&gt;%1&lt;/b&gt; after &lt;b&gt;%2&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5615,12 +5714,12 @@ Please choose a new out gate or out track, this might change next segment.</sour
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="647"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="653"/>
         <source>Remove Job?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="648"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="654"/>
         <source>Are you sure you want to remove Job &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation type="unfinished"></translation>
     </message>

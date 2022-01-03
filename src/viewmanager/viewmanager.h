@@ -5,6 +5,8 @@
 
 #include <QHash>
 
+#include <QTime>
+
 #include "utils/types.h"
 
 class RollingStockManager;
@@ -59,7 +61,7 @@ public:
 
     void requestRSInfo(db_id rsId);
     void requestStJobViewer(db_id stId);
-    void requestStSVGPlan(db_id stId);
+    void requestStSVGPlan(db_id stId, bool showJobs = false, const QTime& time = QTime());
     void requestStFreeRSViewer(db_id stId);
     void requestShiftViewer(db_id id);
     void requestShiftGraphEditor();

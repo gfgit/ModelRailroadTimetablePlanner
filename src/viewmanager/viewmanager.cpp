@@ -313,7 +313,7 @@ void ViewManager::requestStJobViewer(db_id stId)
     viewer->raise();
 }
 
-void ViewManager::requestStSVGPlan(db_id stId)
+void ViewManager::requestStSVGPlan(db_id stId, bool showJobs, const QTime &time)
 {
     DEBUG_ENTRY;
     StationSVGPlanDlg *viewer = nullptr;
@@ -333,6 +333,12 @@ void ViewManager::requestStSVGPlan(db_id stId)
                                  tr("Station %1 has no SVG, please add one.").arg(stName));
             return;
         }
+    }
+
+    if(showJobs)
+    {
+        viewer->showJobs(true);
+        viewer->setJobTime(time);
     }
 
     viewer->showNormal();

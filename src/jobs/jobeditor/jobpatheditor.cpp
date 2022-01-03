@@ -234,8 +234,8 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     unsetTransit->setEnabled(!m_readOnly);
     removeStopAct->setEnabled(!m_readOnly);
 
-    const db_id stationId = stopModel->getItemStationAt(index.row());
-    showStationSVG->setEnabled(stationId != 0); //Enable only if station is set
+    const StopItem stop = stopModel->getItemAt(index.row());
+    showStationSVG->setEnabled(stop.stationId != 0); //Enable only if station is set
 
     QAction *act = menu->exec(ui->view->viewport()->mapToGlobal(pos));
 
@@ -263,7 +263,7 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
 
     if(act == showStationSVG)
     {
-        Session->getViewManager()->requestStSVGPlan(stationId);
+        Session->getViewManager()->requestStSVGPlan(stop.stationId, true, stop.arrival);
     }
 
     if(m_readOnly)

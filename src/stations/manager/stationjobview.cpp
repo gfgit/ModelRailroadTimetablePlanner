@@ -84,23 +84,29 @@ void StationJobView::showContextMenu(const QPoint& pos)
     if(!idx.isValid())
         return;
 
-    std::pair<db_id, db_id> item = model->getJobAndStopId(idx.row());
+    StPlanItem item = model->getItemAt(idx.row());
 
     OwningQPointer<QMenu> menu = new QMenu(this);
 
     QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
     QAction *selectJobInGraph = new QAction(tr("Show job in graph"), menu);
+    QAction *showSVGPlan = new QAction(tr("Show Station SVG Plan"), menu);
     menu->addAction(showInJobEditor);
     menu->addAction(selectJobInGraph);
+    menu->addAction(showSVGPlan);
 
     QAction *act = menu->exec(ui->tableView->viewport()->mapToGlobal(pos));
     if(act == showInJobEditor)
     {
-        Session->getViewManager()->requestJobEditor(item.first, item.second);
+        Session->getViewManager()->requestJobEditor(item.jobId, item.stopId);
     }
     else if(act == selectJobInGraph)
     {
-        Session->getViewManager()->requestJobSelection(item.first, true, true);
+        Session->getViewManager()->requestJobSelection(item.jobId, true, true);
+    }
+    else if(act == showSVGPlan)
+    {
+        Session->getViewManager()->requestStSVGPlan(m_stationId, true, item.arrival);
     }
 }
 

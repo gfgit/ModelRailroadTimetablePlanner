@@ -10,6 +10,10 @@
 
 #include "stations/station_utils.h"
 
+#include "app/session.h"
+
+#include "utils/jobcategorystrings.h"
+
 const char stationTable[] = "stations";
 const char stationSVGCol[] = "svg_data";
 
@@ -278,19 +282,17 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
         ssplib::TrackConnectionInfo info;
         db_id connId = r.get<db_id>(0);
         info.trackId = r.get<db_id>(1);
-        utils::Side trackSide = utils::Side(r.get<int>(2));
+        info.trackSide = ssplib::Side(r.get<int>(2));
         info.stationTrackPos = r.get<int>(3);
         info.gateId = r.get<db_id>(4);
         info.gateLetter = r.get<const char *>(5)[0];
         info.gateTrackPos = r.get<int>(6);
 
-        Q_UNUSED(trackSide)
-
         int i = 0;
         for(; i < trackConnections.size(); i++)
         {
             const ssplib::TrackConnectionItem& item = trackConnections.at(i);
-            if(item.info == info)
+            if(item.info.matchNames(info))
                 break; //Track connection already exists, fill data
         }
         if(i >= trackConnections.size())
@@ -327,6 +329,177 @@ bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationI
 
     if(!loadStationTrackConnections(db, stationId, plan))
         return false;
+
+    return true;
+}
+
+bool StationSVGHelper::getPrevNextStop(sqlite3pp::database &db, db_id stationId,
+                                       bool next, QTime &time)
+{
+    const QTime origTime = time;
+
+    sqlite3pp::query q(db);
+    if(next)
+        q.prepare("SELECT MIN(arrival) FROM stops WHERE station_id=? AND arrival>?");
+    else
+        q.prepare("SELECT MAX(departure) FROM stops WHERE station_id=? AND departure<?");
+
+    q.bind(1, stationId);
+    q.bind(2, origTime);
+    q.step();
+    bool found = q.getRows().column_type(0) != SQLITE_NULL;
+    if(found)
+        time = q.getRows().get<QTime>(0);
+
+    //Try with swapped arrival and departure
+    if(next)
+        q.prepare("SELECT MIN(departure) FROM stops WHERE station_id=? AND departure>?");
+    else
+        q.prepare("SELECT MAX(arrival) FROM stops WHERE station_id=? AND arrival<?");
+
+    q.bind(1, stationId);
+    q.bind(2, origTime);
+    q.step();
+    if(q.getRows().column_type(0) != SQLITE_NULL)
+    {
+        QTime otherTime = q.getRows().get<QTime>(0);
+        //NOTE: If previous query didn't find any stop take this
+        //Otherwise compare with previous query result
+        //If next, keep earlier one, if previous keep latest one
+        if(!found || (next && otherTime < time) || (!next && otherTime > time))
+            time = otherTime;
+        found = true;
+    }
+
+    return found;
+}
+
+bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVGJobStops *station)
+{
+    sqlite3pp::query q(db);
+    q.prepare("SELECT stops.id,stops.job_id,jobs.category,stops.arrival,stops.departure,"
+              "stops.in_gate_conn,c1.track_id,c1.track_side,c1.gate_id,c1.gate_track,"
+              "stops.out_gate_conn,c2.track_id,c2.track_side,c2.gate_id,c2.gate_track"
+              " FROM stops"
+              " JOIN jobs ON jobs.id=stops.job_id"
+              " LEFT JOIN station_gate_connections c1 ON c1.id=stops.in_gate_conn"
+              " LEFT JOIN station_gate_connections c2 ON c2.id=stops.out_gate_conn"
+              " WHERE stops.station_id=?1 AND stops.arrival<=?2 AND stops.departure>=?2");
+    q.bind(1, station->stationId);
+    q.bind(2, station->time);
+
+    station->stops.clear();
+
+    for(auto stop : q)
+    {
+        StationSVGJobStops::Stop s;
+        s.job.stopId = stop.get<db_id>(0);
+        s.job.jobId = stop.get<db_id>(1);
+        s.job.category = JobCategory(stop.get<int>(2));
+        s.arrival = stop.get<QTime>(3);
+        s.departure = stop.get<QTime>(4);
+
+        s.in_gate.connId = stop.get<db_id>(5);
+        s.in_gate.trackId = stop.get<db_id>(6);
+        s.in_gate.trackSide = utils::Side(stop.get<int>(7));
+        s.in_gate.gateId = stop.get<db_id>(8);
+        s.in_gate.gateTrackNum = stop.get<int>(9);
+
+        s.out_gate.connId = stop.get<db_id>(10);
+        s.out_gate.trackId = stop.get<db_id>(11);
+        s.out_gate.trackSide = utils::Side(stop.get<int>(12));
+        s.out_gate.gateId = stop.get<db_id>(13);
+        s.out_gate.gateTrackNum = stop.get<int>(14);
+
+        station->stops.append(s);
+    }
+
+    return true;
+}
+
+bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station, ssplib::StationPlan *plan)
+{
+    const QString fmt = tr("<b>%1</b> from <b>%2</b> to <b>%3</b><br>"
+                           "Platform: %4<br>"
+                           "<b>%5</b>");
+    const QString statusArr = tr("Arriving");
+    const QString statusDep = tr("Departing");
+    const QString statusStop = tr("Stop");
+
+    for(const StationSVGJobStops::Stop& stop : station->stops)
+    {
+        db_id trackId = stop.in_gate.trackId;
+        if(!trackId)
+            trackId = stop.out_gate.trackId;
+
+        QString tooltip = fmt.arg(JobCategoryName::jobName(stop.job.jobId, stop.job.category))
+                              .arg(stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"));
+
+        QRgb color = Session->colorForCat(stop.job.category).rgb();
+
+        bool foundPlatform = false;
+        for(ssplib::TrackItem &platf : plan->platforms)
+        {
+            if(platf.itemId != trackId)
+                continue;
+
+            foundPlatform = true;
+            tooltip = tooltip.arg(platf.trackName);
+
+            platf.visible = true;
+            platf.jobId = stop.job.jobId;
+            platf.jobName = tooltip.arg(stop.departure == station->time ? statusDep : statusStop);
+            platf.color = color;
+            break;
+        }
+
+        if(!foundPlatform)
+            tooltip = tooltip.arg(tr("Not found", "Station platform was not found in SVG"));
+
+        if(stop.arrival == station->time)
+        {
+            ssplib::TrackConnectionInfo inConn;
+            inConn.gateId       = stop.in_gate.gateId;
+            inConn.gateTrackPos = stop.in_gate.gateTrackNum;
+            inConn.trackId      = stop.in_gate.trackId;
+            inConn.trackSide    = ssplib::Side(stop.in_gate.trackSide);
+
+            //Train is arriving at requested time, show path
+            for(ssplib::TrackConnectionItem &conn : plan->trackConnections)
+            {
+                if(conn.itemId != stop.in_gate.connId && !conn.info.matchIDs(inConn))
+                    continue;
+
+                conn.visible = true;
+                conn.jobId = stop.job.jobId;
+                conn.jobName = tooltip.arg(statusArr);
+                conn.color = color;
+                break;
+            }
+        }
+
+        if(stop.departure == station->time)
+        {
+            ssplib::TrackConnectionInfo outConn;
+            outConn.gateId       = stop.out_gate.gateId;
+            outConn.gateTrackPos = stop.out_gate.gateTrackNum;
+            outConn.trackId      = stop.out_gate.trackId;
+            outConn.trackSide    = ssplib::Side(stop.out_gate.trackSide);
+
+            //Train is departing at requested time, show path
+            for(ssplib::TrackConnectionItem &conn : plan->trackConnections)
+            {
+                if(conn.itemId != stop.out_gate.connId && !conn.info.matchIDs(outConn))
+                    continue;
+
+                conn.visible = true;
+                conn.jobId = stop.job.jobId;
+                conn.jobName = tooltip.arg(statusDep);
+                conn.color = color;
+                break;
+            }
+        }
+    }
 
     return true;
 }
