@@ -237,6 +237,10 @@ void StationSVGPlanDlg::showJobs(bool val)
     act_timeEdit->setVisible(m_showJobs);
     act_prevTime->setVisible(m_showJobs);
     act_nextTime->setVisible(m_showJobs);
+
+    if(m_station->time.isNull())
+        m_station->time = QTime(0, 0);
+
     reloadJobs();
 }
 
