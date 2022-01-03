@@ -96,7 +96,7 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     act_nextTime->setVisible(m_showJobs);
 
     setMinimumSize(400, 300);
-    resize(600, 500);
+    resize(650, 500);
 }
 
 StationSVGPlanDlg::~StationSVGPlanDlg()
