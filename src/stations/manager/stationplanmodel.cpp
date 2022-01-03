@@ -191,13 +191,3 @@ void StationPlanModel::loadPlan(db_id stId)
 
     endResetModel();
 }
-
-std::pair<db_id, db_id> StationPlanModel::getJobAndStopId(int row) const
-{
-    if(row < m_data.size())
-    {
-        const StPlanItem& item = m_data.at(row);
-        return {item.jobId, item.stopId};
-    }
-    return {0, 0};
-}

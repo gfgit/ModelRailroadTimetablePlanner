@@ -59,7 +59,14 @@ public:
 
     void loadPlan(db_id stId);
 
-    std::pair<db_id, db_id> getJobAndStopId(int row) const;
+    inline StPlanItem getItemAt(int row) const
+    {
+        if(row < m_data.size())
+        {
+            return m_data.at(row);
+        }
+        return StPlanItem();
+    }
 
 private:
     QVector<StPlanItem> m_data;
