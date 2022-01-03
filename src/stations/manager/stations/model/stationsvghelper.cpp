@@ -294,7 +294,7 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
         for(; i < trackConnections.size(); i++)
         {
             const ssplib::TrackConnectionItem& item = trackConnections.at(i);
-            if(item.info == info)
+            if(item.info.matchNames(info))
                 break; //Track connection already exists, fill data
         }
         if(i >= trackConnections.size())
@@ -401,10 +401,10 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
         if(stop.arrival == station->time)
         {
             ssplib::TrackConnectionInfo inConn;
-            inConn.gateId = stop.in_gate.gateId;
+            inConn.gateId       = stop.in_gate.gateId;
             inConn.gateTrackPos = stop.in_gate.gateTrackNum;
-            inConn.trackId = stop.in_gate.trackId;
-            inConn.trackSide = stop.in_gate.trackSide;
+            inConn.trackId      = stop.in_gate.trackId;
+            inConn.trackSide    = ssplib::Side(stop.in_gate.trackSide);
 
             //Train is arriving at requested time, show path
             for(auto conn : plan->trackConnections)
@@ -424,10 +424,10 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
         if(stop.departure == station->time)
         {
             ssplib::TrackConnectionInfo outConn;
-            outConn.gateId = stop.in_gate.gateId;
-            outConn.gateTrackPos = stop.in_gate.gateTrackNum;
-            outConn.trackId = stop.in_gate.trackId;
-            outConn.trackSide = stop.in_gate.trackSide;
+            outConn.gateId       = stop.out_gate.gateId;
+            outConn.gateTrackPos = stop.out_gate.gateTrackNum;
+            outConn.trackId      = stop.out_gate.trackId;
+            outConn.trackSide    = ssplib::Side(stop.out_gate.trackSide);
 
             //Train is departing at requested time, show path
             for(auto conn : plan->trackConnections)

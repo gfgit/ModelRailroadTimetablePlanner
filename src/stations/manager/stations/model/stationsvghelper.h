@@ -27,7 +27,7 @@ struct StationSVGJobStops
             db_id gateId = 0;
             db_id gateTrackNum = 0;
             db_id trackId = 0;
-            utils::Side trackSide = 0;
+            utils::Side trackSide = utils::Side::NSides;
         };
 
         JobStopEntry job;
