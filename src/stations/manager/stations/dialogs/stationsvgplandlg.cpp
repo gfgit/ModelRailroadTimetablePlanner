@@ -24,6 +24,8 @@
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"
 
+#include "utils/jobcategorystrings.h"
+
 #include <QDebug>
 
 StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
@@ -44,6 +46,8 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     view = new ssplib::SSPViewer(m_plan);
     view->setRenderer(mSvg);
     connect(view, &ssplib::SSPViewer::labelClicked, this, &StationSVGPlanDlg::onLabelClicked);
+    connect(view, &ssplib::SSPViewer::trackClicked, this, &StationSVGPlanDlg::onTrackClicked);
+    connect(view, &ssplib::SSPViewer::trackConnClicked, this, &StationSVGPlanDlg::onTrackConnClicked);
 
     toolBar = new QToolBar;
     lay->addWidget(toolBar);
@@ -131,15 +135,14 @@ void StationSVGPlanDlg::reloadDBData()
     clearDBData();
 
     //Reload from database
-    QString stationName;
-    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, stationName, m_plan))
+    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, mStationName, m_plan))
     {
         QMessageBox::warning(this, tr("Error Loading Station"),
                              tr("Cannot load station from database"));
         return;
     }
 
-    setWindowTitle(tr("%1 Station Plan").arg(stationName));
+    setWindowTitle(tr("%1 Station Plan").arg(mStationName));
 }
 
 void StationSVGPlanDlg::clearDBData()
@@ -355,14 +358,82 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
     }
 }
 
+void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *plan,
+                     const QString& stationName, db_id stationId, QWidget *parent)
+{
+    const QString jobName = JobCategoryName::jobName(stop.job.jobId, stop.job.category);
+
+    OwningQPointer<QMessageBox> msgBox = new QMessageBox(parent);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->setWindowTitle(StationSVGPlanDlg::tr("Job %1", "Message box title on double click").arg(jobName));
+
+    QString platformName;
+    for(const ssplib::TrackItem& track : qAsConst(plan->platforms))
+    {
+        if(track.itemId == stop.in_gate.trackId || track.itemId == stop.out_gate.trackId)
+        {
+            platformName = track.trackName;
+            break;
+        }
+    }
+
+    const QString translatedText =
+        StationSVGPlanDlg::tr(
+            "<h3>%1</h3>"
+            "<p>"
+            "Job: <b>%2</b><br>"
+            "From: <b>%3</b><br>"
+            "To:   <b>%4</b><br>"
+            "Platform: <b>%5</b>"
+            "</p>")
+            .arg(stationName, jobName)
+            .arg(stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"))
+            .arg(platformName);
+
+    msgBox->setTextFormat(Qt::RichText);
+    msgBox->setText(translatedText);
+
+    QPushButton *showJobEditor = msgBox->addButton(StationSVGPlanDlg::tr("Show in Job Editor"), QMessageBox::YesRole);
+    QPushButton *showStJobs = msgBox->addButton(StationSVGPlanDlg::tr("Show Station Jobs"), QMessageBox::YesRole);
+    msgBox->addButton(QMessageBox::Ok);
+    msgBox->setDefaultButton(QMessageBox::Ok);
+
+    msgBox->exec();
+    if(!msgBox)
+        return;
+
+    if(msgBox->clickedButton() == showJobEditor)
+    {
+        Session->getViewManager()->requestJobEditor(stop.job.jobId, stop.job.stopId);
+    }
+    else if(msgBox->clickedButton() == showStJobs)
+    {
+        Session->getViewManager()->requestStJobViewer(stationId);
+    }
+}
+
 void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &name)
 {
-
+    for(const StationSVGJobStops::Stop& stop : qAsConst(m_station->stops))
+    {
+        if(stop.in_gate.trackId == trackId || stop.out_gate.trackId == trackId)
+        {
+            showTrackMsgBox(stop, m_plan, mStationName, stationId, this);
+            break;
+        }
+    }
 }
 
 void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 trackId, qint64 gateId, int gateTrackPos, int trackSide)
 {
-
+    for(const StationSVGJobStops::Stop& stop : qAsConst(m_station->stops))
+    {
+        if(stop.in_gate.connId == connId || stop.out_gate.connId == connId)
+        {
+            showTrackMsgBox(stop, m_plan, mStationName, stationId, this);
+            break;
+        }
+    }
 }
 
 void StationSVGPlanDlg::startJobTimer()

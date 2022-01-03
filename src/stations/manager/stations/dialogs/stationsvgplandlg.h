@@ -81,6 +81,7 @@ private:
     ssplib::StationPlan *m_plan;
 
     StationSVGJobStops *m_station;
+    QString mStationName;
     bool m_showJobs;
     int mJobTimer;
 
