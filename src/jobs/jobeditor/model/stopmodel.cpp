@@ -913,6 +913,8 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
             //No need to fake an in gate to set station track, we already have out gate
             cmd.prepare("UPDATE stops SET in_gate_conn=NULL WHERE id=?");
             cmd.bind(1, s.stopId);
+            cmd.execute();
+            s.fromGate = StopItem::Gate();
         }
     }
 
@@ -970,6 +972,7 @@ bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
 
     StopType destType = type;
 
+    startStopsEditing();
     shiftStopsBy24hoursFrom(stops.at(firstRow).arrival);
 
     query q_getCoupled(mDb, "SELECT rs_id, operation FROM coupling WHERE stop_id=?");
@@ -1025,8 +1028,6 @@ bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
                 return false;
             }
         }
-
-        startStopsEditing();
 
         //Mark the station for update
         stationsToUpdate.insert(s.stationId);
@@ -1293,7 +1294,7 @@ bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *o
 
     if(item.type != StopType::First)
     {
-        //Item is not first stop, check in gate
+        //Item is not First stop, check in gate
         q.bind(1, item.fromGate.gateId);
         q.bind(2, item.fromGate.trackNum);
         q.bind(3, trackId);
@@ -1883,7 +1884,7 @@ bool StopModel::startStopsEditing()
 
     if(ret != SQLITE_OK)
     {
-        qDebug() << "Error while saving old stops:" << ret << mDb.error_msg() << mDb.extended_error_code();
+        qWarning() << "Error while saving old stops:" << ret << mDb.error_msg() << mDb.extended_error_code();
         return false;
     }
 
