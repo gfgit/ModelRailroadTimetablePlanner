@@ -154,6 +154,9 @@ void StationSVGPlanDlg::reloadDBData()
         return;
     }
 
+    if(m_showJobs)
+        reloadJobs();
+
     setWindowTitle(tr("%1 Station Plan").arg(mStationName));
 }
 
