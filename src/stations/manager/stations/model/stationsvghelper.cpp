@@ -333,6 +333,47 @@ bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationI
     return true;
 }
 
+bool StationSVGHelper::getPrevNextStop(sqlite3pp::database &db, db_id stationId,
+                                       bool next, QTime &time)
+{
+    const QTime origTime = time;
+
+    sqlite3pp::query q(db);
+    if(next)
+        q.prepare("SELECT MIN(arrival) FROM stops WHERE station_id=? AND arrival>?");
+    else
+        q.prepare("SELECT MAX(departure) FROM stops WHERE station_id=? AND departure<?");
+
+    q.bind(1, stationId);
+    q.bind(2, origTime);
+    q.step();
+    bool found = q.getRows().column_type(0) != SQLITE_NULL;
+    if(found)
+        time = q.getRows().get<QTime>(0);
+
+    //Try with swapped arrival and departure
+    if(next)
+        q.prepare("SELECT MIN(departure) FROM stops WHERE station_id=? AND departure>?");
+    else
+        q.prepare("SELECT MAX(arrival) FROM stops WHERE station_id=? AND arrival<?");
+
+    q.bind(1, stationId);
+    q.bind(2, origTime);
+    q.step();
+    if(q.getRows().column_type(0) != SQLITE_NULL)
+    {
+        QTime otherTime = q.getRows().get<QTime>(0);
+        //NOTE: If previous query didn't find any stop take this
+        //Otherwise compare with previous query result
+        //If next, keep earlier one, if previous keep latest one
+        if(!found || (next && otherTime < time) || (!next && otherTime > time))
+            time = otherTime;
+        found = true;
+    }
+
+    return found;
+}
+
 bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVGJobStops *station)
 {
     sqlite3pp::query q(db);

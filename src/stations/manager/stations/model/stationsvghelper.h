@@ -62,6 +62,9 @@ public:
     static bool loadStationFromDB(sqlite3pp::database &db, db_id stationId,
                                   QString &stName, ssplib::StationPlan *plan);
 
+    static bool getPrevNextStop(sqlite3pp::database &db, db_id stationId,
+                                bool next, QTime &time);
+
     static bool loadStationJobsFromDB(sqlite3pp::database &db, StationSVGJobStops *station);
 
     static bool applyStationJobsToPlan(const StationSVGJobStops *station, ssplib::StationPlan *plan);
