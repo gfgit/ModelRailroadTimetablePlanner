@@ -419,7 +419,7 @@ bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVG
 
 bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station, ssplib::StationPlan *plan)
 {
-    const QString fmt = tr("<b>%1</b> from %2 to %3<br>"
+    const QString fmt = tr("<b>%1</b> from <b>%2</b> to <b>%3</b><br>"
                            "Platform: %4<br>"
                            "<b>%5</b>");
     const QString statusArr = tr("Arriving");
