@@ -376,26 +376,42 @@ bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVG
 
 bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station, ssplib::StationPlan *plan)
 {
+    const QString fmt = tr("<b>%1</b> from %2 to %3<br>"
+                           "Platform: %4<br>"
+                           "<b>%5</b>");
+    const QString statusArr = tr("Arriving");
+    const QString statusDep = tr("Departing");
+    const QString statusStop = tr("Stop");
+
     for(const StationSVGJobStops::Stop& stop : station->stops)
     {
         db_id trackId = stop.in_gate.trackId;
         if(!trackId)
             trackId = stop.out_gate.trackId;
 
-        const QString jobName = JobCategoryName::jobName(stop.job.jobId, stop.job.category);
+        QString tooltip = fmt.arg(JobCategoryName::jobName(stop.job.jobId, stop.job.category))
+                              .arg(stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"));
+
         QRgb color = Session->colorForCat(stop.job.category).rgb();
 
+        bool foundPlatform = false;
         for(ssplib::TrackItem &platf : plan->platforms)
         {
             if(platf.itemId != trackId)
                 continue;
 
+            foundPlatform = true;
+            tooltip = tooltip.arg(platf.trackName);
+
             platf.visible = true;
             platf.jobId = stop.job.jobId;
-            platf.jobName = jobName;
+            platf.jobName = tooltip.arg(stop.departure == station->time ? statusDep : statusStop);
             platf.color = color;
             break;
         }
+
+        if(!foundPlatform)
+            tooltip = tooltip.arg(tr("Not found", "Station platform was not found in SVG"));
 
         if(stop.arrival == station->time)
         {
@@ -413,7 +429,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
 
                 conn.visible = true;
                 conn.jobId = stop.job.jobId;
-                conn.jobName = jobName;
+                conn.jobName = tooltip.arg(statusArr);
                 conn.color = color;
                 break;
             }
@@ -435,13 +451,11 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
 
                 conn.visible = true;
                 conn.jobId = stop.job.jobId;
-                conn.jobName = jobName;
+                conn.jobName = tooltip.arg(statusDep);
                 conn.color = color;
                 break;
             }
         }
-
-        break;
     }
 
     return true;
