@@ -9,6 +9,7 @@
 #include <QToolBar>
 
 #include <QSpinBox>
+#include <QTimeEdit>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -28,12 +29,17 @@
 StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     QWidget(parent),
     mDb(db),
-    stationId(0)
+    stationId(0),
+    m_showJobs(0),
+    mJobTimer(0),
+    m_zoom(100)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    m_plan = new ssplib::StationPlan;
     mSvg = new QSvgRenderer(this);
+    m_plan = new ssplib::StationPlan;
+    m_station = new StationSVGJobStops;
+    m_station->stationId = 0;
 
     view = new ssplib::SSPViewer(m_plan);
     view->setRenderer(mSvg);
@@ -62,22 +68,39 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
 
     toolBar->addAction(tr("Fit To Window"), this, &StationSVGPlanDlg::zoomToFit);
 
+    toolBar->addSeparator();
+    act_showJobs = toolBar->addAction(tr("Show Jobs At:"));
+    act_showJobs->setCheckable(true);
+    connect(act_showJobs, &QAction::toggled, this, &StationSVGPlanDlg::showJobs);
+
+    mTimeEdit = new QTimeEdit;
+    connect(mTimeEdit, &QTimeEdit::timeChanged, this, &StationSVGPlanDlg::startJobTimer);
+    connect(mTimeEdit, &QTimeEdit::editingFinished, this, &StationSVGPlanDlg::applyJobTime);
+    act_timeEdit = toolBar->addWidget(mTimeEdit);
+    act_timeEdit->setVisible(m_showJobs);
+
     setMinimumSize(400, 300);
     resize(600, 500);
 }
 
 StationSVGPlanDlg::~StationSVGPlanDlg()
 {
+    stopJobTimer();
+
     view->setPlan(nullptr);
     view->setRenderer(nullptr);
 
     delete m_plan;
     m_plan = nullptr;
+
+    delete m_station;
+    m_station = nullptr;
 }
 
 void StationSVGPlanDlg::setStation(db_id stId)
 {
     stationId = stId;
+    m_station->stationId = stationId;
 }
 
 void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
@@ -174,6 +197,47 @@ void StationSVGPlanDlg::clearJobs()
         item.color = ssplib::whiteRGB;
         item.jobName.clear();
     }
+}
+
+void StationSVGPlanDlg::reloadJobs()
+{
+    clearJobs();
+
+    if(m_showJobs)
+    {
+        StationSVGHelper::loadStationJobsFromDB(mDb, m_station);
+        StationSVGHelper::applyStationJobsToPlan(m_station, m_plan);
+    }
+
+    view->update();
+}
+
+void StationSVGPlanDlg::showJobs(bool val)
+{
+    if(m_showJobs == val)
+        return;
+
+    m_showJobs = val;
+    act_showJobs->setChecked(m_showJobs);
+    act_timeEdit->setVisible(m_showJobs);
+    reloadJobs();
+}
+
+void StationSVGPlanDlg::setJobTime(const QTime &t)
+{
+    stopJobTimer();
+
+    if(m_station->time == t)
+        return;
+
+    m_station->time = t;
+
+    //Avoid starting timer
+    mTimeEdit->blockSignals(true);
+    mTimeEdit->setTime(t);
+    mTimeEdit->blockSignals(false);
+
+    reloadJobs();
 }
 
 bool StationSVGPlanDlg::stationHasSVG(sqlite3pp::database &db, db_id stId, QString *stNameOut)
@@ -291,6 +355,36 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
     }
 }
 
+void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &name)
+{
+
+}
+
+void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 trackId, qint64 gateId, int gateTrackPos, int trackSide)
+{
+
+}
+
+void StationSVGPlanDlg::startJobTimer()
+{
+    stopJobTimer();
+    mJobTimer = startTimer(700);
+}
+
+void StationSVGPlanDlg::stopJobTimer()
+{
+    if(mJobTimer)
+    {
+        killTimer(mJobTimer);
+        mJobTimer = 0;
+    }
+}
+
+void StationSVGPlanDlg::applyJobTime()
+{
+    setJobTime(mTimeEdit->time());
+}
+
 void StationSVGPlanDlg::showEvent(QShowEvent *)
 {
     //NOTE: when dialog is created it is hidden so it cannot zoom
@@ -298,4 +392,15 @@ void StationSVGPlanDlg::showEvent(QShowEvent *)
     //Since dialog is hidden at first it cannot calculate zoom
     //So when the dialog is first shown we trigger zoom again.
     zoomToFit();
+}
+
+void StationSVGPlanDlg::timerEvent(QTimerEvent *e)
+{
+    if(e->timerId() == mJobTimer)
+    {
+        applyJobTime();
+        return;
+    }
+
+    QWidget::timerEvent(e);
 }
