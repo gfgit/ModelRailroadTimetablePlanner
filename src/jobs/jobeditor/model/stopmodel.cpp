@@ -1060,7 +1060,7 @@ bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
     {
         StopItem& s = stops[r];
         destType = s.type;
-        if(destType == StopType::First || type == StopType::Last)
+        if(s.type == StopType::First || s.type == StopType::Last)
             destType = StopType::Normal;
 
         s.arrival = s.arrival.addMSecs(msecOffset);
