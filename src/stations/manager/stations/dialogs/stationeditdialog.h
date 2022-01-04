@@ -69,6 +69,9 @@ private slots:
     void removeSVGImage();
     void saveSVGToFile();
 
+    //Xml Plan
+    void saveXmlPlan();
+
 private:
     void addTrackConnInternal(int mode);
     void updateSVGButtons(bool hasImage);

@@ -133,7 +133,14 @@
           <item row="1" column="0">
            <widget class="QPushButton" name="saveSVGBut">
             <property name="text">
-             <string>Save to file</string>
+             <string>Save SVG to file</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QPushButton" name="saveXMLBut">
+            <property name="text">
+             <string>Save XML to file</string>
             </property>
            </widget>
           </item>

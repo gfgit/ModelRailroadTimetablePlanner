@@ -88,6 +88,7 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->addSVGBut, &QPushButton::clicked, this, &StationEditDialog::addSVGImage);
     connect(ui->remSVGBut, &QPushButton::clicked, this, &StationEditDialog::removeSVGImage);
     connect(ui->saveSVGBut, &QPushButton::clicked, this, &StationEditDialog::saveSVGToFile);
+    connect(ui->saveXMLBut, &QPushButton::clicked, this, &StationEditDialog::saveXmlPlan);
 
     //Gates Tab
     gatesModel = new StationGatesModel(mDb, this);
@@ -709,5 +710,40 @@ void StationEditDialog::saveSVGToFile()
     if(!StationSVGHelper::saveImage(mDb, getStation(), &f, &errMsg))
     {
         QMessageBox::warning(this, tr("Error Saving SVG"), errMsg);
+    }
+}
+
+void StationEditDialog::saveXmlPlan()
+{
+    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save XML Plan"));
+    dlg->setFileMode(QFileDialog::AnyFile);
+    dlg->setAcceptMode(QFileDialog::AcceptSave);
+    dlg->setDirectory(RecentDirStore::getDir(station_svg_key, RecentDirStore::Images));
+
+    QStringList filters;
+    filters << FileFormats::tr(FileFormats::xmlFile);
+    filters << FileFormats::tr(FileFormats::allFiles);
+    dlg->setNameFilters(filters);
+
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return;
+
+    QString fileName = dlg->selectedUrls().value(0).toLocalFile();
+    if(fileName.isEmpty())
+        return;
+
+    RecentDirStore::setPath(station_svg_key, fileName);
+
+    QFile f(fileName);
+    if(!f.open(QFile::WriteOnly))
+    {
+        QMessageBox::warning(this, tr("Cannot Save File"), f.errorString());
+        return;
+    }
+
+    QString errMsg;
+    if(!StationSVGHelper::writeStationXmlFromDB(mDb, getStation(), &f))
+    {
+        QMessageBox::warning(this, tr("Error Saving XML"), tr("Unknow error"));
     }
 }
