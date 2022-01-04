@@ -16,6 +16,7 @@ public:
     static constexpr const char *tttFormat = QT_TRANSLATE_NOOP("FileFormats", "MRTPlanner Session (*.ttt)");
     static constexpr const char *sqliteFormat = QT_TRANSLATE_NOOP("FileFormats", "SQLite 3 Database (*.db *.sqlite *.sqlite3 *.db3)");
     static constexpr const char *svgFile = QT_TRANSLATE_NOOP("FileFormats", "SVG vectorial image (*.svg)");
+    static constexpr const char *xmlFile = QT_TRANSLATE_NOOP("FileFormats", "XML (*.xml)");
     static constexpr const char *pdfFile = QT_TRANSLATE_NOOP("FileFormats", "Portable Document Format (*.pdf)");
 };
 
