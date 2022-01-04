@@ -147,7 +147,7 @@ void StationSVGPlanDlg::reloadDBData()
     clearDBData();
 
     //Reload from database
-    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, mStationName, m_plan))
+    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan))
     {
         QMessageBox::warning(this, tr("Error Loading Station"),
                              tr("Cannot load station from database"));
@@ -157,7 +157,7 @@ void StationSVGPlanDlg::reloadDBData()
     if(m_showJobs)
         reloadJobs();
 
-    setWindowTitle(tr("%1 Station Plan").arg(mStationName));
+    setWindowTitle(tr("%1 Station Plan").arg(m_plan->stationName));
 }
 
 void StationSVGPlanDlg::clearDBData()
@@ -175,9 +175,8 @@ void StationSVGPlanDlg::clearDBData()
         item.visible = false;
         item.itemId = 0;
 
-        item.jobId = 0;
         item.color = ssplib::whiteRGB;
-        item.jobName.clear();
+        item.tooltip.clear();
 
         item.trackName.clear();
     }
@@ -187,9 +186,8 @@ void StationSVGPlanDlg::clearDBData()
         item.visible = false;
         item.itemId = 0;
 
-        item.jobId = 0;
         item.color = ssplib::whiteRGB;
-        item.jobName.clear();
+        item.tooltip.clear();
 
         item.info.gateId = 0;
         item.info.trackId = 0;
@@ -202,18 +200,16 @@ void StationSVGPlanDlg::clearJobs()
     {
         item.visible = false;
 
-        item.jobId = 0;
         item.color = ssplib::whiteRGB;
-        item.jobName.clear();
+        item.tooltip.clear();
     }
 
     for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
     {
         item.visible = false;
 
-        item.jobId = 0;
         item.color = ssplib::whiteRGB;
-        item.jobName.clear();
+        item.tooltip.clear();
     }
 }
 
@@ -380,7 +376,7 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
 }
 
 void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *plan,
-                     const QString& stationName, db_id stationId, QWidget *parent)
+                     db_id stationId, QWidget *parent)
 {
     const QString jobName = JobCategoryName::jobName(stop.job.jobId, stop.job.category);
 
@@ -407,7 +403,7 @@ void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *
             "To:   <b>%4</b><br>"
             "Platform: <b>%5</b>"
             "</p>")
-            .arg(stationName, jobName)
+            .arg(plan->stationName, jobName)
             .arg(stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"))
             .arg(platformName);
 
@@ -439,7 +435,7 @@ void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &name)
     {
         if(stop.in_gate.trackId == trackId || stop.out_gate.trackId == trackId)
         {
-            showTrackMsgBox(stop, m_plan, mStationName, stationId, this);
+            showTrackMsgBox(stop, m_plan, stationId, this);
             break;
         }
     }
@@ -451,7 +447,7 @@ void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 trackId, qint64
     {
         if(stop.in_gate.connId == connId || stop.out_gate.connId == connId)
         {
-            showTrackMsgBox(stop, m_plan, mStationName, stationId, this);
+            showTrackMsgBox(stop, m_plan, stationId, this);
             break;
         }
     }
@@ -485,7 +481,7 @@ void StationSVGPlanDlg::goToPrevStop()
         QMessageBox::warning(this, tr("No Stop Found"),
                              tr("No Jobs found to arrive or depart from station <b>%1</b>"
                                 " before <b>%2</b>")
-                                 .arg(mStationName, m_station->time.toString("HH:mm")));
+                                 .arg(m_plan->stationName, m_station->time.toString("HH:mm")));
         return;
     }
 
@@ -500,7 +496,7 @@ void StationSVGPlanDlg::goToNextStop()
         QMessageBox::warning(this, tr("No Stop Found"),
                              tr("No Jobs found to arrive or depart from station <b>%1</b>"
                                 " after <b>%2</b>")
-                                 .arg(mStationName, m_station->time.toString("HH:mm")));
+                                 .arg(m_plan->stationName, m_station->time.toString("HH:mm")));
         return;
     }
 
