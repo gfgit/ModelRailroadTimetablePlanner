@@ -147,7 +147,7 @@ void StationSVGPlanDlg::reloadDBData()
     clearDBData();
 
     //Reload from database
-    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan))
+    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan, true))
     {
         QMessageBox::warning(this, tr("Error Loading Station"),
                              tr("Cannot load station from database"));

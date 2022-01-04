@@ -7,6 +7,7 @@
 #include <QFileDevice>
 
 #include <ssplib/stationplan.h>
+#include <ssplib/parsing/stationinfoparser.h>
 
 #include "stations/station_utils.h"
 
@@ -127,7 +128,7 @@ QIODevice *StationSVGHelper::loadImage(sqlite3pp::database &db, db_id stationId)
     return loadImage_internal(db, stationId);
 }
 
-bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan)
+bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan, bool onlyAlreadyPresent)
 {
     sqlite3pp::query q(db);
 
@@ -145,10 +146,7 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
         db_id gateId = r.get<db_id>(0);
         int outTrackCount = r.get<int>(1);
         QChar gateLetter = r.get<const char *>(2)[0];
-        utils::Side gateSide = utils::Side(r.get<int>(3));
-
-        Q_UNUSED(outTrackCount)
-        Q_UNUSED(gateSide)
+        ssplib::Side gateSide = ssplib::Side(r.get<int>(3));
 
         int i = 0;
         for(; i < plan->labels.size(); i++)
@@ -158,12 +156,23 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
         }
         if(i >= plan->labels.size())
         {
-            //Skip gate because it was not registered in SVG
-            continue;
+            if(onlyAlreadyPresent)
+            {
+                //Skip gate because it was not registered in SVG
+                continue;
+            }
+
+            //Create new gate
+            ssplib::LabelItem gate;
+            gate.gateLetter = gateLetter;
+            plan->labels.append(gate);
+            i = plan->labels.size() - 1;
         }
 
         ssplib::LabelItem& item = plan->labels[i];
         item.itemId = gateId;
+        item.gateOutTrkCount = outTrackCount;
+        item.gateSide = gateSide;
 
         sqlite3pp::query sub(db);
         sub.prepare("SELECT s.id, s.name, s.max_speed_kmh, s.type, s.distance_meters,"
@@ -228,7 +237,7 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
     return true;
 }
 
-bool loadStationTracks(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan)
+bool loadStationTracks(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan, bool onlyAlreadyPresent)
 {
     sqlite3pp::query q(db);
 
@@ -250,8 +259,17 @@ bool loadStationTracks(sqlite3pp::database &db, db_id stationId, ssplib::Station
         }
         if(i >= plan->platforms.size())
         {
-            //Skip track because it was not registered in SVG
-            continue;
+            if(onlyAlreadyPresent)
+            {
+                //Skip track because it was not registered in SVG
+                continue;
+            }
+
+            //Create new track
+            ssplib::TrackItem track;
+            track.trackPos = trackPos;
+            plan->platforms.append(track);
+            i = plan->platforms.size() - 1;
         }
 
         ssplib::TrackItem& item = plan->platforms[i];
@@ -262,7 +280,7 @@ bool loadStationTracks(sqlite3pp::database &db, db_id stationId, ssplib::Station
     return true;
 }
 
-bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan)
+bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan, bool onlyAlreadyPresent)
 {
     sqlite3pp::query q(db);
 
@@ -297,8 +315,15 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
         }
         if(i >= trackConnections.size())
         {
-            //Skip connection because it was not registered in SVG
-            continue;
+            if(onlyAlreadyPresent)
+            {
+                //Skip connection because it was not registered in SVG
+                continue;
+            }
+
+            //Create new gate
+            plan->trackConnections.append(ssplib::TrackConnectionItem());
+            i = plan->trackConnections.size() - 1;
         }
 
         ssplib::TrackConnectionItem& item = trackConnections[i];
@@ -312,7 +337,8 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
     return true;
 }
 
-bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan)
+bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationId,
+                                         ssplib::StationPlan *plan, bool onlyAlreadyPresent)
 {
     sqlite3pp::query q(db);
     q.prepare("SELECT name FROM stations WHERE id=?");
@@ -321,13 +347,13 @@ bool StationSVGHelper::loadStationFromDB(sqlite3pp::database &db, db_id stationI
         return false;
     plan->stationName = q.getRows().get<QString>(0);
 
-    if(!loadStationLabels(db, stationId, plan))
+    if(!loadStationLabels(db, stationId, plan, onlyAlreadyPresent))
         return false;
 
-    if(!loadStationTracks(db, stationId, plan))
+    if(!loadStationTracks(db, stationId, plan, onlyAlreadyPresent))
         return false;
 
-    if(!loadStationTrackConnections(db, stationId, plan))
+    if(!loadStationTrackConnections(db, stationId, plan, onlyAlreadyPresent))
         return false;
 
     return true;
@@ -499,4 +525,18 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
     }
 
     return true;
+}
+
+bool StationSVGHelper::writeStationXml(QIODevice *dev, ssplib::StationPlan *plan)
+{
+    ssplib::StationInfoWriter writer(dev);
+    return writer.write(plan);
+}
+
+bool StationSVGHelper::writeStationXmlFromDB(sqlite3pp::database &db, db_id stationId, QIODevice *dev)
+{
+    ssplib::StationPlan plan;
+    if(!loadStationFromDB(db, stationId, &plan, false))
+        return false;
+    return writeStationXml(dev, &plan);
 }
