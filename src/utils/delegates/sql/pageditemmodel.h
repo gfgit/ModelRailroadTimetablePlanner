@@ -38,6 +38,21 @@ public:
     int currentPage();
     void switchToPage(int page);
 
+    //Filter
+    static constexpr QLatin1String nullFilterStr = QLatin1String("#NULL", 5);
+
+    enum FilterFlag
+    {
+        NoFiltering = 0,
+        BasicFiltering = 1,
+        ExplicitNULL = (1<<1)
+    };
+
+    typedef QFlags<FilterFlag> FilterFlags;
+
+    virtual std::pair<QString, FilterFlags> getFilterAtCol(int col);
+    virtual bool setFilterAtCol(int col, const QString& str);
+
 signals:
     void modelError(const QString& msg);
 
