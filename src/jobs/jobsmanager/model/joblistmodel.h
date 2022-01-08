@@ -55,6 +55,10 @@ public:
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
 
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
+
     // Convinience
     inline db_id getIdAtRow(int row) const
     {
@@ -92,6 +96,10 @@ protected:
 private:
     friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
+
+private:
+    QString m_jobIdFilter;
+    QString m_shiftFilter;
 };
 
 #endif // JOBLISTMODEL_H
