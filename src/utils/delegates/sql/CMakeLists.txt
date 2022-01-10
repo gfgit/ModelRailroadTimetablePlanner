@@ -3,6 +3,8 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/delegates/sql/IFKField.h
   utils/delegates/sql/chooseitemdlg.h
   utils/delegates/sql/customcompletionlineedit.h
+  utils/delegates/sql/filterheaderlineedit.h
+  utils/delegates/sql/filterheaderview.h
   utils/delegates/sql/imatchmodelfactory.h
   utils/delegates/sql/isqlfkmatchmodel.h
   utils/delegates/sql/modelpageswitcher.h
@@ -14,6 +16,8 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/delegates/sql/IFKField.cpp
   utils/delegates/sql/chooseitemdlg.cpp
   utils/delegates/sql/customcompletionlineedit.cpp
+  utils/delegates/sql/filterheaderlineedit.cpp
+  utils/delegates/sql/filterheaderview.cpp
   utils/delegates/sql/imatchmodelfactory.cpp
   utils/delegates/sql/isqlfkmatchmodel.cpp
   utils/delegates/sql/modelpageswitcher.cpp
