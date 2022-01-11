@@ -1,55 +1,40 @@
 #include "shiftsmodel.h"
 
+#include "utils/delegates/sql/pageditemmodelhelper_impl.h"
+
 #include "app/session.h"
+
+#include <sqlite3pp/sqlite3pp.h>
+using namespace sqlite3pp;
+
+#include "shiftresultevent.h"
 
 #include <QDebug>
 
-#include <QCoreApplication>
-#include "shiftresultevent.h"
-
 ShiftsModel::ShiftsModel(database &db, QObject *parent) :
-    IPagedItemModel(500, db, parent),
-    cacheFirstRow(0),
-    firstPendingRow(-BatchSize)
+    BaseClass(500, db, parent)
 {
-}
-
-bool ShiftsModel::event(QEvent *e)
-{
-    if(e->type() == ShiftResultEvent::_Type)
-    {
-        ShiftResultEvent *ev = static_cast<ShiftResultEvent *>(e);
-        ev->setAccepted(true);
-
-        handleResult(ev->items, ev->firstRow);
-
-        return true;
-    }
-
-    return QAbstractTableModel::event(e);
+    sortColumn = ShiftName;
 }
 
 QVariant ShiftsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if(role == Qt::DisplayRole)
     {
-        switch (section)
+        if(orientation == Qt::Horizontal)
         {
-        case ShiftName:
-            return tr("Shift Name");
+            switch (section)
+            {
+            case ShiftName:
+                return tr("Shift Name");
+            }
+        }
+        else
+        {
+            return section + curPage * ItemsPerPage + 1;
         }
     }
     return QAbstractTableModel::headerData(section, orientation, role);
-}
-
-int ShiftsModel::rowCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : curItemCount;
-}
-
-int ShiftsModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 0 : NCols;
 }
 
 QVariant ShiftsModel::data(const QModelIndex &idx, int role) const
@@ -156,112 +141,76 @@ Qt::ItemFlags ShiftsModel::flags(const QModelIndex &idx) const
 
 qint64 ShiftsModel::recalcTotalItemCount()
 {
-    query q(mDb);
-    if(mQuery.size() <= 2) // '%%' -> '%<name>%'
+    QByteArray sql = "SELECT COUNT(1) FROM jobshifts";
+
+    if(!m_nameFilter.isEmpty())
     {
-        q.prepare("SELECT COUNT(1) FROM jobshifts");
-    }else{
-        q.prepare("SELECT COUNT(1) FROM jobshifts WHERE name LIKE ?");
-        q.bind(1, mQuery);
+        sql.append(" WHERE jobshifts.name LIKE ?1");
     }
+
+    query q(mDb, sql);
+
+    QByteArray nameFilter;
+    if(!m_nameFilter.isEmpty())
+    {
+        nameFilter.reserve(m_nameFilter.size() + 2);
+        nameFilter.append('%');
+        nameFilter.append(m_nameFilter.toUtf8());
+        nameFilter.append('%');
+
+        sqlite3_bind_text(q.stmt(), 1, nameFilter, nameFilter.size(), SQLITE_STATIC);
+    }
+
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
 }
 
-void ShiftsModel::clearCache()
+std::pair<QString, IPagedItemModel::FilterFlags> ShiftsModel::getFilterAtCol(int col)
 {
-    cache.clear();
-    cache.squeeze();
-    cacheFirstRow = 0;
-}
-
-void ShiftsModel::fetchRow(int row)
-{
-    if(firstPendingRow != -BatchSize)
-        return; //Currently fetching another batch, wait for it to finish first
-
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching this batch
-
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
-
-    //TODO: abort fetching here
-
-    const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
-    qDebug() << "Requested:" << row << "From:" << firstPendingRow;
-
-    QString val;
-    int valRow = 0;
-    ShiftItem *item = nullptr;
-
-    if(cache.size())
+    switch (col)
     {
-        if(firstPendingRow >= cacheFirstRow + cache.size())
-        {
-            valRow = cacheFirstRow + cache.size();
-            item = &cache.last();
-        }
-        else if(firstPendingRow > (cacheFirstRow - firstPendingRow))
-        {
-            valRow = cacheFirstRow;
-            item = &cache.first();
-        }
+    case ShiftName:
+        return {m_nameFilter, FilterFlag::BasicFiltering};
     }
 
-    if(item)
-        val = item->shiftName;
-
-    //TODO: use a custom QRunnable
-    /*
-    QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
-                              Q_ARG(int, firstPendingRow),
-                              Q_ARG(int, valRow), Q_ARG(QString, val));
-                              */
-    internalFetch(firstPendingRow, valRow, val);
+    return {QString(), FilterFlag::NoFiltering};
 }
 
-void ShiftsModel::internalFetch(int first, int valRow, const QString& val)
+bool ShiftsModel::setFilterAtCol(int col, const QString &str)
+{
+    switch (col)
+    {
+    case ShiftName:
+    {
+        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+            return false; //Cannot have NULL Name
+        m_nameFilter = str;
+        emit filterChanged();
+        return true;
+    }
+    }
+
+    return false;
+}
+
+void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/, const QVariant &/*val*/)
 {
     query q(mDb);
 
-    int offset = first - valRow;
-    bool reverse = false;
+    int offset = first;
 
-    if(valRow > first)
-    {
-        offset = 0;
-        reverse = true;
-    }
-
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "Offset:" << offset;
 
     QByteArray sql = "SELECT id,name FROM jobshifts";
-    if(!val.isEmpty())
+
+    if(!m_nameFilter.isEmpty())
     {
-        sql += " WHERE name";
-        if(reverse)
-            sql += "<?3";
-        else
-            sql += ">?3";
+        sql.append(" WHERE name LIKE ?3");
     }
 
-    if(!mQuery.isEmpty())
-    {
-        if(val.isEmpty())
-            sql += " WHERE name LIKE ?4";
-        else
-            sql += " AND name LIKE ?4";
-    }
+    sql += " ORDER BY name LIMIT ?1";
 
-    sql += " ORDER BY name";
-
-    if(reverse)
-        sql += " DESC";
-
-    sql += " LIMIT ?1";
     if(offset)
         sql += " OFFSET ?2";
 
@@ -270,129 +219,35 @@ void ShiftsModel::internalFetch(int first, int valRow, const QString& val)
     if(offset)
         q.bind(2, offset);
 
-    if(!val.isEmpty())
-        q.bind(3, val);
+    QByteArray nameFilter;
+    if(!m_nameFilter.isEmpty())
+    {
+        nameFilter.reserve(m_nameFilter.size() + 2);
+        nameFilter.append('%');
+        nameFilter.append(m_nameFilter.toUtf8());
+        nameFilter.append('%');
 
-    if(!mQuery.isEmpty())
-        q.bind(4, mQuery);
+        sqlite3_bind_text(q.stmt(), 3, nameFilter, nameFilter.size(), SQLITE_STATIC);
+    }
 
     QVector<ShiftItem> vec(BatchSize);
 
     auto it = q.begin();
     const auto end = q.end();
 
-    if(reverse)
+    int i = 0;
+    for(; it != end; ++it)
     {
-        int i = BatchSize - 1;
-
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            ShiftItem &item = vec[i];
-            item.shiftId = r.get<db_id>(0);
-            item.shiftName = r.get<QString>(1);
-            i--;
-        }
-        if(i > -1)
-            vec.remove(0, i + 1);
+        auto r = *it;
+        ShiftItem &item = vec[i];
+        item.shiftId = r.get<db_id>(0);
+        item.shiftName = r.get<QString>(1);
+        i++;
     }
-    else
-    {
-        int i = 0;
+    if(i < BatchSize)
+        vec.remove(i, BatchSize - i);
 
-        for(; it != end; ++it)
-        {
-            auto r = *it;
-            ShiftItem &item = vec[i];
-            item.shiftId = r.get<db_id>(0);
-            item.shiftName = r.get<QString>(1);
-            i++;
-        }
-        if(i < BatchSize)
-            vec.remove(i, BatchSize - i);
-    }
-
-
-    ShiftResultEvent *ev = new ShiftResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
-
-    qApp->postEvent(this, ev);
-}
-
-void ShiftsModel::handleResult(const QVector<ShiftItem> items, int firstRow)
-{
-    if(firstRow == cacheFirstRow + cache.size())
-    {
-        qDebug() << "RES: appending First:" << cacheFirstRow;
-        cache.append(items);
-        if(cache.size() > ItemsPerPage)
-        {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
-            const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
-            qDebug() << "RES: removing last" << n;
-            cache.remove(0, n);
-            cacheFirstRow += n;
-        }
-    }
-    else
-    {
-        if(firstRow + items.size() == cacheFirstRow)
-        {
-            qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<ShiftItem> tmp = items;
-            tmp.append(cache);
-            cache = tmp;
-            if(cache.size() > ItemsPerPage)
-            {
-                const int n = cache.size() - ItemsPerPage;
-                cache.remove(ItemsPerPage, n);
-                qDebug() << "RES: removing first" << n;
-            }
-        }
-        else
-        {
-            qDebug() << "RES: replacing";
-            cache = items;
-        }
-        cacheFirstRow = firstRow;
-        qDebug() << "NEW First:" << cacheFirstRow;
-    }
-
-    firstPendingRow = -BatchSize;
-
-    QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(firstRow + items.count() - 1, NCols - 1);
-    emit dataChanged(firstIdx, lastIdx);
-
-    qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
-}
-
-db_id ShiftsModel::shiftAtRow(int row) const
-{
-    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return 0; //Not fetched yet or invalid
-
-    return cache.at(row - cacheFirstRow).shiftId;
-}
-
-QString ShiftsModel::shiftNameAtRow(int row) const
-{
-    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return QString(); //Not fetched yet or invalid
-
-    return cache.at(row - cacheFirstRow).shiftName;
-}
-
-void ShiftsModel::setQuery(const QString &text)
-{
-    QString tmp = '%' + text + '%';
-    if(mQuery == tmp)
-        return;
-    mQuery = tmp;
-
-    refreshData(true);
+    postResult(vec, first);
 }
 
 bool ShiftsModel::removeShift(db_id shiftId)
@@ -452,8 +307,9 @@ db_id ShiftsModel::addShift(int *outRow)
     }
 
     //Reset filter
-    mQuery.clear();
-    mQuery.squeeze();
+    m_nameFilter.clear();
+    m_nameFilter.squeeze();
+    emit filterChanged();
 
     refreshData(); //Recalc row count
 

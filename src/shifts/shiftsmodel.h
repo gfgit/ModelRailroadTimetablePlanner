@@ -1,38 +1,40 @@
 #ifndef SHIFTSQLMODEL_H
 #define SHIFTSQLMODEL_H
 
-#include "utils/delegates/sql/pageditemmodel.h"
+#include "utils/delegates/sql/pageditemmodelhelper.h"
 
 #include "utils/types.h"
 
 #include <QVector>
 
-#include "shiftitem.h"
+struct ShiftsModelItem
+{
+    db_id shiftId;
+    QString shiftName;
+};
 
-class ShiftsModel : public IPagedItemModel
+class ShiftsModel : public IPagedItemModelImpl<ShiftsModel, ShiftsModelItem>
 {
     Q_OBJECT
 
 public:
+    enum { BatchSize = 100 };
+
     enum Columns
     {
         ShiftName = 0,
         NCols
     };
 
-    enum { BatchSize = 100 };
+    typedef ShiftsModelItem ShiftItem;
+    typedef IPagedItemModelImpl<ShiftsModel, ShiftsModelItem> BaseClass;
 
     ShiftsModel(sqlite3pp::database &db, QObject *parent = nullptr);
-    bool event(QEvent *e) override;
 
     // QAbstractTableModel
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
-
-    // Basic functionality:
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
@@ -44,36 +46,44 @@ public:
 
     // IPagedItemModel
 
-    // Cached rows management
-    virtual void clearCache() override;
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
 
     // ShiftSQLModel
-    db_id shiftAtRow(int row) const;
-    QString shiftNameAtRow(int row) const;
 
     bool removeShift(db_id shiftId);
     bool removeShiftAt(int row);
 
     db_id addShift(int *outRow);
 
-public slots:
-    void setQuery(const QString& text);
+    // Convinience
+    inline db_id shiftAtRow(int row) const
+    {
+        if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+            return 0; //Not fetched yet or invalid
+
+        return cache.at(row - cacheFirstRow).shiftId;
+    }
+
+    inline QString shiftNameAtRow(int row) const
+    {
+        if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+            return QString(); //Not fetched yet or invalid
+
+        return cache.at(row - cacheFirstRow).shiftName;
+    }
 
 protected:
     virtual qint64 recalcTotalItemCount() override;
 
 private:
-    void fetchRow(int row);
-    Q_INVOKABLE void internalFetch(int first, int valRow, const QString &val);
+    friend BaseClass;
+    Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
     void handleResult(const QVector<ShiftItem> items, int firstRow);
 
 private:
-    QVector<ShiftItem> cache;
-
-    QString mQuery;
-
-    int cacheFirstRow;
-    int firstPendingRow;
+    QString m_nameFilter;
 };
 
 #endif // SHIFTSQLMODEL_H
