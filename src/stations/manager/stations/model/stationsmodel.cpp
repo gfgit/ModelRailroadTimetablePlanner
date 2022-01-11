@@ -194,7 +194,21 @@ Qt::ItemFlags StationsModel::flags(const QModelIndex &idx) const
 
 qint64 StationsModel::recalcTotalItemCount()
 {
-    QByteArray sql = "SELECT COUNT(1) FROM stations";
+    query q(mDb);
+    buildQuery(q, 0, 0, false);
+
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
+void StationsModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData)
+{
+    QByteArray sql;
+    if(fullData)
+        sql = "SELECT id,name,short_name,type,phone_number FROM stations";
+    else
+        sql = "SELECT COUNT(1) FROM stations";
 
     bool whereClauseAdded = false;
 
@@ -217,8 +231,48 @@ qint64 StationsModel::recalcTotalItemCount()
         sql.append("(name LIKE ?4 OR short_name LIKE ?4)");
     }
 
-    query q(mDb, sql);
+    if(fullData)
+    {
+        //Apply sorting
+        const char *sortColExpr = nullptr;
+        switch (sortCol)
+        {
+        case NameCol:
+        {
+            sortColExpr = "name"; //Order by 1 column, no where clause
+            break;
+        }
+        case TypeCol:
+        {
+            sortColExpr = "type,name";
+            break;
+        }
+        }
 
+        sql += " ORDER BY ";
+        sql += sortColExpr;
+
+        sql += " LIMIT ?1";
+        if(offset)
+            sql += " OFFSET ?2";
+
+        q.prepare(sql);
+        q.bind(1, BatchSize);
+        if(offset)
+            q.bind(2, offset);
+    }
+
+    q.prepare(sql);
+
+    if(fullData)
+    {
+        //Apply offset and batch size
+        q.bind(1, BatchSize);
+        if(offset)
+            q.bind(2, offset);
+    }
+
+    //Apply filters
     QByteArray phoneFilter;
     if(!m_phoneFilter.isEmpty() && !phoneFilterIsNull)
     {
@@ -238,10 +292,6 @@ qint64 StationsModel::recalcTotalItemCount()
         nameFilter.append('%');
         sqlite3_bind_text(q.stmt(), 4, nameFilter, nameFilter.size(), SQLITE_STATIC);
     }
-
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
 }
 
 void StationsModel::setSortingColumn(int col)
@@ -390,76 +440,7 @@ void StationsModel::internalFetch(int first, int sortCol, int /*valRow*/, const 
 
     qDebug() << "Fetching:" << first << "Offset:" << offset;
 
-
-    QByteArray sql = "SELECT id,name,short_name,type,phone_number FROM stations";
-
-    bool whereClauseAdded = false;
-
-    bool phoneFilterIsNull = m_phoneFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
-    if(!m_phoneFilter.isEmpty())
-    {
-        if(phoneFilterIsNull)
-            sql.append(" WHERE phone_number IS NULL");
-        else
-            sql.append(" WHERE phone_number LIKE ?3");
-        whereClauseAdded = true;
-    }
-
-    if(!m_nameFilter.isEmpty())
-    {
-        if(whereClauseAdded)
-            sql.append(" AND ");
-        else
-            sql.append(" WHERE ");
-        sql.append("(name LIKE ?4 OR short_name LIKE ?4)");
-    }
-
-    const char *sortColExpr = nullptr;
-    switch (sortCol)
-    {
-    case NameCol:
-    {
-        sortColExpr = "name"; //Order by 1 column, no where clause
-        break;
-    }
-    case TypeCol:
-    {
-        sortColExpr = "type,name";
-        break;
-    }
-    }
-
-    sql += " ORDER BY ";
-    sql += sortColExpr;
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    QByteArray phoneFilter;
-    if(!m_phoneFilter.isEmpty() && !phoneFilterIsNull)
-    {
-        phoneFilter.reserve(m_phoneFilter.size() + 2);
-        phoneFilter.append('%');
-        phoneFilter.append(m_phoneFilter.toUtf8());
-        phoneFilter.append('%');
-        sqlite3_bind_text(q.stmt(), 3, phoneFilter, phoneFilter.size(), SQLITE_STATIC);
-    }
-
-    QByteArray nameFilter;
-    if(!m_nameFilter.isEmpty())
-    {
-        nameFilter.reserve(m_nameFilter.size() + 2);
-        nameFilter.append('%');
-        nameFilter.append(m_nameFilter.toUtf8());
-        nameFilter.append('%');
-        sqlite3_bind_text(q.stmt(), 4, nameFilter, nameFilter.size(), SQLITE_STATIC);
-    }
+    buildQuery(q, sortCol, offset, true);
 
     QVector<StationItem> vec(BatchSize);
 
@@ -580,7 +561,7 @@ bool StationsModel::setShortName(StationsModel::StationItem &item, const QString
     {
         if(ret == SQLITE_CONSTRAINT_UNIQUE)
         {
-            emit modelError(tr(errorShortNameAlreadyUsedText).arg(shortName).arg(QString()));
+            emit modelError(tr(errorShortNameAlreadyUsedText).arg(shortName, QString()));
         }
         else
         {

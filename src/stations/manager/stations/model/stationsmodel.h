@@ -6,6 +6,10 @@
 #include "utils/types.h"
 #include "stations/station_utils.h"
 
+namespace sqlite3pp {
+class query;
+}
+
 struct StationModelItem
 {
     db_id stationId;
@@ -87,6 +91,7 @@ protected:
 
 private:
     friend BaseClass;
+    void buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData);
     Q_INVOKABLE void internalFetch(int firstRow, int sortCol, int valRow, const QVariant &val);
 
     bool setName(StationItem &item, const QString &val);
