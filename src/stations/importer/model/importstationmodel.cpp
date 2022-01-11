@@ -162,6 +162,7 @@ bool ImportStationModel::setFilterAtCol(int col, const QString &str)
         if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
             return false; //Cannot have NULL Name
         m_nameFilter = str;
+        emit filterChanged();
         return true;
     }
     }

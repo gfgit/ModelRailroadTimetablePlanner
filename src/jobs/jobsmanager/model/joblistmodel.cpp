@@ -149,16 +149,19 @@ bool JobListModel::setFilterAtCol(int col, const QString &str)
         if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
             return false; //Cannot have NULL Job ID
         m_jobIdFilter = str;
-        return true;
+        break;
     }
     case ShiftCol:
     {
         m_shiftFilter = str;
-        return true;
+        break;
     }
+    default:
+        return false;
     }
 
-    return false;
+    emit filterChanged();
+    return true;
 }
 
 void JobListModel::onJobAddedOrRemoved()
