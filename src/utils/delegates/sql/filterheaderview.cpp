@@ -81,7 +81,7 @@ void FilterHeaderView::generateFilters()
                 needsUpdateGeo = true;
             }
 
-            filterEdit->setText(filter.first);
+            filterEdit->updateTextWithoutEmitting(filter.first);
         }
 
         //Update sorting

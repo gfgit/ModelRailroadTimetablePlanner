@@ -22,6 +22,13 @@ FilterHeaderLineEdit::~FilterHeaderLineEdit()
     stopTextTimer();
 }
 
+void FilterHeaderLineEdit::updateTextWithoutEmitting(const QString &str)
+{
+    setText(str);
+    lastValue = str;
+    stopTextTimer();
+}
+
 void FilterHeaderLineEdit::startTextTimer()
 {
     stopTextTimer();
@@ -40,7 +47,11 @@ void FilterHeaderLineEdit::stopTextTimer()
 void FilterHeaderLineEdit::delayedTimerFinished()
 {
     stopTextTimer();
-    emit delayedTextChanged(this, text());
+    if(lastValue != text())
+    {
+        lastValue = text();
+        emit delayedTextChanged(this, lastValue);
+    }
 }
 
 void FilterHeaderLineEdit::timerEvent(QTimerEvent *e)

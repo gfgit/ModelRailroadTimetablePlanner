@@ -10,6 +10,8 @@ public:
     FilterHeaderLineEdit(int col, QWidget *parent = nullptr);
     ~FilterHeaderLineEdit();
 
+    void updateTextWithoutEmitting(const QString& str);
+
     inline int getColumn() const { return m_column; }
 
 signals:
@@ -24,6 +26,7 @@ protected:
     void timerEvent(QTimerEvent *e) override;
 
 private:
+    QString lastValue;
     int m_column;
     int m_textTimerId;
 };
