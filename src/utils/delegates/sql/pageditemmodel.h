@@ -64,6 +64,9 @@ signals:
     void pageCountChanged(int count);
     void currentPageChanged(int page);
 
+    // Filter signals
+    void filterChanged();
+
 public:
     void clearCache_slot();
 

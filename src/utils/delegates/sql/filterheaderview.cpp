@@ -32,33 +32,72 @@ FilterHeaderView::FilterHeaderView(QWidget *parent) :
 
 void FilterHeaderView::generateFilters()
 {
-    // Delete all the current filter widgets
-    qDeleteAll(filterWidgets);
-    filterWidgets.clear();
+    bool needsUpdateGeo = false;
 
     IPagedItemModel *m = qobject_cast<IPagedItemModel *>(model());
     if(m)
     {
-        // And generate a bunch of new ones
+        int i = 0;
         const int columnCount = m->columnCount();
-        for(int i = 0; i < columnCount; i++)
+        for(int col = 0; col < columnCount; col++)
         {
-            auto filter = m->getFilterAtCol(i);
+            auto filter = m->getFilterAtCol(col);
             if(!filter.second.testFlag(IPagedItemModel::FilterFlag::BasicFiltering))
-                continue; //No filtering for this column
+            {
+                //No filtering for this column
+                for(; i < filterWidgets.size(); i++)
+                {
+                    if(filterWidgets.at(i)->getColumn() > col)
+                        break; //We went past
 
-            FilterHeaderLineEdit* l = new FilterHeaderLineEdit(i, this);
-            l->setText(filter.first);
-            connect(l, &FilterHeaderLineEdit::delayedTextChanged, this, &FilterHeaderView::inputChanged);
-            filterWidgets.push_back(l);
+                    if(filterWidgets.at(i)->getColumn() == col)
+                    {
+                        //Remove old filter
+                        delete filterWidgets.takeAt(i);
+                        i--;
+                    }
+                }
+                continue;
+            }
+
+            FilterHeaderLineEdit* filterEdit = nullptr;
+            for(; i < filterWidgets.size(); i++)
+            {
+                if(filterWidgets.at(i)->getColumn() > col)
+                    break; //We went past
+
+                if(filterWidgets.at(i)->getColumn() == col)
+                {
+                    filterEdit = filterWidgets.at(i);
+                    break;
+                }
+            }
+
+            if(!filterEdit)
+            {
+                filterEdit = new FilterHeaderLineEdit(col, this);
+                connect(filterEdit, &FilterHeaderLineEdit::delayedTextChanged, this, &FilterHeaderView::inputChanged);
+                filterWidgets.insert(i, filterEdit);
+                needsUpdateGeo = true;
+            }
+
+            filterEdit->setText(filter.first);
         }
 
         //Update sorting
         setSortIndicator(m->getSortingColumn(), Qt::AscendingOrder);
     }
+    else
+    {
+        qDeleteAll(filterWidgets);
+        filterWidgets.clear();
+    }
 
-    // Position them correctly
-    updateGeometries();
+    if(needsUpdateGeo || filterWidgets.isEmpty())
+    {
+        // Position them correctly
+        updateGeometries();
+    }
 }
 
 QSize FilterHeaderView::sizeHint() const
@@ -180,6 +219,19 @@ void FilterHeaderView::installOnTable(QTableView *view)
 
 void FilterHeaderView::setModel(QAbstractItemModel *m)
 {
+    IPagedItemModel *pagedModel = qobject_cast<IPagedItemModel *>(model());
+    if(pagedModel)
+    {
+        disconnect(pagedModel, &IPagedItemModel::filterChanged, this, &FilterHeaderView::generateFilters);
+    }
+
     QHeaderView::setModel(m);
+
+    pagedModel = qobject_cast<IPagedItemModel *>(model());
+    if(pagedModel)
+    {
+        connect(pagedModel, &IPagedItemModel::filterChanged, this, &FilterHeaderView::generateFilters);
+    }
+
     generateFilters();
 }
