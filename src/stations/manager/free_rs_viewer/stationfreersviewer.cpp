@@ -55,6 +55,7 @@ StationFreeRSViewer::StationFreeRSViewer(QWidget *parent) :
 
     connect(view, &QTableView::customContextMenuRequested, this, &StationFreeRSViewer::showContextMenu);
 
+    //FIXME: move to FilterHeaderView and IPagedItemModel
     //Custom colun sorting
     //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
     QHeaderView *header = view->horizontalHeader();

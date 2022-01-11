@@ -2,8 +2,7 @@
 
 #include "app/session.h"
 
-#include "delegates/rstypedelegate.h"
-#include "delegates/rsnumberdelegate.h"
+#include "utils/rs_types_names.h"
 
 #include <QToolBar>
 #include <QTableView>
@@ -12,33 +11,37 @@
 #include <QActionGroup>
 #include <QMenu>
 
+#include <QWindow>
+
 #include "viewmanager/viewmanager.h"
+
+#include "utils/delegates/sql/filterheaderview.h"
+#include "utils/delegates/sql/modelpageswitcher.h"
+
+#include "../rollingstocksqlmodel.h"
+#include "../rsmodelssqlmodel.h"
+#include "../rsownerssqlmodel.h"
+
+#include "utils/delegates/sql/sqlfkfielddelegate.h"
+#include "utils/delegates/sql/chooseitemdlg.h"
+#include "utils/delegates/sql/isqlfkmatchmodel.h"
+#include "../rsmatchmodelfactory.h"
+
+#include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
+#include "delegates/rstypedelegate.h"
+#include "delegates/rsnumberdelegate.h"
+
+#include "utils/owningqpointer.h"
+
+#include <QInputDialog>
+#include <QMessageBox>
 
 #include "../importer/rsimportwizard.h"
 
 #include "dialogs/mergemodelsdialog.h"
 #include "dialogs/mergeownersdialog.h"
 
-#include "utils/delegates/sql/modelpageswitcher.h"
-#include "../rollingstocksqlmodel.h"
-#include "../rsmodelssqlmodel.h"
-#include "../rsownerssqlmodel.h"
-#include <QHeaderView>
 #include <QDebug>
-#include <QWindow>
-#include "utils/delegates/sql/sqlfkfielddelegate.h"
-#include "utils/delegates/sql/chooseitemdlg.h"
-#include "utils/delegates/sql/isqlfkmatchmodel.h"
-#include "../rsmatchmodelfactory.h"
-
-#include "utils/rs_types_names.h"
-
-#include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
-
-#include <QInputDialog>
-#include <QMessageBox>
-
-#include "utils/owningqpointer.h"
 
 RollingStockManager::RollingStockManager(QWidget *parent) :
     QWidget(parent),
@@ -97,24 +100,15 @@ void RollingStockManager::setupPages()
     rsView->setSelectionMode(QTableView::SingleSelection);
     rsLay->addWidget(rsView);
 
+    FilterHeaderView *header = new FilterHeaderView(rsView);
+    header->installOnTable(rsView);
+
     rsSQLModel = new RollingstockSQLModel(Session->m_Db, this);
     rsView->setModel(rsSQLModel);
 
     auto ps = new ModelPageSwitcher(false, this);
     rsLay->addWidget(ps);
     ps->setModel(rsSQLModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    QHeaderView *header = rsView->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), rsView, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), rsView, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-    {
-        rsSQLModel->setSortingColumn(section);
-        header->setSortIndicator(rsSQLModel->getSortingColumn(), Qt::AscendingOrder);
-    });
-    header->setSortIndicatorShown(true);
-    header->setSortIndicator(rsSQLModel->getSortingColumn(), Qt::AscendingOrder);
 
     connect(rsView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &RollingStockManager::onRollingstockSelectionChanged);
@@ -150,24 +144,16 @@ void RollingStockManager::setupPages()
     rsModelsView = new QTableView;
     rsModelsView->setSelectionMode(QTableView::SingleSelection);
     modelsLay->addWidget(rsModelsView);
+
+    header = new FilterHeaderView(rsModelsView);
+    header->installOnTable(rsModelsView);
+
     modelsSQLModel = new RSModelsSQLModel(Session->m_Db, this);
     rsModelsView->setModel(modelsSQLModel);
 
     ps = new ModelPageSwitcher(false, this);
     modelsLay->addWidget(ps);
     ps->setModel(modelsSQLModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    header = rsModelsView->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), rsModelsView, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), rsModelsView, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-    {
-        modelsSQLModel->setSortingColumn(section);
-        header->setSortIndicator(modelsSQLModel->getSortingColumn(), Qt::AscendingOrder);
-    });
-    header->setSortIndicatorShown(true);
-    header->setSortIndicator(modelsSQLModel->getSortingColumn(), Qt::AscendingOrder);
 
     connect(rsModelsView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &RollingStockManager::onRsModelSelectionChanged);
@@ -197,8 +183,12 @@ void RollingStockManager::setupPages()
     ownersView->setSelectionMode(QTableView::SingleSelection);
     ownersLay->addWidget(ownersView);
 
+    header = new FilterHeaderView(ownersView);
+    header->installOnTable(ownersView);
+
     ownersSQLModel = new RSOwnersSQLModel(Session->m_Db, this);
     ownersView->setModel(ownersSQLModel);
+
     ps = new ModelPageSwitcher(false, this);
     ownersLay->addWidget(ps);
     ps->setModel(ownersSQLModel);

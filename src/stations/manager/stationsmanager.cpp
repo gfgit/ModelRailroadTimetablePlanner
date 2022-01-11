@@ -8,9 +8,7 @@
 
 #include <QToolBar>
 #include <QTableView>
-#include <QHeaderView>
-
-#include <QMessageBox>
+#include "utils/delegates/sql/filterheaderview.h"
 
 #include <QWindow>
 
@@ -34,6 +32,7 @@
 
 #include "stations/manager/lines/dialogs/editlinedlg.h"
 
+#include <QMessageBox>
 #include <QInputDialog>
 #include "stations/importer/stationimportwizard.h"
 #include "utils/owningqpointer.h"
@@ -87,24 +86,15 @@ void StationsManager::setup_StationPage()
     stationView->setSelectionMode(QTableView::SingleSelection);
     vboxLayout->addWidget(stationView);
 
+    FilterHeaderView *header = new FilterHeaderView(stationView);
+    header->installOnTable(stationView);
+
     stationsModel = new StationsModel(Session->m_Db, this);
     stationView->setModel(stationsModel);
 
     auto ps = new ModelPageSwitcher(false, this);
     vboxLayout->addWidget(ps);
     ps->setModel(stationsModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    QHeaderView *header = stationView->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), stationView, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), stationView, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-            {
-                stationsModel->setSortingColumn(section);
-                header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
-            });
-    header->setSortIndicatorShown(true);
-    header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
 
     //Station Type Delegate
     QStringList types;
@@ -147,24 +137,15 @@ void StationsManager::setup_SegmentPage()
     segmentsView->setSelectionMode(QTableView::SingleSelection);
     vboxLayout->addWidget(segmentsView);
 
+    FilterHeaderView *header = new FilterHeaderView(segmentsView);
+    header->installOnTable(segmentsView);
+
     segmentsModel = new RailwaySegmentsModel(Session->m_Db, this);
     segmentsView->setModel(segmentsModel);
 
     auto ps = new ModelPageSwitcher(false, this);
     vboxLayout->addWidget(ps);
     ps->setModel(segmentsModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    QHeaderView *header = segmentsView->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), segmentsView, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), segmentsView, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-            {
-                segmentsModel->setSortingColumn(section);
-                header->setSortIndicator(segmentsModel->getSortingColumn(), Qt::AscendingOrder);
-            });
-    header->setSortIndicatorShown(true);
-    header->setSortIndicator(segmentsModel->getSortingColumn(), Qt::AscendingOrder);
 
     QAction *act_addSeg = segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
     act_remSeg = segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
@@ -190,24 +171,15 @@ void StationsManager::setup_LinePage()
     linesView->setSelectionMode(QTableView::SingleSelection);
     vboxLayout->addWidget(linesView);
 
+    FilterHeaderView *header = new FilterHeaderView(linesView);
+    header->installOnTable(linesView);
+
     linesModel = new LinesModel(Session->m_Db, this);
     linesView->setModel(linesModel);
 
     auto ps = new ModelPageSwitcher(false, this);
     vboxLayout->addWidget(ps);
     ps->setModel(linesModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    QHeaderView *header = linesView->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), linesView, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), linesView, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-            {
-                linesModel->setSortingColumn(section);
-                header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
-            });
-    header->setSortIndicatorShown(true);
-    header->setSortIndicator(linesModel->getSortingColumn(), Qt::AscendingOrder);
 
     QAction *act_addLine = linesToolBar->addAction(tr("Add"), this, &StationsManager::onNewLine);
     act_remLine = linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
