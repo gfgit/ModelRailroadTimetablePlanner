@@ -55,6 +55,10 @@ public:
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
 
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
+
     // StationsModel
     bool addStation(const QString& name, db_id *outStationId = nullptr);
     bool removeStation(db_id stationId);
@@ -89,6 +93,10 @@ private:
     bool setShortName(StationItem &item, const QString &val);
     bool setType(StationItem &item, int val);
     bool setPhoneNumber(StationsModel::StationItem &item, qint64 val);
+
+private:
+    QString m_nameFilter;
+    QString m_phoneFilter;
 };
 
 #endif // STATIONSMODEL_H
