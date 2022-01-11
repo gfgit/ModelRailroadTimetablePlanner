@@ -173,55 +173,130 @@ void JobListModel::onJobAddedOrRemoved()
 
 qint64 JobListModel::recalcTotalItemCount()
 {
-    QByteArray sql = "SELECT COUNT(1) FROM jobs";
+    query q(mDb);
+    buildQuery(q, 0, 0, false);
+
+    q.step();
+    const qint64 count = q.getRows().get<int>(0);
+    return count;
+}
+
+void JobListModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData)
+{
+    QByteArray sql;
+    if(fullData)
+    {
+        sql = "SELECT jobs.id, jobs.category, jobs.shift_id, jobshifts.name,"
+              "MIN(s1.departure), s1.station_id, MAX(s2.arrival), s2.station_id"
+              " FROM jobs"
+              " LEFT JOIN stops s1 ON s1.job_id=jobs.id"
+              " LEFT JOIN stops s2 ON s2.job_id=jobs.id";
+    }
+    else
+    {
+        sql = "SELECT COUNT(1) FROM jobs";
+    }
+
+    //If counting but filtering by shift name (not null) we need to JOIN jobshifts
+    bool shiftFilterIsNull = m_shiftFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
+    if(fullData || (!shiftFilterIsNull && !m_shiftFilter.isEmpty()))
+        sql += " LEFT JOIN jobshifts ON jobshifts.id=jobs.shift_id";
 
     bool whereClauseAdded = false;
 
-    bool shiftFilterIsNull = m_shiftFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
-    if(!m_shiftFilter.isEmpty())
+    if(!m_jobIdFilter.isEmpty())
     {
-        if(shiftFilterIsNull)
-            sql.append(" WHERE jobs.shift_id IS NULL");
-        else
-            sql.append(" JOIN jobshifts ON jobshifts.id=jobs.shift_id"
-                       " WHERE jobshifts.name LIKE ?2");
+        sql.append(" WHERE jobs.id LIKE ?3");
         whereClauseAdded = true;
     }
 
-    if(!m_jobIdFilter.isEmpty())
+    if(!m_shiftFilter.isEmpty())
     {
         if(whereClauseAdded)
             sql.append(" AND ");
         else
             sql.append(" WHERE ");
-        sql.append("jobs.id LIKE ?1");
+
+        if(shiftFilterIsNull)
+            sql.append("jobs.shift_id IS NULL");
+        else
+            sql.append("jobshifts.name LIKE ?4");
     }
 
-    query q(mDb, sql);
+    if(fullData)
+    {
+        //Group by Job
+        sql.append(" GROUP BY jobs.id");
 
+        //Apply sorting
+        const char *sortColExpr = nullptr;
+        switch (sortCol)
+        {
+        case IdCol:
+        {
+            sortColExpr = "jobs.id"; //Order by 1 column, no where clause
+            break;
+        }
+        case Category:
+        {
+            sortColExpr = "jobs.category,jobs.id";
+            break;
+        }
+        case ShiftCol:
+        {
+            sortColExpr = "jobshifts.name,s1.departure,jobs.id";
+            break;
+        }
+        case OriginTime:
+        {
+            sortColExpr = "s1.departure,jobs.id";
+            break;
+        }
+        case DestinationTime:
+        {
+            sortColExpr = "s2.arrival,jobs.id";
+            break;
+        }
+        }
+
+        sql += " ORDER BY ";
+        sql += sortColExpr;
+
+        sql += " LIMIT ?1";
+        if(offset)
+            sql += " OFFSET ?2";
+    }
+
+    q.prepare(sql);
+
+    if(fullData)
+    {
+        //Apply offset and batch size
+        q.bind(1, BatchSize);
+        if(offset)
+            q.bind(2, offset);
+    }
+
+    //Apply filters
+    QByteArray jobFilter;
     if(!m_jobIdFilter.isEmpty())
     {
-        QByteArray jobFilter;
         jobFilter.reserve(m_jobIdFilter.size() + 2);
         jobFilter.append('%');
         jobFilter.append(m_jobIdFilter.toUtf8());
         jobFilter.append('%');
-        q.bind(1, jobFilter, sqlite3pp::copy);
+        sqlite3_bind_text(q.stmt(), 3, jobFilter, jobFilter.size(), SQLITE_STATIC);
     }
 
+    QByteArray shiftFilter;
     if(!m_shiftFilter.isEmpty() && !shiftFilterIsNull)
     {
-        QByteArray shiftFilter;
         shiftFilter.reserve(m_shiftFilter.size() + 2);
         shiftFilter.append('%');
         shiftFilter.append(m_shiftFilter.toUtf8());
         shiftFilter.append('%');
-        q.bind(2, shiftFilter, sqlite3pp::copy);
+        sqlite3_bind_text(q.stmt(), 4, shiftFilter, shiftFilter.size(), SQLITE_STATIC);
     }
-
-    q.step();
-    const qint64 count = q.getRows().get<int>(0);
-    return count;
 }
 
 void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant &/*val*/)
@@ -233,98 +308,7 @@ void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const Q
     int offset = first + curPage * ItemsPerPage;
 
     qDebug() << "Fetching:" << first << "Offset:" << offset;
-
-    QByteArray sql = "SELECT jobs.id, jobs.category, jobs.shift_id, jobshifts.name,"
-                     "MIN(s1.departure), s1.station_id, MAX(s2.arrival), s2.station_id"
-                     " FROM jobs"
-                     " LEFT JOIN stops s1 ON s1.job_id=jobs.id"
-                     " LEFT JOIN stops s2 ON s2.job_id=jobs.id"
-                     " LEFT JOIN jobshifts ON jobshifts.id=jobs.shift_id";
-
-    bool whereClauseAdded = false;
-
-    bool shiftFilterIsNull = m_shiftFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
-    if(!m_shiftFilter.isEmpty())
-    {
-        if(shiftFilterIsNull)
-            sql.append(" WHERE jobs.shift_id IS NULL");
-        else
-            sql.append(" WHERE jobshifts.name LIKE ?3");
-        whereClauseAdded = true;
-    }
-
-    if(!m_jobIdFilter.isEmpty())
-    {
-        if(whereClauseAdded)
-            sql.append(" AND ");
-        else
-            sql.append(" WHERE ");
-        sql.append("jobs.id LIKE ?4");
-    }
-
-    sql.append(" GROUP BY jobs.id");
-
-    const char *sortColExpr = nullptr;
-    switch (sortCol)
-    {
-    case IdCol:
-    {
-        sortColExpr = "jobs.id"; //Order by 1 column, no where clause
-        break;
-    }
-    case Category:
-    {
-        sortColExpr = "jobs.category,jobs.id";
-        break;
-    }
-    case ShiftCol:
-    {
-        sortColExpr = "jobshifts.name,s1.departure,jobs.id";
-        break;
-    }
-    case OriginTime:
-    {
-        sortColExpr = "s1.departure,jobs.id";
-        break;
-    }
-    case DestinationTime:
-    {
-        sortColExpr = "s2.arrival,jobs.id";
-        break;
-    }
-    }
-
-    sql += " ORDER BY ";
-    sql += sortColExpr;
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    if(!m_jobIdFilter.isEmpty())
-    {
-        QByteArray jobFilter;
-        jobFilter.reserve(m_jobIdFilter.size() + 2);
-        jobFilter.append('%');
-        jobFilter.append(m_jobIdFilter.toUtf8());
-        jobFilter.append('%');
-        q.bind(4, jobFilter, sqlite3pp::copy);
-    }
-
-    if(!m_shiftFilter.isEmpty() && !shiftFilterIsNull)
-    {
-        QByteArray shiftFilter;
-        shiftFilter.reserve(m_shiftFilter.size() + 2);
-        shiftFilter.append('%');
-        shiftFilter.append(m_shiftFilter.toUtf8());
-        shiftFilter.append('%');
-        q.bind(3, shiftFilter, sqlite3pp::copy);
-    }
+    buildQuery(q, sortCol, offset, true);
 
     QVector<JobItem> vec(BatchSize);
 

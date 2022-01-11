@@ -7,6 +7,10 @@
 
 #include <QTime>
 
+namespace sqlite3pp {
+class query;
+}
+
 struct JobListModelItem
 {
     db_id jobId;
@@ -94,6 +98,7 @@ protected:
 
 private:
     friend BaseClass;
+    void buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData);
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
 
 private:
