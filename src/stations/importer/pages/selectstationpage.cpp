@@ -3,9 +3,8 @@
 
 #include <QVBoxLayout>
 #include <QToolBar>
-#include <QLineEdit>
 #include <QTableView>
-#include <QHeaderView>
+#include "utils/delegates/sql/filterheaderview.h"
 
 #include "utils/owningqpointer.h"
 #include <QInputDialog>
@@ -22,8 +21,7 @@
 SelectStationPage::SelectStationPage(StationImportWizard *w) :
     QWizardPage(w),
     mWizard(w),
-    stationsModel(nullptr),
-    filterTimerId(0)
+    stationsModel(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -33,67 +31,39 @@ SelectStationPage::SelectStationPage(StationImportWizard *w) :
     view = new QTableView;
     lay->addWidget(view);
 
-    auto ps = new ModelPageSwitcher(false, this);
-    lay->addWidget(ps);
-    ps->setModel(stationsModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    QHeaderView *header = view->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), view, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), view, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-            {
-                if(!stationsModel)
-                    return;
-                stationsModel->setSortingColumn(section);
-                header->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
-            });
-    header->setSortIndicatorShown(true);
+    //Custom colun sorting and filtering
+    FilterHeaderView *header = new FilterHeaderView(view);
+    header->installOnTable(view);
 
-    filterNameEdit = new QLineEdit(nullptr);
-    filterNameEdit->setPlaceholderText(tr("Filter..."));
-    filterNameEdit->setClearButtonEnabled(true);
-    connect(filterNameEdit, &QLineEdit::textEdited, this, &SelectStationPage::startFilterTimer);
+    pageSwitcher = new ModelPageSwitcher(false, this);
+    lay->addWidget(pageSwitcher);
 
     actOpenStDlg = toolBar->addAction(tr("View Info"), this, &SelectStationPage::openStationDlg);
     actOpenSVGPlan = toolBar->addAction(tr("SVG Plan"), this, &SelectStationPage::openStationSVGPlan);
     toolBar->addSeparator();
     actImportSt = toolBar->addAction(tr("Import"), this, &SelectStationPage::importSelectedStation);
-    toolBar->addSeparator();
-    toolBar->addWidget(filterNameEdit);
 }
 
 void SelectStationPage::setupModel(ImportStationModel *m)
 {
     stationsModel = m;
-    view->setModel(m);
-
-    //Sync sort indicator
-    view->horizontalHeader()->setSortIndicator(stationsModel->getSortingColumn(), Qt::AscendingOrder);
+    view->setModel(stationsModel);
+    pageSwitcher->setModel(stationsModel);
 
     //Refresh model
-    filterNameEdit->clear();
-    updateFilter();
+    stationsModel->refreshData(true);
 }
 
 void SelectStationPage::finalizeModel()
 {
-    stopFilterTimer();
-
     view->setModel(nullptr);
+    pageSwitcher->setModel(nullptr);
 
     if(stationsModel)
     {
         delete stationsModel;
         stationsModel = nullptr;
     }
-}
-
-void SelectStationPage::updateFilter()
-{
-    stopFilterTimer();
-    QString nameFilter = filterNameEdit->text();
-    stationsModel->filterByName(nameFilter);
 }
 
 void SelectStationPage::openStationDlg()
@@ -211,30 +181,4 @@ void SelectStationPage::importSelectedStation()
 
     //Reset selection
     view->clearSelection();
-}
-
-void SelectStationPage::startFilterTimer()
-{
-    stopFilterTimer();
-    filterTimerId = startTimer(500);
-}
-
-void SelectStationPage::stopFilterTimer()
-{
-    if(filterTimerId)
-    {
-        killTimer(filterTimerId);
-        filterTimerId = 0;
-    }
-}
-
-void SelectStationPage::timerEvent(QTimerEvent *e)
-{
-    if(e->timerId() == filterTimerId)
-    {
-        updateFilter();
-        return;
-    }
-
-    QWizardPage::timerEvent(e);
 }

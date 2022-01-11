@@ -34,6 +34,15 @@ QVariant ImportStationModel::headerData(int section, Qt::Orientation orientation
             }
             break;
         }
+        case Qt::ToolTipRole:
+        {
+            switch (section)
+            {
+            case NameCol:
+                return tr("You can filter by <b>Name</b> or <b>Short Name</b>");
+            }
+            break;
+        }
         }
     }
     else if(role == Qt::DisplayRole)
@@ -97,14 +106,24 @@ QVariant ImportStationModel::data(const QModelIndex &idx, int role) const
 qint64 ImportStationModel::recalcTotalItemCount()
 {
     QByteArray sql = "SELECT COUNT(id) FROM stations";
-    if(!mNameFilter.isEmpty())
+    if(!m_nameFilter.isEmpty())
     {
         sql += " WHERE name LIKE ?1 OR short_name LIKE ?1";
     }
 
     query q(mDb, sql);
-    if(!mNameFilter.isEmpty())
-        sqlite3_bind_text(q.stmt(), 1, mNameFilter, mNameFilter.size(), SQLITE_STATIC);
+
+    QByteArray nameFilter;
+    if(!m_nameFilter.isEmpty())
+    {
+        nameFilter.reserve(m_nameFilter.size() + 2);
+        nameFilter.append('%');
+        nameFilter.append(m_nameFilter.toUtf8());
+        nameFilter.append('%');
+
+        sqlite3_bind_text(q.stmt(), 1, nameFilter, nameFilter.size(), SQLITE_STATIC);
+    }
+
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
@@ -123,19 +142,31 @@ void ImportStationModel::setSortingColumn(int col)
     emit dataChanged(first, last);
 }
 
-void ImportStationModel::filterByName(const QString &text)
+std::pair<QString, IPagedItemModel::FilterFlags> ImportStationModel::getFilterAtCol(int col)
 {
-    mNameFilter.clear();
-    if(!text.isEmpty())
+    switch (col)
     {
-        mNameFilter.clear();
-        mNameFilter.reserve(text.size() + 2);
-        mNameFilter.append('%');
-        mNameFilter.append(text.toUtf8());
-        mNameFilter.append('%');
+    case NameCol:
+        return {m_nameFilter, FilterFlag::BasicFiltering};
     }
 
-    refreshData(true);
+    return {QString(), FilterFlag::NoFiltering};
+}
+
+bool ImportStationModel::setFilterAtCol(int col, const QString &str)
+{
+    switch (col)
+    {
+    case NameCol:
+    {
+        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+            return false; //Cannot have NULL Name
+        m_nameFilter = str;
+        return true;
+    }
+    }
+
+    return false;
 }
 
 void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
@@ -170,7 +201,7 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
     }
     }
 
-    if(!mNameFilter.isEmpty())
+    if(!m_nameFilter.isEmpty())
     {
         sql += " WHERE name LIKE ?3 OR short_name LIKE ?3";
     }
@@ -189,9 +220,16 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
     q.bind(1, BatchSize);
     if(offset)
         q.bind(2, offset);
-    if(!mNameFilter.isEmpty())
+
+    QByteArray nameFilter;
+    if(!m_nameFilter.isEmpty())
     {
-        sqlite3_bind_text(q.stmt(), 3, mNameFilter, mNameFilter.size(), SQLITE_STATIC);
+        nameFilter.reserve(m_nameFilter.size() + 2);
+        nameFilter.append('%');
+        nameFilter.append(m_nameFilter.toUtf8());
+        nameFilter.append('%');
+
+        sqlite3_bind_text(q.stmt(), 3, nameFilter, nameFilter.size(), SQLITE_STATIC);
     }
 
     //    if(val.isValid())
