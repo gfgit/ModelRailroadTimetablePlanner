@@ -15,9 +15,9 @@ using namespace sqlite3pp;
 
 //ERRORMSG: show other errors
 static constexpr char
-errorRSInUseCannotDelete[] = QT_TRANSLATE_NOOP("RollingstockSQLModel",
-                                               "Rollingstock item <b>%1</b> is used in some jobs so it cannot be removed.<br>"
-                                               "If you wish to remove it, please first remove it from its jobs.");
+    errorRSInUseCannotDelete[] = QT_TRANSLATE_NOOP("RollingstockSQLModel",
+                        "Rollingstock item <b>%1</b> is used in some jobs so it cannot be removed.<br>"
+                        "If you wish to remove it, please first remove it from its jobs.");
 
 RollingstockSQLModel::RollingstockSQLModel(sqlite3pp::database &db, QObject *parent) :
     BaseClass(500, db, parent)
@@ -166,8 +166,12 @@ std::pair<QString, IPagedItemModel::FilterFlags> RollingstockSQLModel::getFilter
 {
     switch (col)
     {
+    case Model:
+        return {m_modelFilter, FilterFlag::BasicFiltering};
     case Number:
         return {m_numberFilter, FilterFlag::BasicFiltering};
+    case Owner:
+        return {m_ownerFilter, FilterFlag::BasicFiltering};
     }
 
     return {QString(), FilterFlag::NoFiltering};
@@ -179,11 +183,21 @@ bool RollingstockSQLModel::setFilterAtCol(int col, const QString &str)
 
     switch (col)
     {
+    case Model:
+    {
+        m_modelFilter = str;
+        break;
+    }
     case Number:
     {
         if(isNull)
-            return false; //Cannot have NULL Job ID
+            return false; //Cannot have NULL Number
         m_numberFilter = str;
+        break;
+    }
+    case Owner:
+    {
+        m_ownerFilter = str;
         break;
     }
     default:
@@ -356,8 +370,12 @@ db_id RollingstockSQLModel::addRSItem(int *outRow, QString *errOut)
     }
 
     //Clear filters
+    m_modelFilter.clear();
+    m_modelFilter.squeeze();
     m_numberFilter.clear();
     m_numberFilter.squeeze();
+    m_ownerFilter.clear();
+    m_ownerFilter.squeeze();
     emit filterChanged();
 
     refreshData(); //Recalc row count
@@ -385,14 +403,137 @@ bool RollingstockSQLModel::removeAllRS()
 
 qint64 RollingstockSQLModel::recalcTotalItemCount()
 {
-    QByteArray sql = "SELECT COUNT(1) FROM rs_list";
+    query q(mDb);
+    buildQuery(q, 0, 0, false);
+
+    q.step();
+    const qint64 count = q.getRows().get<qint64>(0);
+    return count;
+}
+
+void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData)
+{
+    QByteArray sql;
+    if(fullData)
+    {
+        sql = "SELECT rs_list.id,rs_list.number,rs_list.model_id,rs_list.owner_id,"
+              "rs_models.name,rs_models.suffix,rs_models.type,rs_owners.name"
+              " FROM rs_list";
+    }
+    else
+    {
+        sql = "SELECT COUNT(1) FROM rs_list";
+    }
+
+    //If counting but filtering by model name (not null) we need to JOIN rs_models
+    bool modelIsNull = m_modelFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
+    if(fullData || (!modelIsNull && !m_modelFilter.isEmpty()))
+        sql += " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id";
+
+    //If counting but filtering by owner name (not null) we need to JOIN rs_owners
+    bool ownerIsNull = m_ownerFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
+    if(fullData || (!ownerIsNull && !m_ownerFilter.isEmpty()))
+        sql += " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id";
+
+    bool whereClauseAdded = false;
+
+    if(!m_modelFilter.isEmpty())
+    {
+        sql.append(" WHERE ");
+
+        if(modelIsNull)
+        {
+            sql.append("rs_list.model_id IS NULL");
+        }
+        else
+        {
+            sql.append("rs_models.name LIKE ?3");
+        }
+
+        whereClauseAdded = true;
+    }
 
     if(!m_numberFilter.isEmpty())
     {
-        sql.append(" WHERE rs_list.number LIKE ?1");
+        if(whereClauseAdded)
+            sql.append(" AND ");
+        else
+            sql.append(" WHERE ");
+
+        sql.append("rs_list.number LIKE ?4");
+
+        whereClauseAdded = true;
     }
 
-    query q(mDb, sql);
+    if(!m_ownerFilter.isEmpty())
+    {
+        if(whereClauseAdded)
+            sql.append(" AND ");
+        else
+            sql.append(" WHERE ");
+
+        if(ownerIsNull)
+        {
+            sql.append("rs_list.owner_id IS NULL");
+        }
+        else
+        {
+            sql.append("rs_owners.name LIKE ?5");
+        }
+    }
+
+    if(fullData)
+    {
+        //Apply sorting
+        const char *sortColExpr = nullptr;
+        switch (sortCol)
+        {
+        case Model:
+        {
+            sortColExpr = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
+            break;
+        }
+        case Owner:
+        {
+            sortColExpr = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+            break;
+        }
+        case TypeCol:
+        {
+            sortColExpr = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+            break;
+        }
+        }
+
+        sql += " ORDER BY ";
+        sql += sortColExpr;
+
+        sql += " LIMIT ?1";
+        if(offset)
+            sql += " OFFSET ?2";
+    }
+
+    q.prepare(sql);
+
+    if(fullData)
+    {
+        //Apply offset and batch size
+        q.bind(1, BatchSize);
+        if(offset)
+            q.bind(2, offset);
+    }
+
+    //Apply filters
+    QByteArray modelFilter;
+    if(!m_modelFilter.isEmpty() && !modelIsNull)
+    {
+        modelFilter.reserve(m_modelFilter.size() + 2);
+        modelFilter.append('%');
+        modelFilter.append(m_modelFilter.toUtf8());
+        modelFilter.append('%');
+
+        sqlite3_bind_text(q.stmt(), 3, modelFilter, modelFilter.size(), SQLITE_STATIC);
+    }
 
     QByteArray numberFilter;
     if(!m_numberFilter.isEmpty())
@@ -403,12 +544,19 @@ qint64 RollingstockSQLModel::recalcTotalItemCount()
         numberFilter.append('%');
         numberFilter.replace('-', nullptr); //Remove dashes
 
-        sqlite3_bind_text(q.stmt(), 1, numberFilter, numberFilter.size(), SQLITE_STATIC);
+        sqlite3_bind_text(q.stmt(), 4, numberFilter, numberFilter.size(), SQLITE_STATIC);
     }
 
-    q.step();
-    const qint64 count = q.getRows().get<qint64>(0);
-    return count;
+    QByteArray ownerFilter;
+    if(!m_ownerFilter.isEmpty() && !ownerIsNull)
+    {
+        ownerFilter.reserve(m_ownerFilter.size() + 2);
+        ownerFilter.append('%');
+        ownerFilter.append(m_ownerFilter.toUtf8());
+        ownerFilter.append('%');
+
+        sqlite3_bind_text(q.stmt(), 5, ownerFilter, ownerFilter.size(), SQLITE_STATIC);
+    }
 }
 
 void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
@@ -419,60 +567,7 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
 
     qDebug() << "Fetching:" << first << "Offset:" << offset;
 
-    QByteArray sql = "SELECT rs_list.id,rs_list.number,rs_list.model_id,rs_list.owner_id,"
-                     "rs_models.name,rs_models.suffix,rs_models.type,rs_owners.name"
-                     " FROM rs_list"
-                     " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                     " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id";
-
-    if(!m_numberFilter.isEmpty())
-    {
-        sql.append(" WHERE rs_list.number LIKE ?3");
-    }
-
-    const char *sortColExpr = nullptr;
-    switch (sortCol)
-    {
-    case Model:
-    {
-        sortColExpr = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
-        break;
-    }
-    case Owner:
-    {
-        sortColExpr = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
-        break;
-    }
-    case TypeCol:
-    {
-        sortColExpr = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
-        break;
-    }
-    }
-
-    sql += " ORDER BY ";
-    sql += sortColExpr;
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    QByteArray numberFilter;
-    if(!m_numberFilter.isEmpty())
-    {
-        numberFilter.reserve(m_numberFilter.size() + 2);
-        numberFilter.append('%');
-        numberFilter.append(m_numberFilter.toUtf8());
-        numberFilter.append('%');
-        numberFilter.replace('-', nullptr); //Remove dashes
-
-        sqlite3_bind_text(q.stmt(), 3, numberFilter, numberFilter.size(), SQLITE_STATIC);
-    }
+    buildQuery(q, sortCol, offset, true);
 
     QVector<RSItem> vec(BatchSize);
 

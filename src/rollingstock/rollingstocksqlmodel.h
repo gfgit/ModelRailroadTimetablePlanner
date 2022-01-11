@@ -6,6 +6,10 @@
 
 #include "utils/types.h"
 
+namespace sqlite3pp {
+class query;
+}
+
 struct RollingstockSQLModelItem
 {
     db_id rsId;
@@ -92,14 +96,18 @@ protected:
 
 private:
     friend BaseClass;
+    void buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData);
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
 
     bool setModel(RSItem &item, db_id modelId, const QString &name);
     bool setOwner(RSItem &item, db_id ownerId, const QString &name);
     bool setNumber(RSItem &item, int number);
 
+
 private:
+    QString m_modelFilter;
     QString m_numberFilter;
+    QString m_ownerFilter;
 };
 
 #endif // ROLLINGSTOCKSQLMODEL_H
