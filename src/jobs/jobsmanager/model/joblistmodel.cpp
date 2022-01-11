@@ -142,11 +142,13 @@ std::pair<QString, IPagedItemModel::FilterFlags> JobListModel::getFilterAtCol(in
 
 bool JobListModel::setFilterAtCol(int col, const QString &str)
 {
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
     switch (col)
     {
     case IdCol:
     {
-        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+        if(isNull)
             return false; //Cannot have NULL Job ID
         m_jobIdFilter = str;
         break;

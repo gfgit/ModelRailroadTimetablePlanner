@@ -52,7 +52,6 @@ public:
 
     // IPagedItemModel
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
 
     //Filter

@@ -26,7 +26,7 @@ public:
     virtual void clearCache() = 0;
     virtual void refreshData(bool forceUpdate = false);
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
+    // Sorting
     virtual void setSortingColumn(int col);
     int getSortingColumn() const;
 

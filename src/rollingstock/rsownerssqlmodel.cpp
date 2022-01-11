@@ -172,19 +172,22 @@ std::pair<QString, IPagedItemModel::FilterFlags> RSOwnersSQLModel::getFilterAtCo
 
 bool RSOwnersSQLModel::setFilterAtCol(int col, const QString &str)
 {
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
     switch (col)
     {
     case Name:
     {
-        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+        if(isNull)
             return false; //Cannot have NULL OwnerName
         m_ownerFilter = str;
-        emit filterChanged();
-        return true;
     }
+    default:
+        return false;
     }
 
-    return false;
+    emit filterChanged();
+    return true;
 }
 
 bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)

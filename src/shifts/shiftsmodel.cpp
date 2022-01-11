@@ -179,19 +179,22 @@ std::pair<QString, IPagedItemModel::FilterFlags> ShiftsModel::getFilterAtCol(int
 
 bool ShiftsModel::setFilterAtCol(int col, const QString &str)
 {
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
     switch (col)
     {
     case ShiftName:
     {
-        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+        if(isNull)
             return false; //Cannot have NULL Name
         m_nameFilter = str;
-        emit filterChanged();
-        return true;
     }
+    default:
+        return false;
     }
 
-    return false;
+    emit filterChanged();
+    return true;
 }
 
 void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/, const QVariant &/*val*/)

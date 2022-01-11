@@ -155,19 +155,22 @@ std::pair<QString, IPagedItemModel::FilterFlags> ImportStationModel::getFilterAt
 
 bool ImportStationModel::setFilterAtCol(int col, const QString &str)
 {
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
     switch (col)
     {
     case NameCol:
     {
-        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+        if(isNull)
             return false; //Cannot have NULL Name
         m_nameFilter = str;
-        emit filterChanged();
-        return true;
     }
+    default:
+        return false;
     }
 
-    return false;
+    emit filterChanged();
+    return true;
 }
 
 void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)

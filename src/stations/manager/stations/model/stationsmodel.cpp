@@ -272,11 +272,13 @@ std::pair<QString, IPagedItemModel::FilterFlags> StationsModel::getFilterAtCol(i
 
 bool StationsModel::setFilterAtCol(int col, const QString &str)
 {
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
     switch (col)
     {
     case NameCol:
     {
-        if(str.startsWith(nullFilterStr, Qt::CaseInsensitive))
+        if(isNull)
             return false; //Cannot have NULL Name
         m_nameFilter = str;
         break;
