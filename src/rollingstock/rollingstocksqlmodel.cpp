@@ -167,11 +167,11 @@ std::pair<QString, IPagedItemModel::FilterFlags> RollingstockSQLModel::getFilter
     switch (col)
     {
     case Model:
-        return {m_modelFilter, FilterFlag::BasicFiltering};
+        return {m_modelFilter, FilterFlags(FilterFlag::BasicFiltering | FilterFlag::ExplicitNULL)};
     case Number:
         return {m_numberFilter, FilterFlag::BasicFiltering};
     case Owner:
-        return {m_ownerFilter, FilterFlag::BasicFiltering};
+        return {m_ownerFilter, FilterFlags(FilterFlag::BasicFiltering | FilterFlag::ExplicitNULL)};
     }
 
     return {QString(), FilterFlag::NoFiltering};
