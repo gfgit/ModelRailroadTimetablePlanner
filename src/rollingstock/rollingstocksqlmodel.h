@@ -58,8 +58,11 @@ public:
 
     // IPagedItemModel
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
+
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
 
     // IFKField
     bool getFieldData(int row, int col, db_id &idOut, QString &nameOut) const override;
@@ -94,6 +97,9 @@ private:
     bool setModel(RSItem &item, db_id modelId, const QString &name);
     bool setOwner(RSItem &item, db_id ownerId, const QString &name);
     bool setNumber(RSItem &item, int number);
+
+private:
+    QString m_numberFilter;
 };
 
 #endif // ROLLINGSTOCKSQLMODEL_H

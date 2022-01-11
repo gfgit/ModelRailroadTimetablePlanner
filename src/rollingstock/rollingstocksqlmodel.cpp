@@ -162,6 +162,38 @@ void RollingstockSQLModel::setSortingColumn(int col)
     emit dataChanged(first, last);
 }
 
+std::pair<QString, IPagedItemModel::FilterFlags> RollingstockSQLModel::getFilterAtCol(int col)
+{
+    switch (col)
+    {
+    case Number:
+        return {m_numberFilter, FilterFlag::BasicFiltering};
+    }
+
+    return {QString(), FilterFlag::NoFiltering};
+}
+
+bool RollingstockSQLModel::setFilterAtCol(int col, const QString &str)
+{
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
+    switch (col)
+    {
+    case Number:
+    {
+        if(isNull)
+            return false; //Cannot have NULL Job ID
+        m_numberFilter = str;
+        break;
+    }
+    default:
+        return false;
+    }
+
+    emit filterChanged();
+    return true;
+}
+
 bool RollingstockSQLModel::getFieldData(int row, int col, db_id &idOut, QString &nameOut) const
 {
     if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
@@ -323,6 +355,11 @@ db_id RollingstockSQLModel::addRSItem(int *outRow, QString *errOut)
         qDebug() << "RollingstockSQLModel Error adding:" << ret << mDb.error_msg() << mDb.error_code() << mDb.extended_error_code();
     }
 
+    //Clear filters
+    m_numberFilter.clear();
+    m_numberFilter.squeeze();
+    emit filterChanged();
+
     refreshData(); //Recalc row count
     switchToPage(0); //Reset to first page and so it is shown as first row
 
@@ -348,69 +385,73 @@ bool RollingstockSQLModel::removeAllRS()
 
 qint64 RollingstockSQLModel::recalcTotalItemCount()
 {
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_list");
+    QByteArray sql = "SELECT COUNT(1) FROM rs_list";
+
+    if(!m_numberFilter.isEmpty())
+    {
+        sql.append(" WHERE rs_list.number LIKE ?1");
+    }
+
+    query q(mDb, sql);
+
+    QByteArray numberFilter;
+    if(!m_numberFilter.isEmpty())
+    {
+        numberFilter.reserve(m_numberFilter.size() + 2);
+        numberFilter.append('%');
+        numberFilter.append(m_numberFilter.toUtf8());
+        numberFilter.append('%');
+        numberFilter.replace('-', nullptr); //Remove dashes
+
+        sqlite3_bind_text(q.stmt(), 1, numberFilter, numberFilter.size(), SQLITE_STATIC);
+    }
+
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
 }
 
-void RollingstockSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
 {
     query q(mDb);
 
-    int offset = first - valRow + curPage * ItemsPerPage;
-    bool reverse = false;
+    int offset = first + curPage * ItemsPerPage;
 
-    if(valRow > first)
-    {
-        offset = 0;
-        reverse = true;
-    }
-
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
-
-    const char *whereCol = nullptr;
+    qDebug() << "Fetching:" << first << "Offset:" << offset;
 
     QByteArray sql = "SELECT rs_list.id,rs_list.number,rs_list.model_id,rs_list.owner_id,"
                      "rs_models.name,rs_models.suffix,rs_models.type,rs_owners.name"
                      " FROM rs_list"
                      " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
                      " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id";
+
+    if(!m_numberFilter.isEmpty())
+    {
+        sql.append(" WHERE rs_list.number LIKE ?3");
+    }
+
+    const char *sortColExpr = nullptr;
     switch (sortCol)
     {
     case Model:
     {
-        whereCol = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
+        sortColExpr = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
         break;
     }
     case Owner:
     {
-        whereCol = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+        sortColExpr = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
         break;
     }
     case TypeCol:
     {
-        whereCol = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+        sortColExpr = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
         break;
     }
     }
 
-    if(val.isValid())
-    {
-        sql += " WHERE ";
-        sql += whereCol;
-        if(reverse)
-            sql += "<?3";
-        else
-            sql += ">?3";
-    }
-
     sql += " ORDER BY ";
-    sql += whereCol;
-
-    if(reverse)
-        sql += " DESC";
+    sql += sortColExpr;
 
     sql += " LIMIT ?1";
     if(offset)
@@ -421,16 +462,16 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int valRow, con
     if(offset)
         q.bind(2, offset);
 
-    if(val.isValid())
+    QByteArray numberFilter;
+    if(!m_numberFilter.isEmpty())
     {
-        switch (sortCol)
-        {
-        case Model:
-        {
-            q.bind(3, val.toString());
-            break;
-        }
-        }
+        numberFilter.reserve(m_numberFilter.size() + 2);
+        numberFilter.append('%');
+        numberFilter.append(m_numberFilter.toUtf8());
+        numberFilter.append('%');
+        numberFilter.replace('-', nullptr); //Remove dashes
+
+        sqlite3_bind_text(q.stmt(), 3, numberFilter, numberFilter.size(), SQLITE_STATIC);
     }
 
     QVector<RSItem> vec(BatchSize);
@@ -438,9 +479,7 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int valRow, con
     auto it = q.begin();
     const auto end = q.end();
 
-    int i = reverse ? BatchSize - 1 : 0;
-    const int increment = reverse ? -1 : 1;
-
+    int i = 0;
     for(; it != end; ++it)
     {
         auto r = *it;
@@ -454,12 +493,10 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int valRow, con
         item.type = RsType(r.get<int>(6));
         item.ownerName = r.get<QString>(7);
 
-        i += increment;
+        i += 1;
     }
 
-    if(reverse && i > -1)
-        vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    if(i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
