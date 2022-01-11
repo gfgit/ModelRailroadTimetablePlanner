@@ -61,6 +61,15 @@ QVariant StationsModel::headerData(int section, Qt::Orientation orientation, int
             }
             break;
         }
+        case Qt::ToolTipRole:
+        {
+            switch (section)
+            {
+            case NameCol:
+                return tr("You can filter by <b>Name</b> or <b>Short Name</b>");
+            }
+            break;
+        }
         }
     }
     else if(role == Qt::DisplayRole)
