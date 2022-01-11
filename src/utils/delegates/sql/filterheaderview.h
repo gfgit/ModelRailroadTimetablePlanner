@@ -36,6 +36,7 @@ protected:
 
 private slots:
     void inputChanged(FilterHeaderLineEdit *w, const QString& new_value);
+    void showColumnTooltip(FilterHeaderLineEdit *w, const QPoint& globalPos);
 
 private:
     QVector<FilterHeaderLineEdit *> filterWidgets;

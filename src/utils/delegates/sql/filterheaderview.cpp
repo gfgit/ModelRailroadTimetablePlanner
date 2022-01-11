@@ -8,6 +8,8 @@
 #include <QScrollBar>
 #include <QLineEdit>
 
+#include <QToolTip>
+
 FilterHeaderView::FilterHeaderView(QWidget *parent) :
     QHeaderView(Qt::Horizontal, parent)
 {
@@ -77,11 +79,13 @@ void FilterHeaderView::generateFilters()
             {
                 filterEdit = new FilterHeaderLineEdit(col, this);
                 connect(filterEdit, &FilterHeaderLineEdit::delayedTextChanged, this, &FilterHeaderView::inputChanged);
+                connect(filterEdit, &FilterHeaderLineEdit::tooltipRequested, this, &FilterHeaderView::showColumnTooltip);
                 filterWidgets.insert(i, filterEdit);
                 needsUpdateGeo = true;
             }
 
             filterEdit->updateTextWithoutEmitting(filter.first);
+            filterEdit->setAllowNull(filter.second.testFlag(IPagedItemModel::ExplicitNULL));
         }
 
         //Update sorting
@@ -160,9 +164,34 @@ void FilterHeaderView::inputChanged(FilterHeaderLineEdit *w, const QString& new_
     m->refreshData(true);
 }
 
+void FilterHeaderView::showColumnTooltip(FilterHeaderLineEdit *w, const QPoint &globalPos)
+{
+    int col = w->getColumn();
+    QString str;
+    if(w->allowNull())
+        str = tr("Type <b>#NULL</b> to filter empty cells.");
+
+    QString modelTooltip;
+    if(model()) //Get model header tooltip at requested column
+        modelTooltip = model()->headerData(col, Qt::Horizontal, Qt::ToolTipRole).toString();
+
+    if(!modelTooltip.isEmpty())
+    {
+        if(!str.isEmpty())
+            str.append(QLatin1String("<br><br>")); //Separate with a line between
+        modelTooltip.replace('\n', QLatin1String("<br>")); //Use HTML line break
+        str.append(modelTooltip);
+    }
+
+    if(str.isEmpty())
+        QToolTip::hideText();
+    else
+        QToolTip::showText(globalPos, str, w);
+}
+
 void FilterHeaderView::clearFilters()
 {
-    for(QLineEdit* filterLineEdit : qAsConst(filterWidgets))
+    for(FilterHeaderLineEdit* filterLineEdit : qAsConst(filterWidgets))
         filterLineEdit->clear();
 }
 
