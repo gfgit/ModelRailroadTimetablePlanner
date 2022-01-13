@@ -28,8 +28,6 @@ public:
 
     /*!
      * \brief ensure point is visible
-     * \badcode
-     * @badcode
      *
      * Scrolls the contents of the scroll area so that the point (\a x, \a y) is visible
      * inside the region of the viewport with margins specified in pixels by \a xmargin and

@@ -9,9 +9,9 @@ class StationImportWizard;
 
 class QToolBar;
 class QAction;
-class QLineEdit;
 class QTableView;
 class ImportStationModel;
+class ModelPageSwitcher;
 
 class SelectStationPage : public QWizardPage
 {
@@ -19,23 +19,13 @@ class SelectStationPage : public QWizardPage
 public:
     explicit SelectStationPage(StationImportWizard *w);
 
-
     void setupModel(ImportStationModel *m);
     void finalizeModel();
 
 private slots:
-    void updateFilter();
     void openStationDlg();
     void openStationSVGPlan();
     void importSelectedStation();
-
-    void startFilterTimer();
-
-private:
-    void stopFilterTimer();
-
-protected:
-    void timerEvent(QTimerEvent *e) override;
 
 private:
     StationImportWizard *mWizard;
@@ -45,12 +35,10 @@ private:
     QAction *actOpenSVGPlan;
     QAction *actImportSt;
 
-    QLineEdit *filterNameEdit;
     QTableView *view;
+    ModelPageSwitcher *pageSwitcher;
 
     ImportStationModel *stationsModel;
-
-    int filterTimerId;
 };
 
 #endif // SELECTSTATIONPAGE_H

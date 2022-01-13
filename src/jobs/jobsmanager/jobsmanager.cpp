@@ -4,7 +4,7 @@
 
 #include <QVBoxLayout>
 #include <QTableView>
-#include <QHeaderView>
+#include "utils/delegates/sql/filterheaderview.h"
 #include <QToolBar>
 
 #include "model/joblistmodel.h"
@@ -42,24 +42,16 @@ JobsManager::JobsManager(QWidget *parent) :
     connect(view, &QTableView::doubleClicked, this, &JobsManager::editJobAtRow);
     l->addWidget(view);
 
+    //Custom sorting and filtering
+    FilterHeaderView *header = new FilterHeaderView(view);
+    header->installOnTable(view);
+
     jobsModel = new JobListModel(Session->m_Db, this);
     view->setModel(jobsModel);
 
     auto ps = new ModelPageSwitcher(false, this);
     l->addWidget(ps);
     ps->setModel(jobsModel);
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
-    QHeaderView *header = view->horizontalHeader();
-    disconnect(header, SIGNAL(sectionPressed(int)), view, SLOT(selectColumn(int)));
-    disconnect(header, SIGNAL(sectionEntered(int)), view, SLOT(_q_selectColumn(int)));
-    connect(header, &QHeaderView::sectionClicked, this, [this, header](int section)
-    {
-        jobsModel->setSortingColumn(section);
-        header->setSortIndicator(jobsModel->getSortingColumn(), Qt::AscendingOrder);
-    });
-    header->setSortIndicatorShown(true);
-    header->setSortIndicator(jobsModel->getSortingColumn(), Qt::AscendingOrder);
 
     connect(view->selectionModel(), &QItemSelectionModel::selectionChanged, this, &JobsManager::onSelectionChanged);
     connect(jobsModel, &QAbstractItemModel::modelReset, this, &JobsManager::onSelectionChanged);

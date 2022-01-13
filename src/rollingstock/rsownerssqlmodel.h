@@ -46,6 +46,10 @@ public:
 
     // IPagedItemModel
 
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
+
     // RSOwnersSQLModel
 
     bool removeRSOwner(db_id ownerId, const QString &name);
@@ -60,6 +64,9 @@ protected:
 private:
     friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
+
+private:
+    QString m_ownerFilter;
 };
 
 #endif // RSOWNERSSQLMODEL_H

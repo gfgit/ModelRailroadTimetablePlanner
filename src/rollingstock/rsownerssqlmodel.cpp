@@ -159,6 +159,38 @@ Qt::ItemFlags RSOwnersSQLModel::flags(const QModelIndex &idx) const
     return f;
 }
 
+std::pair<QString, IPagedItemModel::FilterFlags> RSOwnersSQLModel::getFilterAtCol(int col)
+{
+    switch (col)
+    {
+    case Name:
+        return {m_ownerFilter, FilterFlag::BasicFiltering};
+    }
+
+    return {QString(), FilterFlag::NoFiltering};
+}
+
+bool RSOwnersSQLModel::setFilterAtCol(int col, const QString &str)
+{
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
+    switch (col)
+    {
+    case Name:
+    {
+        if(isNull)
+            return false; //Cannot have NULL OwnerName
+        m_ownerFilter = str;
+        break;
+    }
+    default:
+        return false;
+    }
+
+    emit filterChanged();
+    return true;
+}
+
 bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
 {
     if(!ownerId)
@@ -230,6 +262,11 @@ db_id RSOwnersSQLModel::addRSOwner(int *outRow)
         qDebug() << "RS Owner Error adding:" << ret << mDb.error_msg() << mDb.error_code() << mDb.extended_error_code();
     }
 
+    //Clear filters
+    m_ownerFilter.clear();
+    m_ownerFilter.squeeze();
+    emit filterChanged();
+
     refreshData(); //Recalc row count
     switchToPage(0); //Reset to first page and so it is shown as first row
 
@@ -255,55 +292,56 @@ bool RSOwnersSQLModel::removeAllRSOwners()
 
 qint64 RSOwnersSQLModel::recalcTotalItemCount()
 {
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_owners");
+    QByteArray sql = "SELECT COUNT(1) FROM rs_owners";
+    if(!m_ownerFilter.isEmpty())
+    {
+        sql.append(" WHERE rs_owners.name LIKE ?1");
+    }
+
+    query q(mDb, sql);
+
+    if(!m_ownerFilter.isEmpty())
+    {
+        QByteArray ownerFilter;
+        ownerFilter.reserve(m_ownerFilter.size() + 2);
+        ownerFilter.append('%');
+        ownerFilter.append(m_ownerFilter.toUtf8());
+        ownerFilter.append('%');
+        q.bind(1, ownerFilter, sqlite3pp::copy);
+    }
+
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
 }
 
-void RSOwnersSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
 {
     query q(mDb);
 
-    int offset = first - valRow + curPage * ItemsPerPage;
-    bool reverse = false;
+    int offset = first + curPage * ItemsPerPage;
 
-    if(valRow > first)
-    {
-        offset = 0;
-        reverse = true;
-    }
+    qDebug() << "Fetching:" << first << "Offset:" << offset;
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
-
-    const char *whereCol;
 
     QByteArray sql = "SELECT id,name FROM rs_owners";
+    if(!m_ownerFilter.isEmpty())
+    {
+        sql.append(" WHERE rs_owners.name LIKE ?3");
+    }
+
+    const char *sertColExpr = nullptr;
     switch (sortCol)
     {
     case Name:
     {
-        whereCol = "name"; //Order by 2 columns, no where clause
+        sertColExpr = "name"; //Order by 2 columns, no where clause
         break;
     }
     }
 
-    if(val.isValid())
-    {
-        sql += " WHERE ";
-        sql += whereCol;
-        if(reverse)
-            sql += "<?3";
-        else
-            sql += ">?3";
-    }
-
     sql += " ORDER BY ";
-    sql += whereCol;
-
-    if(reverse)
-        sql += " DESC";
+    sql += sertColExpr;
 
     sql += " LIMIT ?1";
     if(offset)
@@ -314,16 +352,14 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int valRow, const Q
     if(offset)
         q.bind(2, offset);
 
-    if(val.isValid())
+    if(!m_ownerFilter.isEmpty())
     {
-        switch (sortCol)
-        {
-        case Name:
-        {
-            q.bind(3, val.toString());
-            break;
-        }
-        }
+        QByteArray ownerFilter;
+        ownerFilter.reserve(m_ownerFilter.size() + 2);
+        ownerFilter.append('%');
+        ownerFilter.append(m_ownerFilter.toUtf8());
+        ownerFilter.append('%');
+        q.bind(3, ownerFilter, sqlite3pp::copy);
     }
 
     QVector<RSOwner> vec(BatchSize);
@@ -331,9 +367,7 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int valRow, const Q
     auto it = q.begin();
     const auto end = q.end();
 
-    int i = reverse ? BatchSize - 1 : 0;
-    const int increment = reverse ? -1 : 1;
-
+    int i = 0;
     for(; it != end; ++it)
     {
         auto r = *it;
@@ -341,12 +375,10 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int valRow, const Q
         item.ownerId = r.get<db_id>(0);
         item.name = r.get<QString>(1);
 
-        i += increment;
+        i += 1;
     }
 
-    if(reverse && i > -1)
-        vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    if(i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);

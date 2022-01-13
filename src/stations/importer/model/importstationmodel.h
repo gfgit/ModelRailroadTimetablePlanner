@@ -44,11 +44,12 @@ public:
 
     // IPagedItemModel
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
+    // Sorting
     virtual void setSortingColumn(int col) override;
 
-    // ImportStationModel
-    void filterByName(const QString& text);
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
 
     // Convinience
     inline db_id getIdAtRow(int row) const
@@ -76,7 +77,7 @@ private:
     friend BaseClass;
     Q_INVOKABLE void internalFetch(int firstRow, int sortCol, int valRow, const QVariant &val);
 
-    QByteArray mNameFilter;
+    QString m_nameFilter;
 };
 
 #endif // IMPORTSTATIONMODEL_H

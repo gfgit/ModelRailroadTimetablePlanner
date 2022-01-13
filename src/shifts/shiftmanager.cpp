@@ -10,12 +10,13 @@
 
 #include <QVBoxLayout>
 
-#include <QTableView>
 #include <QFileDialog>
 #include "utils/files/recentdirstore.h"
 #include <QMessageBox>
 #include "utils/owningqpointer.h"
 
+#include <QTableView>
+#include "utils/delegates/sql/filterheaderview.h"
 #include <QToolBar>
 #include <QActionGroup>
 
@@ -37,6 +38,10 @@ ShiftManager::ShiftManager(QWidget *parent) :
     view = new QTableView(this);
     view->setSelectionMode(QTableView::SingleSelection);
     l->addWidget(view);
+
+    //Custom filtering
+    FilterHeaderView *header = new FilterHeaderView(view);
+    header->installOnTable(view);
 
     auto ps = new ModelPageSwitcher(false, this);
     l->addWidget(ps);

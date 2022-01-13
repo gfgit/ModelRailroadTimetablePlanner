@@ -5,6 +5,10 @@
 
 #include "utils/types.h"
 
+namespace sqlite3pp {
+class query;
+}
+
 struct RSModelsSQLModelItem
 {
     db_id modelId;
@@ -56,8 +60,11 @@ public:
 
     // IPagedItemModel:
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
+
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
 
     // RSModelsSQLModel:
     bool removeRSModel(db_id modelId, const QString &name);
@@ -73,10 +80,16 @@ protected:
 
 private:
     friend BaseClass;
+    void buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData);
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
 
     bool setNameOrSuffix(RSModel &item, const QString &newName, bool suffix);
     bool setType(RSModel &item, RsType type, RsEngineSubType subType);
+
+private:
+    QString m_nameFilter;
+    QString m_suffixFilter;
+    QString m_speedFilter;
 };
 
 #endif // RSMODELSSQLMODEL_H

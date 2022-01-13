@@ -14,7 +14,7 @@
 /*!
  * \brief Set font point size
  * \param font
- * \param points the value of font size to set
+ * \param val the value of font size to set
  * \param p the QPainter which will draw
  *
  * This function is needed because each QPaintDevice has different resolution (DPI)

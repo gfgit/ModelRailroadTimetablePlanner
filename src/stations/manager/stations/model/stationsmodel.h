@@ -6,6 +6,10 @@
 #include "utils/types.h"
 #include "stations/station_utils.h"
 
+namespace sqlite3pp {
+class query;
+}
+
 struct StationModelItem
 {
     db_id stationId;
@@ -52,8 +56,12 @@ public:
 
     // IPagedItemModel
 
-    // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
+    // Sorting
     virtual void setSortingColumn(int col) override;
+
+    //Filter
+    std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
+    bool setFilterAtCol(int col, const QString& str) override;
 
     // StationsModel
     bool addStation(const QString& name, db_id *outStationId = nullptr);
@@ -83,12 +91,17 @@ protected:
 
 private:
     friend BaseClass;
+    void buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData);
     Q_INVOKABLE void internalFetch(int firstRow, int sortCol, int valRow, const QVariant &val);
 
     bool setName(StationItem &item, const QString &val);
     bool setShortName(StationItem &item, const QString &val);
     bool setType(StationItem &item, int val);
     bool setPhoneNumber(StationsModel::StationItem &item, qint64 val);
+
+private:
+    QString m_nameFilter;
+    QString m_phoneFilter;
 };
 
 #endif // STATIONSMODEL_H

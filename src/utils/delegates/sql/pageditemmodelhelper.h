@@ -5,6 +5,14 @@
 
 #include <QEvent>
 
+/*!
+ * \brief IPagedItemModelImpl common implementation
+ *
+ * Common implementation for \ref IPagedItemModel to reduce code duplication
+ *
+ * SuperType is the model inheriting this class
+ * ModelItemType is the item to store in cache which represents a signle row
+ */
 template <typename SuperType, typename ModelItemType>
 class IPagedItemModelImpl : public IPagedItemModel
 {
@@ -28,8 +36,12 @@ public:
 protected:
     typedef QVector<ModelItemType> Cache;
 
-    //TODO: this would be better in .cpp file so
-    //we do not have to include <QEvent> here
+    /*!
+     * \brief The ResultEvent class
+     *
+     * This event will be posted when finished loading a batch of data
+     * and will be received by the model so new data will be added to cache
+     */
     class ResultEvent : public QEvent
     {
     public:

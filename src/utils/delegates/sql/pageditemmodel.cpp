@@ -97,6 +97,19 @@ void IPagedItemModel::switchToPage(int page)
     emit dataChanged(first, last);
 }
 
+std::pair<QString, IPagedItemModel::FilterFlags> IPagedItemModel::getFilterAtCol(int col)
+{
+    Q_UNUSED(col)
+    return {QString(), FilterFlag::NoFiltering};
+}
+
+bool IPagedItemModel::setFilterAtCol(int col, const QString &str)
+{
+    Q_UNUSED(col)
+    Q_UNUSED(str)
+    return false;
+}
+
 void IPagedItemModel::clearCache_slot()
 {
     clearCache();
