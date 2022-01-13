@@ -13,6 +13,11 @@ struct ShiftsModelItem
     QString shiftName;
 };
 
+/*!
+ * \brief The ShiftsModel class
+ *
+ * Paged model to show Job Shifts
+ */
 class ShiftsModel : public IPagedItemModelImpl<ShiftsModel, ShiftsModelItem>
 {
     Q_OBJECT
@@ -50,7 +55,7 @@ public:
     std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
     bool setFilterAtCol(int col, const QString& str) override;
 
-    // ShiftSQLModel
+    // ShiftModel
 
     bool removeShift(db_id shiftId);
     bool removeShiftAt(int row);
