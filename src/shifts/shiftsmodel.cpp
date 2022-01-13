@@ -188,6 +188,7 @@ bool ShiftsModel::setFilterAtCol(int col, const QString &str)
         if(isNull)
             return false; //Cannot have NULL Name
         m_nameFilter = str;
+        break;
     }
     default:
         return false;

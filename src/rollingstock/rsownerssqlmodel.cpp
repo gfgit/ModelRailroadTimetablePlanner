@@ -181,6 +181,7 @@ bool RSOwnersSQLModel::setFilterAtCol(int col, const QString &str)
         if(isNull)
             return false; //Cannot have NULL OwnerName
         m_ownerFilter = str;
+        break;
     }
     default:
         return false;
