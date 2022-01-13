@@ -7,6 +7,14 @@
 class QTableView;
 class FilterHeaderLineEdit;
 
+/*!
+ * \brief The FilterHeaderView class
+ *
+ * Header view which allows to filter on columns
+ *
+ * \sa IPagedItemModel
+ * \sa FilterHeaderLineEdit
+ */
 class FilterHeaderView : public QHeaderView
 {
     Q_OBJECT
@@ -29,7 +37,7 @@ public slots:
     void updateSoring(int col);
 
 signals:
-    void filterChanged(int column, QString value);
+    void filterChanged(int column, const QString& value);
 
 protected:
     void updateGeometries() override;
