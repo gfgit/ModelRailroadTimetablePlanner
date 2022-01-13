@@ -264,11 +264,6 @@ void StationsModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, boo
         sql += " LIMIT ?1";
         if(offset)
             sql += " OFFSET ?2";
-
-        q.prepare(sql);
-        q.bind(1, BatchSize);
-        if(offset)
-            q.bind(2, offset);
     }
 
     q.prepare(sql);
