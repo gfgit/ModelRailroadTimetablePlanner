@@ -281,6 +281,54 @@ void RSModelsSQLModel::setSortingColumn(int col)
     emit dataChanged(first, last);
 }
 
+std::pair<QString, IPagedItemModel::FilterFlags> RSModelsSQLModel::getFilterAtCol(int col)
+{
+    switch (col)
+    {
+    case Name:
+        return {m_nameFilter, FilterFlag::BasicFiltering};
+    case Suffix:
+        return {m_suffixFilter, FilterFlags(FilterFlag::BasicFiltering | FilterFlag::ExplicitNULL)};
+    case MaxSpeed:
+        return {m_speedFilter, FilterFlag::BasicFiltering};
+    }
+
+    return {QString(), FilterFlag::NoFiltering};
+}
+
+bool RSModelsSQLModel::setFilterAtCol(int col, const QString &str)
+{
+    const bool isNull = str.startsWith(nullFilterStr, Qt::CaseInsensitive);
+
+    switch (col)
+    {
+    case Name:
+    {
+        if(isNull)
+            return false; //Cannot have NULL Name
+        m_nameFilter = str;
+        break;
+    }
+    case Suffix:
+    {
+        m_suffixFilter = str;
+        break;
+    }
+    case MaxSpeed:
+    {
+        if(isNull)
+            return false; //Cannot have NULL Speed
+        m_speedFilter = str;
+        break;
+    }
+    default:
+        return false;
+    }
+
+    emit filterChanged();
+    return true;
+}
+
 bool RSModelsSQLModel::removeRSModel(db_id modelId, const QString& name)
 {
     if(!modelId)
@@ -378,6 +426,15 @@ db_id RSModelsSQLModel::addRSModel(int *outRow, db_id sourceModelId, const QStri
         qDebug() << "RS Model Error adding:" << ret << msg << mDb.error_code() << mDb.extended_error_code();
     }
 
+    //Clear filters
+    m_nameFilter.clear();
+    m_nameFilter.squeeze();
+    m_suffixFilter.clear();
+    m_suffixFilter.squeeze();
+    m_speedFilter.clear();
+    m_speedFilter.squeeze();
+    emit filterChanged();
+
     refreshData(); //Recalc row count
     switchToPage(0); //Reset to first page and so it is shown as first row
 
@@ -408,90 +465,140 @@ bool RSModelsSQLModel::removeAllRSModels()
 
 qint64 RSModelsSQLModel::recalcTotalItemCount()
 {
-    //TODO: consider filters
-    query q(mDb, "SELECT COUNT(1) FROM rs_models");
+    query q(mDb);
+    buildQuery(q, 0, 0, false);
+
     q.step();
     const qint64 count = q.getRows().get<qint64>(0);
     return count;
 }
 
-void RSModelsSQLModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+void RSModelsSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData)
 {
-    query q(mDb);
+    QByteArray sql;
+    if(fullData)
+        sql = "SELECT id,name,suffix,max_speed,axes,type,sub_type FROM rs_models";
+    else
+        sql = "SELECT COUNT(1) FROM rs_models";
 
-    int offset = first - valRow + curPage * ItemsPerPage;
-    bool reverse = false;
+    bool whereClauseAdded = false;
 
-    if(valRow > first)
+    if(!m_nameFilter.isEmpty())
     {
-        offset = 0;
-        reverse = true;
+        sql.append(" WHERE name LIKE ?3");
+        whereClauseAdded = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
-
-    const char *whereCol = nullptr;
-
-    QByteArray sql = "SELECT id,name,suffix,max_speed,axes,type,sub_type FROM rs_models";
-    switch (sortCol)
+    bool suffixFilterIsNull = m_suffixFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
+    if(!m_suffixFilter.isEmpty())
     {
-    case Name:
-    {
-        whereCol = "name,suffix"; //Order by 2 columns, no where clause
-        break;
-    }
-    case TypeCol:
-    {
-        whereCol = "type,sub_type,name,suffix"; //Order by 4 columns, no where clause
-        break;
-    }
-    }
-
-    if(val.isValid())
-    {
-        sql += " WHERE ";
-        sql += whereCol;
-        if(reverse)
-            sql += "<?3";
+        if(whereClauseAdded)
+            sql.append(" AND ");
         else
-            sql += ">?3";
+            sql.append(" WHERE ");
+
+        //NOTE: suffix cannot be NULL because we need to enforce UNIQUE constraint
+        //To emulate NULL suffix we store an empty string
+        if(suffixFilterIsNull)
+            sql.append("suffix = ''");
+        else
+            sql.append("suffix LIKE ?4");
     }
 
-    sql += " ORDER BY ";
-    sql += whereCol;
-
-    if(reverse)
-        sql += " DESC";
-
-    sql += " LIMIT ?1";
-    if(offset)
-        sql += " OFFSET ?2";
-
-    q.prepare(sql);
-    q.bind(1, BatchSize);
-    if(offset)
-        q.bind(2, offset);
-
-    if(val.isValid())
+    if(!m_speedFilter.isEmpty())
     {
+        if(whereClauseAdded)
+            sql.append(" AND ");
+        else
+            sql.append(" WHERE ");
+
+        sql.append("max_speed LIKE ?5");
+    }
+
+    if(fullData)
+    {
+        //Apply sorting
+        const char *sortColExpr = nullptr;
         switch (sortCol)
         {
         case Name:
         {
-            q.bind(3, val.toString());
+            sortColExpr = "name,suffix"; //Order by 2 columns, no where clause
+            break;
+        }
+        case TypeCol:
+        {
+            sortColExpr = "type,sub_type,name,suffix"; //Order by 4 columns, no where clause
             break;
         }
         }
+
+        sql += " ORDER BY ";
+        sql += sortColExpr;
+
+        sql += " LIMIT ?1";
+        if(offset)
+            sql += " OFFSET ?2";
     }
+
+    q.prepare(sql);
+
+    if(fullData)
+    {
+        //Apply offset and batch size
+        q.bind(1, BatchSize);
+        if(offset)
+            q.bind(2, offset);
+    }
+
+    //Apply filters
+    QByteArray nameFilter;
+    if(!m_nameFilter.isEmpty())
+    {
+        nameFilter.reserve(m_nameFilter.size() + 2);
+        nameFilter.append('%');
+        nameFilter.append(m_nameFilter.toUtf8());
+        nameFilter.append('%');
+        sqlite3_bind_text(q.stmt(), 3, nameFilter, nameFilter.size(), SQLITE_STATIC);
+    }
+
+    QByteArray suffixFilter;
+    if(!m_suffixFilter.isEmpty() && !suffixFilterIsNull)
+    {
+        suffixFilter.reserve(m_suffixFilter.size() + 2);
+        suffixFilter.append('%');
+        suffixFilter.append(m_suffixFilter.toUtf8());
+        suffixFilter.append('%');
+        sqlite3_bind_text(q.stmt(), 4, suffixFilter, suffixFilter.size(), SQLITE_STATIC);
+    }
+
+    QByteArray speedFilter;
+    if(!m_speedFilter.isEmpty())
+    {
+        speedFilter.reserve(m_speedFilter.size() + 2);
+        speedFilter.append('%');
+        speedFilter.append(m_speedFilter.toUtf8());
+        speedFilter.append('%');
+        sqlite3_bind_text(q.stmt(), 5, speedFilter, speedFilter.size(), SQLITE_STATIC);
+    }
+}
+
+void RSModelsSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
+{
+    query q(mDb);
+
+    int offset = first + curPage * ItemsPerPage;
+
+    qDebug() << "Fetching:" << first << "Offset:" << offset;
+
+    buildQuery(q, sortCol, offset, true);
 
     QVector<RSModel> vec(BatchSize);
 
     auto it = q.begin();
     const auto end = q.end();
 
-    int i = reverse ? BatchSize - 1 : 0;
-    const int increment = reverse ? -1 : 1;
-
+    int i = 0;
     for(; it != end; ++it)
     {
         auto r = *it;
@@ -504,12 +611,10 @@ void RSModelsSQLModel::internalFetch(int first, int sortCol, int valRow, const Q
         item.type = RsType(r.get<int>(5));
         item.sub_type = RsEngineSubType(r.get<int>(6));
 
-        i += increment;
+        i += 1;
     }
 
-    if(reverse && i > -1)
-        vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    if(i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
