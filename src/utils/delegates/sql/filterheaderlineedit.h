@@ -3,6 +3,13 @@
 
 #include <QLineEdit>
 
+/*!
+ * \brief The FilterHeaderLineEdit class
+ *
+ * Line edit with delayed signal and custom context menu and tooltip
+ *
+ * \sa FilterHeaderView
+ */
 class FilterHeaderLineEdit : public QLineEdit
 {
     Q_OBJECT
