@@ -502,7 +502,7 @@ std::pair<int, int> ShiftGraphScene::getJobItemAt(const QPointF &scenePos) const
         return ret;
 
     const qreal x = scenePos.x() - horizOffset;
-    if(x < 0 || x > 24 * horizOffset)
+    if(x < 0 || x > 24 * hourOffset)
         return ret;
 
     QTime t = QTime::fromMSecsSinceStartOfDay(qFloor(x / hourOffset * MSEC_PER_HOUR));
