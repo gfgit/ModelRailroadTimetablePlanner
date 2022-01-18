@@ -2,8 +2,12 @@
 
 #include "app/session.h"
 
+#include "utils/jobcategorystrings.h"
+
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
+
+#include <QPainter>
 
 static constexpr const char *sql_getStName = "SELECT name,short_name FROM stations"
                                              " WHERE id=?";
@@ -21,6 +25,13 @@ static constexpr const char *sql_getJobs = "SELECT jobs.id, jobs.category,"
                                            " GROUP BY jobs.id"
                                            " ORDER BY s1.arrival ASC";
 
+//See src/graph/view/backgroundhelper.cpp
+inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
+{
+    const qreal pointSize = val * 72.0 / qreal(p->device()->logicalDpiY());
+    font.setPointSizeF(pointSize);
+}
+
 ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
     mDb(db)
@@ -36,6 +47,145 @@ ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
     connect(Session, &MeetingSession::shiftNameChanged, this, &ShiftGraphScene::onShiftNameChanged);
     connect(Session, &MeetingSession::shiftRemoved, this, &ShiftGraphScene::onShiftRemoved);
     connect(Session, &MeetingSession::shiftJobsChanged, this, &ShiftGraphScene::onShiftJobsChanged);
+}
+
+void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
+{
+    QTextOption jobTextOpt(Qt::AlignCenter);
+    QTextOption stationTextOpt(Qt::AlignVCenter | Qt::AlignLeft);
+
+    QFont jobFont;
+    setFontPointSizeDPI(jobFont, 15, painter);
+    painter->setFont(jobFont);
+
+    QPen jobPen;
+    jobPen.setWidth(5);
+
+    QPen textPen;
+
+    db_id lastStId = 0;
+
+    qreal y = vertOffset + spaceOffset / 2;
+    for(const ShiftRow& shift : qAsConst(m_shifts))
+    {
+        const qreal top = y;
+        qreal jobY = top + shiftOffset / 2;
+        qreal bottomY = top + shiftOffset;
+        y = bottomY + spaceOffset;
+
+        if(bottomY < sceneRect.top())
+            continue; //Shift is above requested view
+        if(top > sceneRect.bottom())
+            break; //Shift is below requested view and next will be out too
+
+        for(const JobItem& item : shift.jobList)
+        {
+            double firstX = jobPos(item.start);
+            double lastX = jobPos(item.end);
+
+            if(lastX < sceneRect.left())
+                continue; //Job is at left of requested view
+
+            if(firstX > sceneRect.right())
+                break; //Next Jobs are after in time so they will be out too
+
+            jobPen.setColor(Session->colorForCat(item.job.category));
+            painter->setPen(jobPen);
+
+            //Draw Job line
+            painter->drawLine(firstX, jobY, lastX, jobY);
+
+            painter->setPen(textPen);
+
+            //Draw Job Name above line
+            const QString jobName = JobCategoryName::jobName(item.job.jobId, item.job.category);
+            QRectF textRect(firstX, top, lastX - firstX, shiftOffset / 2);
+            painter->drawText(textRect, jobName, jobTextOpt);
+
+            //Draw Station names below line
+            textRect.moveTop(jobY);
+
+            if(!hideSameStations || lastStId != item.fromStId)
+            {
+                //Origin is different from previous Job Destination
+                QString stName = m_stationCache.value(item.fromStId, QString());
+                painter->drawText(textRect, stName, stationTextOpt);
+            }
+
+            textRect.setLeft(firstX + textRect.width() / 2);
+            QString stName = m_stationCache.value(item.toStId, QString());
+            painter->drawText(textRect, stName, stationTextOpt);
+
+            lastStId = item.toStId;
+        }
+    }
+}
+
+void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect, double vertScroll)
+{
+    QTextOption shiftTextOpt(Qt::AlignCenter);
+
+    QFont shiftFont;
+    shiftFont.setBold(true);
+    setFontPointSizeDPI(shiftFont, 25, painter);
+    painter->setFont(shiftFont);
+
+    QPen shiftPen(Qt::red);
+    painter->setPen(shiftPen);
+
+    QRectF labelRect = rect;
+    labelRect.setHeight(shiftOffset);
+
+    qreal y = vertOffset + spaceOffset / 2 - vertScroll;
+    for(const ShiftRow& shift : qAsConst(m_shifts))
+    {
+        const qreal top = y;
+        qreal bottomY = top + shiftOffset;
+        y = bottomY + spaceOffset;
+
+        if(bottomY < rect.top())
+            continue; //Shift is above requested view
+        if(top > rect.bottom())
+            break; //Shift is below requested view and next will be out too
+
+        labelRect.moveTop(top);
+        painter->drawText(labelRect, shift.shiftName, shiftTextOpt);
+    }
+}
+
+void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll)
+{
+    QTextOption hourTextOpt(Qt::AlignCenter);
+
+    QFont hourTextFont;
+    setFontPointSizeDPI(hourTextFont, 15, painter);
+
+    QPen hourTextPen(AppSettings.getHourTextColor());
+
+    painter->setFont(hourTextFont);
+    painter->setPen(hourTextPen);
+
+    const QString fmt(QStringLiteral("%1:00"));
+
+    QRectF labelRect = rect;
+    labelRect.setWidth(hourOffset);
+
+    qreal x = horizOffset - hourOffset / 2 - horizScroll;
+
+    for(int h = 0; h <= 24; h++)
+    {
+        qreal left = x;
+        qreal right = left + hourOffset;
+        x = right;
+
+        if(right < rect.left())
+            continue;
+        if(left > rect.right())
+            break;
+
+        labelRect.moveLeft(left);
+        painter->drawText(labelRect, fmt.arg(h), hourTextOpt);
+    }
 }
 
 bool ShiftGraphScene::loadShifts()
@@ -180,9 +330,9 @@ void ShiftGraphScene::updateShiftGraphOptions()
     horizOffset = AppSettings.getShiftHorizOffset();
     vertOffset = AppSettings.getShiftVertOffset();
 
-    jobOffset = AppSettings.getShiftJobOffset();
-    jobBoxOffset = AppSettings.getShiftJobBoxOffset();
-    stationNameOffset = AppSettings.getShiftStationOffset();
+    shiftOffset = AppSettings.getShiftJobOffset();
+    //jobBoxOffset = AppSettings.getShiftJobBoxOffset();
+    //stationNameOffset = AppSettings.getShiftStationOffset();
     hideSameStations = AppSettings.getShiftHideSameStations();
 
     emit redrawGraph();

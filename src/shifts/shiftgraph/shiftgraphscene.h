@@ -13,6 +13,10 @@ class database;
 class query;
 }
 
+class QPainter;
+
+constexpr qreal MSEC_PER_HOUR = 1000 * 60 * 60;
+
 class ShiftGraphScene : public QObject
 {
     Q_OBJECT
@@ -39,6 +43,10 @@ public:
 
     ShiftGraphScene(sqlite3pp::database& db, QObject *parent = nullptr);
 
+    void drawShifts(QPainter *painter, const QRectF& sceneRect);
+    void drawShiftHeader(QPainter *painter, const QRectF& rect, double vertScroll);
+    void drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll);
+
 public slots:
     bool loadShifts();
 
@@ -61,6 +69,11 @@ private:
 
     std::pair<int, int> lowerBound(db_id shiftId, const QString& name);
 
+    inline qreal jobPos(const QTime& t)
+    {
+        return t.msecsSinceStartOfDay() / MSEC_PER_HOUR * hourOffset + horizOffset;
+    }
+
 private:
     sqlite3pp::database& mDb;
 
@@ -69,13 +82,11 @@ private:
 
     //Options
     qreal hourOffset = 150;
-    qreal jobOffset = 50;
+    qreal shiftOffset = 50;
+    qreal spaceOffset = 10;
 
     qreal horizOffset = 50;
     qreal vertOffset = 20;
-
-    qreal jobBoxOffset = 20;
-    qreal stationNameOffset = 5;
 
     bool hideSameStations = true;
 };
