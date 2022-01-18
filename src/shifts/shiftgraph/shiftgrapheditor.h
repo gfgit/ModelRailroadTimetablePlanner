@@ -5,12 +5,12 @@
 
 #include "utils/types.h"
 
-class QGraphicsView;
 class QToolBar;
 
-class ShiftGraphHolder;
+class ShiftGraphView;
+class ShiftGraphScene;
 
-class QPrinter;
+class QPainter;
 
 class ShiftGraphEditor : public QWidget
 {
@@ -21,24 +21,23 @@ public:
 
     void exportSVG(const QString &fileName);
     void exportPDF(const QString &fileName);
-    void print(QPrinter *printer);
-    void updateJobColors();
-
-public slots:
-    void onSaveGraph();
-    void onPrintGraph();
-    void onShowOptions();
-
-    void calculateGraph();
-
-    void refreshView();
 
 private slots:
+    void redrawGraph();
+
+    void onSaveGraph();
+    void onPrintGraph();
+
     void showShiftMenuForJob(db_id jobId);
+
+private:
+    void renderGraph(QPainter *painter);
+
 private:
     QToolBar *toolBar;
-    QGraphicsView *view;
-    ShiftGraphHolder *graph;
+
+    ShiftGraphView *view;
+    ShiftGraphScene *m_scene;
 };
 
 #endif // SHIFTGRAPHEDITOR_H
