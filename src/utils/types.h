@@ -58,8 +58,8 @@ constexpr JobCategory FirstPassengerCategory = JobCategory::REGIONAL;
 
 struct JobEntry
 {
-    db_id jobId;
-    JobCategory category;
+    db_id jobId = 0;
+    JobCategory category = JobCategory::NCategories;
 };
 
 struct JobStopEntry
