@@ -35,15 +35,19 @@ ShiftGraphEditor::ShiftGraphEditor(QWidget *parent) :
     toolBar->addAction(tr("Print"), this, &ShiftGraphEditor::onPrintGraph);
     toolBar->addAction(tr("Refresh"), this, &ShiftGraphEditor::redrawGraph);
 
+
     m_scene = new ShiftGraphScene(Session->m_Db, this);
     m_scene->loadShifts();
+
+    view = new ShiftGraphView;
+    view->setScene(m_scene);
 
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->addWidget(toolBar);
     lay->addWidget(view);
 
-    setMinimumSize(300, 200);
-    setWindowTitle(tr("Shift Graph Editor"));
+    setMinimumSize(500, 400);
+    setWindowTitle(tr("Shift Graph"));
 }
 
 ShiftGraphEditor::~ShiftGraphEditor()
