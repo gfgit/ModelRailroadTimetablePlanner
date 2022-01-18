@@ -13,5 +13,9 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   shifts/shiftgraph/shiftgraphholder.cpp
   shifts/shiftgraph/shiftscene.cpp
   shifts/shiftgraph/shiftgraphobj.cpp
+
+  shifts/shiftgraph/shiftgraphscene.h
+  shifts/shiftgraph/shiftgraphscene.cpp
+
   PARENT_SCOPE
 )
