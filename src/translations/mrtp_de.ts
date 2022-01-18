@@ -6,32 +6,32 @@
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="21"/>
         <source>Insert path here or click &apos;Choose&apos; button</source>
-        <translation type="unfinished"></translation>
+        <translation>Fügen Sie hier den Pfad ein oder klicken Sie auf die Schaltfläche &quot;Auswählen&quot;</translation>
     </message>
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="25"/>
         <source>Choose</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen</translation>
     </message>
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="29"/>
         <source>Choose file</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei wählen</translation>
     </message>
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="30"/>
         <source>Choose a file to import in selected format</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie eine zu importierende Datei im ausgewählten Format aus</translation>
     </message>
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="65"/>
         <source>File doesn&apos;t exist</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei existiert nicht</translation>
     </message>
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="66"/>
         <source>Could not find file &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei &apos;%1&apos; konnte nicht gefunden werden</translation>
     </message>
 </context>
 <context>
@@ -39,17 +39,17 @@
     <message>
         <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="32"/>
         <source>Insert value</source>
-        <translation type="unfinished"></translation>
+        <translation>Wert einfügen</translation>
     </message>
     <message>
         <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="53"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="70"/>
         <source>In order to proceed you must select a valid item.</source>
-        <translation type="unfinished"></translation>
+        <translation>Um fortzufahren, müssen Sie einen gültigen Artikel auswählen.</translation>
     </message>
 </context>
 <context>
@@ -57,37 +57,37 @@
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="23"/>
         <source>Filter...</source>
-        <translation type="unfinished"></translation>
+        <translation>Filtern...</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="24"/>
         <source>From station:</source>
-        <translation type="unfinished"></translation>
+        <translation>Vom Bahnhof:</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="28"/>
         <source>Select...</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen...</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="29"/>
         <source>Segment:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="40"/>
         <source>Choose Railway Segment</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählen Sie Eisenbahnsegment</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="52"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/choosesegmentdlg.cpp" line="53"/>
         <source>Invalid railway segment.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültiges Eisenbahnsegment.</translation>
     </message>
 </context>
 <context>
@@ -95,7 +95,7 @@
     <message>
         <location filename="../utils/delegates/color/colorview.cpp" line="30"/>
         <source>Choose a color</source>
-        <translation type="unfinished"></translation>
+        <translation>Wähle eine Farbe</translation>
     </message>
 </context>
 <context>
@@ -103,32 +103,32 @@
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="33"/>
         <source>Name...</source>
-        <translation type="unfinished"></translation>
+        <translation>Name...</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="34"/>
         <source>Name:</source>
-        <translation type="unfinished"></translation>
+        <translation>Name:</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="37"/>
         <source>Km </source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="38"/>
         <source>Start at:</source>
-        <translation type="unfinished"></translation>
+        <translation>Fange an bei:</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="48"/>
         <source>Add station</source>
-        <translation type="unfinished"></translation>
+        <translation>Bahnhof hinzufügen</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="51"/>
         <source>Remove After</source>
-        <translation type="unfinished"></translation>
+        <translation>Danach entfernen</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="64"/>
@@ -143,12 +143,12 @@
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="79"/>
         <source>Edit Line</source>
-        <translation type="unfinished"></translation>
+        <translation>Eisenbahnlinie bearbeiten</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="95"/>
         <source>Line name cannot be empty.</source>
-        <translation type="unfinished"></translation>
+        <translation>Bahnlinienname darf nicht leer sein.</translation>
     </message>
     <message>
         <location filename="../stations/manager/lines/dialogs/editlinedlg.cpp" line="126"/>
@@ -1242,93 +1242,93 @@ Message: %3</source>
     <message>
         <location filename="../app/mainwindow.ui" line="30"/>
         <source>File</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="49"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Bearbeiten</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="63"/>
         <source>Help</source>
-        <translation type="unfinished"></translation>
+        <translation>Hilfe</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="70"/>
         <source>View</source>
-        <translation type="unfinished"></translation>
+        <translation>Ansicht</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="102"/>
         <source>Open</source>
-        <translation type="unfinished"></translation>
+        <translation>Öffnen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="107"/>
         <source>Save</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichern</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="112"/>
         <source>Exit</source>
-        <translation type="unfinished"></translation>
+        <translation>Beenden</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="117"/>
         <source>New Job</source>
-        <translation type="unfinished"></translation>
+        <translation>Neuer Zug</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="122"/>
         <location filename="../app/mainwindow.ui" line="125"/>
         <source>Remove Job</source>
-        <translation type="unfinished"></translation>
+        <translation>Zug entfernen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="130"/>
         <source>Stations</source>
-        <translation type="unfinished"></translation>
+        <translation>Bahnhöfe</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="135"/>
         <source>Rollingstock</source>
-        <translation type="unfinished"></translation>
+        <translation>Fahrzeuge</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="140"/>
         <source>New</source>
-        <translation type="unfinished"></translation>
+        <translation>Neu</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="145"/>
         <source>Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Schließen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="150"/>
         <source>About</source>
-        <translation type="unfinished"></translation>
+        <translation>Über</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="155"/>
         <source>About Qt</source>
-        <translation type="unfinished"></translation>
+        <translation>Über Qt</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="160"/>
         <source>Print</source>
-        <translation type="unfinished"></translation>
+        <translation>Drucken</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="165"/>
         <source>Export PDF</source>
-        <translation type="unfinished"></translation>
+        <translation>PDF exportieren</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="170"/>
         <source>Open Recent</source>
-        <translation type="unfinished"></translation>
+        <translation>Zuletzt bearbeitete Dateien</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="175"/>
@@ -1338,12 +1338,12 @@ Message: %3</source>
     <message>
         <location filename="../app/mainwindow.ui" line="180"/>
         <source>Save Copy As</source>
-        <translation type="unfinished"></translation>
+        <translation>Als Kopie speichern</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="183"/>
         <source>Save a backup copy of the current session</source>
-        <translation type="unfinished"></translation>
+        <translation>Speichern Sie eine Sicherungskopie der aktuellen Sitzung</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="188"/>
@@ -1353,17 +1353,17 @@ Message: %3</source>
     <message>
         <location filename="../app/mainwindow.ui" line="193"/>
         <source>Export Svg</source>
-        <translation type="unfinished"></translation>
+        <translation>Svg exportieren</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="198"/>
         <source>Jobs</source>
-        <translation type="unfinished"></translation>
+        <translation>Züge</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="203"/>
         <source>Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Einstellungen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="211"/>
@@ -1378,7 +1378,7 @@ Message: %3</source>
     <message>
         <location filename="../app/mainwindow.ui" line="224"/>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Eigenschaften</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.ui" line="229"/>
@@ -1399,12 +1399,12 @@ Message: %3</source>
         <location filename="../app/mainwindow.cpp" line="84"/>
         <location filename="../app/mainwindow.cpp" line="260"/>
         <source>About %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Über %1</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.cpp" line="137"/>
         <source>Find</source>
-        <translation type="unfinished"></translation>
+        <translation>Suchen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.cpp" line="292"/>
@@ -1540,12 +1540,12 @@ Make sure there aren&apos;t any background tasks running and try again.</source>
     <message>
         <location filename="../app/mainwindow.cpp" line="664"/>
         <source>&lt;p&gt;Open a file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Open&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create new project: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;New&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Datei öffnen: &lt;b&gt;Datei&lt;/b&gt; &gt; &lt;b&gt;Öffnen&lt;/b&gt;&lt;/p&gt;&lt;p&gt;neues Projekt anlegen: &lt;b&gt;Datei&lt;/b&gt; &gt; &lt;b&gt;Neu&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.cpp" line="666"/>
         <source>Open file or create a new one</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei öffnen oder neu erstellen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.cpp" line="677"/>
@@ -1565,7 +1565,7 @@ Make sure there aren&apos;t any background tasks running and try again.</source>
     <message>
         <location filename="../app/mainwindow.cpp" line="937"/>
         <source>Remove selected Job</source>
-        <translation type="unfinished"></translation>
+        <translation>Ausgewählten Zug entfernen</translation>
     </message>
     <message>
         <location filename="../app/mainwindow.cpp" line="939"/>
