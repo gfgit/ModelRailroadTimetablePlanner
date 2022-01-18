@@ -34,6 +34,8 @@ ShiftGraphView::ShiftGraphView(QWidget *parent) :
     connect(verticalScrollBar(), &QScrollBar::valueChanged, shiftHeader, &ShiftGraphNameHeader::setScroll);
     connect(&AppSettings, &MRTPSettings::shiftGraphOptionsChanged, this, &ShiftGraphView::resizeHeaders);
 
+    viewport()->setContextMenuPolicy(Qt::DefaultContextMenu);
+
     resizeHeaders();
 }
 
@@ -115,13 +117,24 @@ bool ShiftGraphView::event(QEvent *e)
 
 bool ShiftGraphView::viewportEvent(QEvent *e)
 {
-    if(e->type() == QEvent::ToolTip && m_scene)
+    if(m_scene && (e->type() == QEvent::ToolTip || e->type() == QEvent::ContextMenu))
     {
-        QHelpEvent *ev = static_cast<QHelpEvent *>(e);
+        QPointF pos;
+        QPoint globalPos;
+        if(e->type() == QEvent::ToolTip)
+        {
+            QHelpEvent *ev = static_cast<QHelpEvent *>(e);
+            pos = ev->pos();
+            globalPos = ev->globalPos();
+        }
+        else
+        {
+            QContextMenuEvent *ev = static_cast<QContextMenuEvent *>(e);
+            pos = ev->pos();
+            globalPos = ev->globalPos();
+        }
 
         const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
-
-        QPointF pos = ev->pos();
         const QRect vp = viewport()->rect();
 
         //Map to viewport
@@ -133,16 +146,19 @@ bool ShiftGraphView::viewportEvent(QEvent *e)
         pos -= origin;
         pos /= mZoom / 100.0;
 
-//        JobStopEntry job = m_scene->getJobAt(pos, Session->platformOffset / 2);
+        if(e->type() == QEvent::ToolTip)
+        {
+            QString msg = m_scene->getTooltipAt(pos);
 
-//        if(job.jobId)
-//        {
-//            QToolTip::showText(ev->globalPos(),
-//                               JobCategoryName::jobName(job.jobId, job.category),
-//                               viewport());
-//        }else{
-//            QToolTip::hideText();
-//        }
+            if(msg.isEmpty())
+                QToolTip::hideText();
+            else
+                QToolTip::showText(globalPos, msg, viewport());
+        }
+        else
+        {
+            //Context menu FIXME
+        }
 
         return true;
     }
