@@ -47,6 +47,8 @@ ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
     connect(Session, &MeetingSession::shiftNameChanged, this, &ShiftGraphScene::onShiftNameChanged);
     connect(Session, &MeetingSession::shiftRemoved, this, &ShiftGraphScene::onShiftRemoved);
     connect(Session, &MeetingSession::shiftJobsChanged, this, &ShiftGraphScene::onShiftJobsChanged);
+
+    updateShiftGraphOptions();
 }
 
 void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
@@ -62,7 +64,7 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
     QPen jobPen;
     jobPen.setWidth(5);
 
-    QPen textPen;
+    QPen textPen(Qt::black, 2);
 
     db_id lastStId = 0;
 
@@ -98,9 +100,9 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 
             painter->setPen(textPen);
 
-            //Draw Job Name above line
+            //Draw Job Name above line, exceed a little bit from job borders
             const QString jobName = JobCategoryName::jobName(item.job.jobId, item.job.category);
-            QRectF textRect(firstX, top, lastX - firstX, shiftOffset / 2);
+            QRectF textRect(firstX - 15, top, lastX - firstX + 30, shiftOffset / 2);
             painter->drawText(textRect, jobName, jobTextOpt);
 
             //Draw Station names below line
@@ -119,6 +121,33 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 
             lastStId = item.toStId;
         }
+
+        //Draw line to separate from previous row
+        qreal sepLineY = bottomY + spaceOffset / 2;
+        painter->drawLine(QLineF(sceneRect.right(), sepLineY, sceneRect.left(), sepLineY));
+    }
+}
+
+void ShiftGraphScene::drawHourLines(QPainter *painter, const QRectF &sceneRect)
+{
+    QPen hourTextPen(Qt::darkGray, 2);
+    painter->setPen(hourTextPen);
+
+    qreal top = qMax(sceneRect.top(), vertOffset);
+    qreal bottom = sceneRect.bottom();
+
+    qreal x = horizOffset;
+    for(int h = 0; h <= 24; h++)
+    {
+        qreal left = x;
+        x += hourOffset;
+
+        if(left < sceneRect.left())
+            continue;
+        if(left > sceneRect.right())
+            break;
+
+        painter->drawLine(QLineF(left, top, left, bottom));
     }
 }
 
@@ -159,7 +188,7 @@ void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect, doub
     QTextOption hourTextOpt(Qt::AlignCenter);
 
     QFont hourTextFont;
-    setFontPointSizeDPI(hourTextFont, 15, painter);
+    setFontPointSizeDPI(hourTextFont, 20, painter);
 
     QPen hourTextPen(AppSettings.getHourTextColor());
 

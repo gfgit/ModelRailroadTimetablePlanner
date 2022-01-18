@@ -42,6 +42,7 @@ public:
     ShiftGraphScene(sqlite3pp::database& db, QObject *parent = nullptr);
 
     void drawShifts(QPainter *painter, const QRectF& sceneRect);
+    void drawHourLines(QPainter *painter, const QRectF &sceneRect);
     void drawShiftHeader(QPainter *painter, const QRectF& rect, double vertScroll);
     void drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll);
 
