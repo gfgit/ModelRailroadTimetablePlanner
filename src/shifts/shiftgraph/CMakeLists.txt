@@ -17,5 +17,14 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   shifts/shiftgraph/shiftgraphscene.h
   shifts/shiftgraph/shiftgraphscene.cpp
 
+  shifts/shiftgraph/shiftgraphview.h
+  shifts/shiftgraph/shiftgraphview.cpp
+
+  shifts/shiftgraph/shiftgraphhourpanel.h
+  shifts/shiftgraph/shiftgraphhourpanel.cpp
+
+  shifts/shiftgraph/shiftgraphnameheader.h
+  shifts/shiftgraph/shiftgraphnameheader.cpp
+
   PARENT_SCOPE
 )

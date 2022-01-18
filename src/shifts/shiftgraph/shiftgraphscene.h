@@ -47,6 +47,8 @@ public:
     void drawShiftHeader(QPainter *painter, const QRectF& rect, double vertScroll);
     void drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll);
 
+    QSize getContentSize() const;
+
 public slots:
     bool loadShifts();
 

@@ -188,6 +188,14 @@ void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect, doub
     }
 }
 
+QSize ShiftGraphScene::getContentSize() const
+{
+    //Set a margin after last hour of half hour offset
+    double width = horizOffset + 24 * hourOffset + hourOffset / 2;
+    double height = vertOffset + (shiftOffset + spaceOffset) * m_shifts.count();
+    return QSize(qRound(width), qRound(height));
+}
+
 bool ShiftGraphScene::loadShifts()
 {
     m_shifts.clear();
