@@ -65,11 +65,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
             this, &SettingsDialog::onShiftGraphOptionsChanged);
     connect(ui->shiftVertOffsetSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &SettingsDialog::onShiftGraphOptionsChanged);
-    connect(ui->shiftJobOffsetSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+    connect(ui->shiftJobRowHeightSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &SettingsDialog::onShiftGraphOptionsChanged);
-    connect(ui->shiftJobBoxOffsetSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
-            this, &SettingsDialog::onShiftGraphOptionsChanged);
-    connect(ui->shiftStLabelOffsetSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
+    connect(ui->shiftJobRowSpaceSpin, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged),
             this, &SettingsDialog::onShiftGraphOptionsChanged);
     connect(ui->shiftHideSameStCheck, &QCheckBox::toggled, this, &SettingsDialog::onShiftGraphOptionsChanged);
 }
@@ -214,9 +212,8 @@ void SettingsDialog::loadSettings()
     set(ui->shiftHourOffsetSpin, settings.getShiftHourOffset());
     set(ui->shiftHorizOffsetSpin, settings.getShiftHorizOffset());
     set(ui->shiftVertOffsetSpin, settings.getShiftVertOffset());
-    set(ui->shiftJobOffsetSpin, settings.getShiftJobOffset());
-    set(ui->shiftJobBoxOffsetSpin, settings.getShiftJobBoxOffset());
-    set(ui->shiftStLabelOffsetSpin, settings.getShiftStationOffset());
+    set(ui->shiftJobRowHeightSpin, settings.getShiftJobRowHeight());
+    set(ui->shiftJobRowSpaceSpin, settings.getShiftJobRowSpace());
     ui->shiftHideSameStCheck->setChecked(settings.getShiftHideSameStations());
 
     //Rollingstock
@@ -301,9 +298,8 @@ void SettingsDialog::saveSettings()
     settings.setShiftHourOffset(ui->shiftHourOffsetSpin->value());
     settings.setShiftHorizOffset(ui->shiftHorizOffsetSpin->value());
     settings.setShiftVertOffset(ui->shiftVertOffsetSpin->value());
-    settings.setShiftJobOffset(ui->shiftJobOffsetSpin->value());
-    settings.setShiftJobBoxOffset(ui->shiftJobBoxOffsetSpin->value());
-    settings.setShiftStationOffset(ui->shiftStLabelOffsetSpin->value());
+    settings.setShiftJobRowHeight(ui->shiftJobRowHeightSpin->value());
+    settings.setShiftJobRowSpace(ui->shiftJobRowSpaceSpin->value());
     settings.setShiftHideSameStations(ui->shiftHideSameStCheck->isChecked());
 
     //Rollingstock
