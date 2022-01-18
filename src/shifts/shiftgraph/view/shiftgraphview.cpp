@@ -32,7 +32,7 @@ ShiftGraphView::ShiftGraphView(QWidget *parent) :
 
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, hourPanel, &ShiftGraphHourPanel::setScroll);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, shiftHeader, &ShiftGraphNameHeader::setScroll);
-    connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &ShiftGraphView::resizeHeaders);
+    connect(&AppSettings, &MRTPSettings::shiftGraphOptionsChanged, this, &ShiftGraphView::resizeHeaders);
 
     resizeHeaders();
 }
@@ -177,8 +177,7 @@ void ShiftGraphView::paintEvent(QPaintEvent *e)
     painter.translate(origin);
     painter.scale(scaleFactor, scaleFactor);
 
-    //BackgroundHelper::drawBackgroundHourLines(&painter, sceneRect);
-
+    m_scene->drawHourLines(&painter, sceneRect);
     m_scene->drawShifts(&painter, sceneRect);
 }
 
