@@ -1,6 +1,6 @@
 #include "shiftgraphnameheader.h"
 
-#include "shiftgraphscene.h"
+#include "shifts/shiftgraph/model/shiftgraphscene.h"
 
 #include <QPainter>
 #include <QPaintEvent>

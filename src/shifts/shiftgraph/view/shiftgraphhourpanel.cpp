@@ -1,6 +1,6 @@
-#include "shifthourpanel.h"
+#include "shiftgraphhourpanel.h"
 
-#include "shiftgraphscene.h"
+#include "shifts/shiftgraph/model/shiftgraphscene.h"
 
 #include <QPainter>
 

@@ -1,3 +1,6 @@
+add_subdirectory(model)
+add_subdirectory(view)
+
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
   shifts/shiftgraph/graphoptions.h
@@ -13,18 +16,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   shifts/shiftgraph/shiftgraphholder.cpp
   shifts/shiftgraph/shiftscene.cpp
   shifts/shiftgraph/shiftgraphobj.cpp
-
-  shifts/shiftgraph/shiftgraphscene.h
-  shifts/shiftgraph/shiftgraphscene.cpp
-
-  shifts/shiftgraph/shiftgraphview.h
-  shifts/shiftgraph/shiftgraphview.cpp
-
-  shifts/shiftgraph/shiftgraphhourpanel.h
-  shifts/shiftgraph/shiftgraphhourpanel.cpp
-
-  shifts/shiftgraph/shiftgraphnameheader.h
-  shifts/shiftgraph/shiftgraphnameheader.cpp
 
   PARENT_SCOPE
 )

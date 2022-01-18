@@ -1,6 +1,6 @@
 #include "shiftgraphview.h"
 
-#include "shiftgraphscene.h"
+#include "shifts/shiftgraph/model/shiftgraphscene.h"
 
 #include "shiftgraphnameheader.h"
 #include "shiftgraphhourpanel.h"
