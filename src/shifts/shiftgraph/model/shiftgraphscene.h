@@ -15,8 +15,6 @@ class query;
 
 class QPainter;
 
-constexpr qreal MSEC_PER_HOUR = 1000 * 60 * 60;
-
 class ShiftGraphScene : public QObject
 {
     Q_OBJECT
@@ -71,6 +69,7 @@ private:
 
     std::pair<int, int> lowerBound(db_id shiftId, const QString& name);
 
+    static constexpr qreal MSEC_PER_HOUR = 1000 * 60 * 60;
     inline qreal jobPos(const QTime& t)
     {
         return t.msecsSinceStartOfDay() / MSEC_PER_HOUR * hourOffset + horizOffset;

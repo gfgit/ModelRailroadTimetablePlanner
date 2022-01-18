@@ -52,7 +52,8 @@ ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
 void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 {
     QTextOption jobTextOpt(Qt::AlignCenter);
-    QTextOption stationTextOpt(Qt::AlignVCenter | Qt::AlignLeft);
+    QTextOption fromStationTextOpt(Qt::AlignVCenter | Qt::AlignLeft);
+    QTextOption toStationTextOpt(Qt::AlignVCenter | Qt::AlignRight);
 
     QFont jobFont;
     setFontPointSizeDPI(jobFont, 15, painter);
@@ -109,12 +110,12 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
             {
                 //Origin is different from previous Job Destination
                 QString stName = m_stationCache.value(item.fromStId, QString());
-                painter->drawText(textRect, stName, stationTextOpt);
+                painter->drawText(textRect, stName, fromStationTextOpt);
             }
 
             textRect.setLeft(firstX + textRect.width() / 2);
             QString stName = m_stationCache.value(item.toStId, QString());
-            painter->drawText(textRect, stName, stationTextOpt);
+            painter->drawText(textRect, stName, toStationTextOpt);
 
             lastStId = item.toStId;
         }
@@ -236,6 +237,106 @@ bool ShiftGraphScene::loadShifts()
     return true;
 }
 
+void ShiftGraphScene::updateShiftGraphOptions()
+{
+    hourOffset = AppSettings.getShiftHourOffset();
+    horizOffset = AppSettings.getShiftHorizOffset();
+    vertOffset = AppSettings.getShiftVertOffset();
+
+    shiftOffset = AppSettings.getShiftJobOffset();
+    //jobBoxOffset = AppSettings.getShiftJobBoxOffset();
+    //stationNameOffset = AppSettings.getShiftStationOffset();
+    hideSameStations = AppSettings.getShiftHideSameStations();
+
+    emit redrawGraph();
+}
+
+void ShiftGraphScene::onShiftNameChanged(db_id shiftId)
+{
+    query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
+    q.bind(1, shiftId);
+    if(q.step() != SQLITE_ROW)
+        return;
+
+    QString newName = q.getRows().get<QString>(0);
+
+    auto pos = lowerBound(shiftId, newName);
+
+    if(pos.first == -1)
+    {
+        //This shift is new, add it
+        ShiftRow obj;
+        obj.shiftId = shiftId;
+        obj.shiftName = newName;
+
+        //Load jobs
+        query q_getStName(mDb, sql_getStName);
+        query q_countJobs(mDb, sql_countJobs);
+        query q_getJobs(mDb, sql_getJobs);
+        loadShiftRow(obj, q_getStName, q_countJobs, q_getJobs);
+
+        m_shifts.insert(pos.second, obj);
+    }
+    else
+    {
+        //Move shift to keep alphabetical order
+        m_shifts[pos.first].shiftName = newName;
+        if(pos.second > pos.first)
+            pos.second--;
+        m_shifts.move(pos.first, pos.second);
+    }
+
+    emit redrawGraph();
+}
+
+void ShiftGraphScene::onShiftRemoved(db_id shiftId)
+{
+    for(auto it = m_shifts.begin(); it != m_shifts.end(); it++)
+    {
+        if(it->shiftId == shiftId)
+        {
+            m_shifts.erase(it);
+            break;
+        }
+    }
+
+    emit redrawGraph();
+}
+
+void ShiftGraphScene::onShiftJobsChanged(db_id shiftId)
+{
+    //Reload single shift
+    query q_getStName(mDb, sql_getStName);
+    query q_countJobs(mDb, sql_countJobs);
+    query q_getJobs(mDb, sql_getJobs);
+
+    for(ShiftRow& shift : m_shifts)
+    {
+        if(shift.shiftId == shiftId)
+        {
+            loadShiftRow(shift, q_getStName, q_countJobs, q_getJobs);
+            break;
+        }
+    }
+
+    emit redrawGraph();
+}
+
+void ShiftGraphScene::onStationNameChanged(db_id stationId)
+{
+    if(m_stationCache.contains(stationId))
+    {
+        //Reload name
+        m_stationCache.remove(stationId);
+
+        query q_getStName(mDb, sql_getStName);
+        loadStationName(stationId, q_getStName);
+
+        emit redrawGraph();
+    }
+}
+
+
 bool ShiftGraphScene::loadShiftRow(ShiftRow &shiftObj, query &q_getStName, query &q_countJobs, sqlite3pp::query &q_getJobs)
 {
     shiftObj.jobList.clear();
@@ -330,98 +431,4 @@ std::pair<int, int> ShiftGraphScene::lowerBound(db_id shiftId, const QString &na
     }
 
     return {oldIdx, firstIdx};
-}
-
-void ShiftGraphScene::updateShiftGraphOptions()
-{
-    hourOffset = AppSettings.getShiftHourOffset();
-    horizOffset = AppSettings.getShiftHorizOffset();
-    vertOffset = AppSettings.getShiftVertOffset();
-
-    shiftOffset = AppSettings.getShiftJobOffset();
-    //jobBoxOffset = AppSettings.getShiftJobBoxOffset();
-    //stationNameOffset = AppSettings.getShiftStationOffset();
-    hideSameStations = AppSettings.getShiftHideSameStations();
-
-    emit redrawGraph();
-}
-
-void ShiftGraphScene::onShiftNameChanged(db_id shiftId)
-{
-    query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
-    q.bind(1, shiftId);
-    if(q.step() != SQLITE_ROW)
-        return;
-
-    QString newName = q.getRows().get<QString>(0);
-
-    auto pos = lowerBound(shiftId, newName);
-
-    if(pos.first == -1)
-    {
-        //This shift is new, add it
-        ShiftRow obj;
-        obj.shiftId = shiftId;
-        obj.shiftName = newName;
-
-        //Load jobs
-        query q_getStName(mDb, sql_getStName);
-        query q_countJobs(mDb, sql_countJobs);
-        query q_getJobs(mDb, sql_getJobs);
-        loadShiftRow(obj, q_getStName, q_countJobs, q_getJobs);
-
-        m_shifts.insert(pos.second, obj);
-    }
-    else
-    {
-        //Move shift to keep alphabetical order
-        m_shifts.move(pos.first, pos.second);
-    }
-}
-
-void ShiftGraphScene::onShiftRemoved(db_id shiftId)
-{
-    for(auto it = m_shifts.begin(); it != m_shifts.end(); it++)
-    {
-        if(it->shiftId == shiftId)
-        {
-            m_shifts.erase(it);
-            break;
-        }
-    }
-
-    emit redrawGraph();
-}
-
-void ShiftGraphScene::onShiftJobsChanged(db_id shiftId)
-{
-    //Reload single shift
-    query q_getStName(mDb, sql_getStName);
-    query q_countJobs(mDb, sql_countJobs);
-    query q_getJobs(mDb, sql_getJobs);
-
-    for(ShiftRow& shift : m_shifts)
-    {
-        if(shift.shiftId == shiftId)
-        {
-            loadShiftRow(shift, q_getStName, q_countJobs, q_getJobs);
-            break;
-        }
-    }
-
-    emit redrawGraph();
-}
-
-void ShiftGraphScene::onStationNameChanged(db_id stationId)
-{
-    if(m_stationCache.contains(stationId))
-    {
-        //Reload name
-        m_stationCache.remove(stationId);
-
-        query q_getStName(mDb, sql_getStName);
-        loadStationName(stationId, q_getStName);
-
-        emit redrawGraph();
-    }
 }
