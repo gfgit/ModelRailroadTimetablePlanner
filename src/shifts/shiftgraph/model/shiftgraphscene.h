@@ -24,8 +24,8 @@ public:
     {
         JobEntry job;
 
-        db_id fromStId;
-        db_id toStId;
+        db_id fromStId = 0;
+        db_id toStId = 0;
 
         QTime start;
         QTime end;
@@ -47,6 +47,9 @@ public:
     void drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll);
 
     QSize getContentSize() const;
+
+    JobEntry getJobAt(const QPointF& scenePos) const;
+    QString getTooltipAt(const QPointF& scenePos) const;
 
 public slots:
     bool loadShifts();
@@ -75,6 +78,8 @@ private:
     {
         return t.msecsSinceStartOfDay() / MSEC_PER_HOUR * hourOffset + horizOffset;
     }
+
+    std::pair<int, int> getJobItemAt(const QPointF& scenePos) const;
 
 private:
     sqlite3pp::database& mDb;

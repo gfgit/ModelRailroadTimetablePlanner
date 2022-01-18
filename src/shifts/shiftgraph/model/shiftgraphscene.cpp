@@ -9,6 +9,8 @@ using namespace sqlite3pp;
 
 #include <QPainter>
 
+#include <QtMath>
+
 static constexpr const char *sql_getStName = "SELECT name,short_name FROM stations"
                                              " WHERE id=?";
 
@@ -224,6 +226,33 @@ QSize ShiftGraphScene::getContentSize() const
     double width = horizOffset + 24 * hourOffset + hourOffset / 2;
     double height = vertOffset + (shiftRowHeight + rowSpaceOffset) * m_shifts.count();
     return QSize(qRound(width), qRound(height));
+}
+
+JobEntry ShiftGraphScene::getJobAt(const QPointF &scenePos) const
+{
+    auto pos = getJobItemAt(scenePos);
+    if(pos.first < 0 || pos.second < 0)
+        return {};
+
+    return m_shifts.at(pos.first).jobList.at(pos.second).job;
+}
+
+QString ShiftGraphScene::getTooltipAt(const QPointF &scenePos) const
+{
+    auto pos = getJobItemAt(scenePos);
+    if(pos.first < 0 || pos.second < 0)
+        return {};
+
+    const ShiftGraph& shift = m_shifts.at(pos.first);
+    const JobItem item = shift.jobList.at(pos.second);
+
+    return tr("Job: <b>%1</b><br>"
+              "Shift: <b>%2</b><br>"
+              "From: <b>%3</b> at <b>%4</b><br>"
+              "To: <b>%5</b> at <b>%6</b>")
+        .arg(JobCategoryName::jobName(item.job.jobId, item.job.category), shift.shiftName)
+        .arg(m_stationCache.value(item.fromStId, QString()), item.start.toString("HH:mm"))
+        .arg(m_stationCache.value(item.toStId, QString()), item.end.toString("HH:mm"));
 }
 
 bool ShiftGraphScene::loadShifts()
@@ -461,4 +490,37 @@ std::pair<int, int> ShiftGraphScene::lowerBound(db_id shiftId, const QString &na
     }
 
     return {oldIdx, firstIdx};
+}
+
+std::pair<int, int> ShiftGraphScene::getJobItemAt(const QPointF &scenePos) const
+{
+    std::pair<int, int> ret{-1, -1};
+
+    const qreal y = scenePos.y() - vertOffset - rowSpaceOffset / 2;
+    int shiftIdx = qFloor(y / (shiftRowHeight + rowSpaceOffset));
+    if(shiftIdx < 0 || shiftIdx >= m_shifts.size())
+        return ret;
+
+    const qreal x = scenePos.x() - horizOffset;
+    if(x < 0 || x > 24 * horizOffset)
+        return ret;
+
+    QTime t = QTime::fromMSecsSinceStartOfDay(qFloor(x / hourOffset * MSEC_PER_HOUR));
+
+    const ShiftGraph& shift = m_shifts.at(shiftIdx);
+
+    int jobIdx = 0;
+    for(const JobItem& item : shift.jobList)
+    {
+        if(item.start <= t && item.end >= t)
+        {
+            ret.first = shiftIdx;
+            ret.second = jobIdx;
+            break;
+        }
+
+        jobIdx++;
+    }
+
+    return ret;
 }
