@@ -31,7 +31,7 @@ public:
         QTime end;
     };
 
-    struct ShiftRow
+    struct ShiftGraph
     {
         db_id shiftId;
         QString shiftName;
@@ -64,7 +64,7 @@ private slots:
     void onStationNameChanged(db_id stationId);
 
 private:
-    bool loadShiftRow(ShiftRow& shiftObj, sqlite3pp::query& q_getStName,
+    bool loadShiftRow(ShiftGraph& shiftObj, sqlite3pp::query& q_getStName,
                       sqlite3pp::query& q_countJobs, sqlite3pp::query& q_getJobs);
     void loadStationName(db_id stationId, sqlite3pp::query& q_getStName);
 
@@ -79,13 +79,13 @@ private:
 private:
     sqlite3pp::database& mDb;
 
-    QVector<ShiftRow> m_shifts;
+    QVector<ShiftGraph> m_shifts;
     QHash<db_id, QString> m_stationCache;
 
     //Options
     qreal hourOffset = 150;
-    qreal shiftOffset = 50;
-    qreal spaceOffset = 10;
+    qreal shiftRowHeight = 50;
+    qreal rowSpaceOffset = 10;
 
     qreal horizOffset = 50;
     qreal vertOffset = 20;

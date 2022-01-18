@@ -66,20 +66,20 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 
     QPen textPen(Qt::black, 2);
 
-    db_id lastStId = 0;
-
-    qreal y = vertOffset + spaceOffset / 2;
-    for(const ShiftRow& shift : qAsConst(m_shifts))
+    qreal y = vertOffset + rowSpaceOffset / 2;
+    for(const ShiftGraph& shift : qAsConst(m_shifts))
     {
         const qreal top = y;
-        qreal jobY = top + shiftOffset / 2;
-        qreal bottomY = top + shiftOffset;
-        y = bottomY + spaceOffset;
+        qreal jobY = top + shiftRowHeight / 2;
+        qreal bottomY = top + shiftRowHeight;
+        y = bottomY + rowSpaceOffset;
 
         if(bottomY < sceneRect.top())
             continue; //Shift is above requested view
         if(top > sceneRect.bottom())
             break; //Shift is below requested view and next will be out too
+
+        db_id lastStId = 0;
 
         for(const JobItem& item : shift.jobList)
         {
@@ -102,7 +102,7 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 
             //Draw Job Name above line, exceed a little bit from job borders
             const QString jobName = JobCategoryName::jobName(item.job.jobId, item.job.category);
-            QRectF textRect(firstX - 15, top, lastX - firstX + 30, shiftOffset / 2);
+            QRectF textRect(firstX - 15, top, lastX - firstX + 30, shiftRowHeight / 2);
             painter->drawText(textRect, jobName, jobTextOpt);
 
             //Draw Station names below line
@@ -123,7 +123,7 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
         }
 
         //Draw line to separate from previous row
-        qreal sepLineY = bottomY + spaceOffset / 2;
+        qreal sepLineY = bottomY + rowSpaceOffset / 2;
         painter->drawLine(QLineF(sceneRect.right(), sepLineY, sceneRect.left(), sepLineY));
     }
 }
@@ -164,14 +164,14 @@ void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect, dou
     painter->setPen(shiftPen);
 
     QRectF labelRect = rect;
-    labelRect.setHeight(shiftOffset);
+    labelRect.setHeight(shiftRowHeight);
 
-    qreal y = vertOffset + spaceOffset / 2 - vertScroll;
-    for(const ShiftRow& shift : qAsConst(m_shifts))
+    qreal y = vertOffset + rowSpaceOffset / 2 - vertScroll;
+    for(const ShiftGraph& shift : qAsConst(m_shifts))
     {
         const qreal top = y;
-        qreal bottomY = top + shiftOffset;
-        y = bottomY + spaceOffset;
+        qreal bottomY = top + shiftRowHeight;
+        y = bottomY + rowSpaceOffset;
 
         if(bottomY < rect.top())
             continue; //Shift is above requested view
@@ -222,7 +222,7 @@ QSize ShiftGraphScene::getContentSize() const
 {
     //Set a margin after last hour of half hour offset
     double width = horizOffset + 24 * hourOffset + hourOffset / 2;
-    double height = vertOffset + (shiftOffset + spaceOffset) * m_shifts.count();
+    double height = vertOffset + (shiftRowHeight + rowSpaceOffset) * m_shifts.count();
     return QSize(qRound(width), qRound(height));
 }
 
@@ -253,7 +253,7 @@ bool ShiftGraphScene::loadShifts()
     q.prepare("SELECT id,name FROM jobshifts ORDER BY name");
     for(auto shift : q)
     {
-        ShiftRow obj;
+        ShiftGraph obj;
         obj.shiftId = shift.get<db_id>(0);
         obj.shiftName = shift.get<QString>(1);
 
@@ -268,11 +268,12 @@ bool ShiftGraphScene::loadShifts()
 
 void ShiftGraphScene::updateShiftGraphOptions()
 {
-    hourOffset = AppSettings.getShiftHourOffset();
+    hourOffset  = AppSettings.getShiftHourOffset();
     horizOffset = AppSettings.getShiftHorizOffset();
-    vertOffset = AppSettings.getShiftVertOffset();
+    vertOffset  = AppSettings.getShiftVertOffset();
 
-    shiftOffset = AppSettings.getShiftJobOffset();
+    shiftRowHeight = AppSettings.getShiftJobRowHeight();
+    rowSpaceOffset = AppSettings.getShiftJobRowSpace();
     //jobBoxOffset = AppSettings.getShiftJobBoxOffset();
     //stationNameOffset = AppSettings.getShiftStationOffset();
     hideSameStations = AppSettings.getShiftHideSameStations();
@@ -294,7 +295,7 @@ void ShiftGraphScene::onShiftNameChanged(db_id shiftId)
     if(pos.first == -1)
     {
         //This shift is new, add it
-        ShiftRow obj;
+        ShiftGraph obj;
         obj.shiftId = shiftId;
         obj.shiftName = newName;
 
@@ -339,7 +340,7 @@ void ShiftGraphScene::onShiftJobsChanged(db_id shiftId)
     query q_countJobs(mDb, sql_countJobs);
     query q_getJobs(mDb, sql_getJobs);
 
-    for(ShiftRow& shift : m_shifts)
+    for(ShiftGraph& shift : m_shifts)
     {
         if(shift.shiftId == shiftId)
         {
@@ -366,7 +367,7 @@ void ShiftGraphScene::onStationNameChanged(db_id stationId)
 }
 
 
-bool ShiftGraphScene::loadShiftRow(ShiftRow &shiftObj, query &q_getStName, query &q_countJobs, sqlite3pp::query &q_getJobs)
+bool ShiftGraphScene::loadShiftRow(ShiftGraph &shiftObj, query &q_getStName, query &q_countJobs, sqlite3pp::query &q_getJobs)
 {
     shiftObj.jobList.clear();
 
@@ -447,7 +448,7 @@ std::pair<int, int> ShiftGraphScene::lowerBound(db_id shiftId, const QString &na
         int half = len >> 1;
         int middleIdx = firstIdx + half;
 
-        const ShiftRow& obj = m_shifts.at(middleIdx);
+        const ShiftGraph& obj = m_shifts.at(middleIdx);
         if(obj.shiftId != shiftId && obj.shiftName < name)
         {
             firstIdx = middleIdx + 1;
