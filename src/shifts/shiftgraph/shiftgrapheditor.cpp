@@ -134,6 +134,10 @@ void ShiftGraphEditor::exportPDF(const QString& fileName)
     printer.setCreator(AppDisplayName);
     printer.setDocName(QStringLiteral("Railway Shift"));
 
+    QPageLayout lay = printer.pageLayout();
+    lay.setPageSize(QPageSize(m_scene->getContentSize(), QPageSize::Point));
+    printer.setPageLayout(lay);
+
     QPainter painter(&printer);
     renderGraph(&painter);
 }
