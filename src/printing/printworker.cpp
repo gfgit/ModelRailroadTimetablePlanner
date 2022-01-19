@@ -14,6 +14,8 @@
 #include <QPdfWriter>
 #include <QSvgGenerator>
 
+#include <QtMath>
+
 #include "info.h"
 
 #include <QFile>
@@ -199,6 +201,185 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
     return true;
 }
 
+bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage)
+{
+    QPainter painter;
+
+    if(!selection->startIteration())
+    {
+        //Send error and quit
+        sendEvent(new PrintProgressEvent(this,
+                                         PrintProgressEvent::ProgressError,
+                                         PrintWizard::tr("Cannot iterate items.\n"
+                                                         "Check database connection.")),
+                  true);
+        return false;
+    }
+
+    int progressiveNum = 0;
+
+    const int vertOffset = Session->vertOffset;
+    const int horizOffset = Session->horizOffset;
+
+    //To avoid calling newPage() at end of loop
+    //which would result in an empty extra page after last drawn page
+    bool isFirstPage = true;
+
+    bool drawPageFrame = true;
+    double pageFramePenWidth = 5;
+    QPen pageFramePen(Qt::darkRed, pageFramePenWidth);
+
+    while (true)
+    {
+        if(wasStopped())
+        {
+            sendEvent(new PrintProgressEvent(this,
+                                             PrintProgressEvent::ProgressAbortedByUser,
+                                             QString()), true);
+            return false;
+        }
+
+        const SceneSelectionModel::Entry entry = selection->getNextEntry();
+        if(!entry.objectId)
+            break; //Finished
+
+        if(!scene->loadGraph(entry.objectId, entry.type))
+            continue; //Loading error, skip
+
+        const QRectF sceneRect(QPointF(), scene->getContentSize());
+
+        //Send progress and description
+        sendEvent(new PrintProgressEvent(this, progressiveNum, scene->getGraphObjectName()), false);
+
+        bool valid = true;
+        if(func)
+            valid = func(&painter, scene->getGraphObjectName(), sceneRect,
+                         entry.type, progressiveNum);
+        if(!valid)
+            return false;
+
+        //Reset transformation on new scene
+        painter.resetTransform();
+
+        QPagedPaintDevice *dev = static_cast<QPagedPaintDevice *>(painter.device());
+        const QRectF deviceRect(QPointF(), QSizeF(dev->width(), dev->height()));
+
+        //Apply scaling
+        qreal scaleFactor = 5; //FIXME: arbitrary value for testing, make user option
+        QRectF targetRect(deviceRect.topLeft(), deviceRect.size() / scaleFactor);
+        painter.scale(scaleFactor, scaleFactor);
+
+        //Inverse scale frame pen to keep it independent
+        pageFramePen.setWidth(pageFramePenWidth / scaleFactor);
+
+        //Apply overlap margin
+        qreal overlapMargin = targetRect.width() / 15; //FIXME: arbitrary value for testing, make user option
+
+        //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
+        //Calculate effective content size
+        QPointF effectivePageOrigin(overlapMargin, overlapMargin);
+        QSizeF effectivePageSize = targetRect.size();
+        effectivePageSize.rwidth() -= 2 * overlapMargin;
+        effectivePageSize.rheight() -= 2 * overlapMargin;
+
+        int horizPageCount = qCeil(sceneRect.width() / effectivePageSize.width());
+        int vertPageCount = qCeil(sceneRect.height() / effectivePageSize.height());
+
+        QRectF stationLabelRect = sceneRect;
+        stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
+
+        QRectF hourPanelRect = sceneRect;
+        hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
+
+        QRectF sourceRect = targetRect;
+        stationLabelRect.setWidth(sourceRect.width());
+        hourPanelRect.setHeight(sourceRect.height());
+
+        //FIXME: remove, temp fix to align correctly in print preview dialog
+        dev->newPage(); //This skips 'Cover' page when chosing booklet 2 page layout
+
+        for(int y = 0; y < vertPageCount; y++)
+        {
+            //Start at leftmost column
+            painter.translate(sourceRect.left(), 0);
+            sourceRect.moveLeft(0);
+
+            for(int x = 0; x < horizPageCount; x++)
+            {
+                if(isFirstPage)
+                    isFirstPage = false;
+                else
+                    dev->newPage();
+
+                //Clipping must be set on every new page
+                //Since clipping works in logical (QPainter) coordinates
+                //we use sourceRect which is already transformed
+                painter.setClipRect(sourceRect);
+
+                BackgroundHelper::drawBackgroundHourLines(&painter, sourceRect);
+                BackgroundHelper::drawStations(&painter, scene, sourceRect);
+                BackgroundHelper::drawJobStops(&painter, scene, sourceRect, false);
+                BackgroundHelper::drawJobSegments(&painter, scene, sourceRect, false);
+
+                if(x == 0)
+                {
+                    //Left column pages have hour labels
+                    hourPanelRect.moveTop(sourceRect.top());
+                    BackgroundHelper::drawHourPanel(&painter, hourPanelRect, 0);
+                }
+
+                if(y == 0)
+                {
+                    //Top row pages have station labels
+                    stationLabelRect.moveLeft(sourceRect.left());
+                    BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect, 0);
+                }
+
+                if(drawPageFrame)
+                {
+                    //Draw a frame to help align printed pages
+                    painter.setPen(pageFramePen);
+                    QLineF arr[4] = {
+                        //Top
+                        QLineF(sourceRect.left(),  sourceRect.top() + overlapMargin,
+                               sourceRect.right(), sourceRect.top() + overlapMargin),
+                        //Bottom
+                        QLineF(sourceRect.left(),  sourceRect.bottom() - overlapMargin,
+                               sourceRect.right(), sourceRect.bottom() - overlapMargin),
+                        //Left
+                        QLineF(sourceRect.left() + overlapMargin, sourceRect.top(),
+                               sourceRect.left() + overlapMargin, sourceRect.bottom()),
+                        //Right
+                        QLineF(sourceRect.right() - overlapMargin, sourceRect.top(),
+                               sourceRect.right() - overlapMargin, sourceRect.bottom())
+                    };
+                    painter.drawLines(arr, 4);
+                }
+
+                //Go left
+                sourceRect.moveLeft(sourceRect.left() + effectivePageSize.width());
+                painter.translate(-effectivePageSize.width(), 0);
+            }
+
+            //Go down and back to left most column
+            sourceRect.moveTop(sourceRect.top() + effectivePageSize.height());
+            painter.translate(sourceRect.left(), -effectivePageSize.height());
+            sourceRect.moveLeft(0);
+        }
+
+        //Reset to top most and left most
+        painter.translate(sourceRect.topLeft());
+        sourceRect.moveTopLeft(QPointF());
+
+        if(endPaintingEveryPage)
+            painter.end();
+
+        progressiveNum++;
+    }
+
+    return true;
+}
+
 bool PrintWorker::printSvg()
 {
     std::unique_ptr<QSvgGenerator> svg;
@@ -359,5 +540,5 @@ bool PrintWorker::printPaged()
         return true;
     };
 
-    return printInternal(beginPaint, false);
+    return printInternalPaged(beginPaint, false);
 }

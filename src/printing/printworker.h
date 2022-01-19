@@ -73,6 +73,7 @@ private:
                                LineGraphType type, int progressiveNum)> BeginPaintFunc;
 
     bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
+    bool printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage);
 
 private:
     QPrinter *m_printer;
