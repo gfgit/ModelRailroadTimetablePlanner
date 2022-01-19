@@ -436,7 +436,7 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
 
             //Draw a semi transparent background to ease text reading
             painter->fillRect(textRect, textBackground);
-            painter->drawText(textRect, jobName, QTextOption(Qt::AlignCenter));
+            painter->drawText(textRect, jobName, textOption);
 
             //Reset to old transformation
             painter->setTransform(oldTransf);
