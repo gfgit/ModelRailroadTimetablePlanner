@@ -222,19 +222,49 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     const int vertOffset = Session->vertOffset;
     const int horizOffset = Session->horizOffset;
 
-    //To avoid calling newPage() at end of loop
-    //which would result in an empty extra page after last drawn page
-    bool isFirstPage = true;
 
-    bool drawPageFrame = true;
-    double pageFramePenWidth = 5;
-    QPen pageFramePen(Qt::darkRed, pageFramePenWidth);
+    //Page Layout
+    struct PageLayoutOpt
+    {
+        QRectF devicePageRect;
+        QRectF scaledPageRect;
 
-    bool drawPageNumbers = true;
-    double pageNumbersFontSize = 20;
-    QFont pageNumbersFont;
-    pageNumbersFont.setBold(true);
-    QString pageNumbersFmt = QStringLiteral("Row: %1/%2 Col: %3/%4");
+        double scaleFactor;
+        double overlapMarginWidth;
+
+        int horizPageCnt;
+        int vertPageCnt;
+
+        bool drawPageMargins;
+        double pageMarginsPenWidth;
+        QPen pageMarginsPen;
+
+        bool isFirstPage;
+    };
+
+    PageLayoutOpt pageLay;
+    pageLay.scaleFactor = 1; //FIXME: arbitrary value for testing, make user option
+    pageLay.overlapMarginWidth = pageLay.scaledPageRect.width() / 15; //FIXME: arbitrary value for testing, make user option
+
+    pageLay.drawPageMargins = true;
+    pageLay.pageMarginsPenWidth = 5;
+    pageLay.pageMarginsPen = QPen(Qt::darkRed, pageLay.pageMarginsPenWidth);
+    pageLay.isFirstPage = true;
+
+    //Page Numbers
+    struct PageNumberOpt
+    {
+        QFont font;
+        QString fmt;
+        double fontSize;
+        bool enable;
+    };
+
+    PageNumberOpt pageNumberOpt;
+    pageNumberOpt.enable = true;
+    pageNumberOpt.fontSize = 20;
+    pageNumberOpt.font.setBold(true);
+    pageNumberOpt.fmt = QStringLiteral("Row: %1/%2 Col: %3/%4");
 
     while (true)
     {
@@ -269,33 +299,34 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         painter.resetTransform();
 
         QPagedPaintDevice *dev = static_cast<QPagedPaintDevice *>(painter.device());
-        const QRectF deviceRect(QPointF(), QSizeF(dev->width(), dev->height()));
+        pageLay.devicePageRect = QRectF(QPointF(), QSizeF(dev->width(), dev->height()));
 
         //Apply scaling
-        qreal scaleFactor = 1; //FIXME: arbitrary value for testing, make user option
-        QRectF targetRect(deviceRect.topLeft(), deviceRect.size() / scaleFactor);
-        painter.scale(scaleFactor, scaleFactor);
+        pageLay.scaledPageRect = QRectF(pageLay.devicePageRect.topLeft(), pageLay.devicePageRect.size() / pageLay.scaleFactor);
+        painter.scale(pageLay.scaleFactor, pageLay.scaleFactor);
+
+        //Calculate margin
+        pageLay.overlapMarginWidth = pageLay.scaledPageRect.width() / 15; //FIXME: arbitrary value for testing, make user option
 
         //Inverse scale frame pen and page numbers font to keep them independent
-        pageFramePen.setWidth(pageFramePenWidth / scaleFactor);
-        setFontPointSizeDPI(pageNumbersFont, pageNumbersFontSize / scaleFactor, &painter);
+        pageLay.pageMarginsPen.setWidth(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
+        setFontPointSizeDPI(pageNumberOpt.font, pageNumberOpt.fontSize / pageLay.scaleFactor, &painter);
 
         //Apply overlap margin
-        qreal overlapMargin = targetRect.width() / 15; //FIXME: arbitrary value for testing, make user option
-
         //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
         //Calculate effective content size inside margins
-        QPointF effectivePageOrigin(overlapMargin, overlapMargin);
-        QSizeF effectivePageSize = targetRect.size();
-        effectivePageSize.rwidth() -= 2 * overlapMargin;
-        effectivePageSize.rheight() -= 2 * overlapMargin;
+        QPointF effectivePageOrigin(pageLay.overlapMarginWidth, pageLay.overlapMarginWidth);
+        QSizeF effectivePageSize = pageLay.scaledPageRect.size();
+        effectivePageSize.rwidth() -= 2 * pageLay.overlapMarginWidth;
+        effectivePageSize.rheight() -= 2 * pageLay.overlapMarginWidth;
 
         //Page info rect above top margin to draw page numbers
-        QRectF pageNumbersRect(QPointF(overlapMargin, 0), QSizeF(effectivePageSize.width(), overlapMargin));
+        QRectF pageNumbersRect(QPointF(pageLay.overlapMarginWidth, 0),
+                               QSizeF(effectivePageSize.width(), pageLay.overlapMarginWidth));
 
         //Calculate page count
-        int horizPageCount = qCeil(sceneRect.width() / effectivePageSize.width());
-        int vertPageCount = qCeil(sceneRect.height() / effectivePageSize.height());
+        pageLay.horizPageCnt = qCeil(sceneRect.width() / effectivePageSize.width());
+        pageLay.vertPageCnt = qCeil(sceneRect.height() / effectivePageSize.height());
 
         QRectF stationLabelRect = sceneRect;
         stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
@@ -303,23 +334,25 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         QRectF hourPanelRect = sceneRect;
         hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
 
-        QRectF sourceRect = targetRect;
+        QRectF sourceRect = pageLay.scaledPageRect;
         stationLabelRect.setWidth(sourceRect.width());
         hourPanelRect.setHeight(sourceRect.height());
 
         //FIXME: remove, temp fix to align correctly in print preview dialog
         dev->newPage(); //This skips 'Cover' page when chosing booklet 2 page layout
 
-        for(int y = 0; y < vertPageCount; y++)
+        for(int y = 0; y < pageLay.vertPageCnt; y++)
         {
             //Start at leftmost column
             painter.translate(sourceRect.left(), 0);
             sourceRect.moveLeft(0);
 
-            for(int x = 0; x < horizPageCount; x++)
+            for(int x = 0; x < pageLay.horizPageCnt; x++)
             {
-                if(isFirstPage)
-                    isFirstPage = false;
+                //To avoid calling newPage() at end of loop
+                //which would result in an empty extra page after last drawn page
+                if(pageLay.isFirstPage)
+                    pageLay.isFirstPage = false;
                 else
                     dev->newPage();
 
@@ -347,40 +380,39 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
                     BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect, 0);
                 }
 
-                if(drawPageFrame)
+                if(pageLay.drawPageMargins)
                 {
                     //Draw a frame to help align printed pages
-                    painter.setPen(pageFramePen);
+                    painter.setPen(pageLay.pageMarginsPen);
                     QLineF arr[4] = {
                         //Top
-                        QLineF(sourceRect.left(),  sourceRect.top() + overlapMargin,
-                               sourceRect.right(), sourceRect.top() + overlapMargin),
+                        QLineF(sourceRect.left(),  sourceRect.top() + pageLay.overlapMarginWidth,
+                               sourceRect.right(), sourceRect.top() + pageLay.overlapMarginWidth),
                         //Bottom
-                        QLineF(sourceRect.left(),  sourceRect.bottom() - overlapMargin,
-                               sourceRect.right(), sourceRect.bottom() - overlapMargin),
+                        QLineF(sourceRect.left(),  sourceRect.bottom() - pageLay.overlapMarginWidth,
+                               sourceRect.right(), sourceRect.bottom() - pageLay.overlapMarginWidth),
                         //Left
-                        QLineF(sourceRect.left() + overlapMargin, sourceRect.top(),
-                               sourceRect.left() + overlapMargin, sourceRect.bottom()),
+                        QLineF(sourceRect.left() + pageLay.overlapMarginWidth, sourceRect.top(),
+                               sourceRect.left() + pageLay.overlapMarginWidth, sourceRect.bottom()),
                         //Right
-                        QLineF(sourceRect.right() - overlapMargin, sourceRect.top(),
-                               sourceRect.right() - overlapMargin, sourceRect.bottom())
+                        QLineF(sourceRect.right() - pageLay.overlapMarginWidth, sourceRect.top(),
+                               sourceRect.right() - pageLay.overlapMarginWidth, sourceRect.bottom())
                     };
                     painter.drawLines(arr, 4);
                 }
 
-                if(drawPageNumbers)
+                if(pageNumberOpt.enable)
                 {
+                    //Draw page numbers to help laying out printed pages
                     //Add +1 because loop starts from 0
-                    const QString str = pageNumbersFmt
-                                            .arg(y + 1).arg(vertPageCount)
-                                            .arg(x + 1).arg(horizPageCount);
+                    const QString str = pageNumberOpt.fmt
+                                            .arg(y + 1).arg(pageLay.vertPageCnt)
+                                            .arg(x + 1).arg(pageLay.horizPageCnt);
 
                     //Move to top left but separate a bit from left margin
                     pageNumbersRect.moveTop(sourceRect.top());
-                    pageNumbersRect.moveLeft(sourceRect.left() + overlapMargin * 1.5);
-                    painter.fillRect(pageNumbersRect, QColor(0, 255, 0, 50));
-
-                    painter.setFont(pageNumbersFont);
+                    pageNumbersRect.moveLeft(sourceRect.left() + pageLay.overlapMarginWidth * 1.5);
+                    painter.setFont(pageNumberOpt.font);
                     painter.drawText(pageNumbersRect, Qt::AlignVCenter | Qt::AlignLeft, str);
                 }
 
