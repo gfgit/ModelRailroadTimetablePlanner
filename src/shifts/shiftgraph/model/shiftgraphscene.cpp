@@ -8,6 +8,7 @@
 using namespace sqlite3pp;
 
 #include <QPainter>
+#include "utils/font_utils.h"
 
 #include <QtMath>
 
@@ -26,13 +27,6 @@ static constexpr const char *sql_getJobs = "SELECT jobs.id, jobs.category,"
                                            " WHERE jobs.shift_id=?"
                                            " GROUP BY jobs.id"
                                            " ORDER BY s1.arrival ASC";
-
-//See src/graph/view/backgroundhelper.cpp
-inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
-{
-    const qreal pointSize = val * 72.0 / qreal(p->device()->logicalDpiY());
-    font.setPointSizeF(pointSize);
-}
 
 ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),

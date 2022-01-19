@@ -6,6 +6,7 @@ add_subdirectory(wizard)
 
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
+  utils/font_utils.h
   utils/jobcategorystrings.h
   utils/owningqpointer.h
   utils/rs_types_names.h

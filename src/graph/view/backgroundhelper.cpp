@@ -6,31 +6,11 @@
 #include "utils/jobcategorystrings.h"
 
 #include <QPainter>
+#include "utils/font_utils.h"
 
 #include <QtMath>
 
 #include <QDebug>
-
-/*!
- * \brief Set font point size
- * \param font
- * \param val the value of font size to set
- * \param p the QPainter which will draw
- *
- * This function is needed because each QPaintDevice has different resolution (DPI)
- * The default value is 72 dots per inch (DPI)
- * But for example QPdfWriter default is 1200,
- * QPrinter default is 300 an QWidget depends on the screen,
- * so it depends on Operating System display settings.
- *
- * To avoid differences between screen contents and printed output we
- * rescale font sizes as it would be if DPI was 72
- */
-inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
-{
-    const qreal pointSize = val * 72.0 / qreal(p->device()->logicalDpiY());
-    font.setPointSizeF(pointSize);
-}
 
 void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, double verticalScroll)
 {
