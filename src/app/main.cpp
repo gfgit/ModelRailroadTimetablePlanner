@@ -31,19 +31,19 @@ void myMessageOutput(QtMsgType type, const QMessageLogContext &context, const QS
     static const QString fmt = QStringLiteral("%1: %2\n");
     switch (type) {
     case QtDebugMsg:
-        str = fmt.arg(QStringLiteral("Debug")).arg(msg); //.arg(context.file).arg(context.line).arg(context.function);
+        str = fmt.arg(QStringLiteral("Debug"), msg); //.arg(context.file).arg(context.line).arg(context.function);
         break;
     case QtInfoMsg:
-        str = fmt.arg(QStringLiteral("Info")).arg(msg); //.arg(context.file).arg(context.line).arg(context.function);
+        str = fmt.arg(QStringLiteral("Info"), msg); //.arg(context.file).arg(context.line).arg(context.function);
         break;
     case QtWarningMsg:
-        str = fmt.arg(QStringLiteral("Warning")).arg(msg); //.arg(context.file).arg(context.line).arg(context.function);
+        str = fmt.arg(QStringLiteral("Warning"), msg); //.arg(context.file).arg(context.line).arg(context.function);
         break;
     case QtCriticalMsg:
-        str = fmt.arg(QStringLiteral("Critical")).arg(msg); //.arg(context.file).arg(context.line).arg(context.function);
+        str = fmt.arg(QStringLiteral("Critical"), msg); //.arg(context.file).arg(context.line).arg(context.function);
         break;
     case QtFatalMsg:
-        str = fmt.arg(QStringLiteral("Fatal")).arg(msg); //.arg(context.file).arg(context.line).arg(context.function);
+        str = fmt.arg(QStringLiteral("Fatal"), msg); //.arg(context.file).arg(context.line).arg(context.function);
     }
 
     QTextStream s(gLogFile());

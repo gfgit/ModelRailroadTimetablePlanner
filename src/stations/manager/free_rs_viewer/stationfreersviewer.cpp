@@ -113,8 +113,8 @@ void StationFreeRSViewer::goToNext()
     {
         QMessageBox::information(this, tr("No Operation Found"),
                                  tr("No operation found in station %1 after %2!")
-                                 .arg(model->getStationName())
-                                 .arg(model->getTime().toString("HH:mm")));
+                                     .arg(model->getStationName(),
+                                          model->getTime().toString("HH:mm")));
         return;
     }
 
@@ -144,8 +144,8 @@ void StationFreeRSViewer::goToPrev()
     {
         QMessageBox::information(this, tr("No Operation Found"),
                                  tr("No operation found in station %1 before %2!")
-                                 .arg(model->getStationName())
-                                 .arg(model->getTime().toString("HH:mm")));
+                                     .arg(model->getStationName(),
+                                          model->getTime().toString("HH:mm")));
         return;
     }
 

@@ -51,9 +51,9 @@ void NewJobSamePathDlg::setSourceJob(db_id jobId, JobCategory cat, const QTime &
     label->setText(tr("Create a new job with same path of <b>%1</b>.<br>"
                       "Original job starts at <b>%2</b> and ends at <b>%3</b>.<br>"
                       "Please select below when the new job should start.")
-                       .arg(JobCategoryName::jobName(sourceJobId, sourceJobCat))
-                       .arg(sourceStart.toString("HH:mm"))
-                       .arg(sourceEnd.toString("HH:mm")));
+                       .arg(JobCategoryName::jobName(sourceJobId, sourceJobCat),
+                            sourceStart.toString("HH:mm"),
+                            sourceEnd.toString("HH:mm")));
 
     //Prevent calling checkTimeIsValid()
     QSignalBlocker blk(startTimeEdit);

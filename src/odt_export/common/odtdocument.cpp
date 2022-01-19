@@ -345,15 +345,15 @@ void OdtDocument::saveMeta(const QString& path)
             if(start != end)
             {
                 description = Odt::text(Odt::meetingFromTo)
-                        .arg(meetingLocation)
-                        .arg(start.toString("dd/MM/yyyy"))
-                        .arg(end.toString("dd/MM/yyyy"));
+                                  .arg(meetingLocation,
+                                       start.toString("dd/MM/yyyy"),
+                                       end.toString("dd/MM/yyyy"));
             }
             else
             {
                 description = Odt::text(Odt::meetingOnDate)
-                        .arg(meetingLocation)
-                        .arg(start.toString("dd/MM/yyyy"));
+                                  .arg(meetingLocation,
+                                       start.toString("dd/MM/yyyy"));
             }
 
             xml.writeStartElement("dc:description");

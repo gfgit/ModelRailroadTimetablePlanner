@@ -36,23 +36,21 @@ SessionRSWriter::SessionRSWriter(database &db, SessionRSMode mode, SessionRSOrde
     QString temp = sql.arg(m_mode == SessionRSMode::StartOfSession ? "MIN(stops.arrival)" : "MAX(stops.departure)");
     if(m_order == SessionRSOrder::ByStation)
     {
-        temp = temp
-                .arg("rs_list.owner_id")
-                .arg("rs_owners.name")
-                .arg("stops.station_id")
-                .arg("rs_owners ON rs_owners.id=rs_list.owner_id")
-                .arg("stops.station_id");
+        temp = temp.arg("rs_list.owner_id",
+                        "rs_owners.name",
+                        "stops.station_id",
+                        "rs_owners ON rs_owners.id=rs_list.owner_id",
+                        "stops.station_id");
 
         q_getParentName.prepare("SELECT name FROM stations WHERE id=?");
     }
     else
     {
-        temp = temp
-                .arg("stops.station_id")
-                .arg("stations.name")
-                .arg("rs_list.owner_id")
-                .arg("stations ON stations.id=stops.station_id")
-                .arg("rs_list.owner_id");
+        temp = temp.arg("stops.station_id",
+                        "stations.name",
+                        "rs_list.owner_id",
+                        "stations ON stations.id=stops.station_id",
+                        "rs_list.owner_id");
 
         q_getParentName.prepare("SELECT name FROM rs_owners WHERE id=?");
     }

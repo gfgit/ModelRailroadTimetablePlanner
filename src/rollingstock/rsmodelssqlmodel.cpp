@@ -638,8 +638,8 @@ bool RSModelsSQLModel::setNameOrSuffix(RSModel& item, const QString& newName, bo
         {
             emit modelError(tr(suffix ? errorModelSuffixAlreadyUsedWithSameName
                                       : errorModelNameAlreadyUsedWithSameSuffix)
-                            .arg(newName)
-                            .arg(suffix ? item.name : item.suffix));
+                                .arg(newName,
+                                     suffix ? item.name : item.suffix));
         }
         return false;
     }

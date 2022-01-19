@@ -732,8 +732,8 @@ QColor MeetingSession::colorForCat(JobCategory cat)
 void MeetingSession::locateAppdata()
 {
     appDataPath = QStringLiteral("%1/%2/%3")
-                      .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation))
-                      .arg(AppCompany, AppProductShort);
+                      .arg(QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation),
+                           AppCompany, AppProductShort);
     appDataPath = QDir::cleanPath(appDataPath);
     qDebug() << appDataPath;
 }

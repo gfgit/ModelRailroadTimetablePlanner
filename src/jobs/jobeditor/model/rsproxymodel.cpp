@@ -86,8 +86,8 @@ QVariant RSProxyModel::data(const QModelIndex &idx, int role) const
                 return tr("Rollingstock <b>%1</b> cannot be coupled here because it was already coupled before this stop<br>"
                           "to job <b>%2<b/><br>"
                           "Please remove the tick")
-                        .arg(item.rsName)
-                        .arg(JobCategoryName::jobName(item.jobId, item.jobCat));
+                    .arg(item.rsName,
+                         JobCategoryName::jobName(item.jobId, item.jobCat));
             }
         }
         if(item.flag == WrongStation)
@@ -104,16 +104,16 @@ QVariant RSProxyModel::data(const QModelIndex &idx, int role) const
         if(item.flag == HasNextOperation)
         {
             return tr("Rollingstock <b>%1</b> is coupled in this station also by <b>%2</b> at <b>%3</b>.")
-                    .arg(item.rsName)
-                    .arg(JobCategoryName::jobName(item.jobId, item.jobCat))
-                    .arg(item.time.toString("HH:mm"));
+                .arg(item.rsName,
+                     JobCategoryName::jobName(item.jobId, item.jobCat),
+                     item.time.toString("HH:mm"));
         }
         if(item.flag == LastOperation)
         {
             return tr("Rollingstock <b>%1</b> was left in this station by <b>%2</b> at <b>%3</b>.")
-                    .arg(item.rsName)
-                    .arg(JobCategoryName::jobName(item.jobId, item.jobCat))
-                    .arg(item.time.toString("HH:mm"));
+                .arg(item.rsName,
+                     JobCategoryName::jobName(item.jobId, item.jobCat),
+                     item.time.toString("HH:mm"));
         }
         if(item.flag == FirstUseOfRS)
         {

@@ -96,9 +96,9 @@ void JobChangeShiftDlg::done(int ret)
                 QMessageBox::warning(this, tr("Shift Error"),
                                      tr("Error while setting shift <b>%1</b> to job <b>%2</b>.<br>"
                                         "Msg: %3")
-                                         .arg(shiftName)
-                                         .arg(JobCategoryName::jobName(mJobId, mCategory))
-                                         .arg(mDb.error_msg()));
+                                         .arg(shiftName,
+                                              JobCategoryName::jobName(mJobId, mCategory),
+                                              mDb.error_msg()));
                 return;
             }
 

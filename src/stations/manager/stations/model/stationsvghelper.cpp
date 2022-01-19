@@ -458,8 +458,8 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
         if(!trackId)
             trackId = stop.out_gate.trackId;
 
-        QString tooltip = fmt.arg(JobCategoryName::jobName(stop.job.jobId, stop.job.category))
-                              .arg(stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"));
+        QString tooltip = fmt.arg(JobCategoryName::jobName(stop.job.jobId, stop.job.category),
+                                  stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"));
 
         QRgb color = Session->colorForCat(stop.job.category).rgb();
 

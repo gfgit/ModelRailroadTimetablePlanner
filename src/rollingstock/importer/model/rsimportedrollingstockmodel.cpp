@@ -712,10 +712,10 @@ bool RSImportedRollingstockModel::checkNewNumberIsValid(db_id importedRsId, db_i
             if(matchedNewNumber)
             {
                 *errTextOut = tr("There is already another imported rollingstock with same 'New Number': <b>%1 %2</b>")
-                        .arg(model).arg(rs_utils::formatNum(type, numberToCheck));
+                                  .arg(model, rs_utils::formatNum(type, numberToCheck));
             }else{
                 *errTextOut = tr("There is already another imported rollingstock with same number: <b>%1 %2</b>")
-                        .arg(model).arg(rs_utils::formatNum(type, numberToCheck));
+                                  .arg(model, rs_utils::formatNum(type, numberToCheck));
             }
         }
         return false;
@@ -742,7 +742,7 @@ bool RSImportedRollingstockModel::checkNewNumberIsValid(db_id importedRsId, db_i
             if(errTextOut)
             {
                 *errTextOut = tr("There is already an existing rollingstock with same number: <b>%1 %2</b>")
-                        .arg(modelName).arg(rs_utils::formatNum(type, numberToCheck));
+                                  .arg(modelName, rs_utils::formatNum(type, numberToCheck));
             }
             return false;
         }

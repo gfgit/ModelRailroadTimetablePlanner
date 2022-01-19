@@ -420,8 +420,8 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
                 xml.writeCharacters(start.toString("dd/MM/yyyy"));
             else
                 xml.writeCharacters(Odt::text(Odt::meetingFromToShort)
-                                    .arg(start.toString("dd/MM/yyyy"))
-                                    .arg(end.toString("dd/MM/yyyy")));
+                                        .arg(start.toString("dd/MM/yyyy"),
+                                             end.toString("dd/MM/yyyy")));
             xml.writeEndElement();
         }
     }

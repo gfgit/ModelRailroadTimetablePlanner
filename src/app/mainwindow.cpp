@@ -266,10 +266,9 @@ void MainWindow::about()
             "<p>Version: <b>%2</b></p>"
             "<p>Built: %3</p>"
             "<p>Website: <a href='%4'>%4</a></p>")
-            .arg(qApp->applicationDisplayName())
-            .arg(qApp->applicationVersion())
-            .arg(QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy"))
-            .arg(AppProjectWebSite);
+            .arg(qApp->applicationDisplayName(), qApp->applicationVersion(),
+                 QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy"),
+                 AppProjectWebSite);
 
     msgBox->setTextFormat(Qt::RichText);
     msgBox->setText(translatedText);

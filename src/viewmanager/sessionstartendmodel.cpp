@@ -263,9 +263,9 @@ void SessionStartEndModel::setMode(SessionRSMode m, SessionRSOrder o, bool force
                                     " GROUP BY rs_list.id"
                                     " ORDER BY %2, stops.arrival, stops.job_id, rs_list.model_id");
 
-    QByteArray query = sql.arg(m_mode == SessionRSMode::StartOfSession ? "MIN" : "MAX")
-            .arg(m_order == SessionRSOrder::ByStation ? "stops.station_id" : "rs_list.owner_id")
-            .toUtf8();
+    QByteArray query = sql.arg(m_mode == SessionRSMode::StartOfSession ? "MIN" : "MAX",
+                               m_order == SessionRSOrder::ByStation ? "stops.station_id" : "rs_list.owner_id")
+                           .toUtf8();
 
     q.prepare(query.constData());
 
