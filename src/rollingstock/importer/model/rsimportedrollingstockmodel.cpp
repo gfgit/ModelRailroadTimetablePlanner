@@ -127,32 +127,32 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
 
     qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
 
-    const char *whereCol;
-
     QByteArray sql = "SELECT imp.id, imp.import, imp.model_id, imp.owner_id, imp.number, imp.new_number, models.name, models.type, owners.name, owners.new_name"
                      " FROM imported_rs_list imp"
                      " JOIN imported_rs_models models ON models.id=imp.model_id"
                      " JOIN imported_rs_owners owners ON owners.id=imp.owner_id";
+
+    const char *sortColExpr = nullptr;
     switch (sortCol)
     {
     case Import:
     {
-        whereCol = "imp.import";
+        sortColExpr = "imp.import";
         break;
     }
     case Model:
     {
-        whereCol = "models.name";
+        sortColExpr = "models.name";
         break;
     }
     case Number:
     {
-        whereCol = "imp.number";
+        sortColExpr = "imp.number";
         break;
     }
     case Owner:
     {
-        whereCol = "owners.name";
+        sortColExpr = "owners.name";
         break;
     }
     }
@@ -161,7 +161,7 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
     if(val.isValid())
     {
         sql += " AND ";
-        sql += whereCol;
+        sql += sortColExpr;
         if(reverse)
             sql += "<?3";
         else
@@ -169,7 +169,7 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
     }
 
     sql += " ORDER BY ";
-    sql += whereCol;
+    sql += sortColExpr;
 
     if(reverse)
         sql += " DESC";

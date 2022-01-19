@@ -114,36 +114,36 @@ void RSImportedModelsModel::internalFetch(int first, int sortCol, int valRow, co
 
     qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
 
-    const char *whereCol;
-
     QByteArray sql = "SELECT imp.id,imp.name,imp.suffix,imp.import,imp.new_name,imp.match_existing_id,rs_models.name,"
                      " imp.max_speed,imp.axes,imp.type,imp.sub_type"
                      " FROM imported_rs_models imp LEFT JOIN rs_models ON rs_models.id=imp.match_existing_id";
+
+    const char *sortColExpr = nullptr;
     switch (sortCol)
     {
     case Name:
     {
-        whereCol = "imp.name";
+        sortColExpr = "imp.name";
         break;
     }
     case Import:
     {
-        whereCol = "imp.import DESC, imp.name"; //Order by 2 columns, no where clause
+        sortColExpr = "imp.import DESC, imp.name"; //Order by 2 columns, no where clause
         break;
     }
     case MaxSpeedCol:
     {
-        whereCol = "imp.max_speed";
+        sortColExpr = "imp.max_speed";
         break;
     }
     case AxesCol:
     {
-        whereCol = "imp.axes";
+        sortColExpr = "imp.axes";
         break;
     }
     case TypeCol:
     {
-        whereCol = "imp.type,imp.sub_type"; //Order by 2 columns, no where clause
+        sortColExpr = "imp.type,imp.sub_type"; //Order by 2 columns, no where clause
         break;
     }
     }
@@ -151,7 +151,7 @@ void RSImportedModelsModel::internalFetch(int first, int sortCol, int valRow, co
     if(val.isValid())
     {
         sql += " WHERE ";
-        sql += whereCol;
+        sql += sortColExpr;
         if(reverse)
             sql += "<?3";
         else
@@ -159,7 +159,7 @@ void RSImportedModelsModel::internalFetch(int first, int sortCol, int valRow, co
     }
 
     sql += " ORDER BY ";
-    sql += whereCol;
+    sql += sortColExpr;
 
     if(reverse)
         sql += " DESC";

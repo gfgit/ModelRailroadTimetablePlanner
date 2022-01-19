@@ -741,7 +741,6 @@ void StationEditDialog::saveXmlPlan()
         return;
     }
 
-    QString errMsg;
     if(!StationSVGHelper::writeStationXmlFromDB(mDb, getStation(), &f))
     {
         QMessageBox::warning(this, tr("Error Saving XML"), tr("Unknow error"));

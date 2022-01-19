@@ -158,7 +158,7 @@ void SearchResultModel::abortSearch()
 
 void SearchResultModel::stopAllTasks()
 {
-    for(SearchTask *task : tasks)
+    for(SearchTask *task : qAsConst(tasks))
     {
         task->stop();
         task->cleanup();

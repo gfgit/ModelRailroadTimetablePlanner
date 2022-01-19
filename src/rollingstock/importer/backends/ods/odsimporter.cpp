@@ -185,7 +185,7 @@ void ODSImporter::readTable(QXmlStreamReader &xml)
     bool finished = false;
 
     QByteArray model;
-    qint64 number;
+    qint64 number = -1;
 
     while (!finished && xml.readNext() != QXmlStreamReader::Invalid)
     {

@@ -278,7 +278,7 @@ bool StationImportWizard::addStation(db_id sourceStId, const QString &fullName, 
         cmd.bind(2, int(trackSide));
         cmd.bind(3, gateId);
         cmd.bind(4, gateTrk);
-        ret = cmd.execute();
+        cmd.execute();
         cmd.reset();
     }
 
