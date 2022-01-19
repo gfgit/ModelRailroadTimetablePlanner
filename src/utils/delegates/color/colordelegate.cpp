@@ -47,6 +47,6 @@ void ColorDelegate::commitAndCloseEditor()
 {
     QColorDialog *ed = qobject_cast<QColorDialog *>(sender());
     ed->setEnabled(false);
-    commitData(ed);
-    closeEditor(ed);
+    emit commitData(ed);
+    emit closeEditor(ed);
 }

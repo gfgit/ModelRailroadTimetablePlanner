@@ -53,8 +53,8 @@ void ComboDelegate::onItemClicked()
     QComboBox *combo = qobject_cast<QComboBox *>(sender());
     if(combo)
     {
-        commitData(combo);
-        closeEditor(combo);
+        emit commitData(combo);
+        emit closeEditor(combo);
     }
 }
 

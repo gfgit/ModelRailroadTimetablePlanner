@@ -161,7 +161,7 @@ DB_Error MeetingSession::closeDB()
         return DB_Error::DbNotOpen;
 
 #ifdef SEARCHBOX_MODE_ASYNC
-    backgroundManager->abortTrivialTasks();
+    emit backgroundManager->abortTrivialTasks();
 #endif
 
 #ifdef ENABLE_BACKGROUND_MANAGER

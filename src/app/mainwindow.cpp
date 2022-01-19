@@ -281,7 +281,7 @@ void MainWindow::onOpen()
     DEBUG_ENTRY;
 
 #ifdef SEARCHBOX_MODE_ASYNC
-    Session->getBackgroundManager()->abortTrivialTasks();
+    emit Session->getBackgroundManager()->abortTrivialTasks();
 #endif
 
 #ifdef ENABLE_BACKGROUND_MANAGER

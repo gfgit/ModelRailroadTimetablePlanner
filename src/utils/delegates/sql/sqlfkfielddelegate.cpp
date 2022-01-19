@@ -46,6 +46,6 @@ void SqlFKFieldDelegate::setModelData(QWidget *editor, QAbstractItemModel */*mod
 
 void SqlFKFieldDelegate::handleCompletionDone(CustomCompletionLineEdit *editor)
 {
-    commitData(editor);
-    closeEditor(editor);
+    emit commitData(editor);
+    emit closeEditor(editor);
 }
