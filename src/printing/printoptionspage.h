@@ -26,6 +26,7 @@ private slots:
     void onChooseFile();
     void updateDifferentFiles();
     void onOpenPrintDlg();
+    void onShowPreviewDlg();
 
 private:
     void createFilesBox();
@@ -42,6 +43,7 @@ private:
 
     QGroupBox *printerBox;
     QPushButton *printerOptionDlgBut;
+    QPushButton *previewDlgBut;
 
     QComboBox *outputTypeCombo;
 };

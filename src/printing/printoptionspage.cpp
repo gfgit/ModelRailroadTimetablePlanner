@@ -17,6 +17,11 @@
 
 #include <QFileDialog>
 #include <QPrintDialog>
+#include <QPrintPreviewDialog>
+
+//FIXME: remove
+#include "printworker.h"
+#include <QPrinter>
 
 #include <QFileInfo>
 #include <QStandardPaths>
@@ -102,8 +107,12 @@ void PrintOptionsPage::createPrinterBox()
     printerOptionDlgBut = new QPushButton(tr("Open Printer Options"));
     connect(printerOptionDlgBut, &QPushButton::clicked, this, &PrintOptionsPage::onOpenPrintDlg);
 
+    previewDlgBut = new QPushButton(tr("Preview"));
+    connect(previewDlgBut, &QPushButton::clicked, this, &PrintOptionsPage::onShowPreviewDlg);
+
     QVBoxLayout *l = new QVBoxLayout(printerBox);
     l->addWidget(printerOptionDlgBut);
+    l->addWidget(previewDlgBut);
 }
 
 void PrintOptionsPage::initializePage()
@@ -270,6 +279,21 @@ void PrintOptionsPage::onOpenPrintDlg()
     OwningQPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
     dlg->exec();
     delete dlg;
+}
+
+void PrintOptionsPage::onShowPreviewDlg()
+{
+    OwningQPointer<QPrintPreviewDialog> dlg = new QPrintPreviewDialog(mWizard->getPrinter(), this);
+    connect(dlg, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *printer)
+            {
+                //FIXME
+                PrintWorker worker(mWizard->getDb(), this);
+                worker.setPrinter(printer);
+                worker.setOutputType(Print::Native);
+                worker.setSelection(mWizard->getSelectionModel());
+                worker.run();
+            });
+    dlg->exec();
 }
 
 void PrintOptionsPage::updateOutputType()
