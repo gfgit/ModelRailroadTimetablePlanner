@@ -9,6 +9,7 @@
 #include "graph/view/backgroundhelper.h"
 
 #include <QPainter>
+#include "utils/font_utils.h"
 
 #include <QPrinter>
 #include <QPdfWriter>
@@ -229,6 +230,12 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     double pageFramePenWidth = 5;
     QPen pageFramePen(Qt::darkRed, pageFramePenWidth);
 
+    bool drawPageNumbers = true;
+    double pageNumbersFontSize = 20;
+    QFont pageNumbersFont;
+    pageNumbersFont.setBold(true);
+    QString pageNumbersFmt = QStringLiteral("Row: %1/%2 Col: %3/%4");
+
     while (true)
     {
         if(wasStopped())
@@ -265,23 +272,28 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         const QRectF deviceRect(QPointF(), QSizeF(dev->width(), dev->height()));
 
         //Apply scaling
-        qreal scaleFactor = 5; //FIXME: arbitrary value for testing, make user option
+        qreal scaleFactor = 1; //FIXME: arbitrary value for testing, make user option
         QRectF targetRect(deviceRect.topLeft(), deviceRect.size() / scaleFactor);
         painter.scale(scaleFactor, scaleFactor);
 
-        //Inverse scale frame pen to keep it independent
+        //Inverse scale frame pen and page numbers font to keep them independent
         pageFramePen.setWidth(pageFramePenWidth / scaleFactor);
+        setFontPointSizeDPI(pageNumbersFont, pageNumbersFontSize / scaleFactor, &painter);
 
         //Apply overlap margin
         qreal overlapMargin = targetRect.width() / 15; //FIXME: arbitrary value for testing, make user option
 
         //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
-        //Calculate effective content size
+        //Calculate effective content size inside margins
         QPointF effectivePageOrigin(overlapMargin, overlapMargin);
         QSizeF effectivePageSize = targetRect.size();
         effectivePageSize.rwidth() -= 2 * overlapMargin;
         effectivePageSize.rheight() -= 2 * overlapMargin;
 
+        //Page info rect above top margin to draw page numbers
+        QRectF pageNumbersRect(QPointF(overlapMargin, 0), QSizeF(effectivePageSize.width(), overlapMargin));
+
+        //Calculate page count
         int horizPageCount = qCeil(sceneRect.width() / effectivePageSize.width());
         int vertPageCount = qCeil(sceneRect.height() / effectivePageSize.height());
 
@@ -354,6 +366,22 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
                                sourceRect.right() - overlapMargin, sourceRect.bottom())
                     };
                     painter.drawLines(arr, 4);
+                }
+
+                if(drawPageNumbers)
+                {
+                    //Add +1 because loop starts from 0
+                    const QString str = pageNumbersFmt
+                                            .arg(y + 1).arg(vertPageCount)
+                                            .arg(x + 1).arg(horizPageCount);
+
+                    //Move to top left but separate a bit from left margin
+                    pageNumbersRect.moveTop(sourceRect.top());
+                    pageNumbersRect.moveLeft(sourceRect.left() + overlapMargin * 1.5);
+                    painter.fillRect(pageNumbersRect, QColor(0, 255, 0, 50));
+
+                    painter.setFont(pageNumbersFont);
+                    painter.drawText(pageNumbersRect, Qt::AlignVCenter | Qt::AlignLeft, str);
                 }
 
                 //Go left
