@@ -236,6 +236,7 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
 void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
 {
     const double platfOffset = Session->platformOffset;
+    const double stationOffset = Session->stationOffset;
 
     QFont jobNameFont;
     setFontPointSizeDPI(jobNameFont, 20, painter);
@@ -271,7 +272,11 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
         const double left = st.xPos;
         const double right = left + st.platforms.count() * platfOffset;
 
-        if(left > rect.right() || right < rect.left())
+        //Set a maximum right edge to Job labels
+        //This allows to determine if they have to be drawn
+        const double maxJobLabelX = right + stationOffset;
+
+        if(left > rect.right() || maxJobLabelX < rect.left())
             continue; //Skip station, it's not visible
 
         top.rx() = bottom.rx() = st.xPos;
@@ -319,7 +324,11 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 if(jobStop.drawLabel)
                 {
                     const QString jobName = JobCategoryName::jobName(jobStop.stop.jobId, jobStop.stop.category);
-                    QRectF r(top.x() + platfOffset / 2, top.y(), platfOffset * 4, 25);
+
+                    //Put label a bit to the left in respect to the stop arrival point
+                    //Calculate width so it doesn't go after maxJobLabelX
+                    const qreal topWithMargin = top.x() + platfOffset / 2;
+                    QRectF r(topWithMargin, top.y(), maxJobLabelX - topWithMargin, 25);
                     painter->drawText(r, jobName, textOption);
                 }
             }
