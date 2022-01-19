@@ -28,8 +28,6 @@ private slots:
     void onSaveGraph();
     void onPrintGraph();
 
-    void showShiftMenuForJob(db_id jobId);
-
 private:
     void renderGraph(QPainter *painter);
 

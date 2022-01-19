@@ -7,8 +7,6 @@
 #include "view/shiftgraphview.h"
 #include "model/shiftgraphscene.h"
 
-#include "jobchangeshiftdlg.h"
-
 #include "app/session.h"
 
 #include <QPrintDialog>
@@ -140,13 +138,6 @@ void ShiftGraphEditor::exportPDF(const QString& fileName)
 
     QPainter painter(&printer);
     renderGraph(&painter);
-}
-
-void ShiftGraphEditor::showShiftMenuForJob(db_id jobId)
-{
-    OwningQPointer<JobChangeShiftDlg> dlg = new JobChangeShiftDlg(Session->m_Db, this);
-    dlg->setJob(jobId);
-    dlg->exec();
 }
 
 void ShiftGraphEditor::renderGraph(QPainter *painter)

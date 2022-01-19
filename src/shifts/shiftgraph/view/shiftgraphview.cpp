@@ -6,6 +6,10 @@
 #include "shiftgraphhourpanel.h"
 
 #include "app/session.h"
+#include "viewmanager/viewmanager.h"
+
+#include "utils/owningqpointer.h"
+#include "shifts/shiftgraph/jobchangeshiftdlg.h"
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -14,6 +18,8 @@
 
 #include <QHelpEvent>
 #include <QToolTip>
+
+#include <QMenu>
 
 ShiftGraphView::ShiftGraphView(QWidget *parent) :
     QAbstractScrollArea(parent),
@@ -61,6 +67,29 @@ void ShiftGraphView::setScene(ShiftGraphScene *newScene)
         connect(m_scene, &QObject::destroyed, this, &ShiftGraphView::onSceneDestroyed);
     }
     redrawGraph();
+}
+
+QPointF ShiftGraphView::mapToScene(const QPointF &pos, bool *ok)
+{
+    QPointF scenePos = pos;
+
+    const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
+    const QRect vp = viewport()->rect();
+
+    //Map to viewport
+    scenePos -= vp.topLeft();
+    if(scenePos.x() < 0 || scenePos.y() < 0)
+    {
+        if(ok) *ok = false;
+        return scenePos;
+    }
+
+    //Map to scene
+    scenePos -= origin;
+    scenePos /= mZoom / 100.0;
+
+    if(ok) *ok = true;
+    return scenePos;
 }
 
 void ShiftGraphView::redrawGraph()
@@ -117,48 +146,55 @@ bool ShiftGraphView::event(QEvent *e)
 
 bool ShiftGraphView::viewportEvent(QEvent *e)
 {
-    if(m_scene && (e->type() == QEvent::ToolTip || e->type() == QEvent::ContextMenu))
+    if(m_scene && e->type() == QEvent::ToolTip)
     {
-        QPointF pos;
-        QPoint globalPos;
-        if(e->type() == QEvent::ToolTip)
-        {
-            QHelpEvent *ev = static_cast<QHelpEvent *>(e);
-            pos = ev->pos();
-            globalPos = ev->globalPos();
-        }
-        else
-        {
-            QContextMenuEvent *ev = static_cast<QContextMenuEvent *>(e);
-            pos = ev->pos();
-            globalPos = ev->globalPos();
-        }
+        QHelpEvent *ev = static_cast<QHelpEvent *>(e);
 
-        const QPoint origin(-horizontalScrollBar()->value(), -verticalScrollBar()->value());
-        const QRect vp = viewport()->rect();
-
-        //Map to viewport
-        pos -= vp.topLeft();
-        if(pos.x() < 0 || pos.y() < 0)
+        bool ok = false;
+        QPointF scenePos = mapToScene(ev->pos(), &ok);
+        if(!ok)
             return false;
 
-        //Map to scene
-        pos -= origin;
-        pos /= mZoom / 100.0;
+        QString msg = m_scene->getTooltipAt(scenePos);
 
-        if(e->type() == QEvent::ToolTip)
-        {
-            QString msg = m_scene->getTooltipAt(pos);
-
-            if(msg.isEmpty())
-                QToolTip::hideText();
-            else
-                QToolTip::showText(globalPos, msg, viewport());
-        }
+        if(msg.isEmpty())
+            QToolTip::hideText();
         else
-        {
-            //Context menu FIXME
-        }
+            QToolTip::showText(ev->globalPos(), msg, viewport());
+
+        return true;
+    }
+    else if(m_scene && e->type() == QEvent::ContextMenu)
+    {
+        QContextMenuEvent *ev = static_cast<QContextMenuEvent *>(e);
+
+        bool ok = false;
+        QPointF scenePos = mapToScene(ev->pos(), &ok);
+        if(!ok)
+            return false;
+
+        JobEntry job = m_scene->getJobAt(scenePos);
+        if(!job.jobId)
+            return false;
+
+        QMenu *menu = new QMenu(this);
+        menu->addAction(tr("Show Job in Graph"), this, [job]()
+                        {
+                            Session->getViewManager()->requestJobSelection(job.jobId, true, true);
+                        });
+        menu->addAction(tr("Show in Job Editor"), this, [job]()
+                        {
+                            Session->getViewManager()->requestJobEditor(job.jobId);
+                        });
+        menu->addAction(tr("Change Job Shift"), this, [this, job]()
+                        {
+                            OwningQPointer<JobChangeShiftDlg> dlg = new JobChangeShiftDlg(Session->m_Db, this);
+                            dlg->setJob(job.jobId);
+                            dlg->exec();
+                        });
+
+        menu->setAttribute(Qt::WA_DeleteOnClose);
+        menu->popup(ev->globalPos());
 
         return true;
     }

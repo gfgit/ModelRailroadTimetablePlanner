@@ -19,6 +19,8 @@ public:
 
     inline int getZoomLevel() const { return mZoom; }
 
+    QPointF mapToScene(const QPointF& pos, bool *ok = nullptr);
+
 signals:
     void zoomLevelChanged(int zoom);
 
