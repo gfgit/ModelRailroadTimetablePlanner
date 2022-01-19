@@ -98,8 +98,8 @@ public:
     FIELD(ShiftHourOffset,    "shift_graph/hour_offset",     double, 150.0)
     FIELD(ShiftHorizOffset,   "shift_graph/horiz_offset",    double,  50.0)
     FIELD(ShiftVertOffset,    "shift_graph/vert_offset",     double,  35.0)
-    FIELD(ShiftJobRowHeight,  "shift_graph/job_row_height",  double,  60.0)
-    FIELD(ShiftJobRowSpace,   "shift_graph/job_row_space",   double,  10.0)
+    FIELD(ShiftJobRowHeight,  "shift_graph/job_row_height",  double,  70.0)
+    FIELD(ShiftJobRowSpace,   "shift_graph/job_row_space",   double,   4.0)
     FIELD(ShiftHideSameStations, "shift_graph/hide_same_stations", bool, true)
 
     //RollingStock
