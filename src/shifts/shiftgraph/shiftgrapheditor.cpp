@@ -2,33 +2,28 @@
 
 #include <QVBoxLayout>
 
-#include <QGraphicsView>
 #include <QToolBar>
 
-#include "graphoptions.h"
-
-#include "shiftgraphholder.h"
-#include "shiftscene.h"
-
-#include "jobchangeshiftdlg.h"
+#include "view/shiftgraphview.h"
+#include "model/shiftgraphscene.h"
 
 #include "app/session.h"
 
+#include <QPrintDialog>
 #include <QFileDialog>
 #include <QStandardPaths>
 #include "utils/files/file_format_names.h"
 #include "utils/files/openfileinfolder.h"
+#include "utils/owningqpointer.h"
 
-#include <QDebug>
+#include <QPainter>
 
 #include <QPrinter>
 #include <QSvgGenerator>
 
-#include <QPainter>
-
-#include <QPrintDialog>
-#include "utils/owningqpointer.h"
 #include "info.h"
+
+#include <QDebug>
 
 ShiftGraphEditor::ShiftGraphEditor(QWidget *parent) :
     QWidget(parent)
@@ -36,29 +31,31 @@ ShiftGraphEditor::ShiftGraphEditor(QWidget *parent) :
     toolBar = new QToolBar;
     toolBar->addAction(tr("Save"), this, &ShiftGraphEditor::onSaveGraph);
     toolBar->addAction(tr("Print"), this, &ShiftGraphEditor::onPrintGraph);
-    toolBar->addAction(tr("Options"), this, &ShiftGraphEditor::onShowOptions);
-    toolBar->addAction(tr("Refresh"), this, &ShiftGraphEditor::calculateGraph);
+    toolBar->addAction(tr("Refresh"), this, &ShiftGraphEditor::redrawGraph);
 
-    view = new QGraphicsView;
-    view->setAlignment(Qt::AlignTop);
 
-    graph = new ShiftGraphHolder(Session->m_Db, this);
-    graph->loadShifts();
-    view->setScene(graph->scene());
-    view->centerOn(0, 0);
-    connect(graph->scene(), &ShiftScene::jobDoubleClicked, this, &ShiftGraphEditor::showShiftMenuForJob);
+    m_scene = new ShiftGraphScene(Session->m_Db, this);
+    m_scene->loadShifts();
+
+    view = new ShiftGraphView;
+    view->setScene(m_scene);
 
     QVBoxLayout *lay = new QVBoxLayout(this);
     lay->addWidget(toolBar);
     lay->addWidget(view);
 
-    setMinimumSize(300, 200);
-    setWindowTitle(tr("Shift Graph Editor"));
+    setMinimumSize(500, 400);
+    setWindowTitle(tr("Shift Graph"));
 }
 
 ShiftGraphEditor::~ShiftGraphEditor()
 {
 
+}
+
+void ShiftGraphEditor::redrawGraph()
+{
+    m_scene->loadShifts();
 }
 
 void ShiftGraphEditor::onSaveGraph()
@@ -102,7 +99,8 @@ void ShiftGraphEditor::onPrintGraph()
     if(dlg->exec() != QDialog::Accepted)
         return;
 
-    print(&printer);
+    QPainter painter(&printer);
+    renderGraph(&painter);
 }
 
 void ShiftGraphEditor::exportSVG(const QString& fileName)
@@ -113,16 +111,17 @@ void ShiftGraphEditor::exportSVG(const QString& fileName)
 
     QPainter painter;
 
-    auto scene = graph->scene();
-    QRectF r = scene->sceneRect();
-    svg.setSize(r.size().toSize());
-    svg.setViewBox(r);
+    QSize sceneSz = m_scene->getContentSize();
+    QRectF sceneRect;
+    sceneRect.setSize(sceneSz);
+
+    svg.setSize(sceneSz);
+    svg.setViewBox(sceneRect);
 
     svg.setFileName(fileName);
 
     painter.begin(&svg);
-
-    scene->render(&painter);
+    renderGraph(&painter);
 }
 
 void ShiftGraphEditor::exportPDF(const QString& fileName)
@@ -133,42 +132,27 @@ void ShiftGraphEditor::exportPDF(const QString& fileName)
     printer.setCreator(AppDisplayName);
     printer.setDocName(QStringLiteral("Railway Shift"));
 
-    print(&printer);
+    QPageLayout lay = printer.pageLayout();
+    lay.setPageSize(QPageSize(m_scene->getContentSize(), QPageSize::Point));
+    printer.setPageLayout(lay);
+
+    QPainter painter(&printer);
+    renderGraph(&painter);
 }
 
-void ShiftGraphEditor::print(QPrinter *printer)
+void ShiftGraphEditor::renderGraph(QPainter *painter)
 {
-    QPainter painter(printer);
-    auto scene = graph->scene();
-    scene->render(&painter);
-}
+    QRectF sceneRect;
+    sceneRect.setSize(m_scene->getContentSize());
 
-void ShiftGraphEditor::calculateGraph()
-{
-    graph->redrawGraph();
-    refreshView();
-}
+    QRectF hourPanelRect = sceneRect;
+    hourPanelRect.setHeight(AppSettings.getShiftVertOffset() - 5); //See ShiftGraphView::resizeHeaders()
 
-void ShiftGraphEditor::refreshView()
-{
-    view->update();
-}
+    QRectF shiftLabelHeader = sceneRect;
+    shiftLabelHeader.setWidth(AppSettings.getShiftHorizOffset() - 5); //See ShiftGraphView::resizeHeaders()
 
-void ShiftGraphEditor::onShowOptions()
-{
-    OwningQPointer<GraphOptions> dlg = new GraphOptions(this);
-    dlg->setHideSameStations(graph->getHideSameStations());
-
-    int ret = dlg->exec();
-    if(dlg && ret == QDialog::Accepted)
-    {
-        graph->setHideSameStations(dlg->hideSameStation());
-    }
-}
-
-void ShiftGraphEditor::showShiftMenuForJob(db_id jobId)
-{
-    OwningQPointer<JobChangeShiftDlg> dlg = new JobChangeShiftDlg(Session->m_Db, this);
-    dlg->setJob(jobId);
-    dlg->exec();
+    m_scene->drawHourLines(painter, sceneRect);
+    m_scene->drawShifts(painter, sceneRect);
+    m_scene->drawHourHeader(painter, hourPanelRect, 0);
+    m_scene->drawShiftHeader(painter, shiftLabelHeader, 0);
 }

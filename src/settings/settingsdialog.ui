@@ -665,6 +665,9 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="shiftHorizOffsetSpin"/>
+          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="verticalLabel">
             <property name="text">
@@ -672,50 +675,37 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="shiftHorizOffsetSpin"/>
-          </item>
           <item row="2" column="1">
            <widget class="QDoubleSpinBox" name="shiftVertOffsetSpin"/>
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="jobLabel">
             <property name="text">
-             <string>Job</string>
+             <string>Job Row Height</string>
             </property>
            </widget>
           </item>
           <item row="3" column="1">
-           <widget class="QDoubleSpinBox" name="shiftJobOffsetSpin"/>
+           <widget class="QDoubleSpinBox" name="shiftJobRowHeightSpin"/>
           </item>
           <item row="4" column="0">
            <widget class="QLabel" name="jobBoxLabel">
             <property name="text">
-             <string>Job Box</string>
+             <string>Row Space Height</string>
             </property>
            </widget>
           </item>
           <item row="4" column="1">
-           <widget class="QDoubleSpinBox" name="shiftJobBoxOffsetSpin"/>
+           <widget class="QDoubleSpinBox" name="shiftJobRowSpaceSpin"/>
           </item>
           <item row="5" column="0">
-           <widget class="QLabel" name="stationsLabelsLabel">
-            <property name="text">
-             <string>Stations Labels</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="1">
-           <widget class="QDoubleSpinBox" name="shiftStLabelOffsetSpin"/>
-          </item>
-          <item row="6" column="0">
            <widget class="QLabel" name="hideSameStationsLabel">
             <property name="text">
              <string>Hide Same Stations</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="1">
+          <item row="5" column="1">
            <widget class="QCheckBox" name="shiftHideSameStCheck"/>
           </item>
          </layout>

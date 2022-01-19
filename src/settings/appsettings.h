@@ -97,10 +97,9 @@ public:
     //Shift Graph
     FIELD(ShiftHourOffset,    "shift_graph/hour_offset",     double, 150.0)
     FIELD(ShiftHorizOffset,   "shift_graph/horiz_offset",    double,  50.0)
-    FIELD(ShiftVertOffset,    "shift_graph/vert_offset",     double,  20.0)
-    FIELD(ShiftJobOffset,     "shift_graph/job_offset",      double,  50.0)
-    FIELD(ShiftJobBoxOffset,  "shift_graph/job_box_offset",  double,  20.0)
-    FIELD(ShiftStationOffset, "shift_graph/station_offset",  double,   5.0)
+    FIELD(ShiftVertOffset,    "shift_graph/vert_offset",     double,  35.0)
+    FIELD(ShiftJobRowHeight,  "shift_graph/job_row_height",  double,  70.0)
+    FIELD(ShiftJobRowSpace,   "shift_graph/job_row_space",   double,   4.0)
     FIELD(ShiftHideSameStations, "shift_graph/hide_same_stations", bool, true)
 
     //RollingStock
