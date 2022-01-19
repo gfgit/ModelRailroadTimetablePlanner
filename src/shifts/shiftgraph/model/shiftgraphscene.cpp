@@ -61,10 +61,16 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 
     QFont jobFont;
     setFontPointSizeDPI(jobFont, 15, painter);
-    painter->setFont(jobFont);
+
+    QFont destStFont = jobFont;
+    destStFont.setItalic(true);
 
     QPen jobPen;
     jobPen.setWidth(5);
+    const double penMargin = jobPen.widthF() * 0.6;
+
+    //Transparent white as background to make text more readable
+    QColor textBGCol(255, 255, 255, 220);
 
     QPen textPen(Qt::black, 2);
 
@@ -82,6 +88,9 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
             break; //Shift is below requested view and next will be out too
 
         db_id lastStId = 0;
+
+        double prevJobNameLastX = horizOffset;
+        double prevStationNameLastX = horizOffset;
 
         for(const JobItem& item : shift.jobList)
         {
@@ -101,30 +110,71 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
             painter->drawLine(firstX, jobY, lastX, jobY);
 
             painter->setPen(textPen);
+            painter->setFont(jobFont);
 
-            //Draw Job Name above line, exceed a little bit from job borders
+            //Draw Job Name above line
             const QString jobName = JobCategoryName::jobName(item.job.jobId, item.job.category);
-            QRectF textRect(firstX - 15, top, lastX - firstX + 30, shiftRowHeight / 2);
-            painter->drawText(textRect, jobName, jobTextOpt);
+
+            QRectF textRect(firstX, top, lastX - firstX, shiftRowHeight / 4 - penMargin);
+
+            QRectF jobNameRect = painter->boundingRect(textRect, jobName, jobTextOpt);
+            if(jobNameRect.left() < horizOffset)
+                jobNameRect.moveLeft(horizOffset); //Do not go under ShiftGraphNameHeader
+
+            if(jobNameRect.left() > prevJobNameLastX || prevJobNameLastX == horizOffset)
+            {
+                //We do not collide with previous Job Name
+                //So we can take lower label row
+                jobNameRect.moveBottom(jobY - penMargin);
+
+                //Store last edge for next Job Name
+                prevJobNameLastX = jobNameRect.right();
+            }
+
+            painter->fillRect(jobNameRect, textBGCol);
+            painter->drawText(jobNameRect, jobName, jobTextOpt);
 
             //Draw Station names below line
-            textRect.moveTop(jobY);
+            textRect.moveTop(jobY + jobPen.widthF());
 
             if(!hideSameStations || lastStId != item.fromStId)
             {
                 //Origin is different from previous Job Destination
                 QString stName = m_stationCache.value(item.fromStId, StationCache()).shortNameOrFallback;
-                painter->drawText(textRect, stName, fromStationTextOpt);
+
+                QRectF stationLabelRect = painter->boundingRect(textRect, stName, fromStationTextOpt);
+                if(stationLabelRect.width() > textRect.width())
+                {
+                    //Try to align rigth (so move to left because we are longer than Job)
+                    double newLeft = qMax(prevStationNameLastX, lastX - stationLabelRect.width());
+                    stationLabelRect.moveLeft(newLeft);
+                }
+                prevStationNameLastX = stationLabelRect.right();
+
+                painter->fillRect(stationLabelRect.adjusted(0, 1, 0, -1), textBGCol);
+                painter->drawText(stationLabelRect, stName, fromStationTextOpt);
             }
 
-            textRect.setLeft(firstX + textRect.width() / 2);
+            //Draw destination station
             QString stName = m_stationCache.value(item.toStId, StationCache()).shortNameOrFallback;
-            painter->drawText(textRect, stName, toStationTextOpt);
+
+            painter->setFont(destStFont);
+            QRectF stationLabelRect = painter->boundingRect(textRect, stName, toStationTextOpt);
+            if(stationLabelRect.left() < prevStationNameLastX)
+            {
+                //We collide with previous station, move lower
+                stationLabelRect.moveBottom(bottomY);
+            }
+            prevStationNameLastX = stationLabelRect.right();
+
+            painter->fillRect(stationLabelRect.adjusted(0, 1, 0, -1), textBGCol);
+            painter->drawText(stationLabelRect, stName, toStationTextOpt);
 
             lastStId = item.toStId;
         }
 
         //Draw line to separate from previous row
+        painter->setPen(textPen);
         qreal sepLineY = bottomY + rowSpaceOffset / 2;
         painter->drawLine(QLineF(sceneRect.right(), sepLineY, sceneRect.left(), sepLineY));
     }
@@ -249,11 +299,26 @@ QString ShiftGraphScene::getTooltipAt(const QPointF &scenePos) const
     StationCache fromSt = m_stationCache.value(item.fromStId, StationCache());
     StationCache toSt = m_stationCache.value(item.toStId, StationCache());
 
-    return tr("Job: <b>%1</b><br>"
-              "Shift: <b>%2</b><br>"
-              "From: <b>%3</b> at <b>%4</b><br>"
-              "To: <b>%5</b> at <b>%6</b><br>"
-              "Right click to view Job")
+    return tr("<table>"
+              "<tr>"
+              "<td>Job:</td>"
+              "<td><b>%1</b></td>"
+              "</tr>"
+              "<tr>"
+              "<td>Shift:</td>"
+              "<td><b>%2</b></td>"
+              "</tr>"
+              "<tr>"
+              "<td>From:</td>"
+              "<td><b>%3</b></td>"
+              "<td>at <b>%4</b></td>"
+              "</tr>"
+              "<tr>"
+              "<td>To:</td>"
+              "<td><b>%5</b></td>"
+              "<td>at <b>%6</b></td>"
+              "</tr>"
+              "</table>")
         .arg(JobCategoryName::jobName(item.job.jobId, item.job.category),
              shift.shiftName,
              fromSt.name, item.start.toString("HH:mm"),
