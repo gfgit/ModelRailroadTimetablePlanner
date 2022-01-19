@@ -60,12 +60,14 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     QWizard (parent),
     mDb(db),
     printer(nullptr),
-    filePattern(Print::phDefaultPattern),
     differentFiles(false),
     type(Print::Native),
     printTask(nullptr),
     isStoppingTask(false)
 {
+    //Initialize to a default pattern
+    filePattern = Print::phType + QLatin1Char('_') + Print::phNameUnderscore;
+
     printer = new QPrinter;
     selectionModel = new SceneSelectionModel(mDb, this);
 

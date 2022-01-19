@@ -22,8 +22,6 @@ const QLatin1String phNameKeepSpaces = QLatin1String("%N");
 const QLatin1String phType = QLatin1String("%t");
 const QLatin1String phProgressive = QLatin1String("%i");
 
-const QString phDefaultPattern = phType + QLatin1Char('_') + phNameUnderscore;
-
 //Implemented in printwizard.cpp
 QString getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
                     const QString& name, LineGraphType type, int i);
