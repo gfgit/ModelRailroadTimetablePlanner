@@ -602,3 +602,133 @@ bool PrintWorker::printPaged()
 
     return printInternalPaged(beginPaint, false);
 }
+
+bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRenderScene *scene, IProgress *progress,
+                                  PageLayoutOpt &pageLay, PageNumberOpt &pageNumOpt)
+{
+    const int vertOffset = Session->vertOffset;
+    const int horizOffset = Session->horizOffset;
+
+    const QRectF sceneRect(QPointF(), scene->getContentSize());
+
+    //Send initial progress
+    if(!progress->reportProgressAndContinue(0, -1))
+        return false;
+
+    //Reset transformation on new scene
+    painter->resetTransform();
+
+    //Apply scaling
+    painter->scale(pageLay.scaleFactor, pageLay.scaleFactor);
+
+    //Inverse scale frame pen and page numbers font to keep them independent
+    pageLay.pageMarginsPen.setWidth(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
+    setFontPointSizeDPI(pageNumOpt.font, pageNumOpt.fontSize / pageLay.scaleFactor, painter);
+
+    //Apply overlap margin
+    //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
+    //Calculate effective content size inside margins
+    QPointF effectivePageOrigin(pageLay.overlapMarginWidth, pageLay.overlapMarginWidth);
+    QSizeF effectivePageSize = pageLay.scaledPageRect.size();
+    effectivePageSize.rwidth() -= 2 * pageLay.overlapMarginWidth;
+    effectivePageSize.rheight() -= 2 * pageLay.overlapMarginWidth;
+
+    //Page info rect above top margin to draw page numbers
+    QRectF pageNumbersRect(QPointF(pageLay.overlapMarginWidth, 0),
+                           QSizeF(effectivePageSize.width(), pageLay.overlapMarginWidth));
+
+    //Calculate page count
+    pageLay.horizPageCnt = qCeil(sceneRect.width() / effectivePageSize.width());
+    pageLay.vertPageCnt = qCeil(sceneRect.height() / effectivePageSize.height());
+
+    if(!progress->reportProgressAndContinue(0, pageLay.horizPageCnt + pageLay.vertPageCnt))
+        return false;
+
+    QRectF stationLabelRect = sceneRect;
+    stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
+
+    QRectF hourPanelRect = sceneRect;
+    hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
+
+    QRectF sourceRect = pageLay.scaledPageRect;
+    stationLabelRect.setWidth(sourceRect.width());
+    hourPanelRect.setHeight(sourceRect.height());
+
+    dev->newPage(painter, pageLay.isFirstPage);
+    pageLay.isFirstPage = false;
+
+    for(int y = 0; y < pageLay.vertPageCnt; y++)
+    {
+        for(int x = 0; x < pageLay.horizPageCnt; x++)
+        {
+            //To avoid calling newPage() at end of loop
+            //which would result in an empty extra page after last drawn page
+            dev->newPage(painter, pageLay.isFirstPage);
+            pageLay.isFirstPage = false;
+
+            //Clipping must be set on every new page
+            //Since clipping works in logical (QPainter) coordinates
+            //we use sourceRect which is already transformed
+            painter->setClipRect(sourceRect);
+
+            //Render scene
+            scene->render(painter, sceneRect);
+
+            if(pageLay.drawPageMargins)
+            {
+                //Draw a frame to help align printed pages
+                painter->setPen(pageLay.pageMarginsPen);
+                QLineF arr[4] = {
+                    //Top
+                    QLineF(sourceRect.left(),  sourceRect.top() + pageLay.overlapMarginWidth,
+                           sourceRect.right(), sourceRect.top() + pageLay.overlapMarginWidth),
+                    //Bottom
+                    QLineF(sourceRect.left(),  sourceRect.bottom() - pageLay.overlapMarginWidth,
+                           sourceRect.right(), sourceRect.bottom() - pageLay.overlapMarginWidth),
+                    //Left
+                    QLineF(sourceRect.left() + pageLay.overlapMarginWidth, sourceRect.top(),
+                           sourceRect.left() + pageLay.overlapMarginWidth, sourceRect.bottom()),
+                    //Right
+                    QLineF(sourceRect.right() - pageLay.overlapMarginWidth, sourceRect.top(),
+                           sourceRect.right() - pageLay.overlapMarginWidth, sourceRect.bottom())
+                };
+                painter->drawLines(arr, 4);
+            }
+
+            if(pageNumOpt.enable)
+            {
+                //Draw page numbers to help laying out printed pages
+                //Add +1 because loop starts from 0
+                const QString str = pageNumOpt.fmt
+                                        .arg(y + 1).arg(pageLay.vertPageCnt)
+                                        .arg(x + 1).arg(pageLay.horizPageCnt);
+
+                //Move to top left but separate a bit from left margin
+                pageNumbersRect.moveTop(sourceRect.top());
+                pageNumbersRect.moveLeft(sourceRect.left() + pageLay.overlapMarginWidth * 1.5);
+                painter->setFont(pageNumOpt.font);
+                painter->drawText(pageNumbersRect, Qt::AlignVCenter | Qt::AlignLeft, str);
+            }
+
+            //Go left
+            sourceRect.moveLeft(sourceRect.left() + effectivePageSize.width());
+            painter->translate(-effectivePageSize.width(), 0);
+
+            //Report progress
+            if(!progress->reportProgressAndContinue(y * pageLay.horizPageCnt + x,
+                                                     pageLay.horizPageCnt + pageLay.vertPageCnt))
+                return false;
+        }
+
+        //Go down and back to left most column
+        sourceRect.moveTop(sourceRect.top() + effectivePageSize.height());
+        painter->translate(sourceRect.left(), -effectivePageSize.height());
+        sourceRect.moveLeft(0);
+    }
+
+    //Reset to top most and left most
+    painter->translate(sourceRect.topLeft());
+    sourceRect.moveTopLeft(QPointF());
+
+    return true;
+}

@@ -10,6 +10,10 @@
 
 #include "utils/types.h"
 
+#include <QRectF>
+#include <QPen>
+#include <QFont>
+
 class QPrinter;
 class QPainter;
 class QRectF;
@@ -85,6 +89,73 @@ private:
     Print::OutputType outType;
 
     LineGraphScene *scene;
+};
+
+class PrintHelper
+{
+public:
+    //Page Layout
+    struct PageLayoutOpt
+    {
+        QRectF devicePageRect;
+        QRectF scaledPageRect;
+
+        double scaleFactor;
+        double overlapMarginWidth;
+
+        int horizPageCnt;
+        int vertPageCnt;
+
+        bool drawPageMargins;
+        double pageMarginsPenWidth;
+        QPen pageMarginsPen;
+
+        bool isFirstPage;
+    };
+
+    //Page Numbers
+    struct PageNumberOpt
+    {
+        QFont font;
+        QString fmt;
+        double fontSize;
+        bool enable;
+    };
+
+    //Device
+    class IPagedPaintDevice
+    {
+    public:
+        virtual ~IPagedPaintDevice() {};
+        virtual bool newPage(QPainter *painter, bool isFirstPage) = 0;
+
+        inline bool needsInitForEachPage() const { return m_needsInitForEachPage; }
+
+    protected:
+        bool m_needsInitForEachPage;
+    };
+
+    class IRenderScene
+    {
+    public:
+        virtual ~IRenderScene() {};
+        virtual bool render(QPainter *painter, const QRectF& sceneRect) = 0;
+
+        inline QSizeF getContentSize() const { return m_contentSize; }
+
+    protected:
+        QSizeF m_contentSize;
+    };
+
+    class IProgress
+    {
+    public:
+        virtual ~IProgress() {};
+        virtual bool reportProgressAndContinue(int current, int max) = 0;
+    };
+
+    bool printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRenderScene *scene, IProgress *progress,
+                         PageLayoutOpt& pageLay, PageNumberOpt& pageNumOpt);
 };
 
 #endif // PRINTWORKER_H
