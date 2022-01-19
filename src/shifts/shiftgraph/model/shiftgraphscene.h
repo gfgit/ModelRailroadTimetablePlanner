@@ -85,7 +85,17 @@ private:
     sqlite3pp::database& mDb;
 
     QVector<ShiftGraph> m_shifts;
-    QHash<db_id, QString> m_stationCache;
+
+    struct StationCache
+    {
+        //Full Name of station
+        QString name;
+
+        //Short Name if available or fallback to Full Name
+        QString shortNameOrFallback;
+    };
+
+    QHash<db_id, StationCache> m_stationCache;
 
     //Options
     qreal hourOffset = 150;

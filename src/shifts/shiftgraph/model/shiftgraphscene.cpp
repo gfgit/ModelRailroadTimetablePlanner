@@ -113,12 +113,12 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
             if(!hideSameStations || lastStId != item.fromStId)
             {
                 //Origin is different from previous Job Destination
-                QString stName = m_stationCache.value(item.fromStId, QString());
+                QString stName = m_stationCache.value(item.fromStId, StationCache()).shortNameOrFallback;
                 painter->drawText(textRect, stName, fromStationTextOpt);
             }
 
             textRect.setLeft(firstX + textRect.width() / 2);
-            QString stName = m_stationCache.value(item.toStId, QString());
+            QString stName = m_stationCache.value(item.toStId, StationCache()).shortNameOrFallback;
             painter->drawText(textRect, stName, toStationTextOpt);
 
             lastStId = item.toStId;
@@ -246,13 +246,18 @@ QString ShiftGraphScene::getTooltipAt(const QPointF &scenePos) const
     const ShiftGraph& shift = m_shifts.at(pos.first);
     const JobItem item = shift.jobList.at(pos.second);
 
+    StationCache fromSt = m_stationCache.value(item.fromStId, StationCache());
+    StationCache toSt = m_stationCache.value(item.toStId, StationCache());
+
     return tr("Job: <b>%1</b><br>"
               "Shift: <b>%2</b><br>"
               "From: <b>%3</b> at <b>%4</b><br>"
-              "To: <b>%5</b> at <b>%6</b>")
-        .arg(JobCategoryName::jobName(item.job.jobId, item.job.category), shift.shiftName)
-        .arg(m_stationCache.value(item.fromStId, QString()), item.start.toString("HH:mm"))
-        .arg(m_stationCache.value(item.toStId, QString()), item.end.toString("HH:mm"));
+              "To: <b>%5</b> at <b>%6</b><br>"
+              "Right click to view Job")
+        .arg(JobCategoryName::jobName(item.job.jobId, item.job.category),
+             shift.shiftName,
+             fromSt.name, item.start.toString("HH:mm"),
+             toSt.name, item.end.toString("HH:mm"));
 }
 
 bool ShiftGraphScene::loadShifts()
@@ -442,15 +447,19 @@ void ShiftGraphScene::loadStationName(db_id stationId, sqlite3pp::query &q_getSt
     if(!m_stationCache.contains(stationId))
     {
         q_getStName.bind(1, stationId);
-        q_getStName.step();
+        if(q_getStName.step() != SQLITE_ROW)
+            return;
         auto r = q_getStName.getRows();
-        QString stName = r.get<QString>(1);
+
+        StationCache st;
+        st.name = r.get<QString>(0);
+        st.shortNameOrFallback = r.get<QString>(1);
 
         //If 'Short Name' is empty fallback to 'Full Name'
-        if(stName.isEmpty())
-            stName = r.get<QString>(0);
+        if(st.shortNameOrFallback.isEmpty())
+            st.shortNameOrFallback = st.name;
 
-        m_stationCache.insert(stationId, stName);
+        m_stationCache.insert(stationId, st);
         q_getStName.reset();
     }
 }
