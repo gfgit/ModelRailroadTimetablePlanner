@@ -197,9 +197,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
                                             tr("Delete coupling?"),
                                             tr("You couple %1 also in a next stop in %2 at %3.\n"
                                                "Do you want to remove the other coupling operation?")
-                                            .arg(rsName)
-                                            .arg(stName)
-                                            .arg(arr.toString("HH:mm")),
+                                            .arg(rsName, stName, arr.toString("HH:mm")),
                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
             if(but == QMessageBox::Yes)
             {
@@ -269,9 +267,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
                                             tr("Delete uncoupling?"),
                                             tr("You don't couple %1 anymore.\n"
                                                "Do you want to remove also the uncoupling operation in %2 at %3?")
-                                            .arg(rsName)
-                                            .arg(stName)
-                                            .arg(arr.toString("HH:mm")),
+                                            .arg(rsName, stName, arr.toString("HH:mm")),
                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
             if(but == QMessageBox::Yes)
             {
@@ -353,9 +349,7 @@ bool RSCouplingInterface::uncoupleRS(db_id rsId, const QString& rsName, bool on)
                                             tr("Delete uncoupling?"),
                                             tr("You uncouple %1 also in %2 at %3.\n"
                                                "Do you want to remove the other uncoupling operation?")
-                                            .arg(rsName)
-                                            .arg(stName)
-                                            .arg(arr.toString("HH:mm")),
+                                            .arg(rsName, stName, arr.toString("HH:mm")),
                                             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
             if(but == QMessageBox::Yes)
             {

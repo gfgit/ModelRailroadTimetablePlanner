@@ -481,8 +481,8 @@ void EditStopDialog::done(int val)
                 }
                 int ret = QMessageBox::question(this,
                                                 tr("Train Speed Changed"),
-                                                tr("Train speed after this stop has changed from a value of %1 km/h to <b>%2 km/h</b>\n"
-                                                   "Do you want to rebase travel times to this new speed?\n"
+                                                tr("Train speed after this stop has changed from a value of %1 km/h to <b>%2 km/h</b><br>"
+                                                   "Do you want to rebase travel times to this new speed?<br>"
                                                    "NOTE: this doesn't affect stop times but you will lose manual adjustments to travel times")
                                                     .arg(speedBefore).arg(speedAfter),
                                                 QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);

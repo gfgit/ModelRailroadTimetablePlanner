@@ -13,7 +13,7 @@ using namespace sqlite3pp;
 static constexpr char
 errorModelNameAlreadyUsedWithSameSuffix[] = QT_TRANSLATE_NOOP("RSModelsSQLModel",
                                                               "This model name (<b>%1</b>) is already used with the same"
-                                                              " suffix (<b>%2</b>).\n"
+                                                              " suffix (<b>%2</b>).<br>"
                                                               "If you intend to create a new model of same name but different"
                                                               " suffix, please first set the suffix.");
 

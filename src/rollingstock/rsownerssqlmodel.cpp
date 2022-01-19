@@ -15,7 +15,7 @@ errorOwnerNameAlreadyUsed[] = QT_TRANSLATE_NOOP("RSOwnersSQLModel",
 
 static constexpr char
 errorOwnerInUseCannotDelete[] = QT_TRANSLATE_NOOP("RSOwnersSQLModel",
-                                                  "There are rollingstock pieces of owner <b>%1</b> so it cannot be removed.\n"
+                                                  "There are rollingstock pieces of owner <b>%1</b> so it cannot be removed.<br>"
                                                   "If you wish to remove it, please first delete all <b>%1</b> pieces.");
 
 RSOwnersSQLModel::RSOwnersSQLModel(sqlite3pp::database &db, QObject *parent) :

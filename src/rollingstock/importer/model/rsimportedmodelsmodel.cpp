@@ -623,7 +623,7 @@ bool RSImportedModelsModel::checkCustomNameValid(db_id importedModelId, const QS
 
         if(errTextOut)
         {
-            *errTextOut = tr("There is already an existing Model with same name: <b>%1</b>\n"
+            *errTextOut = tr("There is already an existing Model with same name: <b>%1</b><br>"
                              "If you meant to merge theese rollingstock pieces with this existing model "
                              "please use 'Match Existing' field")
                     .arg(nameToCheck);
@@ -642,7 +642,7 @@ bool RSImportedModelsModel::checkCustomNameValid(db_id importedModelId, const QS
 
         if(errTextOut)
         {
-            *errTextOut = tr("There is already an imported Model with name: <b>%1</b>\n"
+            *errTextOut = tr("There is already an imported Model with name: <b>%1</b><br>"
                              "If you meant to merge theese rollingstock pieces with this existing model "
                              "after importing rollingstock use the merge tool to merge them")
                     .arg(nameToCheck);
@@ -665,8 +665,8 @@ bool RSImportedModelsModel::checkCustomNameValid(db_id importedModelId, const QS
         {
             if(errTextOut)
             {
-                *errTextOut = tr("You already gave the same custom name: <b>%1</b> "
-                                 "to the imported model: <b>%2</b>\n"
+                *errTextOut = tr("You already gave the same custom name: <b>%1</b><br>"
+                                 "to the imported model: <b>%2</b><br>"
                                  "In order to proceed you need to assign a different custom name to %2")
                         .arg(nameToCheck)
                         .arg(otherOriginalName);
@@ -676,8 +676,8 @@ bool RSImportedModelsModel::checkCustomNameValid(db_id importedModelId, const QS
         {
             if(errTextOut)
             {
-                *errTextOut = tr("You already gave the same custom name: <b>%1</b> "
-                                 "to the imported model: <b>%2</b>\n"
+                *errTextOut = tr("You already gave the same custom name: <b>%1</b><br>"
+                                 "to the imported model: <b>%2</b><br>"
                                  "Please choose a different name or leave empty for the original name")
                         .arg(nameToCheck)
                         .arg(otherOriginalName);

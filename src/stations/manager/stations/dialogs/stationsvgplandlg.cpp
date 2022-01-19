@@ -343,19 +343,21 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
     const QString translatedText =
         tr(
             "<h3>Railway Segment Details</h3>"
-            "<p>"
-            "Segment: <b>%1</b><br>"
-            "From: <b>%2</b> (Gate: %3)<br>"
-            "To:   <b>%4</b> (Gate: %5)<br>"
-            "Distance: <b>%6 Km</b><br>"
-            "Max. Speed: <b>%7 km/h</b>"
-            "</p>")
-            .arg(info.segmentName)
-            .arg(info.from.stationName)
-            .arg(info.from.gateLetter)
-            .arg(info.to.stationName)
-            .arg(info.to.gateLetter)
-            .arg(utils::kmNumToText(info.distanceMeters))
+            "<table><tr>"
+            "<td>Segment:</td><td><b>%1</b></td>"
+            "</tr><tr>"
+            "<td>From:</td><td><b>%2</b> (Gate: %3)</td>"
+            "</tr><tr>"
+            "<td>To:</td><td><b>%4</b> (Gate: %5)</td>"
+            "</tr><tr>"
+            "<td>Distance:</td><td><b>%6 Km</b></td>"
+            "</tr><tr>"
+            "<td>Max. Speed:</td><td><b>%7 km/h</b></td>"
+            "</tr></table>")
+            .arg(info.segmentName,
+                 info.from.stationName, info.from.gateLetter,
+                 info.to.stationName, info.to.gateLetter,
+                 utils::kmNumToText(info.distanceMeters))
             .arg(info.maxSpeedKmH);
 
     msgBox->setTextFormat(Qt::RichText);
@@ -397,15 +399,18 @@ void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *
     const QString translatedText =
         StationSVGPlanDlg::tr(
             "<h3>%1</h3>"
-            "<p>"
-            "Job: <b>%2</b><br>"
-            "From: <b>%3</b><br>"
-            "To:   <b>%4</b><br>"
-            "Platform: <b>%5</b>"
-            "</p>")
-            .arg(plan->stationName, jobName)
-            .arg(stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"))
-            .arg(platformName);
+            "<table><tr>"
+            "<td>Job:</td><td><b>%2</b></td>"
+            "</tr><tr>"
+            "<td>From:</td><td><b>%3</b></td>"
+            "</tr><tr>"
+            "<td>To:</td><td><b>%4</b></td>"
+            "</tr><tr>"
+            "<td>Platform:</td><td><b>%5</b></td>"
+            "</tr></table>")
+            .arg(plan->stationName, jobName,
+                 stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"),
+                 platformName);
 
     msgBox->setTextFormat(Qt::RichText);
     msgBox->setText(translatedText);
