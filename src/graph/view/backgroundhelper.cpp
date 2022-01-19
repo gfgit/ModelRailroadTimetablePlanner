@@ -86,27 +86,32 @@ void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &
     if(x1 > x2 || b < vertOffset || t > b)
         return;
 
-    qreal f = std::remainder(t - vertOffset, hourOffset);
+    int firstH = qCeil((t - vertOffset) / hourOffset);
+    int lastH = qFloor((b - vertOffset) / hourOffset);
 
-    if(f < 0)
-        f += hourOffset;
-    qreal f1 = qFuzzyIsNull(f) ? vertOffset : qMax(t - f + hourOffset, vertOffset);
+    if(firstH > 24 || lastH < 0)
+        return;
 
+    if(firstH < 0)
+        firstH = 0;
+    if(lastH > 24)
+        lastH = 24;
 
-    const qreal l = std::remainder(b - vertOffset, hourOffset);
-    const qreal l1 = b - l;
+    const int n = lastH - firstH + 1;
+    if(n <= 0)
+        return;
 
-    std::size_t n = std::size_t((l1 - f1)/hourOffset) + 1;
+    qreal y = vertOffset + firstH * hourOffset;
 
     QLineF *arr = new QLineF[n];
-    for(std::size_t i = 0; i < n; i++)
+    for(int i = 0; i < n; i++)
     {
-        arr[i] = QLineF(x1, f1, x2, f1);
-        f1 += hourOffset;
+        arr[i] = QLineF(x1, y, x2, y);
+        y += hourOffset;
     }
 
     painter->setPen(hourLinePen);
-    painter->drawLines(arr, int(n));
+    painter->drawLines(arr, n);
     delete [] arr;
 }
 
@@ -143,7 +148,7 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
         const double left = st.xPos + leftOffset - horizontalScroll;
         const double right = left + st.platforms.count() * platformOffset + stationOffset;
 
-        if(right <= 0 || left >= r.width())
+        if(right < r.left() || left >= r.right())
             continue; //Skip station, it's not visible
 
         QRectF labelRect = r;
