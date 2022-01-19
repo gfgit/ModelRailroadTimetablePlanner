@@ -79,6 +79,9 @@ private:
     bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
     bool printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage);
 
+public:
+    bool sendProgressOrAbort(int cur, int max, const QString& msg);
+
 private:
     QPrinter *m_printer;
     SceneSelectionModel *selection;

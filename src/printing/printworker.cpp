@@ -202,8 +202,77 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
     return true;
 }
 
+class PrintWorkerProgress : public PrintHelper::IProgress
+{
+public:
+    bool reportProgressAndContinue(int current, int max) override
+    {
+        //Cumulate progress with previous scenes FIXME: better logic
+        int totalMax = (progressiveNum + 5) * 10;
+        int progress = progressiveNum * 10 + (current * 10 / max);
+        return m_task->sendProgressOrAbort(progress, totalMax,
+                                           m_scene ? m_scene->getGraphObjectName() : QString());
+    }
+
+public:
+    PrintWorker *m_task;
+
+    LineGraphScene *m_scene;
+    int progressiveNum;
+};
+
+class SceneImpl : public PrintHelper::IRenderScene
+{
+public:
+    bool render(QPainter *painter, const QRectF& sceneRect) override
+    {
+        BackgroundHelper::drawBackgroundHourLines(painter, sceneRect);
+        BackgroundHelper::drawStations(painter, m_scene, sceneRect);
+        BackgroundHelper::drawJobStops(painter, m_scene, sceneRect, false);
+        BackgroundHelper::drawJobSegments(painter, m_scene, sceneRect, false);
+
+        if(sceneRect.top() < vertOffset)
+        {
+            //Left column pages have hour labels
+            QRectF stationLabelRect;
+            stationLabelRect.setLeft(sceneRect.left());
+            stationLabelRect.setWidth(sceneRect.width());
+            stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
+
+
+            //Top row pages have station labels
+            stationLabelRect.moveLeft(sceneRect.left());
+            BackgroundHelper::drawStationHeader(painter, m_scene, stationLabelRect, 0);
+        }
+
+        if(sceneRect.left() < horizOffset)
+        {
+            hourPanelRect.moveTop(sceneRect.top());
+            BackgroundHelper::drawHourPanel(painter, hourPanelRect, 0);
+        }
+    }
+
+    void setScene(LineGraphScene *s)
+    {
+        m_scene = s;
+        m_contentSize = m_scene->getContentSize();
+    }
+
+private:
+    LineGraphScene *m_scene;
+
+public:
+    double vertOffset;
+    double horizOffset;
+};
+
 bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage)
 {
+    PrintWorkerProgress progress;
+    progress.m_task = this;
+    progress.m_scene = nullptr;
+    progress.progressiveNum = 0;
+
     QPainter painter;
 
     if(!selection->startIteration())
@@ -217,32 +286,10 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         return false;
     }
 
-    int progressiveNum = 0;
-
     const int vertOffset = Session->vertOffset;
     const int horizOffset = Session->horizOffset;
 
-
-    //Page Layout
-    struct PageLayoutOpt
-    {
-        QRectF devicePageRect;
-        QRectF scaledPageRect;
-
-        double scaleFactor;
-        double overlapMarginWidth;
-
-        int horizPageCnt;
-        int vertPageCnt;
-
-        bool drawPageMargins;
-        double pageMarginsPenWidth;
-        QPen pageMarginsPen;
-
-        bool isFirstPage;
-    };
-
-    PageLayoutOpt pageLay;
+    PrintHelper::PageLayoutOpt pageLay;
     pageLay.scaleFactor = 1; //FIXME: arbitrary value for testing, make user option
     pageLay.overlapMarginWidth = pageLay.scaledPageRect.width() / 15; //FIXME: arbitrary value for testing, make user option
 
@@ -251,16 +298,7 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     pageLay.pageMarginsPen = QPen(Qt::darkRed, pageLay.pageMarginsPenWidth);
     pageLay.isFirstPage = true;
 
-    //Page Numbers
-    struct PageNumberOpt
-    {
-        QFont font;
-        QString fmt;
-        double fontSize;
-        bool enable;
-    };
-
-    PageNumberOpt pageNumberOpt;
+    PrintHelper::PageNumberOpt pageNumberOpt;
     pageNumberOpt.enable = true;
     pageNumberOpt.fontSize = 20;
     pageNumberOpt.font.setBold(true);
@@ -286,12 +324,12 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         const QRectF sceneRect(QPointF(), scene->getContentSize());
 
         //Send progress and description
-        sendEvent(new PrintProgressEvent(this, progressiveNum, scene->getGraphObjectName()), false);
+        sendEvent(new PrintProgressEvent(this, progress.progressiveNum, scene->getGraphObjectName()), false);
 
         bool valid = true;
         if(func)
             valid = func(&painter, scene->getGraphObjectName(), sceneRect,
-                         entry.type, progressiveNum);
+                         entry.type, progress.progressiveNum);
         if(!valid)
             return false;
 
@@ -437,6 +475,22 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         progressiveNum++;
     }
 
+    return true;
+}
+
+bool PrintWorker::sendProgressOrAbort(int cur, int max, const QString &msg)
+{
+    if(wasStopped())
+    {
+        sendEvent(new PrintProgressEvent(this,
+                                         PrintProgressEvent::ProgressAbortedByUser,
+                                         QString()), true);
+        //Quit
+        return false;
+    }
+
+    //Send progress and description FIXME: pass max?
+    sendEvent(new PrintProgressEvent(this, cur, msg), false);
     return true;
 }
 
