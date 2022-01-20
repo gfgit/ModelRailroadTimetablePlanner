@@ -6,7 +6,7 @@
 
 #include "sceneselectionmodel.h"
 
-#include "printworker.h"
+#include "printing/printworker.h"
 #include <QThreadPool>
 
 #include <QMessageBox>

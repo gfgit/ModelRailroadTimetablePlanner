@@ -30,7 +30,7 @@
 
 #include "db_metadata/meetinginformationdialog.h"
 
-#include "printing/printwizard.h"
+#include "printing/wizard/printwizard.h"
 
 #ifdef ENABLE_USER_QUERY
 #include "sqlconsole/sqlconsole.h"

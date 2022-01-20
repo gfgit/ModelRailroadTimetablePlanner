@@ -20,7 +20,7 @@
 #include <QPrintPreviewDialog>
 
 //FIXME: remove
-#include "printworker.h"
+#include "printing/printworker.h"
 #include <QPrinter>
 
 #include <QFileInfo>

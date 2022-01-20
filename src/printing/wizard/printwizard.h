@@ -4,7 +4,7 @@
 #include <QWizard>
 #include <QVector>
 
-#include "printdefs.h"
+#include "printing/printdefs.h"
 
 class QPrinter;
 class SceneSelectionModel;

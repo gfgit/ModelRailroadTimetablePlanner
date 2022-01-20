@@ -1,21 +1,19 @@
 #include "printworker.h"
-#include "printwizard.h" //For translations and defs
+#include "printing/wizard/printwizard.h" //For translations and defs
+#include "printing/wizard/sceneselectionmodel.h"
+
+#include "printing/helper/model/printhelper.h"
 
 #include "app/session.h"
-
-#include "sceneselectionmodel.h"
 
 #include "graph/model/linegraphscene.h"
 #include "graph/view/backgroundhelper.h"
 
 #include <QPainter>
-#include "utils/font_utils.h"
 
 #include <QPrinter>
 #include <QPdfWriter>
 #include <QSvgGenerator>
-
-#include <QtMath>
 
 #include "info.h"
 
