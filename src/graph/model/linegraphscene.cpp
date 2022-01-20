@@ -77,8 +77,8 @@ void LineGraphScene::recalcContentSize()
 
     //Add an additional half station offset after last station
     //This gives extra space to center station label
-    const int maxWidth = entry.xPos + platfCount * Session->platformOffset + Session->stationOffset / 2;
-    const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
+    const double maxWidth = entry.xPos + platfCount * Session->platformOffset + Session->stationOffset / 2;
+    const double lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
 
     m_cachedContentsSize = QSize(maxWidth, lastY);
 }
