@@ -1,6 +1,7 @@
 add_subdirectory(delegates)
 add_subdirectory(files)
 add_subdirectory(localization)
+add_subdirectory(scene)
 add_subdirectory(thread)
 add_subdirectory(wizard)
 
