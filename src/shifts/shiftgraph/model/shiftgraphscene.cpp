@@ -127,7 +127,7 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
 
             QRectF jobNameRect = painter->boundingRect(textRect, jobName, jobTextOpt);
             if(jobNameRect.left() < horizOffset)
-                jobNameRect.moveLeft(horizOffset); //Do not go under ShiftGraphNameHeader
+                jobNameRect.moveLeft(horizOffset); //Do not go under vertival header
 
             if(jobNameRect.left() > prevJobNameLastX || prevJobNameLastX == horizOffset)
             {

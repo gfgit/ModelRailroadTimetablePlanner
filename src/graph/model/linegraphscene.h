@@ -21,7 +21,7 @@ class database;
  * \brief Class to store line information
  *
  * Reimplement IGraphScene for railway line graph
- * Stores information to draw railway content in a LineGraphView
+ * Stores information to draw railway contents in a LineGraphView
  *
  * \sa LineGraphManager
  * \sa LineGraphView
