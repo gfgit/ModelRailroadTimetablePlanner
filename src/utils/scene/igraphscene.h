@@ -40,10 +40,10 @@ public:
      *
      * Header size is cached for performance.
      * When a subclass changes size \ref m_cachedHeaderSize
-     * it must emit \ref headersSizeChanged() signal to resize view headers
+     * it must emit \ref headersSizeChanged() signal to resize view headers.
      *
-     * Size width is vertical header vidth
-     * Size height is horizontal header height
+     * Size width is vertical header width.
+     * Size height is horizontal header height.
      *
      * \sa headersSizeChanged()
      */

@@ -59,7 +59,7 @@ public:
     {
         NoFiltering = 0, /*!< This column doesn't support filtering, do not show filter */
         BasicFiltering = 1, /*!< This column supports filtering, show filter */
-        ExplicitNULL = (1<<1) /*!< This column can be filtered with #NULL string \sa nullFilterStr */
+        ExplicitNULL = (1<<1) /*!< This column can be filtered with '#NULL' string \sa nullFilterStr */
     };
 
     typedef QFlags<FilterFlag> FilterFlags;
