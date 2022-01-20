@@ -556,24 +556,19 @@ bool PrintWorker::printPaged()
 bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRenderScene *scene, IProgress *progress,
                                   PageLayoutOpt &pageLay, PageNumberOpt &pageNumOpt)
 {
-    const int vertOffset = Session->vertOffset;
-    const int horizOffset = Session->horizOffset;
-
-    const QRectF sceneRect(QPointF(), scene->getContentSize());
-
     //Send initial progress
     if(!progress->reportProgressAndContinue(0, -1))
         return false;
 
-    //Reset transformation on new scene
-    painter->resetTransform();
+    if(!dev->needsInitForEachPage())
+    {
+        //Device was already inited
+        //Reset transformation on new scene
+        painter->resetTransform();
+    }
 
-    //Apply scaling
-    painter->scale(pageLay.scaleFactor, pageLay.scaleFactor);
-
-    //Inverse scale frame pen and page numbers font to keep them independent
+    //Inverse scale for margins pen to keep it independent
     pageLay.pageMarginsPen.setWidth(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
-    setFontPointSizeDPI(pageNumOpt.font, pageNumOpt.fontSize / pageLay.scaleFactor, painter);
 
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
@@ -588,21 +583,14 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
                            QSizeF(effectivePageSize.width(), pageLay.overlapMarginWidth));
 
     //Calculate page count
-    pageLay.horizPageCnt = qCeil(sceneRect.width() / effectivePageSize.width());
-    pageLay.vertPageCnt = qCeil(sceneRect.height() / effectivePageSize.height());
+    pageLay.horizPageCnt = qCeil(scene->getContentSize().width() / effectivePageSize.width());
+    pageLay.vertPageCnt = qCeil(scene->getContentSize().height() / effectivePageSize.height());
 
     if(!progress->reportProgressAndContinue(0, pageLay.horizPageCnt + pageLay.vertPageCnt))
         return false;
 
-    QRectF stationLabelRect = sceneRect;
-    stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
-
-    QRectF hourPanelRect = sceneRect;
-    hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
-
+    //Rect to paint on each page
     QRectF sourceRect = pageLay.scaledPageRect;
-    stationLabelRect.setWidth(sourceRect.width());
-    hourPanelRect.setHeight(sourceRect.height());
 
     for(int y = 0; y < pageLay.vertPageCnt; y++)
     {
@@ -611,6 +599,15 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
             //To avoid calling newPage() at end of loop
             //which would result in an empty extra page after last drawn page
             dev->newPage(painter, pageLay.isFirstPage);
+            if(pageLay.isFirstPage || dev->needsInitForEachPage())
+            {
+                //Apply scaling
+                painter->scale(pageLay.scaleFactor, pageLay.scaleFactor);
+                painter->translate(sourceRect.topLeft());
+
+                //Inverse scale for page numbers font to keep it independent
+                setFontPointSizeDPI(pageNumOpt.font, pageNumOpt.fontSize / pageLay.scaleFactor, painter);
+            }
             pageLay.isFirstPage = false;
 
             //Clipping must be set on every new page
@@ -619,7 +616,7 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
             painter->setClipRect(sourceRect);
 
             //Render scene
-            scene->render(painter, sceneRect);
+            scene->render(painter, sourceRect);
 
             if(pageLay.drawPageMargins)
             {
