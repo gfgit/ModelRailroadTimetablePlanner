@@ -2,6 +2,7 @@
 #define LINEGRAPHSCENE_H
 
 #include "utils/scene/igraphscene.h"
+
 #include <QVector>
 #include <QHash>
 
