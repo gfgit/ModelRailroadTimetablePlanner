@@ -215,10 +215,10 @@ public:
     }
 
 public:
-    PrintWorker *m_task;
+    PrintWorker *m_task = nullptr;
 
-    LineGraphScene *m_scene;
-    int progressiveNum;
+    LineGraphScene *m_scene = nullptr;
+    int progressiveNum = 0;
 };
 
 class SceneImpl : public PrintHelper::IRenderScene
@@ -264,17 +264,17 @@ public:
     }
 
 private:
-    LineGraphScene *m_scene;
+    LineGraphScene *m_scene = nullptr;
 
 public:
-    double vertOffset;
-    double horizOffset;
+    double vertOffset = 0;
+    double horizOffset = 0;
 };
 
 class PrinterImpl : public PrintHelper::IPagedPaintDevice
 {
 public:
-    PrinterImpl() { m_needsInitForEachPage = false; }
+    PrinterImpl() :m_printer(nullptr) { m_needsInitForEachPage = false; }
 
     bool newPage(QPainter *painter, bool isFirstPage) override
     {
@@ -323,7 +323,8 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     //Calculate members
     pageLay.devicePageRect = QRectF(QPointF(), QSizeF(m_printer->width(), m_printer->height()));
     pageLay.scaledPageRect = QRectF(pageLay.devicePageRect.topLeft(), pageLay.devicePageRect.size() / pageLay.scaleFactor);
-    pageLay.overlapMarginWidth = pageLay.scaledPageRect.width() / 15; //FIXME: arbitrary value for testing, make user option
+    pageLay.marginOriginalWidth = pageLay.devicePageRect.width() / 15; //FIXME: arbitrary value for testing, make user option
+    pageLay.overlapMarginWidthScaled = pageLay.marginOriginalWidth / pageLay.scaleFactor;
 
     PrintHelper::PageNumberOpt pageNumberOpt;
     pageNumberOpt.enable = true;
@@ -573,14 +574,14 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
     //Calculate effective content size inside margins
-    QPointF effectivePageOrigin(pageLay.overlapMarginWidth, pageLay.overlapMarginWidth);
+    QPointF effectivePageOrigin(pageLay.overlapMarginWidthScaled, pageLay.overlapMarginWidthScaled);
     QSizeF effectivePageSize = pageLay.scaledPageRect.size();
-    effectivePageSize.rwidth() -= 2 * pageLay.overlapMarginWidth;
-    effectivePageSize.rheight() -= 2 * pageLay.overlapMarginWidth;
+    effectivePageSize.rwidth() -= 2 * pageLay.overlapMarginWidthScaled;
+    effectivePageSize.rheight() -= 2 * pageLay.overlapMarginWidthScaled;
 
     //Page info rect above top margin to draw page numbers
-    QRectF pageNumbersRect(QPointF(pageLay.overlapMarginWidth, 0),
-                           QSizeF(effectivePageSize.width(), pageLay.overlapMarginWidth));
+    QRectF pageNumbersRect(QPointF(pageLay.overlapMarginWidthScaled, 0),
+                           QSizeF(effectivePageSize.width(), pageLay.overlapMarginWidthScaled));
 
     //Calculate page count
     pageLay.horizPageCnt = qCeil(scene->getContentSize().width() / effectivePageSize.width());
@@ -624,17 +625,17 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
                 painter->setPen(pageLay.pageMarginsPen);
                 QLineF arr[4] = {
                     //Top
-                    QLineF(sourceRect.left(),  sourceRect.top() + pageLay.overlapMarginWidth,
-                           sourceRect.right(), sourceRect.top() + pageLay.overlapMarginWidth),
+                    QLineF(sourceRect.left(),  sourceRect.top() + pageLay.overlapMarginWidthScaled,
+                           sourceRect.right(), sourceRect.top() + pageLay.overlapMarginWidthScaled),
                     //Bottom
-                    QLineF(sourceRect.left(),  sourceRect.bottom() - pageLay.overlapMarginWidth,
-                           sourceRect.right(), sourceRect.bottom() - pageLay.overlapMarginWidth),
+                    QLineF(sourceRect.left(),  sourceRect.bottom() - pageLay.overlapMarginWidthScaled,
+                           sourceRect.right(), sourceRect.bottom() - pageLay.overlapMarginWidthScaled),
                     //Left
-                    QLineF(sourceRect.left() + pageLay.overlapMarginWidth, sourceRect.top(),
-                           sourceRect.left() + pageLay.overlapMarginWidth, sourceRect.bottom()),
+                    QLineF(sourceRect.left() + pageLay.overlapMarginWidthScaled, sourceRect.top(),
+                           sourceRect.left() + pageLay.overlapMarginWidthScaled, sourceRect.bottom()),
                     //Right
-                    QLineF(sourceRect.right() - pageLay.overlapMarginWidth, sourceRect.top(),
-                           sourceRect.right() - pageLay.overlapMarginWidth, sourceRect.bottom())
+                    QLineF(sourceRect.right() - pageLay.overlapMarginWidthScaled, sourceRect.top(),
+                           sourceRect.right() - pageLay.overlapMarginWidthScaled, sourceRect.bottom())
                 };
                 painter->drawLines(arr, 4);
             }
@@ -649,7 +650,7 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
 
                 //Move to top left but separate a bit from left margin
                 pageNumbersRect.moveTop(sourceRect.top());
-                pageNumbersRect.moveLeft(sourceRect.left() + pageLay.overlapMarginWidth * 1.5);
+                pageNumbersRect.moveLeft(sourceRect.left() + pageLay.overlapMarginWidthScaled * 1.5);
                 painter->setFont(pageNumOpt.font);
                 painter->drawText(pageNumbersRect, Qt::AlignVCenter | Qt::AlignLeft, str);
             }

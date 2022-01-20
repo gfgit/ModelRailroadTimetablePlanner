@@ -103,17 +103,18 @@ public:
         QRectF devicePageRect;
         QRectF scaledPageRect;
 
-        double scaleFactor;
-        double overlapMarginWidth;
+        double scaleFactor = 1;
+        double marginOriginalWidth = 20;
+        double overlapMarginWidthScaled = 20;
 
-        int horizPageCnt;
-        int vertPageCnt;
+        int horizPageCnt = 0;
+        int vertPageCnt = 0;
 
-        bool drawPageMargins;
-        double pageMarginsPenWidth;
+        bool drawPageMargins = true;
+        double pageMarginsPenWidth = 5;
         QPen pageMarginsPen;
 
-        bool isFirstPage;
+        bool isFirstPage = true;
     };
 
     //Page Numbers
@@ -121,8 +122,8 @@ public:
     {
         QFont font;
         QString fmt;
-        double fontSize;
-        bool enable;
+        double fontSize = 20;
+        bool enable = true;
     };
 
     //Device
