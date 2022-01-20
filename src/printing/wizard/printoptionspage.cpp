@@ -17,9 +17,14 @@
 
 #include <QFileDialog>
 #include <QPrintDialog>
-#include <QPrintPreviewDialog>
+
+#include "printing/helper/view/sceneprintpreviewdlg.h"
+#include "sceneselectionmodel.h"
+#include "graph/model/linegraphscene.h"
 
 //FIXME: remove
+#include <QGuiApplication>
+#include <QPrintPreviewDialog>
 #include "printing/printworker.h"
 #include <QPrinter>
 
@@ -283,16 +288,32 @@ void PrintOptionsPage::onOpenPrintDlg()
 
 void PrintOptionsPage::onShowPreviewDlg()
 {
-    OwningQPointer<QPrintPreviewDialog> dlg = new QPrintPreviewDialog(mWizard->getPrinter(), this);
-    connect(dlg, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *printer)
-            {
-                //FIXME
-                PrintWorker worker(mWizard->getDb(), this);
-                worker.setPrinter(printer);
-                worker.setOutputType(Print::Native);
-                worker.setSelection(mWizard->getSelectionModel());
-                worker.run();
-            });
+    if(QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
+    {
+        OwningQPointer<QPrintPreviewDialog> dlg = new QPrintPreviewDialog(mWizard->getPrinter(), this);
+        connect(dlg, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *printer)
+                {
+                    //FIXME
+                    PrintWorker worker(mWizard->getDb(), this);
+                    worker.setPrinter(printer);
+                    worker.setOutputType(Print::Native);
+                    worker.setSelection(mWizard->getSelectionModel());
+                    worker.run();
+                });
+        dlg->exec();
+    }
+
+    OwningQPointer<ScenePrintPreviewDlg> dlg = new ScenePrintPreviewDlg(this);
+
+    SceneSelectionModel *m = mWizard->getSelectionModel();
+    m->startIteration();
+    SceneSelectionModel::Entry entry = m->getNextEntry();
+
+    LineGraphScene scene(mWizard->getDb());
+    scene.loadGraph(entry.objectId, entry.type);
+
+    dlg->setSourceScene(&scene);
+
     dlg->exec();
 }
 
