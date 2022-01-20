@@ -604,9 +604,6 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
     stationLabelRect.setWidth(sourceRect.width());
     hourPanelRect.setHeight(sourceRect.height());
 
-    dev->newPage(painter, pageLay.isFirstPage);
-    pageLay.isFirstPage = false;
-
     for(int y = 0; y < pageLay.vertPageCnt; y++)
     {
         for(int x = 0; x < pageLay.horizPageCnt; x++)
