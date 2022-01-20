@@ -44,6 +44,7 @@ void BasicGraphView::setScene(IGraphScene *newScene)
     if(m_scene)
     {
         disconnect(m_scene, &IGraphScene::redrawGraph, this, &BasicGraphView::redrawGraph);
+        disconnect(m_scene, &IGraphScene::headersSizeChanged, this, &BasicGraphView::resizeHeaders);
         disconnect(m_scene, &IGraphScene::requestShowRect, this, &BasicGraphView::ensureRectVisible);
         disconnect(m_scene, &QObject::destroyed, this, &BasicGraphView::onSceneDestroyed);
     }
@@ -51,9 +52,12 @@ void BasicGraphView::setScene(IGraphScene *newScene)
     if(m_scene)
     {
         connect(m_scene, &IGraphScene::redrawGraph, this, &BasicGraphView::redrawGraph);
+        connect(m_scene, &IGraphScene::headersSizeChanged, this, &BasicGraphView::resizeHeaders);
         connect(m_scene, &IGraphScene::requestShowRect, this, &BasicGraphView::ensureRectVisible);
         connect(m_scene, &QObject::destroyed, this, &BasicGraphView::onSceneDestroyed);
     }
+
+    resizeHeaders();
     redrawGraph();
 }
 
