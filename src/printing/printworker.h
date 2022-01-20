@@ -157,8 +157,8 @@ public:
         virtual bool reportProgressAndContinue(int current, int max) = 0;
     };
 
-    bool printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRenderScene *scene, IProgress *progress,
-                         PageLayoutOpt& pageLay, PageNumberOpt& pageNumOpt);
+    static bool printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRenderScene *scene, IProgress *progress,
+                                PageLayoutOpt& pageLay, PageNumberOpt& pageNumOpt);
 };
 
 #endif // PRINTWORKER_H
