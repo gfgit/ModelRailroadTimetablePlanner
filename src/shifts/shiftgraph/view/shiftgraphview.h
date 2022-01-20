@@ -3,6 +3,15 @@
 
 #include "utils/scene/basicgraphview.h"
 
+/*!
+ * \brief BasicGraphView subclass to display a ShiftGraphScene
+ *
+ * A custom view to render ShiftGraphScene contents.
+ * Moving the mouse cursor on the contents, tooltips will be shown.
+ * Right clicking on a Job shows context menu.
+ *
+ * \sa ShiftGraphScene
+ */
 class ShiftGraphView : public BasicGraphView
 {
     Q_OBJECT
@@ -11,10 +20,10 @@ public:
 
 protected:
     /*!
-     * \brief Show Tooltips
+     * \brief Show Tooltips and context menu
      *
-     * Show tooltips on viewport
-     * \sa LineGraphScene::getJobAt()
+     * Show tooltips on viewport and context menu
+     * \sa ShiftGraphScene::getJobAt()
      */
     bool viewportEvent(QEvent *e) override;
 };

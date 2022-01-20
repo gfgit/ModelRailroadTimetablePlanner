@@ -14,6 +14,14 @@ class database;
 class query;
 }
 
+/*!
+ * \brief Class to store shift information
+ *
+ * Reimplement IGraphScene for shift graph
+ * Stores information to draw shift contents in a ShiftGraphView
+ *
+ * \sa ShiftGraphView
+ */
 class ShiftGraphScene : public IGraphScene
 {
     Q_OBJECT
@@ -41,7 +49,6 @@ public:
     ShiftGraphScene(sqlite3pp::database& db, QObject *parent = nullptr);
 
     virtual void renderContents(QPainter *painter, const QRectF& sceneRect) override;
-
     virtual void renderHeader(QPainter *painter, const QRectF& sceneRect, Qt::Orientation orient) override;
 
     void drawShifts(QPainter *painter, const QRectF& sceneRect);
@@ -49,8 +56,21 @@ public:
     void drawShiftHeader(QPainter *painter, const QRectF& rect);
     void drawHourHeader(QPainter *painter, const QRectF &rect);
 
-    JobEntry getJobAt(const QPointF& scenePos) const;
-    QString getTooltipAt(const QPointF& scenePos) const;
+    /*!
+     * \brief Get job at graph position
+     *
+     * \param scenePos Point in scene coordinates
+     * \param outShiftName If job is found, gets filled with its shift name
+     */
+    JobItem getJobAt(const QPointF& scenePos, QString& outShiftName) const;
+
+    inline QString getStationFullName(db_id stationId) const
+    {
+        auto st = m_stationCache.constFind(stationId);
+        if(st == m_stationCache.constEnd())
+            return QString();
+        return st.value().name;
+    }
 
 public slots:
     bool loadShifts();
@@ -78,8 +98,6 @@ private:
     {
         return t.msecsSinceStartOfDay() / MSEC_PER_HOUR * hourOffset + horizOffset;
     }
-
-    std::pair<int, int> getJobItemAt(const QPointF& scenePos) const;
 
 private:
     sqlite3pp::database& mDb;

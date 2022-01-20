@@ -278,51 +278,34 @@ void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect)
     }
 }
 
-JobEntry ShiftGraphScene::getJobAt(const QPointF &scenePos) const
+ShiftGraphScene::JobItem ShiftGraphScene::getJobAt(const QPointF &scenePos, QString &outShiftName) const
 {
-    auto pos = getJobItemAt(scenePos);
-    if(pos.first < 0 || pos.second < 0)
-        return {};
+    JobItem job;
 
-    return m_shifts.at(pos.first).jobList.at(pos.second).job;
-}
+    const qreal y = scenePos.y() - vertOffset - rowSpaceOffset / 2;
+    int shiftIdx = qFloor(y / (shiftRowHeight + rowSpaceOffset));
+    if(shiftIdx < 0 || shiftIdx >= m_shifts.size())
+        return job;
 
-QString ShiftGraphScene::getTooltipAt(const QPointF &scenePos) const
-{
-    auto pos = getJobItemAt(scenePos);
-    if(pos.first < 0 || pos.second < 0)
-        return {};
+    const qreal x = scenePos.x() - horizOffset;
+    if(x < 0 || x > 24 * hourOffset)
+        return job;
 
-    const ShiftGraph& shift = m_shifts.at(pos.first);
-    const JobItem item = shift.jobList.at(pos.second);
+    QTime t = QTime::fromMSecsSinceStartOfDay(qFloor(x / hourOffset * MSEC_PER_HOUR));
 
-    StationCache fromSt = m_stationCache.value(item.fromStId, StationCache());
-    StationCache toSt = m_stationCache.value(item.toStId, StationCache());
+    const ShiftGraph& shift = m_shifts.at(shiftIdx);
 
-    return tr("<table>"
-              "<tr>"
-              "<td>Job:</td>"
-              "<td><b>%1</b></td>"
-              "</tr>"
-              "<tr>"
-              "<td>Shift:</td>"
-              "<td><b>%2</b></td>"
-              "</tr>"
-              "<tr>"
-              "<td>From:</td>"
-              "<td><b>%3</b></td>"
-              "<td>at <b>%4</b></td>"
-              "</tr>"
-              "<tr>"
-              "<td>To:</td>"
-              "<td><b>%5</b></td>"
-              "<td>at <b>%6</b></td>"
-              "</tr>"
-              "</table>")
-        .arg(JobCategoryName::jobName(item.job.jobId, item.job.category),
-             shift.shiftName,
-             fromSt.name, item.start.toString("HH:mm"),
-             toSt.name, item.end.toString("HH:mm"));
+    for(const JobItem& item : shift.jobList)
+    {
+        if(item.start <= t && item.end >= t)
+        {
+            job = item;
+            outShiftName = shift.shiftName;
+            break;
+        }
+    }
+
+    return job;
 }
 
 bool ShiftGraphScene::loadShifts()
@@ -583,37 +566,4 @@ std::pair<int, int> ShiftGraphScene::lowerBound(db_id shiftId, const QString &na
     }
 
     return {oldIdx, firstIdx};
-}
-
-std::pair<int, int> ShiftGraphScene::getJobItemAt(const QPointF &scenePos) const
-{
-    std::pair<int, int> ret{-1, -1};
-
-    const qreal y = scenePos.y() - vertOffset - rowSpaceOffset / 2;
-    int shiftIdx = qFloor(y / (shiftRowHeight + rowSpaceOffset));
-    if(shiftIdx < 0 || shiftIdx >= m_shifts.size())
-        return ret;
-
-    const qreal x = scenePos.x() - horizOffset;
-    if(x < 0 || x > 24 * hourOffset)
-        return ret;
-
-    QTime t = QTime::fromMSecsSinceStartOfDay(qFloor(x / hourOffset * MSEC_PER_HOUR));
-
-    const ShiftGraph& shift = m_shifts.at(shiftIdx);
-
-    int jobIdx = 0;
-    for(const JobItem& item : shift.jobList)
-    {
-        if(item.start <= t && item.end >= t)
-        {
-            ret.first = shiftIdx;
-            ret.second = jobIdx;
-            break;
-        }
-
-        jobIdx++;
-    }
-
-    return ret;
 }
