@@ -17,12 +17,16 @@ public:
     IGraphScene *getSourceScene() const;
     void setSourceScene(IGraphScene *newSourceScene);
 
+    double getSourceScaleFactor() const;
+    void setSourceScaleFactor(double newSourceScaleFactor);
+
 private slots:
     void onSourceSceneDestroyed();
     void updateSourceSizeAndRedraw();
 
 private:
     IGraphScene *sourceScene;
+    double sourceScaleFactor;
 };
 
 #endif // PRINTPREVIEWSCENEPROXY_H
