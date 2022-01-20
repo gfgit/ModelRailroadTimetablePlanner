@@ -1,7 +1,8 @@
 #ifndef SHIFTGRAPHSCENE_H
 #define SHIFTGRAPHSCENE_H
 
-#include <QObject>
+#include "utils/scene/igraphscene.h"
+
 #include <QVector>
 #include <QHash>
 #include <QTime>
@@ -13,9 +14,7 @@ class database;
 class query;
 }
 
-class QPainter;
-
-class ShiftGraphScene : public QObject
+class ShiftGraphScene : public IGraphScene
 {
     Q_OBJECT
 public:
@@ -41,21 +40,20 @@ public:
 
     ShiftGraphScene(sqlite3pp::database& db, QObject *parent = nullptr);
 
+    virtual void renderContents(QPainter *painter, const QRectF& sceneRect) override;
+
+    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect, Qt::Orientation orient) override;
+
     void drawShifts(QPainter *painter, const QRectF& sceneRect);
     void drawHourLines(QPainter *painter, const QRectF &sceneRect);
-    void drawShiftHeader(QPainter *painter, const QRectF& rect, double vertScroll);
-    void drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll);
-
-    QSize getContentSize() const;
+    void drawShiftHeader(QPainter *painter, const QRectF& rect);
+    void drawHourHeader(QPainter *painter, const QRectF &rect);
 
     JobEntry getJobAt(const QPointF& scenePos) const;
     QString getTooltipAt(const QPointF& scenePos) const;
 
 public slots:
     bool loadShifts();
-
-signals:
-    void redrawGraph();
 
 private slots:
     void updateShiftGraphOptions();
@@ -67,6 +65,8 @@ private slots:
     void onStationNameChanged(db_id stationId);
 
 private:
+    void recalcContentSize();
+
     bool loadShiftRow(ShiftGraph& shiftObj, sqlite3pp::query& q_getStName,
                       sqlite3pp::query& q_countJobs, sqlite3pp::query& q_getJobs);
     void loadStationName(db_id stationId, sqlite3pp::query& q_getStName);

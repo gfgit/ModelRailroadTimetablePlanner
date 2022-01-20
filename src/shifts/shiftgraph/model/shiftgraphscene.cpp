@@ -29,7 +29,7 @@ static constexpr const char *sql_getJobs = "SELECT jobs.id, jobs.category,"
                                            " ORDER BY s1.arrival ASC";
 
 ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
-    QObject(parent),
+    IGraphScene(parent),
     mDb(db)
 {
     connect(&AppSettings, &MRTPSettings::jobColorsChanged,
@@ -45,6 +45,20 @@ ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
     connect(Session, &MeetingSession::shiftJobsChanged, this, &ShiftGraphScene::onShiftJobsChanged);
 
     updateShiftGraphOptions();
+}
+
+void ShiftGraphScene::renderContents(QPainter *painter, const QRectF &sceneRect)
+{
+    drawHourLines(painter, sceneRect);
+    drawShifts(painter, sceneRect);
+}
+
+void ShiftGraphScene::renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient)
+{
+    if(orient == Qt::Horizontal)
+        drawHourHeader(painter, sceneRect);
+    else
+        drawShiftHeader(painter, sceneRect);
 }
 
 void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
@@ -197,7 +211,7 @@ void ShiftGraphScene::drawHourLines(QPainter *painter, const QRectF &sceneRect)
     }
 }
 
-void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect, double vertScroll)
+void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect)
 {
     QTextOption shiftTextOpt(Qt::AlignCenter);
 
@@ -212,7 +226,7 @@ void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect, dou
     QRectF labelRect = rect;
     labelRect.setHeight(shiftRowHeight);
 
-    qreal y = vertOffset + rowSpaceOffset / 2 - vertScroll;
+    qreal y = vertOffset + rowSpaceOffset / 2;
     for(const ShiftGraph& shift : qAsConst(m_shifts))
     {
         const qreal top = y;
@@ -229,7 +243,7 @@ void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect, dou
     }
 }
 
-void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect, double horizScroll)
+void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect)
 {
     QTextOption hourTextOpt(Qt::AlignCenter);
 
@@ -246,7 +260,7 @@ void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect, doub
     QRectF labelRect = rect;
     labelRect.setWidth(hourOffset);
 
-    qreal x = horizOffset - hourOffset / 2 - horizScroll;
+    qreal x = horizOffset - hourOffset / 2;
 
     for(int h = 0; h <= 24; h++)
     {
@@ -262,14 +276,6 @@ void ShiftGraphScene::drawHourHeader(QPainter *painter, const QRectF &rect, doub
         labelRect.moveLeft(left);
         painter->drawText(labelRect, fmt.arg(h), hourTextOpt);
     }
-}
-
-QSize ShiftGraphScene::getContentSize() const
-{
-    //Set a margin after last hour of half hour offset
-    double width = horizOffset + 24 * hourOffset + hourOffset / 2;
-    double height = vertOffset + (shiftRowHeight + rowSpaceOffset) * m_shifts.count();
-    return QSize(qRound(width), qRound(height));
 }
 
 JobEntry ShiftGraphScene::getJobAt(const QPointF &scenePos) const
@@ -354,6 +360,8 @@ bool ShiftGraphScene::loadShifts()
         m_shifts.append(obj);
     }
 
+    recalcContentSize();
+
     emit redrawGraph();
 
     return true;
@@ -367,9 +375,16 @@ void ShiftGraphScene::updateShiftGraphOptions()
 
     shiftRowHeight = AppSettings.getShiftJobRowHeight();
     rowSpaceOffset = AppSettings.getShiftJobRowSpace();
-    //jobBoxOffset = AppSettings.getShiftJobBoxOffset();
-    //stationNameOffset = AppSettings.getShiftStationOffset();
     hideSameStations = AppSettings.getShiftHideSameStations();
+
+    QSizeF headerSize(horizOffset, vertOffset);
+    if(headerSize != m_cachedHeaderSize)
+    {
+        m_cachedHeaderSize = headerSize;
+        emit headersSizeChanged();
+    }
+
+    recalcContentSize();
 
     emit redrawGraph();
 }
@@ -399,6 +414,8 @@ void ShiftGraphScene::onShiftNameChanged(db_id shiftId)
         loadShiftRow(obj, q_getStName, q_countJobs, q_getJobs);
 
         m_shifts.insert(pos.second, obj);
+
+        recalcContentSize();
     }
     else
     {
@@ -419,6 +436,7 @@ void ShiftGraphScene::onShiftRemoved(db_id shiftId)
         if(it->shiftId == shiftId)
         {
             m_shifts.erase(it);
+            recalcContentSize();
             break;
         }
     }
@@ -459,6 +477,13 @@ void ShiftGraphScene::onStationNameChanged(db_id stationId)
     }
 }
 
+void ShiftGraphScene::recalcContentSize()
+{
+    //Set a margin after last hour of half hour offset
+    double width = horizOffset + 24 * hourOffset + hourOffset / 2;
+    double height = vertOffset + (shiftRowHeight + rowSpaceOffset) * m_shifts.count();
+    m_cachedContentsSize = QSizeF(width, height);
+}
 
 bool ShiftGraphScene::loadShiftRow(ShiftGraph &shiftObj, query &q_getStName, query &q_countJobs, sqlite3pp::query &q_getJobs)
 {
