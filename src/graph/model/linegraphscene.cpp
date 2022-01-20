@@ -1,10 +1,10 @@
 #include "linegraphscene.h"
 
+#include "graph/view/backgroundhelper.h"
+
 #include "app/session.h"
 
 #include <sqlite3pp/sqlite3pp.h>
-
-#include <QRectF>
 
 #include <QDebug>
 
@@ -33,17 +33,38 @@ static inline double stationPlatformPosition(const StationGraphObject& st, const
 }
 
 LineGraphScene::LineGraphScene(sqlite3pp::database &db, QObject *parent) :
-    QObject(parent),
+    IGraphScene(parent),
     mDb(db),
     graphObjectId(0),
-    graphType(LineGraphType::NoGraph)
+    graphType(LineGraphType::NoGraph),
+    m_drawSelection(true)
 {
 
 }
 
+void LineGraphScene::renderContents(QPainter *painter, const QRectF &sceneRect)
+{
+    BackgroundHelper::drawBackgroundHourLines(painter, sceneRect);
+
+    if(getGraphType() == LineGraphType::NoGraph)
+        return; //Nothing to draw
+
+    BackgroundHelper::drawStations(painter, this, sceneRect);
+    BackgroundHelper::drawJobStops(painter, this, sceneRect, m_drawSelection);
+    BackgroundHelper::drawJobSegments(painter, this, sceneRect, m_drawSelection);
+}
+
+void LineGraphScene::renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient)
+{
+    if(orient == Qt::Horizontal)
+        BackgroundHelper::drawStationHeader(painter, this, sceneRect);
+    else
+        BackgroundHelper::drawHourPanel(painter, sceneRect);
+}
+
 void LineGraphScene::recalcContentSize()
 {
-    contentSize = QSize();
+    m_cachedContentsSize = QSize();
 
     if(graphType == LineGraphType::NoGraph)
         return; //Nothing to draw
@@ -59,7 +80,7 @@ void LineGraphScene::recalcContentSize()
     const int maxWidth = entry.xPos + platfCount * Session->platformOffset + Session->stationOffset / 2;
     const int lastY = Session->vertOffset + Session->hourOffset * 24 + 10;
 
-    contentSize = QSize(maxWidth, lastY);
+    m_cachedContentsSize = QSize(maxWidth, lastY);
 }
 
 void LineGraphScene::reload()
@@ -78,7 +99,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     graphObjectName.clear();
     stations.clear();
     stationPositions.clear();
-    contentSize = QSize();
+    m_cachedContentsSize = QSize();
 
     if(type == LineGraphType::NoGraph)
     {
@@ -175,6 +196,7 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
     graphType = type;
 
     recalcContentSize();
+    updateHeaderSize();
 
     reloadJobs();
 
@@ -240,6 +262,16 @@ bool LineGraphScene::reloadJobs()
     setSelectedJob(newSelection);
 
     return true;
+}
+
+void LineGraphScene::updateHeaderSize()
+{
+    QSizeF headerSize(Session->horizOffset, Session->vertOffset);
+    if(headerSize != m_cachedHeaderSize)
+    {
+        m_cachedHeaderSize = headerSize;
+        emit headersSizeChanged();
+    }
 }
 
 JobStopEntry LineGraphScene::getJobStopAt(const StationGraphObject *prevSt, const StationGraphObject *nextSt,
