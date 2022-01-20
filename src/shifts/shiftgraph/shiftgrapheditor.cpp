@@ -111,11 +111,11 @@ void ShiftGraphEditor::exportSVG(const QString& fileName)
 
     QPainter painter;
 
-    QSize sceneSz = m_scene->getContentSize();
+    QSizeF sceneSz = m_scene->getContentsSize();
     QRectF sceneRect;
     sceneRect.setSize(sceneSz);
 
-    svg.setSize(sceneSz);
+    svg.setSize(sceneSz.toSize());
     svg.setViewBox(sceneRect);
 
     svg.setFileName(fileName);
@@ -133,7 +133,7 @@ void ShiftGraphEditor::exportPDF(const QString& fileName)
     printer.setDocName(QStringLiteral("Railway Shift"));
 
     QPageLayout lay = printer.pageLayout();
-    lay.setPageSize(QPageSize(m_scene->getContentSize(), QPageSize::Point));
+    lay.setPageSize(QPageSize(m_scene->getContentsSize(), QPageSize::Point));
     printer.setPageLayout(lay);
 
     QPainter painter(&printer);
@@ -143,7 +143,7 @@ void ShiftGraphEditor::exportPDF(const QString& fileName)
 void ShiftGraphEditor::renderGraph(QPainter *painter)
 {
     QRectF sceneRect;
-    sceneRect.setSize(m_scene->getContentSize());
+    sceneRect.setSize(m_scene->getContentsSize());
 
     QRectF hourPanelRect = sceneRect;
     hourPanelRect.setHeight(AppSettings.getShiftVertOffset() - 5); //See ShiftGraphView::resizeHeaders()
@@ -153,6 +153,6 @@ void ShiftGraphEditor::renderGraph(QPainter *painter)
 
     m_scene->drawHourLines(painter, sceneRect);
     m_scene->drawShifts(painter, sceneRect);
-    m_scene->drawHourHeader(painter, hourPanelRect, 0);
-    m_scene->drawShiftHeader(painter, shiftLabelHeader, 0);
+    m_scene->drawHourHeader(painter, hourPanelRect);
+    m_scene->drawShiftHeader(painter, shiftLabelHeader);
 }
