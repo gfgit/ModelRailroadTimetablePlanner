@@ -166,7 +166,7 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         if(!scene->loadGraph(entry.objectId, entry.type))
             continue; //Loading error, skip
 
-        const QRectF sourceRect(QPointF(), scene->getContentSize());
+        const QRectF sourceRect(QPointF(), scene->getContentsSize());
 
         //Send progress and description
         sendEvent(new PrintProgressEvent(this, progressiveNum, scene->getGraphObjectName()), false);
@@ -188,8 +188,8 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         BackgroundHelper::drawStations(&painter, scene, sourceRect);
         BackgroundHelper::drawJobStops(&painter, scene, sourceRect, false);
         BackgroundHelper::drawJobSegments(&painter, scene, sourceRect, false);
-        BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect, 0);
-        BackgroundHelper::drawHourPanel(&painter, hourPanelRect, 0);
+        BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect);
+        BackgroundHelper::drawHourPanel(&painter, hourPanelRect);
 
         if(endPaintingEveryPage)
             painter.end();
@@ -238,7 +238,7 @@ public:
             hourPanelRect.moveTop(sceneRect.top());
 
             hourPanelRect.moveTop(sceneRect.top());
-            BackgroundHelper::drawHourPanel(painter, hourPanelRect, 0);
+            BackgroundHelper::drawHourPanel(painter, hourPanelRect);
         }
 
         if(sceneRect.top() < vertOffset)
@@ -249,7 +249,7 @@ public:
             stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
             stationLabelRect.moveLeft(sceneRect.left());
 
-            BackgroundHelper::drawStationHeader(painter, m_scene, stationLabelRect, 0);
+            BackgroundHelper::drawStationHeader(painter, m_scene, stationLabelRect);
         }
 
         return true;
@@ -258,7 +258,7 @@ public:
     void setScene(LineGraphScene *s)
     {
         m_scene = s;
-        m_contentSize = m_scene->getContentSize();
+        m_contentSize = m_scene->getContentsSize();
     }
 
 private:
@@ -354,7 +354,7 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         sendEvent(new PrintProgressEvent(this, progress.progressiveNum, scene->getGraphObjectName()), false);
 
 
-        const QRectF sceneRect(QPointF(), scene->getContentSize());
+        const QRectF sceneRect(QPointF(), scene->getContentsSize());
         bool valid = true;
         if(func)
             valid = func(&painter, scene->getGraphObjectName(), sceneRect,
