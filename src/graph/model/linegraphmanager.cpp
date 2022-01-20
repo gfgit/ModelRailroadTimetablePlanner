@@ -101,25 +101,27 @@ JobStopEntry LineGraphManager::getCurrentSelectedJob() const
     return selectedJob;
 }
 
-void LineGraphManager::setActiveScene(LineGraphScene *scene)
+void LineGraphManager::setActiveScene(IGraphScene *scene)
 {
-    if(scene)
+    LineGraphScene *lineScene = qobject_cast<LineGraphScene *>(scene);
+
+    if(lineScene)
     {
-        if(activeScene == scene)
+        if(activeScene == lineScene)
             return;
 
         //NOTE: Only registere scenes can become active
         //Otherwise we cannot track if scene got destroyed and reset active scene.
-        if(!scenes.contains(scene))
+        if(!scenes.contains(lineScene))
             return;
     }
     else if(!scenes.isEmpty())
     {
         //Activate first registered scene because previous one was unregistered
-        scene = scenes.first();
+        lineScene = scenes.first();
     }
 
-    activeScene = scene;
+    activeScene = lineScene;
     emit activeSceneChanged(activeScene);
 
     //Triegger selection update or clear it

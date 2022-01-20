@@ -8,6 +8,7 @@
 #include "utils/types.h"
 #include "graph/linegraphtypes.h"
 
+class IGraphScene;
 class LineGraphScene;
 
 /*!
@@ -100,7 +101,7 @@ public slots:
      * \sa activeSceneChanged()
      * \sa LineGraphScene::activateScene()
      */
-    void setActiveScene(LineGraphScene *scene);
+    void setActiveScene(IGraphScene *scene);
 
 private slots:
     //Scenes
