@@ -1,12 +1,8 @@
-add_subdirectory(helper)
-add_subdirectory(wizard)
-
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
-  printing/printdefs.h
 
-  printing/printworker.h
-  printing/printworker.cpp
+  printing/helper/model/printhelper.h
+  printing/helper/model/printhelper.cpp
 
   PARENT_SCOPE
 )
