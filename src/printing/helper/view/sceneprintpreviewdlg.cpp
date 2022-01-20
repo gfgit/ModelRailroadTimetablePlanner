@@ -8,6 +8,7 @@
 #include <QSlider>
 #include <QSpinBox>
 
+#include <QEvent>
 
 ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QDialog(parent),
@@ -24,7 +25,9 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     zoomSlider->setTickInterval(50);
     zoomSlider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     zoomSlider->setValue(mZoom);
+    zoomSlider->setToolTip(tr("Double click to reset zoom"));
     connect(zoomSlider, &QSlider::valueChanged, this, &ScenePrintPreviewDlg::updateZoomLevel);
+    zoomSlider->installEventFilter(this);
     toolBar->addWidget(zoomSlider);
 
     zoomSpinBox = new QSpinBox;
@@ -46,6 +49,17 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
 void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
 {
     previewScene->setSourceScene(sourceScene);
+}
+
+bool ScenePrintPreviewDlg::eventFilter(QObject *watched, QEvent *ev)
+{
+    if(watched == zoomSlider && ev->type() == QEvent::MouseButtonDblClick)
+    {
+        //Zoom Slider was double clicked, reset zoom level to 100
+        updateZoomLevel(100);
+    }
+
+    return QDialog::eventFilter(watched, ev);
 }
 
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
