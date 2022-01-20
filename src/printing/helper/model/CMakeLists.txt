@@ -4,6 +4,9 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   printing/helper/model/printhelper.h
   printing/helper/model/printhelper.cpp
 
+  printing/helper/model/printpreviewsceneproxy.h
+  printing/helper/model/printpreviewsceneproxy.cpp
+
   PARENT_SCOPE
 )
 
