@@ -21,7 +21,7 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRe
     }
 
     //Inverse scale for margins pen to keep it independent
-    pageLay.pageMarginsPen.setWidth(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
+    pageLay.pageMarginsPen.setWidthF(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
 
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
