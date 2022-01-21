@@ -115,7 +115,7 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
             painter->setPen(jobPen);
 
             //Draw Job line
-            painter->drawLine(firstX, jobY, lastX, jobY);
+            painter->drawLine(QPointF(firstX, jobY), QPointF(lastX, jobY));
 
             painter->setPen(textPen);
             painter->setFont(jobFont);
