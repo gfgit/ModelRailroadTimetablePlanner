@@ -99,6 +99,14 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
     if(firstPageHorizBorder < 0)
         firstPageHorizBorder = 0;
 
+    //Do not go under headers
+    const qreal pageBordersLeft = qMax(m_cachedHeaderSize.width(), sceneRect.left());
+    const qreal pageBordersTop = qMax(m_cachedHeaderSize.height(), sceneRect.top());
+
+    //Do not exceed scene proxy size
+    const qreal pageBordersRight = qMin(m_cachedContentsSize.width(), sceneRect.right());
+    const qreal pageBordersBottom = qMax(m_cachedContentsSize.height(), sceneRect.bottom());
+
     //Draw effective page borders
     QPen borderPen(Qt::black, 5);
     painter->setPen(borderPen);
@@ -112,7 +120,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
     qreal borderX = fixedOffsetX + firstPageVertBorder * effectivePageSize.width();
     for(int i = 0; i < nLines; i++)
     {
-        QLineF line(borderX, sceneRect.top(), borderX, sceneRect.bottom());
+        QLineF line(borderX, pageBordersTop, borderX, pageBordersBottom);
         vec.append(line);
         borderX += effectivePageSize.width();
     }
@@ -126,7 +134,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
     qreal borderY = fixedOffsetY + firstPageHorizBorder * effectivePageSize.height();
     for(int i = 0; i < nLines; i++)
     {
-        QLineF line(sceneRect.left(), borderY, sceneRect.right(), borderY);
+        QLineF line(pageBordersLeft, borderY, pageBordersRight, borderY);
         vec.append(line);
         borderY += effectivePageSize.height();
     }
@@ -206,7 +214,7 @@ void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
 {
     QSizeF srcContentsSize;
     if(sourceScene)
-        srcContentsSize = sourceScene->getContentsSize();
+        srcContentsSize = sourceScene->getContentsSize() * pageLay.scaleFactor;
 
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
