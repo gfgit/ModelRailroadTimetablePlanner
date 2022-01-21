@@ -9,6 +9,8 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 
+#include <QPageSize>
+
 #include <QEvent>
 
 ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
@@ -60,6 +62,9 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
 
     previewScene = new PrintPreviewSceneProxy(this);
     graphView->setScene(previewScene);
+
+    QPageSize pageSize(QPageSize::A4);
+    previewScene->setPageSize(pageSize.rectPixels(graphView->logicalDpiX()));
 
     resize(500, 600);
 }
