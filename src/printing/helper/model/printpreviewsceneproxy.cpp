@@ -6,9 +6,11 @@
 
 PrintPreviewSceneProxy::PrintPreviewSceneProxy(QObject *parent) :
     IGraphScene(parent),
-    sourceScene(nullptr)
+    sourceScene(nullptr),
+    viewScaleFactor(1)
 {
-    m_cachedHeaderSize = QSizeF(50, 50);
+    originalHeaderSize = QSizeF(70, 70);
+    setViewScaleFactor(1.0);
 }
 
 void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sceneRect)
@@ -108,7 +110,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
     const qreal pageBordersBottom = qMin(m_cachedContentsSize.height(), sceneRect.bottom());
 
     //Draw effective page borders
-    QPen borderPen(Qt::black, 5);
+    QPen borderPen(Qt::black, 5, Qt::SolidLine, Qt::FlatCap);
     painter->setPen(borderPen);
 
     QVector<QLineF> vec;
@@ -180,6 +182,25 @@ void PrintPreviewSceneProxy::setSourceScene(IGraphScene *newSourceScene)
     }
 
     updateSourceSizeAndRedraw();
+}
+
+double PrintPreviewSceneProxy::getViewScaleFactor() const
+{
+    return viewScaleFactor;
+}
+
+void PrintPreviewSceneProxy::setViewScaleFactor(double newViewScaleFactor)
+{
+    //Keep header of same size, independently of view zoom
+    viewScaleFactor = newViewScaleFactor;
+
+    const QSizeF newHeaderSize = originalHeaderSize / viewScaleFactor;
+    if(newHeaderSize != m_cachedHeaderSize)
+    {
+        m_cachedHeaderSize = newHeaderSize;
+        emit headersSizeChanged();
+        updateSourceSizeAndRedraw();
+    }
 }
 
 QRectF PrintPreviewSceneProxy::getPageSize() const

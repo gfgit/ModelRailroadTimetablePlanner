@@ -17,6 +17,9 @@ public:
     IGraphScene *getSourceScene() const;
     void setSourceScene(IGraphScene *newSourceScene);
 
+    double getViewScaleFactor() const;
+    void setViewScaleFactor(double newViewScaleFactor);
+
     double getSourceScaleFactor() const;
     void setSourceScaleFactor(double newSourceScaleFactor);
 
@@ -34,6 +37,9 @@ private:
     IGraphScene *sourceScene;
     PrintHelper::PageLayoutOpt pageLay;
     QSizeF effectivePageSize;
+
+    double viewScaleFactor;
+    QSizeF originalHeaderSize;
 };
 
 #endif // PRINTPREVIEWSCENEPROXY_H
