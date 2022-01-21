@@ -63,7 +63,7 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     graphView->setScene(previewScene);
 
     QPageSize pageSize(QPageSize::A4);
-    previewScene->setPageSize(pageSize.rectPixels(graphView->logicalDpiX()));
+    previewScene->setPageSize(pageSize.rectPoints());
 
     resize(500, 600);
 }
