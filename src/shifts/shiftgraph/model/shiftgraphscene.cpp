@@ -53,7 +53,8 @@ void ShiftGraphScene::renderContents(QPainter *painter, const QRectF &sceneRect)
     drawShifts(painter, sceneRect);
 }
 
-void ShiftGraphScene::renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient)
+void ShiftGraphScene::renderHeader(QPainter *painter, const QRectF &sceneRect,
+                                   Qt::Orientation orient, double scroll)
 {
     if(orient == Qt::Horizontal)
         drawHourHeader(painter, sceneRect);

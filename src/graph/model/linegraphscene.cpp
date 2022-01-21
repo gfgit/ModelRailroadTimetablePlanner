@@ -54,7 +54,8 @@ void LineGraphScene::renderContents(QPainter *painter, const QRectF &sceneRect)
     BackgroundHelper::drawJobSegments(painter, this, sceneRect, m_drawSelection);
 }
 
-void LineGraphScene::renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient)
+void LineGraphScene::renderHeader(QPainter *painter, const QRectF &sceneRect,
+                                  Qt::Orientation orient, double scroll)
 {
     if(orient == Qt::Horizontal)
         BackgroundHelper::drawStationHeader(painter, this, sceneRect);

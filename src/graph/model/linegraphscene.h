@@ -34,7 +34,8 @@ public:
     LineGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
 
     void renderContents(QPainter *painter, const QRectF& sceneRect) override;
-    void renderHeader(QPainter *painter, const QRectF& sceneRect, Qt::Orientation orient) override;
+    void renderHeader(QPainter *painter, const QRectF& sceneRect,
+                      Qt::Orientation orient, double scroll) override;
 
     /*!
      * \brief Load graph contents
