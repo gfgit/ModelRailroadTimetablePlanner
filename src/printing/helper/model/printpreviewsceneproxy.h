@@ -12,7 +12,8 @@ public:
     PrintPreviewSceneProxy(QObject *parent = nullptr);
 
     virtual void renderContents(QPainter *painter, const QRectF& sceneRect) override;
-    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect, Qt::Orientation orient) override;
+    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect,
+                              Qt::Orientation orient, double scroll) override;
 
     IGraphScene *getSourceScene() const;
     void setSourceScene(IGraphScene *newSourceScene);
@@ -32,6 +33,8 @@ private slots:
 
 private:
     void updatePageLay();
+    void drawPageBorders(QPainter *painter, const QRectF& sceneRect,
+                         bool isHeader, Qt::Orientation orient = Qt::Horizontal);
 
 private:
     IGraphScene *sourceScene;
