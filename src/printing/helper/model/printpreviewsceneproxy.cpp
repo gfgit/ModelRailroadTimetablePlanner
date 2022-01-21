@@ -105,7 +105,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
 
     //Do not exceed scene proxy size
     const qreal pageBordersRight = qMin(m_cachedContentsSize.width(), sceneRect.right());
-    const qreal pageBordersBottom = qMax(m_cachedContentsSize.height(), sceneRect.bottom());
+    const qreal pageBordersBottom = qMin(m_cachedContentsSize.height(), sceneRect.bottom());
 
     //Draw effective page borders
     QPen borderPen(Qt::black, 5);
@@ -164,9 +164,9 @@ void PrintPreviewSceneProxy::setSourceScene(IGraphScene *newSourceScene)
         disconnect(sourceScene, &QObject::destroyed, this,
                    &PrintPreviewSceneProxy::onSourceSceneDestroyed);
         disconnect(sourceScene, &IGraphScene::redrawGraph,
-                   this, &PrintPreviewSceneProxy::updatePageLay);
+                   this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
         disconnect(sourceScene, &IGraphScene::headersSizeChanged,
-                   this, &PrintPreviewSceneProxy::updatePageLay);
+                   this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
     }
     sourceScene = newSourceScene;
     if(sourceScene)
@@ -174,9 +174,9 @@ void PrintPreviewSceneProxy::setSourceScene(IGraphScene *newSourceScene)
         connect(sourceScene, &QObject::destroyed, this,
                 &PrintPreviewSceneProxy::onSourceSceneDestroyed);
         connect(sourceScene, &IGraphScene::redrawGraph,
-                this, &PrintPreviewSceneProxy::updatePageLay);
+                this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
         connect(sourceScene, &IGraphScene::headersSizeChanged,
-                this, &PrintPreviewSceneProxy::updatePageLay);
+                this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
     }
 
     updateSourceSizeAndRedraw();

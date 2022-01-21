@@ -25,10 +25,10 @@ public:
 
 private slots:
     void onSourceSceneDestroyed();
-    void updatePageLay();
+    void updateSourceSizeAndRedraw();
 
 private:
-    void updateSourceSizeAndRedraw();
+    void updatePageLay();
 
 private:
     IGraphScene *sourceScene;
