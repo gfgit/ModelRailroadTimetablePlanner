@@ -7,12 +7,14 @@
 #include <QToolBar>
 #include <QSlider>
 #include <QSpinBox>
+#include <QDoubleSpinBox>
 
 #include <QEvent>
 
 ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QDialog(parent),
-    mZoom(100)
+    mZoom(100),
+    mSceneScale(1)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -26,16 +28,32 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     zoomSlider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     zoomSlider->setValue(mZoom);
     zoomSlider->setToolTip(tr("Double click to reset zoom"));
-    connect(zoomSlider, &QSlider::valueChanged, this, &ScenePrintPreviewDlg::updateZoomLevel);
+    connect(zoomSlider, &QSlider::valueChanged, this,
+            &ScenePrintPreviewDlg::updateZoomLevel);
     zoomSlider->installEventFilter(this);
-    toolBar->addWidget(zoomSlider);
+    QAction *zoomAct = toolBar->addWidget(zoomSlider);
+    zoomAct->setText(tr("Zoom:"));
 
     zoomSpinBox = new QSpinBox;
     zoomSpinBox->setRange(25, 400);
     zoomSpinBox->setValue(mZoom);
     zoomSpinBox->setSuffix(QChar('%'));
-    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &ScenePrintPreviewDlg::updateZoomLevel);
+    zoomSpinBox->setToolTip(tr("Zoom"));
+    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged),
+            this, &ScenePrintPreviewDlg::updateZoomLevel);
     toolBar->addWidget(zoomSpinBox);
+
+    toolBar->addSeparator();
+
+    sceneScaleSpinBox = new QDoubleSpinBox;
+    sceneScaleSpinBox->setRange(25, 400);
+    sceneScaleSpinBox->setValue(mSceneScale * 100);
+    sceneScaleSpinBox->setSuffix(QChar('%'));
+    sceneScaleSpinBox->setToolTip(tr("Source scale factor"));
+    connect(sceneScaleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+            this, &ScenePrintPreviewDlg::onScaleChanged);
+    QAction *scaleAct = toolBar->addWidget(sceneScaleSpinBox);
+    scaleAct->setText(tr("Scale:"));
 
     graphView = new BasicGraphView;
     lay->addWidget(graphView);
@@ -44,11 +62,6 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     graphView->setScene(previewScene);
 
     resize(500, 600);
-}
-
-void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
-{
-    previewScene->setSourceScene(sourceScene);
 }
 
 bool ScenePrintPreviewDlg::eventFilter(QObject *watched, QEvent *ev)
@@ -62,6 +75,22 @@ bool ScenePrintPreviewDlg::eventFilter(QObject *watched, QEvent *ev)
     return QDialog::eventFilter(watched, ev);
 }
 
+void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
+{
+    previewScene->setSourceScene(sourceScene);
+}
+
+void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
+{
+    if(qFuzzyCompare(mSceneScale, scaleFactor))
+        return;
+
+    mSceneScale = scaleFactor;
+    sceneScaleSpinBox->setValue(mSceneScale * 100);
+
+    previewScene->setSourceScaleFactor(mSceneScale);
+}
+
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
     if(mZoom == zoom)
@@ -71,4 +100,10 @@ void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
     zoomSlider->setValue(zoom);
     zoomSpinBox->setValue(zoom);
     graphView->setZoomLevel(zoom);
+}
+
+void ScenePrintPreviewDlg::onScaleChanged(double zoom)
+{
+    //Convert from 0%-100% to 0-1
+    setSceneScale(zoom / 100);
 }
