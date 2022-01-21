@@ -11,6 +11,10 @@ PrintPreviewSceneProxy::PrintPreviewSceneProxy(QObject *parent) :
 {
     originalHeaderSize = QSizeF(70, 70);
     setViewScaleFactor(1.0);
+
+    //Make margin pen a bit bigger
+    pageLay.pageMarginsPenWidth = 7;
+    updatePageLay();
 }
 
 void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sceneRect)
@@ -68,6 +72,9 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
             vertHeaderRect.setRight(headerSize.width());
             sourceScene->renderHeader(painter, vertHeaderRect, Qt::Vertical, 0);
         }
+
+        //Wash out a bit to make page borders more visible
+        painter->fillRect(sourceRect, QColor(0, 255, 0, 80));
     }
 
     //Reset transorm to previous
@@ -82,7 +89,7 @@ void PrintPreviewSceneProxy::renderHeader(QPainter *painter, const QRectF &scene
 {
     double vertScroll = scroll;
     double horizScroll = 0;
-    if((orient = Qt::Horizontal))
+    if(orient == Qt::Horizontal)
         qSwap(vertScroll, horizScroll);
 
     //Do not overlap the 2 headers in the top left corner for background and separator lines
@@ -218,8 +225,10 @@ void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
     if(sourceScene)
         srcContentsSize = sourceScene->getContentsSize() * pageLay.scaleFactor;
 
-    //Shift by top left page margin
-    srcContentsSize += QSizeF(pageLay.marginOriginalWidth, pageLay.marginOriginalWidth);
+    //NOTE: do not shift by top left margin here
+    //This is because it should not be counted when calculating page count
+    //as it is out of effective page size (= page inside margins)
+    //Overall size is then computed from page count so it's always correct
 
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
