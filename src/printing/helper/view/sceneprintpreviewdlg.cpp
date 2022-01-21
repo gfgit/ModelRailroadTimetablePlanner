@@ -15,7 +15,6 @@
 
 ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QDialog(parent),
-    mZoom(100),
     mSceneScale(1)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
@@ -28,7 +27,7 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     zoomSlider->setTickPosition(QSlider::TicksBelow);
     zoomSlider->setTickInterval(50);
     zoomSlider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-    zoomSlider->setValue(mZoom);
+    zoomSlider->setValue(100);
     zoomSlider->setToolTip(tr("Double click to reset zoom"));
     connect(zoomSlider, &QSlider::valueChanged, this,
             &ScenePrintPreviewDlg::updateZoomLevel);
@@ -38,7 +37,7 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
 
     zoomSpinBox = new QSpinBox;
     zoomSpinBox->setRange(25, 400);
-    zoomSpinBox->setValue(mZoom);
+    zoomSpinBox->setValue(100);
     zoomSpinBox->setSuffix(QChar('%'));
     zoomSpinBox->setToolTip(tr("Zoom"));
     connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged),
@@ -98,13 +97,16 @@ void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
 
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
-    if(mZoom == zoom)
+    if(graphView->getZoomLevel() == zoom)
         return;
 
-    mZoom = zoom;
+    //Set for view first because it checks minimum and mazimum values
+    graphView->setZoomLevel(zoom);
+
+    zoom = graphView->getZoomLevel();
     zoomSlider->setValue(zoom);
     zoomSpinBox->setValue(zoom);
-    graphView->setZoomLevel(zoom);
+    previewScene->setViewScaleFactor(double(zoom) / 100.0);
 }
 
 void ScenePrintPreviewDlg::onScaleChanged(double zoom)

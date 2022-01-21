@@ -39,7 +39,6 @@ private:
 
     QSlider *zoomSlider;
     QSpinBox *zoomSpinBox;
-    int mZoom;
 
     QDoubleSpinBox *sceneScaleSpinBox;
     double mSceneScale;
