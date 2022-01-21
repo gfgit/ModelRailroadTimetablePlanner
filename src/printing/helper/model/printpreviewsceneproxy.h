@@ -20,16 +20,20 @@ public:
     double getSourceScaleFactor() const;
     void setSourceScaleFactor(double newSourceScaleFactor);
 
+    QRectF getPageSize() const;
+    void setPageSize(const QRectF &newPageSize);
+
 private slots:
     void onSourceSceneDestroyed();
-    void updateSourceSizeAndRedraw();
+    void updatePageLay();
 
 private:
-    void updatePageLay();
+    void updateSourceSizeAndRedraw();
 
 private:
     IGraphScene *sourceScene;
     PrintHelper::PageLayoutOpt pageLay;
+    QSizeF effectivePageSize;
 };
 
 #endif // PRINTPREVIEWSCENEPROXY_H
