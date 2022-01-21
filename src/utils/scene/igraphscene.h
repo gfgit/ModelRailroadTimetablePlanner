@@ -54,7 +54,7 @@ public:
 
     /*!
      * \brief activate scene
-     * \param self a pointer to IGraphScene instance
+     * \param self A pointer to IGraphScene instance
      *
      * For scenes registered on a manager, this tells
      * our instance is now the active one and will therefore receive
@@ -66,22 +66,26 @@ public:
 
     /*!
      * \brief renderContents
-     * \param painter a painter to render to
-     * \param sceneRect rect to render in scene coordinates
+     * \param painter A painter to render to
+     * \param sceneRect Rect to render in scene coordinates
      *
      * Renders requested portion of scene contents
      */
     virtual void renderContents(QPainter *painter, const QRectF& sceneRect) = 0;
 
     /*!
-     * \brief renderHeader
-     * \param painter a painter to render to
-     * \param sceneRect rect to render in scene coordinates
-     * \param orient header orientation
+     * \brief render header in scene coordinates
+     * \param painter A painter to render to
+     * \param sceneRect Rect to render in scene coordinates
+     * \param orient Header orientation
+     * \param scroll scrolling in opposite orientation of \ref orient argument
      *
-     * Renders requested portion of header
+     * Renders requested portion of header.
+     *
+     * \sa renderHeaderScroll()
      */
-    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect, Qt::Orientation orient) = 0;
+    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect,
+                              Qt::Orientation orient, double scroll) = 0;
 
 signals:
     /*!

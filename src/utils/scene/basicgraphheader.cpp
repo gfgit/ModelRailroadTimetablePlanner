@@ -59,5 +59,5 @@ void BasicGraphHeader::paintEvent(QPaintEvent *e)
     painter.scale(scaleFactor, scaleFactor);
     painter.translate(-sceneRect.topLeft());
 
-    m_scene->renderHeader(&painter, sceneRect, m_orientation);
+    m_scene->renderHeader(&painter, sceneRect, m_orientation, sceneScroll);
 }
