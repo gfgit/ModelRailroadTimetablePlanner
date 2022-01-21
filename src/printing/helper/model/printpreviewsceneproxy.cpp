@@ -1,5 +1,7 @@
 #include "printpreviewsceneproxy.h"
 
+#include "utils/font_utils.h"
+
 #include <QPainter>
 
 #include <QtMath>
@@ -321,6 +323,13 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
 
     painter->setPen(borderPen);
 
+    QTextOption pageNumTextOpt(Qt::AlignCenter);
+
+    QFont pageNumFont;
+    pageNumFont.setBold(true);
+    setFontPointSizeDPI(pageNumFont, m_cachedHeaderSize.height() * 0.6, painter);
+    painter->setFont(pageNumFont);
+
     QVector<QLineF> vec;
 
     if(!isHeader || orient == Qt::Horizontal)
@@ -337,6 +346,29 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             borderX += effectivePageSize.width();
         }
         painter->drawLines(vec);
+
+        if(isHeader)
+        {
+            //Draw page numbers
+            int firstPageNumber = firstPageVertBorder;
+            if(firstPageVertBorder > 0)
+                firstPageNumber--; //Draw also previous page
+
+            //If there are N pages, there are (N + 1) margins
+            //So last margin and last but one margin both belong to last page
+            int lastPageNumberPlusOne = lastPageVertBorder;
+            if(lastPageVertBorder < pageLay.horizPageCnt)
+                lastPageNumberPlusOne++; //Draw also next page
+
+            borderX = fixedOffsetX + firstPageNumber * effectivePageSize.width();
+            QRectF textRect(borderX, 0, effectivePageSize.width(), m_cachedHeaderSize.height());
+            for(int i = firstPageNumber; i < lastPageNumberPlusOne; i++)
+            {
+                //Column index starts from 0 so add +1
+                painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
+                textRect.moveLeft(textRect.left() + effectivePageSize.width());
+            }
+        }
     }
 
     vec.clear();
@@ -355,6 +387,26 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             borderY += effectivePageSize.height();
         }
         painter->drawLines(vec);
-    }
 
+        if(isHeader)
+        {
+            //Draw page numbers
+            int firstPageNumber = firstPageHorizBorder;
+            if(firstPageHorizBorder > 0)
+                firstPageNumber--; //Draw also previous page
+
+            int lastPageNumberPlusOne = lastPageHorizBorder;
+            if(lastPageHorizBorder < pageLay.vertPageCnt)
+                lastPageNumberPlusOne++; //Draw also next page
+
+            borderY = fixedOffsetY + firstPageNumber * effectivePageSize.height();
+            QRectF textRect(0, borderY, m_cachedHeaderSize.width(), effectivePageSize.height());
+            for(int i = firstPageNumber; i < lastPageNumberPlusOne; i++)
+            {
+                //Row index starts from 0 so add +1
+                painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
+                textRect.moveTop(textRect.top() + effectivePageSize.height());
+            }
+        }
+    }
 }
