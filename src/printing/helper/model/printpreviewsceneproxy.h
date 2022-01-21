@@ -25,8 +25,11 @@ private slots:
     void updateSourceSizeAndRedraw();
 
 private:
+    void updatePageLay();
+
+private:
     IGraphScene *sourceScene;
-    double sourceScaleFactor;
+    PrintHelper::PageLayoutOpt pageLay;
 };
 
 #endif // PRINTPREVIEWSCENEPROXY_H

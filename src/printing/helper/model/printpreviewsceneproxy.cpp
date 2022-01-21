@@ -2,10 +2,11 @@
 
 #include <QPainter>
 
+#include <QtMath>
+
 PrintPreviewSceneProxy::PrintPreviewSceneProxy(QObject *parent) :
     IGraphScene(parent),
-    sourceScene(nullptr),
-    sourceScaleFactor(1)
+    sourceScene(nullptr)
 {
     m_cachedHeaderSize = QSizeF(50, 50);
 }
@@ -24,8 +25,8 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
         sourceRect.moveTopLeft(sourceRect.topLeft() - origin);
 
         //Apply scale factor
-        sourceRect = QRectF(sourceRect.topLeft() / sourceScaleFactor,
-                            sourceRect.size() / sourceScaleFactor);
+        sourceRect = QRectF(sourceRect.topLeft() / pageLay.scaleFactor,
+                            sourceRect.size() / pageLay.scaleFactor);
 
         //Cut negative part which would go under our headers
         //This will reduce a bit the rect size
@@ -42,7 +43,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
             sourceRect.setBottom(contentsSize.height());
 
         painter->translate(origin);
-        painter->scale(sourceScaleFactor, sourceScaleFactor);
+        painter->scale(pageLay.scaleFactor, pageLay.scaleFactor);
 
         //Draw source contents
         sourceScene->renderContents(painter, sourceRect);
@@ -77,8 +78,6 @@ void PrintPreviewSceneProxy::renderHeader(QPainter *painter, const QRectF &scene
     painter->fillRect(sceneRect, QColor(255, 0, 0, 40));
 
     //TODO: draw page number header
-    if(sourceScene)
-        sourceScene->renderHeader(painter, sceneRect, orient);
 }
 
 IGraphScene *PrintPreviewSceneProxy::getSourceScene() const
@@ -123,27 +122,51 @@ void PrintPreviewSceneProxy::onSourceSceneDestroyed()
 
 void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
 {
+    QSizeF srcContentsSize;
     if(sourceScene)
-    {
-        //Scale source scene and then add our headers
-        m_cachedContentsSize = sourceScene->getContentsSize() * sourceScaleFactor + m_cachedHeaderSize;
-    }
-    else
-    {
-        m_cachedContentsSize = QSizeF();
-    }
+        srcContentsSize = sourceScene->getContentsSize();
+
+    //Apply overlap margin
+    //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
+    //Calculate effective content size inside margins
+    QSizeF effectivePageSize = pageLay.devicePageRect.size();
+    effectivePageSize.rwidth() -= 2 * pageLay.marginOriginalWidth;
+    effectivePageSize.rheight() -= 2 * pageLay.marginOriginalWidth;
+
+    //Calculate page count, at least 1 page
+    pageLay.horizPageCnt = qMax(1, qCeil(srcContentsSize.width() / effectivePageSize.width()));
+    pageLay.vertPageCnt = qMax(1, qCeil(srcContentsSize.height() / effectivePageSize.height()));
+
+    QSizeF printedSize(pageLay.horizPageCnt * pageLay.devicePageRect.width(),
+                       pageLay.vertPageCnt * pageLay.devicePageRect.height());
+
+    //Adjust by substracting overlapped edges (n - 1)
+    printedSize -= QSizeF((pageLay.horizPageCnt - 1) * pageLay.marginOriginalWidth,
+                          (pageLay.vertPageCnt - 1)* pageLay.marginOriginalWidth);
+
+    //Add our headers
+    m_cachedContentsSize = printedSize + m_cachedHeaderSize;
 
     emit headersSizeChanged();
     emit redrawGraph();
 }
 
+void PrintPreviewSceneProxy::updatePageLay()
+{
+    pageLay.scaledPageRect = QRectF(pageLay.devicePageRect.topLeft(), pageLay.devicePageRect.size() / pageLay.scaleFactor);
+    pageLay.overlapMarginWidthScaled = pageLay.marginOriginalWidth / pageLay.scaleFactor;
+    pageLay.pageMarginsPen.setWidthF(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
+
+    updateSourceSizeAndRedraw();
+}
+
 double PrintPreviewSceneProxy::getSourceScaleFactor() const
 {
-    return sourceScaleFactor;
+    return pageLay.scaleFactor;
 }
 
 void PrintPreviewSceneProxy::setSourceScaleFactor(double newSourceScaleFactor)
 {
-    sourceScaleFactor = newSourceScaleFactor;
-    updateSourceSizeAndRedraw();
+    pageLay.scaleFactor = newSourceScaleFactor;
+    updatePageLay();
 }
