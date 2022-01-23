@@ -224,56 +224,6 @@ public:
     int progressiveNum = 0;
 };
 
-class SceneImpl : public PrintHelper::IRenderScene
-{
-public:
-    bool render(QPainter *painter, const QRectF& sceneRect) override
-    {
-        BackgroundHelper::drawBackgroundHourLines(painter, sceneRect);
-        BackgroundHelper::drawStations(painter, m_scene, sceneRect);
-        BackgroundHelper::drawJobStops(painter, m_scene, sceneRect, false);
-        BackgroundHelper::drawJobSegments(painter, m_scene, sceneRect, false);
-
-        if(sceneRect.left() < horizOffset)
-        {
-            //Left column pages have hour labels
-            QRectF hourPanelRect;
-            hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
-            hourPanelRect.setHeight(sceneRect.height());
-            hourPanelRect.moveTop(sceneRect.top());
-
-            hourPanelRect.moveTop(sceneRect.top());
-            BackgroundHelper::drawHourPanel(painter, hourPanelRect);
-        }
-
-        if(sceneRect.top() < vertOffset)
-        {
-            //Top row pages have station labels
-            QRectF stationLabelRect;
-            stationLabelRect.setWidth(sceneRect.width());
-            stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
-            stationLabelRect.moveLeft(sceneRect.left());
-
-            BackgroundHelper::drawStationHeader(painter, m_scene, stationLabelRect);
-        }
-
-        return true;
-    }
-
-    void setScene(LineGraphScene *s)
-    {
-        m_scene = s;
-        m_contentSize = m_scene->getContentsSize();
-    }
-
-private:
-    LineGraphScene *m_scene = nullptr;
-
-public:
-    double vertOffset = 0;
-    double horizOffset = 0;
-};
-
 class PrinterImpl : public PrintHelper::IPagedPaintDevice
 {
 public:
@@ -296,10 +246,6 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     progress.m_scene = nullptr;
     progress.progressiveNum = 0;
 
-    SceneImpl sceneImpl;
-    sceneImpl.vertOffset = Session->vertOffset;
-    sceneImpl.horizOffset = Session->horizOffset;
-
     PrinterImpl devImpl;
     devImpl.m_printer = m_printer;
 
@@ -319,13 +265,16 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     scenePageLay.drawPageMargins = true;
     scenePageLay.pageMarginsPenWidth = 5;
     scenePageLay.pageMarginsPen = QPen(Qt::darkRed, scenePageLay.pageMarginsPenWidth);
-    scenePageLay.isFirstPage = true;
 
     //Calculate members
     scenePageLay.devicePageRect = QRectF(QPointF(), QSizeF(m_printer->width(), m_printer->height()));
-    scenePageLay.scaledPageRect = QRectF(scenePageLay.devicePageRect.topLeft(),
-                                         scenePageLay.devicePageRect.size() / scenePageLay.scaleFactor);
-    scenePageLay.overlapMarginWidthScaled = scenePageLay.marginOriginalWidth / scenePageLay.scaleFactor;
+
+    PrintHelper::PageLayoutScaled scenePageLayScale;
+    scenePageLayScale.lay = scenePageLay;
+    scenePageLayScale.scaledPageRect = QRectF(scenePageLay.devicePageRect.topLeft(),
+                                              scenePageLay.devicePageRect.size() / scenePageLay.scaleFactor);
+    scenePageLayScale.overlapMarginWidthScaled = scenePageLay.marginOriginalWidth / scenePageLay.scaleFactor;
+    scenePageLayScale.isFirstPage = true;
 
     PrintHelper::PageNumberOpt pageNumberOpt;
     pageNumberOpt.enable = true;
@@ -351,10 +300,11 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
             continue; //Loading error, skip
 
         progress.m_scene = scene;
-        sceneImpl.setScene(scene);
 
         //Send progress and description
-        sendEvent(new PrintProgressEvent(this, progress.progressiveNum, scene->getGraphObjectName()), false);
+        sendEvent(new PrintProgressEvent(this,
+                                         progress.progressiveNum,
+                                         scene->getGraphObjectName()), false);
 
 
         const QRectF sceneRect(QPointF(), scene->getContentsSize());
@@ -365,7 +315,8 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         if(!valid)
             return false;
 
-        PrintHelper::printPagedScene(&painter, &devImpl, &sceneImpl, &progress, scenePageLay, pageNumberOpt);
+        PrintHelper::printPagedScene(&painter, &devImpl, scene, &progress,
+                                     scenePageLayScale, pageNumberOpt);
 
         if(endPaintingEveryPage)
             painter.end();
