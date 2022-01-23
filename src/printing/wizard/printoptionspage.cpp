@@ -23,9 +23,6 @@
 #include "sceneselectionmodel.h"
 #include "graph/model/linegraphscene.h"
 
-//FIXME: remove
-#include <QGuiApplication>
-#include <QPrintPreviewDialog>
 #include "printing/printworker.h"
 #include <QPrinter>
 
@@ -312,21 +309,6 @@ void PrintOptionsPage::onOpenPageSetup()
 void PrintOptionsPage::onShowPreviewDlg()
 {
     QPrinter *printer = mWizard->getPrinter();
-
-    if(QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
-    {
-        OwningQPointer<QPrintPreviewDialog> dlg = new QPrintPreviewDialog(printer, this);
-        connect(dlg, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *printer_)
-                {
-                    //FIXME
-                    PrintWorker worker(mWizard->getDb(), this);
-                    worker.setPrinter(printer_);
-                    worker.setOutputType(Print::Native);
-                    worker.setSelection(mWizard->getSelectionModel());
-                    worker.run();
-                });
-        dlg->exec();
-    }
 
     OwningQPointer<ScenePrintPreviewDlg> dlg = new ScenePrintPreviewDlg(this);
 
