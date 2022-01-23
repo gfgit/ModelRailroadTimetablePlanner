@@ -311,17 +311,17 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     const qreal pageBordersBottom = qMin(m_cachedContentsSize.height(), sceneRect.bottom());
 
     //Draw effective page borders
-    QPen borderPen(Qt::red, pageLay.pageMarginsPenWidth, Qt::SolidLine, Qt::FlatCap);
+    QPen pageMarginsPen(Qt::red, pageLay.pageMarginsPenWidth, Qt::SolidLine, Qt::FlatCap);
 
     if(isHeader)
     {
         //Keep width independent of view scale but with limits
         qreal wt = pageLay.pageMarginsPenWidth / viewScaleFactor;
         wt = qBound(2.0, wt, 20.0);
-        borderPen.setWidthF(wt);
+        pageMarginsPen.setWidthF(wt);
     }
 
-    painter->setPen(borderPen);
+    painter->setPen(pageMarginsPen);
 
     QTextOption pageNumTextOpt(Qt::AlignCenter);
 
@@ -330,22 +330,24 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     setFontPointSizeDPI(pageNumFont, m_cachedHeaderSize.height() * 0.6, painter);
     painter->setFont(pageNumFont);
 
-    QVector<QLineF> vec;
+    QVector<QLineF> marginsVec;
+
+    int nLinesVert = lastPageVertBorder - firstPageVertBorder + 1;
+    int nLinesHoriz = lastPageHorizBorder - firstPageHorizBorder + 1;
 
     if(!isHeader || orient == Qt::Horizontal)
     {
         //Horizontal header draws vertical borders
-        int nLines = lastPageVertBorder - firstPageVertBorder + 1;
-        vec.reserve(nLines);
+        marginsVec.reserve(nLinesVert);
 
         qreal borderX = fixedOffsetX + firstPageVertBorder * effectivePageSize.width();
-        for(int i = 0; i < nLines; i++)
+        for(int i = 0; i < nLinesVert; i++)
         {
             QLineF line(borderX, pageBordersTop, borderX, pageBordersBottom);
-            vec.append(line);
+            marginsVec.append(line);
             borderX += effectivePageSize.width();
         }
-        painter->drawLines(vec);
+        painter->drawLines(marginsVec);
 
         if(isHeader)
         {
@@ -371,22 +373,21 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
         }
     }
 
-    vec.clear();
+    marginsVec.clear();
 
     if(!isHeader || orient == Qt::Vertical)
     {
         //Vertical header draws horizontal borders
-        int nLines = lastPageHorizBorder - firstPageHorizBorder + 1;
-        vec.reserve(nLines);
+        marginsVec.reserve(nLinesHoriz);
 
         qreal borderY = fixedOffsetY + firstPageHorizBorder * effectivePageSize.height();
-        for(int i = 0; i < nLines; i++)
+        for(int i = 0; i < nLinesHoriz; i++)
         {
             QLineF line(pageBordersLeft, borderY, pageBordersRight, borderY);
-            vec.append(line);
+            marginsVec.append(line);
             borderY += effectivePageSize.height();
         }
-        painter->drawLines(vec);
+        painter->drawLines(marginsVec);
 
         if(isHeader)
         {
@@ -407,6 +408,99 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
                 painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
                 textRect.moveTop(textRect.top() + effectivePageSize.height());
             }
+        }
+    }
+
+    //Free memory
+    marginsVec.clear();
+    marginsVec.squeeze();
+
+    if(!isHeader)
+    {
+        //Draw real page borders (outside margins)
+
+        /* Divide them in four color groups, odd rows start shifted by 2
+         *
+         * +---+---+---+---+
+         * | 1 | 2 | 3 | 4 |
+         * +---+---+---+---+
+         * | 3 | 4 | 1 | 2 |
+         * +---+---+---+---+
+         */
+        QPen pagesBorderPen[4] = {
+            QPen(Qt::blue, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap),
+            QPen(Qt::magenta, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap),
+            QPen(Qt::black, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap),
+            QPen(Qt::darkYellow, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap)
+        };
+
+        //FIXME: allocate memory in advance
+        QVector<QLineF> pageBordersVec[4];
+
+        //Even borders are Left for Even pages and Right for Odd pages
+        int vertPageGroup = firstPageVertBorder % 4;
+        const bool isFirstHorizBorderEven = firstPageHorizBorder % 2 == 0;
+
+        //Get page rect, move out of header
+        QRectF pageRect = pageLay.devicePageRect;
+
+        for(int x = -1; x < nLinesVert; x++)
+        {
+            const int pageVertBorderRow = firstPageVertBorder + x;
+            if(pageVertBorderRow < 0 || pageVertBorderRow == pageLay.horizPageCnt)
+            {
+                //Increment vertical page group
+                vertPageGroup = (vertPageGroup + 1) % 4;
+                //Before first or after last, skip
+                continue;
+            }
+
+            pageRect.moveLeft(m_cachedHeaderSize.width() + effectivePageSize.width() * (pageVertBorderRow));
+
+            //Reset for every row to original value
+            bool isHorizBorderEven = isFirstHorizBorderEven;
+
+            for(int y = -1; y < nLinesHoriz; y++)
+            {
+                const int pageHorizBorderRow = firstPageHorizBorder + y;
+                if(pageHorizBorderRow < 0 || pageHorizBorderRow == pageLay.vertPageCnt)
+                {
+                    //Switch horizontal border
+                    isHorizBorderEven = !isHorizBorderEven;
+                    //Before first or after last, skip
+                    continue;
+                }
+
+                pageRect.moveTop(m_cachedHeaderSize.height() + effectivePageSize.height() * (pageHorizBorderRow));
+
+                //Calculate page borders
+                QLineF topBorder = QLineF(pageRect.topLeft(), pageRect.topRight());
+                QLineF bottomBorder = QLineF(pageRect.bottomLeft(), pageRect.bottomRight());
+                QLineF leftBorder = QLineF(pageRect.topLeft(), pageRect.bottomLeft());
+                QLineF rightBorder = QLineF(pageRect.topRight(), pageRect.bottomRight());
+
+                int group = vertPageGroup;
+                if(!isHorizBorderEven)
+                    group = (group + 2) % 4; //Shift by 2 for odd rows
+
+                pageBordersVec[group].append(topBorder);
+                pageBordersVec[group].append(bottomBorder);
+                pageBordersVec[group].append(leftBorder);
+                pageBordersVec[group].append(rightBorder);
+
+                //Switch horizontal border
+                isHorizBorderEven = !isHorizBorderEven;
+            }
+
+            //Increment vertical page group
+            vertPageGroup = (vertPageGroup + 1) % 4;
+        }
+
+        //Draw lines
+        for(int i = 0; i < 4; i++)
+        {
+            painter->setPen(pagesBorderPen[i]);
+            painter->drawLines(pageBordersVec[i]);
         }
     }
 }
