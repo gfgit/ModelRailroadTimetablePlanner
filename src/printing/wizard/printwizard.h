@@ -6,6 +6,8 @@
 
 #include "printing/printdefs.h"
 
+#include "printing/helper/model/printhelper.h"
+
 class QPrinter;
 class SceneSelectionModel;
 class PrintWorker;
@@ -33,7 +35,7 @@ public:
     bool getDifferentFiles() const;
     void setDifferentFiles(bool newDifferentFiles);
 
-    const QString &getFilePattern() const;
+    QString getFilePattern() const;
     void setFilePattern(const QString &newFilePattern);
 
     QPrinter *getPrinter() const;
@@ -51,6 +53,9 @@ public:
     void abortPrintTask();
     void handleProgressError(const QString& errMsg);
 
+    const PrintHelper::PageLayoutOpt &getScenePageLay() const;
+    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+
 private:
     sqlite3pp::database &mDb;
 
@@ -58,6 +63,8 @@ private:
     QString fileOutput;
     QString filePattern;
     bool differentFiles;
+
+    PrintHelper::PageLayoutOpt scenePageLay;
 
     Print::OutputType type;
 

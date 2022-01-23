@@ -92,6 +92,11 @@ int PrintWorker::getMaxProgress() const
     return selection->getSelectionCount();
 }
 
+void PrintWorker::setScenePageLay(const PrintHelper::PageLayoutOpt &pageLay)
+{
+    scenePageLay = pageLay;
+}
+
 void PrintWorker::run()
 {
     sendEvent(new PrintProgressEvent(this, 0, QString()), false);
@@ -311,18 +316,16 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         return false;
     }
 
-    PrintHelper::PageLayoutOpt pageLay;
-    pageLay.scaleFactor = 1; //FIXME: arbitrary value for testing, make user option
-    pageLay.drawPageMargins = true;
-    pageLay.pageMarginsPenWidth = 5;
-    pageLay.pageMarginsPen = QPen(Qt::darkRed, pageLay.pageMarginsPenWidth);
-    pageLay.isFirstPage = true;
+    scenePageLay.drawPageMargins = true;
+    scenePageLay.pageMarginsPenWidth = 5;
+    scenePageLay.pageMarginsPen = QPen(Qt::darkRed, scenePageLay.pageMarginsPenWidth);
+    scenePageLay.isFirstPage = true;
 
     //Calculate members
-    pageLay.devicePageRect = QRectF(QPointF(), QSizeF(m_printer->width(), m_printer->height()));
-    pageLay.scaledPageRect = QRectF(pageLay.devicePageRect.topLeft(), pageLay.devicePageRect.size() / pageLay.scaleFactor);
-    pageLay.marginOriginalWidth = pageLay.devicePageRect.width() / 15; //FIXME: arbitrary value for testing, make user option
-    pageLay.overlapMarginWidthScaled = pageLay.marginOriginalWidth / pageLay.scaleFactor;
+    scenePageLay.devicePageRect = QRectF(QPointF(), QSizeF(m_printer->width(), m_printer->height()));
+    scenePageLay.scaledPageRect = QRectF(scenePageLay.devicePageRect.topLeft(),
+                                         scenePageLay.devicePageRect.size() / scenePageLay.scaleFactor);
+    scenePageLay.overlapMarginWidthScaled = scenePageLay.marginOriginalWidth / scenePageLay.scaleFactor;
 
     PrintHelper::PageNumberOpt pageNumberOpt;
     pageNumberOpt.enable = true;
@@ -362,7 +365,7 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         if(!valid)
             return false;
 
-        PrintHelper::printPagedScene(&painter, &devImpl, &sceneImpl, &progress, pageLay, pageNumberOpt);
+        PrintHelper::printPagedScene(&painter, &devImpl, &sceneImpl, &progress, scenePageLay, pageNumberOpt);
 
         if(endPaintingEveryPage)
             painter.end();

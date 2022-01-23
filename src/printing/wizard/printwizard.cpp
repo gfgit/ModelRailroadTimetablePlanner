@@ -115,12 +115,7 @@ void PrintWizard::setDifferentFiles(bool newDifferentFiles)
     differentFiles = newDifferentFiles;
 }
 
-QPrinter *PrintWizard::getPrinter() const
-{
-    return printer;
-}
-
-const QString &PrintWizard::getFilePattern() const
+QString PrintWizard::getFilePattern() const
 {
     return filePattern;
 }
@@ -128,6 +123,21 @@ const QString &PrintWizard::getFilePattern() const
 void PrintWizard::setFilePattern(const QString &newFilePattern)
 {
     filePattern = newFilePattern;
+}
+
+QPrinter *PrintWizard::getPrinter() const
+{
+    return printer;
+}
+
+const PrintHelper::PageLayoutOpt &PrintWizard::getScenePageLay() const
+{
+    return scenePageLay;
+}
+
+void PrintWizard::setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay)
+{
+    scenePageLay = newScenePageLay;
 }
 
 bool PrintWizard::event(QEvent *e)
@@ -216,6 +226,7 @@ void PrintWizard::startPrintTask()
     printTask->setPrinter(printer);
     printTask->setFileOutput(fileOutput, differentFiles);
     printTask->setFilePattern(filePattern);
+    printTask->setScenePageLay(scenePageLay);
 
     QThreadPool::globalInstance()->start(printTask);
 

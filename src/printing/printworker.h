@@ -10,9 +10,10 @@
 
 #include "utils/types.h"
 
+#include "printing/helper/model/printhelper.h"
+
 class QPrinter;
 class QPainter;
-class QRectF;
 
 class SceneSelectionModel;
 
@@ -58,6 +59,8 @@ public:
     void setSelection(SceneSelectionModel *newSelection);
     int getMaxProgress() const;
 
+    void setScenePageLay(const PrintHelper::PageLayoutOpt& pageLay);
+
     //IQuittableTask
     void run() override;
 
@@ -80,6 +83,8 @@ public:
 
 private:
     QPrinter *m_printer;
+    PrintHelper::PageLayoutOpt scenePageLay;
+
     SceneSelectionModel *selection;
 
     QString fileOutput;
