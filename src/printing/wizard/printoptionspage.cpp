@@ -311,14 +311,16 @@ void PrintOptionsPage::onOpenPageSetup()
 
 void PrintOptionsPage::onShowPreviewDlg()
 {
+    QPrinter *printer = mWizard->getPrinter();
+
     if(QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier))
     {
-        OwningQPointer<QPrintPreviewDialog> dlg = new QPrintPreviewDialog(mWizard->getPrinter(), this);
-        connect(dlg, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *printer)
+        OwningQPointer<QPrintPreviewDialog> dlg = new QPrintPreviewDialog(printer, this);
+        connect(dlg, &QPrintPreviewDialog::paintRequested, this, [this](QPrinter *printer_)
                 {
                     //FIXME
                     PrintWorker worker(mWizard->getDb(), this);
-                    worker.setPrinter(printer);
+                    worker.setPrinter(printer_);
                     worker.setOutputType(Print::Native);
                     worker.setSelection(mWizard->getSelectionModel());
                     worker.run();
@@ -336,9 +338,18 @@ void PrintOptionsPage::onShowPreviewDlg()
     scene.loadGraph(entry.objectId, entry.type);
 
     dlg->setSourceScene(&scene);
-    dlg->setPrinter(mWizard->getPrinter());
+    dlg->setPrinter(printer);
 
     dlg->exec();
+
+    if(!dlg)
+        return;
+
+    if(printer && printer->outputFormat() == QPrinter::PdfFormat)
+    {
+        //Update page layout
+        printer->setPageLayout(dlg->getPrinterPageLay());
+    }
 }
 
 void PrintOptionsPage::updateOutputType()
