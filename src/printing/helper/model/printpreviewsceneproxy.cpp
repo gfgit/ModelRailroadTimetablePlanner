@@ -327,7 +327,10 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
 
     QFont pageNumFont;
     pageNumFont.setBold(true);
-    setFontPointSizeDPI(pageNumFont, m_cachedHeaderSize.height() * 0.6, painter);
+    if(isHeader)
+        setFontPointSizeDPI(pageNumFont, m_cachedHeaderSize.height() * 0.6, painter);
+    else
+        setFontPointSizeDPI(pageNumFont, pageLay.devicePageRect.height() * 0.3, painter);
     painter->setFont(pageNumFont);
 
     QVector<QLineF> marginsVec;
@@ -446,8 +449,8 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
 
         for(int x = -1; x < nLinesVert; x++)
         {
-            const int pageVertBorderRow = firstPageVertBorder + x;
-            if(pageVertBorderRow < 0 || pageVertBorderRow == pageLay.horizPageCnt)
+            const int pageBorderCol = firstPageVertBorder + x;
+            if(pageBorderCol < 0 || pageBorderCol == pageLay.horizPageCnt)
             {
                 //Increment vertical page group
                 vertPageGroup = (vertPageGroup + 1) % 4;
@@ -455,15 +458,15 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
                 continue;
             }
 
-            pageRect.moveLeft(m_cachedHeaderSize.width() + effectivePageSize.width() * (pageVertBorderRow));
+            pageRect.moveLeft(m_cachedHeaderSize.width() + effectivePageSize.width() * (pageBorderCol));
 
             //Reset for every row to original value
             bool isHorizBorderEven = isFirstHorizBorderEven;
 
             for(int y = -1; y < nLinesHoriz; y++)
             {
-                const int pageHorizBorderRow = firstPageHorizBorder + y;
-                if(pageHorizBorderRow < 0 || pageHorizBorderRow == pageLay.vertPageCnt)
+                const int pageBorderRow = firstPageHorizBorder + y;
+                if(pageBorderRow < 0 || pageBorderRow == pageLay.vertPageCnt)
                 {
                     //Switch horizontal border
                     isHorizBorderEven = !isHorizBorderEven;
@@ -471,7 +474,11 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
                     continue;
                 }
 
-                pageRect.moveTop(m_cachedHeaderSize.height() + effectivePageSize.height() * (pageHorizBorderRow));
+                pageRect.moveTop(m_cachedHeaderSize.height() + effectivePageSize.height() * (pageBorderRow));
+
+                //Draw page number
+                const int pageNumber = pageBorderRow * pageLay.horizPageCnt + pageBorderCol + 1;
+                painter->drawText(pageRect, QString::number(pageNumber), pageNumTextOpt);
 
                 //Calculate page borders
                 QLineF topBorder = QLineF(pageRect.topLeft(), pageRect.topRight());
