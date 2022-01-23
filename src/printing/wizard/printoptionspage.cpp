@@ -13,10 +13,11 @@
 #include <QGridLayout>
 
 #include "utils/files/file_format_names.h"
-#include "utils/owningqpointer.h"
 
+#include "utils/owningqpointer.h"
 #include <QFileDialog>
 #include <QPrintDialog>
+#include "printing/helper/view/custompagesetupdlg.h"
 
 #include "printing/helper/view/sceneprintpreviewdlg.h"
 #include "sceneselectionmodel.h"
@@ -37,7 +38,7 @@ PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     mWizard(w)
 {
     createFilesBox();
-    createPrinterBox();
+    createPageLayoutBox();
 
     outputTypeCombo = new QComboBox;
     QStringList items;
@@ -54,7 +55,7 @@ PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     lay->addWidget(typeLabel, 0, 0);
     lay->addWidget(outputTypeCombo, 0, 1);
     lay->addWidget(fileBox, 1, 0, 1, 2);
-    lay->addWidget(printerBox, 2, 0, 1, 2);
+    lay->addWidget(pageLayoutBox, 2, 0, 1, 2);
 
     setTitle(tr("Print Options"));
 
@@ -105,18 +106,18 @@ void PrintOptionsPage::createFilesBox()
     patternEdit->setToolTip(patternHelp);
 }
 
-void PrintOptionsPage::createPrinterBox()
+void PrintOptionsPage::createPageLayoutBox()
 {
-    printerBox = new QGroupBox(tr("Printer"));
+    pageLayoutBox = new QGroupBox(tr("Page Layout"));
 
-    printerOptionDlgBut = new QPushButton(tr("Open Printer Options"));
-    connect(printerOptionDlgBut, &QPushButton::clicked, this, &PrintOptionsPage::onOpenPrintDlg);
+    pageSetupDlgBut = new QPushButton; //Text is set in updateOutputType()
+    connect(pageSetupDlgBut, &QPushButton::clicked, this, &PrintOptionsPage::onOpenPageSetup);
 
     previewDlgBut = new QPushButton(tr("Preview"));
     connect(previewDlgBut, &QPushButton::clicked, this, &PrintOptionsPage::onShowPreviewDlg);
 
-    QVBoxLayout *l = new QVBoxLayout(printerBox);
-    l->addWidget(printerOptionDlgBut);
+    QVBoxLayout *l = new QVBoxLayout(pageLayoutBox);
+    l->addWidget(pageSetupDlgBut);
     l->addWidget(previewDlgBut);
 }
 
@@ -279,11 +280,33 @@ void PrintOptionsPage::updateDifferentFiles()
     pathEdit->setText(path);
 }
 
-void PrintOptionsPage::onOpenPrintDlg()
+void PrintOptionsPage::onOpenPageSetup()
 {
-    OwningQPointer<QPrintDialog> dlg = new QPrintDialog(mWizard->getPrinter(), this);
-    dlg->exec();
-    delete dlg;
+    QPrinter *printer = mWizard->getPrinter();
+    if(!printer)
+        return;
+
+    if(printer->outputFormat() == QPrinter::NativeFormat)
+    {
+        //Native dialog for native printer
+        OwningQPointer<QPrintDialog> dlg = new QPrintDialog(printer, this);
+        dlg->exec();
+    }
+    else
+    {
+        //Custom dialog for PDF printer
+        OwningQPointer<CustomPageSetupDlg> dlg = new CustomPageSetupDlg(this);
+
+        QPageLayout pageLay = printer->pageLayout();
+        dlg->setPageSize(pageLay.pageSize());
+        dlg->setPageOrient(pageLay.orientation());
+        if(dlg->exec() != QDialog::Accepted || !dlg)
+            return;
+
+        pageLay.setPageSize(dlg->getPageSize());
+        pageLay.setOrientation(dlg->getPageOrient());
+        printer->setPageLayout(pageLay);
+    }
 }
 
 void PrintOptionsPage::onShowPreviewDlg()
@@ -323,7 +346,9 @@ void PrintOptionsPage::updateOutputType()
     Print::OutputType type = Print::OutputType(outputTypeCombo->currentIndex());
 
     fileBox->setEnabled(type != Print::Native);
-    printerBox->setEnabled(type == Print::Native);
+
+    pageLayoutBox->setEnabled(type != Print::Svg);
+    pageSetupDlgBut->setText(type == Print::Native ? tr("Printer Options") : tr("Page Setup"));
 
     if(type == Print::Svg)
     {
@@ -334,6 +359,12 @@ void PrintOptionsPage::updateOutputType()
     else
     {
         differentFilesCheckBox->setEnabled(true);
+    }
+
+    QPrinter *printer = mWizard->getPrinter();
+    if(printer)
+    {
+        printer->setOutputFormat(type == Print::Native ? QPrinter::NativeFormat : QPrinter::PdfFormat);
     }
 
     mWizard->setOutputType(type);

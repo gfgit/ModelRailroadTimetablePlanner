@@ -25,12 +25,12 @@ private slots:
     void updateOutputType();
     void onChooseFile();
     void updateDifferentFiles();
-    void onOpenPrintDlg();
+    void onOpenPageSetup();
     void onShowPreviewDlg();
 
 private:
     void createFilesBox();
-    void createPrinterBox();
+    void createPageLayoutBox();
 
 private:
     PrintWizard *mWizard;
@@ -41,8 +41,8 @@ private:
     QLineEdit *patternEdit;
     QPushButton *fileBut;
 
-    QGroupBox *printerBox;
-    QPushButton *printerOptionDlgBut;
+    QGroupBox *pageLayoutBox;
+    QPushButton *pageSetupDlgBut;
     QPushButton *previewDlgBut;
 
     QComboBox *outputTypeCombo;
