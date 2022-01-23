@@ -24,9 +24,6 @@ public:
     PrintHelper::PageLayoutOpt getPageLay() const;
     void setPageLay(const PrintHelper::PageLayoutOpt& newPageLay);
 
-    static void calculatePageCount(IGraphScene *scene, PrintHelper::PageLayoutOpt& pageLay,
-                                   QSizeF &outEffectivePageSize);
-
 signals:
     void pageCountChanged();
 

@@ -197,30 +197,6 @@ void PrintPreviewSceneProxy::setPageLay(const PrintHelper::PageLayoutOpt &newPag
     updateSourceSizeAndRedraw();
 }
 
-void PrintPreviewSceneProxy::calculatePageCount(IGraphScene *scene, PrintHelper::PageLayoutOpt &pageLay,
-                                                QSizeF &outEffectivePageSize)
-{
-    QSizeF srcContentsSize;
-    if(scene)
-        srcContentsSize = scene->getContentsSize() * pageLay.scaleFactor;
-
-    //NOTE: do not shift by top left margin here
-    //This is because it should not be counted when calculating page count
-    //as it is out of effective page size (= page inside margins)
-    //Overall size is then computed from page count so it's always correct
-
-    //Apply overlap margin
-    //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
-    //Calculate effective content size inside margins
-    outEffectivePageSize = pageLay.devicePageRect.size();
-    outEffectivePageSize.rwidth() -= 2 * pageLay.marginOriginalWidth;
-    outEffectivePageSize.rheight() -= 2 * pageLay.marginOriginalWidth;
-
-    //Calculate page count, at least 1 page
-    pageLay.horizPageCnt = qMax(1, qCeil(srcContentsSize.width() / outEffectivePageSize.width()));
-    pageLay.vertPageCnt = qMax(1, qCeil(srcContentsSize.height() / outEffectivePageSize.height()));
-}
-
 void PrintPreviewSceneProxy::onSourceSceneDestroyed()
 {
     m_sourceScene = nullptr;
@@ -229,7 +205,7 @@ void PrintPreviewSceneProxy::onSourceSceneDestroyed()
 
 void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
 {
-    calculatePageCount(m_sourceScene, m_pageLay, effectivePageSize);
+    PrintHelper::calculatePageCount(m_sourceScene, m_pageLay, effectivePageSize);
 
     //Calculate total size
     QSizeF printedSize(m_pageLay.horizPageCnt * m_pageLay.devicePageRect.width(),
