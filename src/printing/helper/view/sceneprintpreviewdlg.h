@@ -59,7 +59,7 @@ private:
     double mSceneScale;
 
     QPrinter *m_printer;
-    QPageLayout printerPageLay
+    QPageLayout printerPageLay;
 };
 
 #endif // SCENEPRINTPREVIEWDLG_H

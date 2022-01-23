@@ -58,7 +58,9 @@ void CustomPageSetupDlg::setPageSize(const QPageSize &pageSz)
     if(m_pageSize == pageSz)
         return;
 
-    pageSizeCombo->setCurrentIndex(int(m_pageSize.id()));
+    m_pageSize = pageSz;
+    int idx = int(m_pageSize.id());
+    pageSizeCombo->setCurrentIndex(idx);
 }
 
 void CustomPageSetupDlg::setPageOrient(QPageLayout::Orientation orient)
