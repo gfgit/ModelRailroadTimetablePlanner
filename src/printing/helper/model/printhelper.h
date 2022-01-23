@@ -1,31 +1,41 @@
 #ifndef PRINTHELPER_H
 #define PRINTHELPER_H
 
-#include <QRectF>
+#include <QPageLayout>
 #include <QPen>
 #include <QFont>
 
+class IGraphScene;
 
 class PrintHelper
 {
 public:
+
+    //Standard resolution, set to all printers to calculate page size
+    static constexpr const int PrinterResolution = 1000;
+
     //Page Layout
     struct PageLayoutOpt
     {
         QRectF devicePageRect;
-        QRectF scaledPageRect;
 
         double scaleFactor = 1;
         double marginOriginalWidth = 20;
-        double overlapMarginWidthScaled = 20;
 
         int horizPageCnt = 0;
         int vertPageCnt = 0;
 
         bool drawPageMargins = true;
-        double pageMarginsPenWidth = 5;
+        double pageMarginsPenWidth = 7;
         QPen pageMarginsPen;
+    };
 
+    //Scaled values useful for printing
+    struct PageLayoutScaled
+    {
+        PageLayoutOpt lay;
+        QRectF scaledPageRect;
+        double overlapMarginWidthScaled;
         bool isFirstPage = true;
     };
 
@@ -51,18 +61,6 @@ public:
         bool m_needsInitForEachPage;
     };
 
-    class IRenderScene
-    {
-    public:
-        virtual ~IRenderScene() {};
-        virtual bool render(QPainter *painter, const QRectF& sceneRect) = 0;
-
-        inline QSizeF getContentSize() const { return m_contentSize; }
-
-    protected:
-        QSizeF m_contentSize;
-    };
-
     class IProgress
     {
     public:
@@ -70,8 +68,13 @@ public:
         virtual bool reportProgressAndContinue(int current, int max) = 0;
     };
 
-    static bool printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IRenderScene *scene, IProgress *progress,
-                                PageLayoutOpt& pageLay, PageNumberOpt& pageNumOpt);
+    static QPageSize fixPageSize(const QPageSize& pageSz, QPageLayout::Orientation &orient);
+
+    static void calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
+                                   QSizeF &outEffectivePageSize);
+
+    static bool printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGraphScene *scene, IProgress *progress,
+                                PageLayoutScaled &pageLay, PageNumberOpt& pageNumOpt);
 };
 
 #endif // PRINTHELPER_H
