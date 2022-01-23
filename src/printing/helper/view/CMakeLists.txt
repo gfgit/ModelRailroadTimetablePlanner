@@ -1,6 +1,9 @@
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
 
+  printing/helper/view/custompagesetupdlg.h
+  printing/helper/view/custompagesetupdlg.cpp
+
   printing/helper/view/sceneprintpreviewdlg.h
   printing/helper/view/sceneprintpreviewdlg.cpp
 

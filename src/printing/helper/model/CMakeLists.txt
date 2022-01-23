@@ -1,6 +1,9 @@
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
 
+  printing/helper/model/pagesizemodel.h
+  printing/helper/model/pagesizemodel.cpp
+
   printing/helper/model/printhelper.h
   printing/helper/model/printhelper.cpp
 
