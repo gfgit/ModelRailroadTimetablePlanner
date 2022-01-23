@@ -24,18 +24,23 @@ public:
     PrintHelper::PageLayoutOpt getPageLay() const;
     void setPageLay(const PrintHelper::PageLayoutOpt& newPageLay);
 
+    static void calculatePageCount(IGraphScene *scene, PrintHelper::PageLayoutOpt& pageLay,
+                                   QSizeF &outEffectivePageSize);
+
+signals:
+    void pageCountChanged();
+
 private slots:
     void onSourceSceneDestroyed();
     void updateSourceSizeAndRedraw();
 
 private:
-    void updatePageLay();
     void drawPageBorders(QPainter *painter, const QRectF& sceneRect,
                          bool isHeader, Qt::Orientation orient = Qt::Horizontal);
 
 private:
-    IGraphScene *sourceScene;
-    PrintHelper::PageLayoutOpt pageLay;
+    IGraphScene *m_sourceScene;
+    PrintHelper::PageLayoutOpt m_pageLay;
     QSizeF effectivePageSize;
 
     double viewScaleFactor;

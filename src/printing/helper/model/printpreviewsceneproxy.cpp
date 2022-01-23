@@ -8,34 +8,30 @@
 
 PrintPreviewSceneProxy::PrintPreviewSceneProxy(QObject *parent) :
     IGraphScene(parent),
-    sourceScene(nullptr),
+    m_sourceScene(nullptr),
     viewScaleFactor(1)
 {
     originalHeaderSize = QSizeF(70, 70);
     setViewScaleFactor(1.0);
-
-    //Make margin pen a bit bigger
-    pageLay.pageMarginsPenWidth = 7;
-    updatePageLay();
 }
 
 void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sceneRect)
 {
     const QTransform originalTransform = painter->worldTransform();
 
-    if(sourceScene)
+    if(m_sourceScene)
     {
         //Map coordinates to source scene
         QRectF sourceRect = sceneRect;
 
         //Shift contents by our headers size and top left page margin
-        QPointF origin(m_cachedHeaderSize.width() + pageLay.marginOriginalWidth,
-                       m_cachedHeaderSize.height() + pageLay.marginOriginalWidth);
+        QPointF origin(m_cachedHeaderSize.width() + m_pageLay.marginOriginalWidth,
+                       m_cachedHeaderSize.height() + m_pageLay.marginOriginalWidth);
         sourceRect.moveTopLeft(sourceRect.topLeft() - origin);
 
         //Apply scale factor
-        sourceRect = QRectF(sourceRect.topLeft() / pageLay.scaleFactor,
-                            sourceRect.size() / pageLay.scaleFactor);
+        sourceRect = QRectF(sourceRect.topLeft() / m_pageLay.scaleFactor,
+                            sourceRect.size() / m_pageLay.scaleFactor);
 
         //Cut negative part which would go under our headers
         //This will reduce a bit the rect size
@@ -45,26 +41,26 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
             sourceRect.setTop(0);
 
         //Cut possible extra parts
-        QSizeF contentsSize = sourceScene->getContentsSize();
+        QSizeF contentsSize = m_sourceScene->getContentsSize();
         if(sourceRect.right() > contentsSize.width())
             sourceRect.setRight(contentsSize.width());
         if(sourceRect.bottom() > contentsSize.height())
             sourceRect.setBottom(contentsSize.height());
 
         painter->translate(origin);
-        painter->scale(pageLay.scaleFactor, pageLay.scaleFactor);
+        painter->scale(m_pageLay.scaleFactor, m_pageLay.scaleFactor);
 
         //Draw source contents
-        sourceScene->renderContents(painter, sourceRect);
+        m_sourceScene->renderContents(painter, sourceRect);
 
-        QSizeF headerSize = sourceScene->getHeaderSize();
+        QSizeF headerSize = m_sourceScene->getHeaderSize();
 
         //If on top draw horizontal header
         if(sourceRect.top() < headerSize.height())
         {
             QRectF horizHeaderRect = sourceRect;
             horizHeaderRect.setBottom(headerSize.height());
-            sourceScene->renderHeader(painter, horizHeaderRect, Qt::Horizontal, 0);
+            m_sourceScene->renderHeader(painter, horizHeaderRect, Qt::Horizontal, 0);
         }
 
         //If on left draw vertical header
@@ -72,7 +68,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
         {
             QRectF vertHeaderRect = sourceRect;
             vertHeaderRect.setRight(headerSize.width());
-            sourceScene->renderHeader(painter, vertHeaderRect, Qt::Vertical, 0);
+            m_sourceScene->renderHeader(painter, vertHeaderRect, Qt::Vertical, 0);
         }
 
         //Wash out a bit to make page borders more visible
@@ -82,7 +78,6 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
     //Reset transorm to previous
     painter->setWorldTransform(originalTransform);
 
-    //TODO: draw page borders and margins on top of scene
     drawPageBorders(painter, sceneRect, false);
 }
 
@@ -135,14 +130,12 @@ void PrintPreviewSceneProxy::renderHeader(QPainter *painter, const QRectF &scene
                                  m_cachedHeaderSize.width(), nonOverlappingingRect.bottom()));
     }
 
-
-    //TODO: draw page number header
     drawPageBorders(painter, sceneRect, true, orient);
 }
 
 IGraphScene *PrintPreviewSceneProxy::getSourceScene() const
 {
-    return sourceScene;
+    return m_sourceScene;
 }
 
 void PrintPreviewSceneProxy::setSourceScene(IGraphScene *newSourceScene)
@@ -151,23 +144,23 @@ void PrintPreviewSceneProxy::setSourceScene(IGraphScene *newSourceScene)
     //Since this is a print preview we are not interested
     //in sceneActivated() and requestShowRect() signals
 
-    if(sourceScene)
+    if(m_sourceScene)
     {
-        disconnect(sourceScene, &QObject::destroyed, this,
+        disconnect(m_sourceScene, &QObject::destroyed, this,
                    &PrintPreviewSceneProxy::onSourceSceneDestroyed);
-        disconnect(sourceScene, &IGraphScene::redrawGraph,
+        disconnect(m_sourceScene, &IGraphScene::redrawGraph,
                    this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
-        disconnect(sourceScene, &IGraphScene::headersSizeChanged,
+        disconnect(m_sourceScene, &IGraphScene::headersSizeChanged,
                    this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
     }
-    sourceScene = newSourceScene;
-    if(sourceScene)
+    m_sourceScene = newSourceScene;
+    if(m_sourceScene)
     {
-        connect(sourceScene, &QObject::destroyed, this,
+        connect(m_sourceScene, &QObject::destroyed, this,
                 &PrintPreviewSceneProxy::onSourceSceneDestroyed);
-        connect(sourceScene, &IGraphScene::redrawGraph,
+        connect(m_sourceScene, &IGraphScene::redrawGraph,
                 this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
-        connect(sourceScene, &IGraphScene::headersSizeChanged,
+        connect(m_sourceScene, &IGraphScene::headersSizeChanged,
                 this, &PrintPreviewSceneProxy::updateSourceSizeAndRedraw);
     }
 
@@ -195,26 +188,21 @@ void PrintPreviewSceneProxy::setViewScaleFactor(double newViewScaleFactor)
 
 PrintHelper::PageLayoutOpt PrintPreviewSceneProxy::getPageLay() const
 {
-    return pageLay;
+    return m_pageLay;
 }
 
 void PrintPreviewSceneProxy::setPageLay(const PrintHelper::PageLayoutOpt &newPageLay)
 {
-    pageLay = newPageLay;
-    updatePageLay();
-}
-
-void PrintPreviewSceneProxy::onSourceSceneDestroyed()
-{
-    sourceScene = nullptr;
+    m_pageLay = newPageLay;
     updateSourceSizeAndRedraw();
 }
 
-void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
+void PrintPreviewSceneProxy::calculatePageCount(IGraphScene *scene, PrintHelper::PageLayoutOpt &pageLay,
+                                                QSizeF &outEffectivePageSize)
 {
     QSizeF srcContentsSize;
-    if(sourceScene)
-        srcContentsSize = sourceScene->getContentsSize() * pageLay.scaleFactor;
+    if(scene)
+        srcContentsSize = scene->getContentsSize() * pageLay.scaleFactor;
 
     //NOTE: do not shift by top left margin here
     //This is because it should not be counted when calculating page count
@@ -224,40 +212,44 @@ void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
     //Calculate effective content size inside margins
-    effectivePageSize = pageLay.devicePageRect.size();
-    effectivePageSize.rwidth() -= 2 * pageLay.marginOriginalWidth;
-    effectivePageSize.rheight() -= 2 * pageLay.marginOriginalWidth;
+    outEffectivePageSize = pageLay.devicePageRect.size();
+    outEffectivePageSize.rwidth() -= 2 * pageLay.marginOriginalWidth;
+    outEffectivePageSize.rheight() -= 2 * pageLay.marginOriginalWidth;
 
     //Calculate page count, at least 1 page
-    pageLay.horizPageCnt = qMax(1, qCeil(srcContentsSize.width() / effectivePageSize.width()));
-    pageLay.vertPageCnt = qMax(1, qCeil(srcContentsSize.height() / effectivePageSize.height()));
+    pageLay.horizPageCnt = qMax(1, qCeil(srcContentsSize.width() / outEffectivePageSize.width()));
+    pageLay.vertPageCnt = qMax(1, qCeil(srcContentsSize.height() / outEffectivePageSize.height()));
+}
 
-    QSizeF printedSize(pageLay.horizPageCnt * pageLay.devicePageRect.width(),
-                       pageLay.vertPageCnt * pageLay.devicePageRect.height());
+void PrintPreviewSceneProxy::onSourceSceneDestroyed()
+{
+    m_sourceScene = nullptr;
+    updateSourceSizeAndRedraw();
+}
+
+void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
+{
+    calculatePageCount(m_sourceScene, m_pageLay, effectivePageSize);
+
+    //Calculate total size
+    QSizeF printedSize(m_pageLay.horizPageCnt * m_pageLay.devicePageRect.width(),
+                       m_pageLay.vertPageCnt * m_pageLay.devicePageRect.height());
 
     //Adjust by substracting overlapped edges ((2 * n) - 2)
-    printedSize -= QSizeF((2 * pageLay.horizPageCnt - 2) * pageLay.marginOriginalWidth,
-                          (2 * pageLay.vertPageCnt - 2)* pageLay.marginOriginalWidth);
+    printedSize -= QSizeF((2 * m_pageLay.horizPageCnt - 2) * m_pageLay.marginOriginalWidth,
+                          (2 * m_pageLay.vertPageCnt - 2)* m_pageLay.marginOriginalWidth);
 
-    //Add our headers
+    //Add our headers and store
     m_cachedContentsSize = printedSize + m_cachedHeaderSize;
 
     emit redrawGraph();
-}
-
-void PrintPreviewSceneProxy::updatePageLay()
-{
-    pageLay.scaledPageRect = QRectF(pageLay.devicePageRect.topLeft(), pageLay.devicePageRect.size() / pageLay.scaleFactor);
-    pageLay.overlapMarginWidthScaled = pageLay.marginOriginalWidth / pageLay.scaleFactor;
-    pageLay.pageMarginsPen.setWidthF(pageLay.pageMarginsPenWidth / pageLay.scaleFactor);
-
-    updateSourceSizeAndRedraw();
+    emit pageCountChanged();
 }
 
 void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sceneRect, bool isHeader, Qt::Orientation orient)
 {
-    const qreal fixedOffsetX = m_cachedHeaderSize.width() + pageLay.marginOriginalWidth;
-    const qreal fixedOffsetY = m_cachedHeaderSize.height() + pageLay.marginOriginalWidth;
+    const qreal fixedOffsetX = m_cachedHeaderSize.width() + m_pageLay.marginOriginalWidth;
+    const qreal fixedOffsetY = m_cachedHeaderSize.height() + m_pageLay.marginOriginalWidth;
 
     //Theese are effective page sizes (so inside margins)
     int firstPageVertBorder = qCeil((sceneRect.left() - fixedOffsetX) / effectivePageSize.width());
@@ -266,8 +258,8 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     //For N pages there are N + 1 borders, but we count from 0 so last border is N
 
     //Vertical border, horizontal page count
-    if(lastPageVertBorder > pageLay.horizPageCnt)
-        lastPageVertBorder = pageLay.horizPageCnt;
+    if(lastPageVertBorder > m_pageLay.horizPageCnt)
+        lastPageVertBorder = m_pageLay.horizPageCnt;
     if(firstPageVertBorder > lastPageVertBorder)
         firstPageVertBorder = lastPageVertBorder;
     if(firstPageVertBorder < 0)
@@ -277,8 +269,8 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     int lastPageHorizBorder = qFloor((sceneRect.bottom() - fixedOffsetY) / effectivePageSize.height());
 
     //Horizontal border, vertical page count
-    if(lastPageHorizBorder > pageLay.vertPageCnt)
-        lastPageHorizBorder = pageLay.vertPageCnt;
+    if(lastPageHorizBorder > m_pageLay.vertPageCnt)
+        lastPageHorizBorder = m_pageLay.vertPageCnt;
     if(firstPageHorizBorder > lastPageHorizBorder)
         firstPageHorizBorder = lastPageHorizBorder;
     if(firstPageHorizBorder < 0)
@@ -299,12 +291,12 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     const qreal pageBordersRight = qMin(m_cachedContentsSize.width(), sceneRect.right());
     const qreal pageBordersBottom = qMin(m_cachedContentsSize.height(), sceneRect.bottom());
 
-    QPen pageMarginsPen(Qt::red, pageLay.pageMarginsPenWidth, Qt::SolidLine, Qt::FlatCap);
+    QPen pageMarginsPen(Qt::red, m_pageLay.pageMarginsPenWidth, Qt::SolidLine, Qt::FlatCap);
 
     if(isHeader)
     {
         //Keep width independent of view scale but with limits
-        qreal wt = pageLay.pageMarginsPenWidth / viewScaleFactor;
+        qreal wt = m_pageLay.pageMarginsPenWidth / viewScaleFactor;
         wt = qBound(2.0, wt, 20.0);
         pageMarginsPen.setWidthF(wt);
     }
@@ -348,7 +340,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
          * +---+---+---+---+
          */
 
-        const double borderPenWidth = pageLay.pageMarginsPenWidth * 0.7;
+        const double borderPenWidth = m_pageLay.pageMarginsPenWidth * 0.7;
 
         constexpr const int NPageColors = 3;
         QPen pagesBorderPen[NPageColors] = {
@@ -364,7 +356,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
         int horizPageColorGroup = 0;
 
         //Get page rect, move out of header
-        QRectF pageRect = pageLay.devicePageRect;
+        QRectF pageRect = m_pageLay.devicePageRect;
 
         //Try also previous than first or next of last
         //This is because maybe real border is shown but not the effective margin
@@ -374,7 +366,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             vertPageColorGroup = (vertPageColorGroup + 1) % NPageColors;
 
             const int pageBorderCol = firstPageVertBorder + x;
-            if(pageBorderCol < 0 || pageBorderCol >= pageLay.horizPageCnt)
+            if(pageBorderCol < 0 || pageBorderCol >= m_pageLay.horizPageCnt)
                 continue; //Before first or after last, skip
 
             pageRect.moveLeft(m_cachedHeaderSize.width() + effectivePageSize.width() * (pageBorderCol));
@@ -388,13 +380,13 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
                 horizPageColorGroup = (horizPageColorGroup + 1) % NPageColors;
 
                 const int pageBorderRow = firstPageHorizBorder + y;
-                if(pageBorderRow < 0 || pageBorderRow >= pageLay.vertPageCnt)
+                if(pageBorderRow < 0 || pageBorderRow >= m_pageLay.vertPageCnt)
                     continue; //Before first or after last, skip
 
                 pageRect.moveTop(m_cachedHeaderSize.height() + effectivePageSize.height() * (pageBorderRow));
 
                 //Draw page number
-                const int pageNumber = pageBorderRow * pageLay.horizPageCnt + pageBorderCol + 1;
+                const int pageNumber = pageBorderRow * m_pageLay.horizPageCnt + pageBorderCol + 1;
                 painter->drawText(pageRect, QString::number(pageNumber), pageNumTextOpt);
 
                 //Calculate page borders
@@ -448,7 +440,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             //If there are N pages, there are (N + 1) margins
             //So last margin and last but one margin both belong to last page
             int lastPageNumberPlusOne = lastPageVertBorder;
-            if(lastPageVertBorder < pageLay.horizPageCnt)
+            if(lastPageVertBorder < m_pageLay.horizPageCnt)
                 lastPageNumberPlusOne++; //Draw also next page
 
             borderX = fixedOffsetX + firstPageNumber * effectivePageSize.width();
@@ -486,7 +478,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
                 firstPageNumber--; //Draw also previous page
 
             int lastPageNumberPlusOne = lastPageHorizBorder;
-            if(lastPageHorizBorder < pageLay.vertPageCnt)
+            if(lastPageHorizBorder < m_pageLay.vertPageCnt)
                 lastPageNumberPlusOne++; //Draw also next page
 
             borderY = fixedOffsetY + firstPageNumber * effectivePageSize.height();
