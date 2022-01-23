@@ -14,6 +14,7 @@ class PrintPreviewSceneProxy;
 class QSlider;
 class QSpinBox;
 class QDoubleSpinBox;
+class QLabel;
 
 class QPrinter;
 
@@ -43,14 +44,14 @@ public:
     PrintHelper::PageLayoutOpt getScenePageLay() const;
     void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
 
-    static QPageSize fixPageSize(const QPageSize& pageSz, QPageLayout::Orientation &orient);
-
 private slots:
     void updateZoomLevel(int zoom);
     void onScaleChanged(double zoom);
     void setMarginsWidth(double margins);
 
     void showPageSetupDlg();
+
+    void updatePageCount();
 
 private:
     void updateModelPageSize();
@@ -64,6 +65,8 @@ private:
 
     QDoubleSpinBox *sceneScaleSpinBox;
     QDoubleSpinBox *marginSpinBox;
+
+    QLabel *pageCountLabel;
 
     QPrinter *m_printer;
     QPageLayout printerPageLay;

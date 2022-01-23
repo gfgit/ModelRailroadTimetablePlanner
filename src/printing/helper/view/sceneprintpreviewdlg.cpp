@@ -8,6 +8,7 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QLabel>
 
 #include "utils/owningqpointer.h"
 #include "printing/helper/view/custompagesetupdlg.h"
@@ -72,11 +73,17 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     toolBar->addSeparator();
     toolBar->addAction(tr("Setup Page"), this, &ScenePrintPreviewDlg::showPageSetupDlg);
 
+    toolBar->addSeparator();
+    pageCountLabel = new QLabel;
+    toolBar->addWidget(pageCountLabel);
+
     graphView = new BasicGraphView;
     lay->addWidget(graphView);
 
     previewScene = new PrintPreviewSceneProxy(this);
     graphView->setScene(previewScene);
+    connect(previewScene, &PrintPreviewSceneProxy::pageCountChanged,
+            this, &ScenePrintPreviewDlg::updatePageCount);
 
     //Default to A4 Portraint page
     printerPageLay.setPageSize(QPageSize(QPageSize::A4));
@@ -148,31 +155,6 @@ void ScenePrintPreviewDlg::setScenePageLay(const PrintHelper::PageLayoutOpt &new
     marginSpinBox->setValue(newScenePageLay.marginOriginalWidth);
 }
 
-QPageSize ScenePrintPreviewDlg::fixPageSize(const QPageSize &pageSz, QPageLayout::Orientation &orient)
-{
-    //NOTE: Sometimes QPageSetupDialog messes up page size
-    //To express A4 Landascape, it swaps height and width
-    //But now the page size is no longer recognized as "A4"
-    //And other dialogs might show "Custom", try to fix it.
-
-    if(pageSz.id() != QPageSize::Custom)
-        return pageSz; //Already correct value, use it directly
-
-    const QSizeF defSize = pageSz.definitionSize();
-
-    QPageSize possibleMatchSwapped(defSize.transposed(),
-                                   pageSz.definitionUnits());
-    if(possibleMatchSwapped.id() != QPageSize::Custom)
-        return possibleMatchSwapped; //Found a match
-
-    //No match found, at least check orientation
-    if(defSize.width() > defSize.height())
-        orient = QPageLayout::Landscape;
-    else
-        orient = QPageLayout::Portrait;
-    return pageSz;
-}
-
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
     if(graphView->getZoomLevel() == zoom)
@@ -216,7 +198,7 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
         QPageLayout pageLay = m_printer->pageLayout();
         QPageSize pageSz = pageLay.pageSize();
         QPageLayout::Orientation orient = pageLay.orientation();
-        pageSz = ScenePrintPreviewDlg::fixPageSize(pageSz, orient);
+        pageSz = PrintHelper::fixPageSize(pageSz, orient);
         pageLay.setPageSize(pageSz);
         pageLay.setOrientation(orient);
         m_printer->setPageLayout(pageLay);
@@ -238,12 +220,20 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
     setPrinterPageLay(m_printer->pageLayout());
 }
 
+void ScenePrintPreviewDlg::updatePageCount()
+{
+    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    const int totalCount = pageLay.vertPageCnt * pageLay.horizPageCnt;
+    pageCountLabel->setText(tr("Rows: %1, Cols: %2, Total Pages: %3")
+                                .arg(pageLay.vertPageCnt).arg(pageLay.horizPageCnt).arg(totalCount));
+}
+
 void ScenePrintPreviewDlg::updateModelPageSize()
 {
     QPageSize pageSize = printerPageLay.pageSize();
     QPageLayout::Orientation pageOrient = printerPageLay.orientation();
 
-    QRect pixelRect = printerPageLay.pageSize().rectPixels(100);
+    QRect pixelRect = printerPageLay.pageSize().rectPixels(PrintHelper::PrinterResolution);
 
     const bool shouldTranspose = (pageOrient == QPageLayout::Portrait && pixelRect.width() > pixelRect.height())
                                  || (pageOrient == QPageLayout::Landscape && pixelRect.width() < pixelRect.height());
