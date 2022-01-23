@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include <QPageLayout>
+#include "printing/helper/model/printhelper.h"
 
 class BasicGraphView;
 
@@ -39,9 +40,13 @@ public:
     inline QPageLayout getPrinterPageLay() const { return printerPageLay; }
     void setPrinterPageLay(const QPageLayout& pageLay);
 
+    PrintHelper::PageLayoutOpt getScenePageLay() const;
+    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+
 private slots:
     void updateZoomLevel(int zoom);
     void onScaleChanged(double zoom);
+    void setMarginsWidth(double margins);
 
     void showPageSetupDlg();
 
@@ -56,7 +61,7 @@ private:
     QSpinBox *zoomSpinBox;
 
     QDoubleSpinBox *sceneScaleSpinBox;
-    double mSceneScale;
+    QDoubleSpinBox *marginSpinBox;
 
     QPrinter *m_printer;
     QPageLayout printerPageLay;

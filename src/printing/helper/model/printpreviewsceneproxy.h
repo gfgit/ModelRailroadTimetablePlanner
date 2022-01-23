@@ -21,15 +21,6 @@ public:
     double getViewScaleFactor() const;
     void setViewScaleFactor(double newViewScaleFactor);
 
-    double getSourceScaleFactor() const;
-    void setSourceScaleFactor(double newSourceScaleFactor);
-
-    QRectF getPageSize() const;
-    void setPageSize(const QRectF &newPageSize);
-
-    double getMarginWidth() const;
-    void setMarginWidth(double newMarginWidth);
-
     PrintHelper::PageLayoutOpt getPageLay() const;
     void setPageLay(const PrintHelper::PageLayoutOpt& newPageLay);
 

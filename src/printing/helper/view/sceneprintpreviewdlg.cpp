@@ -18,7 +18,6 @@
 
 ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QDialog(parent),
-    mSceneScale(1),
     m_printer(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
@@ -52,13 +51,23 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
 
     sceneScaleSpinBox = new QDoubleSpinBox;
     sceneScaleSpinBox->setRange(5, 200);
-    sceneScaleSpinBox->setValue(mSceneScale * 100);
+    sceneScaleSpinBox->setValue(100);
     sceneScaleSpinBox->setSuffix(QChar('%'));
     sceneScaleSpinBox->setToolTip(tr("Source scale factor"));
     connect(sceneScaleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
             this, &ScenePrintPreviewDlg::onScaleChanged);
     QAction *scaleAct = toolBar->addWidget(sceneScaleSpinBox);
     scaleAct->setText(tr("Scale:"));
+
+    marginSpinBox = new QDoubleSpinBox;
+    marginSpinBox->setRange(0, 200);
+    marginSpinBox->setValue(20);
+    marginSpinBox->setSuffix(QLatin1String("px"));
+    marginSpinBox->setToolTip(tr("Margins"));
+    connect(marginSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+            this, &ScenePrintPreviewDlg::setMarginsWidth);
+    QAction *marginsAct = toolBar->addWidget(marginSpinBox);
+    marginsAct->setText(tr("Margins:"));
 
     toolBar->addSeparator();
     toolBar->addAction(tr("Setup Page"), this, &ScenePrintPreviewDlg::showPageSetupDlg);
@@ -95,13 +104,13 @@ void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
 
 void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
 {
-    if(qFuzzyCompare(mSceneScale, scaleFactor))
+    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    if(qFuzzyCompare(pageLay.scaleFactor, scaleFactor))
         return;
 
-    mSceneScale = scaleFactor;
-    sceneScaleSpinBox->setValue(mSceneScale * 100);
-
-    previewScene->setSourceScaleFactor(mSceneScale);
+    sceneScaleSpinBox->setValue(scaleFactor * 100);
+    pageLay.scaleFactor = scaleFactor;
+    previewScene->setPageLay(pageLay);
 }
 
 QPrinter *ScenePrintPreviewDlg::printer() const
@@ -126,6 +135,19 @@ void ScenePrintPreviewDlg::setPrinterPageLay(const QPageLayout &pageLay)
     updateModelPageSize();
 }
 
+PrintHelper::PageLayoutOpt ScenePrintPreviewDlg::getScenePageLay() const
+{
+    return previewScene->getPageLay();
+}
+
+void ScenePrintPreviewDlg::setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay)
+{
+    previewScene->setPageLay(newScenePageLay);
+
+    sceneScaleSpinBox->setValue(newScenePageLay.scaleFactor * 100);
+    marginSpinBox->setValue(newScenePageLay.marginOriginalWidth);
+}
+
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
     if(graphView->getZoomLevel() == zoom)
@@ -144,6 +166,17 @@ void ScenePrintPreviewDlg::onScaleChanged(double zoom)
 {
     //Convert from 0%-100% to 0-1
     setSceneScale(zoom / 100);
+}
+
+void ScenePrintPreviewDlg::setMarginsWidth(double margins)
+{
+    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    if(qFuzzyCompare(pageLay.marginOriginalWidth, margins))
+        return;
+
+    marginSpinBox->setValue(margins);
+    pageLay.marginOriginalWidth = margins;
+    previewScene->setPageLay(pageLay);
 }
 
 void ScenePrintPreviewDlg::showPageSetupDlg()
@@ -179,5 +212,7 @@ void ScenePrintPreviewDlg::updateModelPageSize()
     if(printerPageLay.orientation() == QPageLayout::Landscape) //Transpose for Landscape
         pixelRect = pixelRect.transposed();
 
-    previewScene->setPageSize(pixelRect);
+    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    pageLay.devicePageRect = pixelRect;
+    previewScene->setPageLay(pageLay);
 }

@@ -193,28 +193,6 @@ void PrintPreviewSceneProxy::setViewScaleFactor(double newViewScaleFactor)
     }
 }
 
-QRectF PrintPreviewSceneProxy::getPageSize() const
-{
-    return pageLay.devicePageRect;
-}
-
-void PrintPreviewSceneProxy::setPageSize(const QRectF &newPageSize)
-{
-    pageLay.devicePageRect = newPageSize;
-    updatePageLay();
-}
-
-double PrintPreviewSceneProxy::getMarginWidth() const
-{
-    return pageLay.marginOriginalWidth;
-}
-
-void PrintPreviewSceneProxy::setMarginWidth(double newMarginWidth)
-{
-    pageLay.marginOriginalWidth = newMarginWidth;
-    updatePageLay();
-}
-
 PrintHelper::PageLayoutOpt PrintPreviewSceneProxy::getPageLay() const
 {
     return pageLay;
@@ -223,17 +201,6 @@ PrintHelper::PageLayoutOpt PrintPreviewSceneProxy::getPageLay() const
 void PrintPreviewSceneProxy::setPageLay(const PrintHelper::PageLayoutOpt &newPageLay)
 {
     pageLay = newPageLay;
-    updatePageLay();
-}
-
-double PrintPreviewSceneProxy::getSourceScaleFactor() const
-{
-    return pageLay.scaleFactor;
-}
-
-void PrintPreviewSceneProxy::setSourceScaleFactor(double newSourceScaleFactor)
-{
-    pageLay.scaleFactor = newSourceScaleFactor;
     updatePageLay();
 }
 
