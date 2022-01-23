@@ -314,9 +314,14 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     QFont pageNumFont;
     pageNumFont.setBold(true);
     if(isHeader)
+    {
         setFontPointSizeDPI(pageNumFont, m_cachedHeaderSize.height() * 0.6, painter);
+    }
     else
-        setFontPointSizeDPI(pageNumFont, pageLay.devicePageRect.height() * 0.3, painter);
+    {
+        const double minEdge = qMin(effectivePageSize.width(), effectivePageSize.height());
+        setFontPointSizeDPI(pageNumFont, minEdge * 0.4, painter);
+    }
     painter->setFont(pageNumFont);
 
     QVector<QLineF> marginsVec;
