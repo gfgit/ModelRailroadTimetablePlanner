@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include <QPageSize>
+#include <QPageLayout>
 
 class BasicGraphView;
 
@@ -36,9 +36,8 @@ public:
     QPrinter *printer() const;
     void setPrinter(QPrinter *newPrinter);
 
-    inline QPageSize getPageSize() const { return m_pageSize; }
-    inline Qt::Orientation getPageOrient() const { return m_pageOrient; }
-    void setPageSize(const QPageSize &newPageSize, Qt::Orientation orient);
+    inline QPageLayout getPrinterPageLay() const { return printerPageLay; }
+    void setPrinterPageLay(const QPageLayout& pageLay);
 
 private slots:
     void updateZoomLevel(int zoom);
@@ -60,8 +59,7 @@ private:
     double mSceneScale;
 
     QPrinter *m_printer;
-    QPageSize m_pageSize;
-    Qt::Orientation m_pageOrient;
+    QPageLayout printerPageLay
 };
 
 #endif // SCENEPRINTPREVIEWDLG_H
