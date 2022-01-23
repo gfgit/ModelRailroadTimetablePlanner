@@ -148,6 +148,31 @@ void ScenePrintPreviewDlg::setScenePageLay(const PrintHelper::PageLayoutOpt &new
     marginSpinBox->setValue(newScenePageLay.marginOriginalWidth);
 }
 
+QPageSize ScenePrintPreviewDlg::fixPageSize(const QPageSize &pageSz, QPageLayout::Orientation &orient)
+{
+    //NOTE: Sometimes QPageSetupDialog messes up page size
+    //To express A4 Landascape, it swaps height and width
+    //But now the page size is no longer recognized as "A4"
+    //And other dialogs might show "Custom", try to fix it.
+
+    if(pageSz.id() != QPageSize::Custom)
+        return pageSz; //Already correct value, use it directly
+
+    const QSizeF defSize = pageSz.definitionSize();
+
+    QPageSize possibleMatchSwapped(defSize.transposed(),
+                                   pageSz.definitionUnits());
+    if(possibleMatchSwapped.id() != QPageSize::Custom)
+        return possibleMatchSwapped; //Found a match
+
+    //No match found, at least check orientation
+    if(defSize.width() > defSize.height())
+        orient = QPageLayout::Landscape;
+    else
+        orient = QPageLayout::Portrait;
+    return pageSz;
+}
+
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
     if(graphView->getZoomLevel() == zoom)
@@ -186,9 +211,6 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
         //For native printers use standard page dialog
         OwningQPointer<QPageSetupDialog> dlg = new QPageSetupDialog(m_printer, this);
         dlg->exec();
-
-        //Update page rect
-        setPrinterPageLay(m_printer->pageLayout());
     }
     else
     {
@@ -203,13 +225,23 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
         printerPageLay.setOrientation(dlg->getPageOrient());
     }
 
-    updateModelPageSize();
+    //Update page rect
+    setPrinterPageLay(m_printer->pageLayout());
 }
 
 void ScenePrintPreviewDlg::updateModelPageSize()
 {
+    QPageSize pageSize = printerPageLay.pageSize();
+    QPageLayout::Orientation pageOrient = printerPageLay.orientation();
+
+    pageSize = fixPageSize(pageSize, pageOrient);
+
     QRect pixelRect = printerPageLay.pageSize().rectPixels(100);
-    if(printerPageLay.orientation() == QPageLayout::Landscape) //Transpose for Landscape
+
+    const bool shouldTranspose = (pageOrient == QPageLayout::Portrait && pixelRect.width() > pixelRect.height())
+                                 || (pageOrient == QPageLayout::Landscape && pixelRect.width() < pixelRect.height());
+
+    if(shouldTranspose)
         pixelRect = pixelRect.transposed();
 
     PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();

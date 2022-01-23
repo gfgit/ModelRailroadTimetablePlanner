@@ -43,6 +43,8 @@ public:
     PrintHelper::PageLayoutOpt getScenePageLay() const;
     void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
 
+    static QPageSize fixPageSize(const QPageSize& pageSz, QPageLayout::Orientation &orient);
+
 private slots:
     void updateZoomLevel(int zoom);
     void onScaleChanged(double zoom);
