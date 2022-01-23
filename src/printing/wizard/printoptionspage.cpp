@@ -313,6 +313,7 @@ void PrintOptionsPage::onShowPreviewDlg()
     scene.loadGraph(entry.objectId, entry.type);
 
     dlg->setSourceScene(&scene);
+    dlg->setPrinter(mWizard->getPrinter());
 
     dlg->exec();
 }

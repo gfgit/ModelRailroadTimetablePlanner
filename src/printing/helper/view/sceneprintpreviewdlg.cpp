@@ -9,13 +9,17 @@
 #include <QSpinBox>
 #include <QDoubleSpinBox>
 
-#include <QPageSize>
+#include "utils/owningqpointer.h"
+#include "printing/helper/view/custompagesetupdlg.h"
+#include <QPageSetupDialog>
+#include <QPrinter>
 
 #include <QEvent>
 
 ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QDialog(parent),
-    mSceneScale(1)
+    mSceneScale(1),
+    m_printer(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -47,7 +51,7 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     toolBar->addSeparator();
 
     sceneScaleSpinBox = new QDoubleSpinBox;
-    sceneScaleSpinBox->setRange(25, 400);
+    sceneScaleSpinBox->setRange(5, 200);
     sceneScaleSpinBox->setValue(mSceneScale * 100);
     sceneScaleSpinBox->setSuffix(QChar('%'));
     sceneScaleSpinBox->setToolTip(tr("Source scale factor"));
@@ -56,14 +60,19 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QAction *scaleAct = toolBar->addWidget(sceneScaleSpinBox);
     scaleAct->setText(tr("Scale:"));
 
+    toolBar->addSeparator();
+    toolBar->addAction(tr("Setup Page"), this, &ScenePrintPreviewDlg::showPageSetupDlg);
+
     graphView = new BasicGraphView;
     lay->addWidget(graphView);
 
     previewScene = new PrintPreviewSceneProxy(this);
     graphView->setScene(previewScene);
 
-    QPageSize pageSize(QPageSize::A4);
-    previewScene->setPageSize(pageSize.rectPoints());
+    //Default to A4 Portraint page
+    m_pageSize = QPageSize(QPageSize::A4);
+    m_pageOrient = Qt::Vertical;
+    updateModelPageSize();
 
     resize(500, 600);
 }
@@ -95,6 +104,33 @@ void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
     previewScene->setSourceScaleFactor(mSceneScale);
 }
 
+QPrinter *ScenePrintPreviewDlg::printer() const
+{
+    return m_printer;
+}
+
+void ScenePrintPreviewDlg::setPrinter(QPrinter *newPrinter)
+{
+    m_printer = newPrinter;
+
+    if(m_printer)
+    {
+        //Update page rect
+        m_pageSize = m_printer->pageLayout().pageSize();
+        QPageLayout::Orientation orient = m_printer->pageLayout().orientation();
+        m_pageOrient = orient == QPageLayout::Portrait ? Qt::Vertical : Qt::Horizontal;
+    }
+
+    updateModelPageSize();
+}
+
+void ScenePrintPreviewDlg::setPageSize(const QPageSize &newPageSize, Qt::Orientation orient)
+{
+    m_pageSize = newPageSize;
+    m_pageOrient = orient;
+    updateModelPageSize();
+}
+
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
     if(graphView->getZoomLevel() == zoom)
@@ -113,4 +149,42 @@ void ScenePrintPreviewDlg::onScaleChanged(double zoom)
 {
     //Convert from 0%-100% to 0-1
     setSceneScale(zoom / 100);
+}
+
+void ScenePrintPreviewDlg::showPageSetupDlg()
+{
+    if(m_printer && m_printer->outputFormat() == QPrinter::NativeFormat)
+    {
+        //For native printers use standard page dialog
+        OwningQPointer<QPageSetupDialog> dlg = new QPageSetupDialog(m_printer, this);
+        dlg->exec();
+
+        //Update page rect
+        m_pageSize = m_printer->pageLayout().pageSize();
+        QPageLayout::Orientation orient = m_printer->pageLayout().orientation();
+        m_pageOrient = orient == QPageLayout::Portrait ? Qt::Vertical : Qt::Horizontal;
+    }
+    else
+    {
+        //Show custom dialog
+        OwningQPointer<CustomPageSetupDlg> dlg = new CustomPageSetupDlg(this);
+        dlg->setPageSize(m_pageSize);
+        dlg->setPageOrient(m_pageOrient);
+        if(dlg->exec() != QDialog::Accepted || !dlg)
+            return;
+
+        m_pageSize = dlg->getPageSize();
+        m_pageOrient = dlg->getPageOrient();
+    }
+
+    updateModelPageSize();
+}
+
+void ScenePrintPreviewDlg::updateModelPageSize()
+{
+    QRect pixelRect = m_pageSize.rectPixels(100);
+    if(m_pageOrient == Qt::Horizontal) //Transpose for Landscape
+        pixelRect = pixelRect.transposed();
+
+    previewScene->setPageSize(pixelRect);
 }
