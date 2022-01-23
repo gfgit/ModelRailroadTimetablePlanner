@@ -288,6 +288,15 @@ void PrintOptionsPage::onOpenPageSetup()
         //Native dialog for native printer
         OwningQPointer<QPrintDialog> dlg = new QPrintDialog(printer, this);
         dlg->exec();
+
+        //Fix possible wrong page size
+        QPageLayout pageLay = printer->pageLayout();
+        QPageSize pageSz = pageLay.pageSize();
+        QPageLayout::Orientation orient = pageLay.orientation();
+        pageSz = ScenePrintPreviewDlg::fixPageSize(pageSz, orient);
+        pageLay.setPageSize(pageSz);
+        pageLay.setOrientation(orient);
+        printer->setPageLayout(pageLay);
     }
     else
     {
@@ -300,6 +309,7 @@ void PrintOptionsPage::onOpenPageSetup()
         if(dlg->exec() != QDialog::Accepted || !dlg)
             return;
 
+        //Update printer layout
         pageLay.setPageSize(dlg->getPageSize());
         pageLay.setOrientation(dlg->getPageOrient());
         printer->setPageLayout(pageLay);
@@ -320,6 +330,7 @@ void PrintOptionsPage::onShowPreviewDlg()
     scene.loadGraph(entry.objectId, entry.type);
 
     dlg->setSourceScene(&scene);
+    dlg->setScenePageLay(mWizard->getScenePageLay());
     dlg->setPrinter(printer);
 
     dlg->exec();
@@ -332,6 +343,8 @@ void PrintOptionsPage::onShowPreviewDlg()
         //Update page layout
         printer->setPageLayout(dlg->getPrinterPageLay());
     }
+
+    mWizard->setScenePageLay(dlg->getScenePageLay());
 }
 
 void PrintOptionsPage::updateOutputType()
