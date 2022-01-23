@@ -1,12 +1,12 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-#include <QLatin1String>
+#include <QString>
 #include "graph/linegraphtypes.h"
 
 namespace Print {
 
-enum OutputType {
+enum class OutputType {
     Native = 0,
     Pdf,
     Svg,
@@ -25,6 +25,15 @@ const QLatin1String phProgressive = QLatin1String("%i");
 //Implemented in printwizard.cpp
 QString getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
                     const QString& name, LineGraphType type, int i);
+
+struct PrintBasicOptions
+{
+    OutputType outputType = Print::OutputType::Pdf;
+    QString fileNamePattern;
+    QString filePath;
+    bool useOneFileForEachScene = false;
+    bool printSceneInOnePage = true;
+};
 
 }
 

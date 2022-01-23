@@ -7,6 +7,9 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   printing/helper/view/sceneprintpreviewdlg.h
   printing/helper/view/sceneprintpreviewdlg.cpp
 
+  printing/helper/view/printeroptionswidget.h
+  printing/helper/view/printeroptionswidget.cpp
+
   PARENT_SCOPE
 )
 
