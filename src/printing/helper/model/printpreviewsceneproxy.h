@@ -27,6 +27,12 @@ public:
     QRectF getPageSize() const;
     void setPageSize(const QRectF &newPageSize);
 
+    double getMarginWidth() const;
+    void setMarginWidth(double newMarginWidth);
+
+    PrintHelper::PageLayoutOpt getPageLay() const;
+    void setPageLay(const PrintHelper::PageLayoutOpt& newPageLay);
+
 private slots:
     void onSourceSceneDestroyed();
     void updateSourceSizeAndRedraw();

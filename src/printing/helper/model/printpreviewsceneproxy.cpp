@@ -204,6 +204,28 @@ void PrintPreviewSceneProxy::setPageSize(const QRectF &newPageSize)
     updatePageLay();
 }
 
+double PrintPreviewSceneProxy::getMarginWidth() const
+{
+    return pageLay.marginOriginalWidth;
+}
+
+void PrintPreviewSceneProxy::setMarginWidth(double newMarginWidth)
+{
+    pageLay.marginOriginalWidth = newMarginWidth;
+    updatePageLay();
+}
+
+PrintHelper::PageLayoutOpt PrintPreviewSceneProxy::getPageLay() const
+{
+    return pageLay;
+}
+
+void PrintPreviewSceneProxy::setPageLay(const PrintHelper::PageLayoutOpt &newPageLay)
+{
+    pageLay = newPageLay;
+    updatePageLay();
+}
+
 double PrintPreviewSceneProxy::getSourceScaleFactor() const
 {
     return pageLay.scaleFactor;
@@ -310,7 +332,6 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     const qreal pageBordersRight = qMin(m_cachedContentsSize.width(), sceneRect.right());
     const qreal pageBordersBottom = qMin(m_cachedContentsSize.height(), sceneRect.bottom());
 
-    //Draw effective page borders
     QPen pageMarginsPen(Qt::red, pageLay.pageMarginsPenWidth, Qt::SolidLine, Qt::FlatCap);
 
     if(isHeader)
@@ -320,8 +341,6 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
         wt = qBound(2.0, wt, 20.0);
         pageMarginsPen.setWidthF(wt);
     }
-
-    painter->setPen(pageMarginsPen);
 
     QTextOption pageNumTextOpt(Qt::AlignCenter);
 
@@ -338,89 +357,12 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     int nLinesVert = lastPageVertBorder - firstPageVertBorder + 1;
     int nLinesHoriz = lastPageHorizBorder - firstPageHorizBorder + 1;
 
-    if(!isHeader || orient == Qt::Horizontal)
-    {
-        //Horizontal header draws vertical borders
-        marginsVec.reserve(nLinesVert);
-
-        qreal borderX = fixedOffsetX + firstPageVertBorder * effectivePageSize.width();
-        for(int i = 0; i < nLinesVert; i++)
-        {
-            QLineF line(borderX, pageBordersTop, borderX, pageBordersBottom);
-            marginsVec.append(line);
-            borderX += effectivePageSize.width();
-        }
-        painter->drawLines(marginsVec);
-
-        if(isHeader)
-        {
-            //Draw page numbers
-            int firstPageNumber = firstPageVertBorder;
-            if(firstPageVertBorder > 0)
-                firstPageNumber--; //Draw also previous page
-
-            //If there are N pages, there are (N + 1) margins
-            //So last margin and last but one margin both belong to last page
-            int lastPageNumberPlusOne = lastPageVertBorder;
-            if(lastPageVertBorder < pageLay.horizPageCnt)
-                lastPageNumberPlusOne++; //Draw also next page
-
-            borderX = fixedOffsetX + firstPageNumber * effectivePageSize.width();
-            QRectF textRect(borderX, 0, effectivePageSize.width(), m_cachedHeaderSize.height());
-            for(int i = firstPageNumber; i < lastPageNumberPlusOne; i++)
-            {
-                //Column index starts from 0 so add +1
-                painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
-                textRect.moveLeft(textRect.left() + effectivePageSize.width());
-            }
-        }
-    }
-
-    marginsVec.clear();
-
-    if(!isHeader || orient == Qt::Vertical)
-    {
-        //Vertical header draws horizontal borders
-        marginsVec.reserve(nLinesHoriz);
-
-        qreal borderY = fixedOffsetY + firstPageHorizBorder * effectivePageSize.height();
-        for(int i = 0; i < nLinesHoriz; i++)
-        {
-            QLineF line(pageBordersLeft, borderY, pageBordersRight, borderY);
-            marginsVec.append(line);
-            borderY += effectivePageSize.height();
-        }
-        painter->drawLines(marginsVec);
-
-        if(isHeader)
-        {
-            //Draw page numbers
-            int firstPageNumber = firstPageHorizBorder;
-            if(firstPageHorizBorder > 0)
-                firstPageNumber--; //Draw also previous page
-
-            int lastPageNumberPlusOne = lastPageHorizBorder;
-            if(lastPageHorizBorder < pageLay.vertPageCnt)
-                lastPageNumberPlusOne++; //Draw also next page
-
-            borderY = fixedOffsetY + firstPageNumber * effectivePageSize.height();
-            QRectF textRect(0, borderY, m_cachedHeaderSize.width(), effectivePageSize.height());
-            for(int i = firstPageNumber; i < lastPageNumberPlusOne; i++)
-            {
-                //Row index starts from 0 so add +1
-                painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
-                textRect.moveTop(textRect.top() + effectivePageSize.height());
-            }
-        }
-    }
-
-    //Free memory
-    marginsVec.clear();
-    marginsVec.squeeze();
-
     if(!isHeader)
     {
         //Draw real page borders (outside margins)
+
+        //Set pen for page numbers
+        painter->setPen(pageMarginsPen);
 
         /* Divide them in four color groups, odd rows start shifted by 2
          *
@@ -510,4 +452,88 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             painter->drawLines(pageBordersVec[i]);
         }
     }
+
+    //Set pen for page margins
+    painter->setPen(pageMarginsPen);
+
+    //Draw effective page borders
+    if(!isHeader || orient == Qt::Horizontal)
+    {
+        //Horizontal header draws vertical borders
+        marginsVec.reserve(nLinesVert);
+
+        qreal borderX = fixedOffsetX + firstPageVertBorder * effectivePageSize.width();
+        for(int i = 0; i < nLinesVert; i++)
+        {
+            QLineF line(borderX, pageBordersTop, borderX, pageBordersBottom);
+            marginsVec.append(line);
+            borderX += effectivePageSize.width();
+        }
+        painter->drawLines(marginsVec);
+
+        if(isHeader)
+        {
+            //Draw page numbers
+            int firstPageNumber = firstPageVertBorder;
+            if(firstPageVertBorder > 0)
+                firstPageNumber--; //Draw also previous page
+
+            //If there are N pages, there are (N + 1) margins
+            //So last margin and last but one margin both belong to last page
+            int lastPageNumberPlusOne = lastPageVertBorder;
+            if(lastPageVertBorder < pageLay.horizPageCnt)
+                lastPageNumberPlusOne++; //Draw also next page
+
+            borderX = fixedOffsetX + firstPageNumber * effectivePageSize.width();
+            QRectF textRect(borderX, 0, effectivePageSize.width(), m_cachedHeaderSize.height());
+            for(int i = firstPageNumber; i < lastPageNumberPlusOne; i++)
+            {
+                //Column index starts from 0 so add +1
+                painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
+                textRect.moveLeft(textRect.left() + effectivePageSize.width());
+            }
+        }
+    }
+
+    marginsVec.clear();
+
+    if(!isHeader || orient == Qt::Vertical)
+    {
+        //Vertical header draws horizontal borders
+        marginsVec.reserve(nLinesHoriz);
+
+        qreal borderY = fixedOffsetY + firstPageHorizBorder * effectivePageSize.height();
+        for(int i = 0; i < nLinesHoriz; i++)
+        {
+            QLineF line(pageBordersLeft, borderY, pageBordersRight, borderY);
+            marginsVec.append(line);
+            borderY += effectivePageSize.height();
+        }
+        painter->drawLines(marginsVec);
+
+        if(isHeader)
+        {
+            //Draw page numbers
+            int firstPageNumber = firstPageHorizBorder;
+            if(firstPageHorizBorder > 0)
+                firstPageNumber--; //Draw also previous page
+
+            int lastPageNumberPlusOne = lastPageHorizBorder;
+            if(lastPageHorizBorder < pageLay.vertPageCnt)
+                lastPageNumberPlusOne++; //Draw also next page
+
+            borderY = fixedOffsetY + firstPageNumber * effectivePageSize.height();
+            QRectF textRect(0, borderY, m_cachedHeaderSize.width(), effectivePageSize.height());
+            for(int i = firstPageNumber; i < lastPageNumberPlusOne; i++)
+            {
+                //Row index starts from 0 so add +1
+                painter->drawText(textRect, QString::number(i + 1), pageNumTextOpt);
+                textRect.moveTop(textRect.top() + effectivePageSize.height());
+            }
+        }
+    }
+
+    //Free memory
+    marginsVec.clear();
+    marginsVec.squeeze();
 }
