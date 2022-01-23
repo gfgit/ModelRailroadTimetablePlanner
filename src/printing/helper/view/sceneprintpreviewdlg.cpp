@@ -211,6 +211,15 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
         //For native printers use standard page dialog
         OwningQPointer<QPageSetupDialog> dlg = new QPageSetupDialog(m_printer, this);
         dlg->exec();
+
+        //Fix possible wrong page size
+        QPageLayout pageLay = m_printer->pageLayout();
+        QPageSize pageSz = pageLay.pageSize();
+        QPageLayout::Orientation orient = pageLay.orientation();
+        pageSz = ScenePrintPreviewDlg::fixPageSize(pageSz, orient);
+        pageLay.setPageSize(pageSz);
+        pageLay.setOrientation(orient);
+        m_printer->setPageLayout(pageLay);
     }
     else
     {
@@ -233,8 +242,6 @@ void ScenePrintPreviewDlg::updateModelPageSize()
 {
     QPageSize pageSize = printerPageLay.pageSize();
     QPageLayout::Orientation pageOrient = printerPageLay.orientation();
-
-    pageSize = fixPageSize(pageSize, pageOrient);
 
     QRect pixelRect = printerPageLay.pageSize().rectPixels(100);
 
