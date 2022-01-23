@@ -76,7 +76,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
         }
 
         //Wash out a bit to make page borders more visible
-        painter->fillRect(sourceRect, QColor(0, 255, 0, 80));
+        painter->fillRect(sourceRect, QColor(40, 255, 40, 100));
     }
 
     //Reset transorm to previous
@@ -336,27 +336,32 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
         //Set pen for page numbers
         painter->setPen(pageMarginsPen);
 
-        /* Divide them in four color groups, odd rows start shifted by 2
+        /* Divide them in 3 color groups
+         * Each row shifts by one
          *
          * +---+---+---+---+
-         * | 1 | 2 | 3 | 4 |
+         * | 1 | 2 | 3 | 1 |
          * +---+---+---+---+
-         * | 3 | 4 | 1 | 2 |
+         * | 2 | 3 | 1 | 2 |
+         * +---+---+---+---+
+         * | 3 | 1 | 2 | 3 |
          * +---+---+---+---+
          */
-        QPen pagesBorderPen[4] = {
-            QPen(Qt::blue, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap),
-            QPen(Qt::magenta, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap),
-            QPen(Qt::black, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap),
-            QPen(Qt::darkYellow, pageLay.pageMarginsPenWidth, Qt::DashLine, Qt::FlatCap)
+
+        const double borderPenWidth = pageLay.pageMarginsPenWidth * 0.7;
+
+        constexpr const int NPageColors = 3;
+        QPen pagesBorderPen[NPageColors] = {
+            QPen(Qt::blue,    borderPenWidth, Qt::DashLine, Qt::FlatCap),
+            QPen(Qt::magenta, borderPenWidth, Qt::DashLine, Qt::FlatCap),
+            QPen(Qt::black,   borderPenWidth, Qt::DashLine, Qt::FlatCap)
         };
 
         //FIXME: allocate memory in advance
-        QVector<QLineF> pageBordersVec[4];
+        QVector<QLineF> pageBordersVec[NPageColors];
 
-        //Even borders are Left for Even pages and Right for Odd pages
-        int vertPageGroup = firstPageVertBorder % 4;
-        const bool isFirstHorizBorderEven = firstPageHorizBorder % 2 == 0;
+        int vertPageColorGroup = firstPageVertBorder % NPageColors;
+        int horizPageColorGroup = 0;
 
         //Get page rect, move out of header
         QRectF pageRect = pageLay.devicePageRect;
@@ -365,30 +370,26 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
         //This is because maybe real border is shown but not the effective margin
         for(int x = -1; x < nLinesVert + 1; x++)
         {
+            //Increment vertical page color group
+            vertPageColorGroup = (vertPageColorGroup + 1) % NPageColors;
+
             const int pageBorderCol = firstPageVertBorder + x;
-            if(pageBorderCol < 0 || pageBorderCol == pageLay.horizPageCnt)
-            {
-                //Increment vertical page group
-                vertPageGroup = (vertPageGroup + 1) % 4;
-                //Before first or after last, skip
-                continue;
-            }
+            if(pageBorderCol < 0 || pageBorderCol >= pageLay.horizPageCnt)
+                continue; //Before first or after last, skip
 
             pageRect.moveLeft(m_cachedHeaderSize.width() + effectivePageSize.width() * (pageBorderCol));
 
-            //Reset for every row to original value
-            bool isHorizBorderEven = isFirstHorizBorderEven;
+            //Reset column to original value for every row
+            horizPageColorGroup = firstPageHorizBorder % NPageColors;
 
             for(int y = -1; y < nLinesHoriz + 1; y++)
             {
+                //Increment horizontal page color group
+                horizPageColorGroup = (horizPageColorGroup + 1) % NPageColors;
+
                 const int pageBorderRow = firstPageHorizBorder + y;
-                if(pageBorderRow < 0 || pageBorderRow == pageLay.vertPageCnt)
-                {
-                    //Switch horizontal border
-                    isHorizBorderEven = !isHorizBorderEven;
-                    //Before first or after last, skip
-                    continue;
-                }
+                if(pageBorderRow < 0 || pageBorderRow >= pageLay.vertPageCnt)
+                    continue; //Before first or after last, skip
 
                 pageRect.moveTop(m_cachedHeaderSize.height() + effectivePageSize.height() * (pageBorderRow));
 
@@ -402,25 +403,17 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
                 QLineF leftBorder = QLineF(pageRect.topLeft(), pageRect.bottomLeft());
                 QLineF rightBorder = QLineF(pageRect.topRight(), pageRect.bottomRight());
 
-                int group = vertPageGroup;
-                if(!isHorizBorderEven)
-                    group = (group + 2) % 4; //Shift by 2 for odd rows
+                const int group = (vertPageColorGroup + horizPageColorGroup) % NPageColors;
 
                 pageBordersVec[group].append(topBorder);
                 pageBordersVec[group].append(bottomBorder);
                 pageBordersVec[group].append(leftBorder);
                 pageBordersVec[group].append(rightBorder);
-
-                //Switch horizontal border
-                isHorizBorderEven = !isHorizBorderEven;
             }
-
-            //Increment vertical page group
-            vertPageGroup = (vertPageGroup + 1) % 4;
         }
 
         //Draw lines
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < NPageColors; i++)
         {
             painter->setPen(pagesBorderPen[i]);
             painter->drawLines(pageBordersVec[i]);
