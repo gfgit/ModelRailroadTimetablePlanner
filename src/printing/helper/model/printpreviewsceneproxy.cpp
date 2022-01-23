@@ -361,7 +361,9 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
         //Get page rect, move out of header
         QRectF pageRect = pageLay.devicePageRect;
 
-        for(int x = -1; x < nLinesVert; x++)
+        //Try also previous than first or next of last
+        //This is because maybe real border is shown but not the effective margin
+        for(int x = -1; x < nLinesVert + 1; x++)
         {
             const int pageBorderCol = firstPageVertBorder + x;
             if(pageBorderCol < 0 || pageBorderCol == pageLay.horizPageCnt)
@@ -377,7 +379,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             //Reset for every row to original value
             bool isHorizBorderEven = isFirstHorizBorderEven;
 
-            for(int y = -1; y < nLinesHoriz; y++)
+            for(int y = -1; y < nLinesHoriz + 1; y++)
             {
                 const int pageBorderRow = firstPageHorizBorder + y;
                 if(pageBorderRow < 0 || pageBorderRow == pageLay.vertPageCnt)
