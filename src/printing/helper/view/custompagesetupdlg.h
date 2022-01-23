@@ -2,7 +2,7 @@
 #define CUSTOMPAGESETUPDLG_H
 
 #include <QDialog>
-#include <QPageSize>
+#include <QPageLayout>
 
 class QComboBox;
 class QRadioButton;
@@ -25,8 +25,8 @@ public:
     void setPageSize(const QPageSize& pageSz);
     inline QPageSize getPageSize() const { return m_pageSize; }
 
-    void setPageOrient(Qt::Orientation orient);
-    inline Qt::Orientation getPageOrient() const { return m_pageOrient; }
+    void setPageOrient(QPageLayout::Orientation orient);
+    inline QPageLayout::Orientation getPageOrient() const { return m_pageOrient; }
 
 private slots:
     void onPageComboActivated(int idx);
@@ -38,7 +38,7 @@ private:
     QRadioButton *landscapeRadioBut;
 
     QPageSize m_pageSize;
-    Qt::Orientation m_pageOrient;
+    QPageLayout::Orientation m_pageOrient;
 };
 
 #endif // CUSTOMPAGESETUPDLG_H

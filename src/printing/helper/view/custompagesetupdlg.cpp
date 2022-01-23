@@ -11,7 +11,7 @@
 CustomPageSetupDlg::CustomPageSetupDlg(QWidget *parent) :
     QDialog(parent),
     m_pageSize(QPageSize::A4),
-    m_pageOrient(Qt::Vertical)
+    m_pageOrient(QPageLayout::Portrait)
 {
     QVBoxLayout *mainLay = new QVBoxLayout(this);
 
@@ -61,16 +61,16 @@ void CustomPageSetupDlg::setPageSize(const QPageSize &pageSz)
     pageSizeCombo->setCurrentIndex(int(m_pageSize.id()));
 }
 
-void CustomPageSetupDlg::setPageOrient(Qt::Orientation orient)
+void CustomPageSetupDlg::setPageOrient(QPageLayout::Orientation orient)
 {
     if(m_pageOrient == orient)
         return;
 
     m_pageOrient = orient;
-    if(m_pageOrient == Qt::Horizontal)
-        landscapeRadioBut->setChecked(true);
-    else
+    if(m_pageOrient == QPageLayout::Portrait)
         portraitRadioBut->setChecked(true);
+    else
+        landscapeRadioBut->setChecked(true);
 }
 
 void CustomPageSetupDlg::onPageComboActivated(int idx)
@@ -81,8 +81,6 @@ void CustomPageSetupDlg::onPageComboActivated(int idx)
 
 void CustomPageSetupDlg::onPagePortraitToggled(bool val)
 {
-    Qt::Orientation orient = Qt::Horizontal;
-    if(val)
-        orient = Qt::Vertical;
+    QPageLayout::Orientation orient = val ? QPageLayout::Portrait : QPageLayout::Landscape;
     setPageOrient(orient);
 }
