@@ -19,11 +19,11 @@ QString Print::getOutputTypeName(Print::OutputType type)
 {
     switch (type)
     {
-    case Print::Native:
+    case Print::OutputType::Native:
         return PrintWizard::tr("Native Printer");
-    case Print::Pdf:
+    case Print::OutputType::Pdf:
         return PrintWizard::tr("PDF");
-    case Print::Svg:
+    case Print::OutputType::Svg:
         return PrintWizard::tr("SVG");
     default:
         break;
@@ -60,15 +60,16 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     QWizard (parent),
     mDb(db),
     printer(nullptr),
-    differentFiles(false),
-    type(Print::Native),
     printTask(nullptr),
     isStoppingTask(false)
 {
     //Initialize to a default pattern
-    filePattern = Print::phType + QLatin1Char('_') + Print::phNameUnderscore;
+    printOpt.fileNamePattern = Print::phType + QLatin1Char('_') + Print::phNameUnderscore;
 
     printer = new QPrinter;
+    printer->setOutputFormat(QPrinter::PdfFormat);
+    printer->setResolution(PrintHelper::PrinterResolution);
+
     selectionModel = new SceneSelectionModel(mDb, this);
 
     setPage(0, new PrintSelectionPage(this));
@@ -85,52 +86,18 @@ PrintWizard::~PrintWizard()
     delete printer;
 }
 
-Print::OutputType PrintWizard::getOutputType() const
-{
-    return type;
-}
-
-void PrintWizard::setOutputType(Print::OutputType out)
-{
-    type = out;
-}
-
-QString PrintWizard::getOutputFile() const
-{
-    return fileOutput;
-}
-
-void PrintWizard::setOutputFile(const QString &fileName)
-{
-    fileOutput = fileName;
-}
-
-bool PrintWizard::getDifferentFiles() const
-{
-    return differentFiles;
-}
-
-void PrintWizard::setDifferentFiles(bool newDifferentFiles)
-{
-    differentFiles = newDifferentFiles;
-}
-
-QString PrintWizard::getFilePattern() const
-{
-    return filePattern;
-}
-
-void PrintWizard::setFilePattern(const QString &newFilePattern)
-{
-    filePattern = newFilePattern;
-}
-
 QPrinter *PrintWizard::getPrinter() const
 {
     return printer;
 }
 
-const PrintHelper::PageLayoutOpt &PrintWizard::getScenePageLay() const
+void PrintWizard::setOutputType(Print::OutputType type)
+{
+    printOpt.outputType = type;
+    validatePrintOptions();
+}
+
+PrintHelper::PageLayoutOpt PrintWizard::getScenePageLay() const
 {
     return scenePageLay;
 }
@@ -138,6 +105,17 @@ const PrintHelper::PageLayoutOpt &PrintWizard::getScenePageLay() const
 void PrintWizard::setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay)
 {
     scenePageLay = newScenePageLay;
+}
+
+Print::PrintBasicOptions PrintWizard::getPrintOpt() const
+{
+    return printOpt;
+}
+
+void PrintWizard::setPrintOpt(const Print::PrintBasicOptions &newPrintOpt)
+{
+    printOpt = newPrintOpt;
+    validatePrintOptions();
 }
 
 bool PrintWizard::event(QEvent *e)
@@ -220,13 +198,13 @@ void PrintWizard::startPrintTask()
 {
     abortPrintTask();
 
+    validatePrintOptions();
+
     printTask = new PrintWorker(mDb, this);
-    printTask->setSelection(selectionModel);
-    printTask->setOutputType(type);
-    printTask->setPrinter(printer);
-    printTask->setFileOutput(fileOutput, differentFiles);
-    printTask->setFilePattern(filePattern);
+    printTask->setPrintOpt(printOpt);
     printTask->setScenePageLay(scenePageLay);
+    printTask->setSelection(selectionModel);
+    printTask->setPrinter(printer);
 
     QThreadPool::globalInstance()->start(printTask);
 
@@ -263,4 +241,24 @@ void PrintWizard::handleProgressError(const QString &errMsg)
         //Go back to options page
         back();
     }
+}
+
+void PrintWizard::validatePrintOptions()
+{
+    if(printOpt.outputType == Print::OutputType::Svg)
+    {
+        //Svg can only be printed in multiple files
+        printOpt.useOneFileForEachScene = true;
+
+        //Svg will always be on single page
+        printOpt.printSceneInOnePage = true;
+    }
+    else if(printOpt.outputType == Print::OutputType::Native)
+    {
+        //Printers always need to split in multiple pages
+        printOpt.printSceneInOnePage = false;
+    }
+
+    //Update printer output format
+    printer->setOutputFormat(printOpt.outputType == Print::OutputType::Native ? QPrinter::NativeFormat : QPrinter::PdfFormat);
 }

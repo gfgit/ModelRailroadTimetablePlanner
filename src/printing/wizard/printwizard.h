@@ -24,23 +24,19 @@ public:
     PrintWizard(sqlite3pp::database &db, QWidget *parent = nullptr);
     ~PrintWizard();
 
-    Print::OutputType getOutputType() const;
-    void setOutputType(Print::OutputType out);
-
-    inline SceneSelectionModel* getSelectionModel() const { return selectionModel; }
-
-    QString getOutputFile() const;
-    void setOutputFile(const QString& fileName);
-
-    bool getDifferentFiles() const;
-    void setDifferentFiles(bool newDifferentFiles);
-
-    QString getFilePattern() const;
-    void setFilePattern(const QString &newFilePattern);
-
     QPrinter *getPrinter() const;
 
+    void setOutputType(Print::OutputType type);
+
+    PrintHelper::PageLayoutOpt getScenePageLay() const;
+    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+
+    Print::PrintBasicOptions getPrintOpt() const;
+    void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
+
     inline sqlite3pp::database& getDb() const { return mDb; }
+
+    inline SceneSelectionModel* getSelectionModel() const { return selectionModel; }
 
     inline bool taskRunning() const { return printTask; }
 
@@ -53,22 +49,18 @@ public:
     void abortPrintTask();
     void handleProgressError(const QString& errMsg);
 
-    const PrintHelper::PageLayoutOpt &getScenePageLay() const;
-    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+private:
+    void validatePrintOptions();
 
 private:
     sqlite3pp::database &mDb;
+    SceneSelectionModel *selectionModel;
 
     QPrinter *printer;
-    QString fileOutput;
-    QString filePattern;
-    bool differentFiles;
 
+    Print::PrintBasicOptions printOpt;
     PrintHelper::PageLayoutOpt scenePageLay;
 
-    Print::OutputType type;
-
-    SceneSelectionModel *selectionModel;
 
     PrintProgressPage *progressPage;
     PrintWorker *printTask;
