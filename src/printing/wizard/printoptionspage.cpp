@@ -5,10 +5,13 @@
 #include <QVBoxLayout>
 #include "printing/helper/view/printeroptionswidget.h"
 
+#include "utils/scene/igraphscene.h"
+
 
 PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     QWizardPage (parent),
-    mWizard(w)
+    mWizard(w),
+    m_scene(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
     optionsWidget = new PrinterOptionsWidget;
@@ -25,10 +28,10 @@ PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
     setButtonText(QWizard::CommitButton, tr("Print"));
 }
 
-void PrintOptionsPage::initializePage()
+PrintOptionsPage::~PrintOptionsPage()
 {
-    optionsWidget->setPrinter(mWizard->getPrinter());
-    optionsWidget->setOptions(mWizard->getPrintOpt());
+    //Reset scene
+    setScene(nullptr);
 }
 
 bool PrintOptionsPage::validatePage()
@@ -38,14 +41,25 @@ bool PrintOptionsPage::validatePage()
 
     //Update options
     mWizard->setPrintOpt(optionsWidget->getOptions());
-
-    //Start task
-    mWizard->startPrintTask();
-
     return true;
 }
 
 bool PrintOptionsPage::isComplete() const
 {
     return optionsWidget->isComplete();
+}
+
+void PrintOptionsPage::setupPage()
+{
+    optionsWidget->setPrinter(mWizard->getPrinter());
+    optionsWidget->setOptions(mWizard->getPrintOpt());
+    setScene(mWizard->getFirstScene());
+}
+
+void PrintOptionsPage::setScene(IGraphScene *scene)
+{
+    if(m_scene)
+        delete m_scene;
+    m_scene = scene;
+    optionsWidget->setSourceScene(m_scene);
 }
