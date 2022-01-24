@@ -112,11 +112,11 @@ void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
 void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
 {
     PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
-    if(qFuzzyCompare(pageLay.scaleFactor, scaleFactor))
+    if(qFuzzyCompare(pageLay.premultipliedScaleFactor, scaleFactor))
         return;
 
     sceneScaleSpinBox->setValue(scaleFactor * 100);
-    pageLay.scaleFactor = scaleFactor;
+    pageLay.originalScaleFactor = scaleFactor;
     previewScene->setPageLay(pageLay);
 }
 
@@ -131,8 +131,20 @@ void ScenePrintPreviewDlg::setPrinter(QPrinter *newPrinter)
 
     if(m_printer)
     {
+        //Update resolution
+        PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+        pageLay.printerResolution = m_printer->resolution();
+        previewScene->setPageLay(pageLay);
+
         //Update page rect
         setPrinterPageLay(m_printer->pageLayout());
+    }
+    else
+    {
+        //Update resolution
+        PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+        pageLay.printerResolution = PrintHelper::PrinterDefaultResolution;
+        previewScene->setPageLay(pageLay);
     }
 }
 
@@ -151,7 +163,7 @@ void ScenePrintPreviewDlg::setScenePageLay(const PrintHelper::PageLayoutOpt &new
 {
     previewScene->setPageLay(newScenePageLay);
 
-    sceneScaleSpinBox->setValue(newScenePageLay.scaleFactor * 100);
+    sceneScaleSpinBox->setValue(newScenePageLay.originalScaleFactor * 100);
     marginSpinBox->setValue(newScenePageLay.marginOriginalWidth);
 }
 
@@ -230,10 +242,12 @@ void ScenePrintPreviewDlg::updatePageCount()
 
 void ScenePrintPreviewDlg::updateModelPageSize()
 {
+    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+
     QPageSize pageSize = printerPageLay.pageSize();
     QPageLayout::Orientation pageOrient = printerPageLay.orientation();
 
-    QRect pixelRect = printerPageLay.pageSize().rectPixels(PrintHelper::PrinterResolution);
+    QRect pixelRect = printerPageLay.pageSize().rectPixels(pageLay.printerResolution);
 
     const bool shouldTranspose = (pageOrient == QPageLayout::Portrait && pixelRect.width() > pixelRect.height())
                                  || (pageOrient == QPageLayout::Landscape && pixelRect.width() < pixelRect.height());
@@ -241,7 +255,7 @@ void ScenePrintPreviewDlg::updateModelPageSize()
     if(shouldTranspose)
         pixelRect = pixelRect.transposed();
 
-    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
     pageLay.devicePageRect = pixelRect;
+
     previewScene->setPageLay(pageLay);
 }

@@ -68,7 +68,6 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
 
     printer = new QPrinter;
     printer->setOutputFormat(QPrinter::PdfFormat);
-    printer->setResolution(PrintHelper::PrinterResolution);
 
     selectionModel = new SceneSelectionModel(mDb, this);
 

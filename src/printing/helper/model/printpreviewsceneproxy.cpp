@@ -30,8 +30,8 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
         sourceRect.moveTopLeft(sourceRect.topLeft() - origin);
 
         //Apply scale factor
-        sourceRect = QRectF(sourceRect.topLeft() / m_pageLay.scaleFactor,
-                            sourceRect.size() / m_pageLay.scaleFactor);
+        sourceRect = QRectF(sourceRect.topLeft() / m_pageLay.premultipliedScaleFactor,
+                            sourceRect.size() / m_pageLay.premultipliedScaleFactor);
 
         //Cut negative part which would go under our headers
         //This will reduce a bit the rect size
@@ -48,7 +48,7 @@ void PrintPreviewSceneProxy::renderContents(QPainter *painter, const QRectF &sce
             sourceRect.setBottom(contentsSize.height());
 
         painter->translate(origin);
-        painter->scale(m_pageLay.scaleFactor, m_pageLay.scaleFactor);
+        painter->scale(m_pageLay.premultipliedScaleFactor, m_pageLay.premultipliedScaleFactor);
 
         //Draw source contents
         m_sourceScene->renderContents(painter, sourceRect);
@@ -205,6 +205,8 @@ void PrintPreviewSceneProxy::onSourceSceneDestroyed()
 
 void PrintPreviewSceneProxy::updateSourceSizeAndRedraw()
 {
+    PrintHelper::updatePrinterResolution(m_pageLay.printerResolution, m_pageLay);
+
     PrintHelper::calculatePageCount(m_sourceScene, m_pageLay, effectivePageSize);
 
     //Calculate total size
