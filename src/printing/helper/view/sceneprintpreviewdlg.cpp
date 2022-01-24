@@ -137,7 +137,9 @@ void ScenePrintPreviewDlg::setPrinter(QPrinter *newPrinter)
         previewScene->setPageLay(pageLay);
 
         //Update page rect
-        setPrinterPageLay(m_printer->pageLayout());
+        QPageLayout printerLay = m_printer->pageLayout();
+        printerLay.setMargins(QMarginsF());
+        setPrinterPageLay(printerLay);
     }
     else
     {
@@ -215,6 +217,7 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
         pageSz = PrintHelper::fixPageSize(pageSz, orient);
         pageLay.setPageSize(pageSz);
         pageLay.setOrientation(orient);
+        pageLay.setMargins(QMarginsF()); //Reset margins
         m_printer->setPageLayout(pageLay);
 
         //Update page rect

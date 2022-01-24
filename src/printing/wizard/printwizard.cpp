@@ -70,6 +70,12 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     printer = new QPrinter;
     printer->setOutputFormat(QPrinter::PdfFormat);
 
+    //Remove page margins
+    QPageLayout printerPageLay = printer->pageLayout();
+    printerPageLay.setMode(QPageLayout::FullPageMode);
+    printerPageLay.setMargins(QMarginsF());
+    printer->setPageLayout(printerPageLay);
+
     selectionModel = new SceneSelectionModel(mDb, this);
 
     setPage(0, new PrintSelectionPage(this));
