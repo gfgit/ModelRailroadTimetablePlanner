@@ -151,6 +151,8 @@ void ScenePrintPreviewDlg::setPrinter(QPrinter *newPrinter)
 void ScenePrintPreviewDlg::setPrinterPageLay(const QPageLayout &pageLay)
 {
     printerPageLay = pageLay;
+    if(m_printer)
+        m_printer->setPageLayout(printerPageLay);
     updateModelPageSize();
 }
 
@@ -214,6 +216,9 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
         pageLay.setPageSize(pageSz);
         pageLay.setOrientation(orient);
         m_printer->setPageLayout(pageLay);
+
+        //Update page rect
+        setPrinterPageLay(m_printer->pageLayout());
     }
     else
     {
@@ -226,10 +231,10 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
 
         printerPageLay.setPageSize(dlg->getPageSize());
         printerPageLay.setOrientation(dlg->getPageOrient());
-    }
 
-    //Update page rect
-    setPrinterPageLay(m_printer->pageLayout());
+        //Update page rect
+        setPrinterPageLay(printerPageLay);
+    }
 }
 
 void ScenePrintPreviewDlg::updatePageCount()
