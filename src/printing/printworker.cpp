@@ -46,9 +46,7 @@ PrintProgressEvent::PrintProgressEvent(QRunnable *self, int pr, const QString &d
 }
 
 PrintWorker::PrintWorker(sqlite3pp::database &db, QObject *receiver) :
-    IQuittableTask(receiver),
-    differentFiles(false),
-    outType(Print::Native)
+    IQuittableTask(receiver)
 {
     scene = new LineGraphScene(db);
 }
@@ -64,22 +62,12 @@ void PrintWorker::setPrinter(QPrinter *printer)
     m_printer = printer;
 }
 
-void PrintWorker::setOutputType(Print::OutputType type)
+void PrintWorker::setPrintOpt(const Print::PrintBasicOptions &newPrintOpt)
 {
-    outType = type;
-}
+    printOpt = newPrintOpt;
 
-void PrintWorker::setFileOutput(const QString &value, bool different)
-{
-    fileOutput = value;
-    if(fileOutput.endsWith('/'))
-        fileOutput.chop(1);
-    differentFiles = different;
-}
-
-void PrintWorker::setFilePattern(const QString &newFilePatter)
-{
-    filePattern = newFilePatter;
+    if(printOpt.filePath.endsWith('/'))
+        printOpt.filePath.chop(1); //Remove last slash
 }
 
 void PrintWorker::setSelection(SceneSelectionModel *newSelection)
@@ -103,25 +91,25 @@ void PrintWorker::run()
 
     bool success = true;
 
-    switch (outType)
+    switch (printOpt.outputType)
     {
-    case Print::Native:
+    case Print::OutputType::Native:
     {
         m_printer->setOutputFormat(QPrinter::NativeFormat);
         success = printPaged();
         break;
     }
-    case Print::Pdf:
+    case Print::OutputType::Pdf:
     {
         success = printPdf();
         break;
     }
-    case Print::Svg:
+    case Print::OutputType::Svg:
     {
         success = printSvg();
         break;
     }
-    case Print::NTypes:
+    case Print::OutputType::NTypes:
         break;
     }
 
@@ -353,7 +341,7 @@ bool PrintWorker::printSvg()
                                                       const QString& title, const QRectF& sourceRect,
                                                       LineGraphType type, int progressiveNum) -> bool
     {
-        const QString fileName = Print::getFileName(fileOutput, filePattern, QLatin1String(".svg"),
+        const QString fileName = Print::getFileName(printOpt.filePath, printOpt.fileNamePattern, QLatin1String(".svg"),
                                                     title, type, progressiveNum);
         svg.reset(new QSvgGenerator);
         svg->setTitle(docTitle);
@@ -399,13 +387,13 @@ bool PrintWorker::printPdf()
     m_printer->setCreator(AppDisplayName);
     m_printer->setDocName(QStringLiteral("Timetable Session"));
 
-    if(differentFiles)
+    if(printOpt.useOneFileForEachScene)
     {
         return printPdfMultipleFiles();
     }
     else
     {
-        m_printer->setOutputFileName(fileOutput);
+        m_printer->setOutputFileName(printOpt.filePath);
         return printPaged();
     }
 }
@@ -418,7 +406,7 @@ bool PrintWorker::printPdfMultipleFiles()
                                       const QString& title, const QRectF& sourceRect,
                                       LineGraphType type, int progressiveNum) -> bool
     {
-        const QString fileName = Print::getFileName(fileOutput, filePattern, QLatin1String(".pdf"),
+        const QString fileName = Print::getFileName(printOpt.filePath, printOpt.fileNamePattern, QLatin1String(".pdf"),
                                                     title, type, progressiveNum);
         writer.reset(new QPdfWriter(fileName));
         QPageSize ps(sourceRect.size(), QPageSize::Point);

@@ -52,9 +52,8 @@ public:
 
     void setPrinter(QPrinter *printer);
 
-    void setOutputType(Print::OutputType type);
-    void setFileOutput(const QString &value, bool different);
-    void setFilePattern(const QString &newFilePatter);
+    inline Print::PrintBasicOptions getPrintOpt() const { return printOpt; };
+    void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
 
     void setSelection(SceneSelectionModel *newSelection);
     int getMaxProgress() const;
@@ -83,14 +82,10 @@ public:
 
 private:
     QPrinter *m_printer;
+    Print::PrintBasicOptions printOpt;
     PrintHelper::PageLayoutOpt scenePageLay;
 
     SceneSelectionModel *selection;
-
-    QString fileOutput;
-    QString filePattern;
-    bool differentFiles;
-    Print::OutputType outType;
 
     LineGraphScene *scene;
 };
