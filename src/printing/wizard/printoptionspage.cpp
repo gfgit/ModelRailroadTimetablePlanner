@@ -41,6 +41,7 @@ bool PrintOptionsPage::validatePage()
 
     //Update options
     mWizard->setPrintOpt(optionsWidget->getOptions());
+    mWizard->setScenePageLay(optionsWidget->getScenePageLay());
     return true;
 }
 
@@ -53,6 +54,7 @@ void PrintOptionsPage::setupPage()
 {
     optionsWidget->setPrinter(mWizard->getPrinter());
     optionsWidget->setOptions(mWizard->getPrintOpt());
+    optionsWidget->setScenePageLay(mWizard->getScenePageLay());
     setScene(mWizard->getFirstScene());
 }
 
