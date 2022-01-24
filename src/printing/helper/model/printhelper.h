@@ -12,7 +12,7 @@ class PrintHelper
 public:
 
     //Standard resolution, set to all printers to calculate page size
-    static constexpr const double PrinterDefaultResolution = 100.0;
+    static constexpr const double PrinterDefaultResolution = 72.0;
 
     //Page Layout
     struct PageLayoutOpt
