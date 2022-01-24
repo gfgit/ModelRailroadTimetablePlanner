@@ -12,14 +12,21 @@ class PrintHelper
 public:
 
     //Standard resolution, set to all printers to calculate page size
-    static constexpr const int PrinterResolution = 100;
+    static constexpr const double PrinterDefaultResolution = 100.0;
 
     //Page Layout
     struct PageLayoutOpt
     {
+        //Device page rect is multiplied by printerResolution
         QRectF devicePageRect;
+        double printerResolution = PrinterDefaultResolution;
 
-        double scaleFactor = 1;
+        //Premultiplied originalScaleFactor for PrinterDefaultResolution/printerResolution
+        //This is needed to compensate devicePageRect which depends on printer resolution
+        double premultipliedScaleFactor = 1;
+
+
+        double originalScaleFactor = 1;
         double marginOriginalWidth = 20;
 
         int horizPageCnt = 0;
@@ -69,6 +76,8 @@ public:
     };
 
     static QPageSize fixPageSize(const QPageSize& pageSz, QPageLayout::Orientation &orient);
+
+    static void updatePrinterResolution(double resolution, PageLayoutOpt& pageLay);
 
     static void calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
                                    QSizeF &outEffectivePageSize);

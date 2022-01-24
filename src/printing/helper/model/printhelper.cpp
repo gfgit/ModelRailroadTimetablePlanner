@@ -33,11 +33,19 @@ QPageSize PrintHelper::fixPageSize(const QPageSize &pageSz, QPageLayout::Orienta
     return pageSz;
 }
 
+void PrintHelper::updatePrinterResolution(double resolution, PageLayoutOpt &pageLay)
+{
+    //Update printer resolution
+    pageLay.printerResolution = resolution;
+    const double resolutionFactor = PrintHelper::PrinterDefaultResolution / pageLay.printerResolution;
+    pageLay.premultipliedScaleFactor = pageLay.originalScaleFactor * resolutionFactor;
+}
+
 void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt &pageLay, QSizeF &outEffectivePageSize)
 {
     QSizeF srcContentsSize;
     if(scene)
-        srcContentsSize = scene->getContentsSize() * pageLay.scaleFactor;
+        srcContentsSize = scene->getContentsSize() * pageLay.premultipliedScaleFactor;
 
     //NOTE: do not shift by top left margin here
     //This is because it should not be counted when calculating page count
@@ -71,7 +79,7 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
     }
 
     //Inverse scale for margins pen to keep it independent
-    pageLay.lay.pageMarginsPen.setWidthF(pageLay.lay.pageMarginsPenWidth / pageLay.lay.scaleFactor);
+    pageLay.lay.pageMarginsPen.setWidthF(pageLay.lay.pageMarginsPenWidth / pageLay.lay.premultipliedScaleFactor);
 
     QSizeF effectivePageSize;
     calculatePageCount(scene, pageLay.lay, effectivePageSize);
@@ -98,11 +106,11 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
             if(pageLay.isFirstPage || dev->needsInitForEachPage())
             {
                 //Apply scaling
-                painter->scale(pageLay.lay.scaleFactor, pageLay.lay.scaleFactor);
+                painter->scale(pageLay.lay.premultipliedScaleFactor, pageLay.lay.premultipliedScaleFactor);
                 painter->translate(sourceRect.topLeft());
 
                 //Inverse scale for page numbers font to keep it independent
-                setFontPointSizeDPI(pageNumOpt.font, pageNumOpt.fontSize / pageLay.lay.scaleFactor, painter);
+                setFontPointSizeDPI(pageNumOpt.font, pageNumOpt.fontSize / pageLay.lay.premultipliedScaleFactor, painter);
             }
             pageLay.isFirstPage = false;
 
