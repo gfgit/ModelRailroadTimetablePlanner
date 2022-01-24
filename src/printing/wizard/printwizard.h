@@ -13,6 +13,8 @@ class SceneSelectionModel;
 class PrintWorker;
 class PrintProgressPage;
 
+class IGraphScene;
+
 namespace sqlite3pp {
 class database;
 }
@@ -24,6 +26,8 @@ public:
     PrintWizard(sqlite3pp::database &db, QWidget *parent = nullptr);
     ~PrintWizard();
 
+    bool validateCurrentPage() override;
+
     QPrinter *getPrinter() const;
 
     void setOutputType(Print::OutputType type);
@@ -33,6 +37,9 @@ public:
 
     Print::PrintBasicOptions getPrintOpt() const;
     void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
+
+    //Get first selected scene, ownership is passed to the caller
+    IGraphScene *getFirstScene();
 
     inline sqlite3pp::database& getDb() const { return mDb; }
 
@@ -44,7 +51,7 @@ protected:
     bool event(QEvent *e) override;
     void done(int result) override;
 
-public:
+private:
     void startPrintTask();
     void abortPrintTask();
     void handleProgressError(const QString& errMsg);

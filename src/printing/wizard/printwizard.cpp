@@ -5,6 +5,7 @@
 #include "progresspage.h"
 
 #include "sceneselectionmodel.h"
+#include "graph/model/linegraphscene.h"
 
 #include "printing/printworker.h"
 #include <QThreadPool>
@@ -85,6 +86,34 @@ PrintWizard::~PrintWizard()
     delete printer;
 }
 
+bool PrintWizard::validateCurrentPage()
+{
+    QWizardPage *curPage = currentPage();
+    if(!curPage)
+        return true;
+
+    if(!curPage->validatePage())
+        return false;
+
+    //NOTE: needed because when going back and then again forward
+    //initializePage() is not called again
+    //So we need to manually initialize again next page
+    int id = currentId();
+    if(id == 0)
+    {
+        //Setup PrintOptionsPage
+        PrintOptionsPage *optionsPage = static_cast<PrintOptionsPage *>(page(1));
+        optionsPage->setupPage();
+    }
+    else if(id == 1)
+    {
+        //After PrintOptionsPage start task
+        startPrintTask();
+    }
+
+    return true;
+}
+
 QPrinter *PrintWizard::getPrinter() const
 {
     return printer;
@@ -115,6 +144,20 @@ void PrintWizard::setPrintOpt(const Print::PrintBasicOptions &newPrintOpt)
 {
     printOpt = newPrintOpt;
     validatePrintOptions();
+}
+
+IGraphScene *PrintWizard::getFirstScene()
+{
+    if(!selectionModel->startIteration())
+        return nullptr;
+
+    SceneSelectionModel::Entry entry = selectionModel->getNextEntry();
+    if(!entry.objectId)
+        return nullptr;
+
+    LineGraphScene *scene = new LineGraphScene(mDb);
+    scene->loadGraph(entry.objectId, entry.type);
+    return scene;
 }
 
 bool PrintWizard::event(QEvent *e)
