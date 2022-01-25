@@ -325,8 +325,14 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
             QPen(Qt::black,   borderPenWidth, Qt::DashLine, Qt::FlatCap)
         };
 
-        //FIXME: allocate memory in advance
         QVector<QLineF> pageBordersVec[NPageColors];
+
+        //Try to allocate memory in advance
+        int allocCount = 4 * nLinesHoriz * nLinesVert / NPageColors;
+        if(allocCount < 4)
+            allocCount = 4;
+        for(int i = 0; i < NPageColors; i++)
+            pageBordersVec[i].reserve(allocCount);
 
         int vertPageColorGroup = firstPageVertBorder % NPageColors;
         int horizPageColorGroup = 0;
