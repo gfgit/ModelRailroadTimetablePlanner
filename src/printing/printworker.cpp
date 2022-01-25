@@ -422,9 +422,11 @@ bool PrintWorker::printPdf()
             writer->setCreator(AppDisplayName);
             writer->setTitle(title);
 
-            //If page layout is need set it
-            if(!printOpt.useOneFileForEachScene)
+            //If page layout is need set it before begin painting
+            //When printing each scene on single page we do not set a layout here
+            if(!printOpt.printSceneInOnePage)
                 writer->setPageLayout(m_printer->pageLayout());
+            qDebug() << "LAYOUT:" << writer->pageLayout();
         }
 
         //If custom page is needed set it before begin painting or adding page
