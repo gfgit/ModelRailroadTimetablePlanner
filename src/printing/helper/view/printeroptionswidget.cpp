@@ -24,6 +24,9 @@
 #include <QFileInfo>
 #include <QStandardPaths>
 
+#include "utils/files/recentdirstore.h"
+
+static const QLatin1String recentDirKey = QLatin1String("print_dir");
 
 PrinterOptionsWidget::PrinterOptionsWidget(QWidget *parent) :
     QWidget(parent),
@@ -60,6 +63,11 @@ void PrinterOptionsWidget::setOptions(const Print::PrintBasicOptions &printOpt)
     sceneInOnePageCheckBox->setChecked(printOpt.printSceneInOnePage);
     outputTypeCombo->setCurrentIndex(int(printOpt.outputType));
     updateOutputType();
+
+    if(printOpt.filePath.isEmpty())
+    {
+        pathEdit->setText(RecentDirStore::getDir(recentDirKey, RecentDirStore::Documents));
+    }
 }
 
 Print::PrintBasicOptions PrinterOptionsWidget::getOptions() const
@@ -89,6 +97,11 @@ bool PrinterOptionsWidget::validateOptions()
         {
             return false;
         }
+    }
+
+    if(!pathEdit->text().isEmpty())
+    {
+        RecentDirStore::setPath(recentDirKey, pathEdit->text());
     }
 
     return true;
@@ -251,37 +264,45 @@ void PrinterOptionsWidget::onOpenPageSetup()
     if(!m_printer)
         return;
 
+    QPageLayout pageLay;
+
     if(m_printer->outputFormat() == QPrinter::NativeFormat)
     {
         //Native dialog for native printer
         OwningQPointer<QPrintDialog> dlg = new QPrintDialog(m_printer, this);
         dlg->exec();
 
+        //Get after dialog finished
+        pageLay = m_printer->pageLayout();
+
         //Fix possible wrong page size
-        QPageLayout pageLay = m_printer->pageLayout();
         QPageSize pageSz = pageLay.pageSize();
         QPageLayout::Orientation orient = pageLay.orientation();
         pageSz = PrintHelper::fixPageSize(pageSz, orient);
         pageLay.setPageSize(pageSz);
         pageLay.setOrientation(orient);
-        m_printer->setPageLayout(pageLay);
     }
     else
     {
         //Custom dialog for PDF printer
         OwningQPointer<CustomPageSetupDlg> dlg = new CustomPageSetupDlg(this);
 
-        QPageLayout pageLay = m_printer->pageLayout();
+        pageLay = m_printer->pageLayout();
         dlg->setPageSize(pageLay.pageSize());
         dlg->setPageOrient(pageLay.orientation());
         if(dlg->exec() != QDialog::Accepted || !dlg)
             return;
 
-        //Update printer layout
+        //Update layout page size
         pageLay.setPageSize(dlg->getPageSize());
         pageLay.setOrientation(dlg->getPageOrient());
-        m_printer->setPageLayout(pageLay);
     }
+
+    //Update printer layout
+    m_printer->setPageLayout(pageLay);
+
+    //Apply page size to scene layout
+    PrintHelper::applyPageSize(pageLay.pageSize(), pageLay.orientation(), scenePageLay);
 }
 
 void PrinterOptionsWidget::onShowPreviewDlg()
