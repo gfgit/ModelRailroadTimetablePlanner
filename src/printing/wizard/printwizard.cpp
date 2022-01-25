@@ -190,6 +190,8 @@ bool PrintWizard::event(QEvent *e)
                 description = tr("Error");
             else if(ev->progress == PrintProgressEvent::ProgressAbortedByUser)
                 description = tr("Canceled");
+            else if(ev->progress == PrintProgressEvent::ProgressMaxFinished)
+                description = tr("Done!");
             else
                 description = tr("Printing %1...").arg(ev->descriptionOrError);
 
@@ -199,6 +201,11 @@ bool PrintWizard::event(QEvent *e)
             {
                 handleProgressError(ev->descriptionOrError);
             }
+
+            //When finished, disable Cancel button.
+            //Errors allow to go back and try again so do not consider them here
+            if(ev->progress == PrintProgressEvent::ProgressMaxFinished || ev->progress == PrintProgressEvent::ProgressAbortedByUser)
+                button(CancelButton)->setEnabled(false);
         }
 
         return true;
@@ -209,7 +216,12 @@ bool PrintWizard::event(QEvent *e)
 
 void PrintWizard::done(int result)
 {
-    if(result == QDialog::Rejected)
+    //When we finish, we disable Cancel button
+    //If finished do not prompt about aborting printing
+    //Tasks is already cleaned up
+    const bool printingFinished = !button(CancelButton)->isEnabled();
+
+    if(result == QDialog::Rejected && !printingFinished)
     {
         if(!isStoppingTask)
         {
