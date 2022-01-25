@@ -76,6 +76,9 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     printerPageLay.setMargins(QMarginsF());
     printer->setPageLayout(printerPageLay);
 
+    //Apply page size to scene layout
+    PrintHelper::applyPageSize(printerPageLay.pageSize(), printerPageLay.orientation(), scenePageLay);
+
     selectionModel = new SceneSelectionModel(mDb, this);
 
     setPage(0, new PrintSelectionPage(this));
