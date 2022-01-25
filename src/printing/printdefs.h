@@ -31,8 +31,8 @@ struct PrintBasicOptions
     OutputType outputType = Print::OutputType::Pdf;
     QString fileNamePattern;
     QString filePath;
-    bool useOneFileForEachScene = false;
-    bool printSceneInOnePage = true;
+    bool useOneFileForEachScene = true;
+    bool printSceneInOnePage = false;
 };
 
 }
