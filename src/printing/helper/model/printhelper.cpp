@@ -33,19 +33,39 @@ QPageSize PrintHelper::fixPageSize(const QPageSize &pageSz, QPageLayout::Orienta
     return pageSz;
 }
 
-void PrintHelper::updatePrinterResolution(double resolution, PageLayoutOpt &pageLay)
+void PrintHelper::applyPageSize(const QPageSize &pageSz, const QPageLayout::Orientation &orient, PageLayoutOpt &pageLay)
 {
-    //Update printer resolution
-    pageLay.printerResolution = resolution;
-    const double resolutionFactor = PrintHelper::PrinterDefaultResolution / pageLay.printerResolution;
-    pageLay.premultipliedScaleFactor = pageLay.originalScaleFactor * resolutionFactor;
+    QRect pointsRect = pageSz.rectPoints();
+
+    const bool shouldTranspose = (orient == QPageLayout::Portrait && pointsRect.width() > pointsRect.height())
+                                 || (orient == QPageLayout::Landscape && pointsRect.width() < pointsRect.height());
+
+    if(shouldTranspose)
+        pointsRect = pointsRect.transposed();
+
+    pageLay.pageRectPoints = pointsRect;
 }
 
-void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt &pageLay, QSizeF &outEffectivePageSize)
+void PrintHelper::initScaledLayout(PageLayoutScaled& scaledPageLay, const PageLayoutOpt &pageLay)
+{
+    scaledPageLay.lay = pageLay;
+
+    //Update printer resolution
+    double resolutionFactor = scaledPageLay.printerResolution / PrintHelper::PrinterDefaultResolution;
+
+    scaledPageLay.realScaleFactor = pageLay.sourceScaleFactor * resolutionFactor;
+
+    //Inverse scale for margins and pen to keep them independent
+    scaledPageLay.overlapMarginWidthScaled = pageLay.marginWidthPoints / pageLay.sourceScaleFactor;
+    scaledPageLay.pageMarginsPen.setWidthF(pageLay.pageMarginsPenWidthPoints / pageLay.sourceScaleFactor);
+}
+
+void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
+                                     QSizeF &outEffectivePageSizePoints)
 {
     QSizeF srcContentsSize;
     if(scene)
-        srcContentsSize = scene->getContentsSize() * pageLay.premultipliedScaleFactor;
+        srcContentsSize = scene->getContentsSize() * pageLay.sourceScaleFactor;
 
     //NOTE: do not shift by top left margin here
     //This is because it should not be counted when calculating page count
@@ -55,13 +75,14 @@ void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt &pageLay,
     //Apply overlap margin
     //Each page has 2 margin (left and right) and other 2 margins (top and bottom)
     //Calculate effective content size inside margins
-    outEffectivePageSize = pageLay.devicePageRect.size();
-    outEffectivePageSize.rwidth() -= 2 * pageLay.marginOriginalWidth;
-    outEffectivePageSize.rheight() -= 2 * pageLay.marginOriginalWidth;
+    const double sizeShrink = 2 * pageLay.marginWidthPoints;
+    outEffectivePageSizePoints = pageLay.pageRectPoints.size();
+    outEffectivePageSizePoints.rwidth() -= sizeShrink;
+    outEffectivePageSizePoints.rheight() -= sizeShrink;
 
     //Calculate page count, at least 1 page
-    pageLay.horizPageCnt = qMax(1, qCeil(srcContentsSize.width() / outEffectivePageSize.width()));
-    pageLay.vertPageCnt = qMax(1, qCeil(srcContentsSize.height() / outEffectivePageSize.height()));
+    pageLay.pageCountHoriz = qMax(1, qCeil(srcContentsSize.width() / outEffectivePageSizePoints.width()));
+    pageLay.pageCountVert = qMax(1, qCeil(srcContentsSize.height() / outEffectivePageSizePoints.height()));
 }
 
 bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGraphScene *scene, IProgress *progress,
@@ -71,46 +92,56 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
     if(!progress->reportProgressAndContinue(0, -1))
         return false;
 
-    if(!dev->needsInitForEachPage())
-    {
-        //Device was already inited
-        //Reset transformation on new scene
-        painter->resetTransform();
-    }
-
-    //Inverse scale for margins pen to keep it independent
-    pageLay.lay.pageMarginsPen.setWidthF(pageLay.lay.pageMarginsPenWidth / pageLay.lay.premultipliedScaleFactor);
-
     QSizeF effectivePageSize;
     calculatePageCount(scene, pageLay.lay, effectivePageSize);
+
+    //NOTE: effectivePageSize is in points, we need to scale by inverse of source scene
+    effectivePageSize /= pageLay.lay.sourceScaleFactor;
+
+    //Fix margins by half pen with so pen does not draw on over contents
+    const double marginCorrection = pageLay.pageMarginsPen.widthF() / 2.0;
 
     //Page info rect above top margin to draw page numbers
     QRectF pageNumbersRect(QPointF(pageLay.overlapMarginWidthScaled, 0),
                            QSizeF(effectivePageSize.width(), pageLay.overlapMarginWidthScaled));
+    if(pageLay.lay.marginWidthPoints < 8)
+        pageNumbersRect.setHeight(8.0 / pageLay.lay.sourceScaleFactor); //Minimum height
+
+    //Avoid overflowing text outside margins
+    double fontSizePt = qMin(pageNumOpt.fontSizePt, pageLay.lay.marginWidthPoints * 0.8);
+    if(fontSizePt < 5)
+        fontSizePt = 5; //Minimum font size
+
+    pageNumOpt.font.setPointSizeF(fontSizePt / pageLay.realScaleFactor);
 
     const QSizeF headerSize = scene->getHeaderSize();
 
-    if(!progress->reportProgressAndContinue(0, pageLay.lay.horizPageCnt + pageLay.lay.vertPageCnt))
+    if(!progress->reportProgressAndContinue(0, pageLay.lay.pageCountHoriz + pageLay.lay.pageCountVert))
         return false;
 
-    //Rect to paint on each page
-    QRectF sourceRect = pageLay.scaledPageRect;
+    //Rect to paint on each page (inverse scale of source)
+    QRectF sourceRect = QRectF(QPointF(), pageLay.lay.pageRectPoints.size() / pageLay.lay.sourceScaleFactor);
 
-    for(int y = 0; y < pageLay.lay.vertPageCnt; y++)
+    //Shift by top left page margins
+    const QPointF origin(pageLay.overlapMarginWidthScaled, pageLay.overlapMarginWidthScaled);
+    sourceRect.moveTopLeft(sourceRect.topLeft() - origin);
+
+    for(int y = 0; y < pageLay.lay.pageCountVert; y++)
     {
-        for(int x = 0; x < pageLay.lay.horizPageCnt; x++)
+        for(int x = 0; x < pageLay.lay.pageCountHoriz; x++)
         {
             //To avoid calling newPage() at end of loop
             //which would result in an empty extra page after last drawn page
-            dev->newPage(painter, pageLay.lay.devicePageRect, pageLay.isFirstPage);
+            dev->newPage(painter, pageLay.devicePageRectPixels, pageLay.isFirstPage);
             if(pageLay.isFirstPage || dev->needsInitForEachPage())
             {
-                //Apply scaling
-                painter->scale(pageLay.lay.premultipliedScaleFactor, pageLay.lay.premultipliedScaleFactor);
-                painter->translate(sourceRect.topLeft());
+                //Device might be already inited
+                //Reset transformation on new scene
+                painter->resetTransform();
 
-                //Inverse scale for page numbers font to keep it independent
-                setFontPointSizeDPI(pageNumOpt.font, pageNumOpt.fontSize / pageLay.lay.premultipliedScaleFactor, painter);
+                //Apply scaling
+                painter->scale(pageLay.realScaleFactor, pageLay.realScaleFactor);
+                painter->translate(origin);
             }
             pageLay.isFirstPage = false;
 
@@ -119,17 +150,23 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
             //we use sourceRect which is already transformed
             painter->setClipRect(sourceRect);
 
+            QRectF sceneRect = sourceRect;
+            if(sceneRect.left() < 0)
+                sceneRect.setLeft(0);
+            if(sceneRect.top() < 0)
+                sceneRect.setTop(0);
+
             //Render scene contets
-            scene->renderContents(painter, sourceRect);
+            scene->renderContents(painter, sceneRect);
 
             //Render horizontal header
-            QRectF horizHeaderRect = sourceRect;
+            QRectF horizHeaderRect = sceneRect;
             horizHeaderRect.moveTop(0);
             horizHeaderRect.setBottom(headerSize.height());
             scene->renderHeader(painter, horizHeaderRect, Qt::Horizontal, 0);
 
             //Render vertical header
-            QRectF vertHeaderRect = sourceRect;
+            QRectF vertHeaderRect = sceneRect;
             vertHeaderRect.moveLeft(0);
             vertHeaderRect.setRight(headerSize.width());
             scene->renderHeader(painter, vertHeaderRect, Qt::Vertical, 0);
@@ -137,20 +174,20 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
             if(pageLay.lay.drawPageMargins)
             {
                 //Draw a frame to help align printed pages
-                painter->setPen(pageLay.lay.pageMarginsPen);
+                painter->setPen(pageLay.pageMarginsPen);
                 QLineF arr[4] = {
                     //Top
-                    QLineF(sourceRect.left(),  sourceRect.top() + pageLay.overlapMarginWidthScaled,
-                           sourceRect.right(), sourceRect.top() + pageLay.overlapMarginWidthScaled),
+                    QLineF(sourceRect.left(),  sourceRect.top() + pageLay.overlapMarginWidthScaled - marginCorrection,
+                           sourceRect.right(), sourceRect.top() + pageLay.overlapMarginWidthScaled - marginCorrection),
                     //Bottom
-                    QLineF(sourceRect.left(),  sourceRect.bottom() - pageLay.overlapMarginWidthScaled,
-                           sourceRect.right(), sourceRect.bottom() - pageLay.overlapMarginWidthScaled),
+                    QLineF(sourceRect.left(),  sourceRect.bottom() - pageLay.overlapMarginWidthScaled + marginCorrection,
+                           sourceRect.right(), sourceRect.bottom() - pageLay.overlapMarginWidthScaled + marginCorrection),
                     //Left
-                    QLineF(sourceRect.left() + pageLay.overlapMarginWidthScaled, sourceRect.top(),
-                           sourceRect.left() + pageLay.overlapMarginWidthScaled, sourceRect.bottom()),
+                    QLineF(sourceRect.left() + pageLay.overlapMarginWidthScaled - marginCorrection, sourceRect.top(),
+                           sourceRect.left() + pageLay.overlapMarginWidthScaled - marginCorrection, sourceRect.bottom()),
                     //Right
-                    QLineF(sourceRect.right() - pageLay.overlapMarginWidthScaled, sourceRect.top(),
-                           sourceRect.right() - pageLay.overlapMarginWidthScaled, sourceRect.bottom())
+                    QLineF(sourceRect.right() - pageLay.overlapMarginWidthScaled + marginCorrection, sourceRect.top(),
+                           sourceRect.right() - pageLay.overlapMarginWidthScaled + marginCorrection, sourceRect.bottom())
                 };
                 painter->drawLines(arr, 4);
             }
@@ -160,8 +197,8 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
                 //Draw page numbers to help laying out printed pages
                 //Add +1 because loop starts from 0
                 const QString str = pageNumOpt.fmt
-                                        .arg(y + 1).arg(pageLay.lay.vertPageCnt)
-                                        .arg(x + 1).arg(pageLay.lay.horizPageCnt);
+                                        .arg(y + 1).arg(pageLay.lay.pageCountVert)
+                                        .arg(x + 1).arg(pageLay.lay.pageCountHoriz);
 
                 //Move to top left but separate a bit from left margin
                 pageNumbersRect.moveTop(sourceRect.top());
@@ -175,15 +212,15 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
             painter->translate(-effectivePageSize.width(), 0);
 
             //Report progress
-            if(!progress->reportProgressAndContinue(y * pageLay.lay.horizPageCnt + x,
-                                                     pageLay.lay.horizPageCnt + pageLay.lay.vertPageCnt))
+            if(!progress->reportProgressAndContinue(y * pageLay.lay.pageCountHoriz + x,
+                                                     pageLay.lay.pageCountHoriz + pageLay.lay.pageCountVert))
                 return false;
         }
 
         //Go down and back to left most column
         sourceRect.moveTop(sourceRect.top() + effectivePageSize.height());
-        painter->translate(sourceRect.left(), -effectivePageSize.height());
-        sourceRect.moveLeft(0);
+        painter->translate(sourceRect.left() + origin.x(), -effectivePageSize.height());
+        sourceRect.moveLeft(-origin.x());
     }
 
     //Reset to top most and left most

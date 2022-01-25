@@ -17,32 +17,35 @@ public:
     //Page Layout
     struct PageLayoutOpt
     {
-        //Device page rect is multiplied by printerResolution
-        QRectF devicePageRect;
-        double printerResolution = PrinterDefaultResolution;
+        QRectF pageRectPoints;
 
-        //Premultiplied originalScaleFactor for PrinterDefaultResolution/printerResolution
-        //This is needed to compensate devicePageRect which depends on printer resolution
-        double premultipliedScaleFactor = 1;
+        int pageCountHoriz = 0;
+        int pageCountVert = 0;
 
+        double sourceScaleFactor = 0.5;
+        double marginWidthPoints = 20;
 
-        double originalScaleFactor = 1;
-        double marginOriginalWidth = 20;
-
-        int horizPageCnt = 0;
-        int vertPageCnt = 0;
-
+        double pageMarginsPenWidthPoints = 7;
         bool drawPageMargins = true;
-        double pageMarginsPenWidth = 7;
-        QPen pageMarginsPen;
     };
 
     //Scaled values useful for printing
     struct PageLayoutScaled
     {
         PageLayoutOpt lay;
-        QRectF scaledPageRect;
-        double overlapMarginWidthScaled;
+
+        //Device page rect is multiplied by printerResolution
+        QRectF devicePageRectPixels;
+        double printerResolution = PrinterDefaultResolution;
+
+        //Premultiplied originalScaleFactor for PrinterDefaultResolution/printerResolution
+        //This is needed to compensate devicePageRect which depends on printer resolution
+        double realScaleFactor = 1;
+
+        double overlapMarginWidthScaled = 20;
+
+        QPen pageMarginsPen;
+
         bool isFirstPage = true;
     };
 
@@ -51,7 +54,7 @@ public:
     {
         QFont font;
         QString fmt;
-        double fontSize = 20;
+        double fontSizePt = 20;
         bool enable = true;
     };
 
@@ -76,11 +79,12 @@ public:
     };
 
     static QPageSize fixPageSize(const QPageSize& pageSz, QPageLayout::Orientation &orient);
+    static void applyPageSize(const QPageSize& pageSz, const QPageLayout::Orientation &orient, PageLayoutOpt& pageLay);
 
-    static void updatePrinterResolution(double resolution, PageLayoutOpt& pageLay);
+    static void initScaledLayout(PageLayoutScaled &scaledPageLay, const PageLayoutOpt &pageLay);
 
     static void calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
-                                   QSizeF &outEffectivePageSize);
+                                   QSizeF &outEffectivePageSizePoints);
 
     static bool printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGraphScene *scene, IProgress *progress,
                                 PageLayoutScaled &pageLay, PageNumberOpt& pageNumOpt);
