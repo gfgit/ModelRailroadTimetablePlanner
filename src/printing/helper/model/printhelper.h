@@ -45,8 +45,6 @@ public:
         double overlapMarginWidthScaled = 20;
 
         QPen pageMarginsPen;
-
-        bool isFirstPage = true;
     };
 
     //Page Numbers
@@ -76,6 +74,8 @@ public:
     public:
         virtual ~IProgress() {};
         virtual bool reportProgressAndContinue(int current, int max) = 0;
+
+        static const int ProgressSetMaximum = -1;
     };
 
     static QPageSize fixPageSize(const QPageSize& pageSz, QPageLayout::Orientation &orient);

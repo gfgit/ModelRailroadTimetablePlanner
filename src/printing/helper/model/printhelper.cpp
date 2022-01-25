@@ -88,10 +88,6 @@ void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
 bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGraphScene *scene, IProgress *progress,
                                   PageLayoutScaled &pageLay, PageNumberOpt &pageNumOpt)
 {
-    //Send initial progress
-    if(!progress->reportProgressAndContinue(0, -1))
-        return false;
-
     QSizeF effectivePageSize;
     calculatePageCount(scene, pageLay.lay, effectivePageSize);
 
@@ -116,7 +112,9 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
 
     const QSizeF headerSize = scene->getHeaderSize();
 
-    if(!progress->reportProgressAndContinue(0, pageLay.lay.pageCountHoriz + pageLay.lay.pageCountVert))
+    //Set maximum progress (= total page count)
+    if(progress && !progress->reportProgressAndContinue(IProgress::ProgressSetMaximum,
+                                                         pageLay.lay.pageCountHoriz * pageLay.lay.pageCountVert))
         return false;
 
     //Rect to paint on each page (inverse scale of source)
@@ -130,20 +128,23 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
     {
         for(int x = 0; x < pageLay.lay.pageCountHoriz; x++)
         {
+            const bool onFirstPage = x + y == 0;
             //To avoid calling newPage() at end of loop
             //which would result in an empty extra page after last drawn page
-            dev->newPage(painter, pageLay.devicePageRectPixels, pageLay.isFirstPage);
-            if(pageLay.isFirstPage || dev->needsInitForEachPage())
+            dev->newPage(painter, pageLay.devicePageRectPixels, onFirstPage);
+
+            if(dev->needsInitForEachPage() || onFirstPage)
             {
-                //Device might be already inited
-                //Reset transformation on new scene
+                //If on first page of current scene or need init for every page
+                //Reset painter transform because device might be already inited
                 painter->resetTransform();
 
                 //Apply scaling
                 painter->scale(pageLay.realScaleFactor, pageLay.realScaleFactor);
+
+                //Shift by inverse of top left page margins
                 painter->translate(origin);
             }
-            pageLay.isFirstPage = false;
 
             //Clipping must be set on every new page
             //Since clipping works in logical (QPainter) coordinates
@@ -212,8 +213,8 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
             painter->translate(-effectivePageSize.width(), 0);
 
             //Report progress
-            if(!progress->reportProgressAndContinue(y * pageLay.lay.pageCountHoriz + x,
-                                                     pageLay.lay.pageCountHoriz + pageLay.lay.pageCountVert))
+            if(progress && !progress->reportProgressAndContinue(y * pageLay.lay.pageCountHoriz + x,
+                                                                 pageLay.lay.pageCountHoriz * pageLay.lay.pageCountVert))
                 return false;
         }
 
