@@ -19,6 +19,8 @@
 
 #include <QFile>
 
+#include <QtMath>
+
 #include <QDebug>
 
 bool testFileIsWriteable(const QString& fileName, QString &errOut)
@@ -77,7 +79,7 @@ void PrintWorker::setSelection(SceneSelectionModel *newSelection)
 
 int PrintWorker::getMaxProgress() const
 {
-    return selection->getSelectionCount();
+    return selection->getSelectionCount() * ProgressStepsForScene;
 }
 
 void PrintWorker::setScenePageLay(const PrintHelper::PageLayoutOpt &pageLay)
@@ -162,7 +164,7 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         const QRectF sourceRect(QPointF(), scene->getContentsSize());
 
         //Send progress and description
-        sendEvent(new PrintProgressEvent(this, progressiveNum, scene->getGraphObjectName()), false);
+        sendEvent(new PrintProgressEvent(this, progressiveNum * ProgressStepsForScene, scene->getGraphObjectName()), false);
 
         bool valid = true;
         if(func)
@@ -198,10 +200,25 @@ class PrintWorkerProgress : public PrintHelper::IProgress
 public:
     bool reportProgressAndContinue(int current, int max) override
     {
-        //Cumulate progress with previous scenes FIXME: better logic
-        int totalMax = (progressiveNum + 5) * 10;
-        int progress = progressiveNum * 10 + (current * 10 / max);
-        return m_task->sendProgressOrAbort(progress, totalMax,
+        if(current == IProgress::ProgressSetMaximum)
+        {
+            //Begin a new scene
+            totalPages = max;
+            pageNum = 0;
+        }
+        else
+        {
+            //Add 1 because curren page is already finished
+            pageNum = current + 1;
+        }
+
+        //Calculate fraction of current scene
+        const double sceneFraction = double(pageNum * PrintWorker::ProgressStepsForScene) / double(totalPages);
+
+        //Calculate progress, completed scenes + fraction of current scene
+        const int progress = sceneNumber * PrintWorker::ProgressStepsForScene + qFloor(sceneFraction);
+
+        return m_task->sendProgressOrAbort(progress,
                                            m_scene ? m_scene->getGraphObjectName() : QString());
     }
 
@@ -209,22 +226,24 @@ public:
     PrintWorker *m_task = nullptr;
 
     LineGraphScene *m_scene = nullptr;
-    int progressiveNum = 0;
+    int pageNum = 0;
+    int totalPages = 0;
+    int sceneNumber = 0;
 };
 
-class PrinterImpl : public PrintHelper::IPagedPaintDevice
+class PagedDevImpl : public PrintHelper::IPagedPaintDevice
 {
 public:
-    PrinterImpl() :m_printer(nullptr) { m_needsInitForEachPage = false; }
+    PagedDevImpl() :m_dev(nullptr) { m_needsInitForEachPage = false; }
 
     bool newPage(QPainter *painter, const QRectF& brect, bool isFirstPage) override
     {
         if(!isFirstPage)
-            return m_printer->newPage();
+            return m_dev->newPage();
         return true;
     }
 public:
-    QPrinter *m_printer;
+    QPagedPaintDevice *m_dev;
 };
 
 bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage)
@@ -232,10 +251,9 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     PrintWorkerProgress progress;
     progress.m_task = this;
     progress.m_scene = nullptr;
-    progress.progressiveNum = 0;
+    progress.sceneNumber = 0;
 
-    PrinterImpl devImpl;
-    devImpl.m_printer = m_printer;
+    PagedDevImpl devImpl;
 
     QPainter painter;
 
@@ -251,24 +269,16 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     }
 
     scenePageLay.drawPageMargins = true;
-    scenePageLay.pageMarginsPenWidth = 5;
-    scenePageLay.pageMarginsPen = QPen(Qt::darkRed, scenePageLay.pageMarginsPenWidth);
-
-    //Calculate members
-    scenePageLay.devicePageRect = QRectF(QPointF(), QSizeF(m_printer->width(), m_printer->height()));
-
-    PrintHelper::PageLayoutScaled scenePageLayScale;
-    scenePageLayScale.lay = scenePageLay;
-    scenePageLayScale.scaledPageRect = QRectF(scenePageLay.devicePageRect.topLeft(),
-                                              scenePageLay.devicePageRect.size() / scenePageLay.scaleFactor);
-    scenePageLayScale.overlapMarginWidthScaled = scenePageLay.marginOriginalWidth / scenePageLay.scaleFactor;
-    scenePageLayScale.isFirstPage = true;
+    scenePageLay.pageMarginsPenWidthPoints = 3;
 
     PrintHelper::PageNumberOpt pageNumberOpt;
     pageNumberOpt.enable = true;
-    pageNumberOpt.fontSize = 20;
+    pageNumberOpt.fontSizePt = 20;
     pageNumberOpt.font.setBold(true);
     pageNumberOpt.fmt = QStringLiteral("Row: %1/%2 Col: %3/%4");
+
+    PrintHelper::PageLayoutScaled scenePageLayScale;
+    scenePageLayScale.pageMarginsPen = QPen(Qt::darkRed);
 
     while (true)
     {
@@ -291,31 +301,39 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
 
         //Send progress and description
         sendEvent(new PrintProgressEvent(this,
-                                         progress.progressiveNum,
+                                         progress.sceneNumber * ProgressStepsForScene,
                                          scene->getGraphObjectName()), false);
-
 
         const QRectF sceneRect(QPointF(), scene->getContentsSize());
         bool valid = true;
         if(func)
             valid = func(&painter, scene->getGraphObjectName(), sceneRect,
-                         entry.type, progress.progressiveNum);
+                         entry.type, progress.sceneNumber * ProgressStepsForScene);
         if(!valid)
             return false;
 
+        devImpl.m_dev = static_cast<QPagedPaintDevice *>(painter.device());
+
+        //Update printer resolution
+        scenePageLayScale.printerResolution = painter.device()->logicalDpiY();
+        scenePageLayScale.devicePageRectPixels = QRectF(0, 0, painter.device()->width(), painter.device()->height());
+        PrintHelper::initScaledLayout(scenePageLayScale, scenePageLay);
+
         PrintHelper::printPagedScene(&painter, &devImpl, scene, &progress,
                                      scenePageLayScale, pageNumberOpt);
+        //Reset transform after evert
+        painter.resetTransform();
 
         if(endPaintingEveryPage)
             painter.end();
 
-        progress.progressiveNum++;
+        progress.sceneNumber++;
     }
 
     return true;
 }
 
-bool PrintWorker::sendProgressOrAbort(int cur, int max, const QString &msg)
+bool PrintWorker::sendProgressOrAbort(int progress, const QString &msg)
 {
     if(wasStopped())
     {
@@ -326,8 +344,7 @@ bool PrintWorker::sendProgressOrAbort(int cur, int max, const QString &msg)
         return false;
     }
 
-    //Send progress and description FIXME: pass max?
-    sendEvent(new PrintProgressEvent(this, cur, msg), false);
+    sendEvent(new PrintProgressEvent(this, progress, msg), false);
     return true;
 }
 
@@ -383,71 +400,99 @@ bool PrintWorker::printSvg()
 
 bool PrintWorker::printPdf()
 {
-    m_printer->setOutputFormat(QPrinter::PdfFormat);
-    m_printer->setCreator(AppDisplayName);
-    m_printer->setDocName(QStringLiteral("Timetable Session"));
-
-    if(printOpt.useOneFileForEachScene)
-    {
-        return printPdfMultipleFiles();
-    }
-    else
-    {
-        m_printer->setOutputFileName(printOpt.filePath);
-        return printPaged();
-    }
-}
-
-bool PrintWorker::printPdfMultipleFiles()
-{
     std::unique_ptr<QPdfWriter> writer;
 
     auto beginPaint = [this, &writer](QPainter *painter,
                                       const QString& title, const QRectF& sourceRect,
                                       LineGraphType type, int progressiveNum) -> bool
     {
-        const QString fileName = Print::getFileName(printOpt.filePath, printOpt.fileNamePattern, QLatin1String(".pdf"),
-                                                    title, type, progressiveNum);
-        writer.reset(new QPdfWriter(fileName));
-        QPageSize ps(sourceRect.size(), QPageSize::Point);
-        writer->setPageSize(ps);
-
-
-        if(!painter->begin(writer.get()))
+        QString fileName = printOpt.filePath;
+        if(printOpt.useOneFileForEachScene)
         {
-            qWarning() << "PrintWorker::printPdfMultipleFiles(): cannot begin QPainter";
-
-            QString fileErr;
-            bool writable = testFileIsWriteable(fileName, fileErr);
-
-            QString msg;
-            if(!writable)
-            {
-                msg = PrintWizard::tr("PDF Error: cannot open output file.\n"
-                         "Path: \"%1\"\n"
-                         "Error: %2").arg(fileName, fileErr);
-            }
-            else
-            {
-                msg = PrintWizard::tr("PDF Error: generic error.");
-            }
-
-            //Send error and quit
-            sendEvent(new PrintProgressEvent(this,
-                                             PrintProgressEvent::ProgressError,
-                                             msg), true);
-            return false;
+            //File path is the base directory, build file name
+            fileName = Print::getFileName(printOpt.filePath, printOpt.fileNamePattern, QLatin1String(".pdf"),
+                                          title, type, progressiveNum);
         }
 
-        const double scaleX = writer->width() / sourceRect.width();
-        const double scaleY = writer->height() / sourceRect.height();
-        const double scale = qMin(scaleX, scaleY);
-        painter->scale(scale, scale);
+        if(printOpt.useOneFileForEachScene || progressiveNum == 0)
+        {
+            //First page of new scene, create a new PDF
+            writer.reset(new QPdfWriter(fileName));
+
+            writer->setCreator(AppDisplayName);
+            writer->setTitle(title);
+
+            //If page layout is need set it
+            if(!printOpt.useOneFileForEachScene)
+                writer->setPageLayout(m_printer->pageLayout());
+        }
+
+        //If custom page is needed set it before begin painting or adding page
+        if(printOpt.printSceneInOnePage)
+        {
+            //Calculate custom page size (inverse scale factor: Pixel -> Points)
+            QSizeF newSize = sourceRect.size() * PrintHelper::PrinterDefaultResolution / writer->resolution();
+            QPageSize ps(newSize, QPageSize::Point);
+            writer->setPageSize(ps);
+            writer->setPageMargins(QMarginsF());
+        }
+
+        if(printOpt.useOneFileForEachScene || progressiveNum == 0)
+        {
+            //First page of new scene, begin painting
+            if(!painter->begin(writer.get()))
+            {
+                qWarning() << "PrintWorker::printPdf(): cannot begin QPainter";
+
+                QString fileErr;
+                bool writable = testFileIsWriteable(fileName, fileErr);
+
+                QString msg;
+                if(!writable)
+                {
+                    msg = PrintWizard::tr("PDF Error: cannot open output file.\n"
+                                          "Path: \"%1\"\n"
+                                          "Error: %2").arg(fileName, fileErr);
+                }
+                else
+                {
+                    msg = PrintWizard::tr("PDF Error: generic error.");
+                }
+
+                //Send error and quit
+                sendEvent(new PrintProgressEvent(this,
+                                                 PrintProgressEvent::ProgressError,
+                                                 msg), true);
+                return false;
+            }
+        }
+        else
+        {
+            //New scene on same file, add page
+            if(!writer->newPage())
+            {
+                qWarning() << "PrintWorker::printPdf(): cannot add page";
+                return false;
+            }
+        }
+
+        if(printOpt.printSceneInOnePage)
+        {
+            //Scale painter to fix possible custom page size problems
+            int wt = writer->width();
+            int ht = writer->height();
+            const double scaleX = wt / sourceRect.width();
+            const double scaleY = ht / sourceRect.height();
+            const double scale = qMin(scaleX, scaleY);
+            painter->scale(scale, scale);
+        }
 
         return true;
     };
 
-    return printInternal(beginPaint, true);
+    if(printOpt.printSceneInOnePage)
+        return printInternal(beginPaint, printOpt.useOneFileForEachScene);
+    return printInternalPaged(beginPaint, printOpt.useOneFileForEachScene);
 }
 
 bool PrintWorker::printPaged()

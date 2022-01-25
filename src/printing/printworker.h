@@ -66,7 +66,6 @@ public:
 private:
     bool printSvg();
     bool printPdf();
-    bool printPdfMultipleFiles();
     bool printPaged();
 
 private:
@@ -78,7 +77,10 @@ private:
     bool printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage);
 
 public:
-    bool sendProgressOrAbort(int cur, int max, const QString& msg);
+    //For each scene, count 10 steps
+    static constexpr int ProgressStepsForScene = 10;
+
+    bool sendProgressOrAbort(int progress, const QString& msg);
 
 private:
     QPrinter *m_printer;
