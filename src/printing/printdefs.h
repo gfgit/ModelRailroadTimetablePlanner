@@ -2,7 +2,6 @@
 #define DEFS_H
 
 #include <QString>
-#include "graph/linegraphtypes.h"
 
 namespace Print {
 
@@ -24,7 +23,7 @@ const QLatin1String phProgressive = QLatin1String("%i");
 
 //Implemented in printwizard.cpp
 QString getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
-                    const QString& name, LineGraphType type, int i);
+                    const QString& name, const QString &type, int i);
 
 struct PrintBasicOptions
 {

@@ -5,14 +5,13 @@
 #include "progresspage.h"
 
 #include "sceneselectionmodel.h"
-#include "graph/model/linegraphscene.h"
 
 #include "printing/printworker.h"
 #include <QThreadPool>
 
+#include "utils/owningqpointer.h"
 #include <QMessageBox>
 #include <QPushButton>
-#include "utils/owningqpointer.h"
 
 #include <QPrinter>
 
@@ -33,7 +32,7 @@ QString Print::getOutputTypeName(Print::OutputType type)
 }
 
 QString Print::getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
-                           const QString& name, LineGraphType type, int i)
+                           const QString& name, const QString &type, int i)
 {
     QString result = pattern;
     if(result.contains(phNameUnderscore))
@@ -45,7 +44,7 @@ QString Print::getFileName(const QString& baseDir, const QString& pattern, const
     }
 
     result.replace(phNameKeepSpaces, name);
-    result.replace(phType, utils::getLineGraphTypeName(type));
+    result.replace(phType, type);
     result.replace(phProgressive, QString::number(i).rightJustified(2, '0'));
 
     if(!baseDir.endsWith('/'))
@@ -160,13 +159,12 @@ IGraphScene *PrintWizard::getFirstScene()
     if(!selectionModel->startIteration())
         return nullptr;
 
-    SceneSelectionModel::Entry entry = selectionModel->getNextEntry();
-    if(!entry.objectId)
+    IGraphSceneCollection::SceneItem item = selectionModel->getNextItem();
+    if(!item.scene)
         return nullptr;
 
-    LineGraphScene *scene = new LineGraphScene(mDb);
-    scene->loadGraph(entry.objectId, entry.type);
-    return scene;
+    selectionModel->takeOwnershipOfLastScene();
+    return item.scene;
 }
 
 bool PrintWizard::event(QEvent *e)
@@ -266,7 +264,7 @@ void PrintWizard::startPrintTask()
     printTask = new PrintWorker(mDb, this);
     printTask->setPrintOpt(printOpt);
     printTask->setScenePageLay(scenePageLay);
-    printTask->setSelection(selectionModel);
+    printTask->setCollection(selectionModel);
     printTask->setPrinter(printer);
 
     QThreadPool::globalInstance()->start(printTask);

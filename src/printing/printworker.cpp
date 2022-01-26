@@ -1,13 +1,9 @@
 #include "printworker.h"
 #include "printing/wizard/printwizard.h" //For translations and defs
-#include "printing/wizard/sceneselectionmodel.h"
 
 #include "printing/helper/model/printhelper.h"
-
-#include "app/session.h"
-
-#include "graph/model/linegraphscene.h"
-#include "graph/view/backgroundhelper.h"
+#include "printing/helper/model/igraphscenecollection.h"
+#include "utils/scene/igraphscene.h"
 
 #include <QPainter>
 
@@ -48,15 +44,16 @@ PrintProgressEvent::PrintProgressEvent(QRunnable *self, int pr, const QString &d
 }
 
 PrintWorker::PrintWorker(sqlite3pp::database &db, QObject *receiver) :
-    IQuittableTask(receiver)
+    IQuittableTask(receiver),
+    m_printer(nullptr),
+    m_collection(nullptr)
 {
-    scene = new LineGraphScene(db);
+
 }
 
 PrintWorker::~PrintWorker()
 {
-    delete scene;
-    scene = nullptr;
+
 }
 
 void PrintWorker::setPrinter(QPrinter *printer)
@@ -72,14 +69,14 @@ void PrintWorker::setPrintOpt(const Print::PrintBasicOptions &newPrintOpt)
         printOpt.filePath.chop(1); //Remove last slash
 }
 
-void PrintWorker::setSelection(SceneSelectionModel *newSelection)
+void PrintWorker::setCollection(IGraphSceneCollection *newCollection)
 {
-    selection = newSelection;
+    m_collection = newCollection;
 }
 
 int PrintWorker::getMaxProgress() const
 {
-    return selection->getSelectionCount() * ProgressStepsForScene;
+    return m_collection->getItemCount() * ProgressStepsForScene;
 }
 
 void PrintWorker::setScenePageLay(const PrintHelper::PageLayoutOpt &pageLay)
@@ -128,7 +125,7 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
 {
     QPainter painter;
 
-    if(!selection->startIteration())
+    if(!m_collection->startIteration())
     {
         //Send error and quit
         sendEvent(new PrintProgressEvent(this,
@@ -141,9 +138,6 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
 
     int progressiveNum = 0;
 
-    const int vertOffset = Session->vertOffset;
-    const int horizOffset = Session->horizOffset;
-
     while (true)
     {
         if(wasStopped())
@@ -154,37 +148,36 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
             return false;
         }
 
-        const SceneSelectionModel::Entry entry = selection->getNextEntry();
-        if(!entry.objectId)
+        const IGraphSceneCollection::SceneItem item = m_collection->getNextItem();
+        if(!item.scene)
             break; //Finished
 
-        if(!scene->loadGraph(entry.objectId, entry.type))
-            continue; //Loading error, skip
-
-        const QRectF sourceRect(QPointF(), scene->getContentsSize());
+        const QRectF sourceRect(QPointF(), item.scene->getContentsSize());
 
         //Send progress and description
-        sendEvent(new PrintProgressEvent(this, progressiveNum * ProgressStepsForScene, scene->getGraphObjectName()), false);
+        sendEvent(new PrintProgressEvent(this, progressiveNum * ProgressStepsForScene, item.name), false);
 
         bool valid = true;
         if(func)
-            valid = func(&painter, scene->getGraphObjectName(), sourceRect,
-                         entry.type, progressiveNum);
+            valid = func(&painter, item.name, sourceRect,
+                         item.type, progressiveNum);
         if(!valid)
             return false;
 
-        QRectF stationLabelRect = sourceRect;
-        stationLabelRect.setHeight(vertOffset - 5); //See LineGraphView::resizeHeaders()
+        //Render scene contets
+        item.scene->renderContents(&painter, sourceRect);
 
-        QRectF hourPanelRect = sourceRect;
-        hourPanelRect.setWidth(horizOffset - 5); //See LineGraphView::resizeHeaders()
+        //Render horizontal header
+        QRectF horizHeaderRect = sourceRect;
+        horizHeaderRect.moveTop(0);
+        horizHeaderRect.setBottom(item.scene->getHeaderSize().height());
+        item.scene->renderHeader(&painter, horizHeaderRect, Qt::Horizontal, 0);
 
-        BackgroundHelper::drawBackgroundHourLines(&painter, sourceRect);
-        BackgroundHelper::drawStations(&painter, scene, sourceRect);
-        BackgroundHelper::drawJobStops(&painter, scene, sourceRect, false);
-        BackgroundHelper::drawJobSegments(&painter, scene, sourceRect, false);
-        BackgroundHelper::drawStationHeader(&painter, scene, stationLabelRect);
-        BackgroundHelper::drawHourPanel(&painter, hourPanelRect);
+        //Render vertical header
+        QRectF vertHeaderRect = sourceRect;
+        vertHeaderRect.moveLeft(0);
+        vertHeaderRect.setRight(item.scene->getHeaderSize().width());
+        item.scene->renderHeader(&painter, vertHeaderRect, Qt::Vertical, 0);
 
         if(endPaintingEveryPage)
             painter.end();
@@ -218,17 +211,16 @@ public:
         //Calculate progress, completed scenes + fraction of current scene
         const int progress = sceneNumber * PrintWorker::ProgressStepsForScene + qFloor(sceneFraction);
 
-        return m_task->sendProgressOrAbort(progress,
-                                           m_scene ? m_scene->getGraphObjectName() : QString());
+        return m_task->sendProgressOrAbort(progress, name);
     }
 
 public:
     PrintWorker *m_task = nullptr;
 
-    LineGraphScene *m_scene = nullptr;
     int pageNum = 0;
     int totalPages = 0;
     int sceneNumber = 0;
+    QString name;
 };
 
 class PagedDevImpl : public PrintHelper::IPagedPaintDevice
@@ -250,14 +242,13 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
 {
     PrintWorkerProgress progress;
     progress.m_task = this;
-    progress.m_scene = nullptr;
     progress.sceneNumber = 0;
 
     PagedDevImpl devImpl;
 
     QPainter painter;
 
-    if(!selection->startIteration())
+    if(!m_collection->startIteration())
     {
         //Send error and quit
         sendEvent(new PrintProgressEvent(this,
@@ -290,25 +281,22 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
             return false;
         }
 
-        const SceneSelectionModel::Entry entry = selection->getNextEntry();
-        if(!entry.objectId)
+        const IGraphSceneCollection::SceneItem item = m_collection->getNextItem();
+        if(!item.scene)
             break; //Finished
 
-        if(!scene->loadGraph(entry.objectId, entry.type))
-            continue; //Loading error, skip
-
-        progress.m_scene = scene;
+        progress.name = item.name;
 
         //Send progress and description
         sendEvent(new PrintProgressEvent(this,
                                          progress.sceneNumber * ProgressStepsForScene,
-                                         scene->getGraphObjectName()), false);
+                                         item.name), false);
 
-        const QRectF sceneRect(QPointF(), scene->getContentsSize());
+        const QRectF sceneRect(QPointF(), item.scene->getContentsSize());
         bool valid = true;
         if(func)
-            valid = func(&painter, scene->getGraphObjectName(), sceneRect,
-                         entry.type, progress.sceneNumber * ProgressStepsForScene);
+            valid = func(&painter, item.name, sceneRect,
+                         item.type, progress.sceneNumber * ProgressStepsForScene);
         if(!valid)
             return false;
 
@@ -319,7 +307,7 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         scenePageLayScale.devicePageRectPixels = QRectF(0, 0, painter.device()->width(), painter.device()->height());
         PrintHelper::initScaledLayout(scenePageLayScale, scenePageLay);
 
-        PrintHelper::printPagedScene(&painter, &devImpl, scene, &progress,
+        PrintHelper::printPagedScene(&painter, &devImpl, item.scene, &progress,
                                      scenePageLayScale, pageNumberOpt);
         //Reset transform after evert
         painter.resetTransform();
@@ -356,7 +344,7 @@ bool PrintWorker::printSvg()
 
     auto beginPaint = [this, &svg, &docTitle, &descr](QPainter *painter,
                                                       const QString& title, const QRectF& sourceRect,
-                                                      LineGraphType type, int progressiveNum) -> bool
+                                                      const QString& type, int progressiveNum) -> bool
     {
         const QString fileName = Print::getFileName(printOpt.filePath, printOpt.fileNamePattern, QLatin1String(".svg"),
                                                     title, type, progressiveNum);
@@ -404,7 +392,7 @@ bool PrintWorker::printPdf()
 
     auto beginPaint = [this, &writer](QPainter *painter,
                                       const QString& title, const QRectF& sourceRect,
-                                      LineGraphType type, int progressiveNum) -> bool
+                                      const QString& type, int progressiveNum) -> bool
     {
         QString fileName = printOpt.filePath;
         if(printOpt.useOneFileForEachScene)
@@ -501,7 +489,7 @@ bool PrintWorker::printPaged()
 {
     auto beginPaint = [this](QPainter *painter,
                              const QString& title, const QRectF& sourceRect,
-                             LineGraphType type, int progressiveNum) -> bool
+                             const QString& type, int progressiveNum) -> bool
     {
         bool success = true;
         QString errMsg;

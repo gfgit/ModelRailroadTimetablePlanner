@@ -4,8 +4,6 @@
 #include "utils/thread/iquittabletask.h"
 #include "utils/worker_event_types.h"
 
-#include <QVector>
-
 #include "printdefs.h"
 
 #include "utils/types.h"
@@ -15,9 +13,7 @@
 class QPrinter;
 class QPainter;
 
-class SceneSelectionModel;
-
-class LineGraphScene;
+class IGraphSceneCollection;
 
 namespace sqlite3pp {
 class database;
@@ -55,7 +51,7 @@ public:
     inline Print::PrintBasicOptions getPrintOpt() const { return printOpt; };
     void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
 
-    void setSelection(SceneSelectionModel *newSelection);
+    void setCollection(IGraphSceneCollection *newCollection);
     int getMaxProgress() const;
 
     void setScenePageLay(const PrintHelper::PageLayoutOpt& pageLay);
@@ -71,7 +67,7 @@ private:
 private:
     typedef std::function<bool(QPainter *painter,
                                const QString& title, const QRectF& sourceRect,
-                               LineGraphType type, int progressiveNum)> BeginPaintFunc;
+                               const QString& type, int progressiveNum)> BeginPaintFunc;
 
     bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
     bool printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage);
@@ -87,9 +83,7 @@ private:
     Print::PrintBasicOptions printOpt;
     PrintHelper::PageLayoutOpt scenePageLay;
 
-    SceneSelectionModel *selection;
-
-    LineGraphScene *scene;
+    IGraphSceneCollection *m_collection;
 };
 
 #endif // PRINTWORKER_H
