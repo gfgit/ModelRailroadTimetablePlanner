@@ -1,6 +1,9 @@
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
 
+  printing/helper/model/igraphscenecollection.h
+  printing/helper/model/igraphscenecollection.cpp
+
   printing/helper/model/pagesizemodel.h
   printing/helper/model/pagesizemodel.cpp
 
