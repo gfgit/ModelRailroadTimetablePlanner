@@ -54,7 +54,7 @@ public:
     void setCollection(IGraphSceneCollection *newCollection);
     int getMaxProgress() const;
 
-    void setScenePageLay(const PrintHelper::PageLayoutOpt& pageLay);
+    void setScenePageLay(const Print::PageLayoutOpt& pageLay);
 
     //IQuittableTask
     void run() override;
@@ -81,7 +81,7 @@ public:
 private:
     QPrinter *m_printer;
     Print::PrintBasicOptions printOpt;
-    PrintHelper::PageLayoutOpt scenePageLay;
+    Print::PageLayoutOpt scenePageLay;
 
     IGraphSceneCollection *m_collection;
 };

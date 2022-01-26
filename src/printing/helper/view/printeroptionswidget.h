@@ -29,8 +29,8 @@ public:
     QPrinter *printer() const;
     void setPrinter(QPrinter *newPrinter);
 
-    PrintHelper::PageLayoutOpt getScenePageLay() const;
-    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+    Print::PageLayoutOpt getScenePageLay() const;
+    void setScenePageLay(const Print::PageLayoutOpt &newScenePageLay);
 
     IGraphScene *sourceScene() const;
     void setSourceScene(IGraphScene *newSourceScene);
@@ -67,7 +67,7 @@ private:
 
     IGraphScene *m_sourceScene;
 
-    PrintHelper::PageLayoutOpt scenePageLay;
+    Print::PageLayoutOpt scenePageLay;
 };
 
 #endif // PRINTEROPTIONSWIDGET_H

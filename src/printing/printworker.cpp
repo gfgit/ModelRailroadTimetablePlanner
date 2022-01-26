@@ -79,7 +79,7 @@ int PrintWorker::getMaxProgress() const
     return m_collection->getItemCount() * ProgressStepsForScene;
 }
 
-void PrintWorker::setScenePageLay(const PrintHelper::PageLayoutOpt &pageLay)
+void PrintWorker::setScenePageLay(const Print::PageLayoutOpt &pageLay)
 {
     scenePageLay = pageLay;
 }
@@ -152,7 +152,9 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         if(!item.scene)
             break; //Finished
 
-        const QRectF sourceRect(QPointF(), item.scene->getContentsSize());
+        QScopedPointer<IGraphScene> scenPtr(item.scene);
+
+        const QRectF sourceRect(QPointF(), scenPtr->getContentsSize());
 
         //Send progress and description
         sendEvent(new PrintProgressEvent(this, progressiveNum * ProgressStepsForScene, item.name), false);
@@ -165,19 +167,19 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
             return false;
 
         //Render scene contets
-        item.scene->renderContents(&painter, sourceRect);
+        scenPtr->renderContents(&painter, sourceRect);
 
         //Render horizontal header
         QRectF horizHeaderRect = sourceRect;
         horizHeaderRect.moveTop(0);
         horizHeaderRect.setBottom(item.scene->getHeaderSize().height());
-        item.scene->renderHeader(&painter, horizHeaderRect, Qt::Horizontal, 0);
+        scenPtr->renderHeader(&painter, horizHeaderRect, Qt::Horizontal, 0);
 
         //Render vertical header
         QRectF vertHeaderRect = sourceRect;
         vertHeaderRect.moveLeft(0);
         vertHeaderRect.setRight(item.scene->getHeaderSize().width());
-        item.scene->renderHeader(&painter, vertHeaderRect, Qt::Vertical, 0);
+        scenPtr->renderHeader(&painter, vertHeaderRect, Qt::Vertical, 0);
 
         if(endPaintingEveryPage)
             painter.end();
@@ -188,12 +190,12 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
     return true;
 }
 
-class PrintWorkerProgress : public PrintHelper::IProgress
+class PrintWorkerProgress : public Print::IProgress
 {
 public:
     bool reportProgressAndContinue(int current, int max) override
     {
-        if(current == IProgress::ProgressSetMaximum)
+        if(current == Print::IProgress::ProgressSetMaximum)
         {
             //Begin a new scene
             totalPages = max;
@@ -223,7 +225,7 @@ public:
     QString name;
 };
 
-class PagedDevImpl : public PrintHelper::IPagedPaintDevice
+class PagedDevImpl : public Print::IPagedPaintDevice
 {
 public:
     PagedDevImpl() :m_dev(nullptr) { m_needsInitForEachPage = false; }
@@ -262,13 +264,13 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
     scenePageLay.drawPageMargins = true;
     scenePageLay.pageMarginsPenWidthPoints = 3;
 
-    PrintHelper::PageNumberOpt pageNumberOpt;
+    Print::PageNumberOpt pageNumberOpt;
     pageNumberOpt.enable = true;
     pageNumberOpt.fontSizePt = 20;
     pageNumberOpt.font.setBold(true);
     pageNumberOpt.fmt = QStringLiteral("Row: %1/%2 Col: %3/%4");
 
-    PrintHelper::PageLayoutScaled scenePageLayScale;
+    Print::PageLayoutScaled scenePageLayScale;
     scenePageLayScale.pageMarginsPen = QPen(Qt::darkRed);
 
     while (true)
@@ -285,6 +287,8 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         if(!item.scene)
             break; //Finished
 
+        QScopedPointer<IGraphScene> scenPtr(item.scene);
+
         progress.name = item.name;
 
         //Send progress and description
@@ -292,7 +296,7 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
                                          progress.sceneNumber * ProgressStepsForScene,
                                          item.name), false);
 
-        const QRectF sceneRect(QPointF(), item.scene->getContentsSize());
+        const QRectF sceneRect(QPointF(), scenPtr->getContentsSize());
         bool valid = true;
         if(func)
             valid = func(&painter, item.name, sceneRect,
@@ -307,7 +311,7 @@ bool PrintWorker::printInternalPaged(BeginPaintFunc func, bool endPaintingEveryP
         scenePageLayScale.devicePageRectPixels = QRectF(0, 0, painter.device()->width(), painter.device()->height());
         PrintHelper::initScaledLayout(scenePageLayScale, scenePageLay);
 
-        PrintHelper::printPagedScene(&painter, &devImpl, item.scene, &progress,
+        PrintHelper::printPagedScene(&painter, &devImpl, scenPtr.data(), &progress,
                                      scenePageLayScale, pageNumberOpt);
         //Reset transform after evert
         painter.resetTransform();
@@ -421,7 +425,7 @@ bool PrintWorker::printPdf()
         if(printOpt.printSceneInOnePage)
         {
             //Calculate custom page size (inverse scale factor: Pixel -> Points)
-            QSizeF newSize = sourceRect.size() * PrintHelper::PrinterDefaultResolution / writer->resolution();
+            QSizeF newSize = sourceRect.size() * Print::PrinterDefaultResolution / writer->resolution();
             QPageSize ps(newSize, QPageSize::Point);
             writer->setPageSize(ps);
             writer->setPageMargins(QMarginsF());

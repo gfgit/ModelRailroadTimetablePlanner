@@ -128,12 +128,12 @@ void PrinterOptionsWidget::setPrinter(QPrinter *newPrinter)
     m_printer = newPrinter;
 }
 
-PrintHelper::PageLayoutOpt PrinterOptionsWidget::getScenePageLay() const
+Print::PageLayoutOpt PrinterOptionsWidget::getScenePageLay() const
 {
     return scenePageLay;
 }
 
-void PrinterOptionsWidget::setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay)
+void PrinterOptionsWidget::setScenePageLay(const Print::PageLayoutOpt &newScenePageLay)
 {
     scenePageLay = newScenePageLay;
 }
