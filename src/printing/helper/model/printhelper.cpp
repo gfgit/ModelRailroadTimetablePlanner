@@ -31,7 +31,7 @@ QPageSize PrintHelper::fixPageSize(const QPageSize &pageSz, QPageLayout::Orienta
     return pageSz;
 }
 
-void PrintHelper::applyPageSize(const QPageSize &pageSz, const QPageLayout::Orientation &orient, PageLayoutOpt &pageLay)
+void PrintHelper::applyPageSize(const QPageSize &pageSz, const QPageLayout::Orientation &orient, Print::PageLayoutOpt &pageLay)
 {
     QRect pointsRect = pageSz.rectPoints();
 
@@ -44,12 +44,12 @@ void PrintHelper::applyPageSize(const QPageSize &pageSz, const QPageLayout::Orie
     pageLay.pageRectPoints = pointsRect;
 }
 
-void PrintHelper::initScaledLayout(PageLayoutScaled& scaledPageLay, const PageLayoutOpt &pageLay)
+void PrintHelper::initScaledLayout(Print::PageLayoutScaled &scaledPageLay, const Print::PageLayoutOpt &pageLay)
 {
     scaledPageLay.lay = pageLay;
 
     //Update printer resolution
-    double resolutionFactor = scaledPageLay.printerResolution / PrintHelper::PrinterDefaultResolution;
+    double resolutionFactor = scaledPageLay.printerResolution / Print::PrinterDefaultResolution;
 
     scaledPageLay.realScaleFactor = pageLay.sourceScaleFactor * resolutionFactor;
 
@@ -58,7 +58,7 @@ void PrintHelper::initScaledLayout(PageLayoutScaled& scaledPageLay, const PageLa
     scaledPageLay.pageMarginsPen.setWidthF(pageLay.pageMarginsPenWidthPoints / pageLay.sourceScaleFactor);
 }
 
-void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
+void PrintHelper::calculatePageCount(IGraphScene *scene, Print::PageLayoutOpt &pageLay,
                                      QSizeF &outEffectivePageSizePoints)
 {
     QSizeF srcContentsSize;
@@ -83,8 +83,8 @@ void PrintHelper::calculatePageCount(IGraphScene *scene, PageLayoutOpt& pageLay,
     pageLay.pageCountVert = qMax(1, qCeil(srcContentsSize.height() / outEffectivePageSizePoints.height()));
 }
 
-bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGraphScene *scene, IProgress *progress,
-                                  PageLayoutScaled &pageLay, PageNumberOpt &pageNumOpt)
+bool PrintHelper::printPagedScene(QPainter *painter, Print::IPagedPaintDevice *dev, IGraphScene *scene, Print::IProgress *progress,
+                                  Print::PageLayoutScaled &pageLay, Print::PageNumberOpt &pageNumOpt)
 {
     QSizeF effectivePageSize;
     calculatePageCount(scene, pageLay.lay, effectivePageSize);
@@ -111,7 +111,7 @@ bool PrintHelper::printPagedScene(QPainter *painter, IPagedPaintDevice *dev, IGr
     const QSizeF headerSize = scene->getHeaderSize();
 
     //Set maximum progress (= total page count)
-    if(progress && !progress->reportProgressAndContinue(IProgress::ProgressSetMaximum,
+    if(progress && !progress->reportProgressAndContinue(Print::IProgress::ProgressSetMaximum,
                                                          pageLay.lay.pageCountHoriz * pageLay.lay.pageCountVert))
         return false;
 

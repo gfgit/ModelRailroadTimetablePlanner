@@ -8,6 +8,9 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   printing/printworker.h
   printing/printworker.cpp
 
+  printing/printworkerhandler.h
+  printing/printworkerhandler.cpp
+
   PARENT_SCOPE
 )
 
