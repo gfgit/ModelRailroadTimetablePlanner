@@ -62,7 +62,7 @@ private:
     sqlite3pp::database &mDb;
     SceneSelectionModel *selectionModel;
 
-    QPrinter *printer;
+    QPrinter *m_printer;
 
     PrintProgressPage *progressPage;
     PrintWorkerHandler *printTaskHandler;

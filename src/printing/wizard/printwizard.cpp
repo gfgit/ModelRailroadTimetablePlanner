@@ -122,7 +122,7 @@ bool Print::askUserToTryAgain(const QString& errMsg, QWidget *parent)
 PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     QWizard (parent),
     mDb(db),
-    printer(nullptr)
+    m_printer(nullptr)
 {
     printTaskHandler = new PrintWorkerHandler(mDb, this);
     connect(printTaskHandler, &PrintWorkerHandler::progressMaxChanged,
@@ -132,19 +132,19 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
     connect(printTaskHandler, &PrintWorkerHandler::progressFinished,
             this, &PrintWizard::handleProgressFinished);
 
-    printer = new QPrinter;
-    printer->setOutputFormat(QPrinter::PdfFormat);
+    m_printer = new QPrinter;
+    m_printer->setOutputFormat(QPrinter::PdfFormat);
 
     //Initialize to a default pattern
     Print::PrintBasicOptions printOpt;
     printOpt.fileNamePattern = Print::phType + QLatin1Char('_') + Print::phNameUnderscore;
-    printTaskHandler->setOptions(printOpt, printer);
+    printTaskHandler->setOptions(printOpt, m_printer);
 
     //Remove page margins
-    QPageLayout printerPageLay = printer->pageLayout();
+    QPageLayout printerPageLay = m_printer->pageLayout();
     printerPageLay.setMode(QPageLayout::FullPageMode);
     printerPageLay.setMargins(QMarginsF());
-    printer->setPageLayout(printerPageLay);
+    m_printer->setPageLayout(printerPageLay);
 
     //Apply page size to scene layout
     Print::PageLayoutOpt scenePageLay;
@@ -164,7 +164,7 @@ PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
 PrintWizard::~PrintWizard()
 {
     printTaskHandler->abortPrintTask();
-    delete printer;
+    delete m_printer;
 }
 
 bool PrintWizard::validateCurrentPage()
@@ -189,7 +189,7 @@ bool PrintWizard::validateCurrentPage()
     else if(id == 1)
     {
         //After PrintOptionsPage start task
-        printTaskHandler->startPrintTask(printer, selectionModel);
+        printTaskHandler->startPrintTask(m_printer, selectionModel);
     }
 
     return true;
@@ -197,14 +197,14 @@ bool PrintWizard::validateCurrentPage()
 
 QPrinter *PrintWizard::getPrinter() const
 {
-    return printer;
+    return m_printer;
 }
 
 void PrintWizard::setOutputType(Print::OutputType type)
 {
     Print::PrintBasicOptions printOpt = printTaskHandler->getOptions();
     printOpt.outputType = type;
-    printTaskHandler->setOptions(printOpt, printer);
+    printTaskHandler->setOptions(printOpt, m_printer);
 }
 
 Print::PageLayoutOpt PrintWizard::getScenePageLay() const
@@ -224,7 +224,7 @@ Print::PrintBasicOptions PrintWizard::getPrintOpt() const
 
 void PrintWizard::setPrintOpt(const Print::PrintBasicOptions &newPrintOpt)
 {
-    printTaskHandler->setOptions(newPrintOpt, printer);
+    printTaskHandler->setOptions(newPrintOpt, m_printer);
 }
 
 IGraphScene *PrintWizard::getFirstScene()
