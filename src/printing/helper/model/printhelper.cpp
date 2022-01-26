@@ -4,8 +4,6 @@
 
 #include <QPainter>
 
-#include "utils/font_utils.h"
-
 #include <QtMath>
 
 QPageSize PrintHelper::fixPageSize(const QPageSize &pageSz, QPageLayout::Orientation &orient)
