@@ -6,17 +6,20 @@
 
 #include "printing/printdefs.h"
 
-#include "printing/helper/model/printhelper.h"
-
 class QPrinter;
 class SceneSelectionModel;
-class PrintWorker;
+
+class PrintWorkerHandler;
 class PrintProgressPage;
 
 class IGraphScene;
 
 namespace sqlite3pp {
 class database;
+}
+
+namespace Print {
+struct PageLayoutOpt;
 }
 
 class PrintWizard : public QWizard
@@ -32,8 +35,8 @@ public:
 
     void setOutputType(Print::OutputType type);
 
-    PrintHelper::PageLayoutOpt getScenePageLay() const;
-    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+    Print::PageLayoutOpt getScenePageLay() const;
+    void setScenePageLay(const Print::PageLayoutOpt &newScenePageLay);
 
     Print::PrintBasicOptions getPrintOpt() const;
     void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
@@ -45,19 +48,15 @@ public:
 
     inline SceneSelectionModel* getSelectionModel() const { return selectionModel; }
 
-    inline bool taskRunning() const { return printTask; }
+    bool taskRunning() const;
 
 protected:
-    bool event(QEvent *e) override;
     void done(int result) override;
 
-private:
-    void startPrintTask();
-    void abortPrintTask();
-    void handleProgressError(const QString& errMsg);
-
-private:
-    void validatePrintOptions();
+private slots:
+    void progressMaxChanged(int max);
+    void progressChanged(int val, const QString& msg);
+    void handleProgressFinished(bool success, const QString& errMsg);
 
 private:
     sqlite3pp::database &mDb;
@@ -65,13 +64,8 @@ private:
 
     QPrinter *printer;
 
-    Print::PrintBasicOptions printOpt;
-    PrintHelper::PageLayoutOpt scenePageLay;
-
-
     PrintProgressPage *progressPage;
-    PrintWorker *printTask;
-    bool isStoppingTask;
+    PrintWorkerHandler *printTaskHandler;
 };
 
 #endif // PRINTWIZARD_H

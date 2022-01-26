@@ -3,6 +3,9 @@
 
 #include <QString>
 
+class QWidget;
+class QPrinter;
+
 namespace Print {
 
 enum class OutputType {
@@ -21,7 +24,7 @@ const QLatin1String phNameKeepSpaces = QLatin1String("%N");
 const QLatin1String phType = QLatin1String("%t");
 const QLatin1String phProgressive = QLatin1String("%i");
 
-//Implemented in printwizard.cpp
+//Implemented in printing/wizard/printwizard.cpp
 QString getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
                     const QString& name, const QString &type, int i);
 
@@ -33,6 +36,15 @@ struct PrintBasicOptions
     bool useOneFileForEachScene = true;
     bool printSceneInOnePage = false;
 };
+
+//Implemented in printing/wizard/printwizard.cpp
+void validatePrintOptions(PrintBasicOptions& printOpt, QPrinter *printer);
+
+//Implemented in printing/wizard/printwizard.cpp
+bool askUserToAbortPrinting(bool wasAlreadyStarted, QWidget *parent);
+
+//Implemented in printing/wizard/printwizard.cpp
+bool askUserToTryAgain(const QString& errMsg, QWidget *parent);
 
 }
 
