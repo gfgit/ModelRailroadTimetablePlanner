@@ -2,6 +2,7 @@
 #define SCENESELECTIONMODEL_H
 
 #include <QAbstractTableModel>
+#include "printing/helper/model/igraphscenecollection.h"
 
 #include <QVector>
 
@@ -10,7 +11,9 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
-class SceneSelectionModel : public QAbstractTableModel
+#include "utils/owningqpointer.h"
+
+class SceneSelectionModel : public QAbstractTableModel, public IGraphSceneCollection
 {
     Q_OBJECT
 
@@ -55,9 +58,11 @@ public:
     inline SelectionMode getMode() const { return selectionMode; }
     inline LineGraphType getSelectedType() const { return selectedType; }
 
-    qint64 getSelectionCount();
-    bool startIteration();
-    Entry getNextEntry();
+    // IGraphSceneCollection
+    qint64 getItemCount() override;
+    bool startIteration() override;
+    SceneItem getNextItem() override;
+    void takeOwnershipOfLastScene() override;
 
     static QString getModeName(SelectionMode mode);
 
@@ -69,6 +74,7 @@ public slots:
     void removeAll();
 
 private:
+    Entry getNextEntry();
     void keepOnlyType(LineGraphType type);
 
 private:
@@ -81,6 +87,8 @@ private:
 
     qint64 cachedCount;
     int iterationIdx;
+
+    OwningQPointer<IGraphScene> m_scene;
 };
 
 #endif // SCENESELECTIONMODEL_H
