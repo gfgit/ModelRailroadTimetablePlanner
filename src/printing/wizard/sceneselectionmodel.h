@@ -11,8 +11,6 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
-#include "utils/owningqpointer.h"
-
 class SceneSelectionModel : public QAbstractTableModel, public IGraphSceneCollection
 {
     Q_OBJECT
@@ -62,7 +60,6 @@ public:
     qint64 getItemCount() override;
     bool startIteration() override;
     SceneItem getNextItem() override;
-    void takeOwnershipOfLastScene() override;
 
     static QString getModeName(SelectionMode mode);
 
@@ -87,8 +84,6 @@ private:
 
     qint64 cachedCount;
     int iterationIdx;
-
-    OwningQPointer<IGraphScene> m_scene;
 };
 
 #endif // SCENESELECTIONMODEL_H

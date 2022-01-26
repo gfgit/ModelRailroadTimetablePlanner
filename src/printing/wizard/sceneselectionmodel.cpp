@@ -9,8 +9,7 @@ SceneSelectionModel::SceneSelectionModel(sqlite3pp::database &db, QObject *paren
     selectedType(LineGraphType::NoGraph),
     selectionMode(UseSelectedEntries),
     cachedCount(-1),
-    iterationIdx(-1),
-    m_scene(nullptr)
+    iterationIdx(-1)
 {
 }
 
@@ -215,27 +214,14 @@ IGraphSceneCollection::SceneItem SceneSelectionModel::getNextItem()
     if(!entry.objectId)
         return item;
 
-    if(!m_scene)
-    {
-        //First iteration or ownership was taken
-        //Create new scene without parent so ownership can be taken
-        m_scene = new LineGraphScene(mDb);
-    }
-
-    LineGraphScene *lineScene = static_cast<LineGraphScene *>(m_scene.data());
+    //Create new scene without parent so ownership is passed to caller
+    LineGraphScene *lineScene = new LineGraphScene(mDb);
     lineScene->loadGraph(entry.objectId, entry.type);
 
     item.scene = lineScene;
     item.name = lineScene->getGraphObjectName();
     item.type = utils::getLineGraphTypeName(entry.type);
     return item;
-}
-
-void SceneSelectionModel::takeOwnershipOfLastScene()
-{
-    //Clear scene so we do not delete it
-    //The caller is now responsible for deleting it
-    m_scene.clear();
 }
 
 QString SceneSelectionModel::getModeName(SelectionMode mode)
