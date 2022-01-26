@@ -186,12 +186,12 @@ void PrintPreviewSceneProxy::setViewScaleFactor(double newViewScaleFactor)
     }
 }
 
-PrintHelper::PageLayoutOpt PrintPreviewSceneProxy::getPageLay() const
+Print::PageLayoutOpt PrintPreviewSceneProxy::getPageLay() const
 {
     return m_pageLay;
 }
 
-void PrintPreviewSceneProxy::setPageLay(const PrintHelper::PageLayoutOpt &newPageLay)
+void PrintPreviewSceneProxy::setPageLay(const Print::PageLayoutOpt &newPageLay)
 {
     m_pageLay = newPageLay;
     updateSourceSizeAndRedraw();

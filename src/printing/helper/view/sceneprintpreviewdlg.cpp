@@ -111,7 +111,7 @@ void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
 
 void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
 {
-    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    Print::PageLayoutOpt pageLay = previewScene->getPageLay();
     if(qFuzzyCompare(pageLay.sourceScaleFactor, scaleFactor))
         return;
 
@@ -146,12 +146,12 @@ void ScenePrintPreviewDlg::setPrinterPageLay(const QPageLayout &pageLay)
     updateModelPageSize();
 }
 
-PrintHelper::PageLayoutOpt ScenePrintPreviewDlg::getScenePageLay() const
+Print::PageLayoutOpt ScenePrintPreviewDlg::getScenePageLay() const
 {
     return previewScene->getPageLay();
 }
 
-void ScenePrintPreviewDlg::setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay)
+void ScenePrintPreviewDlg::setScenePageLay(const Print::PageLayoutOpt &newScenePageLay)
 {
     previewScene->setPageLay(newScenePageLay);
 
@@ -181,7 +181,7 @@ void ScenePrintPreviewDlg::onScaleChanged(double zoom)
 
 void ScenePrintPreviewDlg::setMarginsWidth(double margins)
 {
-    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    Print::PageLayoutOpt pageLay = previewScene->getPageLay();
     if(qFuzzyCompare(pageLay.marginWidthPoints, margins))
         return;
 
@@ -230,7 +230,7 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
 
 void ScenePrintPreviewDlg::updatePageCount()
 {
-    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    Print::PageLayoutOpt pageLay = previewScene->getPageLay();
     const int totalCount = pageLay.pageCountVert * pageLay.pageCountHoriz;
     pageCountLabel->setText(tr("Rows: %1, Cols: %2, Total Pages: %3")
                                 .arg(pageLay.pageCountVert).arg(pageLay.pageCountHoriz).arg(totalCount));
@@ -238,7 +238,7 @@ void ScenePrintPreviewDlg::updatePageCount()
 
 void ScenePrintPreviewDlg::updateModelPageSize()
 {
-    PrintHelper::PageLayoutOpt pageLay = previewScene->getPageLay();
+    Print::PageLayoutOpt pageLay = previewScene->getPageLay();
 
     QPageSize pageSize = printerPageLay.pageSize();
     QPageLayout::Orientation pageOrient = printerPageLay.orientation();

@@ -41,8 +41,8 @@ public:
     inline QPageLayout getPrinterPageLay() const { return printerPageLay; }
     void setPrinterPageLay(const QPageLayout& pageLay);
 
-    PrintHelper::PageLayoutOpt getScenePageLay() const;
-    void setScenePageLay(const PrintHelper::PageLayoutOpt &newScenePageLay);
+    Print::PageLayoutOpt getScenePageLay() const;
+    void setScenePageLay(const Print::PageLayoutOpt &newScenePageLay);
 
 private slots:
     void updateZoomLevel(int zoom);

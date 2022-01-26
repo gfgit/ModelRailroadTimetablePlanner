@@ -21,8 +21,8 @@ public:
     double getViewScaleFactor() const;
     void setViewScaleFactor(double newViewScaleFactor);
 
-    PrintHelper::PageLayoutOpt getPageLay() const;
-    void setPageLay(const PrintHelper::PageLayoutOpt& newPageLay);
+    Print::PageLayoutOpt getPageLay() const;
+    void setPageLay(const Print::PageLayoutOpt& newPageLay);
 
 signals:
     void pageCountChanged();
@@ -37,7 +37,7 @@ private:
 
 private:
     IGraphScene *m_sourceScene;
-    PrintHelper::PageLayoutOpt m_pageLay;
+    Print::PageLayoutOpt m_pageLay;
     QSizeF effectivePageSize;
 
     double viewScaleFactor;
