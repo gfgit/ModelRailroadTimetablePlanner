@@ -148,7 +148,21 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
             return false;
         }
 
+        //Lock to access 'm_collection'
+        lockTask();
+        if(!m_collection)
+        {
+            unlockTask();
+
+            //Task cannot proceed without collection. Abort
+            sendEvent(new PrintProgressEvent(this,
+                                             PrintProgressEvent::ProgressAbortedByUser,
+                                             QString()), true);
+            return false;
+        }
         const IGraphSceneCollection::SceneItem item = m_collection->getNextItem();
+        unlockTask();
+
         if(!item.scene)
             break; //Finished
 
@@ -159,12 +173,22 @@ bool PrintWorker::printInternal(BeginPaintFunc func, bool endPaintingEveryPage)
         //Send progress and description
         sendEvent(new PrintProgressEvent(this, progressiveNum * ProgressStepsForScene, item.name), false);
 
-        bool valid = true;
         if(func)
+        {
+            bool valid = true;
+            //Callback might access 'this' pointer so lock
+            lockTask();
             valid = func(&painter, item.name, sourceRect,
                          item.type, progressiveNum);
-        if(!valid)
-            return false;
+            unlockTask();
+            if(!valid)
+                return false;
+        }
+        else
+        {
+            //Fake success to trigger sending finished event
+            return true;
+        }
 
         //Render scene contets
         scenPtr->renderContents(&painter, sourceRect);
