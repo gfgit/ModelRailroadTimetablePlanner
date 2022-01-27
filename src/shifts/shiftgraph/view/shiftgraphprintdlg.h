@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include "printing/printdefs.h"
+#include "printing/helper/model/printdefs.h"
 
 class PrinterOptionsWidget;
 class QDialogButtonBox;

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "printing/printdefs.h"
+#include "printing/helper/model/printdefs.h"
 #include "printing/helper/model/printhelper.h"
 
 class QCheckBox;

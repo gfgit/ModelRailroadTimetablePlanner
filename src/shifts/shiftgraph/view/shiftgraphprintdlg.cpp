@@ -14,7 +14,7 @@
 #include "utils/scene/igraphscene.h"
 
 #include <QPrinter>
-#include "printing/printworkerhandler.h"
+#include "printing/helper/model/printworkerhandler.h"
 
 #include "utils/files/openfileinfolder.h"
 

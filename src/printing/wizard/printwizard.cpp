@@ -6,7 +6,7 @@
 
 #include "sceneselectionmodel.h"
 
-#include "printing/printworkerhandler.h"
+#include "printing/helper/model/printworkerhandler.h"
 
 #include "utils/owningqpointer.h"
 #include <QMessageBox>

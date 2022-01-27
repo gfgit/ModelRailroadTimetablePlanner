@@ -1,6 +1,6 @@
 #include "printworkerhandler.h"
 
-#include "printing/printworker.h"
+#include "printing/helper/model/printworker.h"
 #include <QThreadPool>
 
 PrintWorkerHandler::PrintWorkerHandler(sqlite3pp::database &db, QObject *parent) :
