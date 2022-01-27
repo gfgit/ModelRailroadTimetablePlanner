@@ -1,12 +1,12 @@
 #ifndef LINEGRAPHSCENE_H
 #define LINEGRAPHSCENE_H
 
-#include <QObject>
+#include "utils/scene/igraphscene.h"
+
 #include <QVector>
 #include <QHash>
 
 #include <QPointF>
-#include <QSize>
 
 #include "utils/types.h"
 
@@ -21,16 +21,21 @@ class database;
 /*!
  * \brief Class to store line information
  *
- * Stores information to draw railway content in a LineGraphView
+ * Reimplement IGraphScene for railway line graph
+ * Stores information to draw railway contents in a LineGraphView
  *
  * \sa LineGraphManager
  * \sa LineGraphView
  */
-class LineGraphScene : public QObject
+class LineGraphScene : public IGraphScene
 {
     Q_OBJECT
 public:
     LineGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
+
+    void renderContents(QPainter *painter, const QRectF& sceneRect) override;
+    void renderHeader(QPainter *painter, const QRectF& sceneRect,
+                      Qt::Orientation orient, double scroll) override;
 
     /*!
      * \brief Load graph contents
@@ -58,6 +63,14 @@ public:
     bool reloadJobs();
 
     /*!
+     * \brief update header size
+     *
+     * Updates header size from settings valuse.
+     * \sa MRTPSettings
+     */
+    void updateHeaderSize();
+
+    /*!
      * \brief Get job at graph position
      *
      * \param pos Point in scene coordinates
@@ -80,11 +93,6 @@ public:
         return graphObjectName;
     }
 
-    inline QSize getContentSize() const
-    {
-        return contentSize;
-    }
-
     /*!
      * \brief get selected job
      *
@@ -105,17 +113,26 @@ public:
     void setSelectedJob(JobStopEntry stop, bool sendChange = true);
 
     /*!
-     * \brief activate scene
-     * \param self a pointer to LineGraphScene instance
+     * \brief getDrawSelection
+     * \return true if selection is drawn
      *
-     * For scenes registered on a LineGraphManager, this tells
-     * our instance is now the active one and will therefore receive
-     * user requests to show items
+     * When true and a Job is selected, it gets a semi transparent aurea
+     * around it's line to make it more visible
      *
-     * \sa LineGraphManager::setActiveScene()
-     * \sa sceneActivated()
+     * \sa setDrawSelection()
      */
-    inline void activateScene() { emit sceneActivated(this); }
+    inline bool getDrawSelection() { return m_drawSelection; }
+
+    /*!
+     * \brief setDrawSelection
+     * \param val true if needs to draw selection
+     *
+     * Sets scene option. You must manually redraw graph
+     * by calling \ref renderContents() or emitting \ref redrawGraph()
+     *
+     * \sa getDrawSelection()
+     */
+    inline void setDrawSelection(bool val) { m_drawSelection = val; }
 
     /*!
      * \brief requestShowZone
@@ -135,7 +152,6 @@ public:
 
 signals:
     void graphChanged(int type, db_id objectId, LineGraphScene *self);
-    void redrawGraph();
 
     /*!
      * \brief job selected
@@ -148,21 +164,6 @@ signals:
      * \sa setSelectedJob()
      */
     void jobSelected(db_id jobId, int category, db_id stopId);
-
-    /*!
-     * \brief Signal for activation
-     * \param self a pointer to LineGraphScene instance
-     *
-     * \sa activateScene()
-     */
-    void sceneActivated(LineGraphScene *self);
-
-    /*!
-     * \brief request LineGraphView to show this rect
-     *
-     * The view will ensure this rect is visible
-     */
-    void requestShowRect(const QRectF& rect);
 
 public slots:
     /*!
@@ -231,7 +232,7 @@ private:
      * \brief Recalculate and store content size
      *
      * Stores cached calculated size of the graph.
-     * It depends on settings like station offset
+     * It depends on settings like station offset.
      * \sa MRTPSettings
      */
     void recalcContentSize();
@@ -309,19 +310,13 @@ private:
     QHash<db_id, StationGraphObject> stations;
 
     /*!
-     * \brief Graph size
-     *
-     * Caches calculated size of the graph.
-     * So it doesn't need to be recalculated for scrollbars and printing
-     */
-    QSize contentSize;
-
-    /*!
      * \brief Job selection
      *
      * Caches selected job item ID
      */
     JobStopEntry selectedJob;
+
+    bool m_drawSelection;
 };
 
 #endif // LINEGRAPHSCENE_H

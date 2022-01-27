@@ -4,19 +4,16 @@
 #include "utils/thread/iquittabletask.h"
 #include "utils/worker_event_types.h"
 
-#include <QVector>
-
 #include "printdefs.h"
 
 #include "utils/types.h"
 
+#include "printing/helper/model/printhelper.h"
+
 class QPrinter;
 class QPainter;
-class QRectF;
 
-class SceneSelectionModel;
-
-class LineGraphScene;
+class IGraphSceneCollection;
 
 namespace sqlite3pp {
 class database;
@@ -51,12 +48,13 @@ public:
 
     void setPrinter(QPrinter *printer);
 
-    void setOutputType(Print::OutputType type);
-    void setFileOutput(const QString &value, bool different);
-    void setFilePattern(const QString &newFilePatter);
+    inline Print::PrintBasicOptions getPrintOpt() const { return printOpt; };
+    void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
 
-    void setSelection(SceneSelectionModel *newSelection);
+    void setCollection(IGraphSceneCollection *newCollection);
     int getMaxProgress() const;
+
+    void setScenePageLay(const Print::PageLayoutOpt& pageLay);
 
     //IQuittableTask
     void run() override;
@@ -64,26 +62,28 @@ public:
 private:
     bool printSvg();
     bool printPdf();
-    bool printPdfMultipleFiles();
     bool printPaged();
 
 private:
     typedef std::function<bool(QPainter *painter,
                                const QString& title, const QRectF& sourceRect,
-                               LineGraphType type, int progressiveNum)> BeginPaintFunc;
+                               const QString& type, int progressiveNum)> BeginPaintFunc;
 
     bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
+    bool printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage);
+
+public:
+    //For each scene, count 10 steps
+    static constexpr int ProgressStepsForScene = 10;
+
+    bool sendProgressOrAbort(int progress, const QString& msg);
 
 private:
     QPrinter *m_printer;
-    SceneSelectionModel *selection;
+    Print::PrintBasicOptions printOpt;
+    Print::PageLayoutOpt scenePageLay;
 
-    QString fileOutput;
-    QString filePattern;
-    bool differentFiles;
-    Print::OutputType outType;
-
-    LineGraphScene *scene;
+    IGraphSceneCollection *m_collection;
 };
 
 #endif // PRINTWORKER_H

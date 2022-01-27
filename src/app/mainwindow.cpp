@@ -30,7 +30,7 @@
 
 #include "db_metadata/meetinginformationdialog.h"
 
-#include "printing/printwizard.h"
+#include "printing/wizard/printwizard.h"
 
 #ifdef ENABLE_USER_QUERY
 #include "sqlconsole/sqlconsole.h"
@@ -852,21 +852,21 @@ void MainWindow::onRemoveJob()
 void MainWindow::onPrint()
 {
     OwningQPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
-    wizard->setOutputType(Print::Native);
+    wizard->setOutputType(Print::OutputType::Native);
     wizard->exec();
 }
 
 void MainWindow::onPrintPDF()
 {
     OwningQPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
-    wizard->setOutputType(Print::Pdf);
+    wizard->setOutputType(Print::OutputType::Pdf);
     wizard->exec();
 }
 
 void MainWindow::onExportSvg()
 {
     OwningQPointer<PrintWizard> wizard = new PrintWizard(Session->m_Db, this);
-    wizard->setOutputType(Print::Svg);
+    wizard->setOutputType(Print::OutputType::Svg);
     wizard->exec();
 }
 

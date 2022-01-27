@@ -1,5 +1,7 @@
 #include "sceneselectionmodel.h"
 
+#include "graph/model/linegraphscene.h"
+
 SceneSelectionModel::SceneSelectionModel(sqlite3pp::database &db, QObject *parent) :
     QAbstractTableModel(parent),
     mDb(db),
@@ -134,7 +136,7 @@ void SceneSelectionModel::setMode(SelectionMode mode, LineGraphType type)
     emit selectionCountChanged();
 }
 
-qint64 SceneSelectionModel::getSelectionCount()
+qint64 SceneSelectionModel::getItemCount()
 {
     if(cachedCount >= 0)
         return cachedCount;
@@ -204,6 +206,49 @@ bool SceneSelectionModel::startIteration()
     return ret == SQLITE_OK;
 }
 
+IGraphSceneCollection::SceneItem SceneSelectionModel::getNextItem()
+{
+    SceneItem item;
+
+    Entry entry = getNextEntry();
+    if(!entry.objectId)
+        return item;
+
+    //Create new scene without parent so ownership is passed to caller
+    LineGraphScene *lineScene = new LineGraphScene(mDb);
+    lineScene->loadGraph(entry.objectId, entry.type);
+
+    item.scene = lineScene;
+    item.name = lineScene->getGraphObjectName();
+    item.type = utils::getLineGraphTypeName(entry.type);
+    return item;
+}
+
+QString SceneSelectionModel::getModeName(SelectionMode mode)
+{
+    switch (mode)
+    {
+    case UseSelectedEntries:
+        return tr("Select items");
+    case AllOfTypeExceptSelected:
+        return tr("All except selected items");
+    default:
+        break;
+    }
+    return QString();
+}
+
+void SceneSelectionModel::removeAll()
+{
+    beginResetModel();
+    entries.clear();
+    entries.squeeze();
+    endResetModel();
+
+    cachedCount = -1;
+    emit selectionCountChanged();
+}
+
 SceneSelectionModel::Entry SceneSelectionModel::getNextEntry()
 {
     Entry entry{0, QString(), selectedType};
@@ -252,31 +297,6 @@ SceneSelectionModel::Entry SceneSelectionModel::getNextEntry()
     }
 
     return entry;
-}
-
-QString SceneSelectionModel::getModeName(SelectionMode mode)
-{
-    switch (mode)
-    {
-    case UseSelectedEntries:
-        return tr("Select items");
-    case AllOfTypeExceptSelected:
-        return tr("All except selected items");
-    default:
-        break;
-    }
-    return QString();
-}
-
-void SceneSelectionModel::removeAll()
-{
-    beginResetModel();
-    entries.clear();
-    entries.squeeze();
-    endResetModel();
-
-    cachedCount = -1;
-    emit selectionCountChanged();
 }
 
 void SceneSelectionModel::keepOnlyType(LineGraphType type)

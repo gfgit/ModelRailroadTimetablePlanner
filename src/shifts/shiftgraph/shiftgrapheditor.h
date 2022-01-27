@@ -10,8 +10,6 @@ class QToolBar;
 class ShiftGraphView;
 class ShiftGraphScene;
 
-class QPainter;
-
 class ShiftGraphEditor : public QWidget
 {
     Q_OBJECT
@@ -19,17 +17,12 @@ public:
     ShiftGraphEditor(QWidget *parent = nullptr);
     virtual ~ShiftGraphEditor();
 
-    void exportSVG(const QString &fileName);
-    void exportPDF(const QString &fileName);
-
 private slots:
     void redrawGraph();
 
-    void onSaveGraph();
-    void onPrintGraph();
-
-private:
-    void renderGraph(QPainter *painter);
+    void exportSVG();
+    void exportPDF();
+    void printGraph();
 
 private:
     QToolBar *toolBar;

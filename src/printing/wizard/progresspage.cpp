@@ -5,8 +5,6 @@
 #include <QProgressBar>
 #include <QVBoxLayout>
 
-#include "printworker.h"
-
 PrintProgressPage::PrintProgressPage(PrintWizard *w, QWidget *parent) :
     QWizardPage(parent),
     mWizard(w)

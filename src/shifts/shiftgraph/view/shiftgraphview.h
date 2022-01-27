@@ -1,76 +1,31 @@
 #ifndef SHIFTGRAPHVIEW_H
 #define SHIFTGRAPHVIEW_H
 
-#include <QAbstractScrollArea>
+#include "utils/scene/basicgraphview.h"
 
-class ShiftGraphScene;
-
-class ShiftGraphNameHeader;
-class ShiftGraphHourPanel;
-
-class ShiftGraphView : public QAbstractScrollArea
+/*!
+ * \brief BasicGraphView subclass to display a ShiftGraphScene
+ *
+ * A custom view to render ShiftGraphScene contents.
+ * Moving the mouse cursor on the contents, tooltips will be shown.
+ * Right clicking on a Job shows context menu.
+ *
+ * \sa ShiftGraphScene
+ */
+class ShiftGraphView : public BasicGraphView
 {
     Q_OBJECT
 public:
     explicit ShiftGraphView(QWidget *parent = nullptr);
 
-    ShiftGraphScene *scene() const;
-    void setScene(ShiftGraphScene *newScene);
-
-    inline int getZoomLevel() const { return mZoom; }
-
-    QPointF mapToScene(const QPointF& pos, bool *ok = nullptr);
-
-signals:
-    void zoomLevelChanged(int zoom);
-
-public slots:
-    /*!
-     * \brief Triggers graph redrawing
-     *
-     * \sa updateScrollBars()
-     */
-    void redrawGraph();
-
-    void setZoomLevel(int zoom);
-
 protected:
     /*!
-     * \brief React to layout and style change
+     * \brief Show Tooltips and context menu
      *
-     * On layout and style change update scroll bars
-     * \sa updateScrollBars()
-     */
-    bool event(QEvent *e) override;
-
-    /*!
-     * \brief Show Tooltips
-     *
-     * Show tooltips on viewport
-     * \sa LineGraphScene::getJobAt()
+     * Show tooltips on viewport and context menu
+     * \sa ShiftGraphScene::getJobAt()
      */
     bool viewportEvent(QEvent *e) override;
-
-    void paintEvent(QPaintEvent *e) override;
-    void resizeEvent(QResizeEvent *) override;
-
-private slots:
-    void onSceneDestroyed();
-    void resizeHeaders();
-
-private:
-    /*!
-     * \brief Update scrollbar size
-     */
-    void updateScrollBars();
-
-private:
-    ShiftGraphNameHeader *shiftHeader;
-    ShiftGraphHourPanel *hourPanel;
-
-    ShiftGraphScene *m_scene;
-
-    int mZoom;
 };
 
 #endif // SHIFTGRAPHVIEW_H

@@ -6,33 +6,13 @@
 #include "utils/jobcategorystrings.h"
 
 #include <QPainter>
+#include "utils/font_utils.h"
 
 #include <QtMath>
 
 #include <QDebug>
 
-/*!
- * \brief Set font point size
- * \param font
- * \param val the value of font size to set
- * \param p the QPainter which will draw
- *
- * This function is needed because each QPaintDevice has different resolution (DPI)
- * The default value is 72 dots per inch (DPI)
- * But for example QPdfWriter default is 1200,
- * QPrinter default is 300 an QWidget depends on the screen,
- * so it depends on Operating System display settings.
- *
- * To avoid differences between screen contents and printed output we
- * rescale font sizes as it would be if DPI was 72
- */
-inline void setFontPointSizeDPI(QFont &font, int val, QPainter *p)
-{
-    const qreal pointSize = val * 72.0 / qreal(p->device()->logicalDpiY());
-    font.setPointSizeF(pointSize);
-}
-
-void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, double verticalScroll)
+void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect)
 {
     //TODO: settings
     QFont hourTextFont;
@@ -49,7 +29,7 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, doub
     //qDebug() << "Drawing hours..." << rect << scroll;
     const QString fmt(QStringLiteral("%1:00"));
 
-    const qreal top = verticalScroll - vertOffset;
+    const qreal top = rect.top() - vertOffset;
     const qreal bottom = rect.bottom();
 
     int h = qFloor(top / hourOffset);
@@ -59,7 +39,7 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect, doub
     QRectF labelRect = rect;
     labelRect.setWidth(labelRect.width() * 0.9);
     labelRect.setHeight(hourOffset);
-    labelRect.moveTop(h * hourOffset - verticalScroll + vertOffset - hourOffset / 2);
+    labelRect.moveTop(h * hourOffset + vertOffset - hourOffset / 2);
 
     for(; h <= 24 && labelRect.top() <= bottom; h++)
     {
@@ -86,31 +66,36 @@ void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &
     if(x1 > x2 || b < vertOffset || t > b)
         return;
 
-    qreal f = std::remainder(t - vertOffset, hourOffset);
+    int firstH = qCeil((t - vertOffset) / hourOffset);
+    int lastH = qFloor((b - vertOffset) / hourOffset);
 
-    if(f < 0)
-        f += hourOffset;
-    qreal f1 = qFuzzyIsNull(f) ? vertOffset : qMax(t - f + hourOffset, vertOffset);
+    if(firstH > 24 || lastH < 0)
+        return;
 
+    if(firstH < 0)
+        firstH = 0;
+    if(lastH > 24)
+        lastH = 24;
 
-    const qreal l = std::remainder(b - vertOffset, hourOffset);
-    const qreal l1 = b - l;
+    const int n = lastH - firstH + 1;
+    if(n <= 0)
+        return;
 
-    std::size_t n = std::size_t((l1 - f1)/hourOffset) + 1;
+    qreal y = vertOffset + firstH * hourOffset;
 
     QLineF *arr = new QLineF[n];
-    for(std::size_t i = 0; i < n; i++)
+    for(int i = 0; i < n; i++)
     {
-        arr[i] = QLineF(x1, f1, x2, f1);
-        f1 += hourOffset;
+        arr[i] = QLineF(x1, y, x2, y);
+        y += hourOffset;
     }
 
     painter->setPen(hourLinePen);
-    painter->drawLines(arr, int(n));
+    painter->drawLines(arr, n);
     delete [] arr;
 }
 
-void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF &rect, double horizontalScroll)
+void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
 {
     QFont stationFont;
     stationFont.setBold(true);
@@ -140,10 +125,10 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
 
     for(auto st : qAsConst(scene->stations))
     {
-        const double left = st.xPos + leftOffset - horizontalScroll;
+        const double left = st.xPos + leftOffset;
         const double right = left + st.platforms.count() * platformOffset + stationOffset;
 
-        if(right <= 0 || left >= r.width())
+        if(right < r.left() || left >= r.right())
             continue; //Skip station, it's not visible
 
         QRectF labelRect = r;
@@ -231,6 +216,7 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
 void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
 {
     const double platfOffset = Session->platformOffset;
+    const double stationOffset = Session->stationOffset;
 
     QFont jobNameFont;
     setFontPointSizeDPI(jobNameFont, 20, painter);
@@ -266,7 +252,11 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
         const double left = st.xPos;
         const double right = left + st.platforms.count() * platfOffset;
 
-        if(left > rect.right() || right < rect.left())
+        //Set a maximum right edge to Job labels
+        //This allows to determine if they have to be drawn
+        const double maxJobLabelX = right + stationOffset;
+
+        if(left > rect.right() || maxJobLabelX < rect.left())
             continue; //Skip station, it's not visible
 
         top.rx() = bottom.rx() = st.xPos;
@@ -314,7 +304,11 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                 if(jobStop.drawLabel)
                 {
                     const QString jobName = JobCategoryName::jobName(jobStop.stop.jobId, jobStop.stop.category);
-                    QRectF r(top.x() + platfOffset / 2, top.y(), platfOffset * 4, 25);
+
+                    //Put label a bit to the left in respect to the stop arrival point
+                    //Calculate width so it doesn't go after maxJobLabelX
+                    const qreal topWithMargin = top.x() + platfOffset / 2;
+                    QRectF r(topWithMargin, top.y(), maxJobLabelX - topWithMargin, 25);
                     painter->drawText(r, jobName, textOption);
                 }
             }

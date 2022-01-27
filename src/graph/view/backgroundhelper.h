@@ -8,22 +8,20 @@ class QPainter;
 class LineGraphScene;
 
 /*!
- * \brief Helper class to render LineGraphView contents
+ * \brief Helper class to render LineGraphScene contents
  *
  * Contains static helper functions to draw each part of the view
  *
- * \sa LineGraphView
- * \sa HourPanel
- * \sa StationLabelsHeader
+ * \sa LineGraphScene
  */
 class BackgroundHelper
 {
 public:
-    static void drawHourPanel(QPainter *painter, const QRectF& rect, double verticalScroll);
+    static void drawHourPanel(QPainter *painter, const QRectF& rect);
 
     static void drawBackgroundHourLines(QPainter *painter, const QRectF& rect);
 
-    static void drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF& rect, double horizontalScroll);
+    static void drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
 
     static void drawStations(QPainter *painter, LineGraphScene *scene, const QRectF& rect);
 

@@ -59,7 +59,7 @@ PrintSelectionPage::PrintSelectionPage(PrintWizard *w, QWidget *parent) :
 
 bool PrintSelectionPage::isComplete() const
 {
-    const qint64 count = mWizard->getSelectionModel()->getSelectionCount();
+    const qint64 count = mWizard->getSelectionModel()->getItemCount();
     return count > 0;
 }
 
@@ -103,7 +103,7 @@ void PrintSelectionPage::updateComboBoxesFromModel()
 
 void PrintSelectionPage::updateSelectionCount()
 {
-    const qint64 count = mWizard->getSelectionModel()->getSelectionCount();
+    const qint64 count = mWizard->getSelectionModel()->getItemCount();
     statusLabel->setText(tr("%1 items selected.").arg(count));
 
     emit completeChanged();

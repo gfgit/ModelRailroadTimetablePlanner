@@ -26,10 +26,12 @@ public:
     void setScene(LineGraphScene *scene);
 
     /*!
-     * \brief listen to focus events
+     * \brief listen to focus events and to slider double click
      *
      * If a children widget gets focus events we do not know it
      * So we install an event filter on every children and listen
+     *
+     * When \ref zoomSlider gets double clicked, reset zoom to 100%
      *
      * \sa focusInEvent()
      */
