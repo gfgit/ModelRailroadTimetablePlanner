@@ -33,6 +33,8 @@
 #include "utils/delegates/sql/customcompletionlineedit.h"
 #include "shifts/shiftcombomodel.h"
 
+#include <QMenu>
+
 JobPathEditor::JobPathEditor(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::JobPathEditor),
@@ -56,11 +58,16 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     ui->categoryCombo->setCurrentIndex(-1);
 
     ShiftComboModel *shiftComboModel = new ShiftComboModel(Session->m_Db, this);
-    shiftCustomCombo = new CustomCompletionLineEdit(shiftComboModel);
-    ui->verticalLayout->insertWidget(ui->verticalLayout->indexOf(ui->categoryCombo) + 1, shiftCustomCombo);
+    shiftCombo = new CustomCompletionLineEdit(shiftComboModel);
+
+    //Get Catecory combo position and insert shift below
+    int categoryRow = 0;
+    QFormLayout::ItemRole unusedRole;
+    ui->formLayout->getWidgetPosition(ui->categoryCombo, &categoryRow, &unusedRole);
+    ui->formLayout->insertRow(categoryRow + 1, tr("Shift:"), shiftCombo);
 
     stopModel = new StopModel(Session->m_Db, this);
-    connect(shiftCustomCombo, &CustomCompletionLineEdit::dataIdChanged, stopModel, &StopModel::setNewShiftId);
+    connect(shiftCombo, &CustomCompletionLineEdit::dataIdChanged, stopModel, &StopModel::setNewShiftId);
     ui->view->setModel(stopModel);
 
     delegate = new StopDelegate(Session->m_Db, this);
@@ -546,7 +553,7 @@ void JobPathEditor::onCategoryChanged(int newCat)
 
 void JobPathEditor::onJobShiftChanged(db_id shiftId)
 {
-    shiftCustomCombo->setData(shiftId);
+    shiftCombo->setData(shiftId);
 
     if(shiftId)
     {
@@ -597,7 +604,7 @@ void JobPathEditor::setReadOnly(bool readOnly)
 
     ui->jobIdSpin->setReadOnly(m_readOnly);
     ui->categoryCombo->setDisabled(m_readOnly);
-    shiftCustomCombo->setDisabled(m_readOnly);
+    shiftCombo->setDisabled(m_readOnly);
 
     ui->buttonBox->setVisible(!m_readOnly);
 

@@ -3,10 +3,6 @@
 
 #include <QDialog>
 
-#include <QSet>
-
-#include <QMenu>
-
 #include "utils/types.h"
 
 class StopDelegate;
@@ -93,7 +89,7 @@ private:
 private:
     Ui::JobPathEditor *ui;
 
-    CustomCompletionLineEdit *shiftCustomCombo;
+    CustomCompletionLineEdit *shiftCombo;
 
     StopModel *stopModel;
     StopDelegate *delegate;
