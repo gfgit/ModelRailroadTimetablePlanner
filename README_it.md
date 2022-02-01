@@ -11,7 +11,7 @@ By Filippo Gentile
 
 ## Screenshots
 
-![Screenshot di ModelRailroadTimetablePlanner](Screenshot_it.png "ModelRailroadTimetablePlanner Screenshot")
+![Screenshot di ModelRailroadTimetablePlanner](screenshots/Screenshot_it.png "ModelRailroadTimetablePlanner Screenshot")
 
 ## Obiettivi
 
