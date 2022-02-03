@@ -2,7 +2,7 @@
 
 [English version](README.md)
 
-Precedenteme noto come **TrainTimetable**
+Precedentemente noto come **TrainTimetable**
 
 Un programma multipiattaforma C++ con GUI Qt (interfaccia grafica) per creare orari di treni per plastici ferroviari.
 *Attualmente testato su Windows e Ubuntu.*
@@ -21,17 +21,17 @@ suggeriscano all'utente azioni utili al fine di
 velocizzare la creazione di tabelle orarie.
 
 Il programma si prefigge di produrre tutta la documentazione
-per condurre e gestire i treni su grandi tracciati come nei FREMO Meetings.
+per condurre e gestire i treni su grandi tracciati come nei FREMO Meeting.
 
 ## Principali funzioni
 - Interfaccia disponibile in: Inglese, Italiano
 - Grafico orario ferroviario per ogni linea in SVG, PDF o stampato
-- Raggruppa servizi (treni) in turni lavorativi 
-- Esporta libretti in ODT (Libreoffice Writer) per turni e stazioni
+- Raggruppa servizi (treni) in turni lavorativi
+- Esporta libretti in ODT (LibreOffice Writer) per turni e stazioni
 - Importazione del materiale rotabile da altre sessioni o fogli di calcolo ODS Spreadsheet
 
 ## Storia del progetto
-Lo sviluppo è partito come piccolo progetto hobbystico nel 2016,
+Lo sviluppo è partito come piccolo progetto hobbistico nel 2016,
 in collaborazione con organizzazioni FREMO italiane.
 È stato completamente riscritto a causa di instabilità e limitazioni nella struttura interna.
 Da allora è cresciuto inaspettatamente.
