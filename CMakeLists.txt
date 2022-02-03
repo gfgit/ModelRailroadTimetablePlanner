@@ -115,29 +115,7 @@ if(BUILD_DOXYGEN)
     find_package(Doxygen)
 endif()
 
-
-#Locate windeployqt
-if(WIN32 AND RUN_WINDEPLOYQT AND NOT WINDEPLOYQT_EXE)
-    set(WINDEPLOYQT_EXE_TMP NOTFOUND)
-    message("Searching windeployqt executable")
-    if(QT_QMAKE_EXECUTABLE)
-        get_filename_component(WINDEPLOYQT_DIR ${QT_QMAKE_EXECUTABLE} DIRECTORY)
-        set(WINDEPLOYQT_EXE_TMP "${WINDEPLOYQT_DIR}/windeployqt.exe")
-    endif()
-    if(NOT EXISTS ${WINDEPLOYQT_EXE_TMP} AND Qt5_DIR)
-        get_filename_component(WINDEPLOYQT_EXE_TMP "${Qt5_DIR}/../../../bin/windeployqt.exe" REALPATH)
-    endif()
-
-    if(EXISTS ${WINDEPLOYQT_EXE_TMP})
-        message("Found ${WINDEPLOYQT_EXE_TMP}")
-    else()
-        message("windeployqt NOT FOUND")
-        set(WINDEPLOYQT_EXE_TMP NOTFOUND)
-    endif()
-    set(WINDEPLOYQT_EXE ${WINDEPLOYQT_EXE_TMP} CACHE FILEPATH "windeployqt executable file path.")
-    unset(WINDEPLOYQT_EXE_TMP)
-    unset(WINDEPLOYQT_DIR)
-endif()
+include(LocateWinDeployQt)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 

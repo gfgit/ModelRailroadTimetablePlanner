@@ -1,50 +1,7 @@
 
 include(GNUInstallDirs)
 
-function(get_dll_library_from_import_library LIB_VAR OUT_VAR)
-    # Locate DLL file
-    # Sometimes we link to import libraries '*.dll.a' or '*.lib'
-    # When installing we need the real '*.dll' file
-    # Try to locate it in same directory or in library path
-
-    get_filename_component(TEMP_EXT ${LIB_VAR} EXT)
-
-    if(${TEMP_EXT} MATCHES ".dll.a" OR ${TEMP_EXT} MATCHES ".lib")
-        # Get filename without extension and then add '.dll'
-        get_filename_component(TEMP_NAME ${LIB_VAR} NAME_WE)
-        set(TEMP_NAME "${TEMP_NAME}.dll")
-
-        # Get file path
-        get_filename_component(TEMP_PATH ${LIB_VAR} DIRECTORY)
-
-        # Try new file in same path
-        set(TEMP_PATH "${TEMP_PATH}/${TEMP_NAME}")
-
-        if(NOT EXISTS ${TEMP_PATH})
-            # Doesn't exist, try to find it in other directory, same name
-            # Searche also in CMAKE_LIBRARY_PATH which is not used by default in find_file(...)
-            find_file(TEMP_PATH_2 NAMES ${TEMP_NAME} PATHS ${CMAKE_LIBRARY_PATH})
-            set(TEMP_PATH ${TEMP_PATH_2})
-
-            # find_file caches the variable but this causes problems
-            # with subsequent calls reading old value instead of finding a new file
-            unset(TEMP_PATH_2 CACHE)
-            unset(TEMP_PATH_2)
-        endif()
-
-        unset(TEMP_NAME)
-
-    elseif(${TEMP_EXT} MATCHES ".dll")
-        # Library is already a *.dll, use it directly
-        set(TEMP_PATH ${LIB_VAR})
-    endif()
-
-    set("${OUT_VAR}" ${TEMP_PATH} PARENT_SCOPE)
-
-    unset(TEMP_PATH)
-    unset(TEMP_EXT)
-endfunction()
-
+include(DLL_Utils)
 
 #Set Win32 resources
 if (WIN32)
@@ -183,78 +140,6 @@ if (WIN32)
         )
 endif()
 
-## Enable Crashpad if found
-#if (GoogleCrashpad_FOUND)
-#  set(OLIVE_DEFINITIONS ${OLIVE_DEFINITIONS} USE_CRASHPAD)
-
-#  target_include_directories(
-#    ${OLIVE_TARGET}
-#    PRIVATE
-#    ${CRASHPAD_INCLUDE_DIRS}
-#  )
-
-#  target_link_libraries(
-#    ${OLIVE_TARGET}
-#    PRIVATE
-#    ${CRASHPAD_LIBRARIES}
-#  )
-
-#  set(OLIVE_CRASH_TARGET "olive-crashhandler")
-
-#  set(OLIVE_CRASH_SOURCES
-#    dialog/crashhandler/crashhandler.h
-#    dialog/crashhandler/crashhandler.cpp
-#    dialog/crashhandler/crashhandlermain.cpp
-#  )
-
-#  if (WIN32)
-#    add_executable(
-#      ${OLIVE_CRASH_TARGET}
-#      WIN32
-#      ${OLIVE_CRASH_SOURCES}
-#    )
-#  else()
-#    add_executable(
-#      ${OLIVE_CRASH_TARGET}
-#      ${OLIVE_CRASH_SOURCES}
-#    )
-#  endif()
-
-#  target_include_directories(
-#    ${OLIVE_CRASH_TARGET}
-#    PRIVATE
-#    ${CRASHPAD_INCLUDE_DIRS}
-#    )
-
-#  target_link_libraries(
-#    ${OLIVE_CRASH_TARGET}
-#    PRIVATE
-#    Qt5::Core
-#    Qt5::Gui
-#    Qt5::Widgets
-#    Qt5::Network
-#    ${CRASHPAD_LIBRARIES}
-#  )
-
-#  set(CRASHPAD_HANDLER "crashpad_handler${CMAKE_EXECUTABLE_SUFFIX}")
-#  set(MINIDUMP_STACKWALK "minidump_stackwalk${CMAKE_EXECUTABLE_SUFFIX}")
-
-#  if(UNIX AND NOT APPLE)
-#    install(TARGETS ${OLIVE_CRASH_TARGET} RUNTIME DESTINATION bin)
-#    install(PROGRAMS ${CRASHPAD_LIBRARY_DIRS}/${CRASHPAD_HANDLER} DESTINATION bin)
-#    install(PROGRAMS ${BREAKPAD_BIN_DIR}/${MINIDUMP_STACKWALK} DESTINATION bin)
-#  endif()
-
-#  if(APPLE)
-#    # Move crash handler executables inside Mac app bundle
-#    add_custom_command(TARGET ${OLIVE_CRASH_TARGET} POST_BUILD
-#      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${OLIVE_CRASH_TARGET} $<TARGET_FILE_DIR:${OLIVE_TARGET}>
-#      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CRASHPAD_LIBRARY_DIRS}/${CRASHPAD_HANDLER} $<TARGET_FILE_DIR:${OLIVE_TARGET}>
-#      COMMAND ${CMAKE_COMMAND} -E copy_if_different ${BREAKPAD_BIN_DIR}/${MINIDUMP_STACKWALK} $<TARGET_FILE_DIR:${OLIVE_TARGET}>
-#    )
-#  endif()
-#endif()
-
 # Set compiler definitions
 target_compile_definitions(${MR_TIMETABLE_PLANNER_TARGET} PRIVATE ${MR_TIMETABLE_PLANNER_DEFINITIONS})
 
@@ -340,21 +225,21 @@ if(WIN32)
     install(PROGRAMS ${LibZip_LIBRARY_TO_INSTALL} DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     if(RUN_WINDEPLOYQT)
-        if(NOT WINDEPLOYQT_EXE)
-            message(FATAL_ERROR "In order to run windeployqt you must first set th exe path in WINDEPLOYQT_EXE")
+        if(NOT TARGET windeployqt_exe)
+            message(FATAL_ERROR "In order to run windeployqt you must first set the exe path in WINDEPLOYQT_EXE_DIR")
         endif()
 
         # Use [[...]] to delay variable expansion
         install(CODE "
-            message(STATUS \"Running windeployqt ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
-            execute_process(COMMAND ${WINDEPLOYQT_EXE} ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
+            message(STATUS \"Running windeployqt ${windeployqt_exe} ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}\")
+            execute_process(COMMAND ${windeployqt_exe} ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
                 WORKING_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}
                 OUTPUT_VARIABLE WINDEPLOYQT_EXE_RESULT
                 ERROR_VARIABLE WINDEPLOYQT_EXE_RESULT)
 
             message(STATUS \"${WINDEPLOYQT_EXE_RESULT}\")
 
-            message(STATUS \"windeployqt Done.\")
+            message(STATUS \"${windeployqt_exe} Done.\")
             ")
     endif()
 endif()
