@@ -2,7 +2,7 @@
 
 ModelRailroadTimetablePlanner uses CMake build system.
 
-CMake Minimun Version: **3.5**
+CMake Minimum Version: **3.5**
 
 
 ## Dependencies
@@ -31,7 +31,7 @@ CMake Minimun Version: **3.5**
 
 - Install Qt 5:
   >`sudo apt install qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools`
-    
+
 - Install SQLite 3
   >`sudo apt install libsqlite3-dev`
 
@@ -40,7 +40,7 @@ CMake Minimun Version: **3.5**
 
 - Install zlib
   > NOTE: automatically installed if installing libzip
-  
+
   >`sudo apt install zlib1g-dev`
 
 
@@ -75,7 +75,7 @@ import libraries `*.dll.a`.
 To manually create an import library from a `*.dll` and associated `*.def` file, go to library directory and run:  
 > `dlltool --dllname sqlite3.dll --def sqlite3.def --output-lib sqlite3.dll.a`  
 
-For more informations see [DLL Import Library Tool](https://www.willus.com/mingw/colinp/win32/tools/dlltool.html)  
+For more information see [DLL Import Library Tool](https://www.willus.com/mingw/colinp/win32/tools/dlltool.html)  
 
 ## Compile
 
@@ -105,7 +105,7 @@ For more informations see [DLL Import Library Tool](https://www.willus.com/mingw
 
 - Run
   > `mrtplanner`
-  
+
   > NOTE: the location depends on where you installed the program  
   >       Look at `CMAKE_INSTALL_PREFIX` variable
 
