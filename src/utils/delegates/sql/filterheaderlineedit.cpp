@@ -109,6 +109,6 @@ void FilterHeaderLineEdit::contextMenuEvent(QContextMenuEvent *e)
     QAction *firstAction = menu->actions().value(0, nullptr);
     menu->insertAction(firstAction, actionFilterNull);
     if(firstAction)
-        menu->insertSeparator(actionFilterNull);
+        menu->insertSeparator(firstAction);
     menu->popup(e->globalPos());
 }

@@ -6,7 +6,6 @@
 #include <QApplication>
 #include <QTableView>
 #include <QScrollBar>
-#include <QLineEdit>
 
 #include <QToolTip>
 
