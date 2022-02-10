@@ -36,6 +36,10 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     fromGateMatch = new StationGatesMatchModel(db, this);
     toGateMatch = new StationGatesMatchModel(db, this);
 
+    //Ensure filter are initialized to avoid crash if user clicks completion before setting station
+    fromGateMatch->setFilter(0, true, 0);
+    toGateMatch->setFilter(0, true, 0);
+
     fromStationEdit = new CustomCompletionLineEdit(fromStationMatch);
     fromGateEdit = new CustomCompletionLineEdit(fromGateMatch);
     connect(fromStationEdit, &CustomCompletionLineEdit::dataIdChanged,
