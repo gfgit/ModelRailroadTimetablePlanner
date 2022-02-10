@@ -265,7 +265,7 @@ void StopEditingHelper::checkOutGateTrack()
         return; //First we need to have a segment
 
     int trackNum = mOutGateTrackSpin->value();
-    curStop.toGate.trackNum = trackNum; //Trigger checking of railway segment connections
+    curStop.toGate.gateTrackNum = trackNum; //Trigger checking of railway segment connections
 
     db_id segOutGateId = 0;
     if(model->trySelectNextSegment(curStop, curStop.nextSegment.segmentId, trackNum, 0, segOutGateId))
@@ -273,7 +273,7 @@ void StopEditingHelper::checkOutGateTrack()
         //Update gate track
         updateGateTrackSpin(curStop.toGate);
 
-        if(curStop.toGate.trackNum != trackNum)
+        if(curStop.toGate.gateTrackNum != trackNum)
         {
             //It wasn't possible to set requested track
             QMessageBox::warning(mEditor, tr("Stop Error"),
@@ -283,7 +283,7 @@ void StopEditingHelper::checkOutGateTrack()
                                     " on available tracks.")
                                      .arg(trackNum)
                                      .arg(mOutGateEdit->text())
-                                     .arg(curStop.toGate.trackNum));
+                                     .arg(curStop.toGate.gateTrackNum));
         }
 
         //Success, close editor
@@ -356,6 +356,6 @@ void StopEditingHelper::updateGateTrackSpin(const StopItem::Gate &toGate)
     //Prevent trigger valueChanged() signal
     mOutGateTrackSpin->blockSignals(true);
     mOutGateTrackSpin->setMaximum(qMax(0, outTrackCount - 1)); //At least one track numbered 0
-    mOutGateTrackSpin->setValue(toGate.trackNum);
+    mOutGateTrackSpin->setValue(toGate.gateTrackNum);
     mOutGateTrackSpin->blockSignals(false);
 }

@@ -19,7 +19,7 @@ struct StopItem
     {
         db_id gateConnId = 0;
         db_id gateId = 0;
-        int trackNum = -1;
+        int gateTrackNum = -1;
         utils::Side stationTrackSide = utils::Side::NSides;
     };
 

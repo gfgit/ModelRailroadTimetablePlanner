@@ -135,11 +135,11 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                               tr("Seg: %1").arg(segName),
                               QTextOption(Qt::AlignHCenter));
 
-            if(item.toGate.trackNum != 0)
+            if(item.toGate.gateTrackNum != 0)
             {
                 painter->setPen(QPen(Qt::red, 4));
                 painter->drawText(QRectF(lineRightX, lineHeight, left + width - lineRightX, bottom - lineHeight),
-                                  QString::number(item.toGate.trackNum),
+                                  QString::number(item.toGate.gateTrackNum),
                                   QTextOption(Qt::AlignHCenter));
             }
         }
