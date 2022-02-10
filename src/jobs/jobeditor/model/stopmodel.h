@@ -7,7 +7,7 @@
 #include <QVector>
 #include <QSet>
 
-#include "utils/types.h"
+#include "stations/station_utils.h"
 
 namespace sqlite3pp {
 class database;
@@ -20,6 +20,7 @@ struct StopItem
         db_id gateConnId = 0;
         db_id gateId = 0;
         int trackNum = -1;
+        utils::Side stationTrackSide = utils::Side::NSides;
     };
 
     struct Segment
