@@ -411,7 +411,6 @@ int EditStopDialog::getTrainSpeedKmH(bool afterStop)
 
 void EditStopDialog::updateAdditionalNotes()
 {
-    const StopItem& prevStop = helper->getPrevItem();
     const StopItem& curStop = helper->getCurItem();
 
     QString msg;
@@ -422,7 +421,7 @@ void EditStopDialog::updateAdditionalNotes()
     {
         //Ignore First and Last stop (sometimes they have fake in/out gates set which might trigger this message)
         //Both entry and exit path are set, check direction
-        if(curStop.fromGate.stationTrackSide == curStop.toGate.stationTrackSide && prevStop.stopId)
+        if(curStop.fromGate.stationTrackSide == curStop.toGate.stationTrackSide)
         {
             //Train leaves station track from same side of entrance
             msg = tr("Train reverses direction.");
