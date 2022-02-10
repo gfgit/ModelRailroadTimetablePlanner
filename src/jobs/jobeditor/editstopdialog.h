@@ -49,6 +49,8 @@ private slots:
 
     void couplingCustomContextMenuRequested(const QPoint &pos);
 
+    void updateAdditionalNotes();
+
 private:
     void saveDataToModel();
 
