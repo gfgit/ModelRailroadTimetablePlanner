@@ -68,6 +68,10 @@ private slots:
 private:
     QSvgRenderer *renderer;
     sqlite3pp::database &mDb;
+
+    static constexpr int NormalStopHeight = 100;
+    static constexpr int TransitStopHeight = 80;
+    static constexpr int AddHereHeight = 30;
 };
 
 #endif // STOPDELEGATE_H

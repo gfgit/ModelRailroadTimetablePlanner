@@ -68,7 +68,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
     const double arrX = left + width * (isTransit ? 0.4 : 0.2);
     const double depX = left + width * 0.6;
-    const double lineX = left + (isTransit ? width * 0.1 : 0.0);
+    const double transitLineX = left + width * 0.1;
 
 
     if(item.addHere == 0)
@@ -109,8 +109,8 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             if(nextSegmentElectrified != prevSegmentElectrified)
             {
                 //Railway type changed, draw a lightning
-                QSizeF s = QSizeF(renderer->defaultSize()).scaled(width, height / 2, Qt::KeepAspectRatio);
-                QRectF lightningRect(left, top + height / 4, s.width(), s.height());
+                QSizeF s = QSizeF(renderer->defaultSize()).scaled(width, height * 0.4, Qt::KeepAspectRatio);
+                QRectF lightningRect(left, top + height * 0.1, s.width(), s.height());
                 renderer->render(painter, lightningRect);
 
                 if(!nextSegmentElectrified)
@@ -131,7 +131,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             q.reset();
 
             const double lineRightX = left + width * 0.8;
-            painter->drawText(QRectF(lineX, lineHeight, lineRightX - left, bottom - lineHeight),
+            painter->drawText(QRectF(transitLineX, lineHeight, lineRightX - left, bottom - lineHeight),
                               tr("Seg: %1").arg(segName),
                               QTextOption(Qt::AlignHCenter));
 
@@ -146,13 +146,13 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
         if(isTransit)
         {
-            const double transitLinePos = rect.left() + rect.width() * 0.1;
-            painter->setPen(QPen(Qt::red, 5));
+            //Draw a vertical -0- to tell this is a transit
+            painter->setPen(QPen(Qt::red, 4));
             painter->setBrush(Qt::red);
-            painter->drawLine(QLineF(transitLinePos, rect.top(),
-                                     transitLinePos, rect.bottom()));
+            painter->drawLine(QLineF(transitLineX, rect.top(),
+                                     transitLineX, rect.bottom()));
 
-            painter->drawEllipse(QRectF(transitLinePos - 12 / 2,
+            painter->drawEllipse(QRectF(transitLineX - 12 / 2,
                                         rect.top() + rect.height() * 0.4,
                                         12, 12));
         }
@@ -174,16 +174,16 @@ QSize StopDelegate::sizeHint(const QStyleOptionViewItem &/*option*/,
                              const QModelIndex &index) const
 {
     int w = 200;
-    int h = 100;
+    int h = NormalStopHeight;
     const StopModel *model = static_cast<const StopModel *>(index.model());
     if(index.row() < 0 || index.row() >= model->rowCount())
-        return QSize(w, 30);
+        return QSize(w, AddHereHeight);
 
     const StopItem& item = model->getItemAt(index.row());
     if(item.type == StopType::Transit)
-        h = 80;
+        h = TransitStopHeight;
     if(item.addHere != 0)
-        h = 30;
+        h = AddHereHeight;
     return QSize(w, h);
 }
 
