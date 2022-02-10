@@ -209,6 +209,8 @@ void StopEditingHelper::onStationSelected()
     mOutGateEdit->setData(0); //Reset, user must choose again
 
     curStop.nextSegment = StopItem::Segment{};
+
+    emit stationTrackChosen();
 }
 
 void StopEditingHelper::onTrackSelected()
@@ -229,6 +231,8 @@ void StopEditingHelper::onTrackSelected()
         if(!stillSucceded)
             mStTrackEdit->setData(curStop.trackId); //Reset to previous track
     }
+
+    emit stationTrackChosen();
 }
 
 void StopEditingHelper::onOutGateSelected(const QModelIndex &idx)
