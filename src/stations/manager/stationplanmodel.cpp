@@ -2,6 +2,8 @@
 
 #include "utils/jobcategorystrings.h"
 
+#include "stations/station_utils.h"
+
 #include <QColor>
 
 StationPlanModel::StationPlanModel(sqlite3pp::database &db, QObject *parent) :
@@ -14,8 +16,8 @@ StationPlanModel::StationPlanModel(sqlite3pp::database &db, QObject *parent) :
                       "stops.arrival,"
                       "stops.departure,"
                       "stops.type,"
-                      "t1.name,"
-                      "t2.name"
+                      "t1.name, t2.name,"
+                      "g1.track_side, g2.track_side"
                       " FROM stops"
                       " JOIN jobs ON jobs.id=stops.job_id"
                       " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
@@ -91,7 +93,11 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
             if(item.type == StPlanItem::ItemType::Departure)
                 return StationPlanModel::tr("Departure"); //Don't repeat description also in the second row.
 
-            return item.description;
+            if(item.reversesDirection)
+                return tr("Reverse direction");
+            if(item.type == StPlanItem::ItemType::Transit)
+                return tr("Transit");
+            break;
         }
         }
         break;
@@ -105,7 +111,7 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
     case Qt::ToolTipRole:
     {
         if(item.type == StPlanItem::ItemType::Transit)
-            return StationPlanModel::tr("Transit");
+            return tr("Transit");
         break;
     }
     }
@@ -152,6 +158,13 @@ void StationPlanModel::loadPlan(db_id stId)
             curStop.platform = r.get<QString>(6);
             if(curStop.platform.isEmpty())
                 curStop.platform = r.get<QString>(7); //Use out gate to get track name
+
+            utils::Side entranceSide = utils::Side(r.get<int>(8));
+            utils::Side exitSide = utils::Side(r.get<int>(9));
+
+            curStop.reversesDirection = false;
+            if(entranceSide == exitSide && r.column_type(8) != SQLITE_NULL && r.column_type(9) != SQLITE_NULL)
+                curStop.reversesDirection = true; //Train enters and leaves from same track side
 
             for(auto stop = stopMap.begin(); stop != stopMap.end(); /*nothing because of erase */)
             {

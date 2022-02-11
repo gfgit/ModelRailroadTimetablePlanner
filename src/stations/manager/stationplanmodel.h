@@ -17,8 +17,6 @@ struct StPlanItem
     QTime departure;
     QString platform;
 
-    QString description;
-
     JobCategory cat;
 
     enum class ItemType : qint8
@@ -28,6 +26,8 @@ struct StPlanItem
         Transit
     };
     ItemType type;
+
+    bool reversesDirection;
 };
 
 class StationPlanModel : public QAbstractTableModel
