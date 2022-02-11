@@ -79,8 +79,8 @@ JobWriter::JobWriter(database &db) :
                        "stops.departure,"
                        "stops.type,"
                        "stops.description,"
-                       "t1.name,"
-                       "t2.name"
+                       "t1.name, t2.name,"
+                       "g1.track_side, g2.track_side"
                        " FROM stops"
                        " JOIN stations ON stations.id=stops.station_id"
                        " LEFT JOIN station_gate_connections g1 ON g1.id=stops.in_gate_conn"
@@ -684,6 +684,19 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         QString trackName = stop.get<QString>(7);
         if(trackName.isEmpty())
             trackName = stop.get<QString>(8); //Use out gate to get track name
+
+        utils::Side entranceSide = utils::Side(stop.get<int>(9));
+        utils::Side exitSide = utils::Side(stop.get<int>(10));
+
+        if(entranceSide == exitSide && stop.column_type(9) != SQLITE_NULL && stop.column_type(10) != SQLITE_NULL)
+        {
+            //Train enters and leaves from same track side, add reversal to description
+            QString descr2 = Odt::text(Odt::jobReverseDirection);
+            if(!descr.isEmpty())
+                descr2.append('\n'); //Separate from manually set description
+            descr2.append(descr);
+            descr = descr2;
+        }
 
         const bool isTransit = stopType == 1;
 
