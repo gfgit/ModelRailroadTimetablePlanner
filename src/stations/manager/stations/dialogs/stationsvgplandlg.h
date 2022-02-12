@@ -22,7 +22,7 @@ class StationPlan;
 class SSPViewer;
 }
 
-class StationSVGJobStops;
+struct StationSVGJobStops;
 
 class StationSVGPlanDlg : public QWidget
 {

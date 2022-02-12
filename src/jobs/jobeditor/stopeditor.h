@@ -3,7 +3,7 @@
 
 #include <QFrame>
 class StopModel;
-class StopItem;
+struct StopItem;
 
 class QTimeEdit;
 class QSpinBox;

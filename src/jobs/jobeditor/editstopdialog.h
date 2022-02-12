@@ -9,7 +9,7 @@
 class StopEditingHelper;
 
 class StopModel;
-class StopItem;
+struct StopItem;
 
 class TrainAssetModel;
 class RSCouplingInterface;
