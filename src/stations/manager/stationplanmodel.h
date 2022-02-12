@@ -9,7 +9,7 @@
 
 #include "utils/types.h"
 
-typedef struct StPlanItem_
+struct StPlanItem
 {
     db_id stopId;
     db_id jobId;
@@ -28,7 +28,7 @@ typedef struct StPlanItem_
         Transit
     };
     ItemType type;
-} StPlanItem;
+};
 
 class StationPlanModel : public QAbstractTableModel
 {

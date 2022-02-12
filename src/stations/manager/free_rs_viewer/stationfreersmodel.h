@@ -26,7 +26,7 @@ public:
         NCols
     };
 
-    typedef struct Item_
+    struct Item
     {
         db_id rsId = 0;
         QTime from; //Time at which RS is uncoupled (from now it's free)
@@ -38,7 +38,7 @@ public:
         db_id toStopId = 0;
         JobCategory fromJobCat;
         JobCategory toJobCat;
-    } Item;
+    };
 
     StationFreeRSModel(sqlite3pp::database &db, QObject *parent = nullptr);
 

@@ -36,16 +36,16 @@ public:
 
     enum { BatchSize = MaxSegmentsPerLine };
 
-    typedef enum {
+    enum Columns {
         SegmentPosCol = -1, //Invisible (Vertical header)
         StationOrSegmentNameCol = 0,
         KmPosCol,
         MaxSpeedCol,
         DistanceCol,
         NCols
-    } Columns;
+    };
 
-    typedef struct LineSegmentItem_
+    struct LineSegmentItem
     {
         db_id lineSegmentId;
         db_id railwaySegmentId;
@@ -57,7 +57,7 @@ public:
         int maxSpeedKmH;
         QFlags<utils::RailwaySegmentType> segmentType;
         bool reversed;
-    } LineSegmentItem;
+    };
 
     LineSegmentsModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
@@ -114,10 +114,10 @@ public:
     //Row Type
     //Event: stations
     //Odd:   segments
-    typedef enum  {
+    enum RowType {
         StationRow,
         SegmentRow
-    } RowType;
+    };
 
     inline RowType getRowType(int row) const { return (row % 2) == 0 ? StationRow : SegmentRow; }
     inline int getItemIndex(int row) const { return (row - (row % 2)) / 2; }

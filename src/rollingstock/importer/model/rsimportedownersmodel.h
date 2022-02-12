@@ -27,7 +27,7 @@ public:
         NCols
     };
 
-    typedef struct
+    struct OwnerItem
     {
         db_id importedOwnerId;
         db_id matchExistingId;
@@ -36,7 +36,7 @@ public:
         QString matchExistingName;
         int sheetIdx;
         bool import;
-    } OwnerItem;
+    };
 
     RSImportedOwnersModel(database &db, QObject *parent = nullptr);
     bool event(QEvent *e) override;

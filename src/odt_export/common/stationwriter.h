@@ -19,7 +19,7 @@ public:
     void writeStation(QXmlStreamWriter &xml, db_id stationId, QString *stNameOut = nullptr);
 
 private:
-    typedef struct Stop
+    struct Stop
     {
         db_id jobId;
 
@@ -33,7 +33,7 @@ private:
         QTime departure;
 
         JobCategory jobCat;
-    } Stop;
+    };
 
     void insertStop(QXmlStreamWriter &xml, const Stop& stop, bool first, bool transit);
 

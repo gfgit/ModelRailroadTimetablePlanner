@@ -31,7 +31,7 @@ public:
         NCols
     };
 
-    typedef struct
+    struct ModelItem
     {
         db_id importdModelId;
         db_id matchExistingId;
@@ -44,7 +44,7 @@ public:
         RsType type;
         RsEngineSubType subType;
         bool import;
-    } ModelItem;
+    };
 
     RSImportedModelsModel(database &db, QObject *parent = nullptr);
 

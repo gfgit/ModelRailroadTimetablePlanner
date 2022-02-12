@@ -20,14 +20,14 @@ class SessionStartEndModel : public QAbstractItemModel
 
 public:
     //Station or RS Owner
-    typedef struct StationOrOwner_
+    struct ParentItem
     {
         db_id id;
         QString name;
         int firstIdx; //First RS index
-    } ParentItem;
+    };
 
-    typedef struct RSItem_
+    struct RSItem
     {
         db_id rsId;
         db_id jobId;
@@ -38,7 +38,7 @@ public:
         int parentIdx;
         QTime time;
         JobCategory jobCategory;
-    } RSItem;
+    };
 
     enum Columns
     {

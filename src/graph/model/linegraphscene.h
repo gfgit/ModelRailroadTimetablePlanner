@@ -181,7 +181,7 @@ private:
      *
      * Contains informations to draw job line between two adjacent stations
      */
-    typedef struct
+    struct JobSegmentGraph
     {
         db_id jobId;
         JobCategory category;
@@ -193,14 +193,14 @@ private:
         db_id toStopId;
         db_id toPlatfId;
         QPointF toArrival;
-    } JobSegmentGraph;
+    };
 
     /*!
      * \brief Station entry on scene
      *
      * Represents a station item placeholder in an ordered list of scene
      */
-    typedef struct
+    struct StationPosEntry
     {
         db_id stationId;
         db_id segmentId;
@@ -211,7 +211,7 @@ private:
          * Stores job graph of the next segment
          * Which means jobs departing from this staation and going to next one
          */
-    } StationPosEntry;
+    };
 
 private:
     /*!

@@ -3,10 +3,10 @@
 
 #include "utils/types.h"
 
-typedef struct SearchResultItem_
+struct SearchResultItem
 {
     db_id jobId;
     JobCategory category;
-} SearchResultItem;
+};
 
 #endif // SEARCHRESULTITEM_H

@@ -11,8 +11,6 @@ class StationJobView;
 
 class StationPlanModel;
 
-typedef struct Stop_ Stop;
-
 class StationJobView : public QWidget
 {
     Q_OBJECT

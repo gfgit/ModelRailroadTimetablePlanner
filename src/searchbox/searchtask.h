@@ -10,7 +10,7 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
-typedef struct SearchResultItem_ SearchResultItem;
+struct SearchResultItem;
 class QRegularExpression;
 
 class SearchTask : public IQuittableTask

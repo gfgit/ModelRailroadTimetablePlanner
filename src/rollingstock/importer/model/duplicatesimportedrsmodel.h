@@ -28,7 +28,7 @@ public:
         NCols
     };
 
-    typedef struct
+    struct DuplicatedItem
     {
         db_id importedId;
         db_id importedModelId;
@@ -39,7 +39,7 @@ public:
         int new_number;
         RsType type;
         bool import;
-    } DuplicatedItem;
+    };
 
     DuplicatesImportedRSModel(database &db, ICheckName *i, QObject *parent = nullptr);
 

@@ -16,27 +16,27 @@ class RailwaySegmentConnectionsModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    typedef enum {
+    enum Columns {
         FromGateTrackCol = 0,
         ToGateTrackCol,
         NCols
-    } Columns;
+    };
 
-    typedef enum {
+    enum ItemState {
         NoChange = 0,
         AddedButNotComplete,
         ToAdd,
         ToRemove,
         Edited
-    } ItemState;
+    };
 
-    typedef struct RailwayTrack_
+    struct RailwayTrack
     {
         db_id connId;
         int fromTrack;
         int toTrack;
         ItemState state;
-    } RailwayTrack;
+    };
 
     static constexpr const int InvalidTrack = -1;
 

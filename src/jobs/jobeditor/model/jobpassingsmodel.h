@@ -14,22 +14,22 @@ class JobPassingsModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    typedef enum {
+    enum Columns {
         JobNameCol = 0,
         ArrivalCol,
         DepartureCol,
         PlatformCol,
         NCols
-    } Columns;
+    };
 
-    typedef struct
+    struct Entry
     {
         db_id jobId;
         QTime arrival;
         QTime departure;
         QString platform;
         JobCategory category;
-    } Entry;
+    };
 
     explicit JobPassingsModel(QObject *parent = nullptr);
 

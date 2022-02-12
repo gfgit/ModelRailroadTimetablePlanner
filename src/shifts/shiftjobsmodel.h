@@ -13,7 +13,7 @@ namespace sqlite3pp {
 class database;
 }
 
-typedef struct ShiftJobItem_
+struct ShiftJobItem
 {
     db_id jobId;
     db_id originStId;
@@ -23,7 +23,7 @@ typedef struct ShiftJobItem_
     JobCategory cat;
     QString originStName;
     QString desinationStName;
-} ShiftJobItem;
+};
 
 class ShiftJobsModel : public QAbstractTableModel
 {

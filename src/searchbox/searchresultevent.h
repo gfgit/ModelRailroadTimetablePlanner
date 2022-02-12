@@ -10,7 +10,7 @@
 #include "utils/worker_event_types.h"
 
 class SearchTask;
-typedef struct SearchResultItem_ SearchResultItem;
+struct SearchResultItem;
 
 class SearchResultEvent : public QEvent
 {

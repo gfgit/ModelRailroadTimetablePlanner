@@ -18,20 +18,20 @@ class ShiftBusyModel : public QAbstractTableModel
 
 public:
 
-    typedef enum {
+    enum Columns {
         JobCol = 0,
         Start,
         End,
         NCols
-    } Columns;
+    };
 
-    typedef struct
+    struct JobInfo
     {
         db_id jobId;
         QTime start;
         QTime end;
         JobCategory jobCat;
-    } JobInfo;
+    };
 
     ShiftBusyModel(sqlite3pp::database &db, QObject *parent = nullptr);
 

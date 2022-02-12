@@ -4,10 +4,10 @@
 #include <QString>
 #include "utils/types.h"
 
-typedef struct
+struct ShiftItem
 {
     db_id shiftId;
     QString shiftName;
-} ShiftItem;
+};
 
 #endif // SHIFTITEM_H

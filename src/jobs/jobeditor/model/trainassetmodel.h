@@ -8,10 +8,10 @@ class TrainAssetModel : public RSListOnDemandModel
 {
     Q_OBJECT
 public:
-    typedef enum {
+    enum Mode {
         BeforeStop,
         AfterStop
-    } Mode;
+    };
 
     TrainAssetModel(sqlite3pp::database& db, QObject *parent = nullptr);
 

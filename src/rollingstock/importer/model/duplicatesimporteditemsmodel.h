@@ -32,14 +32,14 @@ public:
         NCols
     };
 
-    typedef struct
+    struct DuplicatedItem
     {
         db_id importedId;
         QString originalName;
         QString customName;
         int sheetIdx;
         bool import;
-    } DuplicatedItem;
+    };
 
     DuplicatesImportedItemsModel(ModelModes::Mode mode, database &db, ICheckName *i, QObject *parent = nullptr);
 

@@ -22,19 +22,19 @@ class RollingStockManager : public QWidget
     Q_OBJECT
 
 public:
-    typedef enum
+    enum Tabs
     {
         RollingstockTab = 0,
         ModelsTab,
         OwnersTab,
         NTabs
-    } Tabs;
+    };
 
-    typedef enum
+    enum ModelState
     {
         ModelCleared = 0,
         ModelLoaded = -1
-    } ModelState;
+    };
 
     enum { ClearModelTimeout = 5000 }; // 5 seconds
 

@@ -13,7 +13,7 @@ namespace sqlite3pp {
 class database;
 }
 
-typedef struct RsPlanItem_
+struct RsPlanItem
 {
     db_id jobId;
     db_id stopId;
@@ -23,7 +23,7 @@ typedef struct RsPlanItem_
     QString stationName;
     JobCategory jobCat;
     RsOp op;
-} RsPlanItem;
+};
 
 class RsPlanModel : public QAbstractTableModel
 {

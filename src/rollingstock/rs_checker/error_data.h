@@ -22,7 +22,7 @@ enum ErrType : quint32
     UncoupledInSameStop //otherId: previous coupling id
 };
 
-typedef struct ErrorData_
+struct ErrorData
 {
     db_id couplingId;
     db_id rsId;
@@ -33,14 +33,14 @@ typedef struct ErrorData_
     QString stationName;
     QTime time;
     ErrType errorType;
-} ErrorData;
+};
 
-typedef struct RSErrorList_
+struct RSErrorList
 {
     db_id rsId;
     QString rsName;
     QVector<ErrorData> errors;
-} RSErrorList;
+};
 
 } //namespace RsErrors
 

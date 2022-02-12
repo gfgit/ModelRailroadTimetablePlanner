@@ -26,7 +26,7 @@ public:
         NCols
     };
 
-    typedef struct
+    struct RSItem
     {
         db_id importdRsId;
         db_id importedModelId;
@@ -39,7 +39,7 @@ public:
         QByteArray ownerCustomName;
         bool import;
         RsType type;
-    } RSItem;
+    };
 
     RSImportedRollingstockModel(database &db, QObject *parent = nullptr);
     bool event(QEvent *e) override;
