@@ -795,6 +795,8 @@ bool MainWindow::closeSession()
         return false;
     }
 
+    stopCloseTimer();
+
     if(err != DB_Error::NoError && err != DB_Error::DbNotOpen)
         return false;
 
