@@ -28,23 +28,31 @@ StopEditingHelper::StopEditingHelper(database &db, StopModel *m,
 
     mStationEdit = new CustomCompletionLineEdit(stationsMatchModel, mEditor);
     mStationEdit->setPlaceholderText(tr("Station name"));
+    mStationEdit->setToolTip(mStationEdit->placeholderText());
     connect(mStationEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditingHelper::onStationSelected);
 
     mStTrackEdit = new CustomCompletionLineEdit(stationTrackMatchModel, mEditor);
     mStTrackEdit->setPlaceholderText(tr("Track"));
+    mStTrackEdit->setToolTip(mStTrackEdit->placeholderText());
     connect(mStTrackEdit, &CustomCompletionLineEdit::completionDone, this, &StopEditingHelper::onTrackSelected);
 
     mOutGateEdit = new CustomCompletionLineEdit(stationOutGateMatchModel, mEditor);
     mOutGateEdit->setPlaceholderText(tr("Next segment"));
+    mOutGateEdit->setToolTip(mOutGateEdit->placeholderText());
     connect(mOutGateEdit, &CustomCompletionLineEdit::indexSelected, this, &StopEditingHelper::onOutGateSelected);
 
     mOutGateTrackSpin = outTrackSpin;
     mOutGateTrackSpin->setMaximum(0);
+    mOutGateTrackSpin->setToolTip(tr("Out Gate track"));
     connect(mOutGateTrackSpin, qOverload<int>(&QSpinBox::valueChanged), this, &StopEditingHelper::startOutTrackTimer);
     connect(mOutGateTrackSpin, &QSpinBox::editingFinished, this, &StopEditingHelper::checkOutGateTrack);
 
     arrEdit = arr;
     depEdit = dep;
+
+    //Do not set tooltip on arrEdit, it is done inside setStop() already
+    depEdit->setToolTip(tr("Departure"));
+
     connect(arrEdit, &QTimeEdit::timeChanged, this, &StopEditingHelper::arrivalChanged);
     connect(depEdit, &QTimeEdit::timeChanged, this, &StopEditingHelper::departureChanged);
 }
@@ -93,9 +101,12 @@ void StopEditingHelper::setStop(const StopItem &item, const StopItem &prev)
     arrEdit->setEnabled(curStop.type != StopType::First);
     arrEdit->setVisible(curStop.type != StopType::First);
 
-    QString arrTootlip; //No tooltip by default
+    QString arrTootlip = tr("Arrival"); //No message by default
     if(curStop.type == StopType::Normal)
-        arrTootlip = tr("Press shift if you don't want to change also departure time.");
+    {
+        arrTootlip.append('\n'); //Separate from usage tooltip
+        arrTootlip.append(tr("Press shift if you don't want to change also departure time."));
+    }
     arrEdit->setToolTip(arrTootlip);
 
     //Transit and Last stop only have Arrival
