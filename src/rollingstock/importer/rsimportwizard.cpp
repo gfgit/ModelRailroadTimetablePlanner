@@ -242,7 +242,7 @@ bool RSImportWizard::event(QEvent *e)
                 //Delete task before handling event because otherwise it is detected as still running
                 delete importTask;
                 importTask = nullptr;
-                loadFilePage->setProgressCompleted(true);
+                importPage->setProgressCompleted(true);
             }
 
             importPage->handleProgress(ev->progress, ev->max);
@@ -309,7 +309,7 @@ void RSImportWizard::startImportTask()
     abortImportTask();
 
     importTask = new ImportTask(Session->m_Db, this);
-    loadFilePage->setProgressCompleted(false);
+    importPage->setProgressCompleted(false);
     QThreadPool::globalInstance()->start(importTask);
 }
 
