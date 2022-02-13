@@ -41,6 +41,8 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
     helper = new StopEditingHelper(Session->m_Db, stopModel,
                                    ui->outGateTrackSpin, ui->arrivalTimeEdit, ui->departureTimeEdit,
                                    this);
+    connect(helper, &StopEditingHelper::nextSegmentChosen, this, &EditStopDialog::updateAdditionalNotes);
+    connect(helper, &StopEditingHelper::stationTrackChosen, this, &EditStopDialog::updateAdditionalNotes);
 
     CustomCompletionLineEdit *mStationEdit = helper->getStationEdit();
     CustomCompletionLineEdit *mStTrackEdit = helper->getStTrackEdit();
@@ -242,6 +244,8 @@ void EditStopDialog::updateInfo()
     }
 
     couplingMgr->loadCouplings(stopModel, curStop.stopId, m_jobId, curStop.arrival);
+
+    updateAdditionalNotes();
 }
 
 void EditStopDialog::saveDataToModel()
@@ -403,6 +407,59 @@ int EditStopDialog::getTrainSpeedKmH(bool afterStop)
 
     q.step();
     return q.getRows().get<int>(0);
+}
+
+void EditStopDialog::updateAdditionalNotes()
+{
+    const StopItem& curStop = helper->getCurItem();
+
+    QString msg;
+
+    //Check direction
+    if(curStop.fromGate.gateConnId && curStop.toGate.gateConnId
+        && curStop.type != StopType::First && curStop.type != StopType::Last)
+    {
+        //Ignore First and Last stop (sometimes they have fake in/out gates set which might trigger this message)
+        //Both entry and exit path are set, check direction
+        if(curStop.fromGate.stationTrackSide == curStop.toGate.stationTrackSide)
+        {
+            //Train leaves station track from same side of entrance
+            msg = tr("Train reverses direction.");
+        }
+    }
+
+    //Check line traction
+    if(curStop.type != StopType::Last && curStop.nextSegment.segmentId)
+    {
+        //Last has no next segment so do not show traction type
+
+        bool nextSegmentElectrified = stopModel->isRailwayElectrifiedAfterRow(stopIdx.row());
+        bool prevSegmentElectrified = !nextSegmentElectrified; //Trigger change on First stop
+
+        if(curStop.type != StopType::First && stopIdx.row() >= 0)
+        {
+            //Get real previous railway type
+            prevSegmentElectrified = stopModel->isRailwayElectrifiedAfterRow(stopIdx.row() - 1);
+        }
+
+        if(!msg.isEmpty())
+            msg.append("\n\n"); //Separate from previous message
+
+        if(nextSegmentElectrified)
+            msg.append(tr("Electric traction is ALLOWED."));
+        else
+            msg.append(tr("Electric traction is NOT ALLOWED."));
+
+        if(nextSegmentElectrified != prevSegmentElectrified && curStop.type != StopType::First)
+        {
+            //Railway type changed
+            msg.append('\n');
+            msg.append(tr("(Different traction then previous line!)"));
+        }
+    }
+
+    ui->additionalNotesLabel->setText(msg);
+    ui->additionalNotesBox->setVisible(!msg.isEmpty());
 }
 
 void EditStopDialog::setReadOnly(bool value)

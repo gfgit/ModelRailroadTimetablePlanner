@@ -3,10 +3,6 @@
 
 #include <QStyledItemDelegate>
 
-#include "utils/types.h"
-
-#include <QSvgRenderer>
-
 namespace sqlite3pp {
 class database;
 }
@@ -41,8 +37,6 @@ public:
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &) const override;
 
-    void loadIcon(const QString& fileName);
-
 signals:
     /*!
      * \brief popupEditorSegmentCombo
@@ -66,8 +60,20 @@ private slots:
     void onEditorSegmentChosen(StopEditor *editor);
 
 private:
-    QSvgRenderer *renderer;
+    void refreshPixmaps();
+
+private:
     sqlite3pp::database &mDb;
+
+    QPixmap m_lightningPix;
+    QPixmap m_reverseDirPix;
+
+    static constexpr int NormalStopHeight = 100;
+    static constexpr int TransitStopHeight = 80;
+    static constexpr int AddHereHeight = 30;
+
+    static constexpr int PixWidth = 35;
+    static constexpr int PixHeight = PixWidth;
 };
 
 #endif // STOPDELEGATE_H

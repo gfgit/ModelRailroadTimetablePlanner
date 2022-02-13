@@ -404,18 +404,18 @@ All segments after it are also removed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="233"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="252"/>
         <source>Coupled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="257"/>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="291"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="276"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="310"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="267"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="286"/>
         <source>Uncoupled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -425,22 +425,22 @@ All segments after it are also removed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="371"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="390"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="227"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="246"/>
         <source>Rollingstock</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="360"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="379"/>
         <source>Asset After Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="314"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="333"/>
         <source>Asset Before Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -458,6 +458,7 @@ All segments after it are also removed.</source>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="142"/>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="156"/>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="213"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="232"/>
         <source>TextLabel</source>
         <translation type="unfinished"></translation>
     </message>
@@ -469,7 +470,7 @@ All segments after it are also removed.</source>
     </message>
     <message>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="172"/>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="217"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="219"/>
         <source>Current Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -494,77 +495,102 @@ All segments after it are also removed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="301"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="226"/>
+        <source>Additional Notes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="320"/>
         <source>Job Asset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="421"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="440"/>
         <source>Passings / Crossings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="427"/>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="365"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="446"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="369"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="434"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="453"/>
         <source>Passings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="444"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="463"/>
         <source>Crossings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="211"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="213"/>
         <source>First Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="217"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="219"/>
         <source>Last Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="271"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="275"/>
         <source>Couple</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="289"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="293"/>
         <source>Uncouple</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="444"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="427"/>
+        <source>Train reverses direction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="449"/>
+        <source>Electric traction is ALLOWED.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="451"/>
+        <source>Electric traction is NOT ALLOWED.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="457"/>
+        <source>(Different traction then previous line!)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="501"/>
         <source>No Engine Left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="446"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="503"/>
         <source>It seems you have uncoupled all job engines except for electric ones but the line is not electrified
 (The train isn&apos;t able to move)
 Do you want to couple a non electric engine?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="450"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="507"/>
         <source>It seems you have uncoupled all job engines
 (The train isn&apos;t able to move)
 Do you want to couple an engine?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="483"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="540"/>
         <source>Train Speed Changed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="484"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="541"/>
         <source>Train speed after this stop has changed from a value of %1 km/h to &lt;b&gt;%2 km/h&lt;/b&gt;&lt;br&gt;Do you want to rebase travel times to this new speed?&lt;br&gt;NOTE: this doesn&apos;t affect stop times but you will lose manual adjustments to travel times</source>
         <translation type="unfinished"></translation>
     </message>
@@ -633,7 +659,7 @@ Do you want to couple an engine?</source>
 <context>
     <name>FilterHeaderView</name>
     <message>
-        <location filename="../utils/delegates/sql/filterheaderview.cpp" line="172"/>
+        <location filename="../utils/delegates/sql/filterheaderview.cpp" line="171"/>
         <source>Type &lt;b&gt;#NULL&lt;/b&gt; to filter empty cells.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -934,93 +960,108 @@ Do you want to couple an engine?</source>
 <context>
     <name>JobPathEditor</name>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="58"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="20"/>
+        <source>Number:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="44"/>
+        <source>Category:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="69"/>
         <source>Save Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="223"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="230"/>
         <source>Toggle transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="224"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="231"/>
         <source>Set transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="225"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="232"/>
         <source>Unset transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="230"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="237"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="227"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="234"/>
         <source>Edit stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="366"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="373"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="367"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="374"/>
         <source>You must register at least 2 stops.
 Do you want to delete this job?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="482"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="489"/>
         <source>Save?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="483"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="490"/>
         <source>Do you want to save changes to job %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="170"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="177"/>
         <source>Invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="171"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="67"/>
+        <source>Shift:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="178"/>
         <source>Job number &lt;b&gt;%1&lt;/b&gt; is already exists.&lt;br&gt;Please choose a different number.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="228"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="235"/>
         <source>Station SVG Plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="575"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="582"/>
         <source>Empty Job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="576"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="583"/>
         <source>Before setting a shift you should add stops to this job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="623"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="630"/>
         <source>Save Job Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="627"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="634"/>
         <source>job%1_sheet.odt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="647"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="654"/>
         <source>Job Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2271,12 +2312,18 @@ Extension: (*.ods)</source>
     </message>
     <message>
         <location filename="../odt_export/common/odtutils.h" line="136"/>
+        <source>Reverse direction</source>
+        <comment>Job stop table</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../odt_export/common/odtutils.h" line="139"/>
         <source>SHIFT %1</source>
         <comment>Shift title in shift sheet cover</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../odt_export/common/odtutils.h" line="137"/>
+        <location filename="../odt_export/common/odtutils.h" line="140"/>
         <source>Shift %1</source>
         <comment>Shift sheet document title for metadata</comment>
         <translation type="unfinished"></translation>
@@ -5154,33 +5201,39 @@ It can also be both (Bidirectional) but cannot be neither.</source>
 <context>
     <name>StationPlanModel</name>
     <message>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="37"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="39"/>
         <source>Arrival</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="39"/>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="92"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="41"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="94"/>
         <source>Departure</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="41"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="43"/>
         <source>Platform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="43"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="45"/>
         <source>Job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="45"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="47"/>
         <source>Notes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationplanmodel.cpp" line="108"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="97"/>
+        <source>Reverse direction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="99"/>
+        <location filename="../stations/manager/stationplanmodel.cpp" line="114"/>
         <source>Transit</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5781,7 +5834,7 @@ Can be used instead of track length but is less precise.</source>
 <context>
     <name>StopDelegate</name>
     <message>
-        <location filename="../jobs/jobeditor/stopdelegate.cpp" line="135"/>
+        <location filename="../jobs/jobeditor/stopdelegate.cpp" line="148"/>
         <source>Seg: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5819,34 +5872,34 @@ Can be used instead of track length but is less precise.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="227"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="229"/>
         <source>Gate Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="227"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="229"/>
         <source>Track Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="255"/>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="279"/>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="295"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="259"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="283"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="299"/>
         <source>Stop Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="255"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="259"/>
         <source>Cannot set segment &lt;b&gt;%1&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="280"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="284"/>
         <source>Requested gate out track &lt;b&gt;%1&lt;/b&gt; is not connected to segment &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Out track &lt;b&gt;%3&lt;/b&gt; was chosen instead.&lt;br&gt;Look segment track connection from Stations Manager for more information on available tracks.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="295"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="299"/>
         <source>Cannot set segment track!</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5854,28 +5907,28 @@ Can be used instead of track length but is less precise.</source>
 <context>
     <name>StopModel</name>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1265"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1271"/>
         <source>Track belongs to a different station.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1270"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1276"/>
         <source>Track doesn&apos;t exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1282"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1288"/>
         <source>Track is not connected to any of station gates.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1308"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1316"/>
         <source>Track is not connected to in gate track.
 Please choose a new track or change previous segment.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1332"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1343"/>
         <source>Track is not connected to selected out gate track.
 Please choose a new out gate or out track, this might change next segment.</source>
         <translation type="unfinished"></translation>

@@ -47,6 +47,7 @@ protected:
 
 signals:
     void nextSegmentChosen();
+    void stationTrackChosen();
 
 private slots:
     void onStationSelected();

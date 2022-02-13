@@ -132,6 +132,9 @@ public:
     static constexpr Text jobStopPassingsShort = QT_TRANSLATE_NOOP3("Odt", "Passes", "Job stop passings abbreviated column");
     static constexpr Text notes = QT_TRANSLATE_NOOP3("Odt", "Notes", "Job stop table");
 
+    //Job stops
+    static constexpr Text jobReverseDirection = QT_TRANSLATE_NOOP3("Odt", "Reverse direction", "Job stop table");
+
     //Shift
     static constexpr Text shiftCoverTitle = QT_TRANSLATE_NOOP3("Odt", "SHIFT %1", "Shift title in shift sheet cover");
     static constexpr Text shiftDocTitle   = QT_TRANSLATE_NOOP3("Odt", "Shift %1", "Shift sheet document title for metadata");

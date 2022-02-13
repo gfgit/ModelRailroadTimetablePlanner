@@ -200,8 +200,11 @@ endforeach()
 # Copy executable
 install(TARGETS ${MR_TIMETABLE_PLANNER_TARGET})
 
-# Copy SVG icon
+# Copy SVG icons
 install(FILES ${CMAKE_SOURCE_DIR}/files/icons/lightning/lightning.svg
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/icons)
+
+install(FILES ${CMAKE_SOURCE_DIR}/files/icons/reverse_direction/reverse_direction.svg
     DESTINATION ${CMAKE_INSTALL_BINDIR}/icons)
 
 # For each .ts file install corrensponding .qm file

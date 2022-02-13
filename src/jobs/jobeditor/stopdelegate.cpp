@@ -3,8 +3,7 @@
 #include "stopeditor.h"
 
 #include <QPainter>
-
-#include <QDebug>
+#include <QSvgRenderer>
 
 #include "app/session.h"
 #include "model/stopmodel.h"
@@ -13,12 +12,13 @@
 
 #include <QCoreApplication>
 
+#include <QDebug>
+
 StopDelegate::StopDelegate(sqlite3pp::database &db, QObject *parent) :
     QStyledItemDelegate(parent),
     mDb(db)
 {
-    renderer = new QSvgRenderer(this);
-    loadIcon(QCoreApplication::instance()->applicationDirPath() + QStringLiteral("/icons/lightning.svg"));
+    refreshPixmaps();
 }
 
 void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
@@ -68,7 +68,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
     const double arrX = left + width * (isTransit ? 0.4 : 0.2);
     const double depX = left + width * 0.6;
-    const double lineX = left + (isTransit ? width * 0.1 : 0.0);
+    const double transitLineX = left + width * 0.2;
 
 
     if(item.addHere == 0)
@@ -93,6 +93,20 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                               item.departure.toString("HH:mm"));
         }
 
+        //Check direction
+        if(item.fromGate.gateConnId && item.toGate.gateConnId
+            && item.type != StopType::First && item.type != StopType::Last)
+        {
+            //Ignore First and Last stop (sometimes they have fake in/out gates set which might trigger this message)
+            //Both entry and exit path are set, check direction
+            if(item.fromGate.stationTrackSide == item.toGate.stationTrackSide)
+            {
+                //Train leaves station track from same side of entrance, draw reverse icon
+                QPointF iconTopLeft(left, bottom - PixHeight);
+                painter->drawPixmap(iconTopLeft, m_reverseDirPix);
+            }
+        }
+
         if(item.type != StopType::Last && item.nextSegment.segmentId)
         {
             //Last has no next segment so do not draw lightning
@@ -109,16 +123,15 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             if(nextSegmentElectrified != prevSegmentElectrified)
             {
                 //Railway type changed, draw a lightning
-                QSizeF s = QSizeF(renderer->defaultSize()).scaled(width, height / 2, Qt::KeepAspectRatio);
-                QRectF lightningRect(left, top + height / 4, s.width(), s.height());
-                renderer->render(painter, lightningRect);
+                QPointF lightningTopLeft(left, top + qMin(5.0, height * 0.1));
+                painter->drawPixmap(lightningTopLeft, m_lightningPix);
 
                 if(!nextSegmentElectrified)
                 {
                     //Next railway is not electrified, cross the lightning
                     //Then keep red pen to draw next segment name
                     painter->setPen(QPen(Qt::red, 4));
-                    painter->drawLine(lightningRect.topLeft(), lightningRect.bottomRight());
+                    painter->drawLine(lightningTopLeft, lightningTopLeft + QPointF(PixWidth, PixHeight));
                 }
             }
 
@@ -131,28 +144,28 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
             q.reset();
 
             const double lineRightX = left + width * 0.8;
-            painter->drawText(QRectF(lineX, lineHeight, lineRightX - left, bottom - lineHeight),
+            painter->drawText(QRectF(transitLineX, lineHeight, lineRightX - left, bottom - lineHeight),
                               tr("Seg: %1").arg(segName),
                               QTextOption(Qt::AlignHCenter));
 
-            if(item.toGate.trackNum != 0)
+            if(item.toGate.gateTrackNum != 0)
             {
                 painter->setPen(QPen(Qt::red, 4));
                 painter->drawText(QRectF(lineRightX, lineHeight, left + width - lineRightX, bottom - lineHeight),
-                                  QString::number(item.toGate.trackNum),
+                                  QString::number(item.toGate.gateTrackNum),
                                   QTextOption(Qt::AlignHCenter));
             }
         }
 
         if(isTransit)
         {
-            const double transitLinePos = rect.left() + rect.width() * 0.1;
-            painter->setPen(QPen(Qt::red, 5));
+            //Draw a vertical -0- to tell this is a transit
+            painter->setPen(QPen(Qt::red, 4));
             painter->setBrush(Qt::red);
-            painter->drawLine(QLineF(transitLinePos, rect.top(),
-                                     transitLinePos, rect.bottom()));
+            painter->drawLine(QLineF(transitLineX, rect.top(),
+                                     transitLineX, rect.bottom()));
 
-            painter->drawEllipse(QRectF(transitLinePos - 12 / 2,
+            painter->drawEllipse(QRectF(transitLineX - 12 / 2,
                                         rect.top() + rect.height() * 0.4,
                                         12, 12));
         }
@@ -174,16 +187,16 @@ QSize StopDelegate::sizeHint(const QStyleOptionViewItem &/*option*/,
                              const QModelIndex &index) const
 {
     int w = 200;
-    int h = 100;
+    int h = NormalStopHeight;
     const StopModel *model = static_cast<const StopModel *>(index.model());
     if(index.row() < 0 || index.row() >= model->rowCount())
-        return QSize(w, 30);
+        return QSize(w, AddHereHeight);
 
     const StopItem& item = model->getItemAt(index.row());
     if(item.type == StopType::Transit)
-        h = 80;
+        h = TransitStopHeight;
     if(item.addHere != 0)
-        h = 30;
+        h = AddHereHeight;
     return QSize(w, h);
 }
 
@@ -253,11 +266,6 @@ void StopDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewI
     editor->setGeometry(option.rect);
 }
 
-void StopDelegate::loadIcon(const QString &fileName)
-{
-    renderer->load(fileName);
-}
-
 void StopDelegate::onEditorSegmentChosen(StopEditor *editor)
 {
     if(editor->closeOnSegmentChosen())
@@ -265,4 +273,46 @@ void StopDelegate::onEditorSegmentChosen(StopEditor *editor)
         emit commitData(editor);
         emit closeEditor(editor, StopDelegate::EditNextItem);
     }
+}
+
+void StopDelegate::refreshPixmaps()
+{
+    const QString iconPath = QCoreApplication::instance()->applicationDirPath() + QStringLiteral("/icons");
+
+    //Square pixmaps
+    m_lightningPix = QPixmap(PixWidth, PixHeight);
+    m_reverseDirPix = QPixmap(PixWidth, PixHeight);
+
+    m_lightningPix.fill(Qt::transparent);
+    m_reverseDirPix.fill(Qt::transparent);
+
+    QSvgRenderer mSvg;
+    QPainter painter;
+    QRectF iconRect;
+
+    //Cache Lightning
+    mSvg.load(iconPath + QStringLiteral("/lightning.svg"));
+
+    //Scale SVG to fit requested size
+    iconRect.setSize(mSvg.defaultSize().scaled(PixWidth, PixHeight, Qt::KeepAspectRatio));
+
+    //Center on pixmap
+    iconRect.moveTop((PixHeight - iconRect.height()) / 2);
+    iconRect.moveLeft((PixWidth - iconRect.width()) / 2);
+    painter.begin(&m_lightningPix);
+    mSvg.render(&painter, iconRect);
+    painter.end();
+
+    //Cache Reverse Direction
+    mSvg.load(iconPath + QStringLiteral("/reverse_direction.svg"));
+
+    //Scale SVG to fit requested size
+    iconRect.setSize(mSvg.defaultSize().scaled(PixWidth, PixHeight, Qt::KeepAspectRatio));
+
+    //Center on pixmap
+    iconRect.moveTop((PixHeight - iconRect.height()) / 2);
+    iconRect.moveLeft((PixWidth - iconRect.width()) / 2);
+    painter.begin(&m_reverseDirPix);
+    mSvg.render(&painter, iconRect);
+    painter.end();
 }
