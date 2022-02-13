@@ -104,6 +104,7 @@ void StopEditingHelper::setStop(const StopItem &item, const StopItem &prev)
 
     //Last stop has no Out Gate because there's no stop after last
     mOutGateEdit->setVisible(curStop.type != StopType::Last);
+    mOutGateTrackSpin->setVisible(curStop.type != StopType::Last);
 
     //Enable track edit only if station is selected
     mStTrackEdit->setEnabled(curStop.stationId != 0);
