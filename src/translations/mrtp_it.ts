@@ -250,134 +250,134 @@ Tutte le tratte successive saranno inoltre rimosse.</translation>
 <context>
     <name>EditRailwaySegmentDlg</name>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="57"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="61"/>
         <source>Segment name...</source>
         <translation>Nome Segmento...</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="60"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="64"/>
         <source>Km </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="64"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="68"/>
         <source> km/h</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="70"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="75"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="74"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="79"/>
         <source>Station:</source>
         <translation>Stazione:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="71"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="76"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="75"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="80"/>
         <source>Gate:</source>
         <translation>Gate:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="78"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="82"/>
         <source>Segment</source>
         <translation>Tratta</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="80"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="84"/>
         <source>Name:</source>
         <translation>Nome:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="81"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="85"/>
         <source>Distance:</source>
         <translation>Distanza:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="82"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="86"/>
         <source>Max. Speed:</source>
         <translation>Velocità Max:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="83"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="87"/>
         <source>Electrified:</source>
         <translation>Elettrificata:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="85"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="89"/>
         <source>Edit</source>
         <translation>Modifica</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="87"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="91"/>
         <source>Track connections:</source>
         <translation>Connessioni Binari:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="122"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="128"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="134"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="140"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="147"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="172"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="126"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="132"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="138"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="144"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="151"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="176"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="123"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="127"/>
         <source>Origin station must be valid.</source>
         <translation>La Stazione di origine deve essere valida.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="129"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="133"/>
         <source>Origin station gate must be valid.</source>
         <translation>Il gate della stazione di origine deve essere valido.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="135"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="139"/>
         <source>Destination station must be valid.</source>
         <translation>La Stazione di destinazione deve essere valida.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="141"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="145"/>
         <source>Destination station gate must be valid.</source>
         <translation>Il gate della stazione di destinazione deve essere valido.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="148"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="152"/>
         <source>Segment name must not be empty.</source>
         <translation>Il nome della Tratta Ferroviaria non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="173"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="177"/>
         <source>Database error: %1</source>
         <translation>Errore database: %1</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="244"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="248"/>
         <source>Edit Railway Segment</source>
         <translation>Modifica Tratta Ferroviaria</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="249"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="253"/>
         <source>New Railway Segment</source>
         <translation>Nuova Tratta Ferroviaria</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="280"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="284"/>
         <source>From</source>
         <translation>Da</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="280"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="284"/>
         <source>From (Locked)</source>
         <translation>Da (Bloccato)</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="281"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="285"/>
         <source>To (Reversed)</source>
         <translation>Per (Invertito)</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="281"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="285"/>
         <source>To</source>
         <translation>Per</translation>
     </message>
@@ -1653,12 +1653,12 @@ Il file non è stato creato. Riprova.</translation>
         <translation>Devi creare almeno una tratta ferroviaria prima di aggiungere un treno alla sessione</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="936"/>
+        <location filename="../app/mainwindow.cpp" line="938"/>
         <source>Remove selected Job</source>
         <translation>Rimuovi Servizio selezionato</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="938"/>
+        <location filename="../app/mainwindow.cpp" line="940"/>
         <source>First select a Job by double click on graph or type in search box</source>
         <translation>Prima seleziona un Servizio facendo dopppio click sul grafico o scrivendo nella casella di ricerca</translation>
     </message>
@@ -5905,59 +5905,74 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
         <translation>Stazione</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="34"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="35"/>
         <source>Track</source>
         <translation>Binario</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="38"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="40"/>
         <source>Next segment</source>
         <translation>Tratta Successiva</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="98"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="46"/>
+        <source>Out Gate track</source>
+        <translation>Binario Gate Uscita</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="54"/>
+        <source>Departure</source>
+        <translation>Partenza</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="104"/>
+        <source>Arrival</source>
+        <translation>Arrivo</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="108"/>
         <source>Press shift if you don&apos;t want to change also departure time.</source>
         <translation>Premi Shift se non vuoi modificare anche l&apos;orario di partenza.</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="161"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="173"/>
         <source> (reversed)</source>
         <translation> (invertito)</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="163"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="175"/>
         <source>Not set!</source>
         <translation>Non impostato!</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="229"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="241"/>
         <source>Gate Warning</source>
         <translation>Attenzione Gate</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="229"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="241"/>
         <source>Track Error</source>
         <translation>Errore Binario</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="259"/>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="283"/>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="299"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="271"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="295"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="311"/>
         <source>Stop Error</source>
         <translation>Errore Fermata</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="259"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="271"/>
         <source>Cannot set segment &lt;b&gt;%1&lt;/b&gt;</source>
         <translation>Impossibile impostare tratta &lt;b&gt;%1&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="284"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="296"/>
         <source>Requested gate out track &lt;b&gt;%1&lt;/b&gt; is not connected to segment &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Out track &lt;b&gt;%3&lt;/b&gt; was chosen instead.&lt;br&gt;Look segment track connection from Stations Manager for more information on available tracks.</source>
         <translation>Il binario &lt;b&gt;%1&lt;/b&gt; di uscita del gate richiest non è connesso alla tratta &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Il binario di uscita &lt;b&gt;%3&lt;/b&gt; è stato scelto al suo posto.&lt;br&gt;Vedi le connessioni dei binari della tratta attraverso il Manager Stazioni per maggiori informazioni sui binari disponibili.</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="299"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="311"/>
         <source>Cannot set segment track!</source>
         <translation>Impossibile impostare il binario della tratta!</translation>
     </message>
