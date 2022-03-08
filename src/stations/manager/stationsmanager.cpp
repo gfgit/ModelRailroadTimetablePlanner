@@ -462,7 +462,7 @@ void StationsManager::onRemoveSegment()
     RailwaySegmentHelper helper(Session->m_Db);
     if(!helper.removeSegment(segmentId, &errMsg))
     {
-        onModelError(tr("Cannot remove segment:\n%1").arg(errMsg));
+        onModelError(errMsg);
         return;
     }
 

@@ -614,8 +614,7 @@ void StationEditDialog::removeSelectedGateConnection()
     RailwaySegmentHelper helper(mDb);
     if(!helper.removeSegment(segId, &errMsg))
     {
-        QMessageBox::warning(this, tr("Error"),
-                             tr("Cannot remove segment:\n%1").arg(errMsg));
+        QMessageBox::warning(this, tr("Error"), errMsg);
         return;
     }
 
