@@ -340,7 +340,7 @@ bool RSModelsSQLModel::removeRSModel(db_id modelId, const QString& name)
     if(ret != SQLITE_OK)
     {
         ret = mDb.extended_error_code();
-        if(ret == SQLITE_CONSTRAINT_TRIGGER)
+        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
             QString tmp = name;
             if(name.isNull())

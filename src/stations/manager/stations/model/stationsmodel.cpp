@@ -410,7 +410,7 @@ bool StationsModel::removeStation(db_id stationId)
 
     if(ret != SQLITE_OK)
     {
-        if(ret == SQLITE_CONSTRAINT_TRIGGER)
+        if(SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
             //TODO: show more information to the user, like where it's still referenced
             query q(mDb, "SELECT name FROM stations WHERE id=?");
