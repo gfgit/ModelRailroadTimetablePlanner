@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include "utils/files/recentdirstore.h"
 #include <QMessageBox>
+#include <QInputDialog>
 #include "utils/owningqpointer.h"
 
 #include <QTableView>
@@ -71,6 +72,7 @@ ShiftManager::ShiftManager(QWidget *parent) :
             this, &ShiftManager::onShiftSelectionChanged);
     connect(model, &QAbstractItemModel::modelReset,
             this, &ShiftManager::onShiftSelectionChanged);
+    connect(model, &ShiftsModel::modelError, this, &ShiftManager::onModelError);
 
     setReadOnly(false);
 
@@ -116,20 +118,31 @@ void ShiftManager::onNewShift()
     if(m_readOnly)
         return;
 
-    int row = 0;
-    if(!model->addShift(&row) || row == -1)
-    {
-        QMessageBox::warning(this,
-                             tr("Error Adding Shift"),
-                             tr("An error occurred while adding a new shift:\n%1")
-                             .arg(Session->m_Db.error_msg()));
-        return;
-    }
+    OwningQPointer<QInputDialog> dlg = new QInputDialog(this);
+    dlg->setWindowTitle(tr("Add Job Shift"));
+    dlg->setLabelText(tr("Please choose a name for the new shift."));
+    dlg->setTextValue(QString());
 
-    QModelIndex index = model->index(row, ShiftsModel::ShiftName);
-    view->setCurrentIndex(index);
-    view->scrollTo(index);
-    view->edit(index); //FIXME: item is not yet fetched so editing fails, maybe queue edit?
+    do{
+        int ret = dlg->exec();
+        if(ret != QDialog::Accepted || !dlg)
+        {
+            break; //User canceled
+        }
+
+        const QString name = dlg->textValue().simplified();
+        if(name.isEmpty())
+        {
+            QMessageBox::warning(this, tr("Error"), tr("Shift name cannot be empty."));
+            continue; //Second chance
+        }
+
+        if(model->addShift(name))
+        {
+            break; //Done!
+        }
+    }
+    while (true);
 }
 
 void ShiftManager::onRemoveShift()
@@ -176,6 +189,11 @@ void ShiftManager::onShiftSelectionChanged()
     act_Remove->setEnabled(hasSel);
     act_displayShift->setEnabled(hasSel);
     act_Sheet->setEnabled(hasSel);
+}
+
+void ShiftManager::onModelError(const QString &msg)
+{
+    QMessageBox::warning(this, tr("Shift Error"), msg);
 }
 
 void ShiftManager::onSaveSheet()

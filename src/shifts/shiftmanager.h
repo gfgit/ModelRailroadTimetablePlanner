@@ -35,6 +35,8 @@ private slots:
 
     void onShiftSelectionChanged();
 
+    void onModelError(const QString& msg);
+
 private:
     QToolBar *toolBar;
     QTableView *view;
