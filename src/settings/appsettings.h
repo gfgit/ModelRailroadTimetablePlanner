@@ -109,6 +109,9 @@ public:
     FIELD(RemoveMergedSourceOwner,
           "rollingstock/remove_merged_source_owner",
           bool, false)
+    FIELD(ShowCouplingLegend,
+          "rollingstock/show_coupling_legend",
+          bool, false)
 
     //RS Import
     FIELD(ODSFirstRow, "rs_import/first_row",    int, 3)

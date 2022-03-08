@@ -14,10 +14,13 @@
 
 #include <sqlite3pp/sqlite3pp.h>
 
+#include "app/session.h"
+
 RSCoupleDialog::RSCoupleDialog(RSCouplingInterface *mgr, RsOp o, QWidget *parent) :
     QDialog (parent),
     couplingMgr(mgr),
     legend(nullptr),
+    m_showLegend(false),
     op(o)
 {
     engModel     = new RSProxyModel(couplingMgr, op, RsType::Engine, this);
@@ -54,23 +57,28 @@ RSCoupleDialog::RSCoupleDialog(RSCouplingInterface *mgr, RsOp o, QWidget *parent
     lay->addWidget(freightLabel, 0, 2);
     lay->addWidget(freightView, 1, 2);
 
-    showHideLegendBut = new QPushButton;
-    lay->addWidget(showHideLegendBut, 2, 0, 1, 1);
-
     legend = new QFrame;
-    lay->addWidget(legend, 3, 0, 1, 3);
+    lay->addWidget(legend, 2, 0, 1, 3);
     legend->hide();
+
+    QHBoxLayout *buttonLay = new QHBoxLayout;
+    lay->addLayout(buttonLay, 3, 0, 1, 3);
+
+    showHideLegendBut = new QPushButton;
+    buttonLay->addWidget(showHideLegendBut);
 
     QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok); //TODO: implement also cancel
     connect(box, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(box, &QDialogButtonBox::rejected, this, &QDialog::reject);
-    lay->addWidget(box, 4, 0, 1, 3);
+    buttonLay->addWidget(box);
 
     connect(showHideLegendBut, &QPushButton::clicked, this, &RSCoupleDialog::toggleLegend);
     updateButText();
 
     setMinimumSize(400, 300);
     setWindowFlag(Qt::WindowMaximizeButtonHint);
+
+    setLegendVisible(AppSettings.getShowCouplingLegend());
 }
 
 void RSCoupleDialog::loadProxyModels(sqlite3pp::database& db, db_id jobId, db_id stopId, db_id stationId, const QTime& arrival)
@@ -245,32 +253,64 @@ void RSCoupleDialog::loadProxyModels(sqlite3pp::database& db, db_id jobId, db_id
     coachModel->loadData(coaches);
 }
 
+void RSCoupleDialog::done(int ret)
+{
+    //Save legend state
+    AppSettings.setShowCouplingLegend(m_showLegend);
+
+    QDialog::done(ret);
+}
+
 void RSCoupleDialog::toggleLegend()
 {
-    if(legend->isVisible())
+    setLegendVisible(!m_showLegend);
+}
+
+void RSCoupleDialog::updateButText()
+{
+    showHideLegendBut->setText(m_showLegend ? tr("Hide legend") : tr("Show legend"));
+}
+
+void RSCoupleDialog::setLegendVisible(bool val)
+{
+    m_showLegend = val;
+
+    if(legend->isVisible() && !m_showLegend)
     {
         legend->hide();
-    }else{
+    }
+    else if(m_showLegend && !legend->isVisible())
+    {
         legend->show();
         if(!legend->layout())
         {
+            double fontPt = font().pointSizeF() * 1.2;
+
             QVBoxLayout *legendLay = new QVBoxLayout(legend);
-            QLabel *label = new QLabel(tr("<p style=\"font-size:13pt\">"
-                                          "<span style=\"background-color:#FF56FF\">___</span> The item isn't coupled before or already coupled.<br>"
-                                          "<span style=\"background-color:#FF3d43\">___</span> The item isn't in this station.<br>"
-                                          "<span style=\"color:#0000FF;background-color:#FFFFFF\">\\\\\\\\</span> Railway line doesn't allow electric traction.<br>"
-                                          "<span style=\"background-color:#00FFFF\">___</span> First use of this item.<br>"
-                                          "<span style=\"background-color:#00FF00\">___</span> This item is never used in this session.</p>"));
+            QLabel *label = new QLabel(tr("<style>\n"
+                                          "table, td {"
+                                          "border: 1px solid black;"
+                                          "border-collapse:collapse;"
+                                          "padding:5px;"
+                                          " }"
+                                          "</style>"
+                                          "<table style=\"font-size:%1pt;padding:10pt\"><tr>"
+                                          "<td><span style=\"background-color:#FFFFFF\">___</span> This item is free in current station.</td>"
+                                          "<td><span style=\"background-color:#FF3d43\">___</span> The item isn't in this station.</td>"
+                                          "</tr><tr>"
+                                          "<td><span style=\"background-color:#00FFFF\">___</span> First use of this item.</td>"
+                                          "<td><span style=\"background-color:#FF56FF\">___</span> The item isn't coupled before or already coupled.</td>"
+                                          "</tr><tr>"
+                                          "<td><span style=\"background-color:#00FF00\">___</span> This item is never used in this session.</td>"
+                                          "<td><span style=\"color:#0000FF;background-color:#FFFFFF\">\\\\\\\\</span> Railway line doesn't allow electric traction.</td>"
+                                          "</tr></table>").arg(fontPt));
             label->setTextFormat(Qt::RichText);
+            label->setWordWrap(true);
             legendLay->addWidget(label);
+            legendLay->setContentsMargins(QMargins());
             legend->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
         }
     }
     updateButText();
     adjustSize();
-}
-
-void RSCoupleDialog::updateButText()
-{
-    showHideLegendBut->setText(legend->isVisible() ? tr("Hide legend") : tr("Show legend"));
 }
