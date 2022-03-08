@@ -272,7 +272,8 @@ namespace sqlite3pp
 
   inline int statement::prepare_impl(char const* stmt)
   {
-    return sqlite3_prepare(db_.db_, stmt, std::strlen(stmt), &stmt_, &tail_);
+    //return sqlite3_prepare(db_.db_, stmt, std::strlen(stmt), &stmt_, &tail_); -- NOTE: DEPRECATED
+    return sqlite3_prepare_v2(db_.db_, stmt, std::strlen(stmt), &stmt_, &tail_);
   }
 
   inline int statement::finish()
