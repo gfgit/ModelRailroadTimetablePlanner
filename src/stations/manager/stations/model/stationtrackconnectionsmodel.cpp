@@ -329,7 +329,7 @@ bool StationTrackConnectionsModel::removeTrackConnection(db_id connId)
 
     if(ret != SQLITE_OK)
     {
-        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY)
+        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
             //TODO: show more information to the user, like where it's still referenced
             emit modelError(tr(errorTrackConnInUseText));
