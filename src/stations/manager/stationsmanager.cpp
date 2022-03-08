@@ -301,7 +301,16 @@ void StationsManager::onRemoveStation()
     if(!stationView->selectionModel()->hasSelection())
         return;
 
-    db_id stId = stationsModel->getIdAtRow(stationView->currentIndex().row());
+    QModelIndex idx = stationView->currentIndex();
+
+    //Ask confirmation
+    int ret = QMessageBox::question(this, tr("Remove Station?"),
+                                    tr("Are you sure you want to remove station <b>%1</b>?")
+                                        .arg(stationsModel->getNameAtRow(idx.row())));
+    if(ret != QMessageBox::Yes)
+        return;
+
+    db_id stId = stationsModel->getIdAtRow(idx.row());
     if(!stId)
         return;
 
@@ -437,6 +446,14 @@ void StationsManager::onRemoveSegment()
         return;
 
     QModelIndex idx = segmentsView->currentIndex();
+
+    //Ask confirmation
+    int ret = QMessageBox::question(this, tr("Remove Segment?"),
+                                    tr("Are you sure you want to remove segment <b>%1</b>?")
+                                        .arg(segmentsModel->getNameAtRow(idx.row())));
+    if(ret != QMessageBox::Yes)
+        return;
+
     db_id segmentId = segmentsModel->getIdAtRow(idx.row());
     if(!segmentId)
         return;
@@ -534,10 +551,19 @@ void StationsManager::onRemoveLine()
     if(!linesView->selectionModel()->hasSelection())
         return;
 
-    int row = linesView->currentIndex().row();
-    db_id lineId = linesModel->getIdAtRow(row);
+    QModelIndex idx = linesView->currentIndex();
+
+    //Ask confirmation
+    int ret = QMessageBox::question(this, tr("Remove Line?"),
+                                    tr("Are you sure you want to remove line <b>%1</b>?")
+                                        .arg(linesModel->getNameAtRow(idx.row())));
+    if(ret != QMessageBox::Yes)
+        return;
+
+    db_id lineId = linesModel->getIdAtRow(idx.row());
     if(!lineId)
         return;
+
     linesModel->removeLine(lineId);
 }
 
