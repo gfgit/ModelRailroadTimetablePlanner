@@ -114,6 +114,8 @@ void RollingStockManager::setupPages()
             this, &RollingStockManager::onRollingstockSelectionChanged);
     connect(rsSQLModel, &QAbstractItemModel::modelReset,
             this, &RollingStockManager::onRollingstockSelectionChanged);
+    connect(rsSQLModel, &RollingstockSQLModel::modelError,
+            this, &RollingStockManager::onModelError);
 
     //Models Page
     QWidget *modelsTab = new QWidget;
@@ -159,6 +161,8 @@ void RollingStockManager::setupPages()
             this, &RollingStockManager::onRsModelSelectionChanged);
     connect(modelsSQLModel, &QAbstractItemModel::modelReset,
             this, &RollingStockManager::onRsModelSelectionChanged);
+    connect(modelsSQLModel, &RSModelsSQLModel::modelError,
+            this, &RollingStockManager::onModelError);
 
     //Owners Page
     QWidget *ownersTab = new QWidget;
@@ -197,6 +201,8 @@ void RollingStockManager::setupPages()
             this, &RollingStockManager::onRsOwnerSelectionChanged);
     connect(ownersSQLModel, &QAbstractItemModel::modelReset,
             this, &RollingStockManager::onRsOwnerSelectionChanged);
+    connect(ownersSQLModel, &RSOwnersSQLModel::modelError,
+            this, &RollingStockManager::onModelError);
 
     //Setup Delegates
     //auto modelDelegate = new RSModelDelegate(modelsModel, this);
@@ -341,6 +347,11 @@ void RollingStockManager::visibilityChanged(int v)
     }else{
         updateModels();
     }
+}
+
+void RollingStockManager::onModelError(const QString &msg)
+{
+    QMessageBox::warning(this, tr("Rollingstock Error"), msg);
 }
 
 void RollingStockManager::importRS(bool resume, QWidget *parent)

@@ -49,6 +49,8 @@ private slots:
     void updateModels();
     void visibilityChanged(int v);
 
+    void onModelError(const QString& msg);
+
     void onViewRSPlan();
     void onViewRSPlanSearch();
 
