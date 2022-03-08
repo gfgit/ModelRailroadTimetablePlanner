@@ -14,7 +14,7 @@ using namespace sqlite3pp;
 static constexpr char
     errorTrackConnInUseText[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
                         "This track connection is still referenced.\n"
-                        "Please remove all references before deleting it.");
+                        "Please change remove or change path to all Jobs travelling on this connection.");
 
 static constexpr char
     errorConnAlreadyExistsText[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
