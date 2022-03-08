@@ -5,6 +5,8 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
+#include <QBrush>
+
 RsPlanModel::RsPlanModel(sqlite3pp::database &db,
                          QObject *parent) :
     QAbstractTableModel(parent),
@@ -48,23 +50,56 @@ int RsPlanModel::columnCount(const QModelIndex &parent) const
 
 QVariant RsPlanModel::data(const QModelIndex &idx, int role) const
 {
-    if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols || role != Qt::DisplayRole)
+    if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols)
         return QVariant();
 
     const RsPlanItem& item = m_data.at(idx.row());
-    switch (idx.column())
+    const RsPlanItem *prevItem = nullptr;
+    if(idx.row() > 0)
+        prevItem = &m_data.at(idx.row() - 1);
+
+    switch (role)
     {
-    case JobName:
-        return JobCategoryName::jobName(item.jobId, item.jobCat);
-    case Station:
-        return item.stationName;
-    case Arrival:
-        return item.arrival;
-    case Departure:
-        return item.departure;
-    case Operation:
-        return item.op == RsOp::Coupled ?
-                    tr("Coupled") : tr("Uncoupled");
+    case Qt::DisplayRole:
+    {
+        switch (idx.column())
+        {
+        case JobName:
+            return JobCategoryName::jobName(item.jobId, item.jobCat);
+        case Station:
+            return item.stationName;
+        case Arrival:
+            return item.arrival;
+        case Departure:
+            return item.departure;
+        case Operation:
+            return item.op == RsOp::Coupled ?
+                       tr("Coupled") : tr("Uncoupled");
+        }
+        break;
+    }
+    case Qt::BackgroundRole:
+    {
+        //Mark cells with errors
+        switch (idx.column())
+        {
+        case Station:
+        {
+            //Coupled in a different station than previous, this means it gets teleported
+            if(item.op == RsOp::Coupled && prevItem && prevItem->stationId != item.stationId)
+                return QBrush(QColor(255, 0, 183)); //Magenta
+            break;
+        }
+        case Operation:
+        {
+            //Coupled while already coupled or uncoupled while not coupled
+            if(prevItem && item.op == prevItem->op)
+                return QBrush(QColor(255, 110, 110)); //Light red
+            break;
+        }
+        }
+        break;
+    }
     }
 
     return QVariant();
