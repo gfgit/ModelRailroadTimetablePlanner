@@ -57,10 +57,10 @@ public:
 
     // ShiftModel
 
-    bool removeShift(db_id shiftId);
+    bool removeShift(db_id shiftId, const QString &name);
     bool removeShiftAt(int row);
 
-    db_id addShift(int *outRow);
+    db_id addShift(const QString &shiftName);
 
     // Convinience
     inline db_id shiftAtRow(int row) const

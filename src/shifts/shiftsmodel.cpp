@@ -11,6 +11,21 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
+//Error messages
+static constexpr char errorNameAlreadyUsedText[]
+    = QT_TRANSLATE_NOOP("ShiftsModel",
+                        "There is already another job shift with same name: <b>%1</b>");
+
+static constexpr char errorGenericAddText[]
+    = QT_TRANSLATE_NOOP("ShiftsModel",
+                        "An error occurred while adding a new shift: <b>%1</b><br>"
+                        "%2");
+
+static constexpr char errorShiftInUseCannotDeleteText[]
+    = QT_TRANSLATE_NOOP("ShiftsModel",
+                        "Shift <b>%1</b> is used by some jobs.<br>"
+                        "To remove it, transfer those jobs to a different shift or remove them.");
+
 ShiftsModel::ShiftsModel(database &db, QObject *parent) :
     BaseClass(500, db, parent)
 {
@@ -98,13 +113,15 @@ bool ShiftsModel::setData(const QModelIndex &idx, const QVariant &value, int rol
                 set_name.bind(1, newName);
             set_name.bind(2, item.shiftId);
             int ret = set_name.execute();
+
             if(ret == SQLITE_CONSTRAINT_UNIQUE)
             {
-                emit modelError(tr("There is already another job shift with same name: <b>%1</b>").arg(newName));
+                emit modelError(tr(errorNameAlreadyUsedText).arg(newName));
                 return false;
             }
             else if(ret != SQLITE_OK)
             {
+                qDebug() << "Shift Error:" << ret << mDb.error_msg();
                 return false;
             }
 
@@ -254,7 +271,7 @@ void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/, c
     postResult(vec, first);
 }
 
-bool ShiftsModel::removeShift(db_id shiftId)
+bool ShiftsModel::removeShift(db_id shiftId, const QString& name)
 {
     if(!shiftId)
         return false;
@@ -265,6 +282,29 @@ bool ShiftsModel::removeShift(db_id shiftId)
     if(ret != SQLITE_OK)
     {
         qWarning() << "ShiftModel: error removing shift" << ret << mDb.error_msg();
+
+        if(ret != SQLITE_OK)
+        {
+            ret = mDb.extended_error_code();
+            if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+            {
+                QString tmp = name;
+                if(name.isNull())
+                {
+                    query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
+                    q.bind(1, shiftId);
+                    q.step();
+                    tmp = q.getRows().get<QString>(0);
+                }
+
+                emit modelError(tr(errorShiftInUseCannotDeleteText).arg(tmp));
+                return false;
+            }
+
+            qWarning() << "ShiftModel: error removing shift" << ret << mDb.error_msg();
+            return false;
+        }
+
         return false;
     }
 
@@ -279,14 +319,17 @@ bool ShiftsModel::removeShiftAt(int row)
     if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false; //Not fetched yet or invalid
 
-    return removeShift(cache.at(row - cacheFirstRow).shiftId);
+    const ShiftItem& item = cache.at(row - cacheFirstRow);
+    return removeShift(item.shiftId, item.shiftName);
 }
 
-db_id ShiftsModel::addShift(int *outRow)
+db_id ShiftsModel::addShift(const QString& shiftName)
 {
     db_id shiftId = 0;
 
-    command cmd(mDb, "INSERT INTO jobshifts(id, name) VALUES(NULL, '')");
+    command cmd(mDb, "INSERT INTO jobshifts(id, name) VALUES(NULL, ?)");
+    cmd.bind(1, shiftName);
+
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
     int ret = cmd.execute();
@@ -296,18 +339,18 @@ db_id ShiftsModel::addShift(int *outRow)
     }
     sqlite3_mutex_leave(mutex);
 
-    if(ret == SQLITE_CONSTRAINT_UNIQUE)
+    if(ret != SQLITE_OK)
     {
-        //There is already an empty shift, use that instead
-        query findEmpty(mDb, "SELECT id FROM jobshifts WHERE name = '' OR name IS NULL LIMIT 1");
-        if(findEmpty.step() == SQLITE_ROW)
+        qDebug() << "Shift Error adding:" << ret << mDb.error_msg();
+
+        if(ret == SQLITE_CONSTRAINT_UNIQUE)
         {
-            shiftId = findEmpty.getRows().get<db_id>(0);
+            emit modelError(tr(errorNameAlreadyUsedText).arg(shiftName));
+            return false;
         }
-    }
-    else if(ret != SQLITE_OK)
-    {
-        qDebug() << "Shift Error adding:" << ret;
+
+        //Generic Error
+        emit modelError(tr(errorGenericAddText).arg(shiftName, mDb.error_msg()));
     }
 
     //Reset filter
@@ -316,9 +359,6 @@ db_id ShiftsModel::addShift(int *outRow)
     emit filterChanged();
 
     refreshData(); //Recalc row count
-
-    if(outRow)
-        *outRow = shiftId ? 0 : -1; //Empty name is always the first
 
     if(shiftId)
         emit Session->shiftAdded(shiftId);
