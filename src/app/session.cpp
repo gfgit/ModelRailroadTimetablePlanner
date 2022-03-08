@@ -221,6 +221,12 @@ DB_Error MeetingSession::createNewDB(const QString& file)
 
     fileName = file;
 
+    /* NOTE: SQLite Extended Error codes as of version 3.35.0
+     * If a foreign key is explicitly created with "ON DELETE RESTRICT",
+     * it will trigger SQLITE_CONSTRAINT_TRIGGER error,
+     * if not explicitly set, it will trigger SQLITE_CONSTRAINT_FOREIGNKEY error.
+     */
+
     //Tables
     result = m_Db.execute("CREATE TABLE rs_models ("
                           "id INTEGER,"
@@ -367,7 +373,7 @@ DB_Error MeetingSession::createNewDB(const QString& file)
                           "id INTEGER PRIMARY KEY,"
                           "category INTEGER NOT NULL DEFAULT 0,"
                           "shift_id INTEGER,"
-                          "FOREIGN KEY(shift_id) REFERENCES jobshifts(id) )");
+                          "FOREIGN KEY(shift_id) REFERENCES jobshifts(id) ON UPDATE CASCADE ON DELETE RESTRICT)");
     CHECK(result);
 
     result = m_Db.execute("CREATE TABLE stops ("
