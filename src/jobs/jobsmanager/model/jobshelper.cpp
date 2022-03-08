@@ -293,6 +293,12 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
     return true;
 }
 
+bool JobsHelper::checkShiftsExist(sqlite3pp::database &db)
+{
+    query q(db, "SELECT id FROM jobshifts LIMIT 1");
+    return q.step() == SQLITE_ROW;
+}
+
 JobStopDirectionHelper::JobStopDirectionHelper(sqlite3pp::database &db) :
     mDb(db),
     m_query(new sqlite3pp::query(mDb))

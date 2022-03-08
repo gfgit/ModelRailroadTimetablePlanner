@@ -27,6 +27,7 @@
 #include "sessionstartendrsviewer.h"
 
 #include <QMessageBox>
+#include "utils/owningqpointer.h"
 
 ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
@@ -617,6 +618,22 @@ bool ViewManager::requestJobEditor(db_id jobId, db_id stopId)
 bool ViewManager::requestJobCreation()
 {
     /* Creates a new job and opens JobPathEditor */
+
+    if(!JobsHelper::checkShiftsExist(Session->m_Db))
+    {
+        //It's better to create Shifts before creating Jobs,
+        //remind the user on every new Job
+        int ret = QMessageBox::question(m_mainWidget, tr("Create Shift too?"),
+                                        tr("No Shift are present in this session.\n"
+                                           "Do you want to create some before creating Jobs?"),
+                                        QMessageBox::Yes | QMessageBox::No);
+        if(ret == QMessageBox::Yes)
+        {
+            //Create shift
+            showShiftManager();
+            return false;
+        }
+    }
 
     if(!jobEditor || !jobEditor->createNewJob())
         return false; //JobPathEditor is busy, abort

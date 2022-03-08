@@ -18,6 +18,8 @@ public:
 
     static bool copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJobId,
                           int secsOffset, bool copyRsOps, bool reversePath);
+
+    static bool checkShiftsExist(sqlite3pp::database &db);
 };
 
 class JobStopDirectionHelper
