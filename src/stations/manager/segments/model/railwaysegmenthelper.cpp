@@ -5,6 +5,20 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
+#include <QCoreApplication>
+
+//Error messages
+class RailwaySegmentHelperStrings
+{
+    Q_DECLARE_TR_FUNCTIONS(RailwaySegmentHelperStrings)
+};
+
+static constexpr char
+    errorSegmentInUseText[] =
+    QT_TRANSLATE_NOOP("RailwaySegmentHelperStrings",
+                      "Cannot delete segment <b>%1</b> because it is still referenced.<br>"
+                      "Please delete all jobs travelling on this segment or change their path.");
+
 RailwaySegmentHelper::RailwaySegmentHelper(sqlite3pp::database &db) :
     mDb(db)
 {
@@ -129,7 +143,23 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
     if(ret != SQLITE_OK)
     {
         if(outErrMsg)
-            *outErrMsg = mDb.error_msg();
+        {
+            if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+            {
+                //Get name
+                query q(mDb, "SELECT name FROM railway_segments WHERE id=?");
+                q.bind(1, segmentId);
+                q.step();
+                QString segName = q.getRows().get<QString>(0);
+                q.finish();
+
+                *outErrMsg = RailwaySegmentHelperStrings::tr(errorSegmentInUseText).arg(segName.toHtmlEscaped());
+            }
+            else
+            {
+                *outErrMsg = mDb.error_msg();
+            }
+        }
         return false;
     }
 
