@@ -31,7 +31,7 @@ static constexpr char
 
 static constexpr char
     errorStationInUseText[] = QT_TRANSLATE_NOOP("StationsModel",
-                        "Cannot delete <b>%1</b> station because it is stille referenced.<br>"
+                        "Cannot delete <b>%1</b> station because it is still referenced.<br>"
                         "Please delete all jobs stopping here and remove the station from any line.");
 
 StationsModel::StationsModel(sqlite3pp::database &db, QObject *parent) :
