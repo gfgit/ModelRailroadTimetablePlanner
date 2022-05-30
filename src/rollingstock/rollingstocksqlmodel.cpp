@@ -284,7 +284,7 @@ bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
     if(ret != SQLITE_OK)
     {
         ret = mDb.extended_error_code();
-        if(SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
             QString name;
             if(item)
