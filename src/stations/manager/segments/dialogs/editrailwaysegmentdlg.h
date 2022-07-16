@@ -9,6 +9,10 @@ namespace sqlite3pp {
 class database;
 }
 
+namespace utils {
+struct RailwaySegmentInfo;
+}
+
 class StationsMatchModel;
 class StationGatesMatchModel;
 class RailwaySegmentHelper;
@@ -37,6 +41,16 @@ public:
     virtual void done(int res) override;
 
     void setSegment(db_id segmentId, db_id lockStId, db_id lockGateId);
+    void setSegmentInfo(const utils::RailwaySegmentInfo& info);
+
+    bool checkValues();
+    bool applyChanges();
+
+    bool fillSegInfo(utils::RailwaySegmentInfo &info);
+
+    void setGatesReadOnly(bool val);
+
+    void setManuallyApply(bool val);
 
 private slots:
     void onFromStationChanged(db_id stationId);
@@ -73,6 +87,7 @@ private:
     db_id m_lockStationId;
     db_id m_lockGateId;
     bool reversed;
+    bool manuallyApply;
 };
 
 #endif // EDITRAILWAYSEGMENTDLG_H

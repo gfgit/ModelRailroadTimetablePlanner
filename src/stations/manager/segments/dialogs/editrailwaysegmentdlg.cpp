@@ -28,7 +28,8 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
     m_segmentId(0),
     m_lockStationId(0),
     m_lockGateId(0),
-    reversed(false)
+    reversed(false),
+    manuallyApply(false)
 {
     fromStationMatch = new StationsMatchModel(db, this);
     toStationMatch = new StationsMatchModel(db, this);
@@ -62,6 +63,7 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
 
     distanceSpin = new KmSpinBox;
     distanceSpin->setPrefix(tr("Km "));
+    distanceSpin->setMinimum(100); //At least 100 meters, 0.1 km
 
     maxSpeedSpin = new QSpinBox;
     maxSpeedSpin->setRange(10, 999);
@@ -69,12 +71,12 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
 
     electifiedCheck = new QCheckBox;
 
-    fromBox = new QGroupBox;
+    fromBox = new QGroupBox(tr("From:"));
     QFormLayout *fromLay = new QFormLayout(fromBox);
     fromLay->addRow(tr("Station:"), fromStationEdit);
     fromLay->addRow(tr("Gate:"), fromGateEdit);
 
-    toBox = new QGroupBox;
+    toBox = new QGroupBox(tr("To:"));
     QFormLayout *toLay = new QFormLayout(toBox);
     toLay->addRow(tr("Station:"), toStationEdit);
     toLay->addRow(tr("Gate:"), toGateEdit);
@@ -114,71 +116,14 @@ void EditRailwaySegmentDlg::done(int res)
 {
     if(res == QDialog::Accepted)
     {
-        QString tmp;
-        db_id fromStId = 0;
-        db_id fromGateId = 0;
-        db_id toStId = 0;
-        db_id toGateId = 0;
-        const QString segName = segmentNameEdit->text().simplified();
-
-        if(!fromStationEdit->getData(fromStId, tmp))
-        {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Origin station must be valid."));
+        if(!checkValues())
             return;
-        }
-        if(!fromGateEdit->getData(fromGateId, tmp))
-        {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Origin station gate must be valid."));
-            return;
-        }
-        if(!toStationEdit->getData(toStId, tmp))
-        {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Destination station must be valid."));
-            return;
-        }
-        if(!toGateEdit->getData(toGateId, tmp))
-        {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Destination station gate must be valid."));
-            return;
-        }
 
-        if(segName.isEmpty())
+        if(!manuallyApply)
         {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Segment name must not be empty."));
-            return;
+            if(!applyChanges())
+                return;
         }
-
-        QFlags<utils::RailwaySegmentType> type;
-        if(electifiedCheck->isChecked()) //FIXME: other types also
-            type.setFlag(utils::RailwaySegmentType::Electrified);
-
-        const int distanceMeters = distanceSpin->value();
-        const int speedKmH = maxSpeedSpin->value();
-
-        if(reversed)
-        {
-            //Revert to original
-            qSwap(fromStId, toStId);
-            qSwap(fromGateId, toGateId);
-        }
-
-        QString errMsg;
-        if(!helper->setSegmentInfo(m_segmentId, m_segmentId == 0,
-                                    segName, utils::RailwaySegmentType(int(type)),
-                                    distanceMeters, speedKmH,
-                                    fromGateId, toGateId, &errMsg))
-        {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Database error: %1").arg(errMsg));
-            return;
-        }
-
-        connModel->applyChanges(m_segmentId);
     }
 
     QDialog::done(res);
@@ -200,25 +145,17 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
     if(m_lockStationId == DoNotLock)
         m_lockGateId = DoNotLock; //Cannot lock gate without locking station
 
-    RailwaySegmentHelper::SegmentInfo info;
+    utils::RailwaySegmentInfo info;
     info.segmentId = m_segmentId;
-    info.distanceMeters = 10000; // 10 km
-    info.maxSpeedKmH = 120;   // 120 km/h
-
     info.from.stationId = m_lockStationId;
     info.from.gateId = m_lockGateId;
-    info.to.stationId = 0;
-    info.to.gateId = 0;
 
-    QFlags<utils::RailwaySegmentType> type;
-
-    if(segmentId)
+    if(m_segmentId)
     {
         if(!helper->getSegmentInfo(info))
         {
             return; //TODO: error reporting
         }
-        type = info.type;
 
         if(m_lockStationId == info.to.stationId)
         {
@@ -244,14 +181,14 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
             //User passed different gate, do not lock
             m_lockGateId = DoNotLock;
         }
+    }
 
-        setWindowTitle(tr("Edit Railway Segment"));
-    }
-    else
-    {
-        //It's a new segment
-        setWindowTitle(tr("New Railway Segment"));
-    }
+    setSegmentInfo(info);
+}
+
+void EditRailwaySegmentDlg::setSegmentInfo(const utils::RailwaySegmentInfo &info)
+{
+    QFlags<utils::RailwaySegmentType> type = info.type;
 
     segmentNameEdit->setText(info.segmentName);
     distanceSpin->setValue(info.distanceMeters);
@@ -283,6 +220,124 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
     fromBox->setTitle(m_lockGateId == DoNotLock ? tr("From") : tr("From (Locked)"));
     toBox->setTitle(reversed ? tr("To (Reversed)") : tr("To"));
+
+    if(m_segmentId)
+    {
+        setWindowTitle(tr("Edit Railway Segment"));
+    }
+    else
+    {
+        //It's a new segment
+        setWindowTitle(tr("New Railway Segment"));
+    }
+}
+
+void EditRailwaySegmentDlg::setGatesReadOnly(bool val)
+{
+    fromStationEdit->setReadOnly(val);
+    fromGateEdit->setReadOnly(val);
+    toStationEdit->setReadOnly(val);
+    toGateEdit->setReadOnly(val);
+}
+
+bool EditRailwaySegmentDlg::checkValues()
+{
+    utils::RailwaySegmentInfo info;
+    fillSegInfo(info);
+
+    if(!info.from.stationId)
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Origin station must be valid."));
+        return false;
+    }
+    if(!info.from.gateId)
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Origin station gate must be valid."));
+        return false;
+    }
+    if(!info.to.stationId)
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Destination station must be valid."));
+        return false;
+    }
+    if(!info.to.gateId)
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Destination station gate must be valid."));
+        return false;
+    }
+
+    if(info.segmentName.isEmpty())
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Segment name must not be empty."));
+        return false;
+    }
+
+    return true;
+}
+
+bool EditRailwaySegmentDlg::applyChanges()
+{
+    utils::RailwaySegmentInfo info;
+    fillSegInfo(info);
+
+    QString errMsg;
+    if(!helper->setSegmentInfo(m_segmentId, m_segmentId == 0,
+                                info.segmentName, info.type,
+                                info.distanceMeters, info.maxSpeedKmH,
+                                info.from.gateId, info.to.gateId, &errMsg))
+    {
+        QMessageBox::warning(this, tr("Error"),
+                             tr("Database error: %1").arg(errMsg));
+        return false;
+    }
+
+    connModel->applyChanges(m_segmentId);
+
+    return true;
+}
+
+bool EditRailwaySegmentDlg::fillSegInfo(utils::RailwaySegmentInfo &info)
+{
+    info.segmentId = m_segmentId;
+    info.segmentName = segmentNameEdit->text().simplified();
+    info.distanceMeters = distanceSpin->value();
+    info.maxSpeedKmH = maxSpeedSpin->value();
+
+    QFlags<utils::RailwaySegmentType> type;
+    if(electifiedCheck->isChecked()) //FIXME: other types also
+        type.setFlag(utils::RailwaySegmentType::Electrified);
+    info.type = utils::RailwaySegmentType(int(type));
+
+    QString tmp;
+
+    if(!fromStationEdit->getData(info.from.stationId, info.from.stationName))
+        return false;
+
+    if(!fromGateEdit->getData(info.from.gateId, tmp))
+        return false;
+    if(tmp.size())
+        info.from.gateLetter = tmp.front();
+
+    if(!toStationEdit->getData(info.to.stationId, info.to.stationName))
+        return false;
+
+    if(!toGateEdit->getData(info.to.gateId, tmp))
+        return false;
+    if(tmp.size())
+        info.to.gateLetter = tmp.front();
+
+    if(reversed)
+    {
+        //Revert to original
+        qSwap(info.from, info.to);
+    }
+
+    return true;
 }
 
 void EditRailwaySegmentDlg::onFromStationChanged(db_id stationId)
@@ -322,4 +377,9 @@ void EditRailwaySegmentDlg::editSegmentTrackConnections()
 {
     OwningQPointer<EditRailwayConnectionDlg> dlg(new EditRailwayConnectionDlg(connModel, this));
     dlg->exec();
+}
+
+void EditRailwaySegmentDlg::setManuallyApply(bool val)
+{
+    manuallyApply = val;
 }

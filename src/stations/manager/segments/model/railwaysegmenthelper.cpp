@@ -25,7 +25,7 @@ RailwaySegmentHelper::RailwaySegmentHelper(sqlite3pp::database &db) :
 
 }
 
-bool RailwaySegmentHelper::getSegmentInfo(SegmentInfo &info)
+bool RailwaySegmentHelper::getSegmentInfo(utils::RailwaySegmentInfo &info)
 {
     query q(mDb, "SELECT s.name,s.max_speed_kmh,s.type,s.distance_meters,"
                  "s.in_gate_id,g1.station_id,"
@@ -53,7 +53,7 @@ bool RailwaySegmentHelper::getSegmentInfo(SegmentInfo &info)
     return true;
 }
 
-bool RailwaySegmentHelper::getSegmentInfoFromGate(db_id gateId, SegmentInfo &info)
+bool RailwaySegmentHelper::getSegmentInfoFromGate(db_id gateId, utils::RailwaySegmentInfo &info)
 {
     query q(mDb, "SELECT s.id,s.name,s.max_speed_kmh,s.type,s.distance_meters,"
                  "s.in_gate_id,g1.name,g1.station_id,st1.name,"

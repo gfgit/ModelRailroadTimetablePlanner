@@ -2,6 +2,7 @@
 #define STATION_UITLS_H
 
 #include "utils/types.h"
+#include <QString>
 
 namespace utils
 {
@@ -49,6 +50,26 @@ enum class RailwaySegmentType : qint8
     LeftHandTraffic = 1 << 2,
     RightHandTraffic = 1 << 3,
     MultipleTraffic = (LeftHandTraffic | RightHandTraffic)
+};
+
+struct RailwaySegmentGateInfo
+{
+    db_id gateId = 0;
+    db_id stationId = 0;
+    QString stationName;
+    QChar gateLetter;
+};
+
+struct RailwaySegmentInfo
+{
+    db_id segmentId = 0;
+    QString segmentName;
+    int distanceMeters = 10000; //10 Km
+    int maxSpeedKmH = 120;
+    RailwaySegmentType type;
+
+    RailwaySegmentGateInfo from;
+    RailwaySegmentGateInfo to;
 };
 
 } // namespace utils
