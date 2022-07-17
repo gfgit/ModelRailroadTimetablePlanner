@@ -29,6 +29,7 @@
 #include "stations/manager/stations/dialogs/stationeditdialog.h"
 
 #include "stations/manager/segments/dialogs/editrailwaysegmentdlg.h"
+#include "stations/manager/segments/dialogs/splitrailwaysegmentdlg.h"
 
 #include "stations/manager/lines/dialogs/editlinedlg.h"
 
@@ -150,10 +151,13 @@ void StationsManager::setup_SegmentPage()
     QAction *act_addSeg = segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
     act_remSeg = segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
     act_editSeg = segmentsToolBar->addAction(tr("Edit"), this, &StationsManager::onEditSegment);
+    segmentsToolBar->addSeparator();
+    QAction *act_splitSeg = segmentsToolBar->addAction(tr("Split"), this, &StationsManager::onSplitSegment);
 
     act_addSeg->setToolTip(tr("Create new Railway Segment"));
     act_remSeg->setToolTip(tr("Delete selected Railway Segment"));
     act_editSeg->setToolTip(tr("Edit selected Railway Segment"));
+    act_splitSeg->setToolTip(tr("Split Railway Segment in 2 parts"));
 
     connect(segmentsView->selectionModel(), &QItemSelectionModel::selectionChanged,
             this, &StationsManager::onSegmentSelectionChanged);
@@ -472,7 +476,7 @@ void StationsManager::onRemoveSegment()
 
 void StationsManager::onNewSegment()
 {
-    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, this);
     dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 
@@ -493,7 +497,7 @@ void StationsManager::onEditSegment()
     if(!segmentId)
         return;
 
-    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(Session->m_Db, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, this);
     dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 
@@ -503,6 +507,22 @@ void StationsManager::onEditSegment()
     //FIXME: check if actually changed
     emit Session->segmentNameChanged(segmentId);
     emit Session->segmentStationsChanged(segmentId);
+
+    //Refresh fields
+    segmentsModel->refreshData(true);
+}
+
+void StationsManager::onSplitSegment()
+{
+    OwningQPointer<SplitRailwaySegmentDlg> dlg = new SplitRailwaySegmentDlg(Session->m_Db, this);
+    int ret = dlg->exec();
+
+    if(ret != QDialog::Accepted || !dlg)
+        return;
+
+    //FIXME: get segments ID
+    //emit Session->segmentNameChanged(segmentId);
+    //emit Session->segmentStationsChanged(segmentId);
 
     //Refresh fields
     segmentsModel->refreshData(true);

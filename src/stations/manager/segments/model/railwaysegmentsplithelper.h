@@ -15,10 +15,13 @@ class RailwaySegmentSplitHelper
 public:
     RailwaySegmentSplitHelper(sqlite3pp::database &db);
 
-    void setInfo(const utils::RailwaySegmentInfo& origSeg,
-                 const utils::RailwaySegmentInfo& newSeg);
+    void setInfo(const utils::RailwaySegmentInfo& origInfo,
+                 const utils::RailwaySegmentInfo& newInfo);
 
     bool split();
+
+private:
+    bool updateLines();
 
 private:
     sqlite3pp::database &mDb;

@@ -4,6 +4,8 @@
 #include "utils/types.h"
 #include <QString>
 
+#include <QString>
+
 namespace utils
 {
 
