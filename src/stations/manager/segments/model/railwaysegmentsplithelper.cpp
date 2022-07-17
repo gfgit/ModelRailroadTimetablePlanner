@@ -1,6 +1,8 @@
 #include "railwaysegmentsplithelper.h"
 #include "railwaysegmenthelper.h"
 
+#include "railwaysegmentconnectionsmodel.h"
+
 #include "app/session.h"
 
 #include <sqlite3pp/sqlite3pp.h>
@@ -16,8 +18,12 @@ using namespace sqlite3pp;
 //    Q_DECLARE_TR_FUNCTIONS(RailwaySegmentSplitHelperStrings)
 //};
 
-RailwaySegmentSplitHelper::RailwaySegmentSplitHelper(sqlite3pp::database &db) :
-    mDb(db)
+RailwaySegmentSplitHelper::RailwaySegmentSplitHelper(sqlite3pp::database &db,
+                                                     RailwaySegmentConnectionsModel *origSegConn,
+                                                     RailwaySegmentConnectionsModel *newSegConn) :
+    mDb(db),
+    origSegConnModel(origSegConn),
+    newSegConnModel(newSegConn)
 {
 
 }
@@ -49,6 +55,8 @@ bool RailwaySegmentSplitHelper::split()
         return false;
     }
 
+    origSegConnModel->applyChanges(origSegInfo.segmentId);
+
     //Create new segment
     if(!helper.setSegmentInfo(newSegInfo.segmentId, true,
                                newSegInfo.segmentName, newSegInfo.type,
@@ -59,6 +67,8 @@ bool RailwaySegmentSplitHelper::split()
         qWarning() << "RailwaySegmentSplitHelper: cannot create segment" << errMsg;
         return false;
     }
+
+    newSegConnModel->applyChanges(newSegInfo.segmentId);
 
     //Update Railway Lines
     if(!updateLines())

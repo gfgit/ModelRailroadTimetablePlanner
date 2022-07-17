@@ -18,6 +18,7 @@ class QDialogButtonBox;
 class CustomCompletionLineEdit;
 class StationsMatchModel;
 class StationGatesMatchModel;
+class RailwaySegmentConnectionsModel;
 
 class SplitRailwaySegmentDlg : public QDialog
 {
@@ -33,6 +34,8 @@ public:
 private slots:
     void selectSegment();
     void onStationSelected();
+
+    void editOldSegment();
     void editNewSegment();
 
     void onMiddleInCompletionDone();
@@ -53,6 +56,7 @@ private:
     QGroupBox *fromBox;
     QLabel *fromStationLabel;
     QLabel *fromGateLabel;
+    QPushButton *editOldSegBut;
 
     //Middle insert
     QGroupBox *middleBox;
@@ -71,6 +75,9 @@ private:
     StationsMatchModel *stationsModel;
     StationGatesMatchModel *middleInGateModel;
     StationGatesMatchModel *middleOutGateModel;
+
+    RailwaySegmentConnectionsModel *origSegConnModel;
+    RailwaySegmentConnectionsModel *newSegConnModel;
 
     utils::RailwaySegmentInfo origSegInfo;
     utils::RailwaySegmentInfo newSegInfo;

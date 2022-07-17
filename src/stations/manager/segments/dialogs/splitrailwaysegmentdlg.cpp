@@ -16,6 +16,7 @@
 #include "stations/match_models/railwaysegmentmatchmodel.h"
 #include "stations/match_models/stationsmatchmodel.h"
 #include "stations/match_models/stationgatesmatchmodel.h"
+#include "stations/manager/segments/model/railwaysegmentconnectionsmodel.h"
 
 #include "utils/owningqpointer.h"
 #include "utils/delegates/sql/chooseitemdlg.h"
@@ -29,6 +30,9 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     middleInGateModel = new StationGatesMatchModel(mDb, this);
     middleOutGateModel = new StationGatesMatchModel(mDb, this);
     stationsModel->setFilter(0);
+
+    origSegConnModel = new RailwaySegmentConnectionsModel(mDb, this);
+    newSegConnModel = new RailwaySegmentConnectionsModel(mDb, this);
 
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -50,6 +54,9 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     formLay->addRow(tr("Gate:"), fromGateLabel);
     lay->addWidget(fromBox);
 
+    editOldSegBut = new QPushButton(tr("Edit First Segment"));
+    formLay->addWidget(editOldSegBut);
+
     //Middle:
     middleBox = new QGroupBox(tr("Middle:"));
     formLay = new QFormLayout(middleBox);
@@ -65,7 +72,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     middleOutGateEdit = new CustomCompletionLineEdit(middleOutGateModel);
     formLay->addRow(tr("Out Gate:"), middleOutGateEdit);
 
-    editNewSegBut = new QPushButton(tr("Edit New Segment"));
+    editNewSegBut = new QPushButton(tr("Edit Second Segment"));
     formLay->addWidget(editNewSegBut);
     lay->addWidget(middleBox);
 
@@ -86,6 +93,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     lay->addWidget(butBox);
 
     connect(selectSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::selectSegment);
+    connect(editOldSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::editOldSegment);
     connect(editNewSegBut, &QPushButton::clicked, this, &SplitRailwaySegmentDlg::editNewSegment);
 
     connect(middleStationEdit, &CustomCompletionLineEdit::completionDone,
@@ -126,7 +134,7 @@ void SplitRailwaySegmentDlg::done(int res)
             return;
         }
 
-        RailwaySegmentSplitHelper helper(mDb);
+        RailwaySegmentSplitHelper helper(mDb, origSegConnModel, newSegConnModel);
         helper.setInfo(origSegInfo, newSegInfo);
         if(!helper.split())
         {
@@ -163,9 +171,25 @@ void SplitRailwaySegmentDlg::onStationSelected()
     setMiddleStation(stationId);
 }
 
+void SplitRailwaySegmentDlg::editOldSegment()
+{
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(mDb,
+                                                                          origSegConnModel,
+                                                                          this);
+    dlg->setManuallyApply(true);
+    dlg->setSegmentInfo(origSegInfo);
+    if(dlg->exec() != QDialog::Accepted || !dlg)
+        return;
+
+    //Get info back
+    dlg->fillSegInfo(origSegInfo);
+}
+
 void SplitRailwaySegmentDlg::editNewSegment()
 {
-    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(mDb, this);
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(mDb,
+                                                                          newSegConnModel,
+                                                                          this);
     dlg->setManuallyApply(true);
     dlg->setSegmentInfo(newSegInfo);
     if(dlg->exec() != QDialog::Accepted || !dlg)
@@ -274,9 +298,10 @@ void SplitRailwaySegmentDlg::setMiddleStation(db_id stationId)
     middleInGateModel->setFilter(stationId, true, 0);
     middleOutGateModel->setFilter(stationId, true, 0);
 
-    //Allow selectiig Gates and Edit New Segment only after Middle Station is set
+    //Allow selecting Gates and Edit Segment only after Middle Station is set
     middleInGateEdit->setEnabled(stationId != 0);
     middleOutGateEdit->setEnabled(stationId != 0);
+    editOldSegBut->setEnabled(stationId != 0);
     editNewSegBut->setEnabled(stationId != 0);
 }
 
