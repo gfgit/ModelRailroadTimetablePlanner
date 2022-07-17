@@ -44,7 +44,7 @@
     <message>
         <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="53"/>
         <source>Error</source>
-        <translation></translation>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../utils/delegates/sql/chooseitemdlg.cpp" line="70"/>

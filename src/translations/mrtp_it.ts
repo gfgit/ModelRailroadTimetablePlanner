@@ -250,134 +250,144 @@ Tutte le tratte successive saranno inoltre rimosse.</translation>
 <context>
     <name>EditRailwaySegmentDlg</name>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="61"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="62"/>
         <source>Segment name...</source>
         <translation>Nome Segmento...</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="64"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="65"/>
         <source>Km </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="68"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="70"/>
         <source> km/h</source>
         <translation></translation>
     </message>
     <message>
         <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="74"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="79"/>
+        <source>From:</source>
+        <translation>Da:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="76"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="81"/>
         <source>Station:</source>
         <translation>Stazione:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="75"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="80"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="77"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="82"/>
         <source>Gate:</source>
         <translation>Gate:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="82"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="79"/>
+        <source>To:</source>
+        <translation>Per:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="84"/>
         <source>Segment</source>
         <translation>Tratta</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="84"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="86"/>
         <source>Name:</source>
         <translation>Nome:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="85"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="87"/>
         <source>Distance:</source>
         <translation>Distanza:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="86"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="88"/>
         <source>Max. Speed:</source>
         <translation>Velocità Max:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="87"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="89"/>
         <source>Electrified:</source>
         <translation>Elettrificata:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="89"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="91"/>
         <source>Edit</source>
         <translation>Modifica</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="91"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="93"/>
         <source>Track connections:</source>
         <translation>Connessioni Binari:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="126"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="132"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="138"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="144"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="151"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="176"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="250"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="256"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="262"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="268"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="275"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="294"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="127"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="251"/>
         <source>Origin station must be valid.</source>
         <translation>La Stazione di origine deve essere valida.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="133"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="257"/>
         <source>Origin station gate must be valid.</source>
         <translation>Il gate della stazione di origine deve essere valido.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="139"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="263"/>
         <source>Destination station must be valid.</source>
         <translation>La Stazione di destinazione deve essere valida.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="145"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="269"/>
         <source>Destination station gate must be valid.</source>
         <translation>Il gate della stazione di destinazione deve essere valido.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="152"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="276"/>
         <source>Segment name must not be empty.</source>
         <translation>Il nome della Tratta Ferroviaria non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="177"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="295"/>
         <source>Database error: %1</source>
         <translation>Errore database: %1</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="248"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="226"/>
         <source>Edit Railway Segment</source>
         <translation>Modifica Tratta Ferroviaria</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="253"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="231"/>
         <source>New Railway Segment</source>
         <translation>Nuova Tratta Ferroviaria</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="284"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="221"/>
         <source>From</source>
         <translation>Da</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="284"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="221"/>
         <source>From (Locked)</source>
         <translation>Da (Bloccato)</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="285"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="222"/>
         <source>To (Reversed)</source>
         <translation>Per (Invertito)</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="285"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="222"/>
         <source>To</source>
         <translation>Per</translation>
     </message>
@@ -4733,6 +4743,104 @@ Estensione: (*.ttt)</translation>
     </message>
 </context>
 <context>
+    <name>SplitRailwaySegmentDlg</name>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="43"/>
+        <source>From:</source>
+        <translation>Da:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="47"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="62"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="80"/>
+        <source>Station:</source>
+        <translation>Stazione:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="50"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="77"/>
+        <source>Gate:</source>
+        <translation>Gate:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="54"/>
+        <source>Middle:</source>
+        <translation>In mezzo:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="59"/>
+        <source>In Gate:</source>
+        <translation>Gate Entrata:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="66"/>
+        <source>Out Gate:</source>
+        <translation>Gate Uscita:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="68"/>
+        <source>Edit New Segment</source>
+        <translation>Modifica Nuova Tratta</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="73"/>
+        <source>To:</source>
+        <translation>Per:</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="103"/>
+        <source>Split Segment</source>
+        <translation>Dividi Tratta</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="117"/>
+        <source>No Station</source>
+        <translation>Nessuna Stazione</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="118"/>
+        <source>You must choose a station to put in the middle.</source>
+        <translation>Devi scegliere una stazione da inserire in mezzo.</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="124"/>
+        <source>No Gates</source>
+        <translation>Nessun Gate</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="125"/>
+        <source>You must choose in and out gates for middle Station.</source>
+        <translation>Devi scegliere un gate di entrata  uno di uscita per la stazione in mezzo.</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="133"/>
+        <source>Error</source>
+        <translation>Errore</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="134"/>
+        <source>Split of segment failed.</source>
+        <translation>Divisione della Tratta fallita.</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="147"/>
+        <source>Choose a Railway Segment to split in 2 parts.
+A station will be inserted in the middle.</source>
+        <translation>Scegli una Tratta Ferroviaria da dividere in 2 parti.
+Una stazione verrà inserita al centro.</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="149"/>
+        <source>Segment...</source>
+        <translation>Tratta...</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="237"/>
+        <source>Segment: &lt;b&gt;%1&lt;/b&gt;</source>
+        <translation>Tratta: &lt;b&gt;%1&lt;/b&gt;</translation>
+    </message>
+</context>
+<context>
     <name>StationEditDialog</name>
     <message>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="37"/>
@@ -5698,184 +5806,194 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
         <translation>Linee</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="106"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="150"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="184"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="107"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="151"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="188"/>
         <source>Add</source>
         <translation>Aggiungi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="107"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="151"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="185"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="108"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="152"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="189"/>
         <source>Remove</source>
         <translation>Rimuovi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="110"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="111"/>
         <source>Jobs</source>
         <translation>Servizi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="111"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="112"/>
         <source>SVG Plan</source>
         <translation>Piano SVG</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="112"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="113"/>
         <source>Free RS</source>
         <translation>Rotabili liberi</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="116"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="117"/>
         <source>Create new Station</source>
         <translation>Crea una nuova Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="154"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="157"/>
         <source>Create new Railway Segment</source>
         <translation>Crea una nuova Tratta Ferroviaria (Segmento)</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="188"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="192"/>
         <source>Create new Railway Line</source>
         <translation>Crea una nuova Linea Ferroviaria</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="117"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="118"/>
         <source>Remove selected Station</source>
         <translation>Rimuvi la Stazione selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="114"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="115"/>
         <source>Import</source>
         <translation>Importa</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="118"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="119"/>
         <source>Edit selected Station</source>
         <translation>Modifica la Stazione selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="119"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="120"/>
         <source>Show Jobs passing in selected Station</source>
         <translation>Mostra Servizi che passano nella Stazione selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="120"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="121"/>
         <source>Show SVG Plan of selected Station</source>
         <translation>Mostra Piano SVG della Stazione Selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="121"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="122"/>
         <source>Show free Rollingstock items in selected Station</source>
         <translation>Mostra Rotabili liberi nella Stazione selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="122"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="123"/>
         <source>Import Stations</source>
         <translation>Importa Stazioni</translation>
     </message>
     <message>
         <location filename="../stations/manager/stationsmanager.cpp" line="155"/>
+        <source>Split</source>
+        <translation>Dividi</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="158"/>
         <source>Delete selected Railway Segment</source>
         <translation>Elimina la Tratta Ferroviaria selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="156"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="159"/>
         <source>Edit selected Railway Segment</source>
         <translation>Modifica la Tratta Ferroviaria selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="189"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="160"/>
+        <source>Split Railway Segment in 2 parts</source>
+        <translation>Dividi Tratta Ferroviaria in 2 parti</translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stationsmanager.cpp" line="193"/>
         <source>Delete selected Railway Line</source>
         <translation>Elimina la Linea Ferroviaria selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="190"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="194"/>
         <source>Edit selected Railway Line</source>
         <translation>Modifica la Linea Ferroviaria selezionata</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="307"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="311"/>
         <source>Remove Station?</source>
         <translation>Rimuovere Stazione?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="308"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="312"/>
         <source>Are you sure you want to remove station &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation>Sei sicuro di voler rimuovere la Stazione &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="325"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="329"/>
         <source>Add Station</source>
         <translation>Aggiungi Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="326"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="330"/>
         <source>Please choose a name for the new station.</source>
         <translation>Per favore scegli un nome per la nuova stazione.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="339"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="530"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="343"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="550"/>
         <source>Error</source>
         <translation>Errore</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="339"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="343"/>
         <source>Station name cannot be empty.</source>
         <translation>Il nome della stazione non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="359"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="363"/>
         <source>Station Error</source>
         <translation>Errore Stazione</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="451"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="455"/>
         <source>Remove Segment?</source>
         <translation>Rimuovere Tratta?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="452"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="456"/>
         <source>Are you sure you want to remove segment &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation>Sei sicuro di voler rimuovere la Tratta &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="516"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="536"/>
         <source>Add Line</source>
         <translation>Aggiungi Linea</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="517"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="537"/>
         <source>Please choose a name for the new railway line.</source>
         <translation>Per favore scegli un nome per la nuova linea.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="530"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="550"/>
         <source>Line name cannot be empty.</source>
         <translation>Il nome della linea ferroviaria non può essere vuoto.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="557"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="577"/>
         <source>Remove Line?</source>
         <translation>Rimuovere Linea Ferroviaria?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="558"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="578"/>
         <source>Are you sure you want to remove line &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation>Sei sicuro di voler rimuovere la Linea &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="108"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="152"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="186"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="109"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="153"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="190"/>
         <source>Edit</source>
         <translation>Modifica</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="62"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="63"/>
         <source>Stations Manager</source>
         <translation>Manager Stazioni</translation>
     </message>
@@ -6066,17 +6184,29 @@ Per favore scegli un altro Binario o cambia la Tratta successiva.</translation>
 <context>
     <name>ViewManager</name>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="333"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="334"/>
         <source>Station %1 has no SVG, please add one.</source>
         <translation>La Stazione di %1 non ha un piano SVG, per favore aggiungine uno.</translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="653"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="626"/>
+        <source>Create Shift too?</source>
+        <translation>Creare Anche un Turno?</translation>
+    </message>
+    <message>
+        <location filename="../viewmanager/viewmanager.cpp" line="627"/>
+        <source>No Shift are present in this session.
+Do you want to create some before creating Jobs?</source>
+        <translation>Non ci sono Turni in questa sessione.
+Vuoi crearne alcuni prima di creare i Servizi?</translation>
+    </message>
+    <message>
+        <location filename="../viewmanager/viewmanager.cpp" line="670"/>
         <source>Remove Job?</source>
         <translation>Rimuovere Servizio?</translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="654"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="671"/>
         <source>Are you sure you want to remove Job &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation>Sei sicuro di voler rimuovere il Servizio &lt;b&gt;%1&lt;/b&gt;?</translation>
     </message>
