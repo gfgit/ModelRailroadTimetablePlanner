@@ -340,6 +340,11 @@ bool EditRailwaySegmentDlg::fillSegInfo(utils::RailwaySegmentInfo &info)
     return true;
 }
 
+void EditRailwaySegmentDlg::setManuallyApply(bool val)
+{
+    manuallyApply = val;
+}
+
 void EditRailwaySegmentDlg::onFromStationChanged(db_id stationId)
 {
     fromGateMatch->setFilter(stationId, true, m_segmentId);
@@ -377,9 +382,4 @@ void EditRailwaySegmentDlg::editSegmentTrackConnections()
 {
     OwningQPointer<EditRailwayConnectionDlg> dlg(new EditRailwayConnectionDlg(connModel, this));
     dlg->exec();
-}
-
-void EditRailwaySegmentDlg::setManuallyApply(bool val)
-{
-    manuallyApply = val;
 }

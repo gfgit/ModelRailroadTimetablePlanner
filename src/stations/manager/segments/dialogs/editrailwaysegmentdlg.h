@@ -43,12 +43,12 @@ public:
     void setSegment(db_id segmentId, db_id lockStId, db_id lockGateId);
     void setSegmentInfo(const utils::RailwaySegmentInfo& info);
 
+    void setGatesReadOnly(bool val);
+
     bool checkValues();
     bool applyChanges();
 
     bool fillSegInfo(utils::RailwaySegmentInfo &info);
-
-    void setGatesReadOnly(bool val);
 
     void setManuallyApply(bool val);
 
