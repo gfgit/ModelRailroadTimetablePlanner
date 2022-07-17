@@ -78,7 +78,7 @@ public:
      * \param painter A painter to render to
      * \param sceneRect Rect to render in scene coordinates
      * \param orient Header orientation
-     * \param scroll scrolling in opposite orientation of \ref orient argument
+     * \param scroll scrolling in opposite orientation of orient argument
      *
      * Renders requested portion of header.
      *

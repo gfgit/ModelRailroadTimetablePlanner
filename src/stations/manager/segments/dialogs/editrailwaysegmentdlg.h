@@ -41,7 +41,7 @@ public:
      * \param conn segment connection model
      * \param parent parent widget
      *
-     * If \ref conn is nullptr then a default one is created and destroyed
+     * If conn is nullptr then a default one is created and destroyed
      * when the dialog gets destroyed.
      * Otherwise the model passed is used, user actions will be saved on it.
      * Caller is responsible to free the passed connection model.
