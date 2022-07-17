@@ -23,7 +23,9 @@
 
 #include "stations/manager/segments/dialogs/editrailwayconnectiondlg.h"
 
-EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *parent) :
+EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db,
+                                             RailwaySegmentConnectionsModel *conn,
+                                             QWidget *parent) :
     QDialog(parent),
     m_segmentId(0),
     m_lockStationId(0),
@@ -56,7 +58,11 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *p
             this,          &EditRailwaySegmentDlg::updateTrackConnectionModel);
 
     helper = new RailwaySegmentHelper(db);
-    connModel = new RailwaySegmentConnectionsModel(db, this);
+
+    //If no connection model passed, create a new one
+    connModel = conn;
+    if(!connModel)
+        connModel = new RailwaySegmentConnectionsModel(db, this);
 
     segmentNameEdit = new QLineEdit;
     segmentNameEdit->setPlaceholderText(tr("Segment name..."));

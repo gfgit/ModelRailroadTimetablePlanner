@@ -35,7 +35,25 @@ public:
         LockToCurrentValue = -1
     };
 
-    EditRailwaySegmentDlg(sqlite3pp::database &db, QWidget *parent = nullptr);
+    /*!
+     * \brief EditRailwaySegmentDlg
+     * \param db database connection
+     * \param conn segment connection model
+     * \param parent parent widget
+     *
+     * If \ref conn is nullptr then a default one is created and destroyed
+     * when the dialog gets destroyed.
+     * Otherwise the model passed is used, user actions will be saved on it.
+     * Caller is responsible to free the passed connection model.
+     *
+     * It's useful with \ref setManuallyApply() so changes can be recordes
+     * for later use.
+     *
+     * \sa RailwaySegmentConnectionsModel
+     */
+    EditRailwaySegmentDlg(sqlite3pp::database &db,
+                          RailwaySegmentConnectionsModel *conn = nullptr,
+                          QWidget *parent = nullptr);
     ~EditRailwaySegmentDlg();
 
     virtual void done(int res) override;
@@ -50,6 +68,17 @@ public:
 
     bool fillSegInfo(utils::RailwaySegmentInfo &info);
 
+    /*!
+     * \brief setManuallyApply
+     * \param val true to manually apply changes
+     *
+     * If false, changes will be applyed automatically when
+     * dialog is accepted (closed with 'Ok' button).
+     * Otherwise, caller is responsible to apply them later
+     * or discarding them.
+     *
+     * \sa fillSegInfo()
+     */
     void setManuallyApply(bool val);
 
 private slots:

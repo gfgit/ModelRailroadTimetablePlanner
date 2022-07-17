@@ -476,7 +476,7 @@ void StationsManager::onRemoveSegment()
 
 void StationsManager::onNewSegment()
 {
-    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, this);
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, nullptr, this);
     dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 
@@ -497,7 +497,7 @@ void StationsManager::onEditSegment()
     if(!segmentId)
         return;
 
-    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, this);
+    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, nullptr, this);
     dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 

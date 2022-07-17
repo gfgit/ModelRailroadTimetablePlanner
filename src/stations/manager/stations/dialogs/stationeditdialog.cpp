@@ -574,7 +574,7 @@ void StationEditDialog::removeSelectedTrackConn()
 
 void StationEditDialog::addGateConnection()
 {
-    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, nullptr, this));
     dlg->setSegment(0, getStation(), EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
     if(ret != QDialog::Accepted || !dlg)
@@ -592,7 +592,7 @@ void StationEditDialog::editGateConnection()
     if(!segId)
         return;
 
-    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, this));
+    OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, nullptr, this));
     dlg->setSegment(segId, getStation(), EditRailwaySegmentDlg::LockToCurrentValue);
     int ret = dlg->exec();
     if(ret != QDialog::Accepted || !dlg)
