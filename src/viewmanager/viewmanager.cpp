@@ -338,8 +338,8 @@ void ViewManager::requestStSVGPlan(db_id stId, bool showJobs, const QTime &time)
 
     if(showJobs)
     {
-        viewer->showJobs(true);
         viewer->setJobTime(time);
+        viewer->showJobs(true);
     }
 
     viewer->showNormal();
