@@ -355,54 +355,19 @@ void RailwaySegmentConnectionsModel::createDefaultConnections()
 
         //0 -> 1
         track.toTrack = 1;
-
-        bool alreadyConnected = false;
-        for(const RailwayTrack& other : qAsConst(items))
-        {
-            if(other.state == ToRemove || other.state == AddedButNotComplete)
-                continue; //Ignore these items
-
-            if(other.fromTrack == track.fromTrack || other.toTrack == track.toTrack)
-            {
-                alreadyConnected = true;
-                break;
-            }
-        }
-        if(!alreadyConnected)
-            insertOrReplace(track);
+        insertOrReplace(track);
 
         //1 -> 0
         track.fromTrack = 1;
         track.toTrack = 0;
-
-        alreadyConnected = false;
-        for(const RailwayTrack& other : qAsConst(items))
-        {
-            if(other.fromTrack == track.fromTrack || other.toTrack == track.toTrack)
-            {
-                alreadyConnected = true;
-                break;
-            }
-        }
-        if(!alreadyConnected)
-            insertOrReplace(track);
+        insertOrReplace(track);
     }
     else
     {
         //In every other case just connect first track to first track
         //0 -> 0
         track.toTrack = 0;
-        bool alreadyConnected = false;
-        for(const RailwayTrack& other : qAsConst(items))
-        {
-            if(other.fromTrack == track.fromTrack || other.toTrack == track.toTrack)
-            {
-                alreadyConnected = true;
-                break;
-            }
-        }
-        if(!alreadyConnected)
-            insertOrReplace(track);
+        insertOrReplace(track);
     }
 }
 
@@ -530,6 +495,19 @@ void RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
 
 int RailwaySegmentConnectionsModel::insertOrReplace(const RailwaySegmentConnectionsModel::RailwayTrack &newTrack)
 {
+    //Check if track is already connected
+    for(const RailwayTrack& other : qAsConst(items))
+    {
+        if(other.state == ToRemove || other.state == AddedButNotComplete)
+            continue; //Ignore these items
+
+        if(other.fromTrack == newTrack.fromTrack || other.toTrack == newTrack.toTrack)
+        {
+            //Track is already connected, cannot connect twice
+            return TrackAlreadyConnected;
+        }
+    }
+
     actualCount++; //We will have one more row
 
     //Reuse removed rows if any
@@ -558,5 +536,5 @@ int RailwaySegmentConnectionsModel::insertOrReplace(const RailwaySegmentConnecti
     items.last().connId = 0;
     items.last().state = ToAdd;
     endInsertRows();
-    return -1;
+    return NewTrackAdded;
 }

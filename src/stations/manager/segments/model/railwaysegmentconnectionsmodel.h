@@ -39,6 +39,8 @@ public:
     };
 
     static constexpr const int InvalidTrack = -1;
+    static constexpr const int NewTrackAdded = -1;
+    static constexpr const int TrackAlreadyConnected = -2;
 
     RailwaySegmentConnectionsModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
