@@ -83,14 +83,16 @@ EditRailwayConnectionDlg::~EditRailwayConnectionDlg()
 
 void EditRailwayConnectionDlg::done(int res)
 {
-    if(!model->isReadOnly() && model->getActualCount() == 0)
+    if(!model->isReadOnly() && model->getActualCount() == 0 && res == QDialog::Accepted)
     {
         QMessageBox::warning(this, tr("Error"),
                              tr("Add at least 1 segment track connection."));
         return;
     }
 
-    Q_UNUSED(res) //Prevent rejecting, reject is done by main dialog
+    //Prevent rejecting because it's done by main dialog but let user close
+    //even if no connection was created for this segment to avoid getting stuck on errors
+    Q_UNUSED(res)
     QDialog::done(QDialog::Accepted);
 }
 
