@@ -47,14 +47,14 @@ EditRailwaySegmentDlg::EditRailwaySegmentDlg(sqlite3pp::database &db,
     fromGateEdit = new CustomCompletionLineEdit(fromGateMatch);
     connect(fromStationEdit, &CustomCompletionLineEdit::dataIdChanged,
             this,            &EditRailwaySegmentDlg::onFromStationChanged);
-    connect(fromGateEdit, &CustomCompletionLineEdit::dataIdChanged,
+    connect(fromGateEdit, &CustomCompletionLineEdit::completionDone,
             this,          &EditRailwaySegmentDlg::updateTrackConnectionModel);
 
     toStationEdit = new CustomCompletionLineEdit(toStationMatch);
     toGateEdit = new CustomCompletionLineEdit(toGateMatch);
     connect(toStationEdit, &CustomCompletionLineEdit::dataIdChanged,
             this,          &EditRailwaySegmentDlg::onToStationChanged);
-    connect(toGateEdit, &CustomCompletionLineEdit::dataIdChanged,
+    connect(toGateEdit, &CustomCompletionLineEdit::completionDone,
             this,          &EditRailwaySegmentDlg::updateTrackConnectionModel);
 
     helper = new RailwaySegmentHelper(db);
@@ -194,6 +194,8 @@ void EditRailwaySegmentDlg::setSegment(db_id segmentId, db_id lockStId, db_id lo
 
 void EditRailwaySegmentDlg::setSegmentInfo(const utils::RailwaySegmentInfo &info)
 {
+    m_segmentId = info.segmentId;
+
     QFlags<utils::RailwaySegmentType> type = info.type;
 
     segmentNameEdit->setText(info.segmentName);
@@ -226,6 +228,8 @@ void EditRailwaySegmentDlg::setSegmentInfo(const utils::RailwaySegmentInfo &info
 
     fromBox->setTitle(m_lockGateId == DoNotLock ? tr("From") : tr("From (Locked)"));
     toBox->setTitle(reversed ? tr("To (Reversed)") : tr("To"));
+
+    updateTrackConnectionModel();
 
     if(m_segmentId)
     {
