@@ -53,7 +53,7 @@ EditRailwayConnectionDlg::EditRailwayConnectionDlg(RailwaySegmentConnectionsMode
                                    fromTrackDelegate);
 
     toTrackFactory = new SpinBoxEditorFactory;
-    toTrackFactory->setRange(-1, model->getFromGateTrackCount() - 1);
+    toTrackFactory->setRange(-1, model->getToGateTrackCount() - 1);
     toTrackFactory->setSpecialValueText(tr("NULL"));
     auto toTrackDelegate = new QStyledItemDelegate(this);
     toTrackDelegate->setItemEditorFactory(toTrackFactory);
