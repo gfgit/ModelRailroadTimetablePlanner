@@ -284,6 +284,22 @@ bool EditRailwaySegmentDlg::checkValues()
     {
         QMessageBox::warning(this, tr("Error"),
                              tr("Segment name must not be empty."));
+
+        //Try to make a default name
+        QString possibleName = fromStationEdit->text() + QStringLiteral("-") + toStationEdit->text();
+        possibleName = possibleName.simplified();
+        if(possibleName.size() > 1)
+        {
+            int ret = QMessageBox::question(this, tr("Default Name"),
+                                            tr("Apply default segment name <b>%1</b>?")
+                                                .arg(possibleName));
+            if(ret == QMessageBox::Yes)
+            {
+                //Apply default name and return success
+                segmentNameEdit->setText(possibleName);
+                return true;
+            }
+        }
         return false;
     }
 
