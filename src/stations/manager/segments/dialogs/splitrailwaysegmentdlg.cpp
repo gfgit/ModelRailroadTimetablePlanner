@@ -55,7 +55,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     lay->addWidget(fromBox);
 
     editOldSegBut = new QPushButton(tr("Edit First Segment"));
-    formLay->addWidget(editOldSegBut);
+    lay->addWidget(editOldSegBut);
 
     //Middle:
     middleBox = new QGroupBox(tr("Middle:"));
@@ -71,10 +71,10 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     //Middle Station Out Gate is New Segment In Gate
     middleOutGateEdit = new CustomCompletionLineEdit(middleOutGateModel);
     formLay->addRow(tr("Out Gate:"), middleOutGateEdit);
+    lay->addWidget(middleBox);
 
     editNewSegBut = new QPushButton(tr("Edit Second Segment"));
-    formLay->addWidget(editNewSegBut);
-    lay->addWidget(middleBox);
+    lay->addWidget(editNewSegBut);
 
     //To:
     toBox = new QGroupBox(tr("To:"));
@@ -107,7 +107,7 @@ SplitRailwaySegmentDlg::SplitRailwaySegmentDlg(sqlite3pp::database &db, QWidget 
     setMainSegment(0);
 
     setMinimumSize(200, 200);
-    resize(400, 450);
+    resize(400, 500);
     setWindowTitle(tr("Split Segment"));
 }
 
