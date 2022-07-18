@@ -5,6 +5,8 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
+#include <QDebug>
+
 //Error messages
 static constexpr char errorNegativeNumber[] =
     QT_TRANSLATE_NOOP("RailwaySegmentConnectionsModel",
@@ -431,10 +433,10 @@ void RailwaySegmentConnectionsModel::addNewConnection(int *outRow)
         *outRow = row;
 }
 
-void RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
+bool RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
 {
     if(readOnly)
-        return;
+        return false;
 
     if(incompleteRowAdded >= 0)
     {
@@ -457,7 +459,13 @@ void RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
         if(item.state == ToRemove)
         {
             cmd.bind(1, item.connId);
-            cmd.execute();
+            int ret = cmd.execute();
+            if(ret != SQLITE_OK)
+            {
+                qWarning() << "Error removing track conn ID:" << item.connId << "Segment:" << m_segmentId
+                           << "From:" << item.fromTrack << "To:" << item.toTrack
+                           << mDb.error_msg();
+            }
             cmd.reset();
         }
     }
@@ -473,24 +481,46 @@ void RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
             cmd.bind(fromTrackCol, item.fromTrack);
             cmd.bind(toTrackCol, item.toTrack);
             cmd.bind(3, item.connId);
-            cmd.execute();
+            int ret = cmd.execute();
+            if(ret != SQLITE_OK)
+            {
+                qWarning() << "Error editing track conn ID:" << item.connId << "Segment:" << m_segmentId
+                           << "New From:" << item.fromTrack << "New To:" << item.toTrack
+                           << mDb.error_msg();
+            }
             cmd.reset();
         }
     }
 
+    //Lock to retreive inserted ID
+    sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
+    sqlite3_mutex_enter(mutex);
+
     //Finally add all ToAdd
     cmd.prepare("INSERT INTO railway_connections(id,seg_id,in_track,out_track) VALUES(NULL,?3,?1,?2)");
-    for(const RailwayTrack& item : qAsConst(items))
+    for(RailwayTrack& item : items)
     {
         if(item.state == ToAdd)
         {
             cmd.bind(fromTrackCol, item.fromTrack);
             cmd.bind(toTrackCol, item.toTrack);
             cmd.bind(3, overrideSegmentId);
-            cmd.execute();
+            int ret = cmd.execute();
+            if(ret != SQLITE_OK)
+            {
+                qWarning() << "Error adding track conn to Segment:" << m_segmentId
+                           << "From:" << item.fromTrack << "To:" << item.toTrack
+                           << mDb.error_msg();
+            }
+            item.connId = mDb.last_insert_rowid();
             cmd.reset();
         }
     }
+
+    //Unlock database
+    sqlite3_mutex_leave(mutex);
+
+    return true;
 }
 
 int RailwaySegmentConnectionsModel::insertOrReplace(const RailwaySegmentConnectionsModel::RailwayTrack &newTrack)

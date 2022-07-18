@@ -75,7 +75,7 @@ public:
     void removeAtRow(int row);
     void addNewConnection(int *outRow);
 
-    void applyChanges(db_id overrideSegmentId);
+    bool applyChanges(db_id overrideSegmentId);
 
 signals:
     void modelError(const QString& msg);
