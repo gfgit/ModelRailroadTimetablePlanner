@@ -830,7 +830,6 @@ JobStopEntry LineGraphScene::getSelectedJob() const
 
 void LineGraphScene::setSelectedJob(JobStopEntry stop, bool sendChange)
 {
-    //TODO: draw box around selected job or highlight in graph view
     const JobStopEntry oldJob = selectedJob;
 
     selectedJob = stop;
