@@ -1016,6 +1016,7 @@ bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
         }
 
         //Cannot couple or uncouple in transits
+        bool canBeTransit = true;
         if(destType == StopType::Transit)
         {
             q_getCoupled.bind(1, s.stopId);
@@ -1026,7 +1027,7 @@ bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
             {
                 qWarning() << "Error: trying to set Transit on stop:" << s.stopId << "Job:" << mJobId
                            << "while having coupling operation for this stop";
-                continue;
+                canBeTransit = false;
             }
             if(res != SQLITE_OK && res != SQLITE_DONE)
             {
@@ -1052,7 +1053,7 @@ bool StopModel::setStopTypeRange(int firstRow, int lastRow, StopType type)
                 s.departure = s.arrival.addMSecs(defaultStopMsec);
             }
         }
-        else
+        else if(canBeTransit)
         {
             s.type = StopType::Transit;
             //Transit don't stop so departure is the same of arrival -> stop time = 0 minutes
