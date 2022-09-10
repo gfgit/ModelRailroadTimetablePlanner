@@ -298,10 +298,8 @@ void LineGraphManager::onJobChanged(db_id jobId, db_id oldJobId)
         if(oldSelectedJob.jobId == oldJobId)
         {
             scene->setSelectedJob(selectedJob);
-        }
-
-        if(scene->getSelectedJob().jobId == selectedJob.jobId)
             scene->reloadJobs();
+        }
     }
 }
 
