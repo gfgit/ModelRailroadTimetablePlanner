@@ -73,7 +73,7 @@ void StopModel::setAutoUncoupleAtLast(bool value)
     autoUncoupleAtLast = value;
 }
 
-void StopModel::loadJobStops(db_id jobId)
+bool StopModel::loadJobStops(db_id jobId)
 {
     DEBUG_ENTRY;
 
@@ -90,7 +90,9 @@ void StopModel::loadJobStops(db_id jobId)
         q_getCatAndShift.bind(1, mJobId);
         if(q_getCatAndShift.step() != SQLITE_ROW)
         {
-            //Error: job not existent???
+            //Error: job does not exist
+            endResetModel();
+            return false;
         }
 
         auto r = q_getCatAndShift.getRows();
@@ -113,6 +115,7 @@ void StopModel::loadJobStops(db_id jobId)
 
     if(count == 0)
     {
+        //Job has no stops, start editing so it cannot be saved without adding stops to it
         endResetModel();
 
         insertAddHere(0, 1);
@@ -120,7 +123,7 @@ void StopModel::loadJobStops(db_id jobId)
 
         startStopsEditing();
 
-        return;
+        return true;
     }
 
     stops.reserve(count);
@@ -267,6 +270,8 @@ void StopModel::loadJobStops(db_id jobId)
     stops.squeeze();
     rsToUpdate.squeeze();
     stationsToUpdate.squeeze();
+
+    return true;
 }
 
 void StopModel::clearJob()

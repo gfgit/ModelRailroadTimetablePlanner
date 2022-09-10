@@ -140,7 +140,20 @@ bool JobPathEditor::setJob_internal(db_id jobId)
 
     stopJobNumberTimer();
 
-    stopModel->loadJobStops(jobId); //Load from database
+    //Load from database
+    if(!stopModel->loadJobStops(jobId))
+    {
+        //Error: job could not be loaded, maybe invalid jobId
+        clearJob();
+        setEnabled(false);
+
+        QMessageBox::warning(this, tr("Error Loading Job"),
+            tr("<b>Job %1</b> could not be loaded.<br>"
+               "Maybe it's number was changed or maybe it doesn't exist at all.")
+            .arg(jobId));
+
+        return false;
+    }
 
     //If read-only hide 'AddHere' row (last one)
     ui->view->setRowHidden(stopModel->rowCount() - 1, m_readOnly);
@@ -416,6 +429,7 @@ bool JobPathEditor::saveChanges()
     const auto stationsToUpdate = stopModel->getStationsToUpdate();
     const auto rsToUpdate = stopModel->getRsToUpdate();
 
+    //FIXME: does not update line scene correctly
     stopModel->commitChanges();
 
     //Update views

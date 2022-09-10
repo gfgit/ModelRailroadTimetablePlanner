@@ -76,7 +76,7 @@ public:
     void setAutoUncoupleAtLast(bool value);
 
     // Loading
-    void loadJobStops(db_id jobId);
+    bool loadJobStops(db_id jobId);
     void clearJob();
 
     // Saving
