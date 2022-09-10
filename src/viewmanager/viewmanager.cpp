@@ -519,9 +519,13 @@ void ViewManager::onShiftJobsChanged(db_id shiftId)
 
 bool ViewManager::closeEditors()
 {
-    if(jobEditor && !jobEditor->clearJob())
+    if(jobEditor)
     {
-        return false;
+        if(!jobEditor->clearJob())
+        {
+            return false;
+        }
+        jobEditor->setEnabled(false);
     }
 
     if(rsManager && !rsManager->close())
