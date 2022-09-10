@@ -350,9 +350,6 @@ bool StopModel::commitChanges()
 
     emit Session->jobChanged(mNewJobId, oldJobId);
 
-    rsToUpdate.clear();
-    stationsToUpdate.clear();
-
     return endStopsEditing();
 }
 
@@ -424,9 +421,6 @@ bool StopModel::revertChanges()
 
         newShiftId = jobShiftId;
         emit jobShiftChanged(jobShiftId);
-
-        rsToUpdate.clear();
-        stationsToUpdate.clear();
     }
 
     bool ret = endStopsEditing();
@@ -1946,6 +1940,9 @@ bool StopModel::endStopsEditing()
             return false;
         }
     }
+
+    rsToUpdate.clear();
+    stationsToUpdate.clear();
 
     editState = NotEditing;
 
