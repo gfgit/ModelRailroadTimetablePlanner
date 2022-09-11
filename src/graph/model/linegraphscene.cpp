@@ -500,6 +500,44 @@ bool LineGraphScene::loadStation(StationGraphObject& st, QString& outFullName)
     return true;
 }
 
+bool LineGraphScene::updateStationNames()
+{
+    sqlite3pp::query q(mDb);
+
+    q.prepare("SELECT name,short_name FROM stations WHERE id=?");
+
+    for(StationGraphObject& st : stations)
+    {
+        q.bind(1, st.stationId);
+        if(q.step() != SQLITE_ROW)
+        {
+            qWarning() << "Graph: invalid station ID" << st.stationId;
+            continue;
+        }
+
+        st.stationName = q.getRows().get<QString>(1);
+        QString fullName = q.getRows().get<QString>(0);
+        if(st.stationName.isEmpty())
+        {
+            //Empty short name, fallback to full name
+            st.stationName = fullName;
+        }
+
+        if(graphObjectId == st.stationId && graphType == LineGraphType::SingleStation)
+        {
+            //If we are a station graph also update grah name
+            graphObjectName = fullName;
+
+            //Notify views TODO: specify graph didn't really change, just name
+            emit graphChanged(int(graphType), graphObjectId, this);
+        }
+
+        q.reset();
+    }
+
+    return true;
+}
+
 bool LineGraphScene::loadFullLine(db_id lineId)
 {
     //TODO: maybe show also station gates

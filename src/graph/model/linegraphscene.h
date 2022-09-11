@@ -260,6 +260,14 @@ private:
     bool loadStation(StationGraphObject &st, QString &outFullName);
 
     /*!
+     * \brief updateStationNames
+     *
+     * Update names of already loaded stations
+     * If graph type is SingleStation, graph name will be update too
+     */
+    bool updateStationNames();
+
+    /*!
      * \brief Load all stations in a railway line
      *
      * Loads stations of all railway line segments
