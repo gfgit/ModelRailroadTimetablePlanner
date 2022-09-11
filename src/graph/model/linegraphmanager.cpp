@@ -9,6 +9,8 @@
 #include <QCoreApplication>
 #include "utils/worker_event_types.h"
 
+#include <QElapsedTimer>
+
 #include <QDebug>
 
 typedef LineGraphScene::PendingUpdate PendingUpdate;
@@ -134,11 +136,23 @@ void LineGraphManager::scheduleUpdate()
 
 void LineGraphManager::processPendingUpdates()
 {
+    constexpr int MAX_UPDATE_TIME_MS = 1000;
+
     //Clear update flag before updating in case one operation triggers update
     m_hasScheduledUpdate = false;
 
+    QElapsedTimer timer;
+    timer.start();
+
     for(LineGraphScene *scene : qAsConst(scenes))
-    {
+    { 
+        if(timer.elapsed() > MAX_UPDATE_TIME_MS)
+        {
+            //It's taking to long, schedule a second update batch to finish
+            scheduleUpdate();
+            break;
+        }
+
         if(scene->pendingUpdate.testFlag(PendingUpdate::NothingToDo))
             continue; //Skip
 
