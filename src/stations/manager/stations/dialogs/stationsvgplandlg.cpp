@@ -247,14 +247,17 @@ void StationSVGPlanDlg::setJobTime(const QTime &t)
 {
     stopJobTimer();
 
-    if(m_station->time == t)
+    //Remove seconds part, round to minutes
+    QTime rounded = QTime(t.hour(), t.minute());
+
+    if(m_station->time == rounded)
         return;
 
-    m_station->time = t;
+    m_station->time = rounded;
 
     //Avoid starting timer
     mTimeEdit->blockSignals(true);
-    mTimeEdit->setTime(t);
+    mTimeEdit->setTime(rounded);
     mTimeEdit->blockSignals(false);
 
     reloadJobs();
