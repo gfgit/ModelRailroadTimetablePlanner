@@ -31,6 +31,20 @@ class LineGraphScene : public IGraphScene
 {
     Q_OBJECT
 public:
+    /*!
+     * \brief Enum to describe pending update needed
+     *
+     * FIXME: allow to specify segments to update
+     */
+    enum class PendingUpdate
+    {
+        NothingToDo = 0x0, //!< No content needs updating
+        ReloadJobs = 0x1, //!< Only Jobs need to be reloaded
+        ReloadStationNames = 0x2, //!< Only Station Names but not Station Plan has changed
+        FullReload = 0x4 //!< Do a full reload
+    };
+    Q_DECLARE_FLAGS(PendingUpdateFlags, PendingUpdate)
+
     LineGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
 
     void renderContents(QPainter *painter, const QRectF& sceneRect) override;
@@ -317,6 +331,8 @@ private:
     JobStopEntry selectedJob;
 
     bool m_drawSelection;
+
+    PendingUpdateFlags pendingUpdate;
 };
 
 #endif // LINEGRAPHSCENE_H

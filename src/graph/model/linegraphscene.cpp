@@ -201,6 +201,9 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     reloadJobs();
 
+    //Reset pending update
+    pendingUpdate = PendingUpdate::NothingToDo;
+
     emit graphChanged(int(graphType), graphObjectId, this);
     emit redrawGraph();
 
