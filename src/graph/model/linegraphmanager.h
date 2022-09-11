@@ -139,7 +139,7 @@ private slots:
 
     //Stations
     void onStationNameChanged(db_id stationId);
-    void onStationPlanChanged(const QSet<db_id> &stationIds);
+    void onStationJobPlanChanged(const QSet<db_id> &stationIds);
     void onStationRemoved(db_id stationId);
 
     //Segments

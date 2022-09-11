@@ -11,6 +11,8 @@
 
 #include <QDebug>
 
+typedef LineGraphScene::PendingUpdate PendingUpdate;
+
 LineGraphManager::LineGraphManager(QObject *parent) :
     QObject(parent),
     activeScene(nullptr),
@@ -20,7 +22,7 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     auto session = Session;
     //Stations
     connect(session, &MeetingSession::stationNameChanged, this, &LineGraphManager::onStationNameChanged);
-    connect(session, &MeetingSession::stationPlanChanged, this, &LineGraphManager::onStationPlanChanged);
+    connect(session, &MeetingSession::stationPlanChanged, this, &LineGraphManager::onStationJobPlanChanged);
     connect(session, &MeetingSession::stationRemoved, this, &LineGraphManager::onStationRemoved);
 
     //Segments
@@ -131,8 +133,34 @@ void LineGraphManager::scheduleUpdate()
 
 void LineGraphManager::processPendingUpdates()
 {
-    //Clear update flag
+    //Clear update flag before updating in case one operation triggers update
     m_hasScheduledUpdate = false;
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::NothingToDo))
+            continue; //Skip
+
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
+        {
+            scene->reload();
+        }
+        else
+        {
+            if(scene->pendingUpdate.testFlag(PendingUpdate::ReloadJobs))
+            {
+                scene->reloadJobs();
+            }
+            if(scene->pendingUpdate.testFlag(PendingUpdate::ReloadStationNames))
+            {
+                scene->updateStationNames();
+            }
+
+            //Manually cleare pending update and trigger redraw
+            scene->pendingUpdate = PendingUpdate::NothingToDo;
+            emit scene->redrawGraph();
+        }
+    }
 }
 
 void LineGraphManager::setActiveScene(IGraphScene *scene)
@@ -237,70 +265,186 @@ void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)
 
 void LineGraphManager::onStationNameChanged(db_id stationId)
 {
-    onStationPlanChanged({stationId}); //FIXME: update only labels
-}
+    bool found = false;
 
-void LineGraphManager::onStationPlanChanged(const QSet<db_id>& stationIds)
-{
-    //FIXME: speed up with threads???
     for(LineGraphScene *scene : qAsConst(scenes))
     {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
+            continue; //Already flagged
+
+        if(scene->stations.contains(stationId))
+        {
+            scene->pendingUpdate.setFlag(PendingUpdate::ReloadStationNames);
+            found = true;
+        }
+    }
+
+    if(found)
+        scheduleUpdate();
+}
+
+void LineGraphManager::onStationJobPlanChanged(const QSet<db_id>& stationIds)
+{
+    bool found = false;
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload)
+            || scene->pendingUpdate.testFlag(PendingUpdate::ReloadJobs))
+            continue; //Already flagged
+
         for(db_id stationId : stationIds)
         {
             if(scene->stations.contains(stationId))
             {
-                scene->reload();
+                scene->pendingUpdate.setFlag(PendingUpdate::ReloadJobs);
+                found = true;
                 break;
             }
         }
     }
+
+    if(found)
+        scheduleUpdate();
 }
 
 void LineGraphManager::onStationRemoved(db_id stationId)
 {
+    //A station can be removed only when not connected and no jobs pass through it.
+    //So there is no need to update other scenes because no line will contain
+    //The removed station
     clearGraphsOfObject(stationId, LineGraphType::SingleStation);
 }
 
 void LineGraphManager::onSegmentNameChanged(db_id segmentId)
 {
-    onSegmentStationsChanged(segmentId); //FIXME: update only labels
+    QString segName;
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
+            continue; //Already flagged
+
+        if(scene->graphType == LineGraphType::RailwaySegment && scene->graphObjectId == segmentId)
+        {
+            if(segName.isEmpty())
+            {
+                //Fetch new name and cache it
+                sqlite3pp::query q(scene->mDb, "SELECT name FROM railway_segments WHERE id=?");
+                q.bind(1, segmentId);
+                if(q.step() != SQLITE_ROW)
+                {
+                    qWarning() << "Graph: invalid segment ID" << segmentId;
+                    return;
+                }
+
+                //Store segment name
+                segName = q.getRows().get<QString>(0);
+            }
+
+            scene->graphObjectName = segName;
+            emit scene->graphChanged(int(scene->graphType), scene->graphObjectId, scene);
+        }
+    }
 }
 
 void LineGraphManager::onSegmentStationsChanged(db_id segmentId)
 {
-    //FIXME: speed up with threads???
+    bool found = false;
+
     for(LineGraphScene *scene : qAsConst(scenes))
     {
-        if(scene->graphType == LineGraphType::RailwaySegment && scene->graphObjectId == segmentId)
-            scene->reload();
-        else if(scene->graphType == LineGraphType::RailwayLine)
-            scene->reload(); //FIXME: only if inside this line
-        //Single stations are not affected
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
+            continue; //Already flagged
+
+        if(scene->graphType == LineGraphType::RailwayLine)
+        {
+            for(const auto& stPos : qAsConst(scene->stationPositions))
+            {
+                if(stPos.segmentId == segmentId)
+                {
+                    scene->pendingUpdate.setFlag(PendingUpdate::FullReload);
+                    found = true;
+                    break;
+                }
+            }
+        }
+        else if(scene->graphType == LineGraphType::RailwaySegment && scene->graphObjectId == segmentId)
+        {
+            scene->pendingUpdate.setFlag(PendingUpdate::FullReload);
+            found = true;
+        }
     }
+
+    if(found)
+        scheduleUpdate();
 }
 
 void LineGraphManager::onSegmentRemoved(db_id segmentId)
 {
+    //A segment can be removed only when is not on any line
+    //And when no jobs pass through it.
+    //So there is no need to update other line scenes because no line will contain
+    //The removed segment
     clearGraphsOfObject(segmentId, LineGraphType::RailwaySegment);
 }
 
 void LineGraphManager::onLineNameChanged(db_id lineId)
 {
-    onLineSegmentsChanged(lineId); //FIXME: update only labels
+    QString lineName;
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
+            continue; //Already flagged
+
+        if(scene->graphType == LineGraphType::RailwayLine && scene->graphObjectId == lineId)
+        {
+            if(lineName.isEmpty())
+            {
+                //Fetch new name and cache it
+                sqlite3pp::query q(scene->mDb, "SELECT name FROM lines WHERE id=?");
+                q.bind(1, lineId);
+                if(q.step() != SQLITE_ROW)
+                {
+                    qWarning() << "Graph: invalid line ID" << lineId;
+                    return;
+                }
+
+                //Store line name
+                lineName = q.getRows().get<QString>(0);
+            }
+
+            scene->graphObjectName = lineName;
+            emit scene->graphChanged(int(scene->graphType), scene->graphObjectId, scene);
+        }
+    }
 }
 
 void LineGraphManager::onLineSegmentsChanged(db_id lineId)
 {
-    //FIXME: speed up with threads???
+    bool found = false;
+
     for(LineGraphScene *scene : qAsConst(scenes))
     {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
+            continue; //Already flagged
+
         if(scene->graphType == LineGraphType::RailwayLine && scene->graphObjectId == lineId)
-            scene->reload();
+        {
+            scene->pendingUpdate.setFlag(PendingUpdate::FullReload);
+            found = true;
+        }
     }
+
+    if(found)
+        scheduleUpdate();
 }
 
 void LineGraphManager::onLineRemoved(db_id lineId)
 {
+    //Lines do not affect segments and stations
+    //So no other scene needs updating
     clearGraphsOfObject(lineId, LineGraphType::RailwayLine);
 }
 
