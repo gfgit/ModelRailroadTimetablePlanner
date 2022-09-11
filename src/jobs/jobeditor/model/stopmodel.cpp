@@ -341,12 +341,37 @@ bool StopModel::commitChanges()
         }
     }
 
+    if(category != oldCategory || mJobId != oldJobId)
+    {
+        //When category or job number changes, inform all stations
+        for(const StopItem& item : qAsConst(stops))
+        {
+            if(item.stationId)
+                stationsToUpdate.insert(item.stationId);
+        }
+
+        query q_rs(mDb, "SELECT coupling.rs_id"
+                        " FROM stops"
+                        " JOIN coupling ON coupling.stop_id=stops.id"
+                        " WHERE stops.job_id=?"
+                        " GROUP BY coupling.rs_id");
+        q.bind(1, mJobId);
+        for(auto rs : q_rs)
+        {
+            rsToUpdate.insert(rs.get<db_id>(0));
+        }
+    }
+
     oldCategory = category;
 
     if(jobShiftId != newShiftId)
         emit Session->shiftJobsChanged(jobShiftId, oldJobId);
     emit Session->shiftJobsChanged(newShiftId, mNewJobId);
     jobShiftId = newShiftId;
+
+    //Update station and rollingstock views
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
+    emit Session->rollingStockPlanChanged(rsToUpdate);
 
     emit Session->jobChanged(mNewJobId, oldJobId);
 
@@ -422,6 +447,10 @@ bool StopModel::revertChanges()
         newShiftId = jobShiftId;
         emit jobShiftChanged(jobShiftId);
     }
+
+    //Update station and rollingstock views
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
+    emit Session->rollingStockPlanChanged(rsToUpdate);
 
     bool ret = endStopsEditing();
     if(!ret)

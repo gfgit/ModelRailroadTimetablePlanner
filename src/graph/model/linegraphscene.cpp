@@ -201,6 +201,9 @@ bool LineGraphScene::loadGraph(db_id objectId, LineGraphType type, bool force)
 
     reloadJobs();
 
+    //Reset pending update
+    pendingUpdate = PendingUpdate::NothingToDo;
+
     emit graphChanged(int(graphType), graphObjectId, this);
     emit redrawGraph();
 
@@ -492,6 +495,44 @@ bool LineGraphScene::loadStation(StationGraphObject& st, QString& outFullName)
             platf.color = QRgb(r.get<int>(2));
         platf.platformName = r.get<QString>(3);
         st.platforms.append(platf);
+    }
+
+    return true;
+}
+
+bool LineGraphScene::updateStationNames()
+{
+    sqlite3pp::query q(mDb);
+
+    q.prepare("SELECT name,short_name FROM stations WHERE id=?");
+
+    for(StationGraphObject& st : stations)
+    {
+        q.bind(1, st.stationId);
+        if(q.step() != SQLITE_ROW)
+        {
+            qWarning() << "Graph: invalid station ID" << st.stationId;
+            continue;
+        }
+
+        st.stationName = q.getRows().get<QString>(1);
+        QString fullName = q.getRows().get<QString>(0);
+        if(st.stationName.isEmpty())
+        {
+            //Empty short name, fallback to full name
+            st.stationName = fullName;
+        }
+
+        if(graphObjectId == st.stationId && graphType == LineGraphType::SingleStation)
+        {
+            //If we are a station graph also update grah name
+            graphObjectName = fullName;
+
+            //Notify views TODO: specify graph didn't really change, just name
+            emit graphChanged(int(graphType), graphObjectId, this);
+        }
+
+        q.reset();
     }
 
     return true;

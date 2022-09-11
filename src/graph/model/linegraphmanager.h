@@ -27,6 +27,13 @@ public:
     explicit LineGraphManager(QObject *parent = nullptr);
 
     /*!
+     * \brief react to line graph update events
+     *
+     * \sa processPendingUpdates()
+     */
+    bool event(QEvent *ev) override;
+
+    /*!
      * \brief subscribe scene to notifications
      *
      * The scene gets registered on this manager and will be refreshed
@@ -66,6 +73,27 @@ public:
      * \sa LineGraphScene::getSelectedJob()
      */
     JobStopEntry getCurrentSelectedJob() const;
+
+    /*!
+     * \brief schedule async update
+     *
+     * If an update is already schedule, does nothing.
+     * Otherwise posts an event to self so it will update
+     * when Qt event loop is not busy
+     *
+     * \sa processPendingUpdates()
+     */
+    void scheduleUpdate();
+
+    /*!
+     * \brief process pending updates
+     *
+     * Updates all scenes marked for update
+     *
+     * \sa scheduleUpdate()
+     * \sa event()
+     */
+    void processPendingUpdates();
 
 signals:
     /*!
@@ -111,7 +139,8 @@ private slots:
 
     //Stations
     void onStationNameChanged(db_id stationId);
-    void onStationPlanChanged(const QSet<db_id> &stationIds);
+    void onStationJobPlanChanged(const QSet<db_id> &stationIds);
+    void onStationTrackPlanChanged(const QSet<db_id> &stationIds);
     void onStationRemoved(db_id stationId);
 
     //Segments
@@ -131,10 +160,14 @@ private slots:
     void updateGraphOptions();
 
 private:
+    void onStationPlanChanged_internal(const QSet<db_id> &stationIds, int flag);
+
+private:
     QVector<LineGraphScene *> scenes;
     LineGraphScene *activeScene;
     JobStopEntry lastSelectedJob;
     bool m_followJobOnGraphChange;
+    bool m_hasScheduledUpdate;
 };
 
 #endif // LINEGRAPHMANAGER_H

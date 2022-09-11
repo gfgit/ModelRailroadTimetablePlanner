@@ -425,18 +425,7 @@ bool JobPathEditor::saveChanges()
         }
     }
 
-    //Store before they are cleared on commitChanges()
-    const auto stationsToUpdate = stopModel->getStationsToUpdate();
-    const auto rsToUpdate = stopModel->getRsToUpdate();
-
-    //FIXME: does not update line scene correctly
     stopModel->commitChanges();
-
-    //Update views
-    emit Session->rollingStockPlanChanged(rsToUpdate);
-
-    //Update station views
-    emit Session->stationPlanChanged(stationsToUpdate);
 
     //When updating the path selection gets cleared so we restore it
     Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
@@ -458,10 +447,6 @@ void JobPathEditor::discardChanges()
 
     stopJobNumberTimer();
 
-    //Save them before reverting changes
-    QSet<db_id> rsToUpdate = stopModel->getRsToUpdate();
-    QSet<db_id> stationsToUpdate = stopModel->getStationsToUpdate();
-
     stopModel->revertChanges(); //Re-load old job from db
 
     //After re-load but before possible 'clearJob()' (Below)
@@ -481,14 +466,6 @@ void JobPathEditor::discardChanges()
         clearJob();
         setEnabled(false);
     }
-
-    //After possible job deletion update views
-
-    //Update RS views
-    emit Session->rollingStockPlanChanged(rsToUpdate);
-
-    //Update station views
-    emit Session->stationPlanChanged(stationsToUpdate);
 }
 
 db_id JobPathEditor::currentJobId() const

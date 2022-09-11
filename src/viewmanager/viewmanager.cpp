@@ -50,7 +50,7 @@ ViewManager::ViewManager(QObject *parent) :
     //Stations
     connect(Session, &MeetingSession::stationRemoved, this, &ViewManager::onStRemoved);
     connect(Session, &MeetingSession::stationNameChanged, this, &ViewManager::onStNameChanged);
-    connect(Session, &MeetingSession::stationPlanChanged, this, &ViewManager::onStPlanChanged);
+    connect(Session, &MeetingSession::stationJobsPlanChanged, this, &ViewManager::onStPlanChanged);
 
     //Shifts
     connect(Session, &MeetingSession::shiftNameChanged, this, &ViewManager::onShiftEdited);
