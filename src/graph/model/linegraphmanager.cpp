@@ -436,7 +436,9 @@ void LineGraphManager::onLineRemoved(db_id lineId)
 
 void LineGraphManager::onJobChanged(db_id jobId, db_id oldJobId)
 {
-    //If job changed ID or category, update all scenes which had it selected
+    //If job changed ID or category, update selection on all scenes which had it selected
+    //There is no need to reload jobs because it is already done.
+    //In fact when a job changes ID, all station interested by this job get informed, and scenes reloaded
 
     JobStopEntry selectedJob;
     selectedJob.jobId = jobId;
@@ -446,23 +448,26 @@ void LineGraphManager::onJobChanged(db_id jobId, db_id oldJobId)
     if(!selectedJob.jobId)
         return; //Invalid job ID
 
-    if(activeScene)
+    if(activeScene && AppSettings.getSyncSelectionOnAllGraphs())
     {
+        //Update active scene before others in case selection is synced
+        //This way all scenes get updated selection
         JobStopEntry oldSelectedJob = activeScene->getSelectedJob();
         if(oldSelectedJob.jobId == oldJobId)
         {
             activeScene->setSelectedJob(selectedJob);
-            activeScene->reloadJobs();
         }
     }
-
-    for(LineGraphScene *scene : qAsConst(scenes))
+    else
     {
-        JobStopEntry oldSelectedJob = scene->getSelectedJob();
-        if(oldSelectedJob.jobId == oldJobId)
+        //Manually update all scenes
+        for(LineGraphScene *scene : qAsConst(scenes))
         {
-            scene->setSelectedJob(selectedJob);
-            scene->reloadJobs();
+            JobStopEntry oldSelectedJob = scene->getSelectedJob();
+            if(oldSelectedJob.jobId == oldJobId)
+            {
+                scene->setSelectedJob(selectedJob);
+            }
         }
     }
 }
