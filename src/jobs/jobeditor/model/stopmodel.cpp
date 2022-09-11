@@ -712,11 +712,11 @@ void StopModel::uncoupleStillCoupledAtLastStop()
 void StopModel::uncoupleStillCoupledAtStop(const StopItem& s)
 {
     //Uncouple all still-coupled RS
-    command q_uncoupleRS(mDb, "INSERT OR IGNORE INTO coupling(id,rs_id,stop_id,operation) VALUES(NULL,?,?,0)");
+    command q_uncoupleRS(mDb, "INSERT OR REPLACE INTO coupling(id,stop_id,rs_id,operation) VALUES(NULL,?,?,0)");
     query q_selectStillOn(mDb, "SELECT coupling.rs_id,MAX(stops.arrival)"
                                " FROM stops"
                                " JOIN coupling ON coupling.stop_id=stops.id"
-                               " WHERE stops.job_id=?1 AND stops.arrival<?2"
+                               " WHERE stops.job_id=?1 AND stops.arrival<=?2"
                                " GROUP BY coupling.rs_id"
                                " HAVING coupling.operation=1");
     q_selectStillOn.bind(1, mJobId);
@@ -725,8 +725,8 @@ void StopModel::uncoupleStillCoupledAtStop(const StopItem& s)
     {
         db_id rsId = rs.get<db_id>(0);
         rsToUpdate.insert(rsId);
-        q_uncoupleRS.bind(1, rsId);
-        q_uncoupleRS.bind(2, s.stopId);
+        q_uncoupleRS.bind(1, s.stopId);
+        q_uncoupleRS.bind(2, rsId);
         q_uncoupleRS.execute();
         q_uncoupleRS.reset();
     }
