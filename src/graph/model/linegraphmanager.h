@@ -140,6 +140,7 @@ private slots:
     //Stations
     void onStationNameChanged(db_id stationId);
     void onStationJobPlanChanged(const QSet<db_id> &stationIds);
+    void onStationTrackPlanChanged(const QSet<db_id> &stationIds);
     void onStationRemoved(db_id stationId);
 
     //Segments
@@ -157,6 +158,9 @@ private slots:
 
     //Settings
     void updateGraphOptions();
+
+private:
+    void onStationPlanChanged_internal(const QSet<db_id> &stationIds, int flag);
 
 private:
     QVector<LineGraphScene *> scenes;

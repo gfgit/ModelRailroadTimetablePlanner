@@ -85,7 +85,8 @@ bool RailwaySegmentSplitHelper::split()
     stationsToUpdate.insert(newSegInfo.to.stationId);
 
     emit Session->segmentStationsChanged(origSegInfo.segmentId);
-    emit Session->stationPlanChanged(stationsToUpdate);
+    emit Session->stationTrackPlanChanged(stationsToUpdate);
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
 
     return true;
 }

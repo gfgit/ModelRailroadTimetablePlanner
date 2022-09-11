@@ -436,7 +436,7 @@ bool JobPathEditor::saveChanges()
     emit Session->rollingStockPlanChanged(rsToUpdate);
 
     //Update station views
-    emit Session->stationPlanChanged(stationsToUpdate);
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
 
     //When updating the path selection gets cleared so we restore it
     Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
@@ -488,7 +488,7 @@ void JobPathEditor::discardChanges()
     emit Session->rollingStockPlanChanged(rsToUpdate);
 
     //Update station views
-    emit Session->stationPlanChanged(stationsToUpdate);
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
 }
 
 db_id JobPathEditor::currentJobId() const

@@ -113,7 +113,7 @@ bool JobsHelper::removeJob(sqlite3pp::database &db, db_id jobId)
     emit Session->jobRemoved(jobId);
 
     //Refresh graphs and station views
-    emit Session->stationPlanChanged(stationsToUpdate);
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
 
     //Refresh Rollingstock views
     emit Session->rollingStockPlanChanged(rsToUpdate);
@@ -285,7 +285,7 @@ bool JobsHelper::copyStops(sqlite3pp::database &db, db_id fromJobId, db_id toJob
     }
 
     //Refresh graphs and station views
-    emit Session->stationPlanChanged(stationsToUpdate);
+    emit Session->stationJobsPlanChanged(stationsToUpdate);
 
     //Refresh Rollingstock views
     emit Session->rollingStockPlanChanged(rsToUpdate);

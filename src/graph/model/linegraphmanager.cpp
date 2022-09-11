@@ -22,7 +22,8 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     auto session = Session;
     //Stations
     connect(session, &MeetingSession::stationNameChanged, this, &LineGraphManager::onStationNameChanged);
-    connect(session, &MeetingSession::stationPlanChanged, this, &LineGraphManager::onStationJobPlanChanged);
+    connect(session, &MeetingSession::stationJobsPlanChanged, this, &LineGraphManager::onStationJobPlanChanged);
+    connect(session, &MeetingSession::stationTrackPlanChanged, this, &LineGraphManager::onStationTrackPlanChanged);
     connect(session, &MeetingSession::stationRemoved, this, &LineGraphManager::onStationRemoved);
 
     //Segments
@@ -285,27 +286,12 @@ void LineGraphManager::onStationNameChanged(db_id stationId)
 
 void LineGraphManager::onStationJobPlanChanged(const QSet<db_id>& stationIds)
 {
-    bool found = false;
+    onStationPlanChanged_internal(stationIds, int(PendingUpdate::ReloadJobs));
+}
 
-    for(LineGraphScene *scene : qAsConst(scenes))
-    {
-        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload)
-            || scene->pendingUpdate.testFlag(PendingUpdate::ReloadJobs))
-            continue; //Already flagged
-
-        for(db_id stationId : stationIds)
-        {
-            if(scene->stations.contains(stationId))
-            {
-                scene->pendingUpdate.setFlag(PendingUpdate::ReloadJobs);
-                found = true;
-                break;
-            }
-        }
-    }
-
-    if(found)
-        scheduleUpdate();
+void LineGraphManager::onStationTrackPlanChanged(const QSet<db_id> &stationIds)
+{
+    onStationPlanChanged_internal(stationIds, int(PendingUpdate::FullReload));
 }
 
 void LineGraphManager::onStationRemoved(db_id stationId)
@@ -518,4 +504,29 @@ void LineGraphManager::updateGraphOptions()
                 disconnect(scene, &LineGraphScene::graphChanged, this, &LineGraphManager::onGraphChanged);
         }
     }
+}
+
+void LineGraphManager::onStationPlanChanged_internal(const QSet<db_id> &stationIds, int flag)
+{
+    bool found = false;
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload)
+            || scene->pendingUpdate.testFlag(PendingUpdate(flag)))
+            continue; //Already flagged
+
+        for(db_id stationId : stationIds)
+        {
+            if(scene->stations.contains(stationId))
+            {
+                scene->pendingUpdate.setFlag(PendingUpdate(flag));
+                found = true;
+                break;
+            }
+        }
+    }
+
+    if(found)
+        scheduleUpdate();
 }
