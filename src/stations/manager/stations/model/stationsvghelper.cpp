@@ -405,7 +405,8 @@ bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVG
     sqlite3pp::query q(db);
     q.prepare("SELECT stops.id,stops.job_id,jobs.category,stops.arrival,stops.departure,"
               "stops.in_gate_conn,c1.track_id,c1.track_side,c1.gate_id,c1.gate_track,"
-              "stops.out_gate_conn,c2.track_id,c2.track_side,c2.gate_id,c2.gate_track"
+              "stops.out_gate_conn,c2.track_id,c2.track_side,c2.gate_id,c2.gate_track,"
+              "stops.next_segment_conn_id,stops.type"
               " FROM stops"
               " JOIN jobs ON jobs.id=stops.job_id"
               " LEFT JOIN station_gate_connections c1 ON c1.id=stops.in_gate_conn"
@@ -437,6 +438,9 @@ bool StationSVGHelper::loadStationJobsFromDB(sqlite3pp::database &db, StationSVG
         s.out_gate.gateId = stop.get<db_id>(13);
         s.out_gate.gateTrackNum = stop.get<int>(14);
 
+        s.next_seg_conn = stop.get<db_id>(15);
+        s.type = StopType(stop.get<db_id>(16));
+
         station->stops.append(s);
     }
 
@@ -451,6 +455,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
     const QString statusArr = tr("Arriving");
     const QString statusDep = tr("Departing");
     const QString statusStop = tr("Stop");
+    const QString statusTransit = tr("Transit");
 
     for(const StationSVGJobStops::Stop& stop : station->stops)
     {
@@ -472,8 +477,14 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
             foundPlatform = true;
             tooltip = tooltip.arg(platf.trackName);
 
+            QString status = statusStop;
+            if(stop.type == StopType::Transit)
+                status = statusTransit;
+            else if(stop.departure == station->time && stop.next_seg_conn)
+                status = statusDep;
+
             platf.visible = true;
-            platf.tooltip = tooltip.arg(stop.departure == station->time ? statusDep : statusStop);
+            platf.tooltip = tooltip.arg(status);
             platf.color = color;
             break;
         }
@@ -502,7 +513,9 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
             }
         }
 
-        if(stop.departure == station->time)
+        //Check also next_seg_conn because sometimes gate out connection
+        //is used to store track in stop but doesn't mean job will depart.
+        if(stop.departure == station->time && stop.next_seg_conn)
         {
             ssplib::TrackConnectionInfo outConn;
             outConn.gateId       = stop.out_gate.gateId;

@@ -36,6 +36,8 @@ struct StationSVGJobStops
         Gate out_gate;
         QTime arrival;
         QTime departure;
+        db_id next_seg_conn = 0;
+        StopType type;
     };
 
     db_id stationId = 0;
