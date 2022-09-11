@@ -6,12 +6,16 @@
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"
 
+#include <QCoreApplication>
+#include "utils/worker_event_types.h"
+
 #include <QDebug>
 
 LineGraphManager::LineGraphManager(QObject *parent) :
     QObject(parent),
     activeScene(nullptr),
-    m_followJobOnGraphChange(false)
+    m_followJobOnGraphChange(false),
+    m_hasScheduledUpdate(false)
 {
     auto session = Session;
     //Stations
@@ -35,6 +39,18 @@ LineGraphManager::LineGraphManager(QObject *parent) :
     //Settings
     connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
     m_followJobOnGraphChange = AppSettings.getFollowSelectionOnGraphChange();
+}
+
+bool LineGraphManager::event(QEvent *ev)
+{
+    if(ev->type() == QEvent::Type(CustomEvents::LineGraphManagerUpdate))
+    {
+        ev->accept();
+        processPendingUpdates();
+        return true;
+    }
+
+    return QObject::event(ev);
 }
 
 void LineGraphManager::registerScene(LineGraphScene *scene)
@@ -99,6 +115,24 @@ JobStopEntry LineGraphManager::getCurrentSelectedJob() const
     if(activeScene)
         selectedJob = activeScene->getSelectedJob();
     return selectedJob;
+}
+
+void LineGraphManager::scheduleUpdate()
+{
+    if(m_hasScheduledUpdate)
+        return; //Already scheduled
+
+    //Mark as scheduled and post event to ourself
+    m_hasScheduledUpdate = true;
+    QCoreApplication::postEvent(this,
+        new QEvent(QEvent::Type(CustomEvents::LineGraphManagerUpdate)),
+        Qt::HighEventPriority);
+}
+
+void LineGraphManager::processPendingUpdates()
+{
+    //Clear update flag
+    m_hasScheduledUpdate = false;
 }
 
 void LineGraphManager::setActiveScene(IGraphScene *scene)

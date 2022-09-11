@@ -45,7 +45,10 @@ enum class CustomEvents
     JobsModelResult,
 
     //Printing
-    PrintProgress
+    PrintProgress,
+
+    //Line Graph Manager
+    LineGraphManagerUpdate
 };
 
 #endif // WORKER_EVENT_TYPES_H
