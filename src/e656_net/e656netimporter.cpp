@@ -16,7 +16,9 @@ bool jumpToJobStart(QXmlStreamReader &xml)
             continue; //Skip previous elements
         }
 
-        if(xml.name() != QLatin1String("tbody") && xml.attributes().value(QLatin1String("class")) == QLatin1String("list-table"))
+        qDebug() << xml.name();
+
+        if(xml.name() != QLatin1String("tbody") || xml.attributes().value(QLatin1String("class")) != QLatin1String("list-table"))
         {
             continue; //Not our element, skip
         }
@@ -24,7 +26,45 @@ bool jumpToJobStart(QXmlStreamReader &xml)
         break;
     }
 
-    return xml.hasError();
+    return !xml.hasError();
+}
+
+bool readJobTable(QXmlStreamReader &xml)
+{
+    qDebug() << xml.name();
+    while(!xml.atEnd())
+    {
+        //Read row element <tr>
+        xml.readNextStartElement();
+        qDebug() << xml.name();
+
+        xml.readNextStartElement(); //Station Name
+
+        qDebug() << xml.name();
+        QString stName = xml.readElementText();
+        xml.skipCurrentElement();
+
+        xml.readNextStartElement(); //Arrival
+        qDebug() << xml.name();
+        QString arr = xml.readElementText();
+        xml.skipCurrentElement();
+
+        xml.readNextStartElement(); //Departure
+        qDebug() << xml.name();
+        QString dep = xml.readElementText();
+        xml.skipCurrentElement();
+
+        xml.readNextStartElement(); //Platform
+        qDebug() << xml.name();
+        QString platf = xml.readElementText(QXmlStreamReader::IncludeChildElements);
+        xml.skipCurrentElement();
+
+        qDebug() << "Station:" << stName << arr << dep << platf;
+
+        xml.skipCurrentElement(); //End row
+    }
+
+    return !xml.hasError();
 }
 
 E656NetImporter::E656NetImporter(sqlite3pp::database &db, QObject *parent) :
@@ -86,5 +126,9 @@ void E656NetImporter::doImportJob(QNetworkReply *reply)
         return;
     }
 
-
+    if(!readJobTable(xml))
+    {
+        qDebug() << "XML ERROR:" << xml.errorString();
+        return;
+    }
 }

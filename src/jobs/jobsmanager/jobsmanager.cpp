@@ -20,6 +20,10 @@
 #include "newjobsamepathdlg.h"
 #include "utils/owningqpointer.h"
 
+#include "e656_net/e656netimporter.h"
+#include <QInputDialog>
+#include <QUrl>
+
 JobsManager::JobsManager(QWidget *parent) :
     QWidget(parent)
 {
@@ -35,6 +39,13 @@ JobsManager::JobsManager(QWidget *parent) :
     actShowJobInGraph = toolBar->addAction(tr("Show Graph"), this, &JobsManager::onShowJobGraph);
     toolBar->addSeparator();
     QAction *actRemoveAll = toolBar->addAction(tr("Remove All"), this, &JobsManager::onRemoveAllJobs);
+    toolBar->addSeparator();
+    QAction *actionE656Net = toolBar->addAction(tr("Import E656.net"), this, [this]()
+        {
+            E656NetImporter *importer = new E656NetImporter(Session->m_Db, this);
+            QString urlString = QInputDialog::getText(this, tr("Insert URL"), "E656.net");
+            importer->startImportJob(QUrl::fromUserInput(urlString));
+        });
     l->addWidget(toolBar);
 
     view = new QTableView;
