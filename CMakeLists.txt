@@ -93,6 +93,7 @@ find_package(Qt5 REQUIRED
     Widgets
     Svg
     PrintSupport
+    Network
     LinguistTools)
 
 find_package(SQLite3)

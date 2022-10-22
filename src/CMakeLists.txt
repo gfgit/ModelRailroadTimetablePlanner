@@ -15,6 +15,7 @@ endif()
 add_subdirectory(app)
 add_subdirectory(backgroundmanager)
 add_subdirectory(db_metadata)
+add_subdirectory(e656_net)
 add_subdirectory(graph)
 add_subdirectory(jobs)
 add_subdirectory(odt_export)
@@ -98,6 +99,7 @@ target_link_libraries(
     Qt5::Widgets
     Qt5::Svg
     Qt5::PrintSupport
+    Qt5::Network
     ${SQLite3_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ssplib::ssplib
