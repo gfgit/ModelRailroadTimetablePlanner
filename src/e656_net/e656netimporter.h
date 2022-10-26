@@ -6,6 +6,7 @@
 class QUrl;
 class QNetworkAccessManager;
 class QNetworkReply;
+class QIODevice;
 
 namespace sqlite3pp {
 class database;
@@ -24,6 +25,9 @@ private slots:
 
 signals:
     void errorOccurred(const QString& msg);
+
+private:
+    bool readStationTable(QIODevice *dev);
 
 private:
     sqlite3pp::database &mDb;

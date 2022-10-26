@@ -4,7 +4,6 @@
 #include <QNetworkReply>
 
 #include <QXmlStreamReader>
-#include <QFile>
 #include <QBuffer>
 
 #include <QDebug>
@@ -88,12 +87,14 @@ QByteArray deviceFindString(QIODevice *dev, const QByteArray& str)
     constexpr int BUF_LEN = 1024;
 
     qint64 start = -1;
+    qint64 pos = dev->pos();
 
     while (!dev->atEnd())
     {
-        qint64 pos = dev->pos();
         char buf[BUF_LEN];
         qint64 br = dev->read(buf, BUF_LEN);
+        qint64 origPos = pos;
+        pos += br;
 
         int i = 0;
         int idx = 0;
@@ -102,11 +103,11 @@ QByteArray deviceFindString(QIODevice *dev, const QByteArray& str)
             if(start == -1)
             {
                 if(buf[i] == str[0])
-                    start = pos + i;
+                    start = origPos + i;
                 continue;
             }
 
-            idx = pos + i - start;
+            idx = origPos + i - start;
             if(idx < str.size() && buf[i] != str[idx])
             {
                 start = -1;
@@ -119,7 +120,7 @@ QByteArray deviceFindString(QIODevice *dev, const QByteArray& str)
 
         if(start != -1 && idx == str.size())
         {
-            QByteArray ba(buf + start - pos, br - (start - pos));
+            QByteArray ba(buf + start - origPos, br - (start - origPos));
             return ba;
         }
     }
@@ -297,64 +298,6 @@ bool readStationTableRow(QXmlStreamReader &xml, QString& jobCat, QString &jobNum
     return !xml.hasError();
 }
 
-bool readStationTable(QIODevice *dev)
-{
-    QByteArray prevBuf;
-    qint64 prevPos = dev->pos();
-
-    const char tableStart[] = "<tbody class=\"list-table\" ng-controller=\"bookingController\">";
-    const int tableStartSize = sizeof(tableStart) - 1;
-
-    const char rowStart[] = "<tr ng-class=\"{";
-    const int rowStartSz = sizeof(rowStart) - 1;
-
-    const char rowEnd[] = "</tr>";
-    const int rowEndSz = sizeof(rowEnd) - 1;
-
-
-    //Jump to table body start
-    QByteArray rowBuf = deviceFindString2(dev, QByteArray::fromRawData(tableStart, tableStartSize),
-                                          prevBuf, prevPos, false);
-    rowBuf = rowBuf.right(rowBuf.size() - tableStartSize); //Skip table body start element
-    prevPos += tableStartSize;
-
-    QXmlStreamReader xml;
-
-    while (true)
-    {
-        //Read until row end
-        prevBuf = rowBuf;
-        rowBuf = deviceFindString2(dev, QByteArray::fromRawData(rowEnd, rowEndSz),
-                                   prevBuf, prevPos, true);
-        if(rowBuf.isEmpty())
-            break;
-
-        //Keep row end in the buf
-        rowBuf.append(rowEnd, rowEndSz);
-
-        //Parse row...
-        xml.clear();
-        xml.addData(rowBuf);
-
-        QString jobCat, jobNum, urlPath;
-
-        if(!readStationTableRow(xml, jobCat, jobNum, urlPath))
-        {
-            qDebug() << "Station row error";
-        }
-        else
-        {
-
-        }
-
-        //Go to next row
-        rowBuf = deviceFindString2(dev, QByteArray::fromRawData(rowStart, rowStartSz),
-                                   prevBuf, prevPos, false);
-    }
-
-    return true;
-}
-
 E656NetImporter::E656NetImporter(sqlite3pp::database &db, QObject *parent) :
     QObject(parent),
     mDb(db)
@@ -438,13 +381,81 @@ void E656NetImporter::doImportJob(QNetworkReply *reply)
     {
         //Station page
 
-        QFile file("C:\\Users\\Filippo\\Documents\\Test_Session\\new_session\\padova_bella.html");
-        file.open(QFile::ReadOnly | QFile::Text);
-
-        if(!readStationTable(&file))
+        if(!readStationTable(reply))
         {
             qDebug() << "XML ERROR: station";
             return;
         }
     }
+}
+
+bool E656NetImporter::readStationTable(QIODevice *dev)
+{
+    QByteArray prevBuf;
+    qint64 prevPos = dev->pos();
+
+    const char tableStart[] = "<tbody class=\"list-table\" ng-controller=\"bookingController\">";
+    const int tableStartSize = sizeof(tableStart) - 1;
+
+    const char rowStart[] = "<tr ng-class=\"{";
+    const int rowStartSz = sizeof(rowStart) - 1;
+
+    const char rowEnd[] = "</tr>";
+    const int rowEndSz = sizeof(rowEnd) - 1;
+
+
+    //Jump to table body start
+    QByteArray rowBuf = deviceFindString2(dev, QByteArray::fromRawData(tableStart, tableStartSize),
+                                          prevBuf, prevPos, false);
+    rowBuf = rowBuf.right(rowBuf.size() - tableStartSize); //Skip table body start element
+    prevPos += tableStartSize;
+
+    QXmlStreamReader xml;
+
+    CustomEntityResolver resolver;
+    xml.setEntityResolver(&resolver);
+
+    int jobCount = 0;
+
+    while (true)
+    {
+        //Read until row end
+        prevBuf = rowBuf;
+        rowBuf = deviceFindString2(dev, QByteArray::fromRawData(rowEnd, rowEndSz),
+                                   prevBuf, prevPos, true);
+        if(rowBuf.isEmpty())
+            break;
+
+        //Keep row end in the buf
+        rowBuf.append(rowEnd, rowEndSz);
+
+        //Parse row...
+        xml.clear();
+        xml.addData(rowBuf);
+
+        QString jobCat, jobNum, urlPath;
+
+        if(!readStationTableRow(xml, jobCat, jobNum, urlPath))
+        {
+            qDebug() << "Station row error";
+        }
+        else
+        {
+            jobCount++;
+
+            QUrl url;
+            url.setScheme(QLatin1String("https"));
+            url.setHost(QLatin1String("www.e656.net"));
+            url.setPath(urlPath);
+
+            if(jobCount < 10)
+                startImportJob(url);
+        }
+
+        //Go to next row
+        rowBuf = deviceFindString2(dev, QByteArray::fromRawData(rowStart, rowStartSz),
+                                   prevBuf, prevPos, false);
+    }
+
+    return true;
 }
