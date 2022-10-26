@@ -12,6 +12,17 @@ class query;
 class JobsHelper
 {
 public:
+    /*!
+     * \brief createNewJob
+     * \param db open database connection
+     * \param outJobId ID of created job
+     * \param cat Job category
+     * \return true on success
+     *
+     * If \a outJobId is passed non zero, the function tries to cread a Job with the passed ID
+     * If the Job ID is already in use, the function fails and no new Job is created.
+     * If 0 is passed, the function creates a new Job with arbitrary free ID from database
+     */
     static bool createNewJob(sqlite3pp::database &db, db_id &outJobId, JobCategory cat = JobCategory::FREIGHT);
     static bool removeJob(sqlite3pp::database &db, db_id jobId);
     static bool removeAllJobs(sqlite3pp::database &db);

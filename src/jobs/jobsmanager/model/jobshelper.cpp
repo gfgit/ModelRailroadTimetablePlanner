@@ -8,8 +8,12 @@
 
 bool JobsHelper::createNewJob(sqlite3pp::database &db, db_id &outJobId, JobCategory cat)
 {
-    sqlite3pp::command q_newJob(db, "INSERT INTO jobs(id,category,shift_id) VALUES(NULL,?,NULL)");
-    q_newJob.bind(1, int(cat));
+    sqlite3pp::command q_newJob(db, "INSERT INTO jobs(id,category,shift_id) VALUES(?,?,NULL)");
+    if(outJobId)
+        q_newJob.bind(1, outJobId);
+    else
+        q_newJob.bind(1); //Bind NULL
+    q_newJob.bind(2, int(cat));
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(db.db());
     sqlite3_mutex_enter(mutex);
