@@ -561,6 +561,11 @@ bool ViewManager::closeEditors()
         jobEditor->setEnabled(false);
     }
 
+    if(jobsManager && !jobsManager->close())
+    {
+        return false;
+    }
+
     if(rsManager && !rsManager->close())
     {
         return false;
