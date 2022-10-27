@@ -196,26 +196,13 @@ void StationSVGPlanDlg::clearDBData()
 
 void StationSVGPlanDlg::clearJobs()
 {
-    for(ssplib::TrackItem& item : m_plan->platforms)
-    {
-        item.visible = false;
-
-        item.color = ssplib::whiteRGB;
-        item.tooltip.clear();
-    }
-
-    for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
-    {
-        item.visible = false;
-
-        item.color = ssplib::whiteRGB;
-        item.tooltip.clear();
-    }
+    clearJobs_internal();
+    view->update();
 }
 
 void StationSVGPlanDlg::reloadJobs()
 {
-    clearJobs();
+    clearJobs_internal();
 
     if(m_showJobs)
     {
@@ -529,4 +516,23 @@ void StationSVGPlanDlg::timerEvent(QTimerEvent *e)
     }
 
     QWidget::timerEvent(e);
+}
+
+void StationSVGPlanDlg::clearJobs_internal()
+{
+    for(ssplib::TrackItem& item : m_plan->platforms)
+    {
+        item.visible = false;
+
+        item.color = ssplib::whiteRGB;
+        item.tooltip.clear();
+    }
+
+    for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
+    {
+        item.visible = false;
+
+        item.color = ssplib::whiteRGB;
+        item.tooltip.clear();
+    }
 }

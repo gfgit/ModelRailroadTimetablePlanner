@@ -69,6 +69,9 @@ protected:
     void timerEvent(QTimerEvent *e) override;
 
 private:
+    void clearJobs_internal();
+
+private:
     sqlite3pp::database &mDb;
     db_id stationId;
 
