@@ -3,8 +3,6 @@
 
 #include <QWidget>
 
-#include "utils/types.h"
-
 class QToolBar;
 
 class ShiftGraphView;

@@ -9,12 +9,8 @@
 
 #include "app/session.h"
 
-#include "utils/files/openfileinfolder.h"
-
 #include "utils/owningqpointer.h"
 #include "shifts/shiftgraph/view/shiftgraphprintdlg.h"
-
-#include "info.h"
 
 #include <QDebug>
 
