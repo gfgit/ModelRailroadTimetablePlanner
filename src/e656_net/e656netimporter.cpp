@@ -4,7 +4,8 @@
 #include <QNetworkReply>
 
 #include <QXmlStreamReader>
-#include <QBuffer>
+
+#include "jobstopsimporter.h"
 
 #include <QDebug>
 
@@ -386,38 +387,51 @@ QByteArray deviceFindString2(QIODevice *dev, const QByteArray& str, QByteArray& 
     return QByteArray();
 }
 
-bool readJobTable(QXmlStreamReader &xml)
+bool readJobTable(QXmlStreamReader &xml, QVector<JobStopsImporter::Stop>& stops)
 {
+    const QString timeFmt = QLatin1String("HH.mm.ss");
+
     int i = 0;
 
     xml.readNextStartElement(); //<tbody> table start
     while(!xml.atEnd())
     {
-        xml.readNextStartElement(); //<tr> Row start
-        if(xml.hasError())
+        //<tr> Row start
+        if(!xml.readNextStartElement() || xml.hasError() || xml.atEnd())
             break;
 
         xml.readNextStartElement(); //<td> Station Cell
-        if(xml.hasError())
+        if(xml.hasError() || xml.atEnd())
             break;
-        QString stName = xml.readElementText(QXmlStreamReader::IncludeChildElements).simplified();
+
+        JobStopsImporter::Stop stop;
+
+        stop.stationName = xml.readElementText(QXmlStreamReader::IncludeChildElements).simplified();
 
         xml.readNextStartElement(); //<td> Arrival Cell
         QString arr = xml.readElementText(QXmlStreamReader::IncludeChildElements).simplified();
+        stop.arrival = QTime::fromString(arr, timeFmt);
 
         xml.readNextStartElement(); //<td> Departure Cell
         QString dep = xml.readElementText(QXmlStreamReader::IncludeChildElements).simplified();
+        stop.departure = QTime::fromString(dep, timeFmt);
 
-        xml.readNextStartElement(); //<td> Platform Cell
-        QString platf = xml.readElementText(QXmlStreamReader::IncludeChildElements).simplified();
+        if(xml.readNextStartElement()) //<td> Platform Cell
+        {
+            stop.platformName = xml.readElementText(QXmlStreamReader::IncludeChildElements).simplified();
 
-        //Skip current row
-        xml.skipCurrentElement();
+            //Skip current row
+            xml.skipCurrentElement();
+        }
 
-        qDebug().noquote() << i << stName.leftJustified(20, ' ')
+        //
+
+        stops.append(stop);
+
+        qDebug().noquote() << i << stop.stationName.leftJustified(20, ' ')
                            << arr.leftJustified(8, ' ') << " "
                            << dep.leftJustified(8, ' ') << " "
-                           << platf.rightJustified(2, ' ');
+                           << stop.platformName.rightJustified(2, ' ');
         i++;
     }
 
@@ -512,7 +526,7 @@ void E656NetImporter::doImportJob(QNetworkReply *reply)
         return;
     }
 
-    if(reply->url().toString().contains(QLatin1String("treno")))
+    if(reply->url().path().contains(QLatin1String("treno")))
     {
         //Single job page
 
@@ -533,11 +547,16 @@ void E656NetImporter::doImportJob(QNetworkReply *reply)
         CustomEntityResolver resolver;
         xml.setEntityResolver(&resolver);
 
-        if(!readJobTable(xml))
+        QVector<JobStopsImporter::Stop> stops;
+
+        if(!readJobTable(xml, stops))
         {
             qDebug() << "XML ERROR:" << xml.error() << xml.errorString();
             return;
         }
+
+        JobStopsImporter importer(mDb);
+        importer.createJob(0, JobCategory::EXPRESS, stops);
     }
     else
     {
