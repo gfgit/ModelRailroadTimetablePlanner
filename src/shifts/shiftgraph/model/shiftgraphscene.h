@@ -77,13 +77,19 @@ public slots:
     bool loadShifts();
 
 private slots:
+    //Settings
     void updateShiftGraphOptions();
 
+    //Shifts
     void onShiftNameChanged(db_id shiftId);
     void onShiftRemoved(db_id shiftId);
-    void onShiftJobsChanged(db_id shiftId);
 
+    //Stations
     void onStationNameChanged(db_id stationId);
+
+    //Jobs
+    void onShiftJobsChanged(db_id shiftId);
+    void onJobRemoved(db_id jobId);
 
 private:
     void recalcContentSize();

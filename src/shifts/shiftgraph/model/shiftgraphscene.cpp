@@ -42,7 +42,9 @@ ShiftGraphScene::ShiftGraphScene(sqlite3pp::database &db, QObject *parent) :
 
     connect(Session, &MeetingSession::shiftNameChanged, this, &ShiftGraphScene::onShiftNameChanged);
     connect(Session, &MeetingSession::shiftRemoved, this, &ShiftGraphScene::onShiftRemoved);
+
     connect(Session, &MeetingSession::shiftJobsChanged, this, &ShiftGraphScene::onShiftJobsChanged);
+    connect(Session, &MeetingSession::jobRemoved, this, &ShiftGraphScene::onJobRemoved);
 
     updateShiftGraphOptions();
 }
@@ -428,6 +430,20 @@ void ShiftGraphScene::onShiftRemoved(db_id shiftId)
     emit redrawGraph();
 }
 
+void ShiftGraphScene::onStationNameChanged(db_id stationId)
+{
+    if(m_stationCache.contains(stationId))
+    {
+        //Reload name
+        m_stationCache.remove(stationId);
+
+        query q_getStName(mDb, sql_getStName);
+        loadStationName(stationId, q_getStName);
+
+        emit redrawGraph();
+    }
+}
+
 void ShiftGraphScene::onShiftJobsChanged(db_id shiftId)
 {
     //Reload single shift
@@ -447,18 +463,15 @@ void ShiftGraphScene::onShiftJobsChanged(db_id shiftId)
     emit redrawGraph();
 }
 
-void ShiftGraphScene::onStationNameChanged(db_id stationId)
+void ShiftGraphScene::onJobRemoved(db_id jobId)
 {
-    if(m_stationCache.contains(stationId))
-    {
-        //Reload name
-        m_stationCache.remove(stationId);
+    //We already catch normal job removal with other signals
+    if(jobId)
+        return;
 
-        query q_getStName(mDb, sql_getStName);
-        loadStationName(stationId, q_getStName);
-
-        emit redrawGraph();
-    }
+    //If jobId is zero, it means all jobs have been deleted
+    //Reload all shifts
+    loadShifts();
 }
 
 void ShiftGraphScene::recalcContentSize()
