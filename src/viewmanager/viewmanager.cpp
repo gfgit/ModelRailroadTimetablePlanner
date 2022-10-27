@@ -27,7 +27,6 @@
 #include "sessionstartendrsviewer.h"
 
 #include <QMessageBox>
-#include "utils/owningqpointer.h"
 
 ViewManager::ViewManager(QObject *parent) :
     QObject(parent),
@@ -51,6 +50,9 @@ ViewManager::ViewManager(QObject *parent) :
     connect(Session, &MeetingSession::stationRemoved, this, &ViewManager::onStRemoved);
     connect(Session, &MeetingSession::stationNameChanged, this, &ViewManager::onStNameChanged);
     connect(Session, &MeetingSession::stationJobsPlanChanged, this, &ViewManager::onStPlanChanged);
+
+    //Jobs
+    connect(Session, &MeetingSession::jobRemoved, this, &ViewManager::onJobRemoved);
 
     //Shifts
     connect(Session, &MeetingSession::shiftNameChanged, this, &ViewManager::onShiftEdited);
@@ -246,8 +248,39 @@ void ViewManager::onStPlanChanged(const QSet<db_id>& stationIds)
             it3.value()->reloadDBData();
         }
     }
+}
 
+void ViewManager::onJobRemoved(db_id jobId)
+{
+    //We already catch normal job removal with other signals
+    if(jobId)
+        return;
 
+    //If jobId is zero, it means all jobs have been deleted
+    //Reload all views, Shift Graph Editor already reloads itself
+
+    //Close all rollingstock views because we have no couplings anymore
+    qDeleteAll(rsHash);
+    rsHash.clear();
+
+    //Close all station job view
+    qDeleteAll(stHash);
+    stHash.clear();
+
+    //Close all station free RS view
+    qDeleteAll(stRSHash);
+    stRSHash.clear();
+
+    //Close any shift job view
+    qDeleteAll(shiftHash);
+    shiftHash.clear();
+
+    //Reload station plans
+    for(auto st : qAsConst(stPlanHash))
+    {
+        st->clearJobs();
+        st->update();
+    }
 }
 
 StationJobView* ViewManager::createStJobViewer(db_id stId)

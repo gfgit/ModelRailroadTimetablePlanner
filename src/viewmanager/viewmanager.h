@@ -76,15 +76,20 @@ public:
     void resumeRSImportation();
 
 private slots:
-
+    //Rollingstock
     void onRSRemoved(db_id rsId);
     void onRSPlanChanged(QSet<db_id> set);
     void onRSInfoChanged(db_id rsId);
 
+    //Stations
     void onStRemoved(db_id stId);
     void onStNameChanged(db_id stId);
     void onStPlanChanged(const QSet<db_id> &stationIds);
 
+    //Jobs
+    void onJobRemoved(db_id jobId);
+
+    //Shifts
     void onShiftRemoved(db_id shiftId);
     void onShiftEdited(db_id shiftId);
     void onShiftJobsChanged(db_id shiftId);
