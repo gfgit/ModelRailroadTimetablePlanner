@@ -155,6 +155,7 @@ private slots:
 
     //Jobs
     void onJobChanged(db_id jobId, db_id oldJobId);
+    void onJobRemoved(db_id jobId);
 
     //Settings
     void updateGraphOptions();

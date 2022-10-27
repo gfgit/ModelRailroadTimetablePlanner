@@ -40,6 +40,7 @@ LineGraphManager::LineGraphManager(QObject *parent) :
 
     //Jobs
     connect(session, &MeetingSession::jobChanged, this, &LineGraphManager::onJobChanged);
+    connect(session, &MeetingSession::jobRemoved, this, &LineGraphManager::onJobRemoved);
 
     //Settings
     connect(&AppSettings, &MRTPSettings::jobGraphOptionsChanged, this, &LineGraphManager::updateGraphOptions);
@@ -484,6 +485,31 @@ void LineGraphManager::onJobChanged(db_id jobId, db_id oldJobId)
             }
         }
     }
+}
+
+void LineGraphManager::onJobRemoved(db_id jobId)
+{
+    //We already catch normal job removal with other signals
+    if(jobId)
+        return;
+
+    //If jobId is zero, it means all jobs have been deleted
+    //Reload all scenes
+
+    bool found = false;
+
+    for(LineGraphScene *scene : qAsConst(scenes))
+    {
+        if(scene->pendingUpdate.testFlag(PendingUpdate::FullReload)
+            || scene->pendingUpdate.testFlag(PendingUpdate(PendingUpdate::ReloadJobs)))
+            continue; //Already flagged
+
+        scene->pendingUpdate.setFlag(PendingUpdate(PendingUpdate::ReloadJobs));
+        found = true;
+    }
+
+    if(found)
+        scheduleUpdate();
 }
 
 void LineGraphManager::updateGraphOptions()
