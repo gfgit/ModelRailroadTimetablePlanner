@@ -75,7 +75,7 @@ QModelIndex RsErrorTreeModel::parent(const QModelIndex &idx) const
         return QModelIndex();
 
     RsErrors::ErrorData *item = static_cast<RsErrors::ErrorData*>(idx.internalPointer());
-    if(!item) //Caption
+    if(!item) //Caption, it's toplevel so no parent
         return QModelIndex();
 
     auto it = m_data.constFind(item->rsId);
@@ -91,7 +91,7 @@ int RsErrorTreeModel::rowCount(const QModelIndex &parent) const
     if(parent.isValid())
     {
         if(parent.internalPointer())
-            return 0; //Child most
+            return 0; //Child most, no childs below so 0 rows
 
         auto it = m_data.constBegin() + parent.row();
         return it->errors.size();
@@ -126,11 +126,26 @@ QModelIndex RsErrorTreeModel::sibling(int row, int column, const QModelIndex &id
 
     if(idx.internalPointer())
     {
-        return createIndex(row, column, idx.internalPointer());
+        //It's an error row inside a RS Item tree
+        if(column >= NCols)
+            return QModelIndex();
+
+        void *ptr = idx.internalPointer();
+        if(row != idx.row())
+        {
+            //Calculate new ptr for row
+            RsErrors::ErrorData *item = static_cast<RsErrors::ErrorData*>(idx.internalPointer());
+            auto it = m_data.constFind(item->rsId);
+            if(it == m_data.constEnd() || row >= it->errors.size())
+                return QModelIndex(); //Out of bound child row
+            ptr = const_cast<void *>(static_cast<const void *>(&it->errors.at(row)));
+        }
+
+        return createIndex(row, column, ptr);
     }
 
     if(column > 0 || row >= m_data.size())
-        return QModelIndex();
+        return QModelIndex(); //Parents (RS Items) have only column zero
 
     return createIndex(row, 0, nullptr);
 }
