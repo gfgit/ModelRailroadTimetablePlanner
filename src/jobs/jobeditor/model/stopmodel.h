@@ -135,7 +135,7 @@ public:
                                QString *outErr);
 
     bool trySelectNextSegment(StopItem &item, db_id segmentId, int suggestedOutGateTrk,
-                              db_id nextStationId, db_id &out_gateId);
+                              db_id nextStationId, db_id &out_gateId, db_id &out_suggestedTrackId);
 
 signals:
     void edited(bool val);

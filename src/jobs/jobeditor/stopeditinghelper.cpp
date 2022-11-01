@@ -151,7 +151,8 @@ void StopEditingHelper::popupSegmentCombo()
         db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(0);
 
         db_id segOutGateId = 0;
-        if(model->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId))
+        db_id suggestedTrackId = 0;
+        if(model->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId, suggestedTrackId))
         {
             //Success, close editor
             emit nextSegmentChosen();
@@ -257,7 +258,8 @@ void StopEditingHelper::onOutGateSelected(const QModelIndex &idx)
     const db_id newSegId = stationOutGateMatchModel->getSegmentIdAtRow(idx.row());
     const db_id oldGateId = curStop.toGate.gateId;
     db_id segOutGateId = 0;
-    if(model->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId))
+    db_id suggestedTrackId = 0;
+    if(model->trySelectNextSegment(curStop, newSegId, 0, 0, segOutGateId, suggestedTrackId))
     {
         //Update gate track
         updateGateTrackSpin(curStop.toGate);
@@ -284,7 +286,8 @@ void StopEditingHelper::checkOutGateTrack()
     curStop.toGate.gateTrackNum = trackNum; //Trigger checking of railway segment connections
 
     db_id segOutGateId = 0;
-    if(model->trySelectNextSegment(curStop, curStop.nextSegment.segmentId, trackNum, 0, segOutGateId))
+    db_id suggestedTrackId = 0;
+    if(model->trySelectNextSegment(curStop, curStop.nextSegment.segmentId, trackNum, 0, segOutGateId, suggestedTrackId))
     {
         //Update gate track
         updateGateTrackSpin(curStop.toGate);

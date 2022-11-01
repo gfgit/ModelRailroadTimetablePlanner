@@ -858,8 +858,9 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         StopItem& prevStop = stops[row - 1];
         if(prevStop.nextSegment.segmentId != prevSeg.segmentId)
         {
+            db_id suggestedTrackId = 0;
             if(!trySelectNextSegment(prevStop, prevSeg.segmentId, prevStop.toGate.gateTrackNum,
-                                      newStop.stationId, newStop.fromGate.gateId))
+                                      newStop.stationId, newStop.fromGate.gateId, suggestedTrackId))
                 return;
 
             startStopsEditing();
@@ -1381,8 +1382,11 @@ bool StopModel::trySetTrackConnections(StopItem &item, db_id trackId, QString *o
     return true;
 }
 
-bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, int suggestedOutGateTrk, db_id nextStationId, db_id &seg_out_gateId)
+bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, int suggestedOutGateTrk, db_id nextStationId,
+                                     db_id &seg_out_gateId, db_id &out_suggestedTrackId)
 {
+    out_suggestedTrackId = -1;
+
     bool reversed = false;
     query q(mDb, "SELECT s.in_gate_id,g1.station_id,s.out_gate_id,g2.station_id"
                  " FROM railway_segments s"
@@ -1421,6 +1425,8 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, int sugges
     //Station out gate = segment in gate
     if(seg_in_gateId != item.toGate.gateId || item.toGate.gateTrackNum != item.nextSegment.inTrackNum)
     {
+        out_suggestedTrackId = 0;
+
         //Try to find a gate connected to previous track_id
         //Prefer suggested gate out track num if possible or lowest one possible
         QByteArray sql = "SELECT c.id,c.gate_track,c.track_side,sc.id,sc.%2_track"
@@ -1441,7 +1447,48 @@ bool StopModel::trySelectNextSegment(StopItem &item, db_id segmentId, int sugges
         if(q.step() != SQLITE_ROW)
         {
             //Error: gate is not connected to previous track
-            //User must change previous track
+            //User must change previous track, make a suggestion (lowest track connected to in and out gates)
+
+            sql = "SELECT c2.track_id"
+                  " FROM station_gate_connections c2"
+                  " JOIN railway_connections sc ON sc.seg_id=?2 AND sc.%1_track=c2.gate_track"
+                  " %3"
+                  " JOIN station_tracks t ON t.id=c2.track_id"
+                  " WHERE c2.gate_id=?1"
+                  " ORDER BY c2.gate_track=?3 DESC,c2.gate_track ASC,t.pos ASC"
+                  " LIMIT 1";
+
+            if(item.type != StopType::First)
+            {
+                //Check also in gate
+                sql.replace("%3", "JOIN station_gate_connections c1 ON"
+                                  " c1.gate_id=?4 AND c1.gate_track=?5 AND c1.track_id=c2.track_id");
+            }
+            else
+            {
+                //Do not check in gate for first stop
+                sql.replace("%3", "");
+            }
+
+            sql.replace("%1", reversed ? "out" : "in");
+            sql.replace("%2", reversed ? "in" : "out");
+
+            q.prepare(sql);
+            q.bind(1, seg_in_gateId);
+            q.bind(2, segmentId);
+            q.bind(3, suggestedOutGateTrk);
+
+            if(item.type != StopType::First)
+            {
+                q.bind(4, item.fromGate.gateId);
+                q.bind(5, item.fromGate.gateTrackNum);
+            }
+
+            if(q.step() == SQLITE_ROW)
+            {
+                out_suggestedTrackId = q.getRows().get<db_id>(0);
+            }
+
             return false;
         }
 
