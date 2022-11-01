@@ -14,7 +14,7 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-RsErrWorker::RsErrWorker(database &db, QObject *receiver, QVector<db_id> vec) :
+RsErrWorker::RsErrWorker(database &db, QObject *receiver, const QVector<db_id> &vec) :
     IQuittableTask(receiver),
     mDb(db),
     rsToCheck(vec)

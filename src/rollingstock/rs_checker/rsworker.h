@@ -26,7 +26,7 @@ class query;
 class RsErrWorker : public IQuittableTask
 {
 public:
-    RsErrWorker(sqlite3pp::database& db, QObject *receiver, QVector<db_id> vec);
+    RsErrWorker(sqlite3pp::database& db, QObject *receiver, const QVector<db_id>& vec);
 
     void run() override;
 
