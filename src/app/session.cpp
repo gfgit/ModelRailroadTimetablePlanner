@@ -191,8 +191,8 @@ DB_Error MeetingSession::closeDB()
         //return false;
     }
 
-#ifdef ENABLE_RS_CHECKER
-    backgroundManager->getRsChecker()->clearModel();
+#ifdef ENABLE_BACKGROUND_MANAGER
+    backgroundManager->clearResults();
 #endif
 
     fileName.clear();

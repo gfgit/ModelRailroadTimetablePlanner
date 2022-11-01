@@ -4,10 +4,13 @@
 #ifdef ENABLE_BACKGROUND_MANAGER
 
 #include <QObject>
+#include <QVector>
 
 #ifdef ENABLE_RS_CHECKER
 class RsCheckerManager;
 #endif
+
+class IBackgroundChecker;
 
 //TODO: show a progress bar for all task like Qt Creator does
 class BackgroundManager : public QObject
@@ -19,6 +22,11 @@ public:
 
     void abortAllTasks();
     bool isRunning();
+
+    void addChecker(IBackgroundChecker *mgr);
+    void removeChecker(IBackgroundChecker *mgr);
+
+    void clearResults();
 
 #ifdef ENABLE_RS_CHECKER
     inline RsCheckerManager *getRsChecker() const { return rsChecker; };
@@ -39,10 +47,16 @@ signals:
      */
     void abortTrivialTasks();
 
+    void checkerAdded(IBackgroundChecker *mgr);
+    void checkerRemoved(IBackgroundChecker *mgr);
+
 private:
 #ifdef ENABLE_RS_CHECKER
     RsCheckerManager *rsChecker;
 #endif
+
+    friend class BackgroundResultPanel;
+    QVector<IBackgroundChecker *> checkers;
 };
 
 #endif // ENABLE_BACKGROUND_MANAGER
