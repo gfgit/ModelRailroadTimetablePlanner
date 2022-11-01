@@ -34,13 +34,14 @@ bool JobStopsImporter::createJob(db_id jobId, JobCategory category, const QVecto
                                    " WHERE (g1.station_id=?1 AND g2.station_id=?2)"
                                    " OR (g1.station_id=?2 AND g2.station_id=?1)");
 
+    sqlite3pp::query q_findPlatform(mDb, "SELECT 0");
+
+    db_id prevStationId = 0;
+    QTime prevDeparture;
     int i = 0;
+
     for(const Stop& row : stops)
     {
-        //Get previous stop from model
-        StopItem prevStop;
-        if(i > 0)
-            prevStop = model.getItemAt(i - 1);
 
         //Parse station
         q_getStId.bind(1, row.stationName.toUpper());
@@ -58,15 +59,15 @@ bool JobStopsImporter::createJob(db_id jobId, JobCategory category, const QVecto
 
         //Find segment between previous stop and current
         db_id prevSeg = 0;
-        if(prevStop.stationId)
+        if(prevStationId)
         {
-            q_getSeg.bind(1, prevStop.stationId);
+            q_getSeg.bind(1, prevStationId);
             q_getSeg.bind(2, stationId);
             int ret = q_getSeg.step();
             prevSeg = q_getSeg.getRows().get<db_id>(0);
             if(ret != SQLITE_ROW || !prevSeg)
             {
-                qDebug() << "Error Job:" << jobId << "Stations:" << prevStop.stationId << "and" << stationId << "not connected";
+                qDebug() << "Error Job:" << jobId << "Stations:" << prevStationId << "and" << stationId << "not connected";
                 qDebug() << mDb.error_msg();
                 break;
             }
@@ -76,19 +77,42 @@ bool JobStopsImporter::createJob(db_id jobId, JobCategory category, const QVecto
         //Create new (current) stop
         model.addStop();
 
+        //Get previous stop from model
+        StopItem prevStop;
+        if(i > 0)
+        {
+            prevStop = model.getItemAt(i - 1);
+        }
+
         //Set next segment of previous stop (now is not Last anymore)
-        db_id outSegGateId = 0;
         if(prevSeg)
         {
-            if(model.trySelectNextSegment(prevStop, prevSeg, 0, stationId, outSegGateId))
+            db_id outSegGateId = 0;
+            db_id suggestedTrackId = 0;
+            if(!model.trySelectNextSegment(prevStop, prevSeg, 0, stationId, outSegGateId, suggestedTrackId))
             {
-                StopItem::Segment beforePrevSeg;
-                if(i > 1)
-                    beforePrevSeg = model.getItemAt(i - 2).nextSegment;
-
-                //Store changes to previous stop before editing current one
-                model.setStopInfo(model.index(i - 1), prevStop, beforePrevSeg);
+                //Maybe selected track is not connected to out gate
+                if(suggestedTrackId > 0)
+                {
+                    //Try again with suggested track
+                    model.trySetTrackConnections(prevStop, suggestedTrackId, nullptr);
+                    model.trySelectNextSegment(prevStop, prevSeg, 0, stationId, outSegGateId, suggestedTrackId);
+                }
             }
+        }
+
+        if(i > 0)
+        {
+            //Apply departure to previous stop now that it's not Last anymore
+            prevStop.departure = prevDeparture;
+
+            StopItem::Segment beforePrevSeg;
+            if(i > 1)
+                beforePrevSeg = model.getItemAt(i - 2).nextSegment;
+
+            //Store changes to previous stop before editing current one
+            model.setStopInfo(model.index(i - 1), prevStop, beforePrevSeg);
+            prevStop = model.getItemAt(i - 1);
         }
 
         //Get stop after saving previous
@@ -96,6 +120,11 @@ bool JobStopsImporter::createJob(db_id jobId, JobCategory category, const QVecto
         curStop.stationId = stationId;
         curStop.arrival = row.arrival;
         curStop.departure = row.departure;
+
+        //Cannot set departure directly (unless it's First stop) because we are Last stop
+        //On next stop we will go back and set departure
+        prevDeparture = curStop.departure;
+        prevStationId = curStop.stationId;
 
         model.trySelectTrackForStop(curStop);
 
