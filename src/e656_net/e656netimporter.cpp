@@ -387,6 +387,29 @@ QByteArray deviceFindString2(QIODevice *dev, const QByteArray& str, QByteArray& 
     return QByteArray();
 }
 
+JobCategory matchCategory(const QString& name)
+{
+    if(name.contains(QLatin1String("FRECCIA"), Qt::CaseInsensitive) ||
+        name.contains(QLatin1String("NTV"), Qt::CaseInsensitive))
+    {
+        return JobCategory::HIGH_SPEED;
+    }
+
+    if(name.contains(QLatin1String("INTERCITY"), Qt::CaseInsensitive))
+    {
+        return JobCategory::INTERCITY;
+    }
+
+    if(name.contains(QLatin1String("REGIONALE"), Qt::CaseInsensitive))
+    {
+        if(name.contains(QLatin1String("VELOCE"), Qt::CaseInsensitive))
+            return JobCategory::FAST_REGIONAL;
+        return JobCategory::REGIONAL;
+    }
+
+    return JobCategory::NCategories;
+}
+
 bool readJobTable(QXmlStreamReader &xml, QVector<JobStopsImporter::Stop>& stops)
 {
     const QString timeFmt = QLatin1String("HH.mm.ss");
@@ -424,7 +447,7 @@ bool readJobTable(QXmlStreamReader &xml, QVector<JobStopsImporter::Stop>& stops)
             xml.skipCurrentElement();
         }
 
-        //
+        //Do not skip current row because it's already done by failed readNextStartElement()
 
         stops.append(stop);
 
@@ -438,8 +461,11 @@ bool readJobTable(QXmlStreamReader &xml, QVector<JobStopsImporter::Stop>& stops)
     return !xml.hasError();
 }
 
-bool readStationTableRow(QXmlStreamReader &xml, QString& jobCat, QString &jobNum, QString& urlPath)
+bool readStationTableRow(QXmlStreamReader &xml, ImportedJobItem& jobItem)
 {
+    const QString timeFmt = QLatin1String("HH:mm");
+    const QString origTimeFmt = QLatin1String("(HH:mm)");
+
     //<tr> Row start
     xml.readNextStartElement();
     if(xml.atEnd())
@@ -448,27 +474,69 @@ bool readStationTableRow(QXmlStreamReader &xml, QString& jobCat, QString &jobNum
     xml.readNextStartElement(); //<td> Platform Cell
     if(xml.hasError())
         return false;
-    xml.skipCurrentElement();
+
+    if(xml.readNextStartElement())
+    {
+        //<span> platform span
+        jobItem.platformName = xml.readElementText().simplified();
+        xml.skipCurrentElement(); //</td>
+    }
+    //Do not skip </td> because it's already done by failed readNextStartElement()
 
     xml.readNextStartElement(); //<td> Train number Cell
     xml.readNextStartElement(); //<div>
     xml.readNextStartElement(); //<span>
     xml.readNextStartElement(); //<img>
 
-    jobCat = xml.attributes().value("alt").toString();
+    jobItem.catName = xml.attributes().value("alt").toString();
     xml.skipCurrentElement(); //</img>
     xml.skipCurrentElement(); //</span>
 
     xml.readNextStartElement(); //<span>
     xml.readNextStartElement(); //<a>
 
-    urlPath = xml.attributes().value("href").toString();
+    jobItem.urlPath = xml.attributes().value("href").toString();
 
-    jobNum = xml.readElementText().simplified();
+    jobItem.number = xml.readElementText().simplified().toLongLong();
 
     xml.skipCurrentElement(); //</span>
     xml.skipCurrentElement(); //</div>
     xml.skipCurrentElement(); //</td>
+
+    xml.readNextStartElement(); //<td> Arrival
+    QString arr = xml.readElementText().simplified();
+    jobItem.arrival = QTime::fromString(arr, timeFmt);
+
+    xml.readNextStartElement(); //<td> Departure
+    QString dep = xml.readElementText().simplified();
+    jobItem.departure = QTime::fromString(dep, timeFmt);
+
+    xml.readNextStartElement(); //<td> Origin Station
+    xml.readNextStartElement(); //<span>
+    jobItem.originStation = xml.readElementText().simplified();
+
+    if(xml.readNextStartElement())
+    {
+        //<span> Origin Time
+        dep = xml.readElementText().simplified();
+        jobItem.originTime = QTime::fromString(dep, origTimeFmt);
+        xml.skipCurrentElement(); //</td>
+    }
+    //Do not skip </td> because it's already done by failed readNextStartElement()
+
+    xml.readNextStartElement(); //<td> Destination Station
+    xml.readNextStartElement(); //<span>
+    jobItem.destinationStation = xml.readElementText().simplified();
+
+    if(xml.readNextStartElement())
+    {
+        //<span> Destination Time
+        arr = xml.readElementText().simplified();
+        jobItem.destinationTime = QTime::fromString(arr, origTimeFmt);
+        xml.skipCurrentElement(); //</td>
+    }
+    //Do not skip </td> because it's already done by failed readNextStartElement()
+
     xml.skipCurrentElement(); //</tr>
 
     return !xml.hasError();
@@ -481,31 +549,11 @@ E656NetImporter::E656NetImporter(sqlite3pp::database &db, QObject *parent) :
     manager = new QNetworkAccessManager(this);
 }
 
-bool E656NetImporter::startImportJob(const QUrl &url, bool overwriteExisting)
+QNetworkReply* E656NetImporter::startImportJob(const QUrl &url)
 {
-    if(!overwriteExisting)
-    {
-        //TODO: check existing
-    }
-
     QNetworkRequest req(url);
     QNetworkReply *reply = manager->get(req);
-    connect(reply, &QNetworkReply::errorOccurred, this, [this, reply]()
-        {
-            emit errorOccurred(tr("Network Error:\n"
-                                  "%1\n"
-                                  "%2")
-                                   .arg(reply->url().toString(),
-                                       reply->errorString()));
-            reply->deleteLater();
-        });
-
-    connect(reply, &QNetworkReply::finished, this, [this, reply]()
-        {
-            doImportJob(reply);
-        });
-
-    return true;
+    return reply;
 }
 
 void E656NetImporter::doImportJob(QNetworkReply *reply)
@@ -558,19 +606,9 @@ void E656NetImporter::doImportJob(QNetworkReply *reply)
         JobStopsImporter importer(mDb);
         importer.createJob(0, JobCategory::EXPRESS, stops);
     }
-    else
-    {
-        //Station page
-
-        if(!readStationTable(reply))
-        {
-            qDebug() << "XML ERROR: station";
-            return;
-        }
-    }
 }
 
-bool E656NetImporter::readStationTable(QIODevice *dev)
+bool E656NetImporter::readStationTable(QIODevice *dev, QVector<ImportedJobItem> &items)
 {
     QByteArray prevBuf;
     qint64 prevPos = dev->pos();
@@ -596,8 +634,6 @@ bool E656NetImporter::readStationTable(QIODevice *dev)
     CustomEntityResolver resolver;
     xml.setEntityResolver(&resolver);
 
-    int jobCount = 0;
-
     while (true)
     {
         //Read until row end
@@ -614,23 +650,16 @@ bool E656NetImporter::readStationTable(QIODevice *dev)
         xml.clear();
         xml.addData(rowBuf);
 
-        QString jobCat, jobNum, urlPath;
+        ImportedJobItem jobItem;
 
-        if(!readStationTableRow(xml, jobCat, jobNum, urlPath))
+        if(readStationTableRow(xml, jobItem))
         {
-            qDebug() << "Station row error";
+            jobItem.matchingCategory = matchCategory(jobItem.catName);
+            items.append(jobItem);
         }
         else
         {
-            jobCount++;
-
-            QUrl url;
-            url.setScheme(QLatin1String("https"));
-            url.setHost(QLatin1String("www.e656.net"));
-            url.setPath(urlPath);
-
-            if(jobCount < 10)
-                startImportJob(url);
+            qDebug() << "Station row error";
         }
 
         //Go to next row

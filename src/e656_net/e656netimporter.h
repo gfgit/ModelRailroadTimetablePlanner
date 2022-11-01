@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "model/e656_utils.h"
+
 class QUrl;
 class QNetworkAccessManager;
 class QNetworkReply;
@@ -18,16 +20,14 @@ class E656NetImporter : public QObject
 public:
     E656NetImporter(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    bool startImportJob(const QUrl& url, bool overwriteExisting = false);
+    QNetworkReply* startImportJob(const QUrl& url);
+    bool readStationTable(QIODevice *dev, QVector<ImportedJobItem> &items);
 
 private slots:
     void doImportJob(QNetworkReply *reply);
 
 signals:
     void errorOccurred(const QString& msg);
-
-private:
-    bool readStationTable(QIODevice *dev);
 
 private:
     sqlite3pp::database &mDb;
