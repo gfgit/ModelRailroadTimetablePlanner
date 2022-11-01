@@ -28,6 +28,7 @@ private:
     QLineEdit *urlEdit;
     QPushButton *urlImportBut;
     QTableView *view;
+    QPushButton *jobImportBut;
 
     E656StationModel *model;
     E656NetImporter *importer;

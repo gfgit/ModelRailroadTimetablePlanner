@@ -394,7 +394,7 @@ QNetworkReply* E656NetImporter::startImportJob(const QUrl &url)
     return reply;
 }
 
-void E656NetImporter::doImportJob(QNetworkReply *reply)
+void E656NetImporter::doImportJob(QNetworkReply *reply, const ImportedJobItem &item)
 {
     qDebug() << "IMPORTING JOB:" << reply->url();
 
@@ -412,38 +412,35 @@ void E656NetImporter::doImportJob(QNetworkReply *reply)
         return;
     }
 
-    if(reply->url().path().contains(QLatin1String("treno")))
+    //Single job page
+
+    //Needed because HTML is not fully compatible with XML
+    //So parser doesn't work.
+    //As a workaroud we skip to the job stop table which is well-formed and read from there
+    //To find the table we read in chunks, but device is sequential so we cannot seek back
+    //to workaround this second issue, we save the chunk from table onward and use a fake device
+    //which concatenates the buffer with the real device
+    QByteArray seekBuf = deviceFindString(reply, "<tbody class=\"list-table\">");
+    if(seekBuf.isEmpty())
+        return;
+
+    ProxySeqDevice proxy(reply, seekBuf);
+
+    QXmlStreamReader xml(&proxy);
+
+    CustomEntityResolver resolver;
+    xml.setEntityResolver(&resolver);
+
+    QVector<JobStopsImporter::Stop> stops;
+
+    if(!readJobTable(xml, stops))
     {
-        //Single job page
-
-        //Needed because HTML is not fully compatible with XML
-        //So parser doesn't work.
-        //As a workaroud we skip to the job stop table which is well-formed and read from there
-        //To find the table we read in chunks, but device is sequential so we cannot seek back
-        //to workaround this second issue, we save the chunk from table onward and use a fake device
-        //which concatenates the buffer with the real device
-        QByteArray seekBuf = deviceFindString(reply, "<tbody class=\"list-table\">");
-        if(seekBuf.isEmpty())
-            return;
-
-        ProxySeqDevice proxy(reply, seekBuf);
-
-        QXmlStreamReader xml(&proxy);
-
-        CustomEntityResolver resolver;
-        xml.setEntityResolver(&resolver);
-
-        QVector<JobStopsImporter::Stop> stops;
-
-        if(!readJobTable(xml, stops))
-        {
-            qDebug() << "XML ERROR:" << xml.error() << xml.errorString();
-            return;
-        }
-
-        JobStopsImporter importer(mDb);
-        importer.createJob(0, JobCategory::EXPRESS, stops);
+        qDebug() << "XML ERROR:" << xml.error() << xml.errorString();
+        return;
     }
+
+    JobStopsImporter importer(mDb);
+    importer.createJob(item.number, item.matchingCategory, stops);
 }
 
 bool E656NetImporter::readStationTable(QIODevice *dev, QVector<ImportedJobItem> &items)

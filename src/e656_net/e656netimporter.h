@@ -22,9 +22,7 @@ public:
 
     QNetworkReply* startImportJob(const QUrl& url);
     bool readStationTable(QIODevice *dev, QVector<ImportedJobItem> &items);
-
-private slots:
-    void doImportJob(QNetworkReply *reply);
+    void doImportJob(QNetworkReply *reply, const ImportedJobItem& item);
 
 signals:
     void errorOccurred(const QString& msg);

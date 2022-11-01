@@ -7,6 +7,12 @@
 
 #include "e656_utils.h"
 
+class E656NetImporter;
+
+namespace sqlite3pp {
+class database;
+}
+
 class E656StationModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -14,7 +20,7 @@ class E656StationModel : public QAbstractTableModel
 public:
     enum Columns
     {
-        JobCatName = 0,
+        JobCatNameCol = 0,
         JobNumber,
         JobMatchCat,
         PlatfCol,
@@ -25,7 +31,8 @@ public:
         NCols
     };
 
-    explicit E656StationModel(QObject *parent = nullptr);
+    E656StationModel(sqlite3pp::database &db, QObject *parent = nullptr);
+    ~E656StationModel();
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
@@ -36,7 +43,13 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
+    // Editable:
+    bool setData(const QModelIndex &idx, const QVariant &value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
+
     void setJobs(const QVector<ImportedJobItem>& jobs);
+
+    void importSelectedJobs(E656NetImporter *importer);
 
 private:
     QVector<ImportedJobItem> m_data;

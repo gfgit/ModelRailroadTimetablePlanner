@@ -22,6 +22,15 @@ struct ImportedJobItem
     QTime destinationTime;
 
     JobCategory matchingCategory = JobCategory::NCategories;
+
+    enum Status
+    {
+        Unselected = 0,
+        ToBeImported,
+        AlreadyImported
+    };
+
+    Status status = Unselected;
 };
 
 #endif // E656_UTILS_H

@@ -19,7 +19,7 @@ E656ImportDlg::E656ImportDlg(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent)
 {
     importer = new E656NetImporter(db, this);
-    model = new E656StationModel(this);
+    model = new E656StationModel(db, this);
 
     QVBoxLayout *lay = new QVBoxLayout(this);
 
@@ -27,7 +27,7 @@ E656ImportDlg::E656ImportDlg(sqlite3pp::database &db, QWidget *parent) :
     urlEdit = new QLineEdit;
     hlay->addWidget(urlEdit);
 
-    urlImportBut = new QPushButton("Parse");
+    urlImportBut = new QPushButton(tr("Parse"));
     hlay->addWidget(urlImportBut);
 
     lay->addLayout(hlay);
@@ -36,8 +36,15 @@ E656ImportDlg::E656ImportDlg(sqlite3pp::database &db, QWidget *parent) :
     view->setModel(model);
     lay->addWidget(view);
 
+    jobImportBut = new QPushButton(tr("Import Selected"));
+    lay->addWidget(jobImportBut);
+
     connect(importer, &E656NetImporter::errorOccurred, this, &E656ImportDlg::showError);
     connect(urlImportBut, &QPushButton::clicked, this, &E656ImportDlg::startUrlRequest);
+    connect(jobImportBut, &QPushButton::clicked, this, [this]()
+            {
+                model->importSelectedJobs(importer);
+            });
 }
 
 void E656ImportDlg::startUrlRequest()
@@ -56,7 +63,7 @@ void E656ImportDlg::startUrlRequest()
     }
 
     QNetworkReply *reply = importer->startImportJob(url);
-    auto onFinished = [this,  reply]()
+    auto onFinished = [this, reply]()
     {
         reply->deleteLater();
 
