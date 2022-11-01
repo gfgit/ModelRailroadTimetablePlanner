@@ -23,6 +23,8 @@ private slots:
 
     void onRemoveAllJobs();
 
+    void onImportE656Net();
+
     void onSelectionChanged();
 
 private:

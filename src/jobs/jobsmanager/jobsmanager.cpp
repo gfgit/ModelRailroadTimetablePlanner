@@ -20,9 +20,7 @@
 #include "newjobsamepathdlg.h"
 #include "utils/owningqpointer.h"
 
-#include "e656_net/e656netimporter.h"
-#include <QInputDialog>
-#include <QUrl>
+#include "e656_net/e656importdlg.h"
 
 JobsManager::JobsManager(QWidget *parent) :
     QWidget(parent)
@@ -40,12 +38,7 @@ JobsManager::JobsManager(QWidget *parent) :
     toolBar->addSeparator();
     QAction *actRemoveAll = toolBar->addAction(tr("Remove All"), this, &JobsManager::onRemoveAllJobs);
     toolBar->addSeparator();
-    QAction *actionE656Net = toolBar->addAction(tr("Import E656.net"), this, [this]()
-        {
-            E656NetImporter *importer = new E656NetImporter(Session->m_Db, this);
-            QString urlString = QInputDialog::getText(this, tr("Insert URL"), "E656.net");
-            importer->startImportJob(QUrl::fromUserInput(urlString));
-        });
+    QAction *actE656Net = toolBar->addAction(tr("Import E656.net"), this, &JobsManager::onImportE656Net);
     l->addWidget(toolBar);
 
     view = new QTableView;
@@ -77,6 +70,7 @@ JobsManager::JobsManager(QWidget *parent) :
                               "<b>You can double click on a row to edit Job.</b>"));
     actShowJobInGraph->setToolTip(tr("Show selected Job in graph"));
     actRemoveAll->setToolTip(tr("Delete all Jobs of this session"));
+    actE656Net->setToolTip(tr("Import Jobs from www.e656.net website timetable"));
 
     setWindowTitle("Jobs Manager");
 }
@@ -124,6 +118,12 @@ void JobsManager::onRemoveAllJobs()
                                     tr("Are you really sure you want to delete all jobs from this session?"));
     if(ret == QMessageBox::Yes)
         JobsHelper::removeAllJobs(Session->m_Db);
+}
+
+void JobsManager::onImportE656Net()
+{
+    OwningQPointer<E656ImportDlg> dlg = new E656ImportDlg(Session->m_Db, this);
+    dlg->exec();
 }
 
 void JobsManager::onNewJobSamePath()
