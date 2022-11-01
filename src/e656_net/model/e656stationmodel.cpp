@@ -2,22 +2,6 @@
 
 #include "utils/jobcategorystrings.h"
 
-JobCategory matchCategory(const QString& name)
-{
-    if(name.contains(QLatin1String("FRECCIA"), Qt::CaseInsensitive) ||
-        name.contains(QLatin1String("NTV"), Qt::CaseInsensitive))
-    {
-        return JobCategory::HIGH_SPEED;
-    }
-
-    if(name.contains(QLatin1String("REGIONALE"), Qt::CaseInsensitive))
-    {
-        return JobCategory::REGIONAL;
-    }
-
-    return JobCategory::NCategories;
-}
-
 E656StationModel::E656StationModel(QObject *parent)
     : QAbstractTableModel(parent)
 {
