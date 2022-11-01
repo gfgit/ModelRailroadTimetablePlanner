@@ -1,0 +1,6 @@
+add_subdirectory(crossing)
+
+set(MR_TIMETABLE_PLANNER_SOURCES
+  ${MR_TIMETABLE_PLANNER_SOURCES}
+  PARENT_SCOPE
+)

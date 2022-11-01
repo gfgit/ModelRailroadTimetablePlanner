@@ -47,6 +47,9 @@ enum class CustomEvents
     //Jobs
     JobsModelResult,
 
+    //Jobs Checker
+    JobsCrossingCheckResult,
+
     //Printing
     PrintProgress,
 
