@@ -3,6 +3,51 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
+inline bool fillCrossingErrorData(query::rows& job, JobCrossingErrorData& err, bool first, JobCategory &outCat)
+{
+    err.stopId = job.get<db_id>(0);
+    err.otherJob.stopId = job.get<db_id>(1);
+    err.jobId = job.get<db_id>(2);
+    outCat = JobCategory(job.get<int>(3));
+    err.otherJob.jobId = job.get<db_id>(4);
+    err.otherJob.category = JobCategory(job.get<int>(5));
+    err.departure = job.get<QTime>(6);
+    err.arrival = job.get<QTime>(7);
+    err.otherDep = job.get<QTime>(8);
+    err.otherArr = job.get<QTime>(9);
+    bool passing = job.get<int>(10) == 1;
+    err.stationId = job.get<db_id>(11);
+    err.stationName = job.get<QString>(12);
+
+    if(passing)
+    {
+        //In passings:
+        //job A starts before B but gets passed and ends after B
+        //job B starts after A but ends before
+        //B travel period is contained in A travel period
+
+        //We need stricter checking of time, one travel must be contained in the other
+        if(err.departure < err.otherDep && err.arrival < err.otherArr)
+            return false; //A travels before B, no passing
+        if(err.departure > err.otherDep && err.arrival > err.otherArr)
+            return false; //A travels after B, no passing
+    }
+
+    err.type = passing ? JobCrossingErrorData::JobPassing : JobCrossingErrorData::JobCrossing;
+
+    if(!first)
+    {
+        //Swap points of view
+        qSwap(err.jobId, err.otherJob.jobId);
+        qSwap(outCat, err.otherJob.category);
+        qSwap(err.stopId, err.otherJob.stopId);
+        qSwap(err.arrival, err.otherArr);
+        qSwap(err.departure, err.otherDep);
+    }
+
+    return true;
+}
+
 JobCrossingResultEvent::JobCrossingResultEvent(JobCrossingTask *worker, const JobCrossingErrorMap::ErrorMap &data, bool merge) :
     GenericTaskEvent(_Type, worker),
     results(data),
@@ -88,36 +133,10 @@ void JobCrossingTask::checkCrossAndPassSegments(JobCrossingErrorMap::ErrorMap &e
     for(auto job : q)
     {
         JobCrossingErrorData err;
+        JobCategory category = JobCategory::NCategories;
 
-        err.stopId = job.get<db_id>(0);
-        err.otherJob.stopId = job.get<db_id>(1);
-        err.jobId = job.get<db_id>(2);
-        JobCategory category = JobCategory(job.get<int>(3));
-        err.otherJob.jobId = job.get<db_id>(4);
-        err.otherJob.category = JobCategory(job.get<int>(5));
-        err.departure = job.get<QTime>(6);
-        err.arrival = job.get<QTime>(7);
-        err.otherDep = job.get<QTime>(8);
-        err.otherArr = job.get<QTime>(9);
-        bool passing = job.get<int>(10) == 1;
-        err.stationId = job.get<db_id>(11);
-        err.stationName = job.get<QString>(12);
-
-        if(passing)
-        {
-            //In passings:
-            //job A starts before B but gets passed and ends after B
-            //job B starts after A but ends before
-            //B travel period is contained in A travel period
-
-            //We need stricter checking of time, one travel must be contained in the other
-            if(err.departure < err.otherDep && err.arrival < err.otherArr)
-                continue; //A travels before B, no passing
-            if(err.departure > err.otherDep && err.arrival > err.otherArr)
-                continue; //A travels after B, no passing
-        }
-
-        err.type = passing ? JobCrossingErrorData::JobPassing : JobCrossingErrorData::JobCrossing;
+        if(!fillCrossingErrorData(job, err, true, category))
+            continue;
 
         auto it = errMap.find(err.jobId);
         if(it == errMap.end())
