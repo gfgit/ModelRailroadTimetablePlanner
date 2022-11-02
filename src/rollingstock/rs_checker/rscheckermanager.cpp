@@ -1,126 +1,27 @@
 #include "rscheckermanager.h"
 
-#ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_BACKGROUND_MANAGER
 
 #include <QThreadPool>
 
 #include "app/session.h"
+#include "viewmanager/viewmanager.h"
 
 #include "rsworker.h"
 #include "rserrortreemodel.h"
 
-RsCheckerManager::RsCheckerManager(QObject *parent) :
-    QObject(parent),
-    m_mainWorker(nullptr)
+#include <QSet>
+
+#include "utils/owningqpointer.h"
+#include <QMenu>
+
+RsCheckerManager::RsCheckerManager(sqlite3pp::database &db, QObject *parent) :
+    IBackgroundChecker(db, parent)
 {
+    eventType = RsWorkerResultEvent::_Type;
     errorsModel = new RsErrorTreeModel(this);
 
     connect(Session, &MeetingSession::rollingStockPlanChanged, this, &RsCheckerManager::onRSPlanChanged);
-}
-
-RsCheckerManager::~RsCheckerManager()
-{
-    if(m_mainWorker)
-    {
-        m_mainWorker->stop();
-        m_mainWorker->cleanup();
-        m_mainWorker = nullptr;
-    }
-
-    for(RsErrWorker *task : qAsConst(m_workers))
-    {
-        task->stop();
-        task->cleanup();
-    }
-    m_workers.clear();
-}
-
-bool RsCheckerManager::event(QEvent *e)
-{
-    if(e->type() == RsWorkerProgressEvent::_Type)
-    {
-        e->setAccepted(true);
-
-        RsWorkerProgressEvent *ev = static_cast<RsWorkerProgressEvent *>(e);
-
-        if(ev->progress == 0)
-        {
-            emit progressMax(ev->progressMax);
-        }
-
-        emit progress(ev->progress);
-
-        return true;
-    }
-    else if(e->type() == RsWorkerResultEvent::_Type)
-    {
-        e->setAccepted(true);
-
-        RsWorkerResultEvent *ev = static_cast<RsWorkerResultEvent *>(e);
-
-        if(m_mainWorker && ev->task == m_mainWorker)
-        {
-            if(!m_mainWorker->wasStopped())
-            {
-                errorsModel->setErrors(ev->results);
-            }
-
-            delete m_mainWorker;
-            m_mainWorker = nullptr;
-
-            emit taskFinished();
-        }
-        else
-        {
-            int idx = m_workers.indexOf(ev->task);
-            if(idx != -1)
-            {
-                m_workers.removeAt(idx);
-                if(!ev->task->wasStopped())
-                    errorsModel->mergeErrors(ev->results);
-
-                delete ev->task;
-            }
-        }
-
-        return true;
-    }
-
-    return QObject::event(e);
-}
-
-bool RsCheckerManager::startWorker()
-{
-    if(m_mainWorker)
-        return false;
-
-    if(!Session->m_Db.db())
-        return false;
-
-    m_mainWorker = new RsErrWorker(Session->m_Db, this, {});
-
-    QThreadPool::globalInstance()->start(m_mainWorker);
-
-    for(RsErrWorker *task : qAsConst(m_workers))
-    {
-        if(!QThreadPool::globalInstance()->tryTake(task))
-            task->stop();
-    }
-
-    return true;
-}
-
-void RsCheckerManager::abortTasks()
-{
-    if(m_mainWorker)
-    {
-        m_mainWorker->stop();
-    }
-
-    for(RsErrWorker *task : qAsConst(m_workers))
-    {
-        task->stop();
-    }
 }
 
 void RsCheckerManager::checkRs(const QSet<db_id> &rsIds)
@@ -133,19 +34,43 @@ void RsCheckerManager::checkRs(const QSet<db_id> &rsIds)
         vec.append(rsId);
 
     RsErrWorker *task = new RsErrWorker(Session->m_Db, this, vec);
-    m_workers.append(task);
-
-    QThreadPool::globalInstance()->start(task);
+    addSubTask(task);
 }
 
-RsErrorTreeModel *RsCheckerManager::getErrorsModel() const
+QString RsCheckerManager::getName() const
 {
-    return errorsModel;
+    return tr("RS Errors");
 }
 
 void RsCheckerManager::clearModel()
 {
-    errorsModel->clear();
+    static_cast<RsErrorTreeModel *>(errorsModel)->clear();
+}
+
+void RsCheckerManager::showContextMenu(QWidget *panel, const QPoint &pos, const QModelIndex &idx) const
+{
+    const RsErrorTreeModel *model = static_cast<const RsErrorTreeModel *>(errorsModel);
+    auto item = model->getItem(idx);
+    if(!item)
+        return;
+
+    OwningQPointer<QMenu> menu = new QMenu(panel);
+
+    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
+    QAction *showRsPlan = new QAction(tr("Show rollingstock plan"), menu);
+
+    menu->addAction(showInJobEditor);
+    menu->addAction(showRsPlan);
+
+    QAction *act = menu->exec(pos);
+    if(act == showInJobEditor)
+    {
+        Session->getViewManager()->requestJobEditor(item->job.jobId, item->stopId);
+    }
+    else if(act == showRsPlan)
+    {
+        Session->getViewManager()->requestRSInfo(item->rsId);
+    }
 }
 
 void RsCheckerManager::onRSPlanChanged(const QSet<db_id> &rsIds)
@@ -156,4 +81,19 @@ void RsCheckerManager::onRSPlanChanged(const QSet<db_id> &rsIds)
     checkRs(rsIds);
 }
 
-#endif // ENABLE_RS_CHECKER
+IQuittableTask *RsCheckerManager::createMainWorker()
+{
+    return new RsErrWorker(mDb, this, {});
+}
+
+void RsCheckerManager::setErrors(QEvent *e, bool merge)
+{
+    auto model = static_cast<RsErrorTreeModel *>(errorsModel);
+    auto ev = static_cast<RsWorkerResultEvent *>(e);
+    if(merge)
+        model->mergeErrors(ev->results);
+    else
+        model->setErrors(ev->results);
+}
+
+#endif // ENABLE_BACKGROUND_MANAGER

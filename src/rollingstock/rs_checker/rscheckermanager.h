@@ -1,52 +1,32 @@
 #ifndef RSCHECKERMANAGER_H
 #define RSCHECKERMANAGER_H
 
-#ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QObject>
-
-#include <QVector>
-#include <QSet>
+#include "backgroundmanager/ibackgroundchecker.h"
 
 #include "utils/types.h"
 
-class RsErrWorker;
-class RsErrorTreeModel;
-
-class RsCheckerManager : public QObject
+class RsCheckerManager : public IBackgroundChecker
 {
     Q_OBJECT
 public:
-    explicit RsCheckerManager(QObject *parent = nullptr);
-    ~RsCheckerManager();
-
-    bool event(QEvent *e) override;
-
-    bool startWorker();
-    void abortTasks();
-    inline bool isRunning() { return m_mainWorker || m_workers.size() > 0; }
+    RsCheckerManager(sqlite3pp::database &db, QObject *parent = nullptr);
 
     void checkRs(const QSet<db_id> &rsIds);
 
-    RsErrorTreeModel *getErrorsModel() const;
-
-    void clearModel();
-
-signals:
-    void progressMax(int max);
-    void progress(int val);
-    void taskFinished();
+    QString getName() const override;
+    void clearModel() override;
+    void showContextMenu(QWidget *panel, const QPoint& pos, const QModelIndex& idx) const override;
 
 public slots:
     void onRSPlanChanged(const QSet<db_id> &rsIds);
 
-private:
-    RsErrWorker *m_mainWorker; //Checks all rollingstock
-    QVector<RsErrWorker *> m_workers; //Specific check for some RS
-
-    RsErrorTreeModel *errorsModel;
+protected:
+    IQuittableTask *createMainWorker() override;
+    void setErrors(QEvent *e, bool merge) override;
 };
 
-#endif // ENABLE_RS_CHECKER
+#endif // ENABLE_BACKGROUND_MANAGER
 
 #endif // RSCHECKERMANAGER_H
