@@ -105,6 +105,11 @@ void IBackgroundChecker::abortTasks()
     }
 }
 
+void IBackgroundChecker::sessionLoadedHandler()
+{
+    //no-op
+}
+
 void IBackgroundChecker::addSubTask(IQuittableTask *task)
 {
     m_workers.append(task);

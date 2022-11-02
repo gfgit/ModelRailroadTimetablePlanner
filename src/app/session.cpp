@@ -138,10 +138,8 @@ DB_Error MeetingSession::openDB(const QString &str, bool ignoreVersion)
 //    }
 
 #ifdef ENABLE_BACKGROUND_MANAGER
-    if(settings.getCheckRSWhenOpeningDB())
-        backgroundManager->startAllCheckers(); //FIXME
+    backgroundManager->handleSessionLoaded();
 #endif
-
 
     return DB_Error::NoError;
 }

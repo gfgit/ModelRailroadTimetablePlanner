@@ -17,7 +17,7 @@ BackgroundManager::~BackgroundManager()
 
 }
 
-void BackgroundManager::startAllCheckers()
+void BackgroundManager::handleSessionLoaded()
 {
     for(IBackgroundChecker *mgr : qAsConst(checkers))
         mgr->startWorker();

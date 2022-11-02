@@ -36,6 +36,8 @@ public:
     virtual void clearModel() = 0;
     virtual void showContextMenu(QWidget *panel, const QPoint& globalPos, const QModelIndex& idx) const = 0;
 
+    virtual void sessionLoadedHandler();
+
 signals:
     void progress(int val, int max);
     void taskFinished();

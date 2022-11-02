@@ -16,7 +16,7 @@ public:
     explicit BackgroundManager(QObject *parent = nullptr);
     ~BackgroundManager() override;
 
-    void startAllCheckers();
+    void handleSessionLoaded();
     void abortAllTasks();
     bool isRunning();
 
