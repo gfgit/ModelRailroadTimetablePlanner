@@ -1,4 +1,4 @@
-#ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_BACKGROUND_MANAGER
 
 #include "rsworker.h"
 
@@ -6,8 +6,6 @@
 #include "utils/rs_utils.h"
 
 #include <QDebug>
-
-#include "error_data.h"
 
 #include <QVector>
 
@@ -54,7 +52,7 @@ void RsErrWorker::run()
             q_countRs.reset();
 
             int i = 0;
-            sendEvent(new RsWorkerProgressEvent(0, rsCount), false);
+            sendEvent(new TaskProgressEvent(this, 0, rsCount), false);
 
             for(auto r : q_selectRs)
             {
@@ -63,7 +61,7 @@ void RsErrWorker::run()
                     if(wasStopped())
                         break;
 
-                    sendEvent(new RsWorkerProgressEvent(i, rsCount), false);
+                    sendEvent(new TaskProgressEvent(this, i, rsCount), false);
                 }
 
                 RSErrorList rs;
@@ -151,7 +149,7 @@ void RsErrWorker::run()
 void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
 {
     using namespace RsErrors;
-    ErrorData err;
+    RSErrorData err;
     err.rsId = rs.rsId;
 
     RsOp prevOp = RsOp::Uncoupled;
@@ -200,7 +198,7 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
 
 
                     //Here we create another structure to fill it with previous data
-                    ErrorData e;
+                    RSErrorData e;
                     e.couplingId = prevCouplingId;
                     e.rsId = rs.rsId;
                     e.stopId = prevStopId;
@@ -263,22 +261,8 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
     }
 }
 
-RsWorkerProgressEvent::RsWorkerProgressEvent(int pr, int max) :
-    QEvent(_Type),
-    progress(pr),
-    progressMax(max)
-{
-
-}
-
-RsWorkerProgressEvent::~RsWorkerProgressEvent()
-{
-
-}
-
 RsWorkerResultEvent::RsWorkerResultEvent(RsErrWorker *worker, const QMap<db_id, RsErrors::RSErrorList> &data, bool merge) :
-    QEvent(_Type),
-    task(worker),
+    GenericTaskEvent(_Type, worker),
     results(data),
     mergeErrors(merge)
 {
@@ -290,4 +274,4 @@ RsWorkerResultEvent::~RsWorkerResultEvent()
 
 }
 
-#endif // ENABLE_RS_CHECKER
+#endif // ENABLE_BACKGROUND_MANAGER

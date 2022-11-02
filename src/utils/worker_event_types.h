@@ -14,7 +14,6 @@ enum class CustomEvents
     SearchBoxResults,
 
     //RS error checker
-    RsErrWorkerProgress,
     RsErrWorkerResult,
 
     // RS Import
