@@ -22,10 +22,6 @@ class QLabel;
 class QActionGroup;
 class CustomCompletionLineEdit;
 
-#ifdef ENABLE_RS_CHECKER
-class RsErrorsWidget;
-#endif
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -112,10 +108,9 @@ private:
 
     JobPathEditor *jobEditor;
 
-#ifdef ENABLE_RS_CHECKER
-    RsErrorsWidget *rsErrorsWidget;
-    QDockWidget *rsErrDock;
-#endif
+#ifdef ENABLE_BACKGROUND_MANAGER
+    QDockWidget *resPanelDock;
+#endif // ENABLE_BACKGROUND_MANAGER
 
     LineGraphWidget *view;
     QDockWidget *jobDock;
