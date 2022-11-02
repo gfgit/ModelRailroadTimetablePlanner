@@ -38,6 +38,12 @@ public:
     void mergeErrors(const JobCrossingErrorMap::ErrorMap &errMap);
 
     void clear();
+
+    void removeJob(db_id jobId);
+
+    void renameJob(db_id newJobId, db_id oldJobId);
+
+    void renameStation(db_id stationId, const QString& name);
 };
 
 #endif // ENABLE_BACKGROUND_MANAGER

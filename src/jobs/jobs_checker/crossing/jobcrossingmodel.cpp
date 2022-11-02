@@ -88,3 +88,22 @@ void JobCrossingModel::clear()
     m_data.map.clear();
     endResetModel();
 }
+
+void JobCrossingModel::removeJob(db_id jobId)
+{
+    beginResetModel();
+    m_data.removeJob(jobId);
+    endResetModel();
+}
+
+void JobCrossingModel::renameJob(db_id newJobId, db_id oldJobId)
+{
+    beginResetModel();
+    m_data.renameJob(newJobId, oldJobId);
+    endResetModel();
+}
+
+void JobCrossingModel::renameStation(db_id stationId, const QString &name)
+{
+
+}

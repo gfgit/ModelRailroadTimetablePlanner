@@ -10,10 +10,10 @@
 
 struct JobCrossingErrorData
 {
-    db_id jobId;
+    db_id jobId = 0;
 
-    db_id stopId;
-    db_id stationId;
+    db_id stopId = 0;
+    db_id stationId = 0;
 
     JobStopEntry otherJob;
 
@@ -29,7 +29,7 @@ struct JobCrossingErrorData
         JobPassing
     };
 
-    Type type;
+    Type type = NoError;
 };
 
 struct JobCrossingErrorList
@@ -81,6 +81,8 @@ public:
     }
 
     void removeJob(db_id jobId);
+
+    void renameJob(db_id newJobId, db_id oldJobId);
 
     void merge(const ErrorMap& results);
 
