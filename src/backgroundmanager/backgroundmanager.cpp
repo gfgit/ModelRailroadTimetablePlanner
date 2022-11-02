@@ -4,33 +4,28 @@
 #include "backgroundmanager/ibackgroundchecker.h"
 
 #include <QThreadPool>
-#include "rollingstock/rs_checker/rscheckermanager.h"
-
 #include <QSet>
 
 BackgroundManager::BackgroundManager(QObject *parent) :
     QObject(parent)
 {
-#ifdef ENABLE_RS_CHECKER
-    rsChecker = new RsCheckerManager(this);
-#endif
+
 }
 
 BackgroundManager::~BackgroundManager()
 {
-#ifdef ENABLE_RS_CHECKER
-    delete rsChecker;
-    rsChecker = nullptr;
-#endif
+
+}
+
+void BackgroundManager::startAllCheckers()
+{
+    for(IBackgroundChecker *mgr : qAsConst(checkers))
+        mgr->startWorker();
 }
 
 void BackgroundManager::abortAllTasks()
 {
     emit abortTrivialTasks();
-
-#ifdef ENABLE_RS_CHECKER
-    rsChecker->abortTasks();
-#endif
 
     for(IBackgroundChecker *mgr : qAsConst(checkers))
         mgr->abortTasks();
@@ -48,11 +43,7 @@ bool BackgroundManager::isRunning()
             return true;
     }
 
-#ifdef ENABLE_RS_CHECKER
-    running |= rsChecker->isRunning();
-#endif
-
-    return running;
+    return false;
 }
 
 void BackgroundManager::addChecker(IBackgroundChecker *mgr)
