@@ -1,12 +1,13 @@
-#ifndef ERROR_DATA_H
-#define ERROR_DATA_H
+#ifndef RS_ERROR_DATA_H
+#define RS_ERROR_DATA_H
 
-#ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_BACKGROUND_MANAGER
 
 #include "utils/types.h"
 
 #include <QTime>
 #include <QVector>
+#include <QMap>
 
 namespace RsErrors
 {
@@ -22,7 +23,7 @@ enum ErrType : quint32
     UncoupledInSameStop //otherId: previous coupling id
 };
 
-struct ErrorData
+struct RSErrorData
 {
     db_id couplingId;
     db_id rsId;
@@ -39,11 +40,44 @@ struct RSErrorList
 {
     db_id rsId;
     QString rsName;
-    QVector<ErrorData> errors;
+    QVector<RSErrorData> errors;
+
+    inline int childCount() const { return errors.size(); }
+    inline const RSErrorData *ptrForRow(int row) const { return &errors.at(row); }
+};
+
+struct RSErrorMap
+{
+    QMap<db_id, RSErrorList> map;
+
+    inline int topLevelCount() const { return map.size(); }
+
+    inline const RSErrorList *getTopLevelAtRow(int row) const
+    {
+        if(row >= topLevelCount())
+            return nullptr;
+        return &(map.constBegin() + row).value();
+    }
+
+    inline const RSErrorList *getParent(RSErrorData *child) const
+    {
+        auto it = map.constFind(child->rsId);
+        if(it == map.constEnd())
+            return nullptr;
+        return &it.value();
+    }
+
+    inline int getParentRow(RSErrorData *child) const
+    {
+        auto it = map.constFind(child->rsId);
+        if(it == map.constEnd())
+            return -1;
+        return std::distance(map.constBegin(), it);
+    }
 };
 
 } //namespace RsErrors
 
-#endif // ENABLE_RS_CHECKER
+#endif // ENABLE_BACKGROUND_MANAGER
 
-#endif // ERROR_DATA_H
+#endif // RS_ERROR_DATA_H
