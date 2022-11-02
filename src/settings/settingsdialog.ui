@@ -47,7 +47,6 @@
      <property name="font">
       <font>
        <pointsize>10</pointsize>
-       <weight>50</weight>
        <bold>false</bold>
       </font>
      </property>
@@ -58,7 +57,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>6</number>
      </property>
      <property name="usesScrollButtons">
       <bool>true</bool>
@@ -114,7 +113,6 @@
             <property name="font">
              <font>
               <pointsize>10</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -175,7 +173,6 @@
             <property name="font">
              <font>
               <pointsize>10</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -256,7 +253,7 @@
             <x>0</x>
             <y>0</y>
             <width>555</width>
-            <height>772</height>
+            <height>788</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -925,7 +922,7 @@
       <attribute name="title">
        <string>Background Tasks</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_10">
+      <layout class="QVBoxLayout" name="verticalLayout_11">
        <item>
         <widget class="QGroupBox" name="rsErrCheckGroupBox">
          <property name="title">
@@ -943,6 +940,29 @@
            <widget class="QCheckBox" name="rsErrCheckOnJobEdited">
             <property name="text">
              <string>Check rollingstock when a Job is edeited</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="crossingErrCheckGroupBox">
+         <property name="title">
+          <string>Job Crossing/Passing Checker</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_10">
+          <item>
+           <widget class="QCheckBox" name="crossingErrCheckAtFileOpen">
+            <property name="text">
+             <string>Check crossings when opening a file</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="crossingErrCheckOnJobEdited">
+            <property name="text">
+             <string>Check crossings when a Job is edeited</string>
             </property>
            </widget>
           </item>

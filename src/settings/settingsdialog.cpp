@@ -233,6 +233,8 @@ void SettingsDialog::loadSettings()
     //Background Tasks
     ui->rsErrCheckAtFileOpen->setChecked(settings.getCheckRSWhenOpeningDB());
     ui->rsErrCheckOnJobEdited->setChecked(settings.getCheckRSOnJobEdit());
+    ui->crossingErrCheckAtFileOpen->setChecked(settings.getCheckCrossingWhenOpeningDB());
+    ui->crossingErrCheckOnJobEdited->setChecked(settings.getCheckCrossingOnJobEdit());
 
     updateJobsColors = false;
     updateJobGraphOptions = false;
@@ -319,6 +321,8 @@ void SettingsDialog::saveSettings()
     //Background Tasks
     settings.setCheckRSWhenOpeningDB(ui->rsErrCheckAtFileOpen->isChecked());
     settings.setCheckRSOnJobEdit(ui->rsErrCheckOnJobEdited->isChecked());
+    settings.setCheckCrossingWhenOpeningDB(ui->crossingErrCheckAtFileOpen->isChecked());
+    settings.setCheckCrossingOnJobEdit(ui->crossingErrCheckOnJobEdited->isChecked());
 
     settings.saveSettings(); //Sync to file
 
