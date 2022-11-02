@@ -2,8 +2,6 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QThreadPool>
-
 #include "app/session.h"
 #include "viewmanager/viewmanager.h"
 
@@ -71,6 +69,12 @@ void RsCheckerManager::showContextMenu(QWidget *panel, const QPoint &pos, const 
     {
         Session->getViewManager()->requestRSInfo(item->rsId);
     }
+}
+
+void RsCheckerManager::sessionLoadedHandler()
+{
+    if(AppSettings.getCheckRSWhenOpeningDB())
+        startWorker();
 }
 
 void RsCheckerManager::onRSPlanChanged(const QSet<db_id> &rsIds)

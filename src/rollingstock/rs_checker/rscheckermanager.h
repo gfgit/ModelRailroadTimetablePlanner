@@ -19,6 +19,8 @@ public:
     void clearModel() override;
     void showContextMenu(QWidget *panel, const QPoint& pos, const QModelIndex& idx) const override;
 
+    void sessionLoadedHandler() override;
+
 public slots:
     void onRSPlanChanged(const QSet<db_id> &rsIds);
 
