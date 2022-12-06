@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>622</width>
-    <height>385</height>
+    <height>425</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -116,17 +116,10 @@
           <string>SVG Image</string>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QPushButton" name="addSVGBut">
+          <item row="1" column="1">
+           <widget class="QPushButton" name="saveXMLBut">
             <property name="text">
-             <string>Add Image</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="remSVGBut">
-            <property name="text">
-             <string>Remove Image</string>
+             <string>Save XML to file</string>
             </property>
            </widget>
           </item>
@@ -137,10 +130,24 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QPushButton" name="saveXMLBut">
+          <item row="0" column="1">
+           <widget class="QPushButton" name="remSVGBut">
             <property name="text">
-             <string>Save XML to file</string>
+             <string>Remove Image</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="addSVGBut">
+            <property name="text">
+             <string>Add Image</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="importConnBut">
+            <property name="text">
+             <string>Import Connections</string>
             </property>
            </widget>
           </item>

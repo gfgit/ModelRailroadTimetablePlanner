@@ -68,6 +68,7 @@ private slots:
     void addSVGImage();
     void removeSVGImage();
     void saveSVGToFile();
+    void importConnFromSVG();
 
     //Xml Plan
     void saveXmlPlan();
