@@ -7,6 +7,7 @@
 #include <QFileDevice>
 
 #include <ssplib/stationplan.h>
+#include <ssplib/parsing/streamparser.h>
 #include <ssplib/parsing/stationinfoparser.h>
 
 #include "stations/station_utils.h"
@@ -14,6 +15,8 @@
 #include "app/session.h"
 
 #include "utils/jobcategorystrings.h"
+
+#include <QDebug>
 
 const char stationTable[] = "stations";
 const char stationSVGCol[] = "svg_data";
@@ -552,4 +555,98 @@ bool StationSVGHelper::writeStationXmlFromDB(sqlite3pp::database &db, db_id stat
     if(!loadStationFromDB(db, stationId, &plan, false))
         return false;
     return writeStationXml(dev, &plan);
+}
+
+bool StationSVGHelper::importTrackConnFromSVG(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan)
+{
+    query q_getTrack(db, "SELECT id FROM station_tracks WHERE station_id=? AND pos=?");
+    query q_getGate(db, "SELECT id, out_track_count FROM station_gates WHERE station_id=? AND name=?");
+
+    command q_newTrackConn(db, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+                                " VALUES(NULL,?,?,?,?)");
+
+    QVector<ssplib::TrackConnectionInfo> existing;
+
+    for (const auto &conn : qAsConst(plan->trackConnections))
+    {
+        bool alreadyAdded = false;
+        for(const auto& info : qAsConst(existing))
+        {
+            if(info.matchNames(conn.info))
+            {
+                alreadyAdded = true;
+                break;
+            }
+        }
+
+        if(alreadyAdded)
+            continue; //Skip
+
+        db_id trackId = 0;
+        db_id gateId = 0;
+        int gateTrkCnt = 0;
+
+        q_getTrack.bind(1, stationId);
+        q_getTrack.bind(2, conn.info.stationTrackPos);
+        int ret = q_getTrack.step();
+        trackId = q_getTrack.getRows().get<db_id>(0);
+        q_getTrack.reset();
+
+        if(ret != SQLITE_ROW)
+        {
+            qWarning() << "Error importing connection from SVG, station"
+                       << stationId << "has no track at pos" << conn.info.stationTrackPos;
+            continue;
+        }
+
+        q_getGate.bind(1, stationId);
+        q_getGate.bind(2, conn.info.gateLetter);
+        ret = q_getGate.step();
+        gateId = q_getGate.getRows().get<db_id>(0);
+        gateTrkCnt = q_getGate.getRows().get<int>(1);
+        q_getGate.reset();
+
+        if(ret != SQLITE_ROW)
+        {
+            qWarning() << "Error importing connection from SVG, station"
+                       << stationId << "has no gate" << conn.info.gateLetter;
+            continue;
+        }
+
+        if(conn.info.gateTrackPos >= gateTrkCnt)
+        {
+            qWarning() << "Error importing connection from SVG, station" << stationId << "\n"
+                       << "gate" << conn.info.gateLetter << gateId << "has only" << gateTrkCnt << "tracks\n"
+                       << "Track" << conn.info.stationTrackPos << "requested.";
+            continue;
+        }
+
+        q_newTrackConn.bind(1, trackId);
+        q_newTrackConn.bind(2, int(conn.info.trackSide));
+        q_newTrackConn.bind(3, gateId);
+        q_newTrackConn.bind(4, conn.info.gateTrackPos);
+
+        ret = q_newTrackConn.execute();
+        q_newTrackConn.reset();
+        if(ret != SQLITE_OK && ret != SQLITE_CONSTRAINT_UNIQUE)
+        {
+            //Failed not because already existing
+            qWarning() << "Error importing connection from SVG, station" << stationId << "\n"
+                       << db.error_msg() << db.extended_error_code();
+        }
+
+        existing.append(conn.info);
+    }
+
+    return true;
+}
+
+bool StationSVGHelper::importTrackConnFromSVGDev(sqlite3pp::database &db, db_id stationId, QIODevice *dev)
+{
+    ssplib::StationPlan plan;
+    ssplib::StreamParser parser(&plan, dev);
+    if(!parser.parse())
+        return false;
+
+    return importTrackConnFromSVG(db, stationId, &plan);
 }

@@ -74,6 +74,9 @@ public:
     static bool writeStationXml(QIODevice *dev, ssplib::StationPlan *plan);
 
     static bool writeStationXmlFromDB(sqlite3pp::database &db, db_id stationId, QIODevice *dev);
+
+    static bool importTrackConnFromSVG(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan);
+    static bool importTrackConnFromSVGDev(sqlite3pp::database &db, db_id stationId, QIODevice *dev);
 };
 
 #endif // STATIONSVGHELPER_H
