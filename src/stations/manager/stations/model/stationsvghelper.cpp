@@ -290,7 +290,7 @@ bool loadStationTrackConnections(sqlite3pp::database &db, db_id stationId, sspli
               " JOIN station_tracks t ON t.id=c.track_id"
               " JOIN station_gates g ON g.id=c.gate_id"
               " WHERE g.station_id=?"
-              " LIMIT 100");
+              " LIMIT 500");
     q.bind(1, stationId);
 
     auto& trackConnections = plan->trackConnections;
