@@ -389,7 +389,7 @@ void LineSegmentsModel::fetchRows()
 
     q.bind(1, m_lineId);
 
-    //Reverse for 1 extra item (which will hold last station)
+    //Reserve for 1 extra item (which will hold last station)
 
     QVector<LineSegmentItem> vec;
     vec.reserve(curItemCount + 1);
