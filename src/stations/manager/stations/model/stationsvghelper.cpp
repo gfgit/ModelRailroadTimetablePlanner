@@ -495,7 +495,7 @@ bool StationSVGHelper::applyStationJobsToPlan(const StationSVGJobStops *station,
         if(!foundPlatform)
             tooltip = tooltip.arg(tr("Not found", "Station platform was not found in SVG"));
 
-        if(stop.arrival == station->time)
+        if(stop.arrival == station->time && stop.in_gate.connId)
         {
             ssplib::TrackConnectionInfo inConn;
             inConn.gateId       = stop.in_gate.gateId;
