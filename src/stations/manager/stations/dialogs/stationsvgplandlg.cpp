@@ -64,7 +64,7 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
 
     QSpinBox *zoomSpin = new QSpinBox;
     zoomSpin->setRange(25, 400);
-    connect(zoomSpin, qOverload<int>(&QSpinBox::valueChanged), this, &StationSVGPlanDlg::setZoom);
+    connect(zoomSpin, qOverload<int>(&QSpinBox::valueChanged), this, &StationSVGPlanDlg::setZoom_slot);
     connect(this, &StationSVGPlanDlg::zoomChanged, zoomSpin, &QSpinBox::setValue);
 
     QAction *zoomAction = toolBar->addWidget(zoomSpin);
@@ -278,9 +278,11 @@ void StationSVGPlanDlg::reloadPlan()
     reloadDBData();
 }
 
-void StationSVGPlanDlg::setZoom(int val)
+void StationSVGPlanDlg::setZoom(int val, bool force)
 {
-    if(val == m_zoom || val > 400 || val < 25)
+    val = qBound(10, val, 500);
+
+    if(val == m_zoom && !force)
         return;
 
     m_zoom = val;
@@ -289,6 +291,11 @@ void StationSVGPlanDlg::setZoom(int val)
     QSize s = scrollArea->widget()->sizeHint();
     s = s * m_zoom / 100;
     scrollArea->widget()->resize(s);
+}
+
+void StationSVGPlanDlg::setZoom_slot(int val)
+{
+    setZoom(val, false);
 }
 
 void StationSVGPlanDlg::zoomToFit()
@@ -300,7 +307,7 @@ void StationSVGPlanDlg::zoomToFit()
     const int zoomV = 100 * available.height() / contents.height();
 
     const int val = qMin(zoomH, zoomV);
-    setZoom(val);
+    setZoom(val, true);
 }
 
 void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QString &text)

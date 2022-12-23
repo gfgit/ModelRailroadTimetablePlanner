@@ -50,7 +50,8 @@ public slots:
     void setJobTime(const QTime& t);
 
 private slots:
-    void setZoom(int val);
+    void setZoom(int val, bool force = false);
+    void setZoom_slot(int val);
     void zoomToFit();
     void onLabelClicked(qint64 gateId, QChar letter, const QString& text);
     void onTrackClicked(qint64 trackId, const QString& name);
