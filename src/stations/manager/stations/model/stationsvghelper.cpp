@@ -139,7 +139,7 @@ bool loadStationLabels(sqlite3pp::database &db, db_id stationId, ssplib::Station
     q.prepare("SELECT g.id,g.out_track_count,g.name,g.side FROM station_gates g"
               " WHERE g.station_id=?"
               " ORDER BY g.name"
-              " LIMIT 100");
+              " LIMIT 1000");
     q.bind(1, stationId);
 
     //const QString  labelFmt = QStringLiteral("%1 (%2)");
