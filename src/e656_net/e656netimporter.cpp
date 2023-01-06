@@ -394,7 +394,7 @@ QNetworkReply* E656NetImporter::startImportJob(const QUrl &url)
     return reply;
 }
 
-void E656NetImporter::doImportJob(QNetworkReply *reply, const ImportedJobItem &item)
+void E656NetImporter::handleJobReply(QNetworkReply *reply, const ImportedJobItem &item)
 {
     qDebug() << "IMPORTING JOB:" << reply->url();
 
@@ -412,6 +412,11 @@ void E656NetImporter::doImportJob(QNetworkReply *reply, const ImportedJobItem &i
         return;
     }
 
+    readJobPage(reply, item);
+}
+
+void E656NetImporter::readJobPage(QIODevice *dev, const ImportedJobItem &item)
+{
     //Single job page
 
     //Needed because HTML is not fully compatible with XML
@@ -420,13 +425,62 @@ void E656NetImporter::doImportJob(QNetworkReply *reply, const ImportedJobItem &i
     //To find the table we read in chunks, but device is sequential so we cannot seek back
     //to workaround this second issue, we save the chunk from table onward and use a fake device
     //which concatenates the buffer with the real device
-    QByteArray seekBuf = deviceFindString(reply, "<tbody class=\"list-table\">");
+
+    const char jobDaysStart[] = "<table class=\"table table-bordered table-striped\">";
+    const int jobDaysStartSize = sizeof(jobDaysStart) - 1;
+
+    const char jobDaysEnd[] = "</table>";
+    const int jobDaysEndSize = sizeof(jobDaysEnd) - 1;
+
+    const char jobStopsStart[] = "<tbody class=\"list-table\">";
+    const int jobStopsStartSize = sizeof(jobStopsStart) - 1;
+
+
+    QByteArray prevBuf;
+    qint64 prevPos = dev->pos();
+
+
+    //Jump to days restriction table body start
+    QByteArray seekBuf = deviceFindString2(dev, QByteArray::fromRawData(jobDaysStart, jobDaysStartSize),
+                                           prevBuf, prevPos, false);
     if(seekBuf.isEmpty())
         return;
 
-    ProxySeqDevice proxy(reply, seekBuf);
+    seekBuf = seekBuf.right(seekBuf.size() - jobDaysStartSize); //Skip table body start element
+    prevPos += jobDaysStartSize;
 
-    QXmlStreamReader xml(&proxy);
+    //Read until table end
+    prevBuf = seekBuf;
+    seekBuf = deviceFindString2(dev, QByteArray::fromRawData(jobDaysEnd, jobDaysEndSize),
+                               prevBuf, prevPos, true);
+    if(seekBuf.isEmpty())
+        return;
+
+    //Keep row end in the buf
+    seekBuf.append(jobDaysEnd, jobDaysEndSize);
+
+
+    QXmlStreamReader xml(seekBuf);
+    xml.readNextStartElement(); //<tbody>
+    while(xml.readNextStartElement())
+    {
+        //<tr>
+        xml.readNextStartElement(); //<td>
+        QString stopRange = xml.readElementText();
+        xml.readNextStartElement(); //<td>
+        QString condition = xml.readElementText();
+
+        qDebug() << "JOB:" << item.number << stopRange << condition;
+    }
+
+    //Jump to stop table body start
+    seekBuf = deviceFindString2(dev, QByteArray::fromRawData(jobStopsStart, jobStopsStartSize),
+                                prevBuf, prevPos, false);
+    if(seekBuf.isEmpty())
+        return;
+
+    ProxySeqDevice proxy(dev, seekBuf);
+    xml.setDevice(&proxy);
 
     CustomEntityResolver resolver;
     xml.setEntityResolver(&resolver);

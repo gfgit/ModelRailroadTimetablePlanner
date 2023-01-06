@@ -22,7 +22,9 @@ public:
 
     QNetworkReply* startImportJob(const QUrl& url);
     bool readStationTable(QIODevice *dev, QVector<ImportedJobItem> &items);
-    void doImportJob(QNetworkReply *reply, const ImportedJobItem& item);
+    void handleJobReply(QNetworkReply *reply, const ImportedJobItem& item);
+
+    void readJobPage(QIODevice *dev, const ImportedJobItem& item);
 
 signals:
     void errorOccurred(const QString& msg);

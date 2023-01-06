@@ -190,7 +190,7 @@ void E656StationModel::importSelectedJobs(E656NetImporter *importer)
                 return;
             }
 
-            importer->doImportJob(reply, job);
+            importer->handleJobReply(reply, job);
         };
 
         connect(reply, &QNetworkReply::finished, this, onFinished);
