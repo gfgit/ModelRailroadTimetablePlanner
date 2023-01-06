@@ -2980,7 +2980,7 @@ If you wish to remove it, please first delete all &lt;b&gt;%1&lt;/b&gt; pieces.<
     <message>
         <location filename="../jobs/jobeditor/model/rsproxymodel.cpp" line="113"/>
         <source>Rollingstock &lt;b&gt;%1&lt;/b&gt; was left in this station by &lt;b&gt;%2&lt;/b&gt; at &lt;b&gt;%3&lt;/b&gt;.</source>
-        <translation>Il rotabile &lt;b&gt;%1&lt;/b&gt; viene lasciato in questa stazione dal servizio &lt;b&gt;%2&lt;/b&gt; alle &lt;b&gt;%3&gt;&lt;/b&gt;.</translation>
+        <translation>Il rotabile &lt;b&gt;%1&lt;/b&gt; viene lasciato in questa stazione dal servizio &lt;b&gt;%2&lt;/b&gt; alle &lt;b&gt;%3&lt;/b&gt;.</translation>
     </message>
     <message>
         <location filename="../jobs/jobeditor/model/rsproxymodel.cpp" line="121"/>
