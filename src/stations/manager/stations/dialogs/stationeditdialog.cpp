@@ -88,7 +88,11 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->addSVGBut, &QPushButton::clicked, this, &StationEditDialog::addSVGImage);
     connect(ui->remSVGBut, &QPushButton::clicked, this, &StationEditDialog::removeSVGImage);
     connect(ui->saveSVGBut, &QPushButton::clicked, this, &StationEditDialog::saveSVGToFile);
+    connect(ui->importConnBut, &QPushButton::clicked, this, &StationEditDialog::importConnFromSVG);
     connect(ui->saveXMLBut, &QPushButton::clicked, this, &StationEditDialog::saveXmlPlan);
+
+    ui->importConnBut->setToolTip(tr("Import connections between gates and station tracks from SVG image.\n"
+                                     "NOTE: image must contain track data"));
 
     //Gates Tab
     gatesModel = new StationGatesModel(mDb, this);
@@ -558,6 +562,7 @@ void StationEditDialog::updateSVGButtons(bool hasImage)
     ui->addSVGBut->setEnabled(!hasImage && mEnableInternalEdititing);
     ui->remSVGBut->setEnabled(hasImage && mEnableInternalEdititing);
     ui->saveSVGBut->setEnabled(hasImage && mEnableInternalEdititing);
+    ui->importConnBut->setEnabled(hasImage && mEnableInternalEdititing);
 }
 
 void StationEditDialog::removeSelectedTrackConn()
@@ -709,6 +714,32 @@ void StationEditDialog::saveSVGToFile()
     if(!StationSVGHelper::saveImage(mDb, getStation(), &f, &errMsg))
     {
         QMessageBox::warning(this, tr("Error Saving SVG"), errMsg);
+    }
+}
+
+void StationEditDialog::importConnFromSVG()
+{
+    std::unique_ptr<QIODevice> dev;
+    dev.reset(StationSVGHelper::loadImage(mDb, getStation()));
+
+    if(!dev || !dev->open(QIODevice::ReadOnly))
+    {
+        QMessageBox::warning(this, tr("Import Error"),
+                             tr("Could not open SVG image. Make sure you added one to this station."));
+        return;
+    }
+
+    bool ret = StationSVGHelper::importTrackConnFromSVGDev(mDb, getStation(), dev.get());
+    if(ret)
+    {
+        QMessageBox::information(this, tr("Done Importation"),
+                                 tr("Track to gate connections have been successfully imported."));
+    }
+    else
+    {
+        QMessageBox::warning(this, tr("Import Errpr"),
+                             tr("Generic error"));
+
     }
 }
 
