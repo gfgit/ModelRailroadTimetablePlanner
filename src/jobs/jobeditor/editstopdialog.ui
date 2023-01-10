@@ -39,7 +39,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="stopTab">
       <attribute name="title">
@@ -246,40 +246,6 @@
        <string>Rollingstock</string>
       </attribute>
       <layout class="QGridLayout" name="rsTabLay">
-       <item row="0" column="0">
-        <widget class="QGroupBox" name="coupledBox">
-         <property name="title">
-          <string>Coupled</string>
-         </property>
-         <layout class="QVBoxLayout" name="coupledLayout">
-          <property name="spacing">
-           <number>3</number>
-          </property>
-          <property name="leftMargin">
-           <number>3</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>3</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <widget class="QListView" name="coupledView"/>
-          </item>
-          <item>
-           <widget class="QPushButton" name="editCoupledBut">
-            <property name="text">
-             <string>Edit</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QGroupBox" name="uncoupledBox">
          <property name="title">
@@ -314,7 +280,7 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="2" column="0" colspan="2">
         <widget class="QGroupBox" name="rollingstockBox">
          <property name="title">
           <string>Job Asset</string>
@@ -325,7 +291,6 @@
             <property name="font">
              <font>
               <pointsize>10</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -360,7 +325,6 @@
             <property name="font">
              <font>
               <pointsize>12</pointsize>
-              <weight>50</weight>
               <bold>false</bold>
              </font>
             </property>
@@ -371,7 +335,6 @@
             <property name="font">
              <font>
               <pointsize>10</pointsize>
-              <weight>75</weight>
               <bold>true</bold>
              </font>
             </property>
@@ -381,6 +344,47 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QGroupBox" name="coupledBox">
+         <property name="title">
+          <string>Coupled</string>
+         </property>
+         <layout class="QVBoxLayout" name="coupledLayout">
+          <property name="spacing">
+           <number>3</number>
+          </property>
+          <property name="leftMargin">
+           <number>3</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>3</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item>
+           <widget class="QListView" name="coupledView"/>
+          </item>
+          <item>
+           <widget class="QPushButton" name="editCoupledBut">
+            <property name="text">
+             <string>Edit</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="importJobRsBut">
+         <property name="text">
+          <string>Import From Job</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -425,7 +429,7 @@
             <x>0</x>
             <y>0</y>
             <width>837</width>
-            <height>589</height>
+            <height>581</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="infoScrollLay">
