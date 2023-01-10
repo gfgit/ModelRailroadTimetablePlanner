@@ -121,7 +121,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
             }
         }
 
-        if(checkTractionType)
+        if(checkTractionType && !stopsModel->isRailwayElectrifiedAfterStop(m_stopId))
         {
             //Query RS type
             query q_getRSType(mDb, "SELECT rs_models.type,rs_models.sub_type"
@@ -140,19 +140,15 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
 
             if(type == RsType::Engine && subType == RsEngineSubType::Electric)
             {
-                bool electrified = stopsModel->isRailwayElectrifiedAfterStop(m_stopId);
-                if(!electrified)
-                {
-                    int but = QMessageBox::warning(qApp->activeWindow(),
-                                                   tr("Warning"),
-                                                   tr("Rollingstock %1 is an Electric engine but the line is not electrified\n"
-                                                      "This engine will not be albe to move a train.\n"
-                                                      "Do you still want to couple it?")
-                                                       .arg(rsName),
-                                                   QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-                    if(but == QMessageBox::No)
-                        return false; //Abort
-                }
+                int but = QMessageBox::warning(qApp->activeWindow(),
+                                               tr("Warning"),
+                                               tr("Rollingstock %1 is an Electric engine but the line is not electrified\n"
+                                                  "This engine will not be albe to move a train.\n"
+                                                  "Do you still want to couple it?")
+                                                   .arg(rsName),
+                                               QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                if(but == QMessageBox::No)
+                    return false; //Cancel coupling operation
             }
         }
 
