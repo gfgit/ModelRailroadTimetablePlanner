@@ -741,6 +741,8 @@ void StationEditDialog::importConnFromSVG()
                              tr("Generic error"));
 
     }
+
+    trackConnModel->refreshData(); //Recalc row count
 }
 
 void StationEditDialog::saveXmlPlan()
