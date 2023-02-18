@@ -1,5 +1,5 @@
-#ifndef RSCHECKERMANAGER_H
-#define RSCHECKERMANAGER_H
+#ifndef JOBCROSSINGCHECKER_H
+#define JOBCROSSINGCHECKER_H
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
@@ -7,13 +7,10 @@
 
 #include "utils/types.h"
 
-class RsCheckerManager : public IBackgroundChecker
+class JobCrossingChecker : public IBackgroundChecker
 {
-    Q_OBJECT
 public:
-    RsCheckerManager(sqlite3pp::database &db, QObject *parent = nullptr);
-
-    void checkRs(const QSet<db_id> &rsIds);
+    JobCrossingChecker(sqlite3pp::database &db, QObject *parent = nullptr);
 
     QString getName() const override;
     void clearModel() override;
@@ -21,14 +18,18 @@ public:
 
     void sessionLoadedHandler() override;
 
-public slots:
-    void onRSPlanChanged(const QSet<db_id> &rsIds);
-
 protected:
     IQuittableTask *createMainWorker() override;
     void setErrors(QEvent *e, bool merge) override;
+
+private slots:
+    void onJobChanged(db_id newJobId, db_id oldJobId);
+    void onJobRemoved(db_id jobId);
+
+private:
+    sqlite3pp::database &mDb;
 };
 
 #endif // ENABLE_BACKGROUND_MANAGER
 
-#endif // RSCHECKERMANAGER_H
+#endif // JOBCROSSINGCHECKER_H

@@ -1,37 +1,34 @@
 #include "backgroundmanager.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER
-
-#include "app/session.h"
+#include "backgroundmanager/ibackgroundchecker.h"
 
 #include <QThreadPool>
-#include "rollingstock/rs_checker/rscheckermanager.h"
-
 #include <QSet>
 
 BackgroundManager::BackgroundManager(QObject *parent) :
     QObject(parent)
 {
-#ifdef ENABLE_RS_CHECKER
-    rsChecker = new RsCheckerManager(this);
-#endif
+
 }
 
 BackgroundManager::~BackgroundManager()
 {
-#ifdef ENABLE_RS_CHECKER
-    delete rsChecker;
-    rsChecker = nullptr;
-#endif
+
+}
+
+void BackgroundManager::handleSessionLoaded()
+{
+    for(IBackgroundChecker *mgr : qAsConst(checkers))
+        mgr->startWorker();
 }
 
 void BackgroundManager::abortAllTasks()
 {
     emit abortTrivialTasks();
 
-#ifdef ENABLE_RS_CHECKER
-    rsChecker->abortTasks();
-#endif
+    for(IBackgroundChecker *mgr : qAsConst(checkers))
+        mgr->abortTasks();
 }
 
 bool BackgroundManager::isRunning()
@@ -40,11 +37,40 @@ bool BackgroundManager::isRunning()
     if(running)
         return true;
 
-#ifdef ENABLE_RS_CHECKER
-    running |= rsChecker->isRunning();
-#endif
+    for(IBackgroundChecker *mgr : qAsConst(checkers))
+    {
+        if(mgr->isRunning())
+            return true;
+    }
 
-    return running;
+    return false;
+}
+
+void BackgroundManager::addChecker(IBackgroundChecker *mgr)
+{
+    checkers.append(mgr);
+
+    connect(mgr, &IBackgroundChecker::destroyed, this, [this](QObject *self)
+            {
+                removeChecker(static_cast<IBackgroundChecker *>(self));
+            });
+
+    emit checkerAdded(mgr);
+}
+
+void BackgroundManager::removeChecker(IBackgroundChecker *mgr)
+{
+    emit checkerRemoved(mgr);
+    disconnect(mgr, nullptr, this, nullptr);
+    checkers.removeOne(mgr);
+}
+
+void BackgroundManager::clearResults()
+{
+    for(IBackgroundChecker *mgr : qAsConst(checkers))
+    {
+        mgr->clearModel();
+    }
 }
 
 #endif // ENABLE_BACKGROUND_MANAGER

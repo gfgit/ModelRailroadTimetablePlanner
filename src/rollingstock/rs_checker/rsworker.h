@@ -1,20 +1,15 @@
 #ifndef RSWORKER_H
 #define RSWORKER_H
 
-#ifdef ENABLE_RS_CHECKER
-
-#ifndef ENABLE_BACKGROUND_MANAGER
-#error "Cannot use ENABLE_RS_CHECKER without ENABLE_BACKGROUND_MANAGER"
-#endif
+#ifdef ENABLE_BACKGROUND_MANAGER
 
 #include "utils/thread/iquittabletask.h"
+#include "utils/thread/taskprogressevent.h"
 
 #include <QMap>
 #include <QVector>
 
-#include "utils/worker_event_types.h"
-
-#include "error_data.h"
+#include "rs_error_data.h"
 
 
 namespace sqlite3pp
@@ -40,19 +35,7 @@ private:
     QVector<db_id> rsToCheck;
 };
 
-class RsWorkerProgressEvent : public QEvent
-{
-public:
-    static const Type _Type = Type(CustomEvents::RsErrWorkerProgress);
-
-    RsWorkerProgressEvent(int pr, int max);
-    ~RsWorkerProgressEvent();
-
-    int progress;
-    int progressMax;
-};
-
-class RsWorkerResultEvent : public QEvent
+class RsWorkerResultEvent : public GenericTaskEvent
 {
 public:
     static const Type _Type = Type(CustomEvents::RsErrWorkerResult);
@@ -60,11 +43,10 @@ public:
     RsWorkerResultEvent(RsErrWorker *worker, const QMap<db_id, RsErrors::RSErrorList> &data, bool merge);
     ~RsWorkerResultEvent();
 
-    RsErrWorker *task;
     QMap<db_id, RsErrors::RSErrorList> results;
     bool mergeErrors;
 };
 
-#endif // ENABLE_RS_CHECKER
+#endif // ENABLE_BACKGROUND_MANAGER
 
 #endif // RSWORKER_H

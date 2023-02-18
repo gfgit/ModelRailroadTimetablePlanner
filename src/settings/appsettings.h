@@ -126,6 +126,8 @@ public:
     //Background Tasks
     FIELD(CheckRSWhenOpeningDB, "background_tasks/check_rs_at_startup", bool, true)
     FIELD(CheckRSOnJobEdit,     "background_tasks/check_rs_on_job_edited", bool, true)
+    FIELD(CheckCrossingWhenOpeningDB, "background_tasks/check_crossing_at_startup", bool, true)
+    FIELD(CheckCrossingOnJobEdit,     "background_tasks/check_crossing_on_job_edited", bool, true)
 
 signals:
     void jobColorsChanged();

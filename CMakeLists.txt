@@ -39,7 +39,6 @@ option(CONFIG_GLOBAL_TRY_CATCH "Global try/catch at main()" OFF)
 option(CONFIG_NO_DEBUG_CALL_TRACE "Disable scope call trace messages" OFF)
 option(CONFIG_PRINT_DBG_MSG "Debug messages (some)" ON)
 option(CONFIG_ENABLE_BACKGROUND_MANAGER "Enable background task manager" ON)
-cmake_dependent_option(CONFIG_ENABLE_RS_CHECKER "Enable rollingstock checker" ON "CONFIG_ENABLE_BACKGROUND_MANAGER" OFF)
 cmake_dependent_option(CONFIG_SEARCHBOX_MODE_ASYNC "Use thread to search for jobs" ON "CONFIG_ENABLE_BACKGROUND_MANAGER" OFF)
 option(CONFIG_ENABLE_AUTO_TIME_RECALC "Automatic recalculation of travel times based on rollingstock speed, experimental" OFF)
 option(CONFIG_ENABLE_USER_QUERY "Enable SQL console" OFF)
@@ -58,10 +57,6 @@ endif()
 
 if(CONFIG_ENABLE_BACKGROUND_MANAGER)
     set(MR_TIMETABLE_PLANNER_DEFINITIONS ${MR_TIMETABLE_PLANNER_DEFINITIONS} -DENABLE_BACKGROUND_MANAGER)
-endif()
-
-if(CONFIG_ENABLE_RS_CHECKER)
-    set(MR_TIMETABLE_PLANNER_DEFINITIONS ${MR_TIMETABLE_PLANNER_DEFINITIONS} -DENABLE_RS_CHECKER)
 endif()
 
 if(CONFIG_SEARCHBOX_MODE_ASYNC)

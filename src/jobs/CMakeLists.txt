@@ -1,4 +1,5 @@
 add_subdirectory(jobeditor)
+add_subdirectory(jobs_checker)
 add_subdirectory(jobsmanager)
 
 set(MR_TIMETABLE_PLANNER_SOURCES

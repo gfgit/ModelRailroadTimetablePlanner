@@ -43,11 +43,10 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 #include "backgroundmanager/backgroundmanager.h"
-#endif
-
-#ifdef ENABLE_RS_CHECKER
-#include "rollingstock/rs_checker/rserrorswidget.h"
-#endif
+#include "backgroundmanager/backgroundresultpanel.h"
+#include "jobs/jobs_checker/crossing/jobcrossingchecker.h"
+#include "rollingstock/rs_checker/rscheckermanager.h"
+#endif // ENABLE_BACKGROUND_MANAGER
 
 #include "propertiesdialog.h"
 #include "info.h"
@@ -68,10 +67,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     jobEditor(nullptr),
-#ifdef ENABLE_RS_CHECKER
-    rsErrorsWidget(nullptr),
-    rsErrDock(nullptr),
-#endif
+#ifdef ENABLE_BACKGROUND_MANAGER
+    resPanelDock(nullptr),
+#endif // ENABLE_BACKGROUND_MANAGER
     view(nullptr),
     jobDock(nullptr),
     searchEdit(nullptr),
@@ -111,18 +109,25 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->menuView->addAction(jobDock->toggleViewAction());
     connect(jobDock->toggleViewAction(), &QAction::triggered, jobEditor, &JobPathEditor::show);
 
-#ifdef ENABLE_RS_CHECKER
-    //RS Errors dock
-    rsErrorsWidget = new RsErrorsWidget(this);
-    rsErrDock = new QDockWidget(rsErrorsWidget->windowTitle(), this);
-    rsErrDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
-    rsErrDock->setWidget(rsErrorsWidget);
-    rsErrDock->installEventFilter(this); //NOTE: see eventFilter() below
+#ifdef ENABLE_BACKGROUND_MANAGER
+    //Background Errors dock
+    BackgroundResultPanel *resPanel = new BackgroundResultPanel(this);
+    resPanelDock = new QDockWidget(tr("Errors"), this);
+    resPanelDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
+    resPanelDock->setWidget(resPanel);
+    resPanelDock->installEventFilter(this); //NOTE: see eventFilter() below
 
-    addDockWidget(Qt::BottomDockWidgetArea, rsErrDock);
-    ui->menuView->addAction(rsErrDock->toggleViewAction());
-    ui->mainToolBar->addAction(rsErrDock->toggleViewAction());
-#endif
+    addDockWidget(Qt::BottomDockWidgetArea, resPanelDock);
+    ui->menuView->addAction(resPanelDock->toggleViewAction());
+    ui->mainToolBar->addAction(resPanelDock->toggleViewAction());
+
+    //Add checkers FIXME: move to session?
+    JobCrossingChecker *jobCrossingChecker = new JobCrossingChecker(Session->m_Db, this);
+    Session->getBackgroundManager()->addChecker(jobCrossingChecker);
+
+    RsCheckerManager *rsChecker = new RsCheckerManager(Session->m_Db, this);
+    Session->getBackgroundManager()->addChecker(rsChecker);
+#endif // ENABLE_BACKGROUND_MANAGER
 
     //Allow JobPathEditor to use all vertical space when RsErrorWidget dock is at bottom
     setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
@@ -502,7 +507,7 @@ void MainWindow::onNew()
     emit Session->getBackgroundManager()->abortTrivialTasks();
 #endif
 
-#ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_BACKGROUND_MANAGER
     if(Session->getBackgroundManager()->isRunning())
     {
         int ret = QMessageBox::warning(this,
@@ -516,7 +521,7 @@ void MainWindow::onNew()
         else
             return;
     }
-#endif
+#endif // ENABLE_BACKGROUND_MANAGER
 
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Create new Session"));
     dlg->setFileMode(QFileDialog::AnyFile);
@@ -657,9 +662,11 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
     case CentralWidgetMode::StartPageMode:
     {
         jobDock->hide();
-#ifdef ENABLE_RS_CHECKER
-        rsErrDock->hide();
-#endif
+
+#ifdef ENABLE_BACKGROUND_MANAGER
+        resPanelDock->hide();
+#endif // ENABLE_BACKGROUND_MANAGER
+
         welcomeLabel->setText(tr("<p>Open a file: <b>File</b> > <b>Open</b></p>"
                                  "<p>Create new project: <b>File</b> > <b>New</b></p>"));
         statusBar()->showMessage(tr("Open file or create a new one"));
@@ -669,9 +676,11 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
     case CentralWidgetMode::NoLinesWarningMode:
     {
         jobDock->show();
-#ifdef ENABLE_RS_CHECKER
-        rsErrDock->hide();
-#endif
+
+#ifdef ENABLE_BACKGROUND_MANAGER
+        resPanelDock->hide();
+#endif // ENABLE_BACKGROUND_MANAGER
+
         welcomeLabel->setText(
             tr("<p><b>There are no lines in this session</b></p>"
                "<p>"
@@ -708,9 +717,11 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
     case CentralWidgetMode::ViewSessionMode:
     {
         jobDock->show();
-#ifdef ENABLE_RS_CHECKER
-        rsErrDock->show();
-#endif
+
+#ifdef ENABLE_BACKGROUND_MANAGER
+        resPanelDock->show();
+#endif // ENABLE_BACKGROUND_MANAGER
+
         welcomeLabel->setText(QString());
         break;
     }
@@ -815,8 +826,8 @@ void MainWindow::enableDBActions(bool enable)
     if(!enable)
         jobEditor->setEnabled(false);
 
-#ifdef ENABLE_RS_CHECKER
-    rsErrorsWidget->setEnabled(enable);
+#ifdef ENABLE_BACKGROUND_MANAGER
+    resPanelDock->widget()->setEnabled(enable);
 #endif
 }
 
@@ -957,18 +968,18 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
                                });
         }
     }
-#ifdef ENABLE_RS_CHECKER
-    else if(watched == rsErrDock && event->type() == QEvent::Close)
+#ifdef ENABLE_BACKGROUND_MANAGER
+    else if(watched == resPanelDock && event->type() == QEvent::Close)
     {
-        if(rsErrDock->isFloating())
+        if(resPanelDock->isFloating())
         {
-            QTimer::singleShot(0, rsErrDock, [this]()
+            QTimer::singleShot(0, resPanelDock, [this]()
                                {
-                                   rsErrDock->setFloating(false);
+                                   resPanelDock->setFloating(false);
                                });
         }
     }
-#endif
+#endif // ENABLE_BACKGROUND_MANAGER
 
     return QMainWindow::eventFilter(watched, event);
 }

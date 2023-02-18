@@ -11,14 +11,7 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 #include "backgroundmanager/backgroundmanager.h"
-
-#ifdef ENABLE_RS_CHECKER
-#include "rollingstock/rs_checker/rscheckermanager.h"
-#endif // ENABLE_RS_CHECKER
-
 #endif // ENABLE_BACKGROUND_MANAGER
-
-#include "utils/jobcategorystrings.h"
 
 #include <QStandardPaths>
 #include <QDir>
@@ -144,11 +137,9 @@ DB_Error MeetingSession::openDB(const QString &str, bool ignoreVersion)
 //        return false;
 //    }
 
-#ifdef ENABLE_RS_CHECKER
-    if(settings.getCheckRSWhenOpeningDB())
-        backgroundManager->getRsChecker()->startWorker();
+#ifdef ENABLE_BACKGROUND_MANAGER
+    backgroundManager->handleSessionLoaded();
 #endif
-
 
     return DB_Error::NoError;
 }
@@ -191,8 +182,8 @@ DB_Error MeetingSession::closeDB()
         //return false;
     }
 
-#ifdef ENABLE_RS_CHECKER
-    backgroundManager->getRsChecker()->clearModel();
+#ifdef ENABLE_BACKGROUND_MANAGER
+    backgroundManager->clearResults();
 #endif
 
     fileName.clear();

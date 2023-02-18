@@ -7,11 +7,13 @@
 
 enum class CustomEvents
 {
+    //IQuittableTask
+    TaskProgress = QEvent::User + 1,
+
     //Searchbox
-    SearchBoxResults = QEvent::User + 1,
+    SearchBoxResults,
 
     //RS error checker
-    RsErrWorkerProgress,
     RsErrWorkerResult,
 
     // RS Import
@@ -43,6 +45,9 @@ enum class CustomEvents
 
     //Jobs
     JobsModelResult,
+
+    //Jobs Checker
+    JobsCrossingCheckResult,
 
     //Printing
     PrintProgress,

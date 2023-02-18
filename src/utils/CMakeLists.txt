@@ -20,5 +20,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   utils/rs_utils.h
   utils/rs_utils.cpp
 
+  utils/singledepthtreemodelhelper.h
+
   PARENT_SCOPE
 )

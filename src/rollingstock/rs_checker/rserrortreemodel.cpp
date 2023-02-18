@@ -1,4 +1,4 @@
-#ifdef ENABLE_RS_CHECKER
+#ifdef ENABLE_BACKGROUND_MANAGER
 
 #include "rserrortreemodel.h"
 
@@ -22,7 +22,7 @@ class RsError
 };
 
 RsErrorTreeModel::RsErrorTreeModel(QObject *parent) :
-    QAbstractItemModel(parent)
+    RsErrorTreeModelBase(parent)
 {
     //FIXME: listen for changes in rs/job/station names and update them
 }
@@ -48,114 +48,12 @@ QVariant RsErrorTreeModel::headerData(int section, Qt::Orientation orientation, 
     return QAbstractItemModel::headerData(section, orientation, role);
 }
 
-QModelIndex RsErrorTreeModel::index(int row, int column, const QModelIndex &parent) const
-{
-    if(parent.isValid())
-    {
-        if(parent.row() >= m_data.size() || parent.internalPointer())
-            return QModelIndex(); //Out of bound or child-most
-
-        auto it = m_data.constBegin() + parent.row();
-        if(row >= it->errors.size())
-            return QModelIndex();
-
-        void *ptr = const_cast<void *>(static_cast<const void *>(&it->errors.at(row)));
-        return createIndex(row, column, ptr);
-    }
-
-    if(row >= m_data.size())
-        return QModelIndex();
-
-    return createIndex(row, column, nullptr);
-}
-
-QModelIndex RsErrorTreeModel::parent(const QModelIndex &idx) const
-{
-    if(!idx.isValid())
-        return QModelIndex();
-
-    RsErrors::ErrorData *item = static_cast<RsErrors::ErrorData*>(idx.internalPointer());
-    if(!item) //Caption, it's toplevel so no parent
-        return QModelIndex();
-
-    auto it = m_data.constFind(item->rsId);
-    if(it == m_data.constEnd())
-        return QModelIndex();
-
-    int row = std::distance(m_data.constBegin(), it);
-    return index(row, 0);
-}
-
-int RsErrorTreeModel::rowCount(const QModelIndex &parent) const
-{
-    if(parent.isValid())
-    {
-        if(parent.internalPointer())
-            return 0; //Child most, no childs below so 0 rows
-
-        auto it = m_data.constBegin() + parent.row();
-        return it->errors.size();
-    }
-
-    return m_data.size();
-}
-
-int RsErrorTreeModel::columnCount(const QModelIndex &parent) const
-{
-    return parent.isValid() ? 1 : NCols;
-}
-
-bool RsErrorTreeModel::hasChildren(const QModelIndex &parent) const
-{
-    if(parent.isValid())
-    {
-        if(parent.internalPointer() || parent.row() >= m_data.size())
-            return false;
-
-        auto it = m_data.constBegin() + parent.row();
-        return it->errors.size();
-    }
-
-    return m_data.size(); // size > 0
-}
-
-QModelIndex RsErrorTreeModel::sibling(int row, int column, const QModelIndex &idx) const
-{
-    if(!idx.isValid())
-        return QModelIndex();
-
-    if(idx.internalPointer())
-    {
-        //It's an error row inside a RS Item tree
-        if(column >= NCols)
-            return QModelIndex();
-
-        void *ptr = idx.internalPointer();
-        if(row != idx.row())
-        {
-            //Calculate new ptr for row
-            RsErrors::ErrorData *item = static_cast<RsErrors::ErrorData*>(idx.internalPointer());
-            auto it = m_data.constFind(item->rsId);
-            if(it == m_data.constEnd() || row >= it->errors.size())
-                return QModelIndex(); //Out of bound child row
-            ptr = const_cast<void *>(static_cast<const void *>(&it->errors.at(row)));
-        }
-
-        return createIndex(row, column, ptr);
-    }
-
-    if(column > 0 || row >= m_data.size())
-        return QModelIndex(); //Parents (RS Items) have only column zero
-
-    return createIndex(row, 0, nullptr);
-}
-
 QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
 {
     if(!idx.isValid() || role != Qt::DisplayRole)
         return QVariant();
 
-    RsErrors::ErrorData *item = static_cast<RsErrors::ErrorData*>(idx.internalPointer());
+    const RsErrors::RSErrorData *item = getItem(idx);
     if(item)
     {
         switch (idx.column())
@@ -173,12 +71,11 @@ QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
     else
     {
         //Caption
-        if(idx.row() >= m_data.size())
+        if(idx.row() >= m_data.topLevelCount() || idx.column() != 0)
             return QVariant();
 
-        auto it = m_data.constBegin() + idx.row();
-        if(idx.column() == 0)
-            return it->rsName;
+        auto topLevel = m_data.getTopLevelAtRow(idx.row());
+        return topLevel->rsName;
     }
 
     return QVariant();
@@ -190,7 +87,7 @@ QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
 void RsErrorTreeModel::setErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
 {
     beginResetModel();
-    m_data = data;
+    m_data.map = data;
     endResetModel();
 }
 
@@ -202,21 +99,21 @@ void RsErrorTreeModel::setErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
 */
 void RsErrorTreeModel::mergeErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
 {
-    Data::iterator oldIter = m_data.begin();
+    auto oldIter = m_data.map.begin();
     int row = 0;
     for(auto it = data.constBegin(); it != data.constEnd(); it++)
     {
-        auto iter = m_data.find(it.key());
-        if(iter == m_data.end()) //Insert a new RS
+        auto iter = m_data.map.find(it.key());
+        if(iter == m_data.map.end()) //Insert a new RS
         {
             if(it->errors.isEmpty())
                 continue; //Error: tried to remove an RS not in this model (maybe already removed)
 
-            Data::iterator pos = m_data.lowerBound(it.key());
+            auto pos = m_data.map.lowerBound(it.key());
             row += std::distance(oldIter, pos);
 
             beginInsertRows(QModelIndex(), row, row);
-            iter = m_data.insert(pos, it.key(), it.value());
+            iter = m_data.map.insert(pos, it.key(), it.value());
             endInsertRows();
         }
         else
@@ -226,7 +123,7 @@ void RsErrorTreeModel::mergeErrors(const QMap<db_id, RsErrors::RSErrorList> &dat
             if(it->errors.isEmpty()) //Remove RS
             {
                 beginRemoveRows(QModelIndex(), row, row);
-                iter = m_data.erase(iter);
+                iter = m_data.map.erase(iter);
                 endRemoveRows();
             }
             else //Repopulate
@@ -250,28 +147,21 @@ void RsErrorTreeModel::mergeErrors(const QMap<db_id, RsErrors::RSErrorList> &dat
 void RsErrorTreeModel::clear()
 {
     beginResetModel();
-    m_data.clear();
+    m_data.map.clear();
     endResetModel();
-}
-
-RsErrors::ErrorData* RsErrorTreeModel::getItem(const QModelIndex& idx) const
-{
-    if(idx.internalPointer())
-        return static_cast<RsErrors::ErrorData *>(idx.internalPointer());
-    return nullptr;
 }
 
 void RsErrorTreeModel::onRSInfoChanged(db_id rsId)
 {
     Q_UNUSED(rsId)
     //Update top-level items that show RS names
-    if(m_data.size())
+    if(m_data.topLevelCount())
     {
         QModelIndex first = index(0, 0);
-        QModelIndex last = index(m_data.size(), 0);
+        QModelIndex last = index(m_data.topLevelCount(), 0);
 
         emit dataChanged(first, last);
     }
 }
 
-#endif // ENABLE_RS_CHECKER
+#endif // ENABLE_BACKGROUND_MANAGER
