@@ -6,46 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>515</height>
+    <width>350</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string/>
   </property>
   <layout class="QFormLayout" name="formLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="numberLabel">
-     <property name="text">
-      <string>Number:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1">
-    <widget class="QSpinBox" name="jobIdSpin">
-     <property name="font">
-      <font>
-       <pointsize>12</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="maximum">
-      <number>99999</number>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="categoryLabel">
-     <property name="text">
-      <string>Category:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
+   <item row="4" column="1">
     <widget class="QComboBox" name="categoryCombo">
      <property name="minimumSize">
       <size>
@@ -60,17 +29,93 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QListView" name="view"/>
+   <item row="4" column="0">
+    <widget class="QLabel" name="categoryLabel">
+     <property name="text">
+      <string>Category:</string>
+     </property>
+    </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="1" column="0">
+    <widget class="QLabel" name="numberLabel">
+     <property name="text">
+      <string>Number:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QSpinBox" name="jobIdSpin">
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="maximum">
+      <number>99999</number>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="splitterLay1">
+       <item>
+        <widget class="QLabel" name="stopsLabel">
+         <property name="text">
+          <string>Stops:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="stopsView"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <widget class="QLabel" name="prevJobsLabel">
+         <property name="text">
+          <string>Prev Jobs:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableView" name="prevJobsView"/>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="splitterLay3">
+       <item>
+        <widget class="QLabel" name="nextJobsLabel">
+         <property name="text">
+          <string>Next Jobs:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableView" name="nextJobsView"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item row="7" column="0" colspan="2">
     <widget class="QPushButton" name="sheetBut">
      <property name="text">
       <string>Save Sheet</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="2">
+   <item row="9" column="0" colspan="2">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

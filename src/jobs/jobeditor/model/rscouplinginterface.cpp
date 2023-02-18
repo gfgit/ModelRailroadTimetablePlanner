@@ -7,6 +7,9 @@
 #include <QDebug>
 
 #include "stopmodel.h"
+#include "utils/rs_utils.h"
+
+#include <QElapsedTimer>
 
 RSCouplingInterface::RSCouplingInterface(database &db, QObject *parent) :
     QObject(parent),
@@ -121,7 +124,7 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
             }
         }
 
-        if(checkTractionType)
+        if(checkTractionType && !stopsModel->isRailwayElectrifiedAfterStop(m_stopId))
         {
             //Query RS type
             query q_getRSType(mDb, "SELECT rs_models.type,rs_models.sub_type"
@@ -140,19 +143,15 @@ bool RSCouplingInterface::coupleRS(db_id rsId, const QString& rsName, bool on, b
 
             if(type == RsType::Engine && subType == RsEngineSubType::Electric)
             {
-                bool electrified = stopsModel->isRailwayElectrifiedAfterStop(m_stopId);
-                if(!electrified)
-                {
-                    int but = QMessageBox::warning(qApp->activeWindow(),
-                                                   tr("Warning"),
-                                                   tr("Rollingstock %1 is an Electric engine but the line is not electrified\n"
-                                                      "This engine will not be albe to move a train.\n"
-                                                      "Do you still want to couple it?")
-                                                       .arg(rsName),
-                                                   QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-                    if(but == QMessageBox::No)
-                        return false; //Abort
-                }
+                int but = QMessageBox::warning(qApp->activeWindow(),
+                                               tr("Warning"),
+                                               tr("Rollingstock %1 is an Electric engine but the line is not electrified\n"
+                                                  "This engine will not be albe to move a train.\n"
+                                                  "Do you still want to couple it?")
+                                                   .arg(rsName),
+                                               QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+                if(but == QMessageBox::No)
+                    return false; //Cancel coupling operation
             }
         }
 
@@ -396,6 +395,64 @@ bool RSCouplingInterface::uncoupleRS(db_id rsId, const QString& rsName, bool on)
     }
 
     return true;
+}
+
+int RSCouplingInterface::importRSFromJob(db_id otherStopId)
+{
+    query q_getUncoupled(mDb, "SELECT coupling.rs_id, rs_list.number,"
+                              " rs_models.name, rs_models.suffix, rs_models.type"
+                              " FROM coupling"
+                              " JOIN rs_list ON rs_list.id=coupling.rs_id"
+                              " JOIN rs_models ON rs_models.id=rs_list.model_id"
+                              " WHERE coupling.stop_id=? AND coupling.operation=0");
+    q_getUncoupled.bind(1, otherStopId);
+
+    int count = 0;
+    bool lineElectrified = stopsModel->isRailwayElectrifiedAfterStop(m_stopId);
+
+    QElapsedTimer timer;
+    timer.start();
+
+    for(auto rs : q_getUncoupled)
+    {
+        db_id rsId = rs.get<db_id>(0);
+
+        int number = rs.get<int>(1);
+        int modelNameLen = sqlite3_column_bytes(q_getUncoupled.stmt(), 2);
+        const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_getUncoupled.stmt(), 2));
+
+        int modelSuffixLen = sqlite3_column_bytes(q_getUncoupled.stmt(), 3);
+        const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_getUncoupled.stmt(), 3));
+        RsType rsType = RsType(rs.get<int>(4));
+
+        QString rsName = rs_utils::formatNameRef(modelName,
+                                                 modelNameLen,
+                                                 number,
+                                                 modelSuffix,
+                                                 modelSuffixLen,
+                                                 rsType);
+
+        //TODO: optimize work
+        if(coupleRS(rsId, rsName, true, !lineElectrified))
+            count++;
+
+        if(timer.elapsed() > 10000)
+        {
+            //After 10 seconds, give opportunity to stop
+            int ret = QMessageBox::question(
+                qApp->activeWindow(),
+                tr("Continue Importation?"),
+                tr("Rollingstock importation is taking more time than expected.\n"
+                   "Do you want to continue?"));
+
+            if(ret == QMessageBox::No)
+                return count; //Abort here
+
+            timer.restart(); //Count again
+        }
+    }
+
+    return count;
 }
 
 bool RSCouplingInterface::hasEngineAfterStop(bool *isElectricOnNonElectrifiedLine)

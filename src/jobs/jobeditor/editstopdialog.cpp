@@ -15,9 +15,11 @@
 #include "model/trainassetmodel.h"
 #include "model/jobpassingsmodel.h"
 #include "jobs/jobsmanager/model/jobshelper.h"
+#include "jobs/jobsmanager/model/jobmatchmodel.h"
 
 #include "utils/delegates/sql/modelpageswitcher.h"
 #include "utils/delegates/sql/customcompletionlineedit.h"
+#include "utils/delegates/sql/chooseitemdlg.h"
 
 #include <QtMath>
 
@@ -66,6 +68,7 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
     ui->uncoupledView->setModel(uncoupledModel);
     ui->uncoupledLayout->insertWidget(1, ps);
 
+    connect(ui->importJobRsBut, &QPushButton::clicked, this, &EditStopDialog::importJobRS);
     connect(ui->editCoupledBut, &QPushButton::clicked, this, &EditStopDialog::editCoupled);
     connect(ui->editUncoupledBut, &QPushButton::clicked, this, &EditStopDialog::editUncoupled);
 
@@ -267,6 +270,54 @@ void EditStopDialog::saveDataToModel()
     stopModel->setStopInfo(stopIdx, curStop, prevStop.nextSegment, avoidTimeRecalc);
 }
 
+void EditStopDialog::importJobRS()
+{
+    const StopItem& curStop = helper->getCurItem();
+    if(!curStop.stationId)
+    {
+        QMessageBox::warning(this, tr("Import Error"),
+                             tr("In order to import rollingstock from other<br>"
+                                "Jobs stopping in the <b>same station</b> as current one, "
+                                "you must first set a valid station for this stop."));
+        return;
+    }
+
+    JobMatchModel jobsMatch(Session->m_Db);
+    jobsMatch.setDefaultId(JobMatchModel::StopId);
+    jobsMatch.setFilter(m_jobId, curStop.stationId, curStop.departure);
+
+    QString stName = helper->getStationEdit()->text();
+
+    OwningQPointer<ChooseItemDlg> dlg = new ChooseItemDlg(&jobsMatch, this);
+    dlg->setDescription(tr("Please choose a Job among the ones stopping at <b>%1</b> before <b>%2</b>.<br>"
+                           "All rollingstock uncoupled by selected Job at current station<br>"
+                           "will be coupled to current Job.")
+                            .arg(stName,
+                                 curStop.departure.toString("HH:mm")));
+    dlg->setPlaceholder(tr("Job number without category"));
+
+    //Select model
+    int ret = dlg->exec();
+    if(ret != QDialog::Accepted || !dlg)
+        return;
+
+    db_id otherJobStopId = dlg->getItemId();
+    if(!otherJobStopId)
+        return;
+
+    //Import rollingstock
+    int count = couplingMgr->importRSFromJob(otherJobStopId);
+
+    //Refresh views
+    coupledModel->refreshData(true);
+    trainAssetModelAfter->refreshData(true);
+
+    //Tell user it's completed
+    QMessageBox::information(this, tr("Importation Finished"),
+                             tr("<b>%1</b> rollingstock items were successfully imported")
+                             .arg(count));
+}
+
 void EditStopDialog::editCoupled()
 {
     const StopItem& curStop = helper->getCurItem();
@@ -283,7 +334,6 @@ void EditStopDialog::editCoupled()
     coupledModel->refreshData(true);
     trainAssetModelAfter->refreshData(true);
 }
-
 
 void EditStopDialog::editUncoupled()
 {

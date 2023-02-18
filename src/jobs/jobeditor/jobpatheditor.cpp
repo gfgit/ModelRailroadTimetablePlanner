@@ -6,17 +6,11 @@
 
 #include "viewmanager/viewmanager.h"
 
-#include <QFileDialog>
-#include "utils/files/recentdirstore.h"
-
-#include <QMessageBox>
-#include "utils/owningqpointer.h"
-
-#include <QCloseEvent>
-
 #include "model/stopmodel.h"
 #include "stopdelegate.h"
 #include "jobs/jobsmanager/model/jobshelper.h"
+
+#include "model/nextprevrsjobsmodel.h"
 
 #include "jobs/jobeditor/editstopdialog.h"
 
@@ -33,7 +27,15 @@
 #include "utils/delegates/sql/customcompletionlineedit.h"
 #include "shifts/shiftcombomodel.h"
 
+
+#include "utils/owningqpointer.h"
 #include <QMenu>
+#include <QMessageBox>
+#include <QFileDialog>
+#include "utils/files/recentdirstore.h"
+
+#include <QCloseEvent>
+
 
 JobPathEditor::JobPathEditor(QWidget *parent) :
     QDialog(parent),
@@ -66,16 +68,27 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
     ui->formLayout->getWidgetPosition(ui->categoryCombo, &categoryRow, &unusedRole);
     ui->formLayout->insertRow(categoryRow + 1, tr("Shift:"), shiftCombo);
 
+    //Stops
     stopModel = new StopModel(Session->m_Db, this);
     connect(shiftCombo, &CustomCompletionLineEdit::dataIdChanged, stopModel, &StopModel::setNewShiftId);
-    ui->view->setModel(stopModel);
+    ui->stopsView->setModel(stopModel);
 
     delegate = new StopDelegate(Session->m_Db, this);
-    ui->view->setItemDelegateForColumn(0, delegate);
+    ui->stopsView->setItemDelegateForColumn(0, delegate);
 
-    ui->view->setResizeMode(QListView::Adjust);
-    ui->view->setMovement(QListView::Static);
-    ui->view->setSelectionMode(QListView::ContiguousSelection);
+    ui->stopsView->setResizeMode(QListView::Adjust);
+    ui->stopsView->setMovement(QListView::Static);
+    ui->stopsView->setSelectionMode(QListView::ContiguousSelection);
+
+    //Next/Prev Jobs
+    prevJobsModel = new NextPrevRSJobsModel(Session->m_Db, this);
+    prevJobsModel->setMode(NextPrevRSJobsModel::PrevJobs);
+    ui->prevJobsView->setModel(prevJobsModel);
+
+    nextJobsModel = new NextPrevRSJobsModel(Session->m_Db, this);
+    nextJobsModel->setMode(NextPrevRSJobsModel::NextJobs);
+    ui->nextJobsView->setModel(nextJobsModel);
+
 
     connect(ui->categoryCombo, static_cast<void(QComboBox::*)(int)>(&QComboBox::activated), stopModel, &StopModel::setCategory);
     connect(stopModel, &StopModel::categoryChanged, this, &JobPathEditor::onCategoryChanged);
@@ -90,9 +103,15 @@ JobPathEditor::JobPathEditor(QWidget *parent) :
 
     connect(ui->sheetBut, &QPushButton::clicked, this, &JobPathEditor::onSaveSheet);
 
-    ui->view->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->view, &QListView::customContextMenuRequested, this, &JobPathEditor::showContextMenu);
-    connect(ui->view, &QListView::clicked, this, &JobPathEditor::onIndexClicked);
+    ui->stopsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->stopsView, &QListView::customContextMenuRequested, this, &JobPathEditor::showStopsContextMenu);
+    connect(ui->stopsView, &QListView::clicked, this, &JobPathEditor::onStopIndexClicked);
+
+    ui->prevJobsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->prevJobsView, &QListView::customContextMenuRequested, this, &JobPathEditor::showJobContextMenu);
+
+    ui->nextJobsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->nextJobsView, &QListView::customContextMenuRequested, this, &JobPathEditor::showJobContextMenu);
 
     connect(Session, &MeetingSession::jobRemoved, this, &JobPathEditor::onJobRemoved);
     connect(&AppSettings, &MRTPSettings::jobColorsChanged, this, &JobPathEditor::updateSpinColor);
@@ -156,7 +175,10 @@ bool JobPathEditor::setJob_internal(db_id jobId)
     }
 
     //If read-only hide 'AddHere' row (last one)
-    ui->view->setRowHidden(stopModel->rowCount() - 1, m_readOnly);
+    ui->stopsView->setRowHidden(stopModel->rowCount() - 1, m_readOnly);
+
+    prevJobsModel->setJobId(jobId);
+    nextJobsModel->setJobId(jobId);
 
     return true;
 }
@@ -233,9 +255,9 @@ bool JobPathEditor::createNewJob(db_id *out)
     return true;
 }
 
-void JobPathEditor::showContextMenu(const QPoint& pos)
+void JobPathEditor::showStopsContextMenu(const QPoint& pos)
 {
-    QModelIndex index = ui->view->indexAt(pos);
+    QModelIndex index = ui->stopsView->indexAt(pos);
     if(!index.isValid() || index.row()>= stopModel->rowCount() || stopModel->isAddHere(index))
         return;
 
@@ -257,12 +279,12 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     const StopItem stop = stopModel->getItemAt(index.row());
     showStationSVG->setEnabled(stop.stationId != 0); //Enable only if station is set
 
-    QAction *act = menu->exec(ui->view->viewport()->mapToGlobal(pos));
+    QAction *act = menu->exec(ui->stopsView->viewport()->mapToGlobal(pos));
 
-    QItemSelectionModel *sm = ui->view->selectionModel();
+    QItemSelectionModel *sm = ui->stopsView->selectionModel();
 
     QItemSelectionRange range;
-    QItemSelection s = ui->view->selectionModel()->selection();
+    QItemSelection s = ui->stopsView->selectionModel()->selection();
     if(s.count() > 0)
     {
         //Take the first range only
@@ -314,6 +336,56 @@ void JobPathEditor::showContextMenu(const QPoint& pos)
     if(act == removeStopAct)
     {
         stopModel->removeStop(index);
+    }
+}
+
+void JobPathEditor::showJobContextMenu(const QPoint& pos)
+{
+    QTableView *jobView = qobject_cast<QTableView *>(sender());
+    NextPrevRSJobsModel *jobModel = nextJobsModel;
+
+    if(jobView == ui->prevJobsView)
+        jobModel = prevJobsModel;
+
+    QModelIndex index = jobView->indexAt(pos);
+
+    NextPrevRSJobsModel::Item item = jobModel->getItemAtRow(index.row());
+
+    OwningQPointer<QMenu> menu = new QMenu(this);
+    QAction *goToStop = menu->addAction(tr("Go to Stop"));
+    QAction *goToJob = menu->addAction(tr("Show Job"));
+    QAction *showRSPlan = menu->addAction(tr("Show RS Plan"));
+    menu->addSeparator();
+    QAction *refreshViews = menu->addAction(tr("Refresh"));
+
+    //Enable only if RS is not going to depot
+    goToStop->setEnabled(index.isValid());
+    goToJob->setEnabled(index.isValid() && item.otherJobId != 0);
+    showRSPlan->setEnabled(index.isValid());
+
+    QAction *act = menu->exec(jobView->viewport()->mapToGlobal(pos));
+
+    if(act == goToStop)
+    {
+        selectStop(item.stopId);
+    }
+    else if(act == goToJob)
+    {
+        if(isEdited()) //Prevent selecting other job before saving
+        {
+            if(!maybeSave())
+                return;
+        }
+        Session->getViewManager()->requestJobSelection(item.otherJobId, true, true);
+    }
+    else if(act == showRSPlan)
+    {
+        Session->getViewManager()->requestRSInfo(item.rsId);
+    }
+    else if(act == refreshViews)
+    {
+        prevJobsModel->refreshData();
+        nextJobsModel->refreshData();
     }
 }
 
@@ -427,8 +499,12 @@ bool JobPathEditor::saveChanges()
 
     stopModel->commitChanges();
 
+    db_id newJobId = stopModel->getJobId();
+    prevJobsModel->setJobId(newJobId);
+    nextJobsModel->setJobId(newJobId);
+
     //When updating the path selection gets cleared so we restore it
-    Session->getViewManager()->requestJobSelection(stopModel->getJobId(), true, true);
+    Session->getViewManager()->requestJobSelection(newJobId, true, true);
 
     canSetJob = true;
     return true;
@@ -602,15 +678,15 @@ void JobPathEditor::setReadOnly(bool readOnly)
     //If read-only hide 'AddHere' row (last one)
     int size = stopModel->rowCount();
     if(size > 0)
-        ui->view->setRowHidden(size - 1, m_readOnly);
+        ui->stopsView->setRowHidden(size - 1, m_readOnly);
 
     if(m_readOnly)
     {
-        ui->view->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        ui->stopsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     }
     else
     {
-        ui->view->setEditTriggers(QAbstractItemView::DoubleClicked);
+        ui->stopsView->setEditTriggers(QAbstractItemView::DoubleClicked);
     }
 }
 
@@ -645,7 +721,7 @@ void JobPathEditor::onSaveSheet()
     utils::OpenFileInFolderDlg::askUser(tr("Job Sheet Saved"), fileName, this);
 }
 
-void JobPathEditor::onIndexClicked(const QModelIndex& index)
+void JobPathEditor::onStopIndexClicked(const QModelIndex& index)
 {
     DEBUG_ENTRY;
 
@@ -668,9 +744,9 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
 
             //Edit former Last Stop
             QModelIndex prev = stopModel->index(row - 1, 0);
-            ui->view->setCurrentIndex(prev);
-            ui->view->scrollTo(prev);
-            ui->view->edit(prev);
+            ui->stopsView->setCurrentIndex(prev);
+            ui->stopsView->scrollTo(prev);
+            ui->stopsView->edit(prev);
 
             //Tell editor to popup lines combo
             //QAbstractItemView::edit doesn't let you pass additional arguments
@@ -681,9 +757,9 @@ void JobPathEditor::onIndexClicked(const QModelIndex& index)
         else
         {
             QModelIndex lastStop = stopModel->index(row, 0);
-            ui->view->setCurrentIndex(lastStop);
-            ui->view->scrollTo(lastStop);
-            ui->view->edit(lastStop);
+            ui->stopsView->setCurrentIndex(lastStop);
+            ui->stopsView->scrollTo(lastStop);
+            ui->stopsView->edit(lastStop);
         }
     }
 }
@@ -695,8 +771,8 @@ bool JobPathEditor::getCanSetJob() const
 
 void JobPathEditor::closeStopEditor()
 {
-    QModelIndex idx = ui->view->currentIndex();
-    QWidget *ed = ui->view->indexWidget(idx);
+    QModelIndex idx = ui->stopsView->currentIndex();
+    QWidget *ed = ui->stopsView->indexWidget(idx);
     if(ed == nullptr)
         return;
     emit delegate->commitData(ed);
@@ -725,7 +801,7 @@ void JobPathEditor::selectStop(db_id stopId)
     if(row >= 0)
     {
         QModelIndex idx = stopModel->index(row, 0);
-        ui->view->setCurrentIndex(idx);
-        ui->view->scrollTo(idx, QListView::EnsureVisible);
+        ui->stopsView->setCurrentIndex(idx);
+        ui->stopsView->scrollTo(idx, QListView::EnsureVisible);
     }
 }

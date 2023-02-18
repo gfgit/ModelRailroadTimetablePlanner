@@ -42,6 +42,7 @@ public slots:
     void done(int val) override;
 
 private slots:
+    void importJobRS();
     void editCoupled();
     void editUncoupled();
 

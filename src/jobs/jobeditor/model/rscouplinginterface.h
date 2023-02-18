@@ -25,6 +25,8 @@ public:
     bool coupleRS(db_id rsId, const QString &rsName, bool on, bool checkTractionType);
     bool uncoupleRS(db_id rsId, const QString &rsName, bool on);
 
+    int importRSFromJob(db_id otherStopId);
+
     bool hasEngineAfterStop(bool *isElectricOnNonElectrifiedLine = nullptr);
 
     bool isRailwayElectrified() const;

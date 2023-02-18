@@ -9,6 +9,7 @@ class StopDelegate;
 class CustomCompletionLineEdit;
 
 class StopModel;
+class NextPrevRSJobsModel;
 
 namespace Ui {
 class JobPathEditor;
@@ -67,8 +68,11 @@ protected:
 private slots:
     void setEdited(bool val);
 
-    void showContextMenu(const QPoint &pos);
-    void onIndexClicked(const QModelIndex &index);
+    void showJobContextMenu(const QPoint &pos);
+    void showStopsContextMenu(const QPoint &pos);
+
+    void onStopIndexClicked(const QModelIndex &index);
+
     void onJobRemoved(db_id jobId);
 
     void startJobNumberTimer();
@@ -93,6 +97,9 @@ private:
 
     StopModel *stopModel;
     StopDelegate *delegate;
+
+    NextPrevRSJobsModel *prevJobsModel;
+    NextPrevRSJobsModel *nextJobsModel;
 
     int jobNumberTimerId;
 
