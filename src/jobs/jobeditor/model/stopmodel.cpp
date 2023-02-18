@@ -208,16 +208,18 @@ bool StopModel::loadJobStops(db_id jobId)
                 qWarning() << "Stop:" << s.stopId << "Different prev segment:" << prevSegment.segConnId << s.fromGate.gateConnId;
             }
 
-            if(segInGateId != s.toGate.gateId)
-            {
-                //Out gate leads to a different next semgent
-                qWarning() << "Stop:" << s.stopId << "Different next segment:" << s.nextSegment.segConnId << s.toGate.gateConnId;
-            }
-
             if(s.fromGate.gateTrackNum != prevSegment.outTrackNum)
             {
                 //Previous segment leads to a different track than in gate track
                 qWarning() << "Stop:" << s.stopId << "Different in gate track:" << s.fromGate.gateConnId << s.toGate.gateConnId;
+            }
+        }
+        if(s.nextSegment.segmentId != 0)
+        {
+            if(segInGateId != s.toGate.gateId)
+            {
+                //Out gate leads to a different next semgent
+                qWarning() << "Stop:" << s.stopId << "Different next segment:" << s.nextSegment.segConnId << s.toGate.gateConnId;
             }
 
             if(s.toGate.gateTrackNum != s.nextSegment.inTrackNum)
@@ -921,8 +923,12 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
     }
 
     const db_id oldSegConnId = s.nextSegment.segConnId;
-    if(s.toGate.gateConnId != newStop.toGate.gateConnId)
+    if(s.toGate.gateConnId != newStop.toGate.gateConnId || oldSegConnId != newStop.nextSegment.segConnId)
     {
+        //We check also for segConnId changes even if gate did not change
+        //This is needed to fix some database corruption situations
+        //when rail segment was editd (adding tracks, changing connections)
+        //but jobs were not correctly updated.
         startStopsEditing();
 
         //Update next stop
@@ -949,38 +955,44 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
         }
     }
 
-    if(row < stops.count() - 2 && s.nextSegment.segConnId && s.nextSegment.segConnId != oldSegConnId)
+    if(row < stops.count() - 2 && s.nextSegment.segConnId)
     {
-        startStopsEditing();
-
         //Before Last and AddHere, so there is a stop after this
-        //Update next station because "next" segment of previous (current) stop changed
         StopItem& nextStop = stops[row + 1];
-        nextStop.fromGate.gateConnId = 0; //Reset to trigger update
-        if(!updateCurrentInGate(nextStop, s.nextSegment))
-            return;
 
-        if(lastUpdatedRow == row)
-            lastUpdatedRow++; //We updated also next row
-
-        if(timeCalcEnabled)
+        if(s.nextSegment.segConnId != oldSegConnId
+            || s.nextSegment.outTrackNum != nextStop.fromGate.gateTrackNum)
         {
-            const int secs = calcTravelTime(s.nextSegment.segmentId);
-            const QTime oldNextArr = nextStop.arrival;
-            const QTime oldNextDep = nextStop.departure;
+            //Update next station because "next" segment of previous (current) stop changed
+            //or because segment and gate track did not match (happenss on database corruption)
+            startStopsEditing();
 
-            nextStop.arrival = s.departure.addSecs(secs);
+            nextStop.fromGate.gateConnId = 0; //Reset to trigger update
+            if(!updateCurrentInGate(nextStop, s.nextSegment))
+                return;
+
+            if(lastUpdatedRow == row)
+                lastUpdatedRow++; //We updated also next row
 
             if(timeCalcEnabled && !avoidTimeRecalc)
             {
-                if(!updateStopTime(nextStop, row + 1, true, oldNextArr, oldNextDep))
-                {
-                    //Failed, Reset to old values
-                    nextStop.arrival = oldNextArr;
-                    nextStop.departure = oldNextDep;
-                }
+                const int secs = calcTravelTime(s.nextSegment.segmentId);
+                const QTime oldNextArr = nextStop.arrival;
+                const QTime oldNextDep = nextStop.departure;
 
-                lastUpdatedRow = stops.count() - 2;
+                nextStop.arrival = s.departure.addSecs(secs);
+
+                if(oldNextArr != nextStop.arrival)
+                {
+                    if(!updateStopTime(nextStop, row + 1, true, oldNextArr, oldNextDep))
+                    {
+                        //Failed, Reset to old values
+                        nextStop.arrival = oldNextArr;
+                        nextStop.departure = oldNextDep;
+                    }
+
+                    lastUpdatedRow = stops.count() - 2;
+                }
             }
         }
     }
