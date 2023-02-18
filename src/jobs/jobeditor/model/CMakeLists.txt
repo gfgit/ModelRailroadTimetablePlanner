@@ -1,6 +1,7 @@
 set(MR_TIMETABLE_PLANNER_SOURCES
   ${MR_TIMETABLE_PLANNER_SOURCES}
 
+  jobs/jobeditor/model/nextprevrsjobsmodel.h
   jobs/jobeditor/model/jobpassingsmodel.h
   jobs/jobeditor/model/rscouplinginterface.h
   jobs/jobeditor/model/rslistondemandmodel.h
@@ -9,6 +10,7 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   jobs/jobeditor/model/trainassetmodel.h
   jobs/jobeditor/model/stopmodel.h
 
+  jobs/jobeditor/model/nextprevrsjobsmodel.cpp
   jobs/jobeditor/model/jobpassingsmodel.cpp
   jobs/jobeditor/model/rscouplinginterface.cpp
   jobs/jobeditor/model/rslistondemandmodel.cpp
@@ -16,5 +18,6 @@ set(MR_TIMETABLE_PLANNER_SOURCES
   jobs/jobeditor/model/stopcouplingmodel.cpp
   jobs/jobeditor/model/trainassetmodel.cpp
   jobs/jobeditor/model/stopmodel.cpp
+
   PARENT_SCOPE
 )
