@@ -431,7 +431,7 @@ void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *
     }
 }
 
-void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &name)
+void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &/*name*/)
 {
     for(const StationSVGJobStops::Stop& stop : qAsConst(m_station->stops))
     {
@@ -443,7 +443,8 @@ void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &name)
     }
 }
 
-void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 trackId, qint64 gateId, int gateTrackPos, int trackSide)
+void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 /*trackId*/, qint64 /*gateId*/,
+                                           int /*gateTrackPos*/, int /*trackSide*/)
 {
     for(const StationSVGJobStops::Stop& stop : qAsConst(m_station->stops))
     {

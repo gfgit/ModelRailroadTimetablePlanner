@@ -33,7 +33,7 @@ void StopCouplingModel::setStop(db_id stopId, RsOp op)
     refreshData(true);
 }
 
-void StopCouplingModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
+void StopCouplingModel::internalFetch(int first, int /*sortCol*/, int /*valRow*/, const QVariant& /*val*/)
 {
     query q(mDb);
 

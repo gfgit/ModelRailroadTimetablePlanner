@@ -38,7 +38,7 @@ StopModel::StopModel(database &db, QObject *parent) :
     connect(Session, &MeetingSession::stationNameChanged, this, &StopModel::onStationSegmentNameChanged);
 }
 
-QVariant StopModel::data(const QModelIndex &index, int role) const
+QVariant StopModel::data(const QModelIndex &/*index*/, int /*role*/) const
 {
     return QVariant(); //Use setters and getters instead of data() and setData()
 }

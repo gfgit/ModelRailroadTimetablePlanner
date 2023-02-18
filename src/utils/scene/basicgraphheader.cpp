@@ -42,6 +42,7 @@ void BasicGraphHeader::paintEvent(QPaintEvent *e)
         return; //Nothing to draw
 
     //FIXME: consider QPaintEvent rect?
+    Q_UNUSED(e)
 
     const double scaleFactor = mZoom / 100.0;
 

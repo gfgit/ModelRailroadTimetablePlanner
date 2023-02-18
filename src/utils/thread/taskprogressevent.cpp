@@ -1,7 +1,7 @@
 #include "taskprogressevent.h"
 
-GenericTaskEvent::GenericTaskEvent(Type t, IQuittableTask *self) :
-    QEvent(t),
+GenericTaskEvent::GenericTaskEvent(Type type_, IQuittableTask *self) :
+    QEvent(type_),
     task(self)
 {
 

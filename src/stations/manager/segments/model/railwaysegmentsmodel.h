@@ -57,11 +57,6 @@ public:
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
-
-    // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
-
     Qt::ItemFlags flags(const QModelIndex& idx) const override;
 
     // IPagedItemModel

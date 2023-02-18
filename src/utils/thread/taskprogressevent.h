@@ -10,7 +10,7 @@ class IQuittableTask;
 class GenericTaskEvent : public QEvent
 {
 public:
-    GenericTaskEvent(QEvent::Type t, IQuittableTask *self);
+    GenericTaskEvent(QEvent::Type type_, IQuittableTask *self);
 
     IQuittableTask *task = nullptr;
 };

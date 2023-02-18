@@ -161,12 +161,6 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-bool RailwaySegmentsModel::setData(const QModelIndex &idx, const QVariant &value, int role)
-{
-    //TODO: edit here or always by the dialog?
-    return false;
-}
-
 Qt::ItemFlags RailwaySegmentsModel::flags(const QModelIndex &idx) const
 {
     if (!idx.isValid())

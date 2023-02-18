@@ -218,7 +218,7 @@ void LineGraphManager::onSceneDestroyed(QObject *obj)
     unregisterScene(scene);
 }
 
-void LineGraphManager::onGraphChanged(int graphType_, db_id graphObjId, LineGraphScene *scene)
+void LineGraphManager::onGraphChanged(int /*graphType_*/, db_id graphObjId, LineGraphScene *scene)
 {
     if(!m_followJobOnGraphChange || !scenes.contains(scene))
     {

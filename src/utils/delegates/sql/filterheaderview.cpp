@@ -196,6 +196,7 @@ void FilterHeaderView::clearFilters()
 
 void FilterHeaderView::setFilter(int column, const QString& value)
 {
+    Q_UNUSED(value)
     for(FilterHeaderLineEdit* filterLineEdit : qAsConst(filterWidgets))
     {
         if(filterLineEdit->getColumn() == column)
