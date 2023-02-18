@@ -2,6 +2,17 @@
 
 #include "utils/jobcategorystrings.h"
 
+static const char* error_texts[] = {
+    nullptr,
+    QT_TRANSLATE_NOOP("JobErrors", "Job crosses another Job on same track."),
+    QT_TRANSLATE_NOOP("JobErrors", "Job passes another Job on same track.")
+};
+
+class JobError
+{
+    Q_DECLARE_TR_FUNCTIONS(JobErrors)
+};
+
 JobCrossingModel::JobCrossingModel(QObject *parent) : JobCrossingModelBase(parent)
 {
 
@@ -50,7 +61,7 @@ QVariant JobCrossingModel::data(const QModelIndex &idx, int role) const
         case Departure:
             return item->departure;
         case Description:
-            break; //TODO
+            return JobError::tr(error_texts[item->type]);
         default:
             break;
         }
