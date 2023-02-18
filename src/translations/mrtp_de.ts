@@ -2,6 +2,24 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
+    <name>BackgroundResultWidget</name>
+    <message>
+        <location filename="../backgroundmanager/backgroundresultwidget.cpp" line="29"/>
+        <source>Start</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../backgroundmanager/backgroundresultwidget.cpp" line="30"/>
+        <source>Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../backgroundmanager/backgroundresultwidget.cpp" line="54"/>
+        <source>Error Results</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ChooseFilePage</name>
     <message>
         <location filename="../utils/wizard/choosefilepage.cpp" line="21"/>
@@ -236,7 +254,7 @@ All segments after it are also removed.</source>
     </message>
     <message>
         <location filename="../stations/manager/segments/dialogs/editrailwayconnectiondlg.cpp" line="88"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwayconnectiondlg.cpp" line="99"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwayconnectiondlg.cpp" line="101"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -249,144 +267,154 @@ All segments after it are also removed.</source>
 <context>
     <name>EditRailwaySegmentDlg</name>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="62"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="68"/>
         <source>Segment name...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="65"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="71"/>
         <source>Km </source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="70"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="76"/>
         <source> km/h</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="74"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="80"/>
         <source>From:</source>
         <translation type="unfinished">von:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="76"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="81"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="82"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="87"/>
         <source>Station:</source>
         <translation>Bahnhof:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="77"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="82"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="83"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="88"/>
         <source>Gate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="79"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="85"/>
         <source>To:</source>
         <translation type="unfinished">nach:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="84"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="90"/>
         <source>Segment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="86"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="92"/>
         <source>Name:</source>
         <translation type="unfinished">Name:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="87"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="93"/>
         <source>Distance:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="88"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="94"/>
         <source>Max. Speed:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="89"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="95"/>
         <source>Electrified:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="91"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="97"/>
         <source>Edit</source>
         <translation type="unfinished">Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="93"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="99"/>
         <source>Track connections:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="250"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="256"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="262"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="268"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="275"/>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="294"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="260"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="266"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="272"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="278"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="285"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="320"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="251"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="261"/>
         <source>Origin station must be valid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="257"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="267"/>
         <source>Origin station gate must be valid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="263"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="273"/>
         <source>Destination station must be valid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="269"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="279"/>
         <source>Destination station gate must be valid.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="276"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="286"/>
         <source>Segment name must not be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="295"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="293"/>
+        <source>Default Name</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="294"/>
+        <source>Apply default segment name &lt;b&gt;%1&lt;/b&gt;?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="321"/>
         <source>Database error: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="226"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="236"/>
         <source>Edit Railway Segment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="231"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="241"/>
         <source>New Railway Segment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="221"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="229"/>
         <source>From</source>
         <translation type="unfinished">von</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="221"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="229"/>
         <source>From (Locked)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="222"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="230"/>
         <source>To (Reversed)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="222"/>
+        <location filename="../stations/manager/segments/dialogs/editrailwaysegmentdlg.cpp" line="230"/>
         <source>To</source>
         <translation type="unfinished">nach</translation>
     </message>
@@ -414,18 +442,18 @@ All segments after it are also removed.</source>
         <translation>Abfahrt</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="252"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="352"/>
         <source>Coupled</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="276"/>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="310"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="376"/>
         <source>Edit</source>
         <translation type="unfinished">Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="286"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="252"/>
         <source>Uncoupled</source>
         <translation type="unfinished"></translation>
     </message>
@@ -435,7 +463,7 @@ All segments after it are also removed.</source>
         <translation>Bemerkung</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="390"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="394"/>
         <source>Info</source>
         <translation type="unfinished"></translation>
     </message>
@@ -445,12 +473,12 @@ All segments after it are also removed.</source>
         <translation type="unfinished">Fahrzeuge</translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="379"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="342"/>
         <source>Asset After Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="333"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="298"/>
         <source>Asset Before Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -480,7 +508,7 @@ All segments after it are also removed.</source>
     </message>
     <message>
         <location filename="../jobs/jobeditor/editstopdialog.ui" line="172"/>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="219"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="224"/>
         <source>Current Stop</source>
         <translation type="unfinished"></translation>
     </message>
@@ -510,97 +538,137 @@ All segments after it are also removed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="320"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="286"/>
         <source>Job Asset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="440"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="386"/>
+        <source>Import From Job</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="444"/>
         <source>Passings / Crossings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="446"/>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="369"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="450"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="422"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="453"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="457"/>
         <source>Passings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.ui" line="463"/>
+        <location filename="../jobs/jobeditor/editstopdialog.ui" line="467"/>
         <source>Crossings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="213"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="112"/>
+        <source>Press SHIFT modifier and click to save changes without recalculating travel times.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="218"/>
         <source>First Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="219"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="224"/>
         <source>Last Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="275"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="278"/>
+        <source>Import Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="279"/>
+        <source>In order to import rollingstock from other&lt;br&gt;Jobs stopping in the &lt;b&gt;same station&lt;/b&gt; as current one, you must first set a valid station for this stop.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="292"/>
+        <source>Please choose a Job among the ones stopping at &lt;b&gt;%1&lt;/b&gt; before &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;All rollingstock uncoupled by selected Job at current station&lt;br&gt;will be coupled to current Job.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="297"/>
+        <source>Job number without category</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="316"/>
+        <source>Importation Finished</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="317"/>
+        <source>&lt;b&gt;%1&lt;/b&gt; rollingstock items were successfully imported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="329"/>
         <source>Couple</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="293"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="346"/>
         <source>Uncouple</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="427"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="480"/>
         <source>Train reverses direction.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="449"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="502"/>
         <source>Electric traction is ALLOWED.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="451"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="504"/>
         <source>Electric traction is NOT ALLOWED.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="457"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="510"/>
         <source>(Different traction then previous line!)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="501"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="554"/>
         <source>No Engine Left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="503"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="556"/>
         <source>It seems you have uncoupled all job engines except for electric ones but the line is not electrified
 (The train isn&apos;t able to move)
 Do you want to couple a non electric engine?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="507"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="560"/>
         <source>It seems you have uncoupled all job engines
 (The train isn&apos;t able to move)
 Do you want to couple an engine?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="540"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="593"/>
         <source>Train Speed Changed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="541"/>
+        <location filename="../jobs/jobeditor/editstopdialog.cpp" line="594"/>
         <source>Train speed after this stop has changed from a value of %1 km/h to &lt;b&gt;%2 km/h&lt;/b&gt;&lt;br&gt;Do you want to rebase travel times to this new speed?&lt;br&gt;NOTE: this doesn&apos;t affect stop times but you will lose manual adjustments to travel times</source>
         <translation type="unfinished"></translation>
     </message>
@@ -907,6 +975,65 @@ Do you want to couple an engine?</source>
     </message>
 </context>
 <context>
+    <name>JobCrossingChecker</name>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingchecker.cpp" line="27"/>
+        <source>Job Crossings</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingchecker.cpp" line="44"/>
+        <source>Show in Job Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingchecker.cpp" line="45"/>
+        <source>Show in graph</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JobCrossingModel</name>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="28"/>
+        <source>Job</source>
+        <translation type="unfinished">Zug</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="30"/>
+        <source>Station</source>
+        <translation type="unfinished">Bahnhof</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="32"/>
+        <source>Arrival</source>
+        <translation type="unfinished">Ankunft</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="34"/>
+        <source>Departure</source>
+        <translation type="unfinished">Abfahrt</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="36"/>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>JobErrors</name>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="7"/>
+        <source>Job crosses another Job on same track.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobs_checker/crossing/jobcrossingmodel.cpp" line="8"/>
+        <source>Job passes another Job on same track.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>JobListModel</name>
     <message>
         <location filename="../jobs/jobsmanager/model/joblistmodel.cpp" line="37"/>
@@ -970,108 +1097,153 @@ Do you want to couple an engine?</source>
 <context>
     <name>JobPathEditor</name>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="20"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="42"/>
         <source>Number:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="44"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="35"/>
         <source>Category:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="69"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="72"/>
+        <source>Stops:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="86"/>
+        <source>Prev Jobs:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="100"/>
+        <source>Next Jobs:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.ui" line="114"/>
         <source>Save Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="230"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="265"/>
         <source>Toggle transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="231"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="266"/>
         <source>Set transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="232"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="267"/>
         <source>Unset transit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="237"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="272"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="234"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="269"/>
         <source>Edit stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="373"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="458"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="374"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="459"/>
         <source>You must register at least 2 stops.
 Do you want to delete this job?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="489"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="556"/>
         <source>Save?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="490"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="557"/>
         <source>Do you want to save changes to job %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="177"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="212"/>
         <source>Invalid</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="67"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="69"/>
         <source>Shift:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="178"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="169"/>
+        <source>Error Loading Job</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="170"/>
+        <source>&lt;b&gt;Job %1&lt;/b&gt; could not be loaded.&lt;br&gt;Maybe it&apos;s number was changed or maybe it doesn&apos;t exist at all.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="213"/>
         <source>Job number &lt;b&gt;%1&lt;/b&gt; is already exists.&lt;br&gt;Please choose a different number.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="235"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="270"/>
         <source>Station SVG Plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="582"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="355"/>
+        <source>Go to Stop</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="356"/>
+        <source>Show Job</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="357"/>
+        <source>Show RS Plan</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="359"/>
+        <source>Refresh</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="649"/>
         <source>Empty Job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="583"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="650"/>
         <source>Before setting a shift you should add stops to this job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="630"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="697"/>
         <source>Save Job Sheet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="634"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="701"/>
         <source>job%1_sheet.odt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="654"/>
+        <location filename="../jobs/jobeditor/jobpatheditor.cpp" line="721"/>
         <source>Job Sheet Saved</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1481,179 +1653,184 @@ Message: %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="84"/>
-        <location filename="../app/mainwindow.cpp" line="260"/>
+        <location filename="../app/mainwindow.cpp" line="82"/>
+        <location filename="../app/mainwindow.cpp" line="265"/>
         <source>About %1</source>
         <translation>Über %1</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="137"/>
+        <location filename="../app/mainwindow.cpp" line="142"/>
         <source>Find</source>
         <translation>Suchen</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="291"/>
-        <location filename="../app/mainwindow.cpp" line="509"/>
+        <location filename="../app/mainwindow.cpp" line="296"/>
+        <location filename="../app/mainwindow.cpp" line="514"/>
         <source>Backgroung Task</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="292"/>
-        <location filename="../app/mainwindow.cpp" line="510"/>
+        <location filename="../app/mainwindow.cpp" line="297"/>
+        <location filename="../app/mainwindow.cpp" line="515"/>
         <source>Background task for checking rollingstock errors is still running.
 Do you want to cancel it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="303"/>
+        <location filename="../app/mainwindow.cpp" line="308"/>
         <source>Open Session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="329"/>
-        <location filename="../app/mainwindow.cpp" line="547"/>
+        <location filename="../app/mainwindow.cpp" line="334"/>
+        <location filename="../app/mainwindow.cpp" line="552"/>
         <source>Background Tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="330"/>
+        <location filename="../app/mainwindow.cpp" line="335"/>
         <source>Some background tasks are still running.
 The file was not opened. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="357"/>
+        <location filename="../app/mainwindow.cpp" line="362"/>
         <source>Version is old</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="369"/>
+        <location filename="../app/mainwindow.cpp" line="374"/>
         <source>Version is too new</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="242"/>
+        <location filename="../app/mainwindow.cpp" line="247"/>
         <source>Hold shift and click to go to &lt;b&gt;last&lt;/b&gt; job stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="105"/>
+        <location filename="../app/mainwindow.cpp" line="103"/>
         <source>Job Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="243"/>
+        <location filename="../app/mainwindow.cpp" line="115"/>
+        <source>Errors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../app/mainwindow.cpp" line="248"/>
         <source>Hold shift and click to go to &lt;b&gt;first&lt;/b&gt; job stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="263"/>
+        <location filename="../app/mainwindow.cpp" line="268"/>
         <source>&lt;h3&gt;%1&lt;/h3&gt;&lt;p&gt;This program makes it easier to deal with timetables and trains.&lt;/p&gt;&lt;p&gt;Version: &lt;b&gt;%2&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Built: %3&lt;/p&gt;&lt;p&gt;Website: &lt;a href=&apos;%4&apos;&gt;%4&lt;/a&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="358"/>
+        <location filename="../app/mainwindow.cpp" line="363"/>
         <source>This file was created by an older version of %1.
 Opening it without conversion might not work and even crash the application.
 Do you want to open it anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="370"/>
+        <location filename="../app/mainwindow.cpp" line="375"/>
         <source>This file was created by a newer version of %1.
 You should update the application first. Opening this file might not work or even crash.
 Do you want to open it anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="400"/>
+        <location filename="../app/mainwindow.cpp" line="405"/>
         <source>RS Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="401"/>
+        <location filename="../app/mainwindow.cpp" line="406"/>
         <source>There is some rollingstock import data left in this file. Probably the application has crashed!&lt;br&gt;Before deleting it would you like to resume importation?&lt;br&gt;&lt;i&gt;(Sorry for the crash, would you like to contact me and share information about it?)&lt;/i&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="406"/>
+        <location filename="../app/mainwindow.cpp" line="411"/>
         <source>Resume importation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="407"/>
+        <location filename="../app/mainwindow.cpp" line="412"/>
         <source>Just delete it</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="474"/>
+        <location filename="../app/mainwindow.cpp" line="479"/>
         <source>&amp;%1 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="521"/>
+        <location filename="../app/mainwindow.cpp" line="526"/>
         <source>Create new Session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="548"/>
+        <location filename="../app/mainwindow.cpp" line="553"/>
         <source>Some background tasks are still running.
 The new file was not created. Try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="587"/>
+        <location filename="../app/mainwindow.cpp" line="592"/>
         <source>Save Session Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="624"/>
+        <location filename="../app/mainwindow.cpp" line="629"/>
         <source>Error saving copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="639"/>
+        <location filename="../app/mainwindow.cpp" line="644"/>
         <source>Error while Closing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="640"/>
+        <location filename="../app/mainwindow.cpp" line="645"/>
         <source>There was an error while closing the database.
 Make sure there aren&apos;t any background tasks running and try again.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="663"/>
+        <location filename="../app/mainwindow.cpp" line="670"/>
         <source>&lt;p&gt;Open a file: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;Open&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Create new project: &lt;b&gt;File&lt;/b&gt; &gt; &lt;b&gt;New&lt;/b&gt;&lt;/p&gt;</source>
         <translation>&lt;p&gt;Datei öffnen: &lt;b&gt;Datei&lt;/b&gt; &gt; &lt;b&gt;Öffnen&lt;/b&gt;&lt;/p&gt;&lt;p&gt;neues Projekt anlegen: &lt;b&gt;Datei&lt;/b&gt; &gt; &lt;b&gt;Neu&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="665"/>
+        <location filename="../app/mainwindow.cpp" line="672"/>
         <source>Open file or create a new one</source>
         <translation>Datei öffnen oder neu erstellen</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="676"/>
+        <location filename="../app/mainwindow.cpp" line="685"/>
         <source>&lt;p&gt;&lt;b&gt;There are no lines in this session&lt;/b&gt;&lt;/p&gt;&lt;p&gt;&lt;table align=&quot;center&quot;&gt;&lt;tr&gt;&lt;td&gt;Start by creating the railway layout for this session:&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;1.&lt;/td&gt;&lt;td&gt;Create stations (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;2.&lt;/td&gt;&lt;td&gt;Create railway lines (&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;3.&lt;/td&gt;&lt;td&gt;Add stations to railway lines&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;(&lt;b&gt;Edit&lt;/b&gt; &gt; &lt;b&gt;Stations&lt;/b&gt; &gt; &lt;b&gt;Lines Tab&lt;/b&gt; &gt; &lt;b&gt;Edit Line&lt;/b&gt;)&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/p&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="733"/>
+        <location filename="../app/mainwindow.cpp" line="744"/>
         <source>Add train job</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="751"/>
+        <location filename="../app/mainwindow.cpp" line="762"/>
         <source>You must create at least one railway segment before adding job to this session</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="938"/>
+        <location filename="../app/mainwindow.cpp" line="949"/>
         <source>Remove selected Job</source>
         <translation>Ausgewählten Zug entfernen</translation>
     </message>
     <message>
-        <location filename="../app/mainwindow.cpp" line="940"/>
+        <location filename="../app/mainwindow.cpp" line="951"/>
         <source>First select a Job by double click on graph or type in search box</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2037,6 +2214,29 @@ Make sure it was created by a recent version of the application and was not mani
     </message>
 </context>
 <context>
+    <name>NextPrevRSJobsModel</name>
+    <message>
+        <location filename="../jobs/jobeditor/model/nextprevrsjobsmodel.cpp" line="23"/>
+        <source>Job</source>
+        <translation type="unfinished">Zug</translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/model/nextprevrsjobsmodel.cpp" line="25"/>
+        <source>RS item</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/model/nextprevrsjobsmodel.cpp" line="27"/>
+        <source>Time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/model/nextprevrsjobsmodel.cpp" line="62"/>
+        <source>Depot</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>ODSOptionsWidget</name>
     <message>
         <location filename="../rollingstock/importer/backends/ods/odsoptionswidget.cpp" line="17"/>
@@ -2069,43 +2269,48 @@ Extension: (*.ods)</source>
 <context>
     <name>Odt</name>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="51"/>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="98"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="54"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="101"/>
         <source>Null device</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="84"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="87"/>
         <source>Cannot remove SVG: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="105"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="108"/>
         <source>Cannot open source: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="448"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="455"/>
         <source>&lt;b&gt;%1&lt;/b&gt; from &lt;b&gt;%2&lt;/b&gt; to &lt;b&gt;%3&lt;/b&gt;&lt;br&gt;Platform: &lt;b&gt;%4&lt;/b&gt;&lt;br&gt;&lt;b&gt;%5&lt;/b&gt;</source>
         <translation>&lt;b&gt;%1&lt;/b&gt; ab &lt;b&gt;%2&lt;/b&gt; bis &lt;b&gt;%3&lt;/b&gt;&lt;br&gt;Gleis: &lt;b&gt;%4&lt;/b&gt;&lt;br&gt;&lt;b&gt;%5&lt;/b&gt;</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="451"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="458"/>
         <source>Arriving</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="452"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="459"/>
         <source>Departing</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="453"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="460"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="482"/>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="461"/>
+        <source>Transit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/model/stationsvghelper.cpp" line="496"/>
         <source>Not found</source>
         <comment>Station platform was not found in SVG</comment>
         <translation type="unfinished"></translation>
@@ -2673,19 +2878,19 @@ table, td {border: 1px solid black;border-collapse:collapse;padding:5px; }&lt;/s
 <context>
     <name>RSCouplingInterface</name>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="99"/>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="112"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="102"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="115"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="100"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="103"/>
         <source>Error while adding coupling operation.
 Rollingstock %1 is already coupled by this job (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="113"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="116"/>
         <source>Error while adding coupling operation.
 Rollingstock %1 is already coupled to another job (%2)
 Do you still want to couple it?</source>
@@ -2704,32 +2909,43 @@ Do you still want to couple it?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="197"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="196"/>
         <source>Delete coupling?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="198"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="197"/>
         <source>You couple %1 also in a next stop in %2 at %3.
 Do you want to remove the other coupling operation?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="267"/>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="349"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="266"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="348"/>
         <source>Delete uncoupling?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="268"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="267"/>
         <source>You don&apos;t couple %1 anymore.
 Do you want to remove also the uncoupling operation in %2 at %3?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="350"/>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="349"/>
         <source>You uncouple %1 also in %2 at %3.
 Do you want to remove the other uncoupling operation?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="444"/>
+        <source>Continue Importation?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../jobs/jobeditor/model/rscouplinginterface.cpp" line="445"/>
+        <source>Rollingstock importation is taking more time than expected.
+Do you want to continue?</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -2969,58 +3185,58 @@ If you wish to remove it, please first delete all &lt;b&gt;%1&lt;/b&gt; pieces.<
 <context>
     <name>RailwaySegmentConnectionsModel</name>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="10"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="12"/>
         <source>Cannot set negative number as track.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="14"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="16"/>
         <source>Track number out of bound.&lt;br&gt;Gate has only &lt;b&gt;%1&lt;/b&gt; tracks.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="19"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="21"/>
         <source>Track &lt;b&gt;%1&lt;/b&gt; is already connected to track &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="23"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="25"/>
         <source>Track &lt;b&gt;%1&lt;/b&gt; is already connected from track &lt;b&gt;%2&lt;/b&gt;.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="54"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="56"/>
         <source>From</source>
         <translation>von</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="56"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="58"/>
         <source>To</source>
         <translation>nach</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="92"/>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="98"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="94"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="100"/>
         <source>NULL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="123"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="125"/>
         <source>Incomplete</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="125"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="127"/>
         <source>To Add</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="127"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="129"/>
         <source>To Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="130"/>
+        <location filename="../stations/manager/segments/model/railwaysegmentconnectionsmodel.cpp" line="132"/>
         <source>Edited</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3310,6 +3526,24 @@ NOTE: you can remove all rollingstock pieces at once from the Rollingstock tab.<
     </message>
 </context>
 <context>
+    <name>RsCheckerManager</name>
+    <message>
+        <location filename="../rollingstock/rs_checker/rscheckermanager.cpp" line="40"/>
+        <source>RS Errors</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/rs_checker/rscheckermanager.cpp" line="57"/>
+        <source>Show in Job Editor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../rollingstock/rs_checker/rscheckermanager.cpp" line="58"/>
+        <source>Show rollingstock plan</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>RsErrorTreeModel</name>
     <message>
         <location filename="../rollingstock/rs_checker/rserrortreemodel.cpp" line="37"/>
@@ -3362,34 +3596,6 @@ NOTE: you can remove all rollingstock pieces at once from the Rollingstock tab.<
     <message>
         <location filename="../rollingstock/rs_checker/rserrortreemodel.cpp" line="16"/>
         <source>Uncoupled in the same stop it was coupled.</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>RsErrorsWidget</name>
-    <message>
-        <location filename="../rollingstock/rs_checker/rserrorswidget.cpp" line="37"/>
-        <source>Start</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/rs_checker/rserrorswidget.cpp" line="38"/>
-        <source>Stop</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/rs_checker/rserrorswidget.cpp" line="65"/>
-        <source>Rollingstock Errors</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/rs_checker/rserrorswidget.cpp" line="127"/>
-        <source>Show in Job Editor</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../rollingstock/rs_checker/rserrorswidget.cpp" line="128"/>
-        <source>Show rollingstock plan</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4083,294 +4289,309 @@ Extension: (*.ttt)</source>
     <name>SettingsDialog</name>
     <message>
         <location filename="../settings/settingsdialog.ui" line="32"/>
-        <location filename="../settings/settingsdialog.cpp" line="362"/>
-        <location filename="../settings/settingsdialog.cpp" line="380"/>
+        <location filename="../settings/settingsdialog.cpp" line="366"/>
+        <location filename="../settings/settingsdialog.cpp" line="384"/>
         <source>Settings</source>
         <translation type="unfinished">Einstellungen</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="68"/>
+        <location filename="../settings/settingsdialog.ui" line="67"/>
         <source>General</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="193"/>
+        <location filename="../settings/settingsdialog.ui" line="190"/>
         <source>Reset to Application Language</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="209"/>
+        <location filename="../settings/settingsdialog.ui" line="206"/>
         <source>Restore Default Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="230"/>
+        <location filename="../settings/settingsdialog.ui" line="227"/>
         <source>Job Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="272"/>
-        <location filename="../settings/settingsdialog.ui" line="644"/>
+        <location filename="../settings/settingsdialog.ui" line="269"/>
+        <location filename="../settings/settingsdialog.ui" line="641"/>
         <source>Offsets</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="278"/>
+        <location filename="../settings/settingsdialog.ui" line="275"/>
         <source>Stations</source>
         <translation>Bahnhöfe</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="292"/>
-        <location filename="../settings/settingsdialog.ui" line="650"/>
+        <location filename="../settings/settingsdialog.ui" line="289"/>
+        <location filename="../settings/settingsdialog.ui" line="647"/>
         <source>Hours</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="306"/>
-        <location filename="../settings/settingsdialog.ui" line="386"/>
+        <location filename="../settings/settingsdialog.ui" line="303"/>
+        <location filename="../settings/settingsdialog.ui" line="383"/>
         <source>Platforms</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="320"/>
-        <location filename="../settings/settingsdialog.ui" line="664"/>
+        <location filename="../settings/settingsdialog.ui" line="317"/>
+        <location filename="../settings/settingsdialog.ui" line="661"/>
         <source>Horizontal</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="334"/>
-        <location filename="../settings/settingsdialog.ui" line="674"/>
+        <location filename="../settings/settingsdialog.ui" line="331"/>
+        <location filename="../settings/settingsdialog.ui" line="671"/>
         <source>Vertical</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="357"/>
+        <location filename="../settings/settingsdialog.ui" line="354"/>
         <source>Line Width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="366"/>
+        <location filename="../settings/settingsdialog.ui" line="363"/>
         <source>Job</source>
         <translation>Zug</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="376"/>
+        <location filename="../settings/settingsdialog.ui" line="373"/>
         <source>Hour</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="399"/>
+        <location filename="../settings/settingsdialog.ui" line="396"/>
         <source>Colors</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="405"/>
+        <location filename="../settings/settingsdialog.ui" line="402"/>
         <source>Hour Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="428"/>
+        <location filename="../settings/settingsdialog.ui" line="425"/>
         <source>Hour Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="457"/>
+        <location filename="../settings/settingsdialog.ui" line="454"/>
         <source>Main Platform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="480"/>
+        <location filename="../settings/settingsdialog.ui" line="477"/>
         <source>Depot Platform</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="503"/>
+        <location filename="../settings/settingsdialog.ui" line="500"/>
         <source>Station Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="529"/>
+        <location filename="../settings/settingsdialog.ui" line="526"/>
         <source>Selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="535"/>
+        <location filename="../settings/settingsdialog.ui" line="532"/>
         <source>Follow Job selection on Graph change</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="542"/>
+        <location filename="../settings/settingsdialog.ui" line="539"/>
         <source>Sync Job selection on all graphs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="557"/>
+        <location filename="../settings/settingsdialog.ui" line="554"/>
         <source>Stop</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="569"/>
+        <location filename="../settings/settingsdialog.ui" line="566"/>
         <source>Default Stop Duration</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="585"/>
+        <location filename="../settings/settingsdialog.ui" line="582"/>
         <source>Job Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="594"/>
+        <location filename="../settings/settingsdialog.ui" line="591"/>
         <source>Auto insert transits between two stops.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="608"/>
+        <location filename="../settings/settingsdialog.ui" line="605"/>
         <source>Auto uncouple all rollingstock items at last stop.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="684"/>
+        <location filename="../settings/settingsdialog.ui" line="681"/>
         <source>Job Row Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="694"/>
+        <location filename="../settings/settingsdialog.ui" line="691"/>
         <source>Row Space Height</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="601"/>
+        <location filename="../settings/settingsdialog.ui" line="952"/>
+        <source>Job Crossing/Passing Checker</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="958"/>
+        <source>Check crossings when opening a file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="965"/>
+        <source>Check crossings when a Job is edeited</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settings/settingsdialog.ui" line="598"/>
         <source>Auto move uncoupled rollingstock pieces from last stop when adding a new one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="74"/>
+        <location filename="../settings/settingsdialog.ui" line="73"/>
         <source>Application Language:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="86"/>
-        <location filename="../settings/settingsdialog.ui" line="147"/>
+        <location filename="../settings/settingsdialog.ui" line="85"/>
+        <location filename="../settings/settingsdialog.ui" line="145"/>
         <source>Language:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="122"/>
+        <location filename="../settings/settingsdialog.ui" line="120"/>
         <source>Application Language changes will be applied next time you start the application!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="135"/>
+        <location filename="../settings/settingsdialog.ui" line="133"/>
         <source>Sheet Export Language:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="183"/>
+        <location filename="../settings/settingsdialog.ui" line="180"/>
         <source>This is the language for exported sheets. It will be reset at every launch to same language of application.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="632"/>
+        <location filename="../settings/settingsdialog.ui" line="629"/>
         <source>Shift Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="704"/>
+        <location filename="../settings/settingsdialog.ui" line="701"/>
         <source>Hide Same Stations</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="731"/>
+        <location filename="../settings/settingsdialog.ui" line="728"/>
         <source>Rollingstock</source>
         <translation type="unfinished">Fahrzeuge</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="743"/>
+        <location filename="../settings/settingsdialog.ui" line="740"/>
         <source>Merge models</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="752"/>
+        <location filename="../settings/settingsdialog.ui" line="749"/>
         <source>Remove source merged model by default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="768"/>
+        <location filename="../settings/settingsdialog.ui" line="765"/>
         <source>Merge owners</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="777"/>
+        <location filename="../settings/settingsdialog.ui" line="774"/>
         <source>Remove sourcemerged owner by default</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="787"/>
+        <location filename="../settings/settingsdialog.ui" line="784"/>
         <source>Open Document Spreadsheet Import</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="793"/>
+        <location filename="../settings/settingsdialog.ui" line="790"/>
         <source>First non-empty row</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="810"/>
+        <location filename="../settings/settingsdialog.ui" line="807"/>
         <source>Number column</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="817"/>
+        <location filename="../settings/settingsdialog.ui" line="814"/>
         <source>Model column</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="861"/>
+        <location filename="../settings/settingsdialog.ui" line="858"/>
         <source>Sheet Export</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="867"/>
+        <location filename="../settings/settingsdialog.ui" line="864"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="873"/>
+        <location filename="../settings/settingsdialog.ui" line="870"/>
         <source>Header</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="880"/>
+        <location filename="../settings/settingsdialog.ui" line="877"/>
         <source>Footer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="896"/>
+        <location filename="../settings/settingsdialog.ui" line="893"/>
         <source>Metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="902"/>
+        <location filename="../settings/settingsdialog.ui" line="899"/>
         <source>Store meeting location and dates in sheet metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="926"/>
+        <location filename="../settings/settingsdialog.ui" line="923"/>
         <source>Background Tasks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="932"/>
+        <location filename="../settings/settingsdialog.ui" line="929"/>
         <source>Rollingstock Error Checker</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="938"/>
+        <location filename="../settings/settingsdialog.ui" line="935"/>
         <source>Check rollingstock when opening a file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.ui" line="945"/>
+        <location filename="../settings/settingsdialog.ui" line="942"/>
         <source>Check rollingstock when a Job is edeited</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4395,12 +4616,12 @@ Extension: (*.ttt)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="363"/>
+        <location filename="../settings/settingsdialog.cpp" line="367"/>
         <source>Do you want to save settings?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settings/settingsdialog.cpp" line="381"/>
+        <location filename="../settings/settingsdialog.cpp" line="385"/>
         <source>Do you want to restore default settings?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4439,27 +4660,27 @@ Extension: (*.ttt)</source>
 <context>
     <name>ShiftGraphEditor</name>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="27"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="23"/>
         <source>Print</source>
         <translation type="unfinished">Drucken</translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="28"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="24"/>
         <source>Save PDF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="29"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="25"/>
         <source>Save SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="43"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="39"/>
         <source>Shift Graph</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="25"/>
+        <location filename="../shifts/shiftgraph/shiftgrapheditor.cpp" line="21"/>
         <source>Refresh</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4698,96 +4919,101 @@ Extension: (*.ttt)</source>
 <context>
     <name>SplitRailwaySegmentDlg</name>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="43"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="47"/>
         <source>From:</source>
         <translation type="unfinished">von:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="47"/>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="62"/>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="80"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="51"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="69"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="87"/>
         <source>Station:</source>
         <translation type="unfinished">Bahnhof:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="50"/>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="77"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="54"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="84"/>
         <source>Gate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="54"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="57"/>
+        <source>Edit First Segment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="61"/>
         <source>Middle:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="59"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="66"/>
         <source>In Gate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="66"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="73"/>
         <source>Out Gate:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="68"/>
-        <source>Edit New Segment</source>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="76"/>
+        <source>Edit Second Segment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="73"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="80"/>
         <source>To:</source>
         <translation type="unfinished">nach:</translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="103"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="111"/>
         <source>Split Segment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="117"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="125"/>
         <source>No Station</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="118"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="126"/>
         <source>You must choose a station to put in the middle.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="124"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="132"/>
         <source>No Gates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="125"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="133"/>
         <source>You must choose in and out gates for middle Station.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="133"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="141"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="134"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="142"/>
         <source>Split of segment failed.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="147"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="155"/>
         <source>Choose a Railway Segment to split in 2 parts.
 A station will be inserted in the middle.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="149"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="157"/>
         <source>Segment...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="237"/>
+        <location filename="../stations/manager/segments/dialogs/splitrailwaysegmentdlg.cpp" line="261"/>
         <source>Segment: &lt;b&gt;%1&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4845,36 +5071,33 @@ A station will be inserted in the middle.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="122"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="143"/>
         <source>Add Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="129"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="136"/>
         <source>Remove Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="136"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="129"/>
         <source>Save SVG to file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="143"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="122"/>
         <source>Save XML to file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="167"/>
-        <source>Gates</source>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="150"/>
+        <source>Import Connections</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="175"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="216"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="271"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="326"/>
-        <source>Add</source>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="174"/>
+        <source>Gates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4882,195 +5105,235 @@ A station will be inserted in the middle.</source>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="223"/>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="278"/>
         <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="333"/>
+        <source>Add</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="189"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="230"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="285"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="340"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="208"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="215"/>
         <source>Tracks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="230"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="237"/>
         <source>Move Up</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="237"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="244"/>
         <source>Move Down</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="263"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="270"/>
         <source>Track Connections</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="285"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="292"/>
         <source>Track To All Gates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="292"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="299"/>
         <source>Gate To All Tracks</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="318"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="325"/>
         <source>Gate Connections</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="340"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.ui" line="347"/>
         <source>Edit</source>
         <translation type="unfinished">Bearbeiten</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="133"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="94"/>
+        <source>Import connections between gates and station tracks from SVG image.
+NOTE: image must contain track data</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="137"/>
         <source>Hold shift to move selected track to the top.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="134"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="138"/>
         <source>Hold shift to move selected track to the bottom.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="224"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="228"/>
         <source>New Station</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="308"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="312"/>
         <source>Station name cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="313"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="317"/>
         <source>Station short name cannot be equal to full name.
 Leave empty if you want to use the full name in all places.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="320"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="324"/>
         <source>Check station &lt;b&gt;name&lt;/b&gt;, &lt;b&gt;short name&lt;/b&gt; and &lt;b&gt;phone number&lt;/b&gt; to be &lt;b&gt;unique&lt;/b&gt; for this station.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="327"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="331"/>
         <source>A station should at least have 1 gate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="333"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="337"/>
         <source>A station should at least have 1 track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="344"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="348"/>
         <source>Cannot cancel changes. Changes will be applied.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="352"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="356"/>
         <source>Station Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="370"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="374"/>
         <source>Add Gate</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="371"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="375"/>
         <source>Please choose a letter for the new station gate.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="384"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="438"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="617"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="388"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="442"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="622"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="384"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="388"/>
         <source>Gate name cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="424"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="428"/>
         <source>Add Track</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="425"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="429"/>
         <source>Please choose a name for the new station track.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="438"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="442"/>
         <source>Track name cannot be empty.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="626"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="631"/>
         <source>Open SVG Image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="649"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="654"/>
         <source>Cannot Read File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="656"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="661"/>
         <source>Error Adding SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="665"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="670"/>
         <source>Delete Image?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="666"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="671"/>
         <source>Are you sure to delete SVG plan of this station?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="673"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="678"/>
         <source>Error Deleting SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="682"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="687"/>
         <source>Save SVG Copy</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="704"/>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="739"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="709"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="772"/>
         <source>Cannot Save File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="711"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="716"/>
         <source>Error Saving SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="717"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="727"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="740"/>
+        <source>Import Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="728"/>
+        <source>Could not open SVG image. Make sure you added one to this station.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="735"/>
+        <source>Done Importation</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="736"/>
+        <source>Track to gate connections have been successfully imported.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="741"/>
+        <source>Generic error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="750"/>
         <source>Save XML Plan</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="745"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="778"/>
         <source>Error Saving XML</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="745"/>
+        <location filename="../stations/manager/stations/dialogs/stationeditdialog.cpp" line="778"/>
         <source>Unknow error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5441,80 +5704,80 @@ Click to enable and enter time.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="275"/>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="282"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="265"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="272"/>
         <source>Error Loading SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="276"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="266"/>
         <source>Cannot find SVG data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="283"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="273"/>
         <source>Cannot read data: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="322"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="319"/>
         <source>Database Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="323"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="320"/>
         <source>Cannot retrive details for gate %1 (%2)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="341"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="338"/>
         <source>Gate %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="344"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="341"/>
         <source>&lt;h3&gt;Railway Segment Details&lt;/h3&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;Segment:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;From:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%2&lt;/b&gt; (Gate: %3)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;To:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%4&lt;/b&gt; (Gate: %5)&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Distance:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%6 Km&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Max. Speed:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%7 km/h&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="400"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="397"/>
         <source>&lt;h3&gt;%1&lt;/h3&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;Job:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%2&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;From:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%3&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;To:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%4&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;Platform:&lt;/td&gt;&lt;td&gt;&lt;b&gt;%5&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="366"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="363"/>
         <source>Show SVG</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="387"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="384"/>
         <source>Job %1</source>
         <comment>Message box title on double click</comment>
         <translation>Zug %1</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="418"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="415"/>
         <source>Show in Job Editor</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="419"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="416"/>
         <source>Show Station Jobs</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="486"/>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="501"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="483"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="498"/>
         <source>No Stop Found</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="487"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="484"/>
         <source>No Jobs found to arrive or depart from station &lt;b&gt;%1&lt;/b&gt; before &lt;b&gt;%2&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="502"/>
+        <location filename="../stations/manager/stations/dialogs/stationsvgplandlg.cpp" line="499"/>
         <source>No Jobs found to arrive or depart from station &lt;b&gt;%1&lt;/b&gt; after &lt;b&gt;%2&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5891,7 +6154,7 @@ Can be used instead of track length but is less precise.</source>
     </message>
     <message>
         <location filename="../stations/manager/stationsmanager.cpp" line="343"/>
-        <location filename="../stations/manager/stationsmanager.cpp" line="550"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="551"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5906,37 +6169,37 @@ Can be used instead of track length but is less precise.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="455"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="456"/>
         <source>Remove Segment?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="456"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="457"/>
         <source>Are you sure you want to remove segment &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="536"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="537"/>
         <source>Add Line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="537"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="538"/>
         <source>Please choose a name for the new railway line.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="550"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="551"/>
         <source>Line name cannot be empty.</source>
         <translation type="unfinished">Bahnlinienname darf nicht leer sein.</translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="577"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="578"/>
         <source>Remove Line?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../stations/manager/stationsmanager.cpp" line="578"/>
+        <location filename="../stations/manager/stationsmanager.cpp" line="579"/>
         <source>Are you sure you want to remove line &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6007,7 +6270,7 @@ Can be used instead of track length but is less precise.</source>
 <context>
     <name>StopDelegate</name>
     <message>
-        <location filename="../jobs/jobeditor/stopdelegate.cpp" line="148"/>
+        <location filename="../jobs/jobeditor/stopdelegate.cpp" line="146"/>
         <source>Seg: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6050,73 +6313,81 @@ Can be used instead of track length but is less precise.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="173"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="174"/>
         <source> (reversed)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="175"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="176"/>
         <source>Not set!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="241"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="242"/>
         <source>Gate Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="241"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="242"/>
         <source>Track Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="271"/>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="295"/>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="311"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="273"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="298"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="314"/>
         <source>Stop Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="271"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="273"/>
         <source>Cannot set segment &lt;b&gt;%1&lt;/b&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="296"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="299"/>
         <source>Requested gate out track &lt;b&gt;%1&lt;/b&gt; is not connected to segment &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Out track &lt;b&gt;%3&lt;/b&gt; was chosen instead.&lt;br&gt;Look segment track connection from Stations Manager for more information on available tracks.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="311"/>
+        <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="314"/>
         <source>Cannot set segment track!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>StopEditor</name>
+    <message>
+        <location filename="../jobs/jobeditor/stopeditor.cpp" line="47"/>
+        <source>To avoid recalculation of travel times when saving changes, hold SHIFT modifier while closing editor</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>StopModel</name>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1271"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1313"/>
         <source>Track belongs to a different station.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1276"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1318"/>
         <source>Track doesn&apos;t exist.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1288"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1330"/>
         <source>Track is not connected to any of station gates.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1316"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1358"/>
         <source>Track is not connected to in gate track.
 Please choose a new track or change previous segment.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1343"/>
+        <location filename="../jobs/jobeditor/model/stopmodel.cpp" line="1385"/>
         <source>Track is not connected to selected out gate track.
 Please choose a new out gate or out track, this might change next segment.</source>
         <translation type="unfinished"></translation>
@@ -6125,28 +6396,28 @@ Please choose a new out gate or out track, this might change next segment.</sour
 <context>
     <name>ViewManager</name>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="334"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="367"/>
         <source>Station %1 has no SVG, please add one.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="626"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="668"/>
         <source>Create Shift too?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="627"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="669"/>
         <source>No Shift are present in this session.
 Do you want to create some before creating Jobs?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="670"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="712"/>
         <source>Remove Job?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../viewmanager/viewmanager.cpp" line="671"/>
+        <location filename="../viewmanager/viewmanager.cpp" line="713"/>
         <source>Are you sure you want to remove Job &lt;b&gt;%1&lt;/b&gt;?</source>
         <translation type="unfinished"></translation>
     </message>
