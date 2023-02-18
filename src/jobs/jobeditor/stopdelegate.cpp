@@ -1,17 +1,15 @@
 #include "stopdelegate.h"
-
 #include "stopeditor.h"
+#include "model/stopmodel.h"
 
 #include <QPainter>
 #include <QSvgRenderer>
-
-#include "app/session.h"
-#include "model/stopmodel.h"
-
-#include "app/scopedebug.h"
-
 #include <QGuiApplication>
 
+#include <sqlite3pp/sqlite3pp.h>
+using namespace sqlite3pp;
+
+#include "app/scopedebug.h"
 #include <QDebug>
 
 StopDelegate::StopDelegate(sqlite3pp::database &db, QObject *parent) :

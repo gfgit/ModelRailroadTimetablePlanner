@@ -11,7 +11,6 @@
 #include "rscoupledialog.h"
 #include "model/rscouplinginterface.h"
 
-#include "model/rsproxymodel.h"
 #include "model/stopcouplingmodel.h"
 #include "model/trainassetmodel.h"
 #include "model/jobpassingsmodel.h"
