@@ -9,6 +9,7 @@
 
 class JobCrossingChecker : public IBackgroundChecker
 {
+    Q_OBJECT
 public:
     JobCrossingChecker(sqlite3pp::database &db, QObject *parent = nullptr);
 

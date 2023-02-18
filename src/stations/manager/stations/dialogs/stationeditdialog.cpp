@@ -737,7 +737,7 @@ void StationEditDialog::importConnFromSVG()
     }
     else
     {
-        QMessageBox::warning(this, tr("Import Errpr"),
+        QMessageBox::warning(this, tr("Import Error"),
                              tr("Generic error"));
 
     }

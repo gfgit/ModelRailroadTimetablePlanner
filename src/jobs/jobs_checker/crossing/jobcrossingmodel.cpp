@@ -8,7 +8,7 @@ static const char* error_texts[] = {
     QT_TRANSLATE_NOOP("JobErrors", "Job passes another Job on same track.")
 };
 
-class JobError
+class JobErrors
 {
     Q_DECLARE_TR_FUNCTIONS(JobErrors)
 };
@@ -61,7 +61,7 @@ QVariant JobCrossingModel::data(const QModelIndex &idx, int role) const
         case Departure:
             return item->departure;
         case Description:
-            return JobError::tr(error_texts[item->type]);
+            return JobErrors::tr(error_texts[item->type]);
         default:
             break;
         }

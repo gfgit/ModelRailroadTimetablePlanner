@@ -51,7 +51,7 @@ BackgroundResultWidget::BackgroundResultWidget(IBackgroundChecker *mgr_, QWidget
     view->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(view, &QTreeView::customContextMenuRequested, this, &BackgroundResultWidget::showContextMenu);
 
-    setWindowTitle(tr("Rollingstock Errors"));
+    setWindowTitle(tr("Error Results"));
 
     progressBar->hide();
 }
