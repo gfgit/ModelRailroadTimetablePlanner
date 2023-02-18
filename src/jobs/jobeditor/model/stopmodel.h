@@ -99,7 +99,7 @@ public:
     db_id getNewShiftId() const;
 
     // Setters
-    void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg);
+    void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg, bool avoidTimeRecalc = false);
 
     bool setStopTypeRange(int firstRow, int lastRow, StopType type);
 

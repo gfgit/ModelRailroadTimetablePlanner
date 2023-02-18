@@ -107,6 +107,9 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
     //So you get a mixed state: Arrival/Departure/Descriptio ecc changes are canceled but Coupling changes are still applied
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Ok);
 
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setToolTip(tr("Press SHIFT modifier and click to save changes"
+                                                               " without recalculating travel times."));
+
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
@@ -261,7 +264,8 @@ void EditStopDialog::saveDataToModel()
                                   ui->descriptionEdit->toPlainText());
     }
 
-    stopModel->setStopInfo(stopIdx, curStop, prevStop.nextSegment);
+    bool avoidTimeRecalc = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+    stopModel->setStopInfo(stopIdx, curStop, prevStop.nextSegment, avoidTimeRecalc);
 }
 
 void EditStopDialog::editCoupled()

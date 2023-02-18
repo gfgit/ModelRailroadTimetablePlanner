@@ -43,6 +43,8 @@ StopEditor::StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent) :
     setTabOrder(mStationEdit, arrEdit);
     setTabOrder(arrEdit, depEdit);
     setTabOrder(depEdit, mOutGateEdit);
+
+    setToolTip(tr("To avoid recalculation of travel times when saving changes, hold SHIFT modifier while closing editor"));
 }
 
 StopEditor::~StopEditor()

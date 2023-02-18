@@ -837,7 +837,7 @@ void StopModel::setNewShiftId(db_id shiftId)
     emit jobShiftChanged(newShiftId);
 }
 
-void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg)
+void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg, bool avoidTimeRecalc)
 {
     const int row = idx.row();
     int lastUpdatedRow = row;
@@ -971,7 +971,7 @@ void StopModel::setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::
 
             nextStop.arrival = s.departure.addSecs(secs);
 
-            if(oldNextArr != nextStop.arrival)
+            if(timeCalcEnabled && !avoidTimeRecalc)
             {
                 if(!updateStopTime(nextStop, row + 1, true, oldNextArr, oldNextDep))
                 {

@@ -10,7 +10,7 @@
 
 #include "app/scopedebug.h"
 
-#include <QCoreApplication>
+#include <QGuiApplication>
 
 #include <QDebug>
 
@@ -258,7 +258,9 @@ void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     StopEditor *ed = static_cast<StopEditor*>(editor);
     StopModel *stopModel = static_cast<StopModel *>(model);
 
-    stopModel->setStopInfo(index, ed->getCurItem(), ed->getPrevItem().nextSegment);
+    bool avoidTimeRecalc = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+
+    stopModel->setStopInfo(index, ed->getCurItem(), ed->getPrevItem().nextSegment, avoidTimeRecalc);
 }
 
 void StopDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
