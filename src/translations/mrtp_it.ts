@@ -6141,7 +6141,7 @@ Può essere utilizzata al posto della lunghezza del binario ma è meno precisa.<
     <message>
         <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="296"/>
         <source>Requested gate out track &lt;b&gt;%1&lt;/b&gt; is not connected to segment &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Out track &lt;b&gt;%3&lt;/b&gt; was chosen instead.&lt;br&gt;Look segment track connection from Stations Manager for more information on available tracks.</source>
-        <translation>Il binario &lt;b&gt;%1&lt;/b&gt; di uscita del gate richiest non è connesso alla tratta &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Il binario di uscita &lt;b&gt;%3&lt;/b&gt; è stato scelto al suo posto.&lt;br&gt;Vedi le connessioni dei binari della tratta attraverso il Manager Stazioni per maggiori informazioni sui binari disponibili.</translation>
+        <translation type="unfinished">Il binario &lt;b&gt;%1&lt;/b&gt; di uscita del gate richiesto non è connesso alla tratta &lt;b&gt;%2&lt;/b&gt;.&lt;br&gt;Il binario di uscita &lt;b&gt;%3&lt;/b&gt; è stato scelto al suo posto.&lt;br&gt;Vedi le connessioni dei binari della tratta attraverso il Manager Stazioni per maggiori informazioni sui binari disponibili.</translation>
     </message>
     <message>
         <location filename="../jobs/jobeditor/stopeditinghelper.cpp" line="311"/>
