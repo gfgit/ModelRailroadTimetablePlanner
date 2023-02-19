@@ -259,21 +259,7 @@ void ViewManager::onJobRemoved(db_id jobId)
     //If jobId is zero, it means all jobs have been deleted
     //Reload all views, Shift Graph Editor already reloads itself
 
-    //Close all rollingstock views because we have no couplings anymore
-    qDeleteAll(rsHash);
-    rsHash.clear();
-
-    //Close all station job view
-    qDeleteAll(stHash);
-    stHash.clear();
-
-    //Close all station free RS view
-    qDeleteAll(stRSHash);
-    stRSHash.clear();
-
-    //Close any shift job view
-    qDeleteAll(shiftHash);
-    shiftHash.clear();
+    closeJobRelatedViewsHelper();
 
     //Reload station plans
     for(auto st : qAsConst(stPlanHash))
@@ -502,6 +488,32 @@ ShiftViewer* ViewManager::createShiftViewer(db_id id)
     return viewer;
 }
 
+void ViewManager::closeJobRelatedViewsHelper()
+{
+    //Close all Job related views except managers and Shift Graph Editor
+    //SVG station plans are left open because they are useful also for other purposes
+
+    //NOTE: because views destroyed() signals are connected to lambda
+    //which remove them from the list, they invalidate iterators.
+    //To avoid this we copy the list (swap) and iterate from copy
+
+    //Close all rollingstock views because we have no couplings anymore
+    auto rsHashCopy = std::move(rsHash);
+    qDeleteAll(rsHashCopy);
+
+    //Close all station job view
+    auto stHashCopy = std::move(stHash);
+    qDeleteAll(stHashCopy);
+
+    //Close all station free RS view
+    auto stRSHashCopy = std::move(stRSHash);
+    qDeleteAll(stRSHashCopy);
+
+    //Close any shift job view
+    auto shiftHashCopy = std::move(shiftHash);
+    qDeleteAll(shiftHashCopy);
+}
+
 void ViewManager::requestShiftViewer(db_id id)
 {
     ShiftViewer *viewer = nullptr;
@@ -571,28 +583,22 @@ bool ViewManager::closeEditors()
         return false;
     }
 
-    qDeleteAll(rsHash);
-    rsHash.clear();
-
     if(stManager && !stManager->close())
     {
         return false;
     }
 
-    qDeleteAll(stHash);
-    stHash.clear();
-
-    qDeleteAll(stRSHash);
-    stRSHash.clear();
-
-    qDeleteAll(stPlanHash);
-    stPlanHash.clear();
-
-
     if(shiftManager && !shiftManager->close())
     {
         return false;
     }
+
+    closeJobRelatedViewsHelper();
+
+    //Also close SVG Station Plans now
+    //NOTE: use copy to avoid using invalid iterators, see closeJobRelatedViewsHelper()
+    auto stPlanCopy = std::move(stPlanHash);
+    qDeleteAll(stPlanCopy);
 
     if(shiftGraphEditor)
     {
@@ -601,9 +607,6 @@ bool ViewManager::closeEditors()
         delete shiftGraphEditor;
         shiftGraphEditor = nullptr;
     }
-
-    qDeleteAll(shiftHash);
-    shiftHash.clear();
 
     return true;
 }

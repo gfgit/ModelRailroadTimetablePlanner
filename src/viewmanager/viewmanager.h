@@ -101,6 +101,8 @@ private:
     StationFreeRSViewer *createStFreeRSViewer(db_id stId);
     ShiftViewer *createShiftViewer(db_id id);
 
+    void closeJobRelatedViewsHelper();
+
 private:
     LineGraphManager *lineGraphManager;
 
