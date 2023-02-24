@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.17)
 include(CMakeDependentOption)
 
-project(ModelRailroadTimetablePlanner VERSION 6.2.0 LANGUAGES CXX)
+project(ModelRailroadTimetablePlanner VERSION 6.2.1 LANGUAGES CXX)
 
 option(UPDATE_TS "Update translations" OFF)
 option(UPDATE_TS_KEEP_OBSOLETE "Keep obsolete entries when updating translations" ON)
