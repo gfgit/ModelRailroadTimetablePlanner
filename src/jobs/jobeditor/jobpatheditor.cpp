@@ -411,6 +411,9 @@ bool JobPathEditor::clearJob()
 
     stopJobNumberTimer();
 
+    prevJobsModel->clearData();
+    nextJobsModel->clearData();
+
     return true;
 }
 
