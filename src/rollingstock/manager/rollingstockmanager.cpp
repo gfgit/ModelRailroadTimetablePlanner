@@ -362,7 +362,6 @@ void RollingStockManager::importRS(bool resume, QWidget *parent)
 
 void RollingStockManager::onViewRSPlan()
 {
-    //TODO: use also a search if requested RS is not in current page
     QModelIndex idx = rsView->currentIndex();
     if(!idx.isValid())
         return;
@@ -375,8 +374,6 @@ void RollingStockManager::onViewRSPlan()
 
 void RollingStockManager::onViewRSPlanSearch()
 {
-    //TODO: add search dialog also for deleting owners/models/RS items.
-
     RSMatchModelFactory factory(ModelModes::Rollingstock, Session->m_Db, this);
     std::unique_ptr<ISqlFKMatchModel> matchModel;
     matchModel.reset(factory.createModel());
