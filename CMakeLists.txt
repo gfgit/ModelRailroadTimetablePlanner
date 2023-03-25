@@ -24,7 +24,19 @@ set(PROJECT_HOMEPAGE_URL "https://github.com/gfgit/ModelRailroadTimetablePlanner
 set(APP_HELP_URL ${PROJECT_HOMEPAGE_URL})
 set(APP_UPDATE_URL ${PROJECT_HOMEPAGE_URL})
 
-set(PROJECT_DESCRIPTION "${APP_DISPLAY_NAME} lets you create and manage model railway sessions")
+string(CONCAT PROJECT_DESCRIPTION "${APP_DISPLAY_NAME} is a cross-platform C++\n"
+                        "application with Qt GUI for model railway timetable scheduling.\n\n"
+                        "It lets you create and manage model railway sessions\n"
+                        "and provides all documents useful for driving and dispatching\n"
+                        "trains on big layouts like in FREMO Meetings.\n\n"
+                        "Main features:\n"
+                        " * Railway timetable graph per each line in SVG, PDF or printed\n"
+                        " * Group jobs (trains) in work shift\n"
+                        " * Export booklets in ODT (LibreOffice Writer) for shifts and stations\n"
+                        " * Importation of rollingstock pieces from\n"
+                        "   other sessions or ODS Spreadsheet")
+
+set(PROJECT_DESCRIPTION_SHORT "Timetables for model railroads")
 
 set(APP_ICON ${CMAKE_SOURCE_DIR}/files/icons/icon.ico)
 
