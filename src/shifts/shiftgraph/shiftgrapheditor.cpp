@@ -17,7 +17,7 @@
  *
  */
 
-﻿#include "shiftgrapheditor.h"
+#include "shiftgrapheditor.h"
 
 #include <QVBoxLayout>
 

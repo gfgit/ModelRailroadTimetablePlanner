@@ -17,7 +17,7 @@
  *
  */
 
-﻿#include "sceneprintpreviewdlg.h"
+#include "sceneprintpreviewdlg.h"
 
 #include "utils/scene/basicgraphview.h"
 #include "printing/helper/model/printpreviewsceneproxy.h"

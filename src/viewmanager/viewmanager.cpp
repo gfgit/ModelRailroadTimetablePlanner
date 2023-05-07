@@ -17,7 +17,7 @@
  *
  */
 
-﻿#include "viewmanager.h"
+#include "viewmanager.h"
 
 #include "app/session.h"
 
