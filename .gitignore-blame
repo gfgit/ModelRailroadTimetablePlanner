@@ -1,0 +1,5 @@
+# Use this file when blaming
+# git-blame --ignore-revs-file .gitignore-blame
+
+# Big clang-format refactor
+9f14ee1c64b3b9d399078918fc20ccce7bc4a7d9
