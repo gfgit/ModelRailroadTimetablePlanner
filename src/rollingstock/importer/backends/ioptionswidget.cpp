@@ -19,7 +19,7 @@
 
 #include "ioptionswidget.h"
 
-IOptionsWidget::IOptionsWidget(QWidget *parent) : QWidget(parent)
+IOptionsWidget::IOptionsWidget(QWidget *parent) :
+    QWidget(parent)
 {
-
 }

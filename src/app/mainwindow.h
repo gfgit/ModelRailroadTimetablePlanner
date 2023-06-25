@@ -57,7 +57,7 @@ public:
     void loadFile(const QString &fileName);
 
     bool closeSession();
-    
+
 private slots:
     void onStationManager();
 
@@ -140,8 +140,11 @@ private:
 
     QActionGroup *databaseActionGroup;
 
-    enum { MaxRecentFiles = 5 };
-    QAction* recentFileActs[MaxRecentFiles];
+    enum
+    {
+        MaxRecentFiles = 5
+    };
+    QAction *recentFileActs[MaxRecentFiles];
 
     CentralWidgetMode m_mode;
 

@@ -45,10 +45,14 @@ class StationTracksModel : public IPagedItemModelImpl<StationTracksModel, Statio
     Q_OBJECT
 
 public:
-    enum { BatchSize = 100 };
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum Columns {
-        PosCol = -1, //Fake column, uses row header
+    enum Columns
+    {
+        PosCol  = -1, // Fake column, uses row header
         NameCol = 0,
         ColorCol,
         IsElectrifiedCol,
@@ -68,16 +72,16 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
@@ -87,9 +91,12 @@ public:
     // StationTracksModel
 
     bool setStation(db_id stationId);
-    inline db_id getStation() const { return m_stationId; }
+    inline db_id getStation() const
+    {
+        return m_stationId;
+    }
 
-    bool addTrack(int pos, const QString& name, db_id *outTrackId = nullptr);
+    bool addTrack(int pos, const QString &name, db_id *outTrackId = nullptr);
     bool removeTrack(db_id trackId);
     bool moveTrackUpDown(db_id trackId, bool up, bool topOrBottom);
 
@@ -97,32 +104,38 @@ public:
     inline db_id getIdAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Invalid
+            return 0; // Invalid
 
-        const TrackItem& item = cache.at(row - cacheFirstRow);
+        const TrackItem &item = cache.at(row - cacheFirstRow);
         return item.trackId;
     }
 
     inline QString getNameAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return QChar(); //Invalid
+            return QChar(); // Invalid
 
-        const TrackItem& item = cache.at(row - cacheFirstRow);
+        const TrackItem &item = cache.at(row - cacheFirstRow);
         return item.name;
     }
 
-    inline bool isEditable() const { return editable; }
-    inline void setEditable(bool val) { editable = val; }
+    inline bool isEditable() const
+    {
+        return editable;
+    }
+    inline void setEditable(bool val)
+    {
+        editable = val;
+    }
 
     inline bool hasAtLeastOneTrack()
     {
-        refreshData(); //Recalc count
+        refreshData(); // Recalc count
         return getTotalItemsCount() > 0;
     }
 
 signals:
-    void trackNameChanged(db_id trackId, const QString& name);
+    void trackNameChanged(db_id trackId, const QString &name);
     void trackRemoved(db_id trackId);
 
 protected:

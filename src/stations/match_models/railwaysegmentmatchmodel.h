@@ -34,14 +34,13 @@ class RailwaySegmentMatchModel : public ISqlFKMatchModel
     Q_OBJECT
 
 public:
-    explicit RailwaySegmentMatchModel(sqlite3pp::database &db,
-                                      QObject *parent = nullptr);
+    explicit RailwaySegmentMatchModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // ISqlFKMatchModel:
-    void autoSuggest(const QString& text) override;
+    void autoSuggest(const QString &text) override;
     virtual void refreshData() override;
     QString getName(db_id id) const override;
 

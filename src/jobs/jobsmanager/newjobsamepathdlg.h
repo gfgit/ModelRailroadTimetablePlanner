@@ -35,7 +35,7 @@ class NewJobSamePathDlg : public QDialog
 public:
     explicit NewJobSamePathDlg(QWidget *parent = nullptr);
 
-    void setSourceJob(db_id jobId, JobCategory cat, const QTime& start, const QTime& end);
+    void setSourceJob(db_id jobId, JobCategory cat, const QTime &start, const QTime &end);
 
     QTime getNewStartTime() const;
     bool shouldCopyRs() const;
@@ -50,7 +50,7 @@ private:
     QCheckBox *copyRsCheck;
     QCheckBox *reversePathCheck;
 
-    db_id sourceJobId = 0;
+    db_id sourceJobId        = 0;
     JobCategory sourceJobCat = JobCategory::NCategories;
     QTime sourceStart;
     QTime sourceEnd;

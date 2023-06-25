@@ -23,14 +23,13 @@
 class QTranslator;
 class QLocale;
 
-template<typename T>
-class QVector;
+template <typename T> class QVector;
 
 namespace utils {
 
 namespace language {
 
-QTranslator *loadAppTranslator(const QLocale& loc);
+QTranslator *loadAppTranslator(const QLocale &loc);
 
 bool loadTranslationsFromSettings();
 

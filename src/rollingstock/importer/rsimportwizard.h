@@ -70,33 +70,42 @@ public:
 
     bool startLoadTask(const QString &fileName);
     void abortLoadTask();
-    inline bool taskRunning() const { return loadTask || importTask; }
+    inline bool taskRunning() const
+    {
+        return loadTask || importTask;
+    }
 
     void startImportTask();
     void abortImportTask();
 
     void goToPrevPageQueued();
 
-public: //Settings
+public: // Settings
     void setDefaultTypeAndSpeed(RsType t, int speed);
 
-    inline int getImportMode() const { return importMode; }
+    inline int getImportMode() const
+    {
+        return importMode;
+    }
     void setImportMode(int m);
 
-    inline int getBackendIdx() const { return backendIdx; }
+    inline int getBackendIdx() const
+    {
+        return backendIdx;
+    }
 
     QAbstractItemModel *getBackendsModel() const;
 
     IOptionsWidget *createOptionsWidget(int idx, QWidget *parent);
     void setSource(int idx, IOptionsWidget *options);
 
-    ILoadRSTask *createLoadTask(const QMap<QString, QVariant>& arguments, const QString &fileName);
+    ILoadRSTask *createLoadTask(const QMap<QString, QVariant> &arguments, const QString &fileName);
 
 protected:
     bool event(QEvent *e) override;
 
 private slots:
-    void onFileChosen(const QString& filename);
+    void onFileChosen(const QString &filename);
 
 private:
     RSImportedOwnersModel *ownersModel;
@@ -110,7 +119,7 @@ private:
     LoadingPage *importPage;
     bool isStoppingTask;
 
-    //Import options
+    // Import options
     int defaultSpeed;
     RsType defaultRsType;
     int importMode;

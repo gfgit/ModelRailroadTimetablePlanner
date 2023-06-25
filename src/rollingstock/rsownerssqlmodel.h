@@ -30,16 +30,18 @@ struct RSOwnersSQLModelItem
     QString name;
 };
 
-
 class RSOwnersSQLModel : public IPagedItemModelImpl<RSOwnersSQLModel, RSOwnersSQLModelItem>
 {
     Q_OBJECT
 
 public:
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum { BatchSize = 100 };
-
-    enum Columns {
+    enum Columns
+    {
         Name = 0,
         NCols
     };
@@ -52,22 +54,21 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
-
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
-    //Filter
+    // Filter
     std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
-    bool setFilterAtCol(int col, const QString& str) override;
+    bool setFilterAtCol(int col, const QString &str) override;
 
     // RSOwnersSQLModel
 

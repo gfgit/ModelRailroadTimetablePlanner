@@ -36,16 +36,22 @@ public:
     FilterHeaderLineEdit(int col, QWidget *parent = nullptr);
     ~FilterHeaderLineEdit();
 
-    void updateTextWithoutEmitting(const QString& str);
+    void updateTextWithoutEmitting(const QString &str);
 
-    inline int getColumn() const { return m_column; }
+    inline int getColumn() const
+    {
+        return m_column;
+    }
 
-    inline int allowNull() const { return m_allowNull; }
+    inline int allowNull() const
+    {
+        return m_allowNull;
+    }
     void setAllowNull(bool val);
 
 signals:
-    void delayedTextChanged(FilterHeaderLineEdit *self, const QString& str);
-    void tooltipRequested(FilterHeaderLineEdit *self, const QPoint& globalPos);
+    void delayedTextChanged(FilterHeaderLineEdit *self, const QString &str);
+    void tooltipRequested(FilterHeaderLineEdit *self, const QPoint &globalPos);
 
 private slots:
     void startTextTimer();

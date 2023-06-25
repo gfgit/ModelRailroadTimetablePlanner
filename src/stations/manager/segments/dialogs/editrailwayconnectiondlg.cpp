@@ -31,13 +31,14 @@
 #include "utils/delegates/kmspinbox/spinboxeditorfactory.h"
 #include <QStyledItemDelegate>
 
-EditRailwayConnectionDlg::EditRailwayConnectionDlg(RailwaySegmentConnectionsModel *m, QWidget *parent) :
+EditRailwayConnectionDlg::EditRailwayConnectionDlg(RailwaySegmentConnectionsModel *m,
+                                                   QWidget *parent) :
     QDialog(parent),
     model(m)
 {
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    QVBoxLayout *lay        = new QVBoxLayout(this);
 
-    QHBoxLayout *toolLay = new QHBoxLayout;
+    QHBoxLayout *toolLay    = new QHBoxLayout;
 
     QToolButton *addConnBut = new QToolButton;
     addConnBut->setText(tr("Add"));
@@ -76,15 +77,16 @@ EditRailwayConnectionDlg::EditRailwayConnectionDlg(RailwaySegmentConnectionsMode
     toTrackFactory->setSpecialValueText(tr("NULL"));
     auto toTrackDelegate = new QStyledItemDelegate(this);
     toTrackDelegate->setItemEditorFactory(toTrackFactory);
-    view->setItemDelegateForColumn(RailwaySegmentConnectionsModel::ToGateTrackCol,
-                                   toTrackDelegate);
+    view->setItemDelegateForColumn(RailwaySegmentConnectionsModel::ToGateTrackCol, toTrackDelegate);
 
     connect(addConnBut, &QToolButton::clicked, this, &EditRailwayConnectionDlg::addTrackConn);
-    connect(removeConnBut, &QToolButton::clicked, this, &EditRailwayConnectionDlg::removeSelectedTrackConn);
-    connect(addDefaultConnBut, &QToolButton::clicked, this, &EditRailwayConnectionDlg::addDefaultConnections);
+    connect(removeConnBut, &QToolButton::clicked, this,
+            &EditRailwayConnectionDlg::removeSelectedTrackConn);
+    connect(addDefaultConnBut, &QToolButton::clicked, this,
+            &EditRailwayConnectionDlg::addDefaultConnections);
 
-    connect(model, &RailwaySegmentConnectionsModel::modelError,
-            this, &EditRailwayConnectionDlg::onModelError);
+    connect(model, &RailwaySegmentConnectionsModel::modelError, this,
+            &EditRailwayConnectionDlg::onModelError);
 
     connect(box, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(box, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -102,15 +104,14 @@ EditRailwayConnectionDlg::~EditRailwayConnectionDlg()
 
 void EditRailwayConnectionDlg::done(int res)
 {
-    if(!model->isReadOnly() && model->getActualCount() == 0 && res == QDialog::Accepted)
+    if (!model->isReadOnly() && model->getActualCount() == 0 && res == QDialog::Accepted)
     {
-        QMessageBox::warning(this, tr("Error"),
-                             tr("Add at least 1 segment track connection."));
+        QMessageBox::warning(this, tr("Error"), tr("Add at least 1 segment track connection."));
         return;
     }
 
-    //Prevent rejecting because it's done by main dialog but let user close
-    //even if no connection was created for this segment to avoid getting stuck on errors
+    // Prevent rejecting because it's done by main dialog but let user close
+    // even if no connection was created for this segment to avoid getting stuck on errors
     Q_UNUSED(res)
     QDialog::done(QDialog::Accepted);
 }
@@ -124,7 +125,7 @@ void EditRailwayConnectionDlg::addTrackConn()
 {
     int row = 0;
     model->addNewConnection(&row);
-    if(row < 0)
+    if (row < 0)
         return;
 
     QModelIndex idx = model->index(row, 0);
@@ -134,11 +135,11 @@ void EditRailwayConnectionDlg::addTrackConn()
 
 void EditRailwayConnectionDlg::removeSelectedTrackConn()
 {
-    if(!view->selectionModel()->hasSelection())
+    if (!view->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = view->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
     model->removeAtRow(idx.row());

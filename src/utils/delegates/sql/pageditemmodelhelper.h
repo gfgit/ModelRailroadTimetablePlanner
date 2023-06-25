@@ -36,8 +36,8 @@ template <typename SuperType, typename ModelItemType>
 class IPagedItemModelImpl : public IPagedItemModel
 {
 protected:
-    //Get some definition from SuperType so we don't have to pass them as templates
-    static constexpr int NCols_ = SuperType::NCols;
+    // Get some definition from SuperType so we don't have to pass them as templates
+    static constexpr int NCols_     = SuperType::NCols;
     static constexpr int BatchSize_ = SuperType::BatchSize;
 
 public:
@@ -65,7 +65,10 @@ protected:
     {
     public:
         static constexpr Type _Type = Type(QEvent::User + 1);
-        inline ResultEvent() : QEvent(_Type) {}
+        inline ResultEvent() :
+            QEvent(_Type)
+        {
+        }
 
         Cache items;
         int firstRow;

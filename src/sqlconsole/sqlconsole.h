@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_USER_QUERY
 
-#include <QDialog>
+#    include <QDialog>
 
 class SQLViewer;
 class QPlainTextEdit;
@@ -45,6 +45,7 @@ private slots:
     void onIntervalChangedUser();
 
     void timedExec();
+
 private:
     QPlainTextEdit *edit;
     SQLViewer *viewer;

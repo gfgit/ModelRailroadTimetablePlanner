@@ -41,16 +41,20 @@ struct RollingstockSQLModelItem
     RsType type;
 };
 
-class RollingstockSQLModel : public IPagedItemModelImpl<RollingstockSQLModel, RollingstockSQLModelItem>,
-                             public IFKField
+class RollingstockSQLModel
+    : public IPagedItemModelImpl<RollingstockSQLModel, RollingstockSQLModelItem>,
+      public IFKField
 {
     Q_OBJECT
 
 public:
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum { BatchSize = 100 };
-
-    enum Columns {
+    enum Columns
+    {
         Model = 0,
         Number,
         Suffix,
@@ -67,25 +71,24 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
-
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
     virtual void setSortingColumn(int col) override;
 
-    //Filter
+    // Filter
     std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
-    bool setFilterAtCol(int col, const QString& str) override;
+    bool setFilterAtCol(int col, const QString &str) override;
 
     // IFKField
     bool getFieldData(int row, int col, db_id &idOut, QString &nameOut) const override;
@@ -103,12 +106,11 @@ public:
     inline db_id getIdAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Invalid
+            return 0; // Invalid
 
-        const RSItem& item = cache.at(row - cacheFirstRow);
+        const RSItem &item = cache.at(row - cacheFirstRow);
         return item.rsId;
     }
-
 
 protected:
     virtual qint64 recalcTotalItemCount() override;
@@ -121,7 +123,6 @@ private:
     bool setModel(RSItem &item, db_id modelId, const QString &name);
     bool setOwner(RSItem &item, db_id ownerId, const QString &name);
     bool setNumber(RSItem &item, int number);
-
 
 private:
     QString m_modelFilter;

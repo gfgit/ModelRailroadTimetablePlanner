@@ -38,11 +38,11 @@ JobMatchModel::JobMatchModel(database &db, QObject *parent) :
 
 int JobMatchModel::columnCount(const QModelIndex &p) const
 {
-    if(p.isValid())
+    if (p.isValid())
         return 0;
 
-    if(!m_stopStationId)
-        return NCols - 1; //Hide stop arrival if no station filter is set
+    if (!m_stopStationId)
+        return NCols - 1; // Hide stop arrival if no station filter is set
     return NCols;
 }
 
@@ -59,7 +59,7 @@ QVariant JobMatchModel::data(const QModelIndex &idx, int role) const
         {
         case JobCategoryCol:
         {
-            if(isEllipsesRow(idx.row()))
+            if (isEllipsesRow(idx.row()))
             {
                 break;
             }
@@ -67,7 +67,7 @@ QVariant JobMatchModel::data(const QModelIndex &idx, int role) const
         }
         case JobNumber:
         {
-            if(isEllipsesRow(idx.row()))
+            if (isEllipsesRow(idx.row()))
             {
                 return ellipsesString;
             }
@@ -75,8 +75,8 @@ QVariant JobMatchModel::data(const QModelIndex &idx, int role) const
         }
         case StopArrivalCol:
         {
-            if(!m_stopStationId)
-                break; //Do not show stop arrival if not filtering by station
+            if (!m_stopStationId)
+                break; // Do not show stop arrival if not filtering by station
 
             return items[idx.row()].stopArrival;
         }
@@ -85,7 +85,7 @@ QVariant JobMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::ForegroundRole:
     {
-        if(isEllipsesRow(idx.row()))
+        if (isEllipsesRow(idx.row()))
         {
             break;
         }
@@ -124,7 +124,7 @@ QVariant JobMatchModel::data(const QModelIndex &idx, int role) const
 void JobMatchModel::autoSuggest(const QString &text)
 {
     mQuery.clear();
-    if(!text.isEmpty())
+    if (!text.isEmpty())
     {
         mQuery.reserve(text.size() + 2);
         mQuery.append('%');
@@ -137,36 +137,36 @@ void JobMatchModel::autoSuggest(const QString &text)
 
 void JobMatchModel::refreshData()
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
     beginResetModel();
 
     char emptyQuery = '%';
 
-    if(mQuery.isEmpty())
+    if (mQuery.isEmpty())
         sqlite3_bind_text(q_getMatches.stmt(), 1, &emptyQuery, 1, SQLITE_STATIC);
     else
         sqlite3_bind_text(q_getMatches.stmt(), 1, mQuery, mQuery.size(), SQLITE_STATIC);
 
-    if(m_exceptJobId)
+    if (m_exceptJobId)
         q_getMatches.bind(2, m_exceptJobId);
 
-    if(m_stopStationId)
+    if (m_stopStationId)
     {
         q_getMatches.bind(3, m_stopStationId);
-        if(!m_maxStopArrival.isNull())
+        if (!m_maxStopArrival.isNull())
             q_getMatches.bind(4, m_maxStopArrival);
     }
 
     auto end = q_getMatches.end();
-    auto it = q_getMatches.begin();
-    int i = 0;
-    for(; i < MaxMatchItems && it != end; i++)
+    auto it  = q_getMatches.begin();
+    int i    = 0;
+    for (; i < MaxMatchItems && it != end; i++)
     {
-        items[i].stop.jobId = (*it).get<db_id>(0);
+        items[i].stop.jobId    = (*it).get<db_id>(0);
         items[i].stop.category = JobCategory((*it).get<int>(1));
-        if(m_stopStationId)
+        if (m_stopStationId)
         {
             items[i].stop.stopId = (*it).get<db_id>(2);
             items[i].stopArrival = (*it).get<QTime>(3);
@@ -176,13 +176,13 @@ void JobMatchModel::refreshData()
     }
 
     size = i;
-    if(hasEmptyRow)
-        size++; //Items + Empty, add 1 row
+    if (hasEmptyRow)
+        size++; // Items + Empty, add 1 row
 
-    if(it != end)
+    if (it != end)
     {
-        //There would be still rows, show Ellipses
-        size++; //Items + Empty + Ellispses
+        // There would be still rows, show Ellipses
+        size++; // Items + Empty + Ellispses
     }
 
     q_getMatches.reset();
@@ -193,12 +193,12 @@ void JobMatchModel::refreshData()
 
 QString JobMatchModel::getName(db_id jobId) const
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return QString();
 
     query q(mDb, "SELECT category FROM jobs WHERE id=?");
     q.bind(1, jobId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
         return QString();
 
     JobCategory jobCat = JobCategory(q.getRows().get<int>(0));
@@ -207,32 +207,31 @@ QString JobMatchModel::getName(db_id jobId) const
 
 db_id JobMatchModel::getIdAtRow(int row) const
 {
-    if(m_defaultId == StopId)
+    if (m_defaultId == StopId)
         return items[row].stop.stopId;
     return items[row].stop.jobId;
 }
 
 QString JobMatchModel::getNameAtRow(int row) const
 {
-    return JobCategoryName::jobName(items[row].stop.jobId,
-                                    items[row].stop.category);
+    return JobCategoryName::jobName(items[row].stop.jobId, items[row].stop.category);
 }
 
 void JobMatchModel::setFilter(db_id exceptJobId, db_id stopsInStationId, const QTime &maxStopArr)
 {
-    m_exceptJobId = exceptJobId;
-    m_stopStationId = stopsInStationId;
+    m_exceptJobId    = exceptJobId;
+    m_stopStationId  = stopsInStationId;
     m_maxStopArrival = maxStopArr;
 
     QByteArray sql;
-    if(m_stopStationId)
+    if (m_stopStationId)
     {
-        //Filter by stopping station
+        // Filter by stopping station
         sql = "SELECT stops.job_id, jobs.category, stops.id, stops.arrival"
               " FROM stops JOIN jobs ON jobs.id=stops.job_id"
               " WHERE stops.station_id=?3 AND";
 
-        if(!m_maxStopArrival.isNull())
+        if (!m_maxStopArrival.isNull())
             sql += " stops.arrival < ?4 AND";
     }
     else
@@ -240,18 +239,18 @@ void JobMatchModel::setFilter(db_id exceptJobId, db_id stopsInStationId, const Q
         sql = "SELECT jobs.id, jobs.category FROM jobs WHERE";
     }
 
-    if(exceptJobId)
+    if (exceptJobId)
     {
-        //Filter out unwanted job ID
+        // Filter out unwanted job ID
         sql += " jobs.id<>?2 AND";
     }
 
-    //Filter by name (job ID number)
-    //FIXME: filter also by category with regexp
+    // Filter by name (job ID number)
+    // FIXME: filter also by category with regexp
     sql += " jobs.id LIKE ?1";
 
     sql += " ORDER BY ";
-    if(m_stopStationId)
+    if (m_stopStationId)
     {
         sql += "stops.arrival, ";
     }

@@ -41,7 +41,8 @@ FilterHeaderView::FilterHeaderView(QWidget *parent) :
     // Highlight column headers of selected cells to emulate spreadsheet behaviour
     setHighlightSections(true);
 
-    // Do some connects: Basically just resize and reposition the input widgets whenever anything changes
+    // Do some connects: Basically just resize and reposition the input widgets whenever anything
+    // changes
     connect(this, &FilterHeaderView::sectionResized, this, &FilterHeaderView::adjustPositions);
 
     connect(this, &FilterHeaderView::sectionClicked, this, &FilterHeaderView::updateSoring);
@@ -54,25 +55,25 @@ void FilterHeaderView::generateFilters()
 {
     bool needsUpdateGeo = false;
 
-    IPagedItemModel *m = qobject_cast<IPagedItemModel *>(model());
-    if(m)
+    IPagedItemModel *m  = qobject_cast<IPagedItemModel *>(model());
+    if (m)
     {
-        int i = 0;
+        int i                 = 0;
         const int columnCount = m->columnCount();
-        for(int col = 0; col < columnCount; col++)
+        for (int col = 0; col < columnCount; col++)
         {
             auto filter = m->getFilterAtCol(col);
-            if(!filter.second.testFlag(IPagedItemModel::FilterFlag::BasicFiltering))
+            if (!filter.second.testFlag(IPagedItemModel::FilterFlag::BasicFiltering))
             {
-                //No filtering for this column
-                for(; i < filterWidgets.size(); i++)
+                // No filtering for this column
+                for (; i < filterWidgets.size(); i++)
                 {
-                    if(filterWidgets.at(i)->getColumn() > col)
-                        break; //We went past
+                    if (filterWidgets.at(i)->getColumn() > col)
+                        break; // We went past
 
-                    if(filterWidgets.at(i)->getColumn() == col)
+                    if (filterWidgets.at(i)->getColumn() == col)
                     {
-                        //Remove old filter
+                        // Remove old filter
                         delete filterWidgets.takeAt(i);
                         i--;
                     }
@@ -80,24 +81,26 @@ void FilterHeaderView::generateFilters()
                 continue;
             }
 
-            FilterHeaderLineEdit* filterEdit = nullptr;
-            for(; i < filterWidgets.size(); i++)
+            FilterHeaderLineEdit *filterEdit = nullptr;
+            for (; i < filterWidgets.size(); i++)
             {
-                if(filterWidgets.at(i)->getColumn() > col)
-                    break; //We went past
+                if (filterWidgets.at(i)->getColumn() > col)
+                    break; // We went past
 
-                if(filterWidgets.at(i)->getColumn() == col)
+                if (filterWidgets.at(i)->getColumn() == col)
                 {
                     filterEdit = filterWidgets.at(i);
                     break;
                 }
             }
 
-            if(!filterEdit)
+            if (!filterEdit)
             {
                 filterEdit = new FilterHeaderLineEdit(col, this);
-                connect(filterEdit, &FilterHeaderLineEdit::delayedTextChanged, this, &FilterHeaderView::inputChanged);
-                connect(filterEdit, &FilterHeaderLineEdit::tooltipRequested, this, &FilterHeaderView::showColumnTooltip);
+                connect(filterEdit, &FilterHeaderLineEdit::delayedTextChanged, this,
+                        &FilterHeaderView::inputChanged);
+                connect(filterEdit, &FilterHeaderLineEdit::tooltipRequested, this,
+                        &FilterHeaderView::showColumnTooltip);
                 filterWidgets.insert(i, filterEdit);
                 needsUpdateGeo = true;
             }
@@ -106,7 +109,7 @@ void FilterHeaderView::generateFilters()
             filterEdit->setAllowNull(filter.second.testFlag(IPagedItemModel::ExplicitNULL));
         }
 
-        //Update sorting
+        // Update sorting
         setSortIndicator(m->getSortingColumn(), Qt::AscendingOrder);
     }
     else
@@ -115,7 +118,7 @@ void FilterHeaderView::generateFilters()
         filterWidgets.clear();
     }
 
-    if(needsUpdateGeo || filterWidgets.isEmpty())
+    if (needsUpdateGeo || filterWidgets.isEmpty())
     {
         // Position them correctly
         updateGeometries();
@@ -124,17 +127,20 @@ void FilterHeaderView::generateFilters()
 
 QSize FilterHeaderView::sizeHint() const
 {
-    // For the size hint just take the value of the standard implementation and add the height of a input widget to it if necessary
+    // For the size hint just take the value of the standard implementation and add the height of a
+    // input widget to it if necessary
     QSize s = QHeaderView::sizeHint();
-    if(filterWidgets.size())
-        s.setHeight(s.height() + filterWidgets.at(0)->sizeHint().height() + 4); // The 4 adds just adds some extra space
+    if (filterWidgets.size())
+        s.setHeight(s.height() + filterWidgets.at(0)->sizeHint().height()
+                    + 4); // The 4 adds just adds some extra space
     return s;
 }
 
 void FilterHeaderView::updateGeometries()
 {
-    // If there are any input widgets add a viewport margin to the header to generate some empty space for them which is not affected by scrolling
-    if(filterWidgets.size())
+    // If there are any input widgets add a viewport margin to the header to generate some empty
+    // space for them which is not affected by scrolling
+    if (filterWidgets.size())
         setViewportMargins(0, 0, 0, filterWidgets.at(0)->sizeHint().height());
     else
         setViewportMargins(0, 0, 0, 0);
@@ -148,19 +154,19 @@ void FilterHeaderView::adjustPositions()
 {
     int y = QHeaderView::sizeHint().height();
 
-    //Sometimes it's 0 when recursion happen, skip moving widgets to avoid flickering
-    if(y == 0)
+    // Sometimes it's 0 when recursion happen, skip moving widgets to avoid flickering
+    if (y == 0)
         return;
 
     // The two adds some extra space between the header label and the input widget
     y += 2;
 
     // Loop through all widgets
-    for(int i = 0; i < filterWidgets.size(); ++i)
+    for (int i = 0; i < filterWidgets.size(); ++i)
     {
         // Get the current widget, move it and resize it
-        FilterHeaderLineEdit* w = filterWidgets.at(i);
-        const int col = w->getColumn();
+        FilterHeaderLineEdit *w = filterWidgets.at(i);
+        const int col           = w->getColumn();
         if (QApplication::layoutDirection() == Qt::RightToLeft)
             w->move(width() - (sectionPosition(col) + sectionSize(col) - offset()), y);
         else
@@ -169,13 +175,14 @@ void FilterHeaderView::adjustPositions()
     }
 }
 
-void FilterHeaderView::inputChanged(FilterHeaderLineEdit *w, const QString& new_value)
+void FilterHeaderView::inputChanged(FilterHeaderLineEdit *w, const QString &new_value)
 {
-    // Just get the column number and the new value and send them to anybody interested in filter changes
+    // Just get the column number and the new value and send them to anybody interested in filter
+    // changes
     emit filterChanged(w->getColumn(), new_value);
 
     IPagedItemModel *m = qobject_cast<IPagedItemModel *>(model());
-    if(!m)
+    if (!m)
         return;
 
     m->setFilterAtCol(w->getColumn(), new_value);
@@ -186,22 +193,22 @@ void FilterHeaderView::showColumnTooltip(FilterHeaderLineEdit *w, const QPoint &
 {
     int col = w->getColumn();
     QString str;
-    if(w->allowNull())
+    if (w->allowNull())
         str = tr("Type <b>#NULL</b> to filter empty cells.");
 
     QString modelTooltip;
-    if(model()) //Get model header tooltip at requested column
+    if (model()) // Get model header tooltip at requested column
         modelTooltip = model()->headerData(col, Qt::Horizontal, Qt::ToolTipRole).toString();
 
-    if(!modelTooltip.isEmpty())
+    if (!modelTooltip.isEmpty())
     {
-        if(!str.isEmpty())
-            str.append(QLatin1String("<br><br>")); //Separate with a line between
-        modelTooltip.replace('\n', QLatin1String("<br>")); //Use HTML line break
+        if (!str.isEmpty())
+            str.append(QLatin1String("<br><br>"));         // Separate with a line between
+        modelTooltip.replace('\n', QLatin1String("<br>")); // Use HTML line break
         str.append(modelTooltip);
     }
 
-    if(str.isEmpty())
+    if (str.isEmpty())
         QToolTip::hideText();
     else
         QToolTip::showText(globalPos, str, w);
@@ -209,16 +216,16 @@ void FilterHeaderView::showColumnTooltip(FilterHeaderLineEdit *w, const QPoint &
 
 void FilterHeaderView::clearFilters()
 {
-    for(FilterHeaderLineEdit* filterLineEdit : qAsConst(filterWidgets))
+    for (FilterHeaderLineEdit *filterLineEdit : qAsConst(filterWidgets))
         filterLineEdit->clear();
 }
 
-void FilterHeaderView::setFilter(int column, const QString& value)
+void FilterHeaderView::setFilter(int column, const QString &value)
 {
     Q_UNUSED(value)
-    for(FilterHeaderLineEdit* filterLineEdit : qAsConst(filterWidgets))
+    for (FilterHeaderLineEdit *filterLineEdit : qAsConst(filterWidgets))
     {
-        if(filterLineEdit->getColumn() == column)
+        if (filterLineEdit->getColumn() == column)
         {
             filterLineEdit->clear();
             break;
@@ -229,7 +236,7 @@ void FilterHeaderView::setFilter(int column, const QString& value)
 void FilterHeaderView::updateSoring(int col)
 {
     IPagedItemModel *m = qobject_cast<IPagedItemModel *>(model());
-    if(!m)
+    if (!m)
         return;
 
     m->setSortingColumn(col);
@@ -238,9 +245,9 @@ void FilterHeaderView::updateSoring(int col)
 
 QString FilterHeaderView::filterValue(int column) const
 {
-    for(FilterHeaderLineEdit* filterLineEdit : qAsConst(filterWidgets))
+    for (FilterHeaderLineEdit *filterLineEdit : qAsConst(filterWidgets))
     {
-        if(filterLineEdit->getColumn() == column)
+        if (filterLineEdit->getColumn() == column)
         {
             return filterLineEdit->text();
         }
@@ -253,32 +260,36 @@ void FilterHeaderView::installOnTable(QTableView *view)
 {
     view->setHorizontalHeader(this);
 
-    connect(view->horizontalScrollBar(), &QScrollBar::valueChanged, this, &FilterHeaderView::adjustPositions);
-    connect(view->verticalScrollBar(), &QScrollBar::valueChanged, this, &FilterHeaderView::adjustPositions);
+    connect(view->horizontalScrollBar(), &QScrollBar::valueChanged, this,
+            &FilterHeaderView::adjustPositions);
+    connect(view->verticalScrollBar(), &QScrollBar::valueChanged, this,
+            &FilterHeaderView::adjustPositions);
 
     // Disconnect clicking in header to select column, since we will use it for sorting.
     // Note that, in order to work, this cannot be converted to the standard C++11 format.
     disconnect(this, SIGNAL(sectionPressed(int)), view, SLOT(selectColumn(int)));
     disconnect(this, SIGNAL(sectionEntered(int)), view, SLOT(_q_selectColumn(int)));
 
-    //Must be enabled again because QTableView disables it if sorting not enabled in QTableView
+    // Must be enabled again because QTableView disables it if sorting not enabled in QTableView
     setSortIndicatorShown(true);
 }
 
 void FilterHeaderView::setModel(QAbstractItemModel *m)
 {
     IPagedItemModel *pagedModel = qobject_cast<IPagedItemModel *>(model());
-    if(pagedModel)
+    if (pagedModel)
     {
-        disconnect(pagedModel, &IPagedItemModel::filterChanged, this, &FilterHeaderView::generateFilters);
+        disconnect(pagedModel, &IPagedItemModel::filterChanged, this,
+                   &FilterHeaderView::generateFilters);
     }
 
     QHeaderView::setModel(m);
 
     pagedModel = qobject_cast<IPagedItemModel *>(model());
-    if(pagedModel)
+    if (pagedModel)
     {
-        connect(pagedModel, &IPagedItemModel::filterChanged, this, &FilterHeaderView::generateFilters);
+        connect(pagedModel, &IPagedItemModel::filterChanged, this,
+                &FilterHeaderView::generateFilters);
     }
 
     generateFilters();

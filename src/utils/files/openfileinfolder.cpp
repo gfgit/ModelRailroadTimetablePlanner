@@ -37,23 +37,24 @@
 
 namespace utils {
 
-static bool openDefAppOrShowFolder(const QFileInfo& info, bool folder)
+static bool openDefAppOrShowFolder(const QFileInfo &info, bool folder)
 {
-    if(info.isDir())
+    if (info.isDir())
         folder = true;
 
     QString path = folder ? info.absolutePath() : info.absoluteFilePath();
 
-#if defined(Q_OS_WIN) && !defined (Q_OS_WINRT)
-    if(folder && !info.isDir())
+#if defined(Q_OS_WIN) && !defined(Q_OS_WINRT)
+    if (folder && !info.isDir())
     {
-        //NOTE: on Windows desktop we can also select a file inside a folder
-        //So prefer it instead of default QDesktopServices
-        QString args = QStringLiteral("/select,%1").arg(QDir::toNativeSeparators(info.absoluteFilePath()));
+        // NOTE: on Windows desktop we can also select a file inside a folder
+        // So prefer it instead of default QDesktopServices
+        QString args =
+          QStringLiteral("/select,%1").arg(QDir::toNativeSeparators(info.absoluteFilePath()));
         QProcess explorer;
         explorer.setProgram(QLatin1String("explorer.exe"));
-        explorer.setNativeArguments(args); //This must not be quoted
-        if(explorer.startDetached())
+        explorer.setNativeArguments(args); // This must not be quoted
+        if (explorer.startDetached())
             return true;
     }
 #endif
@@ -66,7 +67,7 @@ OpenFileInFolderDlg::OpenFileInFolderDlg(QWidget *parent) :
 {
     QGridLayout *lay = new QGridLayout(this);
 
-    mIconLabel = new QLabel;
+    mIconLabel       = new QLabel;
     mIconLabel->setAlignment(Qt::AlignCenter);
     mIconLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     lay->addWidget(mIconLabel, 0, 0, Qt::AlignCenter);
@@ -78,15 +79,15 @@ OpenFileInFolderDlg::OpenFileInFolderDlg(QWidget *parent) :
     QDialogButtonBox *box = new QDialogButtonBox(Qt::Horizontal);
     lay->addWidget(box, 1, 0, 1, 2);
 
-    openFileBut = box->addButton(tr("Open In App"), QDialogButtonBox::AcceptRole);
-    openFolderBut = box->addButton(tr("Show Folder"), QDialogButtonBox::AcceptRole);
+    openFileBut        = box->addButton(tr("Open In App"), QDialogButtonBox::AcceptRole);
+    openFolderBut      = box->addButton(tr("Show Folder"), QDialogButtonBox::AcceptRole);
     QPushButton *okBut = box->addButton(QDialogButtonBox::Ok);
 
-    //Open Folder by default
+    // Open Folder by default
     openFolderBut->setDefault(true);
     openFolderBut->setFocus();
 
-    //Only close dialog with Ok button, ignore others
+    // Only close dialog with Ok button, ignore others
     connect(okBut, &QPushButton::clicked, this, &QDialog::accept);
     connect(openFileBut, &QPushButton::clicked, this, &OpenFileInFolderDlg::onOpenFile);
     connect(openFolderBut, &QPushButton::clicked, this, &OpenFileInFolderDlg::onOpenFolder);
@@ -98,18 +99,18 @@ void OpenFileInFolderDlg::setFilePath(const QString &newFilePath)
     openFileBut->setVisible(info.isFile());
 
     QFileIconProvider provider;
-    QIcon fileIcon = provider.icon(info);
+    QIcon fileIcon     = provider.icon(info);
 
-    QStyle *s = style();
+    QStyle *s          = style();
     const int iconSize = s->pixelMetric(QStyle::PM_MessageBoxIconSize, 0, this);
-    if(fileIcon.isNull())
+    if (fileIcon.isNull())
         fileIcon = s->standardIcon(QStyle::SP_MessageBoxInformation, 0, this);
 
     QPixmap pix;
-    if(!fileIcon.isNull())
+    if (!fileIcon.isNull())
     {
         QWindow *window = nativeParentWidget() ? nativeParentWidget()->windowHandle() : nullptr;
-        pix = fileIcon.pixmap(window, QSize(iconSize, iconSize));
+        pix             = fileIcon.pixmap(window, QSize(iconSize, iconSize));
     }
 
     mIconLabel->setPixmap(pix);
@@ -127,7 +128,7 @@ void OpenFileInFolderDlg::askUser(const QString &title, const QString &filePath,
     dlg->setWindowTitle(title);
     dlg->setFilePath(filePath);
     dlg->setLabelText(OpenFileInFolderDlg::tr("Do you want to open file?<br><b>%1</b>")
-                          .arg(dlg->getInfo().canonicalFilePath()));
+                        .arg(dlg->getInfo().canonicalFilePath()));
     dlg->exec();
 }
 
@@ -141,4 +142,4 @@ void OpenFileInFolderDlg::onOpenFolder()
     openDefAppOrShowFolder(info, true);
 }
 
-} //namespace utils
+} // namespace utils

@@ -25,54 +25,58 @@
 
 #include <QDebug>
 
-#include "info.h" //Fot App constants
+#include "info.h"        //Fot App constants
 #include "app/session.h" //For settings
 #include "db_metadata/metadatamanager.h"
 
 #include "odtutils.h"
 
-//content.xml
+// content.xml
 static constexpr char contentFileStr[] = "content.xml";
-static constexpr QLatin1String contentFileName = QLatin1String(contentFileStr, sizeof (contentFileStr) - 1);
+static constexpr QLatin1String contentFileName =
+  QLatin1String(contentFileStr, sizeof(contentFileStr) - 1);
 
-//styles.xml
+// styles.xml
 static constexpr char stylesFileStr[] = "styles.xml";
-static constexpr QLatin1String stylesFileName = QLatin1String(stylesFileStr, sizeof (stylesFileStr) - 1);
+static constexpr QLatin1String stylesFileName =
+  QLatin1String(stylesFileStr, sizeof(stylesFileStr) - 1);
 
-//meta.xml
-static constexpr char metaFileStr[] = "meta.xml";
-static constexpr QLatin1String metaFileName = QLatin1String(metaFileStr, sizeof (metaFileStr) - 1);
+// meta.xml
+static constexpr char metaFileStr[]         = "meta.xml";
+static constexpr QLatin1String metaFileName = QLatin1String(metaFileStr, sizeof(metaFileStr) - 1);
 
-//META-INF/manifest.xml
+// META-INF/manifest.xml
 static constexpr char manifestFileNameStr[] = "manifest.xml";
-static constexpr QLatin1String manifestFileName = QLatin1String(manifestFileNameStr, sizeof (manifestFileNameStr) - 1);
+static constexpr QLatin1String manifestFileName =
+  QLatin1String(manifestFileNameStr, sizeof(manifestFileNameStr) - 1);
 static constexpr char metaInfPathStr[] = "/META-INF";
-static constexpr QLatin1String metaInfDirPath = QLatin1String(metaInfPathStr, sizeof (metaInfPathStr) - 1);
+static constexpr QLatin1String metaInfDirPath =
+  QLatin1String(metaInfPathStr, sizeof(metaInfPathStr) - 1);
 static constexpr char manifestFilePathStr[] = "META-INF/manifest.xml";
-static constexpr QLatin1String manifestFilePath = QLatin1String(manifestFilePathStr, sizeof (manifestFilePathStr) - 1);
+static constexpr QLatin1String manifestFilePath =
+  QLatin1String(manifestFilePathStr, sizeof(manifestFilePathStr) - 1);
 
 OdtDocument::OdtDocument()
 {
-
 }
 
 bool OdtDocument::initDocument()
 {
-    if(!dir.isValid())
+    if (!dir.isValid())
         return false;
 
     content.setFileName(dir.filePath(contentFileName));
-    if(!content.open(QFile::WriteOnly | QFile::Truncate))
+    if (!content.open(QFile::WriteOnly | QFile::Truncate))
         return false;
 
     styles.setFileName(dir.filePath(stylesFileName));
-    if(!styles.open(QFile::WriteOnly | QFile::Truncate))
+    if (!styles.open(QFile::WriteOnly | QFile::Truncate))
         return false;
 
     contentXml.setDevice(&content);
     stylesXml.setDevice(&styles);
 
-    //Init content.xml
+    // Init content.xml
     writeStartDoc(contentXml);
     contentXml.writeStartElement("office:document-content");
     contentXml.writeNamespace("urn:oasis:names:tc:opendocument:xmlns:office:1.0", "office");
@@ -85,7 +89,7 @@ bool OdtDocument::initDocument()
     contentXml.writeNamespace("http://www.w3.org/1999/xlink", "xlink");
     contentXml.writeAttribute("office:version", "1.2");
 
-    //Init styles.xml
+    // Init styles.xml
     writeStartDoc(stylesXml);
     stylesXml.writeStartElement("office:document-styles");
     stylesXml.writeNamespace("urn:oasis:names:tc:opendocument:xmlns:office:1.0", "office");
@@ -100,31 +104,32 @@ bool OdtDocument::initDocument()
     return true;
 }
 
-void OdtDocument::startBody() //TODO: start body manually, remove this function
+void OdtDocument::startBody() // TODO: start body manually, remove this function
 {
-    contentXml.writeEndElement(); //office:automatic-styles
+    contentXml.writeEndElement(); // office:automatic-styles
 
     contentXml.writeStartElement("office:body");
     contentXml.writeStartElement("office:text");
 }
 
-bool OdtDocument::saveTo(const QString& fileName)
+bool OdtDocument::saveTo(const QString &fileName)
 {
-    int err = 0;
+    int err       = 0;
     zip_t *zipper = zip_open(fileName.toUtf8(), ZIP_CREATE | ZIP_TRUNCATE, &err);
 
     if (zipper == nullptr)
     {
         zip_error_t ziperror;
         zip_error_init_with_code(&ziperror, err);
-        qDebug() << "Failed to open output file" << fileName << "Err:" << zip_error_strerror(&ziperror);
+        qDebug() << "Failed to open output file" << fileName
+                 << "Err:" << zip_error_strerror(&ziperror);
         zip_error_fini(&ziperror);
         return false;
     }
 
-    //Add mimetype file NOTE: must be the first file in archive
+    // Add mimetype file NOTE: must be the first file in archive
     const char mimetype[] = "application/vnd.oasis.opendocument.text";
-    zip_source_t *source = zip_source_buffer(zipper, mimetype, sizeof (mimetype) - 1, 0);
+    zip_source_t *source  = zip_source_buffer(zipper, mimetype, sizeof(mimetype) - 1, 0);
     if (source == nullptr)
     {
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
@@ -136,10 +141,10 @@ bool OdtDocument::saveTo(const QString& fileName)
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
     }
 
-    //Add META-INF/manifest.xml
+    // Add META-INF/manifest.xml
     QString fileToCompress = dir.filePath(manifestFilePath);
 
-    source = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
+    source                 = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
     if (source == nullptr)
     {
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
@@ -151,10 +156,10 @@ bool OdtDocument::saveTo(const QString& fileName)
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
     }
 
-    //Add styles.xml
+    // Add styles.xml
     fileToCompress = dir.filePath(stylesFileName);
 
-    source = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
+    source         = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
     if (source == nullptr)
     {
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
@@ -166,10 +171,10 @@ bool OdtDocument::saveTo(const QString& fileName)
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
     }
 
-    //Add content.xml
+    // Add content.xml
     fileToCompress = dir.filePath(contentFileName);
 
-    source = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
+    source         = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
     if (source == nullptr)
     {
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
@@ -181,10 +186,10 @@ bool OdtDocument::saveTo(const QString& fileName)
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
     }
 
-    //Add meta.xml
+    // Add meta.xml
     fileToCompress = dir.filePath(metaFileName);
 
-    source = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
+    source         = zip_source_file(zipper, fileToCompress.toUtf8(), 0, 0);
     if (source == nullptr)
     {
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
@@ -196,10 +201,10 @@ bool OdtDocument::saveTo(const QString& fileName)
         qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
     }
 
-    //Add possible images
-    QString imgBasePath = dir.filePath("Pictures") + QLatin1String("/%1");
+    // Add possible images
+    QString imgBasePath    = dir.filePath("Pictures") + QLatin1String("/%1");
     QString imgNewBasePath = QLatin1String("Pictures/%1");
-    for(const auto& img : qAsConst(imageList))
+    for (const auto &img : qAsConst(imageList))
     {
         source = zip_source_file(zipper, imgBasePath.arg(img.first).toUtf8(), 0, 0);
         if (source == nullptr)
@@ -207,14 +212,15 @@ bool OdtDocument::saveTo(const QString& fileName)
             qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
         }
 
-        if (zip_file_add(zipper, imgNewBasePath.arg(img.first).toUtf8(), source, ZIP_FL_ENC_UTF_8) < 0)
+        if (zip_file_add(zipper, imgNewBasePath.arg(img.first).toUtf8(), source, ZIP_FL_ENC_UTF_8)
+            < 0)
         {
             zip_source_free(source);
             qDebug() << "Failed to add file to zip:" << zip_strerror(zipper);
         }
     }
 
-    if(zip_close(zipper) != 0)
+    if (zip_close(zipper) != 0)
     {
         qDebug() << "Failed to close zip:" << zip_strerror(zipper);
     }
@@ -236,11 +242,11 @@ void OdtDocument::endDocument()
 
 QString OdtDocument::addImage(const QString &name, const QString &mediaType)
 {
-    if(imageList.isEmpty())
+    if (imageList.isEmpty())
     {
-        //First image added, create Pictures folder
+        // First image added, create Pictures folder
         QDir pictures(dir.path());
-        if(!pictures.mkdir("Pictures"))
+        if (!pictures.mkdir("Pictures"))
             qWarning() << "OdtDocument: cannot create Pictures folder";
     }
     imageList.append({name, mediaType});
@@ -251,12 +257,12 @@ void OdtDocument::writeStartDoc(QXmlStreamWriter &xml)
 {
     xml.setAutoFormatting(true);
     xml.setAutoFormattingIndent(-1);
-    //xml.writeStartDocument(QStringLiteral("1.0"), true);
+    // xml.writeStartDocument(QStringLiteral("1.0"), true);
     xml.writeStartDocument(QStringLiteral("1.0"));
 }
 
-void OdtDocument::writeFileEntry(QXmlStreamWriter& xml,
-                                 const QString& fullPath, const QString& mediaType)
+void OdtDocument::writeFileEntry(QXmlStreamWriter &xml, const QString &fullPath,
+                                 const QString &mediaType)
 {
     xml.writeStartElement("manifest:file-entry");
     xml.writeAttribute("manifest:full-path", fullPath);
@@ -264,12 +270,12 @@ void OdtDocument::writeFileEntry(QXmlStreamWriter& xml,
     xml.writeEndElement();
 }
 
-void OdtDocument::saveManifest(const QString& path)
+void OdtDocument::saveManifest(const QString &path)
 {
     const QString xmlMime = QLatin1String("text/xml");
 
     QDir manifestDir(path + metaInfDirPath);
-    if(!manifestDir.exists())
+    if (!manifestDir.exists())
         manifestDir.mkpath(".");
 
     QFile manifest(manifestDir.filePath(manifestFileName));
@@ -281,30 +287,30 @@ void OdtDocument::saveManifest(const QString& path)
     xml.writeNamespace("urn:oasis:names:tc:opendocument:xmlns:manifest:1.0", "manifest");
     xml.writeAttribute("manifest:version", "1.2");
 
-    //Root
+    // Root
     writeFileEntry(xml, "/", "application/vnd.oasis.opendocument.text");
 
-    //styles.xml
+    // styles.xml
     writeFileEntry(xml, stylesFileName, xmlMime);
 
-    //content.xml
+    // content.xml
     writeFileEntry(xml, contentFileName, xmlMime);
 
-    //meta.xml
+    // meta.xml
     writeFileEntry(xml, metaFileName, xmlMime);
 
-    //Add possible images
-    for(const auto& img : qAsConst(imageList))
+    // Add possible images
+    for (const auto &img : qAsConst(imageList))
     {
         writeFileEntry(xml, "Pictures/" + img.first, img.second);
     }
 
-    xml.writeEndElement(); //manifest:manifest
+    xml.writeEndElement(); // manifest:manifest
 
     xml.writeEndDocument();
 }
 
-void OdtDocument::saveMeta(const QString& path)
+void OdtDocument::saveMeta(const QString &path)
 {
     QDir metaDir(path);
 
@@ -323,122 +329,122 @@ void OdtDocument::saveMeta(const QString& path)
 
     xml.writeStartElement("office:meta");
 
-    MetaDataManager *meta = Session->getMetaDataManager();
+    MetaDataManager *meta           = Session->getMetaDataManager();
     const bool storeLocationAndDate = AppSettings.getSheetStoreLocationDateInMeta();
 
-    //Title
-    if(!documentTitle.isEmpty())
+    // Title
+    if (!documentTitle.isEmpty())
     {
         xml.writeStartElement("dc:title");
         xml.writeCharacters(documentTitle);
-        xml.writeEndElement(); //dc:title
+        xml.writeEndElement(); // dc:title
     }
 
-    //Subject
+    // Subject
     xml.writeStartElement("dc:subject");
     xml.writeCharacters(AppDisplayName);
-    xml.writeCharacters(" Session Meeting"); //Do not translate, so it's standard for everyone
-    xml.writeEndElement(); //dc:subject
+    xml.writeCharacters(" Session Meeting"); // Do not translate, so it's standard for everyone
+    xml.writeEndElement();                   // dc:subject
 
-    //Description
+    // Description
     QString meetingLocation;
-    if(storeLocationAndDate)
+    if (storeLocationAndDate)
     {
         meta->getString(meetingLocation, MetaDataKey::MeetingLocation);
 
         QDate start, end;
         qint64 tmp = 0;
-        if(meta->getInt64(tmp, MetaDataKey::MeetingStartDate) == MetaDataKey::ValueFound)
+        if (meta->getInt64(tmp, MetaDataKey::MeetingStartDate) == MetaDataKey::ValueFound)
             start = QDate::fromJulianDay(tmp);
-        if(meta->getInt64(tmp, MetaDataKey::MeetingEndDate) == MetaDataKey::ValueFound)
+        if (meta->getInt64(tmp, MetaDataKey::MeetingEndDate) == MetaDataKey::ValueFound)
             end = QDate::fromJulianDay(tmp);
-        if(!end.isValid() || end < start)
+        if (!end.isValid() || end < start)
             end = start;
 
-        if(!meetingLocation.isEmpty() && start.isValid())
+        if (!meetingLocation.isEmpty() && start.isValid())
         {
-            //Store description only if metadata is valid
-            //Example: Meeting in CORNUDA from 07/11/2020 to 09/11/2020
+            // Store description only if metadata is valid
+            // Example: Meeting in CORNUDA from 07/11/2020 to 09/11/2020
 
             QString description;
-            if(start != end)
+            if (start != end)
             {
-                description = Odt::text(Odt::meetingFromTo)
-                                  .arg(meetingLocation,
-                                       start.toString("dd/MM/yyyy"),
-                                       end.toString("dd/MM/yyyy"));
+                description =
+                  Odt::text(Odt::meetingFromTo)
+                    .arg(meetingLocation, start.toString("dd/MM/yyyy"), end.toString("dd/MM/yyyy"));
             }
             else
             {
-                description = Odt::text(Odt::meetingOnDate)
-                                  .arg(meetingLocation,
-                                       start.toString("dd/MM/yyyy"));
+                description =
+                  Odt::text(Odt::meetingOnDate).arg(meetingLocation, start.toString("dd/MM/yyyy"));
             }
 
             xml.writeStartElement("dc:description");
             xml.writeCharacters(description);
-            xml.writeEndElement(); //dc:description
+            xml.writeEndElement(); // dc:description
         }
     }
 
-    //Language
+    // Language
     xml.writeStartElement("dc:language");
     xml.writeCharacters(Session->getSheetExportLocale().bcp47Name());
-    xml.writeEndElement(); //dc:language
+    xml.writeEndElement(); // dc:language
 
-    //Generator
+    // Generator
     xml.writeStartElement("meta:generator");
     xml.writeCharacters(AppProduct);
     xml.writeCharacters("/");
     xml.writeCharacters(AppVersion);
     xml.writeCharacters("-");
     xml.writeCharacters(AppBuildDate);
-    xml.writeEndElement(); //meta:generator
+    xml.writeEndElement(); // meta:generator
 
-    //Initial creator
+    // Initial creator
     xml.writeStartElement("meta:initial-creator");
     xml.writeCharacters(AppDisplayName);
-    xml.writeEndElement(); //meta:initial-creator
+    xml.writeEndElement(); // meta:initial-creator
 
-    //Creation date
+    // Creation date
     xml.writeStartElement("meta:creation-date");
-    //NOTE: date must be in ISO 8601 format but without time zone offset (LibreOffice doesn't recognize it)
-    //      so do not use Qt::ISODate otherwise there is the risk of adding time zone offset to string
+    // NOTE: date must be in ISO 8601 format but without time zone offset (LibreOffice doesn't
+    // recognize it)
+    //       so do not use Qt::ISODate otherwise there is the risk of adding time zone offset to
+    //       string
     xml.writeCharacters(QDateTime::currentDateTime().toString("yyyy-MM-ddTHH:mm:ss"));
-    xml.writeEndElement(); //meta:creation-date
+    xml.writeEndElement(); // meta:creation-date
 
-    //Keywords
+    // Keywords
     xml.writeStartElement("meta:keyword");
     xml.writeCharacters(AppDisplayName);
-    xml.writeEndElement(); //meta:keyword
+    xml.writeEndElement(); // meta:keyword
 
     xml.writeStartElement("meta:keyword");
     xml.writeCharacters(AppProduct);
-    xml.writeEndElement(); //meta:keyword
+    xml.writeEndElement(); // meta:keyword
 
     xml.writeStartElement("meta:keyword");
     xml.writeCharacters(AppCompany);
-    xml.writeEndElement(); //meta:keyword
+    xml.writeEndElement(); // meta:keyword
 
     xml.writeStartElement("meta:keyword");
     xml.writeCharacters(Odt::text(Odt::meeting));
-    xml.writeEndElement(); //meta:keyword
+    xml.writeEndElement(); // meta:keyword
 
-    //Untranslated version
+    // Untranslated version
     xml.writeStartElement("meta:keyword");
     xml.writeCharacters(QString::fromUtf8(Odt::meeting.sourceText));
-    xml.writeEndElement(); //meta:keyword
+    xml.writeEndElement(); // meta:keyword
 
-    if(storeLocationAndDate && !meetingLocation.isEmpty())
+    if (storeLocationAndDate && !meetingLocation.isEmpty())
     {
         xml.writeStartElement("meta:keyword");
         xml.writeCharacters(meetingLocation);
-        xml.writeEndElement(); //meta:keyword
+        xml.writeEndElement(); // meta:keyword
     }
 
-    //End
-    xml.writeEndElement(); //office:meta
-    xml.writeEndElement(); //office:document-meta
+    // End
+    xml.writeEndElement(); // office:meta
+    xml.writeEndElement(); // office:document-meta
 
     xml.writeEndDocument();
 }

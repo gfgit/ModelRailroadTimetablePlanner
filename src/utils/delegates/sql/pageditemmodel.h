@@ -39,7 +39,10 @@ class IPagedItemModel : public QAbstractTableModel
 public:
     IPagedItemModel(const int itemsPerPage, sqlite3pp::database &db, QObject *parent = nullptr);
 
-    inline sqlite3pp::database &getDb() const { return mDb; }
+    inline sqlite3pp::database &getDb() const
+    {
+        return mDb;
+    }
 
     // Cached rows management
     virtual void clearCache() = 0;
@@ -57,7 +60,7 @@ public:
     int currentPage();
     void switchToPage(int page);
 
-    //Filter
+    // Filter
 
     /*!
      * \brief nullFilterStr
@@ -76,9 +79,10 @@ public:
      */
     enum FilterFlag
     {
-        NoFiltering = 0, /*!< This column doesn't support filtering, do not show filter */
+        NoFiltering    = 0, /*!< This column doesn't support filtering, do not show filter */
         BasicFiltering = 1, /*!< This column supports filtering, show filter */
-        ExplicitNULL = (1<<1) /*!< This column can be filtered with "\#NULL" string \sa nullFilterStr */
+        ExplicitNULL =
+          (1 << 1) /*!< This column can be filtered with "\#NULL" string \sa nullFilterStr */
     };
 
     typedef QFlags<FilterFlag> FilterFlags;
@@ -109,14 +113,14 @@ public:
      * \sa refreshData()
      * \sa FilterHeaderView
      */
-    virtual bool setFilterAtCol(int col, const QString& str);
+    virtual bool setFilterAtCol(int col, const QString &str);
 
 signals:
-    void modelError(const QString& msg);
+    void modelError(const QString &msg);
 
     // Items signals
     void totalItemsCountChanged(qint64 count);
-    void itemsReady(int startRow, int endRow); //In local indices
+    void itemsReady(int startRow, int endRow); // In local indices
 
     // Page signals
     void pageCountChanged(int count);
@@ -140,6 +144,5 @@ protected:
     int sortColumn;
     const int ItemsPerPage;
 };
-
 
 #endif // PAGEDITEMMODEL_H

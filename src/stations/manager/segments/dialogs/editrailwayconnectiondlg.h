@@ -39,7 +39,7 @@ public:
     void setReadOnly(bool readOnly);
 
 private slots:
-    void onModelError(const QString& msg);
+    void onModelError(const QString &msg);
     void addTrackConn();
     void removeSelectedTrackConn();
     void addDefaultConnections();

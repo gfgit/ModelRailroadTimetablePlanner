@@ -43,10 +43,13 @@ class StationsModel : public IPagedItemModelImpl<StationsModel, StationModelItem
     Q_OBJECT
 
 public:
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum { BatchSize = 100 };
-
-    enum Columns{
+    enum Columns
+    {
         NameCol = 0,
         ShortNameCol,
         TypeCol,
@@ -62,46 +65,46 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
     // Sorting
     virtual void setSortingColumn(int col) override;
 
-    //Filter
+    // Filter
     std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
-    bool setFilterAtCol(int col, const QString& str) override;
+    bool setFilterAtCol(int col, const QString &str) override;
 
     // StationsModel
-    bool addStation(const QString& name, db_id *outStationId = nullptr);
+    bool addStation(const QString &name, db_id *outStationId = nullptr);
     bool removeStation(db_id stationId);
 
     // Convinience
     inline db_id getIdAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Invalid
+            return 0; // Invalid
 
-        const StationItem& item = cache.at(row - cacheFirstRow);
+        const StationItem &item = cache.at(row - cacheFirstRow);
         return item.stationId;
     }
 
     inline QString getNameAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return QString(); //Invalid
+            return QString(); // Invalid
 
-        const StationItem& item = cache.at(row - cacheFirstRow);
+        const StationItem &item = cache.at(row - cacheFirstRow);
         return item.name;
     }
 

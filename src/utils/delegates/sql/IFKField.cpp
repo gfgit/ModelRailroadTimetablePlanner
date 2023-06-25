@@ -21,5 +21,4 @@
 
 IFKField::~IFKField()
 {
-
 }

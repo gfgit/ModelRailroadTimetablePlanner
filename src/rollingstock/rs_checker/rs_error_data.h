@@ -22,24 +22,23 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "utils/types.h"
+#    include "utils/types.h"
 
-#include <QTime>
-#include <QVector>
-#include <QMap>
+#    include <QTime>
+#    include <QVector>
+#    include <QMap>
 
-namespace RsErrors
-{
+namespace RsErrors {
 
 enum ErrType : quint32
 {
     NoError = 0,
     StopIsTransit,
-    CoupledWhileBusy, //otherId: previous coupling id
-    UncoupledWhenNotCoupled, //otherId: previous uncoupling id
-    NotUncoupledAtJobEnd, //otherId: next operation id or zero
-    CoupledInDifferentStation, //otherId: previous coupling id
-    UncoupledInSameStop //otherId: previous coupling id
+    CoupledWhileBusy,          // otherId: previous coupling id
+    UncoupledWhenNotCoupled,   // otherId: previous uncoupling id
+    NotUncoupledAtJobEnd,      // otherId: next operation id or zero
+    CoupledInDifferentStation, // otherId: previous coupling id
+    UncoupledInSameStop        // otherId: previous coupling id
 };
 
 struct RSErrorData
@@ -61,19 +60,28 @@ struct RSErrorList
     QString rsName;
     QVector<RSErrorData> errors;
 
-    inline int childCount() const { return errors.size(); }
-    inline const RSErrorData *ptrForRow(int row) const { return &errors.at(row); }
+    inline int childCount() const
+    {
+        return errors.size();
+    }
+    inline const RSErrorData *ptrForRow(int row) const
+    {
+        return &errors.at(row);
+    }
 };
 
 struct RSErrorMap
 {
     QMap<db_id, RSErrorList> map;
 
-    inline int topLevelCount() const { return map.size(); }
+    inline int topLevelCount() const
+    {
+        return map.size();
+    }
 
     inline const RSErrorList *getTopLevelAtRow(int row) const
     {
-        if(row >= topLevelCount())
+        if (row >= topLevelCount())
             return nullptr;
         return &(map.constBegin() + row).value();
     }
@@ -81,7 +89,7 @@ struct RSErrorMap
     inline const RSErrorList *getParent(RSErrorData *child) const
     {
         auto it = map.constFind(child->rsId);
-        if(it == map.constEnd())
+        if (it == map.constEnd())
             return nullptr;
         return &it.value();
     }
@@ -89,13 +97,13 @@ struct RSErrorMap
     inline int getParentRow(RSErrorData *child) const
     {
         auto it = map.constFind(child->rsId);
-        if(it == map.constEnd())
+        if (it == map.constEnd())
             return -1;
         return std::distance(map.constBegin(), it);
     }
 };
 
-} //namespace RsErrors
+} // namespace RsErrors
 
 #endif // ENABLE_BACKGROUND_MANAGER
 

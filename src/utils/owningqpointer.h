@@ -28,18 +28,19 @@
  * OwningQPointer adds ownership of tracked object by deleting it if still valid
  * when the pointer goes out of scope
  */
-template <typename T>
-class OwningQPointer : public QPointer<T>
+template <typename T> class OwningQPointer : public QPointer<T>
 {
 public:
-    inline OwningQPointer(T *p) : QPointer<T>(p) { }
+    inline OwningQPointer(T *p) :
+        QPointer<T>(p)
+    {
+    }
     ~OwningQPointer();
 };
 
-template<typename T>
-OwningQPointer<T>::~OwningQPointer()
+template <typename T> OwningQPointer<T>::~OwningQPointer()
 {
-    if(this->data())
+    if (this->data())
         delete this->data();
 }
 

@@ -1,0 +1,55 @@
+﻿---
+BasedOnStyle: Microsoft
+AlignEscapedNewlines: Left
+IndentWidth: 4
+
+ColumnLimit: 100
+
+# We want a space between the type and the star for pointer types.
+PointerBindsToType: false
+
+# We want to break before the operators, but not before a '='.
+BreakBeforeBinaryOperators: NonAssignment
+
+# Braces are usually attached, but not after functions or class declarations.
+BreakBeforeBraces: Custom
+BraceWrapping:
+    AfterClass: true
+    AfterCaseLabel: true
+    AfterControlStatement: true
+    AfterEnum: true
+    AfterFunction: true
+    BeforeLambdaBody: true
+    AfterNamespace: false
+    AfterObjCDeclaration: false
+    AfterStruct: true
+    AfterUnion: false
+    BeforeCatch: true
+    BeforeElse: true
+    IndentBraces: false
+    SplitEmptyFunction: true
+
+# Indent width for line continuations.
+ContinuationIndentWidth: 2
+
+# Allow indentation for preprocessing directives (if/ifdef/endif). https://reviews.llvm.org/rL312125
+IndentPPDirectives: AfterHash
+
+# Do not indent public/private/protected
+IndentAccessModifiers: false
+
+# This is needed because IndentAccessModifiers doesn't seem to work
+AccessModifierOffset: -4
+
+BreakConstructorInitializers: AfterColon
+PackConstructorInitializers: Never
+
+# Horizontally align arguments after an open bracket.
+AlignAfterOpenBracket: true
+
+SortIncludes: false
+
+InsertNewlineAtEOF: true
+
+AlignConsecutiveMacros: AcrossEmptyLines
+AlignConsecutiveAssignments: AcrossEmptyLines

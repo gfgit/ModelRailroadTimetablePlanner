@@ -58,16 +58,16 @@ PrinterOptionsWidget::PrinterOptionsWidget(QWidget *parent) :
     outputTypeCombo = new QComboBox;
     QStringList items;
     items.reserve(int(Print::OutputType::NTypes));
-    for(int i = 0; i < int(Print::OutputType::NTypes); i++)
+    for (int i = 0; i < int(Print::OutputType::NTypes); i++)
         items.append(Print::getOutputTypeName(Print::OutputType(i)));
     outputTypeCombo->addItems(items);
     outputTypeCombo->setCurrentIndex(int(Print::OutputType::Pdf));
-    connect(outputTypeCombo, qOverload<int>(&QComboBox::activated),
-            this, &PrinterOptionsWidget::updateOutputType);
+    connect(outputTypeCombo, qOverload<int>(&QComboBox::activated), this,
+            &PrinterOptionsWidget::updateOutputType);
 
     QLabel *typeLabel = new QLabel(tr("Output Type:"));
 
-    QGridLayout *lay = new QGridLayout(this);
+    QGridLayout *lay  = new QGridLayout(this);
     lay->addWidget(typeLabel, 0, 0);
     lay->addWidget(outputTypeCombo, 0, 1);
     lay->addWidget(fileBox, 1, 0, 1, 2);
@@ -83,7 +83,7 @@ void PrinterOptionsWidget::setOptions(const Print::PrintBasicOptions &printOpt)
     outputTypeCombo->setCurrentIndex(int(printOpt.outputType));
     updateOutputType();
 
-    if(printOpt.filePath.isEmpty())
+    if (printOpt.filePath.isEmpty())
     {
         pathEdit->setText(RecentDirStore::getDir(recentDirKey, RecentDirStore::Documents));
     }
@@ -92,33 +92,33 @@ void PrinterOptionsWidget::setOptions(const Print::PrintBasicOptions &printOpt)
 Print::PrintBasicOptions PrinterOptionsWidget::getOptions() const
 {
     Print::PrintBasicOptions printOpt;
-    printOpt.filePath = pathEdit->text();
-    printOpt.fileNamePattern = patternEdit->text();
+    printOpt.filePath               = pathEdit->text();
+    printOpt.fileNamePattern        = patternEdit->text();
     printOpt.useOneFileForEachScene = differentFilesCheckBox->isChecked();
-    printOpt.printSceneInOnePage = sceneInOnePageCheckBox->isChecked();
-    printOpt.outputType = Print::OutputType(outputTypeCombo->currentIndex());
+    printOpt.printSceneInOnePage    = sceneInOnePageCheckBox->isChecked();
+    printOpt.outputType             = Print::OutputType(outputTypeCombo->currentIndex());
     return printOpt;
 }
 
 bool PrinterOptionsWidget::validateOptions()
 {
-    if(outputTypeCombo->currentIndex() != int(Print::OutputType::Native))
+    if (outputTypeCombo->currentIndex() != int(Print::OutputType::Native))
     {
-        //Check files
+        // Check files
         const QString path = pathEdit->text();
-        if(path.isEmpty())
+        if (path.isEmpty())
         {
             return false;
         }
 
         const QString pattern = patternEdit->text();
-        if(pattern.isEmpty() && differentFilesCheckBox->isChecked())
+        if (pattern.isEmpty() && differentFilesCheckBox->isChecked())
         {
             return false;
         }
     }
 
-    if(!pathEdit->text().isEmpty())
+    if (!pathEdit->text().isEmpty())
     {
         RecentDirStore::setPath(recentDirKey, pathEdit->text());
     }
@@ -128,11 +128,11 @@ bool PrinterOptionsWidget::validateOptions()
 
 bool PrinterOptionsWidget::isComplete() const
 {
-    if(outputTypeCombo->currentIndex() == int(Print::OutputType::Native))
-        return true; //No need to check files
+    if (outputTypeCombo->currentIndex() == int(Print::OutputType::Native))
+        return true; // No need to check files
 
     bool complete = !pathEdit->text().isEmpty();
-    if(complete && differentFilesCheckBox->isChecked())
+    if (complete && differentFilesCheckBox->isChecked())
         complete = !patternEdit->text().isEmpty();
     return complete;
 }
@@ -171,33 +171,31 @@ void PrinterOptionsWidget::onChooseFile()
 {
     QString path = pathEdit->text();
 
-    if(!path.isEmpty())
+    if (!path.isEmpty())
     {
-        //Check if file or dir is valid
+        // Check if file or dir is valid
         QFileInfo info(path);
-        if(differentFilesCheckBox->isChecked())
+        if (differentFilesCheckBox->isChecked())
         {
-            if(!info.isDir() || !info.exists())
+            if (!info.isDir() || !info.exists())
                 path.clear();
         }
         else
         {
-            if(info.isFile() && !info.absoluteDir().exists())
+            if (info.isFile() && !info.absoluteDir().exists())
                 path.clear();
         }
     }
 
-    //Default to Documents folder
-    if(path.isEmpty())
+    // Default to Documents folder
+    if (path.isEmpty())
         path = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
 
-    if(differentFilesCheckBox->isChecked())
+    if (differentFilesCheckBox->isChecked())
     {
-        path = QFileDialog::getExistingDirectory(this,
-                                                 tr("Choose Folder"),
-                                                 path);
+        path = QFileDialog::getExistingDirectory(this, tr("Choose Folder"), path);
 
-        if(path.isEmpty()) //User canceled dialog
+        if (path.isEmpty()) // User canceled dialog
             return;
     }
     else
@@ -207,25 +205,22 @@ void PrinterOptionsWidget::onChooseFile()
         switch (Print::OutputType(outputTypeCombo->currentIndex()))
         {
         case Print::OutputType::Pdf:
-            ext = QStringLiteral(".pdf");
+            ext      = QStringLiteral(".pdf");
             fullName = FileFormats::tr(FileFormats::pdfFile);
             break;
         case Print::OutputType::Svg:
-            ext = QStringLiteral(".svg");
+            ext      = QStringLiteral(".svg");
             fullName = FileFormats::tr(FileFormats::svgFile);
             break;
         default:
             break;
         }
 
-        path = QFileDialog::getSaveFileName(this,
-                                            tr("Choose file"),
-                                            path,
-                                            fullName);
-        if(path.isEmpty()) //User canceled dialog
+        path = QFileDialog::getSaveFileName(this, tr("Choose file"), path, fullName);
+        if (path.isEmpty()) // User canceled dialog
             return;
 
-        if(!path.endsWith(ext))
+        if (!path.endsWith(ext))
             path.append(ext);
     }
 
@@ -234,14 +229,14 @@ void PrinterOptionsWidget::onChooseFile()
 
 void PrinterOptionsWidget::updateDifferentFiles()
 {
-    //Pattern is applicable only if printing multiple files
+    // Pattern is applicable only if printing multiple files
     patternEdit->setEnabled(differentFilesCheckBox->isChecked());
 
-    //If pathEdit contains a file but user checks 'Different Files'
-    //We go up to file directory and use that
+    // If pathEdit contains a file but user checks 'Different Files'
+    // We go up to file directory and use that
 
     QString path = pathEdit->text();
-    if(path.isEmpty())
+    if (path.isEmpty())
         return;
 
     QString ext;
@@ -257,18 +252,18 @@ void PrinterOptionsWidget::updateDifferentFiles()
         break;
     }
 
-    if(differentFilesCheckBox->isChecked())
+    if (differentFilesCheckBox->isChecked())
     {
-        if(path.endsWith(ext))
+        if (path.endsWith(ext))
         {
             path = path.left(path.lastIndexOf('/'));
         }
     }
     else
     {
-        if(!path.endsWith(ext))
+        if (!path.endsWith(ext))
         {
-            if(path.endsWith('/'))
+            if (path.endsWith('/'))
                 path.append(QStringLiteral("file%1").arg(ext));
             else
                 path.append(QStringLiteral("/file%1").arg(ext));
@@ -280,47 +275,47 @@ void PrinterOptionsWidget::updateDifferentFiles()
 
 void PrinterOptionsWidget::onOpenPageSetup()
 {
-    if(!m_printer)
+    if (!m_printer)
         return;
 
     QPageLayout pageLay;
 
-    if(m_printer->outputFormat() == QPrinter::NativeFormat)
+    if (m_printer->outputFormat() == QPrinter::NativeFormat)
     {
-        //Native dialog for native printer
+        // Native dialog for native printer
         OwningQPointer<QPrintDialog> dlg = new QPrintDialog(m_printer, this);
         dlg->exec();
 
-        //Get after dialog finished
+        // Get after dialog finished
         pageLay = m_printer->pageLayout();
 
-        //Fix possible wrong page size
-        QPageSize pageSz = pageLay.pageSize();
+        // Fix possible wrong page size
+        QPageSize pageSz                = pageLay.pageSize();
         QPageLayout::Orientation orient = pageLay.orientation();
-        pageSz = PrintHelper::fixPageSize(pageSz, orient);
+        pageSz                          = PrintHelper::fixPageSize(pageSz, orient);
         pageLay.setPageSize(pageSz);
         pageLay.setOrientation(orient);
     }
     else
     {
-        //Custom dialog for PDF printer
+        // Custom dialog for PDF printer
         OwningQPointer<CustomPageSetupDlg> dlg = new CustomPageSetupDlg(this);
 
-        pageLay = m_printer->pageLayout();
+        pageLay                                = m_printer->pageLayout();
         dlg->setPageSize(pageLay.pageSize());
         dlg->setPageOrient(pageLay.orientation());
-        if(dlg->exec() != QDialog::Accepted || !dlg)
+        if (dlg->exec() != QDialog::Accepted || !dlg)
             return;
 
-        //Update layout page size
+        // Update layout page size
         pageLay.setPageSize(dlg->getPageSize());
         pageLay.setOrientation(dlg->getPageOrient());
     }
 
-    //Update printer layout
+    // Update printer layout
     m_printer->setPageLayout(pageLay);
 
-    //Apply page size to scene layout
+    // Apply page size to scene layout
     PrintHelper::applyPageSize(pageLay.pageSize(), pageLay.orientation(), scenePageLay);
 }
 
@@ -334,12 +329,12 @@ void PrinterOptionsWidget::onShowPreviewDlg()
 
     dlg->exec();
 
-    if(!dlg)
+    if (!dlg)
         return;
 
-    if(m_printer && m_printer->outputFormat() == QPrinter::PdfFormat)
+    if (m_printer && m_printer->outputFormat() == QPrinter::PdfFormat)
     {
-        //Update page layout
+        // Update page layout
         m_printer->setPageLayout(dlg->getPrinterPageLay());
     }
 
@@ -353,15 +348,16 @@ void PrinterOptionsWidget::updateOutputType()
     fileBox->setEnabled(type != Print::OutputType::Native);
 
     pageLayoutBox->setEnabled(type != Print::OutputType::Svg);
-    pageSetupDlgBut->setText(type == Print::OutputType::Native ? tr("Printer Options") : tr("Page Setup"));
+    pageSetupDlgBut->setText(type == Print::OutputType::Native ? tr("Printer Options")
+                                                               : tr("Page Setup"));
 
-    if(type == Print::OutputType::Svg)
+    if (type == Print::OutputType::Svg)
     {
-        //Svg can only be printed in multiple files
+        // Svg can only be printed in multiple files
         differentFilesCheckBox->setChecked(true);
         differentFilesCheckBox->setEnabled(false);
 
-        //Svg will always be on single page
+        // Svg will always be on single page
         sceneInOnePageCheckBox->setChecked(true);
         sceneInOnePageCheckBox->setEnabled(false);
     }
@@ -369,8 +365,8 @@ void PrinterOptionsWidget::updateOutputType()
     {
         differentFilesCheckBox->setEnabled(true);
 
-        //Printers always need to split in multiple pages
-        if(type == Print::OutputType::Native)
+        // Printers always need to split in multiple pages
+        if (type == Print::OutputType::Native)
         {
             sceneInOnePageCheckBox->setChecked(false);
             sceneInOnePageCheckBox->setEnabled(false);
@@ -381,38 +377,40 @@ void PrinterOptionsWidget::updateOutputType()
         }
     }
 
-    if(m_printer)
+    if (m_printer)
     {
-        m_printer->setOutputFormat(type == Print::OutputType::Native ? QPrinter::NativeFormat : QPrinter::PdfFormat);
+        m_printer->setOutputFormat(type == Print::OutputType::Native ? QPrinter::NativeFormat
+                                                                     : QPrinter::PdfFormat);
     }
 
-    //Check if new otptions are valid
+    // Check if new otptions are valid
     emit completeChanged();
 }
 
 void PrinterOptionsWidget::createFilesBox()
 {
-    fileBox = new QGroupBox(tr("Files"));
+    fileBox                = new QGroupBox(tr("Files"));
 
     differentFilesCheckBox = new QCheckBox(tr("Different Files"));
-    connect(differentFilesCheckBox, &QCheckBox::toggled,
-            this, &PrinterOptionsWidget::updateDifferentFiles);
+    connect(differentFilesCheckBox, &QCheckBox::toggled, this,
+            &PrinterOptionsWidget::updateDifferentFiles);
 
     sceneInOnePageCheckBox = new QCheckBox(tr("Whole scene in one page"));
-    sceneInOnePageCheckBox->setToolTip(tr("This will print a custom page size to fit everything in one page.\n"
-                                          "Not available on native printer."));
+    sceneInOnePageCheckBox->setToolTip(
+      tr("This will print a custom page size to fit everything in one page.\n"
+         "Not available on native printer."));
 
     pathEdit = new QLineEdit;
     connect(pathEdit, &QLineEdit::textChanged, this, &PrinterOptionsWidget::completeChanged);
 
     patternEdit = new QLineEdit;
     connect(patternEdit, &QLineEdit::textChanged, this, &PrinterOptionsWidget::completeChanged);
-    patternEdit->setEnabled(false); //Initially different files is not checked
+    patternEdit->setEnabled(false); // Initially different files is not checked
 
     fileBut = new QPushButton(tr("Choose"));
     connect(fileBut, &QPushButton::clicked, this, &PrinterOptionsWidget::onChooseFile);
 
-    QLabel *label = new QLabel(tr("File(s)"));
+    QLabel *label  = new QLabel(tr("File(s)"));
 
     QGridLayout *l = new QGridLayout;
     l->addWidget(differentFilesCheckBox, 0, 0, 1, 2);
@@ -433,9 +431,9 @@ void PrinterOptionsWidget::createFilesBox()
 
 void PrinterOptionsWidget::createPageLayoutBox()
 {
-    pageLayoutBox = new QGroupBox(tr("Page Layout"));
+    pageLayoutBox   = new QGroupBox(tr("Page Layout"));
 
-    pageSetupDlgBut = new QPushButton; //Text is set in updateOutputType()
+    pageSetupDlgBut = new QPushButton; // Text is set in updateOutputType()
     connect(pageSetupDlgBut, &QPushButton::clicked, this, &PrinterOptionsWidget::onOpenPageSetup);
 
     previewDlgBut = new QPushButton(tr("Preview"));

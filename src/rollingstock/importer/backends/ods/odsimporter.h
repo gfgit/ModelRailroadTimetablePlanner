@@ -37,7 +37,7 @@ public:
     bool readNextTable(QXmlStreamReader &xml);
 
 private:
-    void readTable(QXmlStreamReader& xml);
+    void readTable(QXmlStreamReader &xml);
     void readRow(QXmlStreamReader &xml, QByteArray &model, qint64 &number);
     QString readCell(QXmlStreamReader &xml);
 
@@ -53,9 +53,9 @@ private:
     sqlite3pp::query q_findModel;
     sqlite3pp::query q_findImportedModel;
 
-    const int tableFirstRow;     //Start from 1 (not 0)
-    const int tableRSNumberCol;  //Start from 1 (not 0)
-    const int tableModelNameCol; //Start from 1 (not 0)
+    const int tableFirstRow;     // Start from 1 (not 0)
+    const int tableRSNumberCol;  // Start from 1 (not 0)
+    const int tableModelNameCol; // Start from 1 (not 0)
     const int importMode;
 
     int sheetIdx;

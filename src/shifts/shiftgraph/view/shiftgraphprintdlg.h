@@ -58,8 +58,8 @@ public:
 private slots:
     void updatePrintButton();
     void progressMaxChanged(int max);
-    void progressChanged(int val, const QString& msg);
-    void handleProgressFinished(bool success, const QString& errMsg);
+    void progressChanged(int val, const QString &msg);
+    void handleProgressFinished(bool success, const QString &errMsg);
 
 private:
     sqlite3pp::database &mDb;

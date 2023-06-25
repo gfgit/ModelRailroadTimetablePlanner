@@ -37,15 +37,15 @@
 #include "sceneselectionmodel.h"
 
 PrintSelectionPage::PrintSelectionPage(PrintWizard *w, QWidget *parent) :
-    QWizardPage (parent),
+    QWizardPage(parent),
     mWizard(w)
 {
     SceneSelectionModel *model = mWizard->getSelectionModel();
 
     setupComboBoxes();
 
-    addBut = new QPushButton(tr("Add"));
-    remBut = new QPushButton(tr("Remove"));
+    addBut       = new QPushButton(tr("Add"));
+    remBut       = new QPushButton(tr("Remove"));
     removeAllBut = new QPushButton(tr("Unselect All"));
 
     connect(addBut, &QPushButton::clicked, this, &PrintSelectionPage::onAddItem);
@@ -56,7 +56,8 @@ PrintSelectionPage::PrintSelectionPage(PrintWizard *w, QWidget *parent) :
     view->setModel(model);
 
     statusLabel = new QLabel;
-    connect(model, &SceneSelectionModel::selectionCountChanged, this, &PrintSelectionPage::updateSelectionCount);
+    connect(model, &SceneSelectionModel::selectionCountChanged, this,
+            &PrintSelectionPage::updateSelectionCount);
     updateSelectionCount();
 
     QVBoxLayout *lay = new QVBoxLayout(this);
@@ -84,23 +85,23 @@ bool PrintSelectionPage::isComplete() const
 
 void PrintSelectionPage::comboBoxesChanged()
 {
-    SceneSelectionModel *model = mWizard->getSelectionModel();
+    SceneSelectionModel *model                    = mWizard->getSelectionModel();
 
-    const int modeIdx = modeCombo->currentIndex();
+    const int modeIdx                             = modeCombo->currentIndex();
     const SceneSelectionModel::SelectionMode mode = SceneSelectionModel::SelectionMode(modeIdx);
-    LineGraphType type = LineGraphType(typeCombo->currentIndex());
+    LineGraphType type                            = LineGraphType(typeCombo->currentIndex());
 
-    if(mode == SceneSelectionModel::AllOfTypeExceptSelected)
+    if (mode == SceneSelectionModel::AllOfTypeExceptSelected)
     {
-        //Type cannot be NoGraph
-        if(type == LineGraphType::NoGraph)
+        // Type cannot be NoGraph
+        if (type == LineGraphType::NoGraph)
             type = model->getSelectedType();
 
-        //Default to RailwayLine if still NoGraph
-        if(type == LineGraphType::NoGraph)
+        // Default to RailwayLine if still NoGraph
+        if (type == LineGraphType::NoGraph)
             type = LineGraphType::RailwayLine;
 
-        //Update combo box
+        // Update combo box
         typeCombo->setCurrentIndex(int(type));
     }
 
@@ -109,10 +110,10 @@ void PrintSelectionPage::comboBoxesChanged()
 
 void PrintSelectionPage::updateComboBoxesFromModel()
 {
-    SceneSelectionModel *model = mWizard->getSelectionModel();
+    SceneSelectionModel *model                    = mWizard->getSelectionModel();
 
     const SceneSelectionModel::SelectionMode mode = model->getMode();
-    const LineGraphType type = model->getSelectedType();
+    const LineGraphType type                      = model->getSelectedType();
 
     modeCombo->setCurrentIndex(int(mode));
     typeCombo->setCurrentIndex(int(type));
@@ -130,12 +131,12 @@ void PrintSelectionPage::updateSelectionCount()
 
 void PrintSelectionPage::onAddItem()
 {
-    SceneSelectionModel *model = mWizard->getSelectionModel();
+    SceneSelectionModel *model                = mWizard->getSelectionModel();
 
-    const LineGraphType requestedType = model->getSelectedType();
+    const LineGraphType requestedType         = model->getSelectedType();
 
-    OwningQPointer<QDialog> dlg = new QDialog(this);
-    QVBoxLayout *lay = new QVBoxLayout(dlg);
+    OwningQPointer<QDialog> dlg               = new QDialog(this);
+    QVBoxLayout *lay                          = new QVBoxLayout(dlg);
 
     LineGraphSelectionWidget *selectionWidget = new LineGraphSelectionWidget;
     selectionWidget->setGraphType(requestedType);
@@ -149,7 +150,7 @@ void PrintSelectionPage::onAddItem()
     auto updateDlg = [selectionWidget, box, requestedType]()
     {
         LineGraphType type = selectionWidget->getGraphType();
-        if(requestedType != LineGraphType::NoGraph && type != requestedType)
+        if (requestedType != LineGraphType::NoGraph && type != requestedType)
         {
             selectionWidget->setGraphType(requestedType);
             return;
@@ -161,24 +162,24 @@ void PrintSelectionPage::onAddItem()
     connect(selectionWidget, &LineGraphSelectionWidget::graphChanged, this, updateDlg);
     updateDlg();
 
-    if(dlg->exec() != QDialog::Accepted)
+    if (dlg->exec() != QDialog::Accepted)
         return;
 
     SceneSelectionModel::Entry entry;
     entry.objectId = selectionWidget->getObjectId();
-    entry.name = selectionWidget->getObjectName();
-    entry.type = selectionWidget->getGraphType();
+    entry.name     = selectionWidget->getObjectName();
+    entry.type     = selectionWidget->getGraphType();
 
     model->addEntry(entry);
 }
 
 void PrintSelectionPage::onRemoveItem()
 {
-    if(!view->selectionModel()->hasSelection())
+    if (!view->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = view->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
     mWizard->getSelectionModel()->removeAt(idx.row());
@@ -188,15 +189,17 @@ void PrintSelectionPage::setupComboBoxes()
 {
     SceneSelectionModel *model = mWizard->getSelectionModel();
 
-    modeCombo = new QComboBox;
-    typeCombo = new QComboBox;
+    modeCombo                  = new QComboBox;
+    typeCombo                  = new QComboBox;
 
-    connect(modeCombo, qOverload<int>(&QComboBox::activated), this, &PrintSelectionPage::comboBoxesChanged);
-    connect(typeCombo, qOverload<int>(&QComboBox::activated), this, &PrintSelectionPage::comboBoxesChanged);
+    connect(modeCombo, qOverload<int>(&QComboBox::activated), this,
+            &PrintSelectionPage::comboBoxesChanged);
+    connect(typeCombo, qOverload<int>(&QComboBox::activated), this,
+            &PrintSelectionPage::comboBoxesChanged);
 
-    QStringList  items;
+    QStringList items;
     items.reserve(SceneSelectionModel::NModes);
-    for(int i = 0; i < SceneSelectionModel::NModes; i++)
+    for (int i = 0; i < SceneSelectionModel::NModes; i++)
     {
         items.append(SceneSelectionModel::getModeName(SceneSelectionModel::SelectionMode(i)));
     }
@@ -204,10 +207,11 @@ void PrintSelectionPage::setupComboBoxes()
 
     items.clear();
     items.reserve(int(LineGraphType::NTypes));
-    for(int i = 0; i < int(LineGraphType::NTypes); i++)
+    for (int i = 0; i < int(LineGraphType::NTypes); i++)
         items.append(utils::getLineGraphTypeName(LineGraphType(i)));
     typeCombo->addItems(items);
 
-    connect(model, &SceneSelectionModel::selectionModeChanged, this, &PrintSelectionPage::updateComboBoxesFromModel);
+    connect(model, &SceneSelectionModel::selectionModeChanged, this,
+            &PrintSelectionPage::updateComboBoxesFromModel);
     updateComboBoxesFromModel();
 }

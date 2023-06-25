@@ -22,16 +22,16 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QMap>
-#include <QTime>
+#    include <QMap>
+#    include <QTime>
 
-#include "utils/types.h"
+#    include "utils/types.h"
 
 struct JobCrossingErrorData
 {
-    db_id jobId = 0;
+    db_id jobId     = 0;
 
-    db_id stopId = 0;
+    db_id stopId    = 0;
     db_id stationId = 0;
 
     JobStopEntry otherJob;
@@ -44,7 +44,8 @@ struct JobCrossingErrorData
     enum Type
     {
         NoError = 0,
-        JobCrossing, //NOTE: arrival refers to next job stop so it comes after departure (same for otherArr/Dep)
+        JobCrossing, // NOTE: arrival refers to next job stop so it comes after departure (same for
+                     // otherArr/Dep)
         JobPassing
     };
 
@@ -56,8 +57,14 @@ struct JobCrossingErrorList
     JobEntry job;
     QVector<JobCrossingErrorData> errors;
 
-    inline int childCount() const { return errors.size(); }
-    inline const JobCrossingErrorData *ptrForRow(int row) const { return &errors.at(row); }
+    inline int childCount() const
+    {
+        return errors.size();
+    }
+    inline const JobCrossingErrorData *ptrForRow(int row) const
+    {
+        return &errors.at(row);
+    }
 };
 
 /*!
@@ -74,11 +81,14 @@ public:
 
     JobCrossingErrorMap();
 
-    inline int topLevelCount() const { return map.size(); }
+    inline int topLevelCount() const
+    {
+        return map.size();
+    }
 
     inline const JobCrossingErrorList *getTopLevelAtRow(int row) const
     {
-        if(row >= topLevelCount())
+        if (row >= topLevelCount())
             return nullptr;
         return &(map.constBegin() + row).value();
     }
@@ -86,7 +96,7 @@ public:
     inline const JobCrossingErrorList *getParent(JobCrossingErrorData *child) const
     {
         auto it = map.constFind(child->jobId);
-        if(it == map.constEnd())
+        if (it == map.constEnd())
             return nullptr;
         return &it.value();
     }
@@ -94,7 +104,7 @@ public:
     inline int getParentRow(JobCrossingErrorData *child) const
     {
         auto it = map.constFind(child->jobId);
-        if(it == map.constEnd())
+        if (it == map.constEnd())
             return -1;
         return std::distance(map.constBegin(), it);
     }
@@ -103,7 +113,7 @@ public:
 
     void renameJob(db_id newJobId, db_id oldJobId);
 
-    void merge(const ErrorMap& results);
+    void merge(const ErrorMap &results);
 
 public:
     ErrorMap map;

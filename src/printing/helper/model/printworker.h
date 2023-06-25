@@ -43,21 +43,20 @@ class PrintProgressEvent : public QEvent
 public:
     enum
     {
-        ProgressError = -1,
+        ProgressError         = -1,
         ProgressAbortedByUser = -2,
-        ProgressMaxFinished = -3
+        ProgressMaxFinished   = -3
     };
 
     static constexpr Type _Type = Type(CustomEvents::PrintProgress);
 
-    PrintProgressEvent(QRunnable *self, int pr, const QString& descrOrErr);
+    PrintProgressEvent(QRunnable *self, int pr, const QString &descrOrErr);
 
 public:
     QRunnable *task;
     int progress;
     QString descriptionOrError;
 };
-
 
 class PrintWorker : public IQuittableTask
 {
@@ -67,15 +66,18 @@ public:
 
     void setPrinter(QPrinter *printer);
 
-    inline Print::PrintBasicOptions getPrintOpt() const { return printOpt; };
+    inline Print::PrintBasicOptions getPrintOpt() const
+    {
+        return printOpt;
+    };
     void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
 
     void setCollection(IGraphSceneCollection *newCollection);
     int getMaxProgress() const;
 
-    void setScenePageLay(const Print::PageLayoutOpt& pageLay);
+    void setScenePageLay(const Print::PageLayoutOpt &pageLay);
 
-    //IQuittableTask
+    // IQuittableTask
     void run() override;
 
 private:
@@ -84,18 +86,18 @@ private:
     bool printPaged();
 
 private:
-    typedef std::function<bool(QPainter *painter,
-                               const QString& title, const QRectF& sourceRect,
-                               const QString& type, int progressiveNum)> BeginPaintFunc;
+    typedef std::function<bool(QPainter *painter, const QString &title, const QRectF &sourceRect,
+                               const QString &type, int progressiveNum)>
+      BeginPaintFunc;
 
     bool printInternal(BeginPaintFunc func, bool endPaintingEveryPage);
     bool printInternalPaged(BeginPaintFunc func, bool endPaintingEveryPage);
 
 public:
-    //For each scene, count 10 steps
+    // For each scene, count 10 steps
     static constexpr int ProgressStepsForScene = 10;
 
-    bool sendProgressOrAbort(int progress, const QString& msg);
+    bool sendProgressOrAbort(int progress, const QString &msg);
 
 private:
     QPrinter *m_printer;

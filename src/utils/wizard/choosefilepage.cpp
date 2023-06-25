@@ -36,7 +36,7 @@ ChooseFilePage::ChooseFilePage(QWidget *parent) :
 {
     QHBoxLayout *lay = new QHBoxLayout(this);
 
-    pathEdit = new QLineEdit;
+    pathEdit         = new QLineEdit;
     pathEdit->setPlaceholderText(tr("Insert path here or click 'Choose' button"));
     connect(pathEdit, &QLineEdit::textChanged, this, &QWizardPage::completeChanged);
     lay->addWidget(pathEdit);
@@ -48,8 +48,8 @@ ChooseFilePage::ChooseFilePage(QWidget *parent) :
     setTitle(tr("Choose file"));
     setSubTitle(tr("Choose a file to import in selected format"));
 
-    //Prevent user from going back to this page and change file.
-    //If user wants to change file he has to Cancel the wizard and start it again
+    // Prevent user from going back to this page and change file.
+    // If user wants to change file he has to Cancel the wizard and start it again
     setCommitPage(true);
 }
 
@@ -60,13 +60,13 @@ bool ChooseFilePage::isComplete() const
 
 void ChooseFilePage::initializePage()
 {
-    //HACK: I don't like the 'Commit' button. This hack makes it similar to 'Next' button
+    // HACK: I don't like the 'Commit' button. This hack makes it similar to 'Next' button
     setButtonText(QWizard::CommitButton, wizard()->buttonText(QWizard::NextButton));
 }
 
 void ChooseFilePage::setFileDlgOptions(const QString &dlgTitle, const QStringList &fileFormats)
 {
-    fileDlgTitle = dlgTitle;
+    fileDlgTitle   = dlgTitle;
     fileDlgFormats = fileFormats;
 }
 
@@ -75,7 +75,7 @@ bool ChooseFilePage::validatePage()
     QString fileName = pathEdit->text();
 
     QFileInfo f(fileName);
-    if(f.exists() && f.isFile())
+    if (f.exists() && f.isFile())
     {
         emit fileChosen(fileName);
         return true;
@@ -93,7 +93,7 @@ void ChooseFilePage::onChoose()
     dlg->setAcceptMode(QFileDialog::AcceptOpen);
     dlg->setNameFilters(fileDlgFormats);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();

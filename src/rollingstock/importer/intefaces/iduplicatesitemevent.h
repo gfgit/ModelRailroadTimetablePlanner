@@ -32,9 +32,9 @@ public:
 
     enum
     {
-        ProgressError = -1,
+        ProgressError         = -1,
         ProgressAbortedByUser = -2,
-        ProgressMaxFinished = -3
+        ProgressMaxFinished   = -3
     };
 
     static constexpr Type _Type = Type(CustomEvents::RsImportCheckDuplicates);

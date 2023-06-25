@@ -30,7 +30,7 @@ JobPassingsModel::JobPassingsModel(QObject *parent) :
 
 QVariant JobPassingsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -71,7 +71,7 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols)
         return QVariant();
 
-    const Entry& e = m_data.at(idx.row());
+    const Entry &e = m_data.at(idx.row());
     switch (role)
     {
     case Qt::DisplayRole:
@@ -97,7 +97,7 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
     {
         QFont f;
         f.setPointSize(10);
-        if(idx.column() == JobNameCol)
+        if (idx.column() == JobNameCol)
             f.setBold(true);
         return f;
     }

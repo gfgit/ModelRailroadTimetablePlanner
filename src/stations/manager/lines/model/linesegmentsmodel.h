@@ -33,8 +33,10 @@
 /* NOTE: LineSegmentsModel should be loaded in signle batch
  *
  * Loading on demand has problems:
- * - You must be careful on row counting like exclude/include last row which is a station without next segment
- * - You must tell the user that there is a page after the current one otherwise he may think the line ends there.
+ * - You must be careful on row counting like exclude/include last row which is a station without
+ * next segment
+ * - You must tell the user that there is a page after the current one otherwise he may think the
+ * line ends there.
  * - You cannot easily calculate the position of first page item
  *   (You must always start from first segment which may be on a previous page)
  *
@@ -52,11 +54,14 @@ class LineSegmentsModel : public IPagedItemModel
     Q_OBJECT
 
 public:
+    enum
+    {
+        BatchSize = MaxSegmentsPerLine
+    };
 
-    enum { BatchSize = MaxSegmentsPerLine };
-
-    enum Columns {
-        SegmentPosCol = -1, //Invisible (Vertical header)
+    enum Columns
+    {
+        SegmentPosCol           = -1, // Invisible (Vertical header)
         StationOrSegmentNameCol = 0,
         KmPosCol,
         MaxSpeedCol,
@@ -83,7 +88,8 @@ public:
     bool event(QEvent *e) override;
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -94,7 +100,7 @@ public:
     // IPagedItemModel
 
     // Cached rows management
-    //NOTE: custom implementation
+    // NOTE: custom implementation
     virtual void clearCache() override;
     virtual void refreshData(bool forceUpdate = false) override;
 
@@ -104,25 +110,28 @@ public:
     bool getLineInfo(QString &nameOut, int &startMetersOut) const;
     bool setLineInfo(const QString &name, int startMeters);
 
-    inline int getSegmentCount() const { return curItemCount; }
+    inline int getSegmentCount() const
+    {
+        return curItemCount;
+    }
     inline db_id getLastStation() const
     {
-        //Use fake last segment which contains last station
-        if(segments.size() < 1)
+        // Use fake last segment which contains last station
+        if (segments.size() < 1)
             return 0;
         return segments.last().fromStationId;
     }
     inline db_id getLastRailwaySegment() const
     {
-        //Use ONE BUT LAST segment which contains last railway segment
-        if(segments.size() < 2)
+        // Use ONE BUT LAST segment which contains last railway segment
+        if (segments.size() < 2)
             return 0;
         return segments[segments.size() - 2].railwaySegmentId;
     }
     inline QString getStationNameAt(int itemPos) const
     {
-        //Use ONE BUT LAST segment which contains last railway segment
-        if(itemPos >= segments.size())
+        // Use ONE BUT LAST segment which contains last railway segment
+        if (itemPos >= segments.size())
             return QString();
         return segments[itemPos].fromStationName;
     }
@@ -130,16 +139,23 @@ public:
     bool removeSegmentsAfterPosInclusive(int pos);
     bool addStation(db_id railwaySegmentId, bool reverse);
 
-    //Row Type
-    //Event: stations
-    //Odd:   segments
-    enum RowType {
+    // Row Type
+    // Event: stations
+    // Odd:   segments
+    enum RowType
+    {
         StationRow,
         SegmentRow
     };
 
-    inline RowType getRowType(int row) const { return (row % 2) == 0 ? StationRow : SegmentRow; }
-    inline int getItemIndex(int row) const { return (row - (row % 2)) / 2; }
+    inline RowType getRowType(int row) const
+    {
+        return (row % 2) == 0 ? StationRow : SegmentRow;
+    }
+    inline int getItemIndex(int row) const
+    {
+        return (row - (row % 2)) / 2;
+    }
 
 private:
     void fetchRows();

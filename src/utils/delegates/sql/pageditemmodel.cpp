@@ -31,18 +31,17 @@ IPagedItemModel::IPagedItemModel(const int itemsPerPage, sqlite3pp::database &db
     sortColumn(0),
     ItemsPerPage(itemsPerPage)
 {
-
 }
 
 void IPagedItemModel::refreshData(bool forceUpdate)
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
-    emit itemsReady(-1, -1); //Notify we are about to refresh
+    emit itemsReady(-1, -1); // Notify we are about to refresh
 
     qint64 count = recalcTotalItemCount();
-    if(count != totalItemsCount || forceUpdate)
+    if (count != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
@@ -50,12 +49,12 @@ void IPagedItemModel::refreshData(bool forceUpdate)
         totalItemsCount = count;
         emit totalItemsCountChanged(totalItemsCount);
 
-        //Round up division
+        // Round up division
         const int rem = count % ItemsPerPage;
-        pageCount = count / ItemsPerPage + (rem != 0);
+        pageCount     = count / ItemsPerPage + (rem != 0);
         emit pageCountChanged(pageCount);
 
-        if(curPage >= pageCount)
+        if (curPage >= pageCount)
         {
             switchToPage(pageCount - 1);
         }
@@ -68,7 +67,7 @@ void IPagedItemModel::refreshData(bool forceUpdate)
 
 void IPagedItemModel::setSortingColumn(int col)
 {
-    //Do nothing, it must be reimplemented
+    // Do nothing, it must be reimplemented
     Q_UNUSED(col)
 }
 
@@ -94,15 +93,15 @@ int IPagedItemModel::currentPage()
 
 void IPagedItemModel::switchToPage(int page)
 {
-    if(curPage == page || page < 0 || page >= pageCount)
+    if (curPage == page || page < 0 || page >= pageCount)
         return;
 
     clearCache();
-    curPage = page;
+    curPage         = page;
 
-    const int rem = totalItemsCount % ItemsPerPage;
+    const int rem   = totalItemsCount % ItemsPerPage;
     const int items = (curPage == pageCount - 1 && rem) ? rem : ItemsPerPage;
-    if(items != curItemCount)
+    if (items != curItemCount)
     {
         beginResetModel();
         curItemCount = items;
@@ -112,7 +111,7 @@ void IPagedItemModel::switchToPage(int page)
     emit currentPageChanged(curPage);
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, columnCount() - 1);
+    QModelIndex last  = index(curItemCount - 1, columnCount() - 1);
     emit dataChanged(first, last);
 }
 
@@ -133,12 +132,12 @@ void IPagedItemModel::clearCache_slot()
 {
     clearCache();
     QModelIndex start = index(0, 0);
-    QModelIndex end = index(rowCount() - 1, columnCount() - 1);
+    QModelIndex end   = index(rowCount() - 1, columnCount() - 1);
     emit dataChanged(start, end);
 }
 
 qint64 IPagedItemModel::recalcTotalItemCount()
 {
-    //NOTE: either override this or refreshData()
-    return 0; //Default implementation
+    // NOTE: either override this or refreshData()
+    return 0; // Default implementation
 }

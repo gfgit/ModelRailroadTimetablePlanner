@@ -26,7 +26,7 @@ enum Mode
     Owners,
     Models,
     Rollingstock
-}; //FIXME: maybe remove
-}
+}; // FIXME: maybe remove
+} // namespace ModelModes
 
 #endif // MODEL_MODE_H

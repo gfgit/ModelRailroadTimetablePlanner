@@ -27,7 +27,7 @@ class ComboDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-    ComboDelegate(const QStringList& list, int role, QObject *parent = nullptr);
+    ComboDelegate(const QStringList &list, int role, QObject *parent = nullptr);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const override;
@@ -36,8 +36,8 @@ public:
     void setModelData(QWidget *editor, QAbstractItemModel *model,
                       const QModelIndex &index) const override;
 
-    void updateEditorGeometry(QWidget *editor,
-                              const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                              const QModelIndex &index) const override;
 
 private slots:
     void onItemClicked();

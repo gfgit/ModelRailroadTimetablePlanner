@@ -21,5 +21,4 @@
 
 StationGraphObject::StationGraphObject()
 {
-
 }

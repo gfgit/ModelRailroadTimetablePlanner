@@ -57,18 +57,18 @@ public:
      */
     enum class PendingUpdate
     {
-        NothingToDo = 0x0, //!< No content needs updating
-        ReloadJobs = 0x1, //!< Only Jobs need to be reloaded
+        NothingToDo        = 0x0, //!< No content needs updating
+        ReloadJobs         = 0x1, //!< Only Jobs need to be reloaded
         ReloadStationNames = 0x2, //!< Only Station Names but not Station Plan has changed
-        FullReload = 0x4 //!< Do a full reload
+        FullReload         = 0x4  //!< Do a full reload
     };
     Q_DECLARE_FLAGS(PendingUpdateFlags, PendingUpdate)
 
     LineGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    void renderContents(QPainter *painter, const QRectF& sceneRect) override;
-    void renderHeader(QPainter *painter, const QRectF& sceneRect,
-                      Qt::Orientation orient, double scroll) override;
+    void renderContents(QPainter *painter, const QRectF &sceneRect) override;
+    void renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient,
+                      double scroll) override;
 
     /*!
      * \brief Load graph contents
@@ -109,7 +109,7 @@ public:
      * \param pos Point in scene coordinates
      * \param tolerance A tolerance if mouse doesn't exactly click on job item
      */
-    JobStopEntry getJobAt(const QPointF& pos, const double tolerance);
+    JobStopEntry getJobAt(const QPointF &pos, const double tolerance);
 
     inline LineGraphType getGraphType() const
     {
@@ -154,7 +154,10 @@ public:
      *
      * \sa setDrawSelection()
      */
-    inline bool getDrawSelection() { return m_drawSelection; }
+    inline bool getDrawSelection()
+    {
+        return m_drawSelection;
+    }
 
     /*!
      * \brief setDrawSelection
@@ -165,7 +168,10 @@ public:
      *
      * \sa getDrawSelection()
      */
-    inline void setDrawSelection(bool val) { m_drawSelection = val; }
+    inline void setDrawSelection(bool val)
+    {
+        m_drawSelection = val;
+    }
 
     /*!
      * \brief requestShowZone
@@ -208,7 +214,6 @@ public slots:
     void reload();
 
 private:
-
     /*!
      * \brief Graph of the job while is moving
      *
@@ -308,7 +313,8 @@ private:
      * Load job segments and stores them in 'from' station
      * \sa loadStationJobStops()
      */
-    bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromSt, const StationGraphObject &toSt);
+    bool loadSegmentJobs(StationPosEntry &stPos, const StationGraphObject &fromSt,
+                         const StationGraphObject &toSt);
 
     /*!
      * \brief Update job selection category
@@ -324,7 +330,7 @@ private:
     friend class BackgroundHelper;
     friend class LineGraphManager;
 
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
 
     /*!
      * \brief Graph Object ID

@@ -95,11 +95,11 @@ private:
     StopCouplingModel *coupledModel;
     StopCouplingModel *uncoupledModel;
 
-    TrainAssetModel   *trainAssetModelBefore;
-    TrainAssetModel   *trainAssetModelAfter;
+    TrainAssetModel *trainAssetModelBefore;
+    TrainAssetModel *trainAssetModelAfter;
 
-    JobPassingsModel  *passingsModel;
-    JobPassingsModel  *crossingsModel;
+    JobPassingsModel *passingsModel;
+    JobPassingsModel *crossingsModel;
 
     bool readOnly;
 };

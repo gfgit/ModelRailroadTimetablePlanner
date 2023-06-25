@@ -31,7 +31,6 @@ class QToolBar;
 class QScrollArea;
 class QTimeEdit;
 
-
 namespace sqlite3pp {
 class database;
 }
@@ -39,7 +38,7 @@ class database;
 namespace ssplib {
 class StationPlan;
 class SSPViewer;
-}
+} // namespace ssplib
 
 struct StationSVGJobStops;
 
@@ -66,16 +65,16 @@ signals:
 public slots:
     void reloadPlan();
     void showJobs(bool val);
-    void setJobTime(const QTime& t);
+    void setJobTime(const QTime &t);
 
 private slots:
     void setZoom(int val, bool force = false);
     void setZoom_slot(int val);
     void zoomToFit();
-    void onLabelClicked(qint64 gateId, QChar letter, const QString& text);
-    void onTrackClicked(qint64 trackId, const QString& name);
-    void onTrackConnClicked(qint64 connId, qint64 trackId, qint64 gateId,
-                            int gateTrackPos, int trackSide);
+    void onLabelClicked(qint64 gateId, QChar letter, const QString &text);
+    void onTrackClicked(qint64 trackId, const QString &name);
+    void onTrackConnClicked(qint64 connId, qint64 trackId, qint64 gateId, int gateTrackPos,
+                            int trackSide);
 
     void startJobTimer();
     void stopJobTimer();
@@ -96,10 +95,10 @@ private:
     db_id stationId;
 
     QToolBar *toolBar;
-    QAction  *act_showJobs;
-    QAction  *act_timeEdit;
-    QAction  *act_prevTime;
-    QAction  *act_nextTime;
+    QAction *act_showJobs;
+    QAction *act_timeEdit;
+    QAction *act_prevTime;
+    QAction *act_nextTime;
     QTimeEdit *mTimeEdit;
 
     QScrollArea *scrollArea;

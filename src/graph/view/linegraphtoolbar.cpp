@@ -49,7 +49,8 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     lay->setContentsMargins(0, 0, 0, 0);
 
     selectionWidget = new LineGraphSelectionWidget;
-    connect(selectionWidget, &LineGraphSelectionWidget::graphChanged, this, &LineGraphToolbar::onWidgetGraphChanged);
+    connect(selectionWidget, &LineGraphSelectionWidget::graphChanged, this,
+            &LineGraphToolbar::onWidgetGraphChanged);
     lay->addWidget(selectionWidget);
 
     redrawBut = new QPushButton(tr("Redraw"));
@@ -70,57 +71,59 @@ LineGraphToolbar::LineGraphToolbar(QWidget *parent) :
     zoomSpinBox->setRange(25, 400);
     zoomSpinBox->setValue(mZoom);
     zoomSpinBox->setSuffix(QChar('%'));
-    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged), this, &LineGraphToolbar::updateZoomLevel);
+    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged), this,
+            &LineGraphToolbar::updateZoomLevel);
     lay->addWidget(zoomSpinBox);
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
-    //Accept focus events by click
+    // Accept focus events by click
     setFocusPolicy(Qt::ClickFocus);
 
-    //Install event filter to catch focus events on children widgets
-    for(QObject *child : selectionWidget->children())
+    // Install event filter to catch focus events on children widgets
+    for (QObject *child : selectionWidget->children())
     {
-        if(child->isWidgetType())
+        if (child->isWidgetType())
             child->installEventFilter(this);
     }
 
-    //Install event filter on Zoom Slider to catch double click
+    // Install event filter on Zoom Slider to catch double click
     zoomSlider->installEventFilter(this);
 }
 
 LineGraphToolbar::~LineGraphToolbar()
 {
-
 }
 
 void LineGraphToolbar::setScene(LineGraphScene *scene)
 {
-    if(m_scene)
+    if (m_scene)
     {
-        disconnect(m_scene, &LineGraphScene::graphChanged, this, &LineGraphToolbar::onSceneGraphChanged);
+        disconnect(m_scene, &LineGraphScene::graphChanged, this,
+                   &LineGraphToolbar::onSceneGraphChanged);
         disconnect(m_scene, &QObject::destroyed, this, &LineGraphToolbar::onSceneDestroyed);
     }
     m_scene = scene;
-    if(m_scene)
+    if (m_scene)
     {
-        connect(m_scene, &LineGraphScene::graphChanged, this, &LineGraphToolbar::onSceneGraphChanged);
+        connect(m_scene, &LineGraphScene::graphChanged, this,
+                &LineGraphToolbar::onSceneGraphChanged);
         connect(m_scene, &QObject::destroyed, this, &LineGraphToolbar::onSceneDestroyed);
     }
 }
 
 bool LineGraphToolbar::eventFilter(QObject *watched, QEvent *ev)
 {
-    if(ev->type() == QEvent::FocusIn)
+    if (ev->type() == QEvent::FocusIn)
     {
-        //If any of our child widgets receives focus, activate our scene
-        if(m_scene)
+        // If any of our child widgets receives focus, activate our scene
+        if (m_scene)
             m_scene->activateScene();
     }
 
-    if(watched == zoomSlider && ev->type() == QEvent::MouseButtonDblClick)
+    if (watched == zoomSlider && ev->type() == QEvent::MouseButtonDblClick)
     {
-        //Zoom Slider was double clicked, reset zoom level to 100
+        // Zoom Slider was double clicked, reset zoom level to 100
         updateZoomLevel(100);
     }
 
@@ -130,14 +133,14 @@ bool LineGraphToolbar::eventFilter(QObject *watched, QEvent *ev)
 void LineGraphToolbar::resetToolbarToScene()
 {
     LineGraphType type = LineGraphType::NoGraph;
-    db_id objectId = 0;
+    db_id objectId     = 0;
     QString name;
 
-    if(m_scene)
+    if (m_scene)
     {
-        type = m_scene->getGraphType();
+        type     = m_scene->getGraphType();
         objectId = m_scene->getGraphObjectId();
-        name = m_scene->getGraphObjectName();
+        name     = m_scene->getGraphObjectName();
     }
 
     selectionWidget->setGraphType(type);
@@ -146,7 +149,7 @@ void LineGraphToolbar::resetToolbarToScene()
 
 void LineGraphToolbar::updateZoomLevel(int zoom)
 {
-    if(mZoom == zoom)
+    if (mZoom == zoom)
         return;
 
     mZoom = zoom;
@@ -160,13 +163,13 @@ void LineGraphToolbar::updateZoomLevel(int zoom)
 void LineGraphToolbar::onWidgetGraphChanged(int type, db_id objectId)
 {
     LineGraphType graphType = LineGraphType(type);
-    if(graphType == LineGraphType::NoGraph)
+    if (graphType == LineGraphType::NoGraph)
         objectId = 0;
 
-    if(graphType != LineGraphType::NoGraph && !objectId)
-        return; //User is still selecting an object
+    if (graphType != LineGraphType::NoGraph && !objectId)
+        return; // User is still selecting an object
 
-    if(m_scene)
+    if (m_scene)
         m_scene->loadGraph(objectId, graphType);
 }
 
@@ -175,7 +178,7 @@ void LineGraphToolbar::onSceneGraphChanged(int type, db_id objectId)
     selectionWidget->setGraphType(LineGraphType(type));
 
     QString name;
-    if(m_scene && m_scene->getGraphObjectId() == objectId)
+    if (m_scene && m_scene->getGraphObjectId() == objectId)
         name = m_scene->getGraphObjectName();
     selectionWidget->setObjectId(objectId, name);
 }
@@ -183,12 +186,12 @@ void LineGraphToolbar::onSceneGraphChanged(int type, db_id objectId)
 void LineGraphToolbar::onSceneDestroyed()
 {
     m_scene = nullptr;
-    resetToolbarToScene(); //Clear UI
+    resetToolbarToScene(); // Clear UI
 }
 
 void LineGraphToolbar::focusInEvent(QFocusEvent *e)
 {
-    if(m_scene)
+    if (m_scene)
         m_scene->activateScene();
 
     QWidget::focusInEvent(e);

@@ -57,8 +57,11 @@ public:
     QPrinter *printer() const;
     void setPrinter(QPrinter *newPrinter);
 
-    inline QPageLayout getPrinterPageLay() const { return printerPageLay; }
-    void setPrinterPageLay(const QPageLayout& pageLay);
+    inline QPageLayout getPrinterPageLay() const
+    {
+        return printerPageLay;
+    }
+    void setPrinterPageLay(const QPageLayout &pageLay);
 
     Print::PageLayoutOpt getScenePageLay() const;
     void setScenePageLay(const Print::PageLayoutOpt &newScenePageLay);

@@ -30,20 +30,17 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-//Error messages
-static constexpr char errorNameAlreadyUsedText[]
-    = QT_TRANSLATE_NOOP("ShiftsModel",
-                        "There is already another job shift with same name: <b>%1</b>");
+// Error messages
+static constexpr char errorNameAlreadyUsedText[] =
+  QT_TRANSLATE_NOOP("ShiftsModel", "There is already another job shift with same name: <b>%1</b>");
 
-static constexpr char errorGenericAddText[]
-    = QT_TRANSLATE_NOOP("ShiftsModel",
-                        "An error occurred while adding a new shift: <b>%1</b><br>"
-                        "%2");
+static constexpr char errorGenericAddText[] =
+  QT_TRANSLATE_NOOP("ShiftsModel", "An error occurred while adding a new shift: <b>%1</b><br>"
+                                   "%2");
 
-static constexpr char errorShiftInUseCannotDeleteText[]
-    = QT_TRANSLATE_NOOP("ShiftsModel",
-                        "Shift <b>%1</b> is used by some jobs.<br>"
-                        "To remove it, transfer those jobs to a different shift or remove them.");
+static constexpr char errorShiftInUseCannotDeleteText[] = QT_TRANSLATE_NOOP(
+  "ShiftsModel", "Shift <b>%1</b> is used by some jobs.<br>"
+                 "To remove it, transfer those jobs to a different shift or remove them.");
 
 ShiftsModel::ShiftsModel(database &db, QObject *parent) :
     BaseClass(500, db, parent)
@@ -53,9 +50,9 @@ ShiftsModel::ShiftsModel(database &db, QObject *parent) :
 
 QVariant ShiftsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole)
     {
-        if(orientation == Qt::Horizontal)
+        if (orientation == Qt::Horizontal)
         {
             switch (section)
             {
@@ -77,12 +74,12 @@ QVariant ShiftsModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cach
+        // Fetch above or below current cach
         const_cast<ShiftsModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
@@ -91,7 +88,7 @@ QVariant ShiftsModel::data(const QModelIndex &idx, int role) const
     case Qt::DisplayRole:
     case Qt::EditRole:
     {
-        const ShiftItem& item = cache.at(idx.row() - cacheFirstRow);
+        const ShiftItem &item = cache.at(idx.row() - cacheFirstRow);
 
         switch (idx.column())
         {
@@ -107,8 +104,9 @@ QVariant ShiftsModel::data(const QModelIndex &idx, int role) const
 bool ShiftsModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
     ShiftItem &item = cache[row - cacheFirstRow];
 
@@ -121,24 +119,24 @@ bool ShiftsModel::setData(const QModelIndex &idx, const QVariant &value, int rol
         case ShiftName:
         {
             QString newName = value.toString().simplified();
-            if(item.shiftName == newName)
-                return false; //No change
+            if (item.shiftName == newName)
+                return false; // No change
 
             command set_name(mDb, "UPDATE jobshifts SET name=? WHERE id=?");
 
-            if(newName.isEmpty())
-                set_name.bind(1); //Bind NULL
+            if (newName.isEmpty())
+                set_name.bind(1); // Bind NULL
             else
                 set_name.bind(1, newName);
             set_name.bind(2, item.shiftId);
             int ret = set_name.execute();
 
-            if(ret == SQLITE_CONSTRAINT_UNIQUE)
+            if (ret == SQLITE_CONSTRAINT_UNIQUE)
             {
                 emit modelError(tr(errorNameAlreadyUsedText).arg(newName));
                 return false;
             }
-            else if(ret != SQLITE_OK)
+            else if (ret != SQLITE_OK)
             {
                 qDebug() << "Shift Error:" << ret << mDb.error_msg();
                 return false;
@@ -147,9 +145,9 @@ bool ShiftsModel::setData(const QModelIndex &idx, const QVariant &value, int rol
             item.shiftName = newName;
             emit Session->shiftNameChanged(item.shiftId);
 
-            //This row has now changed position so we need to invalidate cache
-            //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-            //but the view will trigger fetching at same scroll position so it is enough
+            // This row has now changed position so we need to invalidate cache
+            // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+            // but the view will trigger fetching at same scroll position so it is enough
             cache.clear();
             cacheFirstRow = 0;
 
@@ -169,7 +167,7 @@ Qt::ItemFlags ShiftsModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
         return f;
 
     return f | Qt::ItemIsEditable;
@@ -179,7 +177,7 @@ qint64 ShiftsModel::recalcTotalItemCount()
 {
     QByteArray sql = "SELECT COUNT(1) FROM jobshifts";
 
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         sql.append(" WHERE jobshifts.name LIKE ?1");
     }
@@ -187,7 +185,7 @@ qint64 ShiftsModel::recalcTotalItemCount()
     query q(mDb, sql);
 
     QByteArray nameFilter;
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         nameFilter.reserve(m_nameFilter.size() + 2);
         nameFilter.append('%');
@@ -221,8 +219,8 @@ bool ShiftsModel::setFilterAtCol(int col, const QString &str)
     {
     case ShiftName:
     {
-        if(isNull)
-            return false; //Cannot have NULL Name
+        if (isNull)
+            return false; // Cannot have NULL Name
         m_nameFilter = str;
         break;
     }
@@ -234,7 +232,8 @@ bool ShiftsModel::setFilterAtCol(int col, const QString &str)
     return true;
 }
 
-void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/, const QVariant &/*val*/)
+void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/,
+                                const QVariant & /*val*/)
 {
     query q(mDb);
 
@@ -244,23 +243,23 @@ void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/, c
 
     QByteArray sql = "SELECT id,name FROM jobshifts";
 
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         sql.append(" WHERE name LIKE ?3");
     }
 
     sql += " ORDER BY name LIMIT ?1";
 
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
     QByteArray nameFilter;
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         nameFilter.reserve(m_nameFilter.size() + 2);
         nameFilter.append('%');
@@ -272,43 +271,43 @@ void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/, c
 
     QVector<ShiftItem> vec(BatchSize);
 
-    auto it = q.begin();
+    auto it        = q.begin();
     const auto end = q.end();
 
-    int i = 0;
-    for(; it != end; ++it)
+    int i          = 0;
+    for (; it != end; ++it)
     {
-        auto r = *it;
+        auto r          = *it;
         ShiftItem &item = vec[i];
-        item.shiftId = r.get<db_id>(0);
-        item.shiftName = r.get<QString>(1);
+        item.shiftId    = r.get<db_id>(0);
+        item.shiftName  = r.get<QString>(1);
         i++;
     }
-    if(i < BatchSize)
+    if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
 }
 
-bool ShiftsModel::removeShift(db_id shiftId, const QString& name)
+bool ShiftsModel::removeShift(db_id shiftId, const QString &name)
 {
-    if(!shiftId)
+    if (!shiftId)
         return false;
 
     command cmd(mDb, "DELETE FROM jobshifts WHERE id=?");
     cmd.bind(1, shiftId);
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
         qWarning() << "ShiftModel: error removing shift" << ret << mDb.error_msg();
 
-        if(ret != SQLITE_OK)
+        if (ret != SQLITE_OK)
         {
             ret = mDb.extended_error_code();
-            if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+            if (ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
             {
                 QString tmp = name;
-                if(name.isNull())
+                if (name.isNull())
                 {
                     query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
                     q.bind(1, shiftId);
@@ -329,20 +328,20 @@ bool ShiftsModel::removeShift(db_id shiftId, const QString& name)
 
     emit Session->shiftRemoved(shiftId);
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
     return true;
 }
 
 bool ShiftsModel::removeShiftAt(int row)
 {
-    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
-    const ShiftItem& item = cache.at(row - cacheFirstRow);
+    const ShiftItem &item = cache.at(row - cacheFirstRow);
     return removeShift(item.shiftId, item.shiftName);
 }
 
-db_id ShiftsModel::addShift(const QString& shiftName)
+db_id ShiftsModel::addShift(const QString &shiftName)
 {
     db_id shiftId = 0;
 
@@ -352,34 +351,34 @@ db_id ShiftsModel::addShift(const QString& shiftName)
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
     int ret = cmd.execute();
-    if(ret == SQLITE_OK)
+    if (ret == SQLITE_OK)
     {
         shiftId = mDb.last_insert_rowid();
     }
     sqlite3_mutex_leave(mutex);
 
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
         qDebug() << "Shift Error adding:" << ret << mDb.error_msg();
 
-        if(ret == SQLITE_CONSTRAINT_UNIQUE)
+        if (ret == SQLITE_CONSTRAINT_UNIQUE)
         {
             emit modelError(tr(errorNameAlreadyUsedText).arg(shiftName));
             return false;
         }
 
-        //Generic Error
+        // Generic Error
         emit modelError(tr(errorGenericAddText).arg(shiftName, mDb.error_msg()));
     }
 
-    //Reset filter
+    // Reset filter
     m_nameFilter.clear();
     m_nameFilter.squeeze();
     emit filterChanged();
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
 
-    if(shiftId)
+    if (shiftId)
         emit Session->shiftAdded(shiftId);
 
     return shiftId;

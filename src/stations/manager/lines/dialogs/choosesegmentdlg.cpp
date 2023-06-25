@@ -38,11 +38,11 @@ ChooseSegmentDlg::ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     QFormLayout *lay = new QFormLayout(this);
 
     fromStationMatch = new StationsMatchModel(db, this);
-    fromStationEdit = new CustomCompletionLineEdit(fromStationMatch);
+    fromStationEdit  = new CustomCompletionLineEdit(fromStationMatch);
     fromStationEdit->setPlaceholderText(tr("Filter..."));
     lay->addRow(tr("From station:"), fromStationEdit);
 
-    gateMatch = new StationGatesMatchModel(db, this);
+    gateMatch   = new StationGatesMatchModel(db, this);
     outGateEdit = new CustomCompletionLineEdit(gateMatch);
     outGateEdit->setPlaceholderText(tr("Select..."));
     lay->addRow(tr("Segment:"), outGateEdit);
@@ -53,8 +53,10 @@ ChooseSegmentDlg::ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent) :
     connect(box, &QDialogButtonBox::accepted, this, &ChooseSegmentDlg::accept);
     connect(box, &QDialogButtonBox::rejected, this, &ChooseSegmentDlg::reject);
 
-    connect(fromStationEdit, &CustomCompletionLineEdit::dataIdChanged, this, &ChooseSegmentDlg::onStationChanged);
-    connect(outGateEdit, &CustomCompletionLineEdit::indexSelected, this, &ChooseSegmentDlg::onSegmentSelected);
+    connect(fromStationEdit, &CustomCompletionLineEdit::dataIdChanged, this,
+            &ChooseSegmentDlg::onStationChanged);
+    connect(outGateEdit, &CustomCompletionLineEdit::indexSelected, this,
+            &ChooseSegmentDlg::onSegmentSelected);
 
     setWindowTitle(tr("Choose Railway Segment"));
     setMinimumSize(300, 100);
@@ -62,14 +64,13 @@ ChooseSegmentDlg::ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent) :
 
 void ChooseSegmentDlg::done(int res)
 {
-    if(res == QDialog::Accepted)
+    if (res == QDialog::Accepted)
     {
         db_id segmentId = 0;
         QString tmp;
-        if(!outGateEdit->getData(segmentId, tmp))
+        if (!outGateEdit->getData(segmentId, tmp))
         {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Invalid railway segment."));
+            QMessageBox::warning(this, tr("Error"), tr("Invalid railway segment."));
             return;
         }
     }
@@ -80,7 +81,7 @@ void ChooseSegmentDlg::done(int res)
 void ChooseSegmentDlg::setFilter(db_id fromStationId, db_id exceptSegment)
 {
     lockFromStationId = fromStationId;
-    excludeSegmentId = exceptSegment;
+    excludeSegmentId  = exceptSegment;
     selectedSegmentId = 0;
 
     fromStationEdit->setData(lockFromStationId);
@@ -94,7 +95,7 @@ bool ChooseSegmentDlg::getData(db_id &outSegId, QString &segName, bool &outIsRev
 {
     db_id tmpGateId = 0;
     outGateEdit->getData(tmpGateId, segName);
-    outSegId = selectedSegmentId;
+    outSegId      = selectedSegmentId;
     outIsReversed = isReversed;
     return outSegId != 0;
 }
@@ -104,16 +105,16 @@ void ChooseSegmentDlg::onStationChanged()
     QString tmp;
     fromStationEdit->getData(lockFromStationId, tmp);
 
-    //Reset segment
+    // Reset segment
     outGateEdit->setData(0);
     gateMatch->setFilter(lockFromStationId, true, excludeSegmentId, true);
     isReversed = false;
 }
 
-void ChooseSegmentDlg::onSegmentSelected(const QModelIndex& idx)
+void ChooseSegmentDlg::onSegmentSelected(const QModelIndex &idx)
 {
-    isReversed = false;
+    isReversed        = false;
     selectedSegmentId = gateMatch->getSegmentIdAtRow(idx.row());
-    if(selectedSegmentId)
+    if (selectedSegmentId)
         isReversed = gateMatch->isSegmentReversedAtRow(idx.row());
 }

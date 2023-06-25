@@ -33,7 +33,8 @@ class JobPassingsModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    enum Columns {
+    enum Columns
+    {
         JobNameCol = 0,
         ArrivalCol,
         DepartureCol,
@@ -60,7 +61,7 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
-    void setJobs(const QVector<Entry>& vec);
+    void setJobs(const QVector<Entry> &vec);
 
 private:
     QVector<Entry> m_data;

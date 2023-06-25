@@ -30,7 +30,7 @@ public:
     StationSheetExport(db_id stationId);
 
     void write();
-    void save(const QString& fileName);
+    void save(const QString &fileName);
 
 private:
     OdtDocument odt;

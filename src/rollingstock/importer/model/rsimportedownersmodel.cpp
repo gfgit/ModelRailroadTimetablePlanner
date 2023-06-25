@@ -34,7 +34,10 @@ class OwnerResultEvent : public QEvent
 {
 public:
     static constexpr Type _Type = Type(CustomEvents::RsImportedOwnersResult);
-    inline OwnerResultEvent() : QEvent(_Type) {}
+    inline OwnerResultEvent() :
+        QEvent(_Type)
+    {
+    }
 
     QVector<RSImportedOwnersModel::OwnerItem> items;
     int firstRow;
@@ -50,7 +53,7 @@ RSImportedOwnersModel::RSImportedOwnersModel(database &db, QObject *parent) :
 
 bool RSImportedOwnersModel::event(QEvent *e)
 {
-    if(e->type() == OwnerResultEvent::_Type)
+    if (e->type() == OwnerResultEvent::_Type)
     {
         OwnerResultEvent *ev = static_cast<OwnerResultEvent *>(e);
         ev->setAccepted(true);
@@ -65,37 +68,37 @@ bool RSImportedOwnersModel::event(QEvent *e)
 
 void RSImportedOwnersModel::fetchRow(int row)
 {
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching
+    if (row >= firstPendingRow && row < firstPendingRow + BatchSize)
+        return; // Already fetching
 
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
+    if (row >= cacheFirstRow && row < cacheFirstRow + cache.size())
+        return; // Already cached
 
-    //TODO: abort fetching here
+    // TODO: abort fetching here
 
     const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
+    firstPendingRow     = row - remainder;
     qDebug() << "Requested:" << row << "From:" << firstPendingRow;
 
-    //NOTE: Sorting hint:
-    //because LIMIT ? OFFSET ? can be slow when offset is big
-    //we give an hint to reduce offset
+    // NOTE: Sorting hint:
+    // because LIMIT ? OFFSET ? can be slow when offset is big
+    // we give an hint to reduce offset
     QVariant val;
-    int valRow = 0;
+    int valRow      = 0;
     OwnerItem *item = nullptr;
 
-    //We can give an hint only if we already have cached some data
-    if(cache.size())
+    // We can give an hint only if we already have cached some data
+    if (cache.size())
     {
-        if(firstPendingRow >= cacheFirstRow + cache.size())
+        if (firstPendingRow >= cacheFirstRow + cache.size())
         {
             valRow = cacheFirstRow + cache.size();
-            item = &cache.last();
+            item   = &cache.last();
         }
-        else if(firstPendingRow > (cacheFirstRow - firstPendingRow))
+        else if (firstPendingRow > (cacheFirstRow - firstPendingRow))
         {
             valRow = cacheFirstRow;
-            item = &cache.first();
+            item   = &cache.first();
         }
     }
 
@@ -103,7 +106,7 @@ void RSImportedOwnersModel::fetchRow(int row)
     {
     case SheetIdx:
     {
-        if(item)
+        if (item)
         {
             val = item->sheetIdx;
         }
@@ -111,40 +114,43 @@ void RSImportedOwnersModel::fetchRow(int row)
     }
     case Name:
     {
-        if(item)
+        if (item)
         {
             val = item->name;
         }
         break;
     }
-        //No data hint for Import column
+        // No data hint for Import column
     }
 
-    //TODO: use a custom QRunnable
+    // TODO: use a custom QRunnable
     QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
                               Q_ARG(int, firstPendingRow), Q_ARG(int, sortColumn),
                               Q_ARG(int, valRow), Q_ARG(QVariant, val));
 }
 
-void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
 {
     query q(mDb);
 
-    int offset = first - valRow;
+    int offset   = first - valRow;
     bool reverse = false;
 
-    if(valRow > first)
+    if (valRow > first)
     {
-        offset = 0;
+        offset  = 0;
         reverse = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset
+             << "Reverse:" << reverse;
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT imp.id,imp.name,imp.import,imp.new_name,imp.match_existing_id,imp.sheet_idx,rs_owners.name"
-                     " FROM imported_rs_owners imp LEFT JOIN rs_owners ON rs_owners.id=imp.match_existing_id";
+    QByteArray sql =
+      "SELECT "
+      "imp.id,imp.name,imp.import,imp.new_name,imp.match_existing_id,imp.sheet_idx,rs_owners.name"
+      " FROM imported_rs_owners imp LEFT JOIN rs_owners ON rs_owners.id=imp.match_existing_id";
     switch (sortCol)
     {
     case SheetIdx:
@@ -159,16 +165,16 @@ void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, co
     }
     case Import:
     {
-        whereCol = "imp.import DESC, imp.name"; //Order by 2 columns, no where clause
+        whereCol = "imp.import DESC, imp.name"; // Order by 2 columns, no where clause
         break;
     }
     }
 
-    if(val.isValid())
+    if (val.isValid())
     {
         sql += " WHERE ";
         sql += whereCol;
-        if(reverse)
+        if (reverse)
             sql += "<?3";
         else
             sql += ">?3";
@@ -177,19 +183,19 @@ void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, co
     sql += " ORDER BY ";
     sql += whereCol;
 
-    if(reverse)
+    if (reverse)
         sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
-    if(val.isValid())
+    if (val.isValid())
     {
         switch (sortCol)
         {
@@ -208,72 +214,72 @@ void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, co
 
     QVector<OwnerItem> vec(BatchSize);
 
-    auto it = q.begin();
+    auto it        = q.begin();
     const auto end = q.end();
 
-    if(reverse)
+    if (reverse)
     {
         int i = BatchSize - 1;
 
-        for(; it != end; ++it)
+        for (; it != end; ++it)
         {
-            auto r = *it;
-            OwnerItem &item = vec[i];
+            auto r               = *it;
+            OwnerItem &item      = vec[i];
             item.importedOwnerId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.import = r.get<int>(2) != 0;
-            if(r.column_type(3) != SQLITE_NULL)
+            item.name            = r.get<QString>(1);
+            item.import          = r.get<int>(2) != 0;
+            if (r.column_type(3) != SQLITE_NULL)
                 item.customName = r.get<QString>(3);
             item.matchExistingId = r.get<db_id>(4);
-            item.sheetIdx = r.get<int>(5);
-            if(item.matchExistingId)
+            item.sheetIdx        = r.get<int>(5);
+            if (item.matchExistingId)
                 item.matchExistingName = r.get<QString>(6);
             i--;
         }
-        if(i > -1)
+        if (i > -1)
             vec.remove(0, i + 1);
     }
     else
     {
         int i = 0;
 
-        for(; it != end; ++it)
+        for (; it != end; ++it)
         {
-            auto r = *it;
-            OwnerItem &item = vec[i];
+            auto r               = *it;
+            OwnerItem &item      = vec[i];
             item.importedOwnerId = r.get<db_id>(0);
-            item.name = r.get<QString>(1);
-            item.import = r.get<int>(2) != 0;
-            if(r.column_type(3) != SQLITE_NULL)
+            item.name            = r.get<QString>(1);
+            item.import          = r.get<int>(2) != 0;
+            if (r.column_type(3) != SQLITE_NULL)
                 item.customName = r.get<QString>(3);
             item.matchExistingId = r.get<db_id>(4);
-            item.sheetIdx = r.get<int>(5);
-            if(item.matchExistingId)
+            item.sheetIdx        = r.get<int>(5);
+            if (item.matchExistingId)
                 item.matchExistingName = r.get<QString>(6);
             i++;
         }
-        if(i < BatchSize)
+        if (i < BatchSize)
             vec.remove(i, BatchSize - i);
     }
 
     OwnerResultEvent *ev = new OwnerResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
+    ev->items            = vec;
+    ev->firstRow         = first;
 
     qApp->postEvent(this, ev);
 }
 
-void RSImportedOwnersModel::handleResult(const QVector<OwnerItem>& items, int firstRow)
+void RSImportedOwnersModel::handleResult(const QVector<OwnerItem> &items, int firstRow)
 {
-    if(firstRow == cacheFirstRow + cache.size())
+    if (firstRow == cacheFirstRow + cache.size())
     {
         qDebug() << "RES: appending First:" << cacheFirstRow;
         cache.append(items);
-        if(cache.size() > ItemsPerPage)
+        if (cache.size() > ItemsPerPage)
         {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
+            const int extra     = cache.size() - ItemsPerPage; // Round up to BatchSize
             const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
+            const int n         = remainder ? extra + BatchSize - remainder : extra;
             qDebug() << "RES: removing last" << n;
             cache.remove(0, n);
             cacheFirstRow += n;
@@ -281,13 +287,13 @@ void RSImportedOwnersModel::handleResult(const QVector<OwnerItem>& items, int fi
     }
     else
     {
-        if(firstRow + items.size() == cacheFirstRow)
+        if (firstRow + items.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
             QVector<OwnerItem> tmp = items;
             tmp.append(cache);
             cache = tmp;
-            if(cache.size() > ItemsPerPage)
+            if (cache.size() > ItemsPerPage)
             {
                 const int n = cache.size() - ItemsPerPage;
                 cache.remove(ItemsPerPage, n);
@@ -303,10 +309,10 @@ void RSImportedOwnersModel::handleResult(const QVector<OwnerItem>& items, int fi
         qDebug() << "NEW First:" << cacheFirstRow;
     }
 
-    firstPendingRow = -BatchSize;
+    firstPendingRow      = -BatchSize;
 
     QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(firstRow + items.count() - 1, NCols - 1);
+    QModelIndex lastIdx  = index(firstRow + items.count() - 1, NCols - 1);
     emit dataChanged(firstIdx, lastIdx);
 
     qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
@@ -316,7 +322,7 @@ void RSImportedOwnersModel::handleResult(const QVector<OwnerItem>& items, int fi
 
 QVariant RSImportedOwnersModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -351,14 +357,14 @@ QVariant RSImportedOwnersModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    //qDebug() << "Data:" << idx.row();
+    // qDebug() << "Data:" << idx.row();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<RSImportedOwnersModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return QVariant();
     }
 
@@ -371,7 +377,7 @@ QVariant RSImportedOwnersModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case SheetIdx:
-            return item.sheetIdx + 1; //1-based index (Start from 1)
+            return item.sheetIdx + 1; // 1-based index (Start from 1)
         case Name:
             return item.name;
         case CustomName:
@@ -392,10 +398,10 @@ QVariant RSImportedOwnersModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::BackgroundRole:
     {
-        if(!item.import ||
-                (idx.column() == CustomName && item.customName.isEmpty()) ||
-                (idx.column() == MatchExisting && item.matchExistingId == 0))
-            return QBrush(Qt::lightGray); //If not imported mark background or no custom/matching name set
+        if (!item.import || (idx.column() == CustomName && item.customName.isEmpty())
+            || (idx.column() == MatchExisting && item.matchExistingId == 0))
+            return QBrush(
+              Qt::lightGray); // If not imported mark background or no custom/matching name set
         break;
     }
     case Qt::CheckStateRole:
@@ -415,12 +421,13 @@ QVariant RSImportedOwnersModel::data(const QModelIndex &idx, int role) const
 bool RSImportedOwnersModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
-    OwnerItem &item = cache[row - cacheFirstRow];
+    OwnerItem &item   = cache[row - cacheFirstRow];
     QModelIndex first = idx;
-    QModelIndex last = idx;
+    QModelIndex last  = idx;
 
     switch (role)
     {
@@ -431,27 +438,28 @@ bool RSImportedOwnersModel::setData(const QModelIndex &idx, const QVariant &valu
         case CustomName:
         {
             const QString newName = value.toString().simplified();
-            if(item.customName == newName)
-                return false; //No change
+            if (item.customName == newName)
+                return false; // No change
 
             QString errText;
-            if(!checkCustomNameValid(item.importedOwnerId, item.name, newName, &errText))
+            if (!checkCustomNameValid(item.importedOwnerId, item.name, newName, &errText))
             {
                 emit modelError(errText);
                 return false;
             }
 
-            command set_name(mDb, "UPDATE imported_rs_owners SET new_name=?,match_existing_id=NULL WHERE id=?");
+            command set_name(
+              mDb, "UPDATE imported_rs_owners SET new_name=?,match_existing_id=NULL WHERE id=?");
 
-            if(newName.isEmpty())
-                set_name.bind(1); //Bind NULL
+            if (newName.isEmpty())
+                set_name.bind(1); // Bind NULL
             else
                 set_name.bind(1, newName);
             set_name.bind(2, item.importedOwnerId);
-            if(set_name.execute() != SQLITE_OK)
+            if (set_name.execute() != SQLITE_OK)
                 return false;
 
-            item.customName = newName;
+            item.customName      = newName;
             item.matchExistingId = 0;
             item.matchExistingName.clear();
             item.matchExistingName.squeeze();
@@ -473,14 +481,15 @@ bool RSImportedOwnersModel::setData(const QModelIndex &idx, const QVariant &valu
         {
             Qt::CheckState cs = value.value<Qt::CheckState>();
             const bool import = cs == Qt::Checked;
-            if(item.import == import)
-                return false; //No change
+            if (item.import == import)
+                return false; // No change
 
-            if(import)
+            if (import)
             {
-                //Newly imported, check if there are duplicates
+                // Newly imported, check if there are duplicates
                 QString errText;
-                if(!checkCustomNameValid(item.importedOwnerId, item.name, item.customName, &errText))
+                if (!checkCustomNameValid(item.importedOwnerId, item.name, item.customName,
+                                          &errText))
                 {
                     emit modelError(errText);
                     return false;
@@ -490,25 +499,25 @@ bool RSImportedOwnersModel::setData(const QModelIndex &idx, const QVariant &valu
             command set_imported(mDb, "UPDATE imported_rs_owners SET import=? WHERE id=?");
             set_imported.bind(1, import ? 1 : 0);
             set_imported.bind(2, item.importedOwnerId);
-            if(set_imported.execute() != SQLITE_OK)
+            if (set_imported.execute() != SQLITE_OK)
                 return false;
 
             item.import = import;
 
-            if(sortColumn == Import)
+            if (sortColumn == Import)
             {
-                //This row has now changed position so we need to invalidate cache
-                //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-                //but the view will trigger fetching at same scroll position so it is enough
+                // This row has now changed position so we need to invalidate cache
+                // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+                // but the view will trigger fetching at same scroll position so it is enough
                 cache.clear();
                 cacheFirstRow = 0;
             }
 
             emit importCountChanged();
 
-            //Update all columns to update background
+            // Update all columns to update background
             first = index(row, 0);
-            last = index(row, NCols - 1);
+            last  = index(row, NCols - 1);
             break;
         }
         default:
@@ -530,12 +539,12 @@ Qt::ItemFlags RSImportedOwnersModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
 
-    if(idx.column() == Import)
+    if (idx.column() == Import)
         f.setFlag(Qt::ItemIsUserCheckable);
-    if(idx.column() == CustomName || idx.column() == MatchExisting)
+    if (idx.column() == CustomName || idx.column() == MatchExisting)
         f.setFlag(Qt::ItemIsEditable);
 
     return f;
@@ -560,14 +569,14 @@ void RSImportedOwnersModel::clearCache()
 
 void RSImportedOwnersModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col == CustomName || col == MatchExisting)
-        return; //Do not sort by CustomName or MatchExisting (not useful and complicated)
+    if (sortColumn == col || col == CustomName || col == MatchExisting)
+        return; // Do not sort by CustomName or MatchExisting (not useful and complicated)
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
@@ -583,99 +592,110 @@ int RSImportedOwnersModel::countImported()
 
 /* ICheckName */
 
-bool RSImportedOwnersModel::checkCustomNameValid(db_id importedOwnerId, const QString& originalName, const QString& newCustomName, QString *errTextOut)
+bool RSImportedOwnersModel::checkCustomNameValid(db_id importedOwnerId, const QString &originalName,
+                                                 const QString &newCustomName, QString *errTextOut)
 {
-    if(originalName == newCustomName)
+    if (originalName == newCustomName)
     {
-        if(errTextOut)
+        if (errTextOut)
         {
-            if(originalName.isEmpty())
+            if (originalName.isEmpty())
             {
-                *errTextOut = tr("Owners with empty name must have a Custom Name or must be matched to an existing owner");
-            }else{
+                *errTextOut = tr("Owners with empty name must have a Custom Name or must be "
+                                 "matched to an existing owner");
+            }
+            else
+            {
                 *errTextOut = tr("You cannot set the same name in the 'Custom Name' field.\n"
-                                 "If you meant to revert to original name then clear the custom name and leave the cell empty");
+                                 "If you meant to revert to original name then clear the custom "
+                                 "name and leave the cell empty");
             }
         }
         return false;
     }
 
-    //FIXME: maybe use EXISTS instead of WHERE for performance
+    // FIXME: maybe use EXISTS instead of WHERE for performance
 
-    //First check for duplicates
+    // First check for duplicates
     query q_nameDuplicates(mDb, "SELECT id FROM rs_owners WHERE name=? LIMIT 1");
 
-    //If removing custom name check against original sheet name
+    // If removing custom name check against original sheet name
     QString nameToCheck = newCustomName;
-    if(newCustomName.isEmpty())
+    if (newCustomName.isEmpty())
         nameToCheck = originalName;
 
     q_nameDuplicates.bind(1, nameToCheck);
 
-    if(q_nameDuplicates.step() == SQLITE_ROW)
+    if (q_nameDuplicates.step() == SQLITE_ROW)
     {
         db_id ownerId = q_nameDuplicates.getRows().get<db_id>(0);
-        Q_UNUSED(ownerId) //TODO: maybe use it?
+        Q_UNUSED(ownerId) // TODO: maybe use it?
 
-        if(errTextOut)
+        if (errTextOut)
         {
-            *errTextOut = tr("There is already an existing Owner with same name: <b>%1</b><br>"
-                             "If you meant to merge theese rollingstock pieces with this existing owner "
-                             "please use 'Match Existing' field")
-                    .arg(nameToCheck);
+            *errTextOut =
+              tr("There is already an existing Owner with same name: <b>%1</b><br>"
+                 "If you meant to merge theese rollingstock pieces with this existing owner "
+                 "please use 'Match Existing' field")
+                .arg(nameToCheck);
         }
         return false;
     }
 
-    //Check also against other imported owners original names (that don't have a custom name)
-    q_nameDuplicates.prepare("SELECT id FROM imported_rs_owners WHERE name=? AND new_name IS NULL AND id<>? LIMIT 1");
+    // Check also against other imported owners original names (that don't have a custom name)
+    q_nameDuplicates.prepare(
+      "SELECT id FROM imported_rs_owners WHERE name=? AND new_name IS NULL AND id<>? LIMIT 1");
     q_nameDuplicates.bind(1, nameToCheck);
     q_nameDuplicates.bind(2, importedOwnerId);
-    if(q_nameDuplicates.step() == SQLITE_ROW)
+    if (q_nameDuplicates.step() == SQLITE_ROW)
     {
         db_id ownerId = q_nameDuplicates.getRows().get<db_id>(0);
-        Q_UNUSED(ownerId) //TODO: maybe use it?
+        Q_UNUSED(ownerId) // TODO: maybe use it?
 
-        if(errTextOut)
+        if (errTextOut)
         {
-            *errTextOut = tr("There is already an imported Owner with name: <b>%1</b><br>"
-                             "If you meant to merge theese rollingstock pieces with this existing owner "
-                             "after importing rollingstock use the merge tool to merge them")
-                    .arg(nameToCheck);
+            *errTextOut =
+              tr("There is already an imported Owner with name: <b>%1</b><br>"
+                 "If you meant to merge theese rollingstock pieces with this existing owner "
+                 "after importing rollingstock use the merge tool to merge them")
+                .arg(nameToCheck);
         }
         return false;
     }
 
-    //Check also against other imported owners custom names
-    q_nameDuplicates.prepare("SELECT id, name FROM imported_rs_owners WHERE new_name=? AND id<>? LIMIT 1");
+    // Check also against other imported owners custom names
+    q_nameDuplicates.prepare(
+      "SELECT id, name FROM imported_rs_owners WHERE new_name=? AND id<>? LIMIT 1");
     q_nameDuplicates.bind(1, nameToCheck);
     q_nameDuplicates.bind(2, importedOwnerId);
-    if(q_nameDuplicates.step() == SQLITE_ROW)
+    if (q_nameDuplicates.step() == SQLITE_ROW)
     {
-        auto r = q_nameDuplicates.getRows();
+        auto r        = q_nameDuplicates.getRows();
         db_id ownerId = r.get<db_id>(0);
-        Q_UNUSED(ownerId) //TODO: maybe use it?
+        Q_UNUSED(ownerId) // TODO: maybe use it?
 
         QString otherOriginalName = r.get<QString>(1);
 
-        if(newCustomName.isEmpty())
+        if (newCustomName.isEmpty())
         {
-            if(errTextOut)
+            if (errTextOut)
             {
-                *errTextOut = tr("You already gave the same custom name: <b>%1</b><br>"
-                                 "to the imported owner: <b>%2</b><br>"
-                                 "In order to proceed you need to assign a different custom name to %2")
-                                  .arg(nameToCheck, otherOriginalName);
+                *errTextOut =
+                  tr("You already gave the same custom name: <b>%1</b><br>"
+                     "to the imported owner: <b>%2</b><br>"
+                     "In order to proceed you need to assign a different custom name to %2")
+                    .arg(nameToCheck, otherOriginalName);
             }
         }
         else
         {
-            if(errTextOut)
+            if (errTextOut)
             {
-                *errTextOut = tr("You already gave the same custom name: <b>%1</b><br>"
-                                 "to the imported owner: <b>%2</b><br>"
-                                 "Please choose a different name or leave empty for the original name")
-                                  .arg(nameToCheck, otherOriginalName);
+                *errTextOut =
+                  tr("You already gave the same custom name: <b>%1</b><br>"
+                     "to the imported owner: <b>%2</b><br>"
+                     "Please choose a different name or leave empty for the original name")
+                    .arg(nameToCheck, otherOriginalName);
             }
         }
 
@@ -687,60 +707,64 @@ bool RSImportedOwnersModel::checkCustomNameValid(db_id importedOwnerId, const QS
 
 /* IFKField */
 
-bool RSImportedOwnersModel::getFieldData(int row, int /*col*/, db_id &ownerIdOut, QString &ownerNameOut) const
+bool RSImportedOwnersModel::getFieldData(int row, int /*col*/, db_id &ownerIdOut,
+                                         QString &ownerNameOut) const
 {
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false;
 
-    const OwnerItem& item = cache.at(row - cacheFirstRow);
-    ownerIdOut = item.matchExistingId;
-    ownerNameOut = item.matchExistingName;
+    const OwnerItem &item = cache.at(row - cacheFirstRow);
+    ownerIdOut            = item.matchExistingId;
+    ownerNameOut          = item.matchExistingName;
 
     return true;
 }
 
-bool RSImportedOwnersModel::validateData(int /*row*/, int /*col*/, db_id /*ownerId*/, const QString &/*ownerName*/)
+bool RSImportedOwnersModel::validateData(int /*row*/, int /*col*/, db_id /*ownerId*/,
+                                         const QString & /*ownerName*/)
 {
-    return true; //TODO: implement
+    return true; // TODO: implement
 }
 
-bool RSImportedOwnersModel::setFieldData(int row, int /*col*/, db_id ownerId, const QString &ownerName)
+bool RSImportedOwnersModel::setFieldData(int row, int /*col*/, db_id ownerId,
+                                         const QString &ownerName)
 {
-    //NOTE: CustomName and MatchExisting exclude each other
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    // NOTE: CustomName and MatchExisting exclude each other
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false;
 
-    OwnerItem& item = cache[row - cacheFirstRow];
-    if(item.matchExistingId == ownerId)
-        return true; //No change
+    OwnerItem &item = cache[row - cacheFirstRow];
+    if (item.matchExistingId == ownerId)
+        return true; // No change
 
-    if(ownerId == 0)
+    if (ownerId == 0)
     {
-        //Check if we can leave it with no match and no custom name
-        //FIXME: if owner is matched and instead user wants to set a custom name
-        //but you can't remove the match because the name is a duplicate
-        //The user should set a custom name, it will automatically remove the match
-        //BUT we need to show a proper error test if just removing the match
-        //so add it to checkCustomNameValid() with like 'bool isMatchingOwner=true' argument
+        // Check if we can leave it with no match and no custom name
+        // FIXME: if owner is matched and instead user wants to set a custom name
+        // but you can't remove the match because the name is a duplicate
+        // The user should set a custom name, it will automatically remove the match
+        // BUT we need to show a proper error test if just removing the match
+        // so add it to checkCustomNameValid() with like 'bool isMatchingOwner=true' argument
         QString errText;
-        if(!checkCustomNameValid(item.importedOwnerId, item.name, QString(), &errText))
+        if (!checkCustomNameValid(item.importedOwnerId, item.name, QString(), &errText))
         {
             emit modelError(errText);
             return false;
         }
     }
 
-    command set_match(mDb, "UPDATE imported_rs_owners SET new_name=NULL,match_existing_id=? WHERE id=?");
-    if(ownerId)
+    command set_match(mDb,
+                      "UPDATE imported_rs_owners SET new_name=NULL,match_existing_id=? WHERE id=?");
+    if (ownerId)
         set_match.bind(1, ownerId);
     else
-        set_match.bind(1); //Bind NULL
+        set_match.bind(1); // Bind NULL
     set_match.bind(2, item.importedOwnerId);
 
-    if(set_match.execute() != SQLITE_OK)
+    if (set_match.execute() != SQLITE_OK)
         return false;
 
-    item.matchExistingId = ownerId;
+    item.matchExistingId   = ownerId;
     item.matchExistingName = ownerName;
     item.customName.clear();
     item.customName.squeeze();
@@ -749,4 +773,3 @@ bool RSImportedOwnersModel::setFieldData(int row, int /*col*/, db_id ownerId, co
 
     return true;
 }
-

@@ -81,7 +81,10 @@ public:
      *
      * \sa sceneActivated()
      */
-    inline void activateScene() { emit sceneActivated(this); }
+    inline void activateScene()
+    {
+        emit sceneActivated(this);
+    }
 
     /*!
      * \brief renderContents
@@ -90,7 +93,7 @@ public:
      *
      * Renders requested portion of scene contents
      */
-    virtual void renderContents(QPainter *painter, const QRectF& sceneRect) = 0;
+    virtual void renderContents(QPainter *painter, const QRectF &sceneRect) = 0;
 
     /*!
      * \brief render header in scene coordinates
@@ -103,8 +106,8 @@ public:
      *
      * \sa renderHeaderScroll()
      */
-    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect,
-                              Qt::Orientation orient, double scroll) = 0;
+    virtual void renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient,
+                              double scroll) = 0;
 
 signals:
     /*!
@@ -129,7 +132,7 @@ signals:
      *
      * The view will ensure this rect is visible if possible
      */
-    void requestShowRect(const QRectF& rect);
+    void requestShowRect(const QRectF &rect);
 
     /*!
      * \brief Signal for activation

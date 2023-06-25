@@ -19,21 +19,22 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "rserrortreemodel.h"
+#    include "rserrortreemodel.h"
 
-#include <QCoreApplication> //For translations
+#    include <QCoreApplication> //For translations
 
-#include "utils/jobcategorystrings.h"
+#    include "utils/jobcategorystrings.h"
 
-static const char* error_texts[] = {
-    nullptr,
-    QT_TRANSLATE_NOOP("RsErrors", "Stop is transit. Cannot couple/uncouple rollingstock."),
-    QT_TRANSLATE_NOOP("RsErrors", "Coupled while busy: it was already coupled to another job."),
-    QT_TRANSLATE_NOOP("RsErrors", "Uncoupled when not coupled."),
-    QT_TRANSLATE_NOOP("RsErrors", "Not uncoupled at the end of the job or coupled by another job before this jobs uncouples it."),
-    QT_TRANSLATE_NOOP("RsErrors", "Coupled in a different station than that where it was uncoupled."),
-    QT_TRANSLATE_NOOP("RsErrors", "Uncoupled in the same stop it was coupled.")
-};
+static const char *error_texts[] = {
+  nullptr,
+  QT_TRANSLATE_NOOP("RsErrors", "Stop is transit. Cannot couple/uncouple rollingstock."),
+  QT_TRANSLATE_NOOP("RsErrors", "Coupled while busy: it was already coupled to another job."),
+  QT_TRANSLATE_NOOP("RsErrors", "Uncoupled when not coupled."),
+  QT_TRANSLATE_NOOP(
+    "RsErrors",
+    "Not uncoupled at the end of the job or coupled by another job before this jobs uncouples it."),
+  QT_TRANSLATE_NOOP("RsErrors", "Coupled in a different station than that where it was uncoupled."),
+  QT_TRANSLATE_NOOP("RsErrors", "Uncoupled in the same stop it was coupled.")};
 
 class RsError
 {
@@ -43,12 +44,12 @@ class RsError
 RsErrorTreeModel::RsErrorTreeModel(QObject *parent) :
     RsErrorTreeModelBase(parent)
 {
-    //FIXME: listen for changes in rs/job/station names and update them
+    // FIXME: listen for changes in rs/job/station names and update them
 }
 
 QVariant RsErrorTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -69,11 +70,11 @@ QVariant RsErrorTreeModel::headerData(int section, Qt::Orientation orientation, 
 
 QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
 {
-    if(!idx.isValid() || role != Qt::DisplayRole)
+    if (!idx.isValid() || role != Qt::DisplayRole)
         return QVariant();
 
     const RsErrors::RSErrorData *item = getItem(idx);
-    if(item)
+    if (item)
     {
         switch (idx.column())
         {
@@ -89,8 +90,8 @@ QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
     }
     else
     {
-        //Caption
-        if(idx.row() >= m_data.topLevelCount() || idx.column() != 0)
+        // Caption
+        if (idx.row() >= m_data.topLevelCount() || idx.column() != 0)
             return QVariant();
 
         auto topLevel = m_data.getTopLevelAtRow(idx.row());
@@ -102,7 +103,7 @@ QVariant RsErrorTreeModel::data(const QModelIndex &idx, int role) const
 
 /* Description:
  * Clear current errors and set new ones
-*/
+ */
 void RsErrorTreeModel::setErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
 {
     beginResetModel();
@@ -114,19 +115,20 @@ void RsErrorTreeModel::setErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
  * Merge new errors with pre-existing.
  * - If an RS is passed with no errors (i.e. empty QVector) it gets removed from the model
  * - If an new RS is passed it gets inserted in the model
- * - If an RS already in the model is passed then its current errors are cleared and the new errors are inserted
-*/
+ * - If an RS already in the model is passed then its current errors are cleared and the new errors
+ * are inserted
+ */
 void RsErrorTreeModel::mergeErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
 {
     auto oldIter = m_data.map.begin();
-    int row = 0;
-    for(auto it = data.constBegin(); it != data.constEnd(); it++)
+    int row      = 0;
+    for (auto it = data.constBegin(); it != data.constEnd(); it++)
     {
         auto iter = m_data.map.find(it.key());
-        if(iter == m_data.map.end()) //Insert a new RS
+        if (iter == m_data.map.end()) // Insert a new RS
         {
-            if(it->errors.isEmpty())
-                continue; //Error: tried to remove an RS not in this model (maybe already removed)
+            if (it->errors.isEmpty())
+                continue; // Error: tried to remove an RS not in this model (maybe already removed)
 
             auto pos = m_data.map.lowerBound(it.key());
             row += std::distance(oldIter, pos);
@@ -139,22 +141,23 @@ void RsErrorTreeModel::mergeErrors(const QMap<db_id, RsErrors::RSErrorList> &dat
         {
             row += std::distance(oldIter, iter);
 
-            if(it->errors.isEmpty()) //Remove RS
+            if (it->errors.isEmpty()) // Remove RS
             {
                 beginRemoveRows(QModelIndex(), row, row);
                 iter = m_data.map.erase(iter);
                 endRemoveRows();
             }
-            else //Repopulate
+            else // Repopulate
             {
-                //First remove old rows to invalidate QModelIndex because they store a pointer to vector elements that will become dangling
+                // First remove old rows to invalidate QModelIndex because they store a pointer to
+                // vector elements that will become dangling
                 QModelIndex parent = createIndex(row, 0, nullptr);
                 beginRemoveRows(parent, 0, iter->errors.size() - 1);
                 iter->errors.clear();
                 endRemoveRows();
 
                 beginInsertRows(parent, 0, it->errors.size() - 1);
-                iter.value() = it.value(); //Copy errors QVector
+                iter.value() = it.value(); // Copy errors QVector
                 endInsertRows();
             }
         }
@@ -173,11 +176,11 @@ void RsErrorTreeModel::clear()
 void RsErrorTreeModel::onRSInfoChanged(db_id rsId)
 {
     Q_UNUSED(rsId)
-    //Update top-level items that show RS names
-    if(m_data.topLevelCount())
+    // Update top-level items that show RS names
+    if (m_data.topLevelCount())
     {
         QModelIndex first = index(0, 0);
-        QModelIndex last = index(m_data.topLevelCount(), 0);
+        QModelIndex last  = index(m_data.topLevelCount(), 0);
 
         emit dataChanged(first, last);
     }

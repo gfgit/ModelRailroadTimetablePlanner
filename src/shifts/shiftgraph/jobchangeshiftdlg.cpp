@@ -46,7 +46,7 @@ JobChangeShiftDlg::JobChangeShiftDlg(sqlite3pp::database &db, QWidget *parent) :
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    label = new QLabel;
+    label            = new QLabel;
     lay->addWidget(label);
 
     ShiftComboModel *shiftComboModel = new ShiftComboModel(db, this);
@@ -67,17 +67,17 @@ JobChangeShiftDlg::JobChangeShiftDlg(sqlite3pp::database &db, QWidget *parent) :
 
 void JobChangeShiftDlg::done(int ret)
 {
-    if(ret == QDialog::Accepted)
+    if (ret == QDialog::Accepted)
     {
         db_id shiftId = 0;
         QString shiftName;
         shiftCombo->getData(shiftId, shiftName);
 
-        if(shiftId != originalShiftId)
+        if (shiftId != originalShiftId)
         {
-            if(shiftId)
+            if (shiftId)
             {
-                //Setting a new shift, check if we overlap with other jobs
+                // Setting a new shift, check if we overlap with other jobs
                 sqlite3pp::query q(mDb);
                 q.prepare("SELECT MIN(departure) FROM stops WHERE job_id=?");
                 q.bind(1, mJobId);
@@ -93,7 +93,7 @@ void JobChangeShiftDlg::done(int ret)
 
                 ShiftBusyModel model(mDb);
                 model.loadData(shiftId, mJobId, start, end);
-                if(model.hasConcurrentJobs())
+                if (model.hasConcurrentJobs())
                 {
                     OwningQPointer<ShiftBusyDlg> dlg = new ShiftBusyDlg(this);
                     dlg->setModel(&model);
@@ -103,21 +103,20 @@ void JobChangeShiftDlg::done(int ret)
             }
 
             sqlite3pp::command cmd(mDb, "UPDATE jobs SET shift_id=? WHERE id=?");
-            if(shiftId)
+            if (shiftId)
                 cmd.bind(1, shiftId);
             else
-                cmd.bind(1); //Bind NULL
+                cmd.bind(1); // Bind NULL
             cmd.bind(2, mJobId);
             ret = cmd.execute();
-            if(ret != SQLITE_OK)
+            if (ret != SQLITE_OK)
             {
-                //Error
-                QMessageBox::warning(this, tr("Shift Error"),
-                                     tr("Error while setting shift <b>%1</b> to job <b>%2</b>.<br>"
-                                        "Msg: %3")
-                                         .arg(shiftName,
-                                              JobCategoryName::jobName(mJobId, mCategory),
-                                              mDb.error_msg()));
+                // Error
+                QMessageBox::warning(
+                  this, tr("Shift Error"),
+                  tr("Error while setting shift <b>%1</b> to job <b>%2</b>.<br>"
+                     "Msg: %3")
+                    .arg(shiftName, JobCategoryName::jobName(mJobId, mCategory), mDb.error_msg()));
                 return;
             }
 
@@ -131,8 +130,8 @@ void JobChangeShiftDlg::done(int ret)
 
 void JobChangeShiftDlg::onJobChanged(db_id jobId, db_id oldJobId)
 {
-    //Update id/category
-    if(mJobId == oldJobId)
+    // Update id/category
+    if (mJobId == oldJobId)
         setJob(jobId);
 }
 
@@ -140,7 +139,7 @@ void JobChangeShiftDlg::setJob(db_id jobId)
 {
     query q_getJobInfo(mDb, "SELECT shift_id,category FROM jobs WHERE id=?");
     q_getJobInfo.bind(1, jobId);
-    if(q_getJobInfo.step() != SQLITE_ROW)
+    if (q_getJobInfo.step() != SQLITE_ROW)
         return;
     auto j = q_getJobInfo.getRows();
     setJob(jobId, j.get<db_id>(0), JobCategory(j.get<int>(1)));
@@ -148,9 +147,9 @@ void JobChangeShiftDlg::setJob(db_id jobId)
 
 void JobChangeShiftDlg::setJob(db_id jobId, db_id shiftId, JobCategory jobCat)
 {
-    mJobId = jobId;
+    mJobId          = jobId;
     originalShiftId = shiftId;
-    mCategory = jobCat;
+    mCategory       = jobCat;
 
     QString jobName = JobCategoryName::jobName(mJobId, mCategory);
 

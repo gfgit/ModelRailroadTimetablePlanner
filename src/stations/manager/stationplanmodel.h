@@ -63,10 +63,11 @@ public:
         Notes,
         NCols
     };
-    StationPlanModel(sqlite3pp::database& db, QObject *parent = nullptr);
+    StationPlanModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -80,7 +81,7 @@ public:
 
     inline StPlanItem getItemAt(int row) const
     {
-        if(row < m_data.size())
+        if (row < m_data.size())
         {
             return m_data.at(row);
         }
@@ -90,7 +91,7 @@ public:
 private:
     QVector<StPlanItem> m_data;
 
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
     sqlite3pp::query q_countPlanItems;
     sqlite3pp::query q_selectPlan;
 };

@@ -33,7 +33,7 @@ NewJobSamePathDlg::NewJobSamePathDlg(QWidget *parent) :
     QDialog(parent)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
-    label = new QLabel;
+    label            = new QLabel;
     label->setTextFormat(Qt::RichText);
     lay->addWidget(label);
 
@@ -41,11 +41,11 @@ NewJobSamePathDlg::NewJobSamePathDlg(QWidget *parent) :
     lay->addWidget(startTimeEdit);
 
     copyRsCheck = new QCheckBox(tr("Copy Rollingstock items"));
-    copyRsCheck->setChecked(true); //Enabled by default
+    copyRsCheck->setChecked(true); // Enabled by default
     lay->addWidget(copyRsCheck);
 
     reversePathCheck = new QCheckBox(tr("Reverse path"));
-    reversePathCheck->setChecked(false); //Disabled by default
+    reversePathCheck->setChecked(false); // Disabled by default
     lay->addWidget(reversePathCheck);
 
     QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -60,21 +60,21 @@ NewJobSamePathDlg::NewJobSamePathDlg(QWidget *parent) :
     setWindowTitle(tr("New Job With Same Path"));
 }
 
-void NewJobSamePathDlg::setSourceJob(db_id jobId, JobCategory cat, const QTime &start, const QTime &end)
+void NewJobSamePathDlg::setSourceJob(db_id jobId, JobCategory cat, const QTime &start,
+                                     const QTime &end)
 {
-    sourceJobId = jobId;
+    sourceJobId  = jobId;
     sourceJobCat = cat;
-    sourceStart = start;
-    sourceEnd = end;
+    sourceStart  = start;
+    sourceEnd    = end;
 
     label->setText(tr("Create a new job with same path of <b>%1</b>.<br>"
                       "Original job starts at <b>%2</b> and ends at <b>%3</b>.<br>"
                       "Please select below when the new job should start.")
-                       .arg(JobCategoryName::jobName(sourceJobId, sourceJobCat),
-                            sourceStart.toString("HH:mm"),
-                            sourceEnd.toString("HH:mm")));
+                     .arg(JobCategoryName::jobName(sourceJobId, sourceJobCat),
+                          sourceStart.toString("HH:mm"), sourceEnd.toString("HH:mm")));
 
-    //Prevent calling checkTimeIsValid()
+    // Prevent calling checkTimeIsValid()
     QSignalBlocker blk(startTimeEdit);
     startTimeEdit->setTime(sourceStart);
 }
@@ -96,21 +96,21 @@ bool NewJobSamePathDlg::shouldReversePath() const
 
 void NewJobSamePathDlg::checkTimeIsValid()
 {
-    const QTime lastValidTime = QTime(23, 59);
+    const QTime lastValidTime     = QTime(23, 59);
     const int travelDurationMsecs = sourceStart.msecsTo(sourceEnd);
 
-    QTime newStart = startTimeEdit->time();
-    int msecsToMidnight = newStart.msecsTo(lastValidTime);
-    if(travelDurationMsecs > msecsToMidnight)
+    QTime newStart                = startTimeEdit->time();
+    int msecsToMidnight           = newStart.msecsTo(lastValidTime);
+    if (travelDurationMsecs > msecsToMidnight)
     {
-        //New job would end after midnigth
+        // New job would end after midnigth
         QMessageBox::warning(this, tr("Invalid Start Time"),
                              tr("New job would end past midnight."));
 
-        //Go back from midnight to get maximum start value
+        // Go back from midnight to get maximum start value
         newStart = lastValidTime.addMSecs(-travelDurationMsecs);
 
-        //Prevent recursion
+        // Prevent recursion
         QSignalBlocker blk(startTimeEdit);
         startTimeEdit->setTime(newStart);
     }

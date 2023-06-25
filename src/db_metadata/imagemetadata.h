@@ -27,10 +27,9 @@
 typedef struct sqlite3 sqlite3;
 typedef struct sqlite3_blob sqlite3_blob;
 
-namespace ImageMetaData
-{
+namespace ImageMetaData {
 
-//TODO: move to utils
+// TODO: move to utils
 class ImageBlobDevice : public QIODevice
 {
     Q_OBJECT
@@ -38,7 +37,7 @@ public:
     ImageBlobDevice(sqlite3 *db, QObject *parent = nullptr);
     ~ImageBlobDevice() override;
 
-    void setBlobInfo(const QByteArray& table, const QByteArray& column, qint64 rowId);
+    void setBlobInfo(const QByteArray &table, const QByteArray &column, qint64 rowId);
 
     bool reserveSizeAndReset(qint64 len);
 
@@ -61,8 +60,8 @@ private:
     QByteArray mColumn;
 };
 
-ImageBlobDevice *getImage(sqlite3pp::database& db, const MetaDataManager::Key& key);
-void setImage(sqlite3pp::database& db, const MetaDataManager::Key &key, const void *data, int size);
+ImageBlobDevice *getImage(sqlite3pp::database &db, const MetaDataManager::Key &key);
+void setImage(sqlite3pp::database &db, const MetaDataManager::Key &key, const void *data, int size);
 
 } // namespace ImageMetaData
 

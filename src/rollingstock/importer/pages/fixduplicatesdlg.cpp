@@ -44,18 +44,18 @@ public:
         dlg(parent)
     {
         setAutoReset(false);
-        //Manually handle cancel
+        // Manually handle cancel
         disconnect(this, SIGNAL(canceled()), this, SLOT(cancel()));
         connect(this, SIGNAL(canceled()), this, SLOT(reject()));
     }
 
     void done(int res) override
     {
-        if(res != QDialog::Accepted)
+        if (res != QDialog::Accepted)
         {
             res = dlg->warnCancel(this);
-            if(res == QDialog::Accepted)
-                return; //Give user a second chance
+            if (res == QDialog::Accepted)
+                return; // Give user a second chance
         }
         QDialog::done(res);
     }
@@ -71,18 +71,19 @@ FixDuplicatesDlg::FixDuplicatesDlg(IDuplicatesItemModel *m, bool enableGoBack, Q
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    QLabel *label = new QLabel(RsImportStrings::tr("The file constains some duplicates in item names wich need to be fixed in order to procced.\n"
-                                                   "There also may be some items with empty name.\n"
-                                                   "Please assign a custom name to them so that there are no duplicates"));
+    QLabel *label    = new QLabel(
+      RsImportStrings::tr("The file constains some duplicates in item names wich need to be fixed "
+                                "in order to procced.\n"
+                                "There also may be some items with empty name.\n"
+                                "Please assign a custom name to them so that there are no duplicates"));
     lay->addWidget(label);
 
     view = new QTableView;
-    //Prevent changing names by accidentally pressing a key
+    // Prevent changing names by accidentally pressing a key
     view->setEditTriggers(QTableView::DoubleClicked);
     view->setModel(model);
     view->resizeColumnsToContents();
     lay->addWidget(view);
-
 
     box = new QDialogButtonBox(QDialogButtonBox::Ok);
     connect(box, &QDialogButtonBox::accepted, this, &QDialog::accept);
@@ -105,55 +106,58 @@ void FixDuplicatesDlg::setItemDelegateForColumn(int column, QAbstractItemDelegat
     view->setItemDelegateForColumn(column, delegate);
 }
 
-void FixDuplicatesDlg::showModelError(const QString& text)
+void FixDuplicatesDlg::showModelError(const QString &text)
 {
     QMessageBox::warning(this, RsImportStrings::tr("Invalid Operation"), text);
 }
 
 void FixDuplicatesDlg::done(int res)
 {
-    if(res == QDialog::Accepted)
+    if (res == QDialog::Accepted)
     {
-        //Check if all are fixed
+        // Check if all are fixed
         res = blockingReloadCount(IDuplicatesItemModel::LoadingData);
-        if(res != QDialog::Accepted)
+        if (res != QDialog::Accepted)
         {
             QDialog::done(res);
             return;
         }
 
         int count = model->getItemCount();
-        if(count)
+        if (count)
         {
             OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
             msgBox->setIcon(QMessageBox::Warning);
             msgBox->setWindowTitle(RsImportStrings::tr("Not yet!"));
             msgBox->setText(RsImportStrings::tr("There are still %1 items to be fixed").arg(count));
-            QPushButton *okBut = msgBox->addButton(QMessageBox::Ok);
+            QPushButton *okBut          = msgBox->addButton(QMessageBox::Ok);
             QPushButton *backToPrevPage = nullptr;
-            if(canGoBack)
-                backToPrevPage = msgBox->addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
+            if (canGoBack)
+                backToPrevPage =
+                  msgBox->addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
             msgBox->setDefaultButton(okBut);
-            msgBox->setEscapeButton(okBut); //If dialog gets closed of Esc is pressed act ad if Ok was pressed
+            msgBox->setEscapeButton(
+              okBut); // If dialog gets closed of Esc is pressed act ad if Ok was pressed
             msgBox->exec();
 
-            const bool goBack = msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage;
+            const bool goBack =
+              msgBox && msgBox->clickedButton() == backToPrevPage && backToPrevPage;
 
-            if(goBack)
+            if (goBack)
             {
                 res = GoBackToPrevPage;
             }
             else
             {
-                return; //Give user a second chance
+                return; // Give user a second chance
             }
         }
     }
     else
     {
         res = warnCancel(this);
-        if(res == QDialog::Accepted)
-            return; //Give user a second chance
+        if (res == QDialog::Accepted)
+            return; // Give user a second chance
     }
 
     return QDialog::done(res);
@@ -190,7 +194,7 @@ void FixDuplicatesDlg::handleModelState(int state)
 
 int FixDuplicatesDlg::blockingReloadCount(int mode)
 {
-    if(!model->startLoading(mode))
+    if (!model->startLoading(mode))
         return canGoBack ? int(GoBackToPrevPage) : int(QDialog::Rejected);
 
     progressDlg->reset();
@@ -207,17 +211,18 @@ int FixDuplicatesDlg::blockingReloadCount(int mode)
 
 int FixDuplicatesDlg::warnCancel(QWidget *w)
 {
-    //Warn user
+    // Warn user
     OwningQPointer<QMessageBox> msgBox = new QMessageBox(w);
     msgBox->setIcon(QMessageBox::Warning);
     msgBox->setWindowTitle(RsImportStrings::tr("Aborting RS Import"));
     msgBox->setText(RsImportStrings::tr("If you don't fix duplicated items you cannot proceed.\n"
                                         "Do you wish to Abort the process?"));
-    QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
-    QPushButton *noBut = msgBox->addButton(QMessageBox::No);
+    QPushButton *abortBut       = msgBox->addButton(QMessageBox::Abort);
+    QPushButton *noBut          = msgBox->addButton(QMessageBox::No);
     QPushButton *backToPrevPage = nullptr;
-    if(canGoBack)
-        backToPrevPage = msgBox->addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
+    if (canGoBack)
+        backToPrevPage =
+          msgBox->addButton(RsImportStrings::tr("Previuos page"), QMessageBox::NoRole);
     msgBox->setDefaultButton(noBut);
     msgBox->setEscapeButton(noBut);
 
@@ -225,16 +230,16 @@ int FixDuplicatesDlg::warnCancel(QWidget *w)
     connect(model, &IDuplicatesItemModel::processAborted, msgBox, &QMessageBox::accept);
     msgBox->exec();
 
-    if(!msgBox)
+    if (!msgBox)
         return QDialog::Rejected;
 
     QAbstractButton *but = msgBox->clickedButton();
-    int ret = QDialog::Accepted; //Default give second chance
-    if(but == abortBut)
+    int ret              = QDialog::Accepted; // Default give second chance
+    if (but == abortBut)
     {
         ret = QDialog::Rejected;
     }
-    else if(but == backToPrevPage && backToPrevPage)
+    else if (but == backToPrevPage && backToPrevPage)
     {
         ret = FixDuplicatesDlg::GoBackToPrevPage;
     }

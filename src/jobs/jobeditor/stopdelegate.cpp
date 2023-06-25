@@ -41,11 +41,11 @@ StopDelegate::StopDelegate(sqlite3pp::database &db, QObject *parent) :
 void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
                          const QModelIndex &index) const
 {
-    QRect rect = option.rect.adjusted(5, 5, -5, -5);
+    QRect rect             = option.rect.adjusted(5, 5, -5, -5);
 
     const StopModel *model = static_cast<const StopModel *>(index.model());
-    const StopItem item = model->getItemAt(index.row());
-    const bool isTransit = item.type == StopType::Transit;
+    const StopItem item    = model->getItemAt(index.row());
+    const bool isTransit   = item.type == StopType::Transit;
 
     query q(mDb, "SELECT name FROM stations WHERE id=?");
     q.bind(1, item.stationId);
@@ -56,7 +56,7 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    //Draw bottom border
+    // Draw bottom border
     painter->setPen(QPen(Qt::black, 1));
     painter->drawLine(option.rect.bottomLeft(), option.rect.bottomRight());
 
@@ -73,120 +73,117 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
 
     painter->setBrush(option.palette.text());
 
-    const double top = rect.top();
-    const double bottom = rect.bottom();
-    const double left = rect.left();
-    const double width = rect.width();
-    const double height = rect.height();
+    const double top          = rect.top();
+    const double bottom       = rect.bottom();
+    const double left         = rect.left();
+    const double width        = rect.width();
+    const double height       = rect.height();
 
-    const double stHeight = top + (isTransit ? 0.0 : height * 0.1);
-    const double timeHeight = top + height * 0.4;
-    const double lineHeight = top + height * 0.65;
+    const double stHeight     = top + (isTransit ? 0.0 : height * 0.1);
+    const double timeHeight   = top + height * 0.4;
+    const double lineHeight   = top + height * 0.65;
 
-    const double arrX = left + width * (isTransit ? 0.4 : 0.2);
-    const double depX = left + width * 0.6;
+    const double arrX         = left + width * (isTransit ? 0.4 : 0.2);
+    const double depX         = left + width * 0.6;
     const double transitLineX = left + width * 0.2;
 
-
-    if(item.addHere == 0)
+    if (item.addHere == 0)
     {
-        //Draw item
-        //Station name
-        painter->drawText(QRectF(left, stHeight, width, bottom - stHeight),
-                          station,
+        // Draw item
+        // Station name
+        painter->drawText(QRectF(left, stHeight, width, bottom - stHeight), station,
                           QTextOption(Qt::AlignHCenter));
 
-        if(item.type != StopType::First)
+        if (item.type != StopType::First)
         {
-            //Arrival
+            // Arrival
             painter->drawText(QRectF(arrX, timeHeight, width, bottom - timeHeight),
                               item.arrival.toString("HH:mm"));
         }
 
-        if(item.type == StopType::First || item.type == StopType::Normal) //Last, Transit don't have a separate departure
+        if (item.type == StopType::First
+            || item.type == StopType::Normal) // Last, Transit don't have a separate departure
         {
-            //Departure
+            // Departure
             painter->drawText(QRectF(depX, timeHeight, width, bottom - timeHeight),
                               item.departure.toString("HH:mm"));
         }
 
-        //Check direction
-        if(item.fromGate.gateConnId && item.toGate.gateConnId
-            && item.type != StopType::First && item.type != StopType::Last)
+        // Check direction
+        if (item.fromGate.gateConnId && item.toGate.gateConnId && item.type != StopType::First
+            && item.type != StopType::Last)
         {
-            //Ignore First and Last stop (sometimes they have fake in/out gates set which might trigger this message)
-            //Both entry and exit path are set, check direction
-            if(item.fromGate.stationTrackSide == item.toGate.stationTrackSide)
+            // Ignore First and Last stop (sometimes they have fake in/out gates set which might
+            // trigger this message) Both entry and exit path are set, check direction
+            if (item.fromGate.stationTrackSide == item.toGate.stationTrackSide)
             {
-                //Train leaves station track from same side of entrance, draw reverse icon
+                // Train leaves station track from same side of entrance, draw reverse icon
                 QPointF iconTopLeft(left, bottom - PixHeight);
                 painter->drawPixmap(iconTopLeft, m_reverseDirPix);
             }
         }
 
-        if(item.type != StopType::Last && item.nextSegment.segmentId)
+        if (item.type != StopType::Last && item.nextSegment.segmentId)
         {
-            //Last has no next segment so do not draw lightning
+            // Last has no next segment so do not draw lightning
 
             bool nextSegmentElectrified = model->isRailwayElectrifiedAfterRow(index.row());
-            bool prevSegmentElectrified = !nextSegmentElectrified; //Trigger change on First stop
+            bool prevSegmentElectrified = !nextSegmentElectrified; // Trigger change on First stop
 
-            if(item.type != StopType::First && index.row() >= 0)
+            if (item.type != StopType::First && index.row() >= 0)
             {
-                //Get real previous railway type
+                // Get real previous railway type
                 prevSegmentElectrified = model->isRailwayElectrifiedAfterRow(index.row() - 1);
             }
 
-            if(nextSegmentElectrified != prevSegmentElectrified)
+            if (nextSegmentElectrified != prevSegmentElectrified)
             {
-                //Railway type changed, draw a lightning
+                // Railway type changed, draw a lightning
                 QPointF lightningTopLeft(left, top + qMin(5.0, height * 0.1));
                 painter->drawPixmap(lightningTopLeft, m_lightningPix);
 
-                if(!nextSegmentElectrified)
+                if (!nextSegmentElectrified)
                 {
-                    //Next railway is not electrified, cross the lightning
-                    //Then keep red pen to draw next segment name
+                    // Next railway is not electrified, cross the lightning
+                    // Then keep red pen to draw next segment name
                     painter->setPen(QPen(Qt::red, 4));
-                    painter->drawLine(lightningTopLeft, lightningTopLeft + QPointF(PixWidth, PixHeight));
+                    painter->drawLine(lightningTopLeft,
+                                      lightningTopLeft + QPointF(PixWidth, PixHeight));
                 }
             }
 
-            //Draw next segment name
+            // Draw next segment name
             q.prepare("SELECT name FROM railway_segments WHERE id=?");
             q.bind(1, item.nextSegment.segmentId);
             q.step();
-            auto r = q.getRows();
+            auto r                = q.getRows();
             const QString segName = r.get<QString>(0);
             q.reset();
 
             const double lineRightX = left + width * 0.8;
-            painter->drawText(QRectF(transitLineX, lineHeight, lineRightX - left, bottom - lineHeight),
-                              tr("Seg: %1").arg(segName),
-                              QTextOption(Qt::AlignHCenter));
+            painter->drawText(
+              QRectF(transitLineX, lineHeight, lineRightX - left, bottom - lineHeight),
+              tr("Seg: %1").arg(segName), QTextOption(Qt::AlignHCenter));
 
-            if(item.toGate.gateTrackNum != 0)
+            if (item.toGate.gateTrackNum != 0)
             {
                 painter->setPen(QPen(Qt::red, 4));
-                painter->drawText(QRectF(lineRightX, lineHeight, left + width - lineRightX, bottom - lineHeight),
-                                  QString::number(item.toGate.gateTrackNum),
-                                  QTextOption(Qt::AlignHCenter));
+                painter->drawText(
+                  QRectF(lineRightX, lineHeight, left + width - lineRightX, bottom - lineHeight),
+                  QString::number(item.toGate.gateTrackNum), QTextOption(Qt::AlignHCenter));
             }
         }
 
-        if(isTransit)
+        if (isTransit)
         {
-            //Draw a vertical -0- to tell this is a transit
+            // Draw a vertical -0- to tell this is a transit
             painter->setPen(QPen(Qt::red, 4));
             painter->setBrush(Qt::red);
-            painter->drawLine(QLineF(transitLineX, rect.top(),
-                                     transitLineX, rect.bottom()));
+            painter->drawLine(QLineF(transitLineX, rect.top(), transitLineX, rect.bottom()));
 
-            painter->drawEllipse(QRectF(transitLineX - 12 / 2,
-                                        rect.top() + rect.height() * 0.4,
-                                        12, 12));
+            painter->drawEllipse(
+              QRectF(transitLineX - 12 / 2, rect.top() + rect.height() * 0.4, 12, 12));
         }
-
     }
     else if (item.addHere == 1)
     {
@@ -200,30 +197,29 @@ void StopDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option,
     painter->restore();
 }
 
-QSize StopDelegate::sizeHint(const QStyleOptionViewItem &/*option*/,
+QSize StopDelegate::sizeHint(const QStyleOptionViewItem & /*option*/,
                              const QModelIndex &index) const
 {
-    int w = 200;
-    int h = NormalStopHeight;
+    int w                  = 200;
+    int h                  = NormalStopHeight;
     const StopModel *model = static_cast<const StopModel *>(index.model());
-    if(index.row() < 0 || index.row() >= model->rowCount())
+    if (index.row() < 0 || index.row() >= model->rowCount())
         return QSize(w, AddHereHeight);
 
-    const StopItem& item = model->getItemAt(index.row());
-    if(item.type == StopType::Transit)
+    const StopItem &item = model->getItemAt(index.row());
+    if (item.type == StopType::Transit)
         h = TransitStopHeight;
-    if(item.addHere != 0)
+    if (item.addHere != 0)
         h = AddHereHeight;
     return QSize(w, h);
 }
 
-QWidget *StopDelegate::createEditor(QWidget *parent,
-                                    const QStyleOptionViewItem &/*option*/,
+QWidget *StopDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
                                     const QModelIndex &index) const
 
 {
-    StopModel *model = const_cast<StopModel*>(static_cast<const StopModel *>(index.model()));
-    if(model->isAddHere(index))
+    StopModel *model = const_cast<StopModel *>(static_cast<const StopModel *>(index.model()));
+    if (model->isAddHere(index))
     {
         qDebug() << index << "is AddHere";
         return nullptr;
@@ -231,35 +227,34 @@ QWidget *StopDelegate::createEditor(QWidget *parent,
 
     StopEditor *editor = new StopEditor(mDb, model, parent);
     editor->setAutoFillBackground(true);
-    editor->setEnabled(false); //Mark it
+    editor->setEnabled(false); // Mark it
 
-    //Prevent JobPathEditor context menu in table view during stop editing
+    // Prevent JobPathEditor context menu in table view during stop editing
     editor->setContextMenuPolicy(Qt::PreventContextMenu);
 
-    //See 'StopEditor::popupLinesCombo'
+    // See 'StopEditor::popupLinesCombo'
     connect(this, &StopDelegate::popupEditorSegmentCombo, editor, &StopEditor::popupSegmentCombo);
     connect(editor, &StopEditor::nextSegmentChosen, this, &StopDelegate::onEditorSegmentChosen);
 
     return editor;
 }
 
-void StopDelegate::setEditorData(QWidget *editor,
-                                 const QModelIndex &index) const
+void StopDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-    StopEditor *ed = static_cast<StopEditor*>(editor);
-    if(ed->isEnabled()) //We already set data
+    StopEditor *ed = static_cast<StopEditor *>(editor);
+    if (ed->isEnabled()) // We already set data
         return;
-    ed->setEnabled(true); //Mark it
+    ed->setEnabled(true); // Mark it
 
     const StopModel *model = static_cast<const StopModel *>(index.model());
 
-    const StopItem item = model->getItemAt(index.row());
+    const StopItem item    = model->getItemAt(index.row());
     StopItem prev;
 
     int r = index.row();
-    if(r > 0)
+    if (r > 0)
     {
-        //Current stop is not First, get also previous one
+        // Current stop is not First, get also previous one
         prev = model->getItemAt(r - 1);
     }
 
@@ -272,7 +267,7 @@ void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     DEBUG_IMPORTANT_ENTRY;
 
     qDebug() << "End editing: stop" << index.row();
-    StopEditor *ed = static_cast<StopEditor*>(editor);
+    StopEditor *ed       = static_cast<StopEditor *>(editor);
     StopModel *stopModel = static_cast<StopModel *>(model);
 
     bool avoidTimeRecalc = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
@@ -280,14 +275,15 @@ void StopDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
     stopModel->setStopInfo(index, ed->getCurItem(), ed->getPrevItem().nextSegment, avoidTimeRecalc);
 }
 
-void StopDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
+void StopDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                                        const QModelIndex & /*index*/) const
 {
     editor->setGeometry(option.rect);
 }
 
 void StopDelegate::onEditorSegmentChosen(StopEditor *editor)
 {
-    if(editor->closeOnSegmentChosen())
+    if (editor->closeOnSegmentChosen())
     {
         emit commitData(editor);
         emit closeEditor(editor, StopDelegate::EditNextItem);
@@ -296,10 +292,11 @@ void StopDelegate::onEditorSegmentChosen(StopEditor *editor)
 
 void StopDelegate::refreshPixmaps()
 {
-    const QString iconPath = QCoreApplication::instance()->applicationDirPath() + QStringLiteral("/icons");
+    const QString iconPath =
+      QCoreApplication::instance()->applicationDirPath() + QStringLiteral("/icons");
 
-    //Square pixmaps
-    m_lightningPix = QPixmap(PixWidth, PixHeight);
+    // Square pixmaps
+    m_lightningPix  = QPixmap(PixWidth, PixHeight);
     m_reverseDirPix = QPixmap(PixWidth, PixHeight);
 
     m_lightningPix.fill(Qt::transparent);
@@ -309,26 +306,26 @@ void StopDelegate::refreshPixmaps()
     QPainter painter;
     QRectF iconRect;
 
-    //Cache Lightning
+    // Cache Lightning
     mSvg.load(iconPath + QStringLiteral("/lightning.svg"));
 
-    //Scale SVG to fit requested size
+    // Scale SVG to fit requested size
     iconRect.setSize(mSvg.defaultSize().scaled(PixWidth, PixHeight, Qt::KeepAspectRatio));
 
-    //Center on pixmap
+    // Center on pixmap
     iconRect.moveTop((PixHeight - iconRect.height()) / 2);
     iconRect.moveLeft((PixWidth - iconRect.width()) / 2);
     painter.begin(&m_lightningPix);
     mSvg.render(&painter, iconRect);
     painter.end();
 
-    //Cache Reverse Direction
+    // Cache Reverse Direction
     mSvg.load(iconPath + QStringLiteral("/reverse_direction.svg"));
 
-    //Scale SVG to fit requested size
+    // Scale SVG to fit requested size
     iconRect.setSize(mSvg.defaultSize().scaled(PixWidth, PixHeight, Qt::KeepAspectRatio));
 
-    //Center on pixmap
+    // Center on pixmap
     iconRect.moveTop((PixHeight - iconRect.height()) / 2);
     iconRect.moveLeft((PixWidth - iconRect.width()) / 2);
     painter.begin(&m_reverseDirPix);

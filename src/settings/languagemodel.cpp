@@ -21,16 +21,16 @@
 
 #include "utils/localization/languageutils.h"
 
-LanguageModel::LanguageModel(QObject *parent)
-    : QAbstractListModel(parent)
+LanguageModel::LanguageModel(QObject *parent) :
+    QAbstractListModel(parent)
 {
 }
 
 QVariant LanguageModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
-        if(section == 0)
+        if (section == 0)
             return tr("Language");
     }
 
@@ -47,19 +47,19 @@ QVariant LanguageModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= m_data.size())
         return QVariant();
 
-    const QLocale& loc = m_data.at(idx.row());
+    const QLocale &loc = m_data.at(idx.row());
 
     switch (role)
     {
     case Qt::DisplayRole:
     {
-        //NOTE: Do not show "American English" for default locale (row 0)
-        if(idx.row() > 0)
+        // NOTE: Do not show "American English" for default locale (row 0)
+        if (idx.row() > 0)
             return loc.nativeLanguageName();
         Q_FALLTHROUGH();
     }
     case Qt::ToolTipRole:
-        return QLocale::languageToString(loc.language()); //Return english name in tooltip
+        return QLocale::languageToString(loc.language()); // Return english name in tooltip
     }
 
     return QVariant();
@@ -79,16 +79,16 @@ QLocale LanguageModel::getLocaleAt(int idx)
 
 int LanguageModel::findMatchingRow(const QLocale &loc)
 {
-    int exactMatchIdx = -1;
+    int exactMatchIdx   = -1;
     int partialMatchIdx = -1;
-    for(int i = 0; i < m_data.size(); i++)
+    for (int i = 0; i < m_data.size(); i++)
     {
-        const QLocale& item = m_data.at(i);
-        if(item.language() == loc.language())
+        const QLocale &item = m_data.at(i);
+        if (item.language() == loc.language())
         {
             partialMatchIdx = i;
 
-            if(item.country() == loc.country())
+            if (item.country() == loc.country())
             {
                 exactMatchIdx = i;
                 break;
@@ -96,10 +96,10 @@ int LanguageModel::findMatchingRow(const QLocale &loc)
         }
     }
 
-    if(exactMatchIdx != -1)
+    if (exactMatchIdx != -1)
         return exactMatchIdx;
 
-    if(partialMatchIdx != -1)
+    if (partialMatchIdx != -1)
         return partialMatchIdx;
 
     return 0;

@@ -25,38 +25,41 @@
 #include "isqlfkmatchmodel.h"
 #include "IFKField.h"
 
-SqlFKFieldDelegate::SqlFKFieldDelegate(IMatchModelFactory *factory, IFKField *iface, QObject *parent) :
+SqlFKFieldDelegate::SqlFKFieldDelegate(IMatchModelFactory *factory, IFKField *iface,
+                                       QObject *parent) :
     QStyledItemDelegate(parent),
     mIface(iface),
     mFactory(factory)
 {
-
 }
 
-QWidget *SqlFKFieldDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/, const QModelIndex &/*index*/) const
+QWidget *SqlFKFieldDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                                          const QModelIndex & /*index*/) const
 {
-    ISqlFKMatchModel *model = mFactory->createModel();
+    ISqlFKMatchModel *model          = mFactory->createModel();
     CustomCompletionLineEdit *editor = new CustomCompletionLineEdit(model, parent);
     model->setParent(editor);
-    connect(editor, &CustomCompletionLineEdit::completionDone, this, &SqlFKFieldDelegate::handleCompletionDone);
+    connect(editor, &CustomCompletionLineEdit::completionDone, this,
+            &SqlFKFieldDelegate::handleCompletionDone);
     return editor;
 }
 
 void SqlFKFieldDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
     CustomCompletionLineEdit *ed = static_cast<CustomCompletionLineEdit *>(editor);
-    db_id dataId = 0;
+    db_id dataId                 = 0;
     QString name;
-    if(mIface->getFieldData(index.row(), index.column(), dataId, name))
+    if (mIface->getFieldData(index.row(), index.column(), dataId, name))
     {
         ed->setData(dataId, name);
     }
 }
 
-void SqlFKFieldDelegate::setModelData(QWidget *editor, QAbstractItemModel */*model*/, const QModelIndex &index) const
+void SqlFKFieldDelegate::setModelData(QWidget *editor, QAbstractItemModel * /*model*/,
+                                      const QModelIndex &index) const
 {
     CustomCompletionLineEdit *ed = static_cast<CustomCompletionLineEdit *>(editor);
-    //FIXME: use also validateData() ?
+    // FIXME: use also validateData() ?
     db_id dataId = 0;
     QString name;
     ed->getData(dataId, name);

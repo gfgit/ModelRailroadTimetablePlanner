@@ -34,7 +34,7 @@ ShiftBusyDlg::ShiftBusyDlg(QWidget *parent) :
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    m_label = new QLabel;
+    m_label          = new QLabel;
     lay->addWidget(m_label);
 
     view = new QTableView;
@@ -57,8 +57,7 @@ void ShiftBusyDlg::setModel(ShiftBusyModel *m)
     m_label->setText(tr("Cannot set shift <b>%1</b> to job <b>%2</b>.<br>"
                         "The selected shift is busy:<br>"
                         "From: %3 To: %4")
-                         .arg(model->getShiftName(),
-                              model->getJobName(),
-                              model->getStart().toString("HH:mm"),
-                              model->getEnd().toString("HH:mm")));
+                       .arg(model->getShiftName(), model->getJobName(),
+                            model->getStart().toString("HH:mm"),
+                            model->getEnd().toString("HH:mm")));
 }

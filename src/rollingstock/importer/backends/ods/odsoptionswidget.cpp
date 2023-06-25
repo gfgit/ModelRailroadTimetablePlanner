@@ -31,14 +31,16 @@
 ODSOptionsWidget::ODSOptionsWidget(QWidget *parent) :
     IOptionsWidget(parent)
 {
-    //ODS Option
+    // ODS Option
     QFormLayout *lay = new QFormLayout(this);
-    lay->addRow(new QLabel(tr("Import rollingstock pieces, models and owners from a spreadsheet file.\n"
-                              "The file must be a valid Open Document Format Spreadsheet V1.2\n"
-                              "Extension: (*.ods)")));
+    lay->addRow(
+      new QLabel(tr("Import rollingstock pieces, models and owners from a spreadsheet file.\n"
+                    "The file must be a valid Open Document Format Spreadsheet V1.2\n"
+                    "Extension: (*.ods)")));
     odsFirstRowSpin = new QSpinBox;
     odsFirstRowSpin->setRange(1, 9999);
-    lay->addRow(tr("First non-empty row that contains rollingstock piece information"), odsFirstRowSpin);
+    lay->addRow(tr("First non-empty row that contains rollingstock piece information"),
+                odsFirstRowSpin);
     odsNumColSpin = new QSpinBox;
     odsNumColSpin->setRange(1, 9999);
     lay->addRow(tr("Column from which item number is extracted"), odsNumColSpin);

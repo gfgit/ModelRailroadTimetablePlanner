@@ -43,23 +43,37 @@ class StopEditingHelper : public QObject
 {
     Q_OBJECT
 public:
-    StopEditingHelper(sqlite3pp::database &db, StopModel *m,
-                      QSpinBox *outTrackSpin, QTimeEdit *arr, QTimeEdit *dep,
-                      QWidget *editor = nullptr);
+    StopEditingHelper(sqlite3pp::database &db, StopModel *m, QSpinBox *outTrackSpin, QTimeEdit *arr,
+                      QTimeEdit *dep, QWidget *editor = nullptr);
     ~StopEditingHelper();
 
-    void setStop(const StopItem& item, const StopItem& prev);
+    void setStop(const StopItem &item, const StopItem &prev);
 
     void popupSegmentCombo();
 
     QString getGateString(db_id gateId, bool reversed);
 
-    inline CustomCompletionLineEdit *getStationEdit() const { return mStationEdit; }
-    inline CustomCompletionLineEdit *getStTrackEdit() const { return mStTrackEdit; }
-    inline CustomCompletionLineEdit *getOutGateEdit() const { return mOutGateEdit; }
+    inline CustomCompletionLineEdit *getStationEdit() const
+    {
+        return mStationEdit;
+    }
+    inline CustomCompletionLineEdit *getStTrackEdit() const
+    {
+        return mStTrackEdit;
+    }
+    inline CustomCompletionLineEdit *getOutGateEdit() const
+    {
+        return mOutGateEdit;
+    }
 
-    inline const StopItem& getCurItem() const { return curStop; }
-    inline const StopItem& getPrevItem() const { return prevStop; }
+    inline const StopItem &getCurItem() const
+    {
+        return curStop;
+    }
+    inline const StopItem &getPrevItem() const
+    {
+        return prevStop;
+    }
 
 protected:
     void timerEvent(QTimerEvent *e) override;
@@ -82,7 +96,7 @@ public slots:
     void stopOutTrackTimer();
 
 private:
-    void updateGateTrackSpin(const StopItem::Gate& toGate);
+    void updateGateTrackSpin(const StopItem::Gate &toGate);
 
 private:
     QWidget *mEditor;

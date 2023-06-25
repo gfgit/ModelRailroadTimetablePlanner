@@ -33,7 +33,10 @@ class RSImportedRollingstockModel : public IRsImportModel
     Q_OBJECT
 
 public:
-    enum { BatchSize = 100 };
+    enum
+    {
+        BatchSize = 100
+    };
 
     enum Columns
     {
@@ -66,7 +69,8 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -75,11 +79,9 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
-
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
@@ -89,14 +91,12 @@ public:
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
 
-
     // IRsImportModel:
     int countImported() override;
 
-
     // ICheckName:
-    bool checkNewNumberIsValid(db_id importedRsId, db_id importedModelId, db_id matchExistingModelId, RsType rsType,
-                               int number, int newNumber,
+    bool checkNewNumberIsValid(db_id importedRsId, db_id importedModelId,
+                               db_id matchExistingModelId, RsType rsType, int number, int newNumber,
                                QString *errTextOut) override;
 
 protected:
@@ -104,8 +104,8 @@ protected:
 
 private:
     void fetchRow(int row);
-    Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant& val);
-    void handleResult(const QVector<RSItem>& items, int firstRow);
+    Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant &val);
+    void handleResult(const QVector<RSItem> &items, int firstRow);
 
 private:
     QVector<RSItem> cache;

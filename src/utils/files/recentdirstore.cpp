@@ -47,11 +47,11 @@ inline QStandardPaths::StandardLocation convertFlag(RecentDirStore::DefaultDir k
 QString RecentDirStore::getDir(const QString &key, DefaultDir kind)
 {
     auto it = recent_dirs()->m_dirs.find(key);
-    if(it == recent_dirs()->m_dirs.end())
+    if (it == recent_dirs()->m_dirs.end())
     {
-        //Insert new dir
+        // Insert new dir
         QString path = QStandardPaths::writableLocation(convertFlag(kind));
-        it = recent_dirs->m_dirs.insert(key, path);
+        it           = recent_dirs->m_dirs.insert(key, path);
     }
 
     return it.value();
@@ -60,17 +60,17 @@ QString RecentDirStore::getDir(const QString &key, DefaultDir kind)
 void RecentDirStore::setPath(const QString &key, const QString &path)
 {
     auto it = recent_dirs()->m_dirs.find(key);
-    if(it == recent_dirs()->m_dirs.end())
+    if (it == recent_dirs()->m_dirs.end())
         return;
 
     QFileInfo info(path);
-    if(info.isDir())
+    if (info.isDir())
         it.value() = info.absoluteFilePath();
     else
     {
         QString path2 = info.absolutePath();
         info.setFile(path2);
-        if(info.isDir())
+        if (info.isDir())
             it.value() = path2;
     }
 }

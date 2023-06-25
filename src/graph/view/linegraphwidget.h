@@ -46,9 +46,20 @@ class LineGraphWidget : public QWidget
 public:
     explicit LineGraphWidget(QWidget *parent = nullptr);
 
-    inline LineGraphScene *getScene() const { return m_scene; }
-    inline LineGraphView *getView() const { return view; }
-    inline LineGraphToolbar *getToolbar() const { return toolBar; }
+    inline LineGraphScene *getScene() const
+    {
+        return m_scene;
+    }
+
+    inline LineGraphView *getView() const
+    {
+        return view;
+    }
+
+    inline LineGraphToolbar *getToolbar() const
+    {
+        return toolBar;
+    }
 
     bool tryLoadGraph(db_id graphObjId, LineGraphType type);
 

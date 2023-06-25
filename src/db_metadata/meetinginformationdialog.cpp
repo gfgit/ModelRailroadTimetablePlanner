@@ -47,28 +47,34 @@ MeetingInformationDialog::MeetingInformationDialog(QWidget *parent) :
     ui->setupUi(this);
 
     connect(ui->viewPictureBut, &QPushButton::clicked, this, &MeetingInformationDialog::showImage);
-    connect(ui->importPictureBut, &QPushButton::clicked, this, &MeetingInformationDialog::importImage);
-    connect(ui->removePictureBut, &QPushButton::clicked, this, &MeetingInformationDialog::removeImage);
-    connect(ui->resetHeaderBut, &QPushButton::clicked, this, &MeetingInformationDialog::toggleHeader);
-    connect(ui->resetFooterBut, &QPushButton::clicked, this, &MeetingInformationDialog::toggleFooter);
-    connect(ui->startDate, &QDateEdit::dateChanged, this, &MeetingInformationDialog::updateMinumumDate);
+    connect(ui->importPictureBut, &QPushButton::clicked, this,
+            &MeetingInformationDialog::importImage);
+    connect(ui->removePictureBut, &QPushButton::clicked, this,
+            &MeetingInformationDialog::removeImage);
+    connect(ui->resetHeaderBut, &QPushButton::clicked, this,
+            &MeetingInformationDialog::toggleHeader);
+    connect(ui->resetFooterBut, &QPushButton::clicked, this,
+            &MeetingInformationDialog::toggleFooter);
+    connect(ui->startDate, &QDateEdit::dateChanged, this,
+            &MeetingInformationDialog::updateMinumumDate);
 
     QSizePolicy sp = ui->headerEdit->sizePolicy();
     sp.setRetainSizeWhenHidden(true);
     ui->headerEdit->setSizePolicy(sp);
     ui->footerEdit->setSizePolicy(sp);
 
-    //Use similar font to the actual font used in sheet export
+    // Use similar font to the actual font used in sheet export
     QFont font;
     font.setBold(true);
     font.setPointSize(18);
     ui->descrEdit->document()->setDefaultFont(font);
 
-    if(!loadData())
+    if (!loadData())
     {
         QMessageBox::warning(this, tr("Database Error"),
                              tr("This database doesn't support metadata.\n"
-                                "Make sure it was created by a recent version of the application and was not manipulated."));
+                                "Make sure it was created by a recent version of the application "
+                                "and was not manipulated."));
         setDisabled(true);
     }
 }
@@ -82,7 +88,7 @@ bool MeetingInformationDialog::loadData()
 {
     MetaDataManager *meta = Session->getMetaDataManager();
 
-    qint64 tmp = 0;
+    qint64 tmp            = 0;
     QDate date;
 
     switch (meta->getInt64(tmp, MetaDataKey::MeetingStartDate))
@@ -93,7 +99,7 @@ bool MeetingInformationDialog::loadData()
         break;
     }
     case MetaDataKey::Result::NoMetaDataTable:
-        return false; //Database has no well-formed metadata
+        return false; // Database has no well-formed metadata
     default:
         date = QDate::currentDate();
     }
@@ -126,7 +132,7 @@ bool MeetingInformationDialog::loadData()
     text.clear();
     meta->getString(text, MetaDataKey::MeetingDescription);
     ui->descrEdit->setPlainText(text);
-    //Align all text to center
+    // Align all text to center
     QTextCursor c = ui->descrEdit->textCursor();
     c.select(QTextCursor::Document);
     QTextBlockFormat fmt;
@@ -145,11 +151,12 @@ bool MeetingInformationDialog::loadData()
     return true;
 }
 
-void MeetingInformationDialog::setSheetText(QLineEdit *lineEdit, QPushButton *but, const QString& text, bool isNull)
+void MeetingInformationDialog::setSheetText(QLineEdit *lineEdit, QPushButton *but,
+                                            const QString &text, bool isNull)
 {
     lineEdit->setVisible(!isNull);
 
-    if(isNull)
+    if (isNull)
     {
         but->setText(tr("Set custom text"));
         lineEdit->setText(QString());
@@ -170,15 +177,18 @@ void MeetingInformationDialog::saveData()
     meta->setInt64(ui->showDatesBox->isChecked() ? 1 : 0, false, MetaDataKey::MeetingShowDates);
 
     meta->setString(ui->locationEdit->text().simplified(), false, MetaDataKey::MeetingLocation);
-    meta->setString(ui->associationEdit->text().simplified(), false, MetaDataKey::MeetingHostAssociation);
+    meta->setString(ui->associationEdit->text().simplified(), false,
+                    MetaDataKey::MeetingHostAssociation);
     meta->setString(ui->descrEdit->toPlainText(), false, MetaDataKey::MeetingDescription);
 
-    meta->setString(ui->headerEdit->text().simplified(), headerIsNull, MetaDataKey::SheetHeaderText);
-    meta->setString(ui->footerEdit->text().simplified(), footerIsNull, MetaDataKey::SheetFooterText);
+    meta->setString(ui->headerEdit->text().simplified(), headerIsNull,
+                    MetaDataKey::SheetHeaderText);
+    meta->setString(ui->footerEdit->text().simplified(), footerIsNull,
+                    MetaDataKey::SheetFooterText);
 
-    if(needsToSaveImg)
+    if (needsToSaveImg)
     {
-        if(img.isNull())
+        if (img.isNull())
         {
             ImageMetaData::setImage(Session->m_Db, MetaDataKey::MeetingLogoPicture, nullptr, 0);
         }
@@ -189,10 +199,13 @@ void MeetingInformationDialog::saveData()
             buf.open(QIODevice::WriteOnly);
 
             QImageWriter writer(&buf, "PNG");
-            if(writer.canWrite() && writer.write(img))
+            if (writer.canWrite() && writer.write(img))
             {
-                ImageMetaData::setImage(Session->m_Db, MetaDataKey::MeetingLogoPicture, arr.data(), arr.size());
-            }else{
+                ImageMetaData::setImage(Session->m_Db, MetaDataKey::MeetingLogoPicture, arr.data(),
+                                        arr.size());
+            }
+            else
+            {
                 qDebug() << "MeetingInformationDialog: error saving image," << writer.errorString();
             }
         }
@@ -203,25 +216,28 @@ void MeetingInformationDialog::showImage()
 {
     OwningQPointer<ImageViewer> dlg = new ImageViewer(this);
 
-    if(img.isNull() && !needsToSaveImg)
+    if (img.isNull() && !needsToSaveImg)
     {
         std::unique_ptr<ImageMetaData::ImageBlobDevice> imageIO;
         imageIO.reset(ImageMetaData::getImage(Session->m_Db, MetaDataKey::MeetingLogoPicture));
-        if(imageIO && imageIO->open(QIODevice::ReadOnly))
+        if (imageIO && imageIO->open(QIODevice::ReadOnly))
         {
             QImageReader reader(imageIO.get());
-            if(reader.canRead())
+            if (reader.canRead())
             {
-                img = reader.read(); //ERRORMSG: handle errors, show to user
+                img = reader.read(); // ERRORMSG: handle errors, show to user
             }
 
-            if(img.isNull())
+            if (img.isNull())
             {
-                qDebug() << "MeetingInformationDialog: error loading image," << reader.errorString();
+                qDebug() << "MeetingInformationDialog: error loading image,"
+                         << reader.errorString();
             }
 
             imageIO->close();
-        }else{
+        }
+        else
+        {
             qDebug() << "MeetingInformationDialog: error query image," << Session->m_Db.error_msg();
         }
     }
@@ -230,15 +246,15 @@ void MeetingInformationDialog::showImage()
 
     dlg->exec();
 
-    if(!needsToSaveImg)
-        img = QImage(); //Cleanup to free memory
+    if (!needsToSaveImg)
+        img = QImage(); // Cleanup to free memory
 }
 
 void MeetingInformationDialog::importImage()
 {
     const QLatin1String meeting_image_key = QLatin1String("meeting_image_key");
 
-    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Import image"));
+    OwningQPointer<QFileDialog> dlg       = new QFileDialog(this, tr("Import image"));
     dlg->setFileMode(QFileDialog::ExistingFile);
     dlg->setAcceptMode(QFileDialog::AcceptOpen);
     dlg->setDirectory(RecentDirStore::getDir(meeting_image_key, RecentDirStore::Images));
@@ -246,28 +262,28 @@ void MeetingInformationDialog::importImage()
     QList<QByteArray> mimes = QImageReader::supportedMimeTypes();
     QStringList filters;
     filters.reserve(mimes.size() + 1);
-    for(const QByteArray &ba : mimes)
+    for (const QByteArray &ba : mimes)
         filters.append(QString::fromUtf8(ba));
 
     filters << "application/octet-stream"; // will show "All files (*)"
 
     dlg->setMimeTypeFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(meeting_image_key, fileName);
 
     QImageReader reader(fileName);
     reader.setQuality(100);
-    if(reader.canRead())
+    if (reader.canRead())
     {
         QImage image = reader.read();
-        if(image.isNull())
+        if (image.isNull())
         {
             QMessageBox::warning(this, tr("Importing error"),
                                  tr("The image format is not supported or the file is corrupted."));
@@ -275,7 +291,7 @@ void MeetingInformationDialog::importImage()
             return;
         }
 
-        img = image;
+        img            = image;
         needsToSaveImg = true;
     }
 }
@@ -284,10 +300,10 @@ void MeetingInformationDialog::removeImage()
 {
     int ret = QMessageBox::question(this, tr("Remove image?"),
                                     tr("Are you sure to remove the image logo?"));
-    if(ret != QMessageBox::Yes)
+    if (ret != QMessageBox::Yes)
         return;
 
-    img = QImage(); //Cleanup to free memory
+    img            = QImage(); // Cleanup to free memory
     needsToSaveImg = true;
 }
 

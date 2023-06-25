@@ -44,7 +44,7 @@ RailwaySegmentsModel::RailwaySegmentsModel(sqlite3pp::database &db, QObject *par
 
 QVariant RailwaySegmentsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal)
     {
         switch (role)
         {
@@ -73,7 +73,7 @@ QVariant RailwaySegmentsModel::headerData(int section, Qt::Orientation orientati
         }
         }
     }
-    else if(role == Qt::DisplayRole)
+    else if (role == Qt::DisplayRole)
     {
         return section + curPage * ItemsPerPage + 1;
     }
@@ -87,16 +87,16 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<RailwaySegmentsModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const RailwaySegmentItem& item = cache.at(row - cacheFirstRow);
+    const RailwaySegmentItem &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -128,7 +128,7 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
         case FromStationCol:
         case ToStationCol:
         {
-            if(item.reversed)
+            if (item.reversed)
                 return tr("Segment <b>%1</b> is shown reversed.").arg(item.segmentName);
             break;
         }
@@ -155,9 +155,9 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
         case FromStationCol:
         case ToStationCol:
         {
-            if(item.reversed)
+            if (item.reversed)
             {
-                //Light red
+                // Light red
                 QBrush b(qRgb(255, 110, 110));
                 return b;
             }
@@ -171,7 +171,8 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case IsElectrifiedCol:
-            return item.type.testFlag(utils::RailwaySegmentType::Electrified) ? Qt::Checked : Qt::Unchecked;
+            return item.type.testFlag(utils::RailwaySegmentType::Electrified) ? Qt::Checked
+                                                                              : Qt::Unchecked;
         }
         break;
     }
@@ -186,10 +187,10 @@ Qt::ItemFlags RailwaySegmentsModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
 
-    if(idx.column() == IsElectrifiedCol)
+    if (idx.column() == IsElectrifiedCol)
         f.setFlag(Qt::ItemIsUserCheckable);
 
     return f;
@@ -197,14 +198,14 @@ Qt::ItemFlags RailwaySegmentsModel::flags(const QModelIndex &idx) const
 
 void RailwaySegmentsModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col == FromGateCol || col == ToGateCol || col == IsElectrifiedCol)
+    if (sortColumn == col || col == FromGateCol || col == ToGateCol || col == IsElectrifiedCol)
         return;
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
@@ -222,14 +223,16 @@ void RailwaySegmentsModel::setFilterFromStationId(const db_id &value)
 qint64 RailwaySegmentsModel::recalcTotalItemCount()
 {
     query q(mDb);
-    if(filterFromStationId)
+    if (filterFromStationId)
     {
         q.prepare("SELECT COUNT(1) FROM railway_segments s"
                   " JOIN station_gates g1 ON g1.id=s.in_gate_id"
                   " JOIN station_gates g2 ON g2.id=s.out_gate_id"
                   " WHERE g1.station_id=?1 OR g2.station_id=?1");
         q.bind(1, filterFromStationId);
-    }else{
+    }
+    else
+    {
         q.prepare("SELECT COUNT(1) FROM railway_segments");
     }
 
@@ -242,33 +245,34 @@ void RailwaySegmentsModel::internalFetch(int first, int sortCol, int valRow, con
 {
     query q(mDb);
 
-    int offset = first - valRow + curPage * ItemsPerPage;
+    int offset   = first - valRow + curPage * ItemsPerPage;
     bool reverse = false;
 
-    if(valRow > first)
+    if (valRow > first)
     {
-        offset = 0;
+        offset  = 0;
         reverse = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset
+             << "Reverse:" << reverse;
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT s.id, s.name, s.max_speed_kmh, s.type, s.distance_meters,"
-                     "g1.station_id, g2.station_id,"
-                     "s.in_gate_id, g1.name, st1.name,"
-                     "s.out_gate_id,g2.name, st2.name"
-                     " FROM railway_segments s"
-                     " JOIN station_gates g1 ON g1.id=s.in_gate_id"
-                     " JOIN station_gates g2 ON g2.id=s.out_gate_id"
-                     " JOIN stations st1 ON st1.id=g1.station_id"
-                     " JOIN stations st2 ON st2.id=g2.station_id";
+    QByteArray sql       = "SELECT s.id, s.name, s.max_speed_kmh, s.type, s.distance_meters,"
+                           "g1.station_id, g2.station_id,"
+                           "s.in_gate_id, g1.name, st1.name,"
+                           "s.out_gate_id,g2.name, st2.name"
+                           " FROM railway_segments s"
+                           " JOIN station_gates g1 ON g1.id=s.in_gate_id"
+                           " JOIN station_gates g2 ON g2.id=s.out_gate_id"
+                           " JOIN stations st1 ON st1.id=g1.station_id"
+                           " JOIN stations st2 ON st2.id=g2.station_id";
     switch (sortCol)
     {
     case NameCol:
     {
-        whereCol = "s.name"; //Order by 1 column, no where clause
+        whereCol = "s.name"; // Order by 1 column, no where clause
         break;
     }
     case FromStationCol:
@@ -293,17 +297,17 @@ void RailwaySegmentsModel::internalFetch(int first, int sortCol, int valRow, con
     }
     }
 
-    if(val.isValid())
+    if (val.isValid())
     {
         sql += " WHERE ";
         sql += whereCol;
-        if(reverse)
+        if (reverse)
             sql += "<?3";
         else
             sql += ">?3";
     }
 
-    if(filterFromStationId)
+    if (filterFromStationId)
     {
         sql += " WHERE g1.station_id=?4 OR g2.station_id=?4";
     }
@@ -311,19 +315,19 @@ void RailwaySegmentsModel::internalFetch(int first, int sortCol, int valRow, con
     sql += " ORDER BY ";
     sql += whereCol;
 
-    if(reverse)
+    if (reverse)
         sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
-    if(filterFromStationId)
+    if (filterFromStationId)
         q.bind(4, filterFromStationId);
 
     //    if(val.isValid())
@@ -340,54 +344,54 @@ void RailwaySegmentsModel::internalFetch(int first, int sortCol, int valRow, con
 
     QVector<RailwaySegmentItem> vec(BatchSize);
 
-    auto it = q.begin();
-    const auto end = q.end();
+    auto it             = q.begin();
+    const auto end      = q.end();
 
-    int i = reverse ? BatchSize - 1 : 0;
+    int i               = reverse ? BatchSize - 1 : 0;
     const int increment = reverse ? -1 : 1;
 
-    for(; it != end; ++it)
+    for (; it != end; ++it)
     {
-        auto r = *it;
+        auto r                   = *it;
         RailwaySegmentItem &item = vec[i];
-        item.segmentId = r.get<db_id>(0);
-        item.segmentName = r.get<QString>(1);
-        item.maxSpeedKmH = r.get<int>(2);
-        item.type = utils::RailwaySegmentType(r.get<int>(3));
-        item.distanceMeters = r.get<int>(4);
+        item.segmentId           = r.get<db_id>(0);
+        item.segmentName         = r.get<QString>(1);
+        item.maxSpeedKmH         = r.get<int>(2);
+        item.type                = utils::RailwaySegmentType(r.get<int>(3));
+        item.distanceMeters      = r.get<int>(4);
 
-        item.fromStationId = r.get<db_id>(5);
-        item.toStationId = r.get<db_id>(6);
+        item.fromStationId       = r.get<db_id>(5);
+        item.toStationId         = r.get<db_id>(6);
 
-        item.fromGateId = r.get<db_id>(7);
-        item.fromGateLetter = sqlite3_column_text(q.stmt(), 8)[0];
-        item.fromStationName = r.get<QString>(9);
+        item.fromGateId          = r.get<db_id>(7);
+        item.fromGateLetter      = sqlite3_column_text(q.stmt(), 8)[0];
+        item.fromStationName     = r.get<QString>(9);
 
-        item.toGateId = r.get<db_id>(10);
-        item.toGateLetter = sqlite3_column_text(q.stmt(), 11)[0];
-        item.toStationName = r.get<QString>(12);
-        item.reversed = false;
+        item.toGateId            = r.get<db_id>(10);
+        item.toGateLetter        = sqlite3_column_text(q.stmt(), 11)[0];
+        item.toStationName       = r.get<QString>(12);
+        item.reversed            = false;
 
-        if(filterFromStationId)
+        if (filterFromStationId)
         {
-            if(filterFromStationId == item.toStationId)
+            if (filterFromStationId == item.toStationId)
             {
-                //Always show filter station as 'From'
+                // Always show filter station as 'From'
                 qSwap(item.fromStationId, item.toStationId);
                 qSwap(item.fromGateId, item.toGateId);
                 qSwap(item.fromStationName, item.toStationName);
                 qSwap(item.fromGateLetter, item.toGateLetter);
                 item.reversed = true;
             }
-            //item.fromStationName.clear(); //Save some memory???
+            // item.fromStationName.clear(); //Save some memory???
         }
 
         i += increment;
     }
 
-    if(reverse && i > -1)
+    if (reverse && i > -1)
         vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    else if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);

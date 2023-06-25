@@ -43,10 +43,10 @@ struct StationSVGJobStops
     {
         struct Gate
         {
-            db_id connId = 0;
-            db_id gateId = 0;
-            db_id gateTrackNum = 0;
-            db_id trackId = 0;
+            db_id connId          = 0;
+            db_id gateId          = 0;
+            db_id gateTrackNum    = 0;
+            db_id trackId         = 0;
             utils::Side trackSide = utils::Side::NSides;
         };
 
@@ -64,7 +64,7 @@ struct StationSVGJobStops
     QTime time;
 };
 
-//FIXME: compress SVG on saving and uncompress on loading?
+// FIXME: compress SVG on saving and uncompress on loading?
 class StationSVGHelper
 {
     Q_DECLARE_TR_FUNCTIONS(Odt)
@@ -73,28 +73,28 @@ public:
 
     static bool addImage(sqlite3pp::database &db, db_id stationId, QIODevice *source,
                          QString *errOut = nullptr);
-    static bool removeImage(sqlite3pp::database &db, db_id stationId,
-                            QString *errOut = nullptr);
+    static bool removeImage(sqlite3pp::database &db, db_id stationId, QString *errOut = nullptr);
 
     static bool saveImage(sqlite3pp::database &db, db_id stationId, QIODevice *dest,
                           QString *errOut = nullptr);
-    static QIODevice* loadImage(sqlite3pp::database &db, db_id stationId);
+    static QIODevice *loadImage(sqlite3pp::database &db, db_id stationId);
 
     static bool loadStationFromDB(sqlite3pp::database &db, db_id stationId,
                                   ssplib::StationPlan *plan, bool onlyAlreadyPresent);
 
-    static bool getPrevNextStop(sqlite3pp::database &db, db_id stationId,
-                                bool next, QTime &time);
+    static bool getPrevNextStop(sqlite3pp::database &db, db_id stationId, bool next, QTime &time);
 
     static bool loadStationJobsFromDB(sqlite3pp::database &db, StationSVGJobStops *station);
 
-    static bool applyStationJobsToPlan(const StationSVGJobStops *station, ssplib::StationPlan *plan);
+    static bool applyStationJobsToPlan(const StationSVGJobStops *station,
+                                       ssplib::StationPlan *plan);
 
     static bool writeStationXml(QIODevice *dev, ssplib::StationPlan *plan);
 
     static bool writeStationXmlFromDB(sqlite3pp::database &db, db_id stationId, QIODevice *dev);
 
-    static bool importTrackConnFromSVG(sqlite3pp::database &db, db_id stationId, ssplib::StationPlan *plan);
+    static bool importTrackConnFromSVG(sqlite3pp::database &db, db_id stationId,
+                                       ssplib::StationPlan *plan);
     static bool importTrackConnFromSVGDev(sqlite3pp::database &db, db_id stationId, QIODevice *dev);
 };
 

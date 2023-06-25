@@ -34,12 +34,11 @@ class RailwaySegmentConnectionsModel;
 class RailwaySegmentSplitHelper
 {
 public:
-    RailwaySegmentSplitHelper(sqlite3pp::database &db,
-                              RailwaySegmentConnectionsModel *origSegConn,
+    RailwaySegmentSplitHelper(sqlite3pp::database &db, RailwaySegmentConnectionsModel *origSegConn,
                               RailwaySegmentConnectionsModel *newSegConn);
 
-    void setInfo(const utils::RailwaySegmentInfo& origInfo,
-                 const utils::RailwaySegmentInfo& newInfo);
+    void setInfo(const utils::RailwaySegmentInfo &origInfo,
+                 const utils::RailwaySegmentInfo &newInfo);
 
     bool split();
 

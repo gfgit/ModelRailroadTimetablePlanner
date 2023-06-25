@@ -35,13 +35,15 @@ class RailwaySegmentConnectionsModel : public QAbstractTableModel
     Q_OBJECT
 
 public:
-    enum Columns {
+    enum Columns
+    {
         FromGateTrackCol = 0,
         ToGateTrackCol,
         NCols
     };
 
-    enum ItemState {
+    enum ItemState
+    {
         NoChange = 0,
         AddedButNotComplete,
         ToAdd,
@@ -57,14 +59,15 @@ public:
         ItemState state;
     };
 
-    static constexpr const int InvalidTrack = -1;
-    static constexpr const int NewTrackAdded = -1;
+    static constexpr const int InvalidTrack          = -1;
+    static constexpr const int NewTrackAdded         = -1;
     static constexpr const int TrackAlreadyConnected = -2;
 
     RailwaySegmentConnectionsModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -73,21 +76,35 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     void setSegment(db_id segmentId, db_id fromGateId, db_id toGateId, bool reversed);
     void resetData();
     void clear();
 
-    inline int getActualCount() const { return actualCount; }
-    inline void setReadOnly(bool val) { readOnly = val; }
-    inline bool isReadOnly() const  { return readOnly; }
+    inline int getActualCount() const
+    {
+        return actualCount;
+    }
+    inline void setReadOnly(bool val)
+    {
+        readOnly = val;
+    }
+    inline bool isReadOnly() const
+    {
+        return readOnly;
+    }
 
-    inline int getFromGateTrackCount() const { return m_fromGateTrackCount; }
-    inline int getToGateTrackCount() const { return m_toGateTrackCount; }
+    inline int getFromGateTrackCount() const
+    {
+        return m_fromGateTrackCount;
+    }
+    inline int getToGateTrackCount() const
+    {
+        return m_toGateTrackCount;
+    }
 
     void createDefaultConnections();
 
@@ -97,10 +114,10 @@ public:
     bool applyChanges(db_id overrideSegmentId);
 
 signals:
-    void modelError(const QString& msg);
+    void modelError(const QString &msg);
 
 private:
-    int insertOrReplace(const RailwayTrack& newTrack);
+    int insertOrReplace(const RailwayTrack &newTrack);
 
 private:
     sqlite3pp::database &mDb;

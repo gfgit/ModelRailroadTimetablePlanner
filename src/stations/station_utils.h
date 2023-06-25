@@ -25,28 +25,27 @@
 
 #include <QString>
 
-namespace utils
-{
+namespace utils {
 
 enum class StationType : qint8
 {
-    Normal = 0, //Normal station
-    SimpleStop = 1, //Trains can stop but cannot be origin or destination
-    Junction = 2, //This is not a real station but instead a junction between 2 lines
+    Normal     = 0, // Normal station
+    SimpleStop = 1, // Trains can stop but cannot be origin or destination
+    Junction   = 2, // This is not a real station but instead a junction between 2 lines
     NTypes
 };
 
-//TODO: is this useful???
+// TODO: is this useful???
 enum class GateType : qint8
 {
-    Unknown = 0,
-    Entrance = 1 << 0, //NOTE: at least Entrance or Exit
-    Exit     = 1 << 1,
-    Bidirectional = (Entrance | Exit),
+    Unknown          = 0,
+    Entrance         = 1 << 0, // NOTE: at least Entrance or Exit
+    Exit             = 1 << 1,
+    Bidirectional    = (Entrance | Exit),
 
-    LeftHandTraffic = 1 << 2,
+    LeftHandTraffic  = 1 << 2,
     RightHandTraffic = 1 << 3,
-    MultipleTraffic = (LeftHandTraffic | RightHandTraffic)
+    MultipleTraffic  = (LeftHandTraffic | RightHandTraffic)
 };
 
 enum class Side : qint8
@@ -56,26 +55,26 @@ enum class Side : qint8
     NSides
 };
 
-//NOTE: a track can be for passenger and freight traffic at the same time or none of them
-//      just set platf_length_cm TO non-zero, same for freight_length_cm
+// NOTE: a track can be for passenger and freight traffic at the same time or none of them
+//       just set platf_length_cm TO non-zero, same for freight_length_cm
 enum class StationTrackType : qint8
 {
-    Electrified = 1 << 0, //Electric engines are allowed
-    Through     = 1 << 1 //For non-stopping trains
+    Electrified = 1 << 0, // Electric engines are allowed
+    Through     = 1 << 1  // For non-stopping trains
 };
 
 enum class RailwaySegmentType : qint8
 {
-    Electrified = 1 << 0, //Electric engines are allowed
+    Electrified      = 1 << 0, // Electric engines are allowed
 
-    LeftHandTraffic = 1 << 2,
+    LeftHandTraffic  = 1 << 2,
     RightHandTraffic = 1 << 3,
-    MultipleTraffic = (LeftHandTraffic | RightHandTraffic)
+    MultipleTraffic  = (LeftHandTraffic | RightHandTraffic)
 };
 
 struct RailwaySegmentGateInfo
 {
-    db_id gateId = 0;
+    db_id gateId    = 0;
     db_id stationId = 0;
     QString stationName;
     QChar gateLetter;
@@ -85,8 +84,8 @@ struct RailwaySegmentInfo
 {
     db_id segmentId = 0;
     QString segmentName;
-    int distanceMeters = 10000; //10 Km
-    int maxSpeedKmH = 120;
+    int distanceMeters = 10000; // 10 Km
+    int maxSpeedKmH    = 120;
     RailwaySegmentType type;
 
     RailwaySegmentGateInfo from;

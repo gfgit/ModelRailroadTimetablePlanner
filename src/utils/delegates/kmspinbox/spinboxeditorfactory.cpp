@@ -24,7 +24,6 @@ SpinBoxEditorFactory::SpinBoxEditorFactory() :
     m_minVal(0),
     m_maxVal(99)
 {
-
 }
 
 QWidget *SpinBoxEditorFactory::createEditor(int /*userType*/, QWidget *parent) const

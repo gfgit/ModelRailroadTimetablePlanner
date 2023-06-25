@@ -35,16 +35,19 @@ class ChooseItemDlg : public QDialog
 {
     Q_OBJECT
 public:
-    typedef std::function<bool(db_id, QString&)> Callback;
+    typedef std::function<bool(db_id, QString &)> Callback;
 
     ChooseItemDlg(ISqlFKMatchModel *matchModel, QWidget *parent);
 
-    void setDescription(const QString& text);
-    void setPlaceholder(const QString& text);
+    void setDescription(const QString &text);
+    void setPlaceholder(const QString &text);
 
     void setCallback(const Callback &callback);
 
-    inline db_id getItemId() const { return itemId; }
+    inline db_id getItemId() const
+    {
+        return itemId;
+    }
 
 public slots:
     void done(int res) override;

@@ -46,9 +46,9 @@ JobListModel::JobListModel(sqlite3pp::database &db, QObject *parent) :
 
 QVariant JobListModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole)
     {
-        if(orientation == Qt::Horizontal)
+        if (orientation == Qt::Horizontal)
         {
             switch (section)
             {
@@ -84,16 +84,16 @@ QVariant JobListModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<JobListModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const JobItem& item = cache.at(row - cacheFirstRow);
+    const JobItem &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -122,7 +122,7 @@ QVariant JobListModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::TextAlignmentRole:
     {
-        if(idx.column() == IdCol)
+        if (idx.column() == IdCol)
         {
             return Qt::AlignVCenter + Qt::AlignRight;
         }
@@ -135,14 +135,14 @@ QVariant JobListModel::data(const QModelIndex &idx, int role) const
 
 void JobListModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col == OriginSt || col == DestinationSt || col >= NCols)
+    if (sortColumn == col || col == OriginSt || col == DestinationSt || col >= NCols)
         return;
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
@@ -167,8 +167,8 @@ bool JobListModel::setFilterAtCol(int col, const QString &str)
     {
     case IdCol:
     {
-        if(isNull)
-            return false; //Cannot have NULL Job ID
+        if (isNull)
+            return false; // Cannot have NULL Job ID
         m_jobIdFilter = str;
         break;
     }
@@ -187,7 +187,7 @@ bool JobListModel::setFilterAtCol(int col, const QString &str)
 
 void JobListModel::onJobAddedOrRemoved()
 {
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
 }
 
 qint64 JobListModel::recalcTotalItemCount()
@@ -203,7 +203,7 @@ qint64 JobListModel::recalcTotalItemCount()
 void JobListModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData)
 {
     QByteArray sql;
-    if(fullData)
+    if (fullData)
     {
         sql = "SELECT jobs.id, jobs.category, jobs.shift_id, jobshifts.name,"
               "MIN(s1.departure), s1.station_id, MAX(s2.arrival), s2.station_id"
@@ -216,44 +216,44 @@ void JobListModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool
         sql = "SELECT COUNT(1) FROM jobs";
     }
 
-    //If counting but filtering by shift name (not null) we need to JOIN jobshifts
+    // If counting but filtering by shift name (not null) we need to JOIN jobshifts
     bool shiftFilterIsNull = m_shiftFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
-    if(fullData || (!shiftFilterIsNull && !m_shiftFilter.isEmpty()))
+    if (fullData || (!shiftFilterIsNull && !m_shiftFilter.isEmpty()))
         sql += " LEFT JOIN jobshifts ON jobshifts.id=jobs.shift_id";
 
     bool whereClauseAdded = false;
 
-    if(!m_jobIdFilter.isEmpty())
+    if (!m_jobIdFilter.isEmpty())
     {
         sql.append(" WHERE jobs.id LIKE ?3");
         whereClauseAdded = true;
     }
 
-    if(!m_shiftFilter.isEmpty())
+    if (!m_shiftFilter.isEmpty())
     {
-        if(whereClauseAdded)
+        if (whereClauseAdded)
             sql.append(" AND ");
         else
             sql.append(" WHERE ");
 
-        if(shiftFilterIsNull)
+        if (shiftFilterIsNull)
             sql.append("jobs.shift_id IS NULL");
         else
             sql.append("jobshifts.name LIKE ?4");
     }
 
-    if(fullData)
+    if (fullData)
     {
-        //Group by Job
+        // Group by Job
         sql.append(" GROUP BY jobs.id");
 
-        //Apply sorting
+        // Apply sorting
         const char *sortColExpr = nullptr;
         switch (sortCol)
         {
         case IdCol:
         {
-            sortColExpr = "jobs.id"; //Order by 1 column, no where clause
+            sortColExpr = "jobs.id"; // Order by 1 column, no where clause
             break;
         }
         case Category:
@@ -282,23 +282,23 @@ void JobListModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool
         sql += sortColExpr;
 
         sql += " LIMIT ?1";
-        if(offset)
+        if (offset)
             sql += " OFFSET ?2";
     }
 
     q.prepare(sql);
 
-    if(fullData)
+    if (fullData)
     {
-        //Apply offset and batch size
+        // Apply offset and batch size
         q.bind(1, BatchSize);
-        if(offset)
+        if (offset)
             q.bind(2, offset);
     }
 
-    //Apply filters
+    // Apply filters
     QByteArray jobFilter;
-    if(!m_jobIdFilter.isEmpty())
+    if (!m_jobIdFilter.isEmpty())
     {
         jobFilter.reserve(m_jobIdFilter.size() + 2);
         jobFilter.append('%');
@@ -308,7 +308,7 @@ void JobListModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool
     }
 
     QByteArray shiftFilter;
-    if(!m_shiftFilter.isEmpty() && !shiftFilterIsNull)
+    if (!m_shiftFilter.isEmpty() && !shiftFilterIsNull)
     {
         shiftFilter.reserve(m_shiftFilter.size() + 2);
         shiftFilter.append('%');
@@ -318,7 +318,7 @@ void JobListModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool
     }
 }
 
-void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant &/*val*/)
+void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant & /*val*/)
 {
     query q(mDb);
 
@@ -331,29 +331,29 @@ void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const Q
 
     QVector<JobItem> vec(BatchSize);
 
-    //QString are implicitly shared, use QHash to temporary store them instead
-    //of creating new ones for each JobItem
+    // QString are implicitly shared, use QHash to temporary store them instead
+    // of creating new ones for each JobItem
     QHash<db_id, QString> shiftHash;
     QHash<db_id, QString> stationHash;
 
-    auto it = q.begin();
-    const auto end = q.end();
+    auto it             = q.begin();
+    const auto end      = q.end();
 
-    int i = 0;
+    int i               = 0;
     const int increment = 1;
 
-    for(; it != end; ++it)
+    for (; it != end; ++it)
     {
-        auto r = *it;
+        auto r        = *it;
         JobItem &item = vec[i];
-        item.jobId = r.get<db_id>(0);
+        item.jobId    = r.get<db_id>(0);
         item.category = JobCategory(r.get<int>(1));
-        item.shiftId = r.get<db_id>(2);
+        item.shiftId  = r.get<db_id>(2);
 
-        if(item.shiftId)
+        if (item.shiftId)
         {
             auto shift = shiftHash.constFind(item.shiftId);
-            if(shift == shiftHash.constEnd())
+            if (shift == shiftHash.constEnd())
             {
                 shift = shiftHash.insert(item.shiftId, r.get<QString>(3));
             }
@@ -362,13 +362,13 @@ void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const Q
 
         item.originTime = r.get<QTime>(4);
         item.originStId = r.get<db_id>(5);
-        item.destTime = r.get<QTime>(6);
-        item.destStId = r.get<db_id>(7);
+        item.destTime   = r.get<QTime>(6);
+        item.destStId   = r.get<db_id>(7);
 
-        if(item.originStId)
+        if (item.originStId)
         {
             auto st = stationHash.constFind(item.originStId);
-            if(st == stationHash.constEnd())
+            if (st == stationHash.constEnd())
             {
                 q_stationName.bind(1, item.originStId);
                 q_stationName.step();
@@ -378,10 +378,10 @@ void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const Q
             item.origStName = st.value();
         }
 
-        if(item.destStId)
+        if (item.destStId)
         {
             auto st = stationHash.constFind(item.destStId);
-            if(st == stationHash.constEnd())
+            if (st == stationHash.constEnd())
             {
                 q_stationName.bind(1, item.destStId);
                 q_stationName.step();
@@ -394,7 +394,7 @@ void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const Q
         i += increment;
     }
 
-    if(i < BatchSize)
+    if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);

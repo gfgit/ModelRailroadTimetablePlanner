@@ -36,7 +36,7 @@ ImportStationModel::ImportStationModel(sqlite3pp::database &db, QObject *parent)
 
 QVariant ImportStationModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal)
     {
         switch (role)
         {
@@ -64,7 +64,7 @@ QVariant ImportStationModel::headerData(int section, Qt::Orientation orientation
         }
         }
     }
-    else if(role == Qt::DisplayRole)
+    else if (role == Qt::DisplayRole)
     {
         return section + curPage * ItemsPerPage + 1;
     }
@@ -78,16 +78,16 @@ QVariant ImportStationModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<ImportStationModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const StationItem& item = cache.at(row - cacheFirstRow);
+    const StationItem &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -125,7 +125,7 @@ QVariant ImportStationModel::data(const QModelIndex &idx, int role) const
 qint64 ImportStationModel::recalcTotalItemCount()
 {
     QByteArray sql = "SELECT COUNT(id) FROM stations";
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         sql += " WHERE name LIKE ?1 OR short_name LIKE ?1";
     }
@@ -133,7 +133,7 @@ qint64 ImportStationModel::recalcTotalItemCount()
     query q(mDb, sql);
 
     QByteArray nameFilter;
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         nameFilter.reserve(m_nameFilter.size() + 2);
         nameFilter.append('%');
@@ -150,14 +150,14 @@ qint64 ImportStationModel::recalcTotalItemCount()
 
 void ImportStationModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || (col != NameCol && col != TypeCol))
+    if (sortColumn == col || (col != NameCol && col != TypeCol))
         return;
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
@@ -180,8 +180,8 @@ bool ImportStationModel::setFilterAtCol(int col, const QString &str)
     {
     case NameCol:
     {
-        if(isNull)
-            return false; //Cannot have NULL Name
+        if (isNull)
+            return false; // Cannot have NULL Name
         m_nameFilter = str;
         break;
     }
@@ -197,25 +197,26 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
 {
     query q(mDb);
 
-    int offset = first - valRow + curPage * ItemsPerPage;
+    int offset   = first - valRow + curPage * ItemsPerPage;
     bool reverse = false;
 
-    if(valRow > first)
+    if (valRow > first)
     {
-        offset = 0;
+        offset  = 0;
         reverse = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset
+             << "Reverse:" << reverse;
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT id,name,short_name,type FROM stations";
+    QByteArray sql       = "SELECT id,name,short_name,type FROM stations";
     switch (sortCol)
     {
     case NameCol:
     {
-        whereCol = "name"; //Order by 1 column, no where clause
+        whereCol = "name"; // Order by 1 column, no where clause
         break;
     }
     case TypeCol:
@@ -225,7 +226,7 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
     }
     }
 
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         sql += " WHERE name LIKE ?3 OR short_name LIKE ?3";
     }
@@ -233,20 +234,20 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
     sql += " ORDER BY ";
     sql += whereCol;
 
-    if(reverse)
+    if (reverse)
         sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
     QByteArray nameFilter;
-    if(!m_nameFilter.isEmpty())
+    if (!m_nameFilter.isEmpty())
     {
         nameFilter.reserve(m_nameFilter.size() + 2);
         nameFilter.append('%');
@@ -270,27 +271,27 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
 
     QVector<StationItem> vec(BatchSize);
 
-    auto it = q.begin();
-    const auto end = q.end();
+    auto it             = q.begin();
+    const auto end      = q.end();
 
-    int i = reverse ? BatchSize - 1 : 0;
+    int i               = reverse ? BatchSize - 1 : 0;
     const int increment = reverse ? -1 : 1;
 
-    for(; it != end; ++it)
+    for (; it != end; ++it)
     {
-        auto r = *it;
+        auto r            = *it;
         StationItem &item = vec[i];
-        item.stationId = r.get<db_id>(0);
-        item.name = r.get<QString>(1);
-        item.shortName = r.get<QString>(2);
-        item.type = utils::StationType(r.get<int>(3));
+        item.stationId    = r.get<db_id>(0);
+        item.name         = r.get<QString>(1);
+        item.shortName    = r.get<QString>(2);
+        item.type         = utils::StationType(r.get<int>(3));
 
         i += increment;
     }
 
-    if(reverse && i > -1)
+    if (reverse && i > -1)
         vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    else if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);

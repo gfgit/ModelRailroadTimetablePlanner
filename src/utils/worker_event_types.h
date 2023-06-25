@@ -22,17 +22,17 @@
 
 #include <QEvent>
 
-//Here we define custom QEvent types in a central place to avoid conflicts
+// Here we define custom QEvent types in a central place to avoid conflicts
 
 enum class CustomEvents
 {
-    //IQuittableTask
+    // IQuittableTask
     TaskProgress = QEvent::User + 1,
 
-    //Searchbox
+    // Searchbox
     SearchBoxResults,
 
-    //RS error checker
+    // RS error checker
     RsErrWorkerResult,
 
     // RS Import
@@ -43,16 +43,16 @@ enum class CustomEvents
     RsImportedOwnersResult,
     RsImportCheckDuplicates,
 
-    //RS main models
+    // RS main models
     RollingstockModelResult,
     RsModelsModelResult,
     RsOwnersModelResult,
     RsOnDemandListModelResult,
 
-    //Shift
+    // Shift
     ShiftWorkerResult,
 
-    //Stations
+    // Stations
     StationsModelResult,
     LinesModelResult,
     LineSegmentsModelResult,
@@ -62,16 +62,16 @@ enum class CustomEvents
     StationTracksListResult,
     StationTrackConnListResult,
 
-    //Jobs
+    // Jobs
     JobsModelResult,
 
-    //Jobs Checker
+    // Jobs Checker
     JobsCrossingCheckResult,
 
-    //Printing
+    // Printing
     PrintProgress,
 
-    //Line Graph Manager
+    // Line Graph Manager
     LineGraphManagerUpdate
 };
 

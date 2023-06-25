@@ -29,7 +29,7 @@ LoadingPage::LoadingPage(QWidget *parent) :
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    progressBar = new QProgressBar;
+    progressBar      = new QProgressBar;
     lay->addWidget(progressBar);
 }
 
@@ -40,7 +40,7 @@ bool LoadingPage::isComplete() const
 
 void LoadingPage::handleProgress(int pr, int max)
 {
-    if(max == LoadProgressEvent::ProgressMaxFinished)
+    if (max == LoadProgressEvent::ProgressMaxFinished)
     {
         progressBar->setValue(progressBar->maximum());
         emit completeChanged();

@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QWidget>
+#    include <QWidget>
 
 class QTreeView;
 class QProgressBar;

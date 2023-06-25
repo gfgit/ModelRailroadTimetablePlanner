@@ -24,7 +24,8 @@ RSOwnersMatchModel::RSOwnersMatchModel(database &db, QObject *parent) :
     mDb(db),
     q_getMatches(mDb)
 {
-    q_getMatches.prepare("SELECT id,name FROM rs_owners WHERE name LIKE ? LIMIT " QT_STRINGIFY(MaxMatchItems));
+    q_getMatches.prepare(
+      "SELECT id,name FROM rs_owners WHERE name LIKE ? LIMIT " QT_STRINGIFY(MaxMatchItems));
 }
 
 QVariant RSOwnersMatchModel::data(const QModelIndex &idx, int role) const
@@ -36,11 +37,11 @@ QVariant RSOwnersMatchModel::data(const QModelIndex &idx, int role) const
     {
     case Qt::DisplayRole:
     {
-        if(isEmptyRow(idx.row()))
+        if (isEmptyRow(idx.row()))
         {
             return ISqlFKMatchModel::tr("Empty");
         }
-        else if(isEllipsesRow(idx.row()))
+        else if (isEllipsesRow(idx.row()))
         {
             return ellipsesString;
         }
@@ -49,7 +50,7 @@ QVariant RSOwnersMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::FontRole:
     {
-        if(isEmptyRow(idx.row()))
+        if (isEmptyRow(idx.row()))
         {
             return boldFont();
         }
@@ -63,7 +64,7 @@ QVariant RSOwnersMatchModel::data(const QModelIndex &idx, int role) const
 void RSOwnersMatchModel::autoSuggest(const QString &text)
 {
     mQuery.clear();
-    if(!text.isEmpty())
+    if (!text.isEmpty())
     {
         mQuery.clear();
         mQuery.reserve(text.size() + 2);
@@ -77,35 +78,34 @@ void RSOwnersMatchModel::autoSuggest(const QString &text)
 
 void RSOwnersMatchModel::refreshData()
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
     beginResetModel();
 
     char emptyQuery = '%';
 
-    if(mQuery.isEmpty())
+    if (mQuery.isEmpty())
         sqlite3_bind_text(q_getMatches.stmt(), 1, &emptyQuery, 1, SQLITE_STATIC);
     else
         sqlite3_bind_text(q_getMatches.stmt(), 1, mQuery, mQuery.size(), SQLITE_STATIC);
 
-
     auto end = q_getMatches.end();
-    auto it = q_getMatches.begin();
-    int i = 0;
-    for(; i < MaxMatchItems && it != end; i++)
+    auto it  = q_getMatches.begin();
+    int i    = 0;
+    for (; i < MaxMatchItems && it != end; i++)
     {
         items[i].ownerId = (*it).get<db_id>(0);
-        items[i].name = (*it).get<QString>(1);
+        items[i].name    = (*it).get<QString>(1);
         ++it;
     }
 
-    size = i + 1; //Items + Empty
+    size = i + 1; // Items + Empty
 
-    if(it != end)
+    if (it != end)
     {
-        //There would be still rows, show Ellipses
-        size++; //Items + Empty + Ellispses
+        // There would be still rows, show Ellipses
+        size++; // Items + Empty + Ellispses
     }
 
     q_getMatches.reset();
@@ -116,12 +116,12 @@ void RSOwnersMatchModel::refreshData()
 
 QString RSOwnersMatchModel::getName(db_id id) const
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return QString();
 
     query q(mDb, "SELECT name FROM rs_owners WHERE id=?");
     q.bind(1, id);
-    if(q.step() == SQLITE_ROW)
+    if (q.step() == SQLITE_ROW)
         return q.getRows().get<QString>(0);
     return QString();
 }

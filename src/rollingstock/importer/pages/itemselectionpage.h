@@ -36,7 +36,9 @@ class ItemSelectionPage : public QWizardPage
 {
     Q_OBJECT
 public:
-    ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItemEditorFactory *edFactory, IFKField *ifaceDelegate, int delegateCol, ModelModes::Mode mode, QWidget *parent = nullptr);
+    ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItemEditorFactory *edFactory,
+                      IFKField *ifaceDelegate, int delegateCol, ModelModes::Mode mode,
+                      QWidget *parent = nullptr);
 
     virtual void initializePage() override;
     virtual void cleanupPage() override;

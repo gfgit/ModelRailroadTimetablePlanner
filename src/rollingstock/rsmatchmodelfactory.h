@@ -24,8 +24,7 @@
 
 #include "utils/model_mode.h"
 
-namespace sqlite3pp
-{
+namespace sqlite3pp {
 class database;
 }
 

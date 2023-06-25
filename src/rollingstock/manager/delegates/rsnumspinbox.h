@@ -31,7 +31,7 @@ public:
     virtual QValidator::State validate(QString &input, int &pos) const override;
 
 protected:
-    int valueFromText(const QString& text) const override;
+    int valueFromText(const QString &text) const override;
     QString textFromValue(int val) const override;
 };
 

@@ -36,7 +36,10 @@ class RSResultEvent : public QEvent
 {
 public:
     static constexpr Type _Type = Type(CustomEvents::RsImportedRSModelResult);
-    inline RSResultEvent() : QEvent(_Type) {}
+    inline RSResultEvent() :
+        QEvent(_Type)
+    {
+    }
 
     QVector<RSImportedRollingstockModel::RSItem> items;
     int firstRow;
@@ -52,7 +55,7 @@ RSImportedRollingstockModel::RSImportedRollingstockModel(database &db, QObject *
 
 bool RSImportedRollingstockModel::event(QEvent *e)
 {
-    if(e->type() == RSResultEvent::_Type)
+    if (e->type() == RSResultEvent::_Type)
     {
         RSResultEvent *ev = static_cast<RSResultEvent *>(e);
         ev->setAccepted(true);
@@ -67,33 +70,33 @@ bool RSImportedRollingstockModel::event(QEvent *e)
 
 void RSImportedRollingstockModel::fetchRow(int row)
 {
-    if(row >= firstPendingRow && row < firstPendingRow + BatchSize)
-        return; //Already fetching
+    if (row >= firstPendingRow && row < firstPendingRow + BatchSize)
+        return; // Already fetching
 
-    if(row >= cacheFirstRow && row < cacheFirstRow + cache.size())
-        return; //Already cached
+    if (row >= cacheFirstRow && row < cacheFirstRow + cache.size())
+        return; // Already cached
 
-    //TODO: abort fetching here
+    // TODO: abort fetching here
 
     const int remainder = row % BatchSize;
-    firstPendingRow = row - remainder;
+    firstPendingRow     = row - remainder;
     qDebug() << "Requested:" << row << "From:" << firstPendingRow;
 
     QVariant val;
-    int valRow = 0;
+    int valRow   = 0;
     RSItem *item = nullptr;
 
-    if(cache.size())
+    if (cache.size())
     {
-        if(firstPendingRow >= cacheFirstRow + cache.size())
+        if (firstPendingRow >= cacheFirstRow + cache.size())
         {
             valRow = cacheFirstRow + cache.size();
-            item = &cache.last();
+            item   = &cache.last();
         }
-        else if(firstPendingRow > (cacheFirstRow - firstPendingRow))
+        else if (firstPendingRow > (cacheFirstRow - firstPendingRow))
         {
-            valRow = cacheFirstRow; //It's shortet to get here by reverse from cache first
-            item = &cache.first();
+            valRow = cacheFirstRow; // It's shortet to get here by reverse from cache first
+            item   = &cache.first();
         }
     }
 
@@ -101,7 +104,7 @@ void RSImportedRollingstockModel::fetchRow(int row)
     {
     case Model:
     {
-        if(item)
+        if (item)
         {
             val = item->modelName;
         }
@@ -109,7 +112,7 @@ void RSImportedRollingstockModel::fetchRow(int row)
     }
     case Number:
     {
-        if(item)
+        if (item)
         {
             val = item->number;
         }
@@ -117,7 +120,7 @@ void RSImportedRollingstockModel::fetchRow(int row)
     }
     case Owner:
     {
-        if(item)
+        if (item)
         {
             val = item->ownerName;
         }
@@ -125,31 +128,34 @@ void RSImportedRollingstockModel::fetchRow(int row)
     }
     }
 
-    //TODO: use a custom QRunnable
+    // TODO: use a custom QRunnable
     QMetaObject::invokeMethod(this, "internalFetch", Qt::QueuedConnection,
                               Q_ARG(int, firstPendingRow), Q_ARG(int, sortColumn),
                               Q_ARG(int, valRow), Q_ARG(QVariant, val));
 }
 
-void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valRow, const QVariant& val)
+void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valRow,
+                                                const QVariant &val)
 {
     query q(mDb);
 
-    int offset = first - valRow;
+    int offset   = first - valRow;
     bool reverse = false;
 
-    if(valRow > first)
+    if (valRow > first)
     {
-        offset = 0;
+        offset  = 0;
         reverse = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset
+             << "Reverse:" << reverse;
 
-    QByteArray sql = "SELECT imp.id, imp.import, imp.model_id, imp.owner_id, imp.number, imp.new_number, models.name, models.type, owners.name, owners.new_name"
-                     " FROM imported_rs_list imp"
-                     " JOIN imported_rs_models models ON models.id=imp.model_id"
-                     " JOIN imported_rs_owners owners ON owners.id=imp.owner_id";
+    QByteArray sql          = "SELECT imp.id, imp.import, imp.model_id, imp.owner_id, imp.number, "
+                              "imp.new_number, models.name, models.type, owners.name, owners.new_name"
+                              " FROM imported_rs_list imp"
+                              " JOIN imported_rs_models models ON models.id=imp.model_id"
+                              " JOIN imported_rs_owners owners ON owners.id=imp.owner_id";
 
     const char *sortColExpr = nullptr;
     switch (sortCol)
@@ -177,11 +183,11 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
     }
 
     sql += " WHERE owners.import=1 AND models.import=1";
-    if(val.isValid())
+    if (val.isValid())
     {
         sql += " AND ";
         sql += sortColExpr;
-        if(reverse)
+        if (reverse)
             sql += "<?3";
         else
             sql += ">?3";
@@ -190,20 +196,20 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
     sql += " ORDER BY ";
     sql += sortColExpr;
 
-    if(reverse)
+    if (reverse)
         sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     sqlite3_stmt *st = q.stmt();
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
-    if(val.isValid())
+    if (val.isValid())
     {
         switch (sortCol)
         {
@@ -225,103 +231,104 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
 
     QVector<RSItem> vec(BatchSize);
 
-    auto it = q.begin();
+    auto it        = q.begin();
     const auto end = q.end();
 
-    if(reverse)
+    if (reverse)
     {
         int i = BatchSize - 1;
 
-        for(; it != end; ++it)
+        for (; it != end; ++it)
         {
-            auto r = *it;
-            RSItem &item = vec[i];
-            item.importdRsId = r.get<db_id>(0);
-            item.import = r.get<int>(1) == 1;
+            auto r               = *it;
+            RSItem &item         = vec[i];
+            item.importdRsId     = r.get<db_id>(0);
+            item.import          = r.get<int>(1) == 1;
             item.importedModelId = r.get<db_id>(2);
             item.importedOwnerId = r.get<db_id>(3);
 
-            item.number = r.get<int>(4);
+            item.number          = r.get<int>(4);
 
-            if(r.column_type(5) == SQLITE_NULL)
+            if (r.column_type(5) == SQLITE_NULL)
                 item.new_number = -1;
             else
                 item.new_number = r.get<int>(5);
 
-            item.modelName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 6)),
+            item.modelName = QByteArray(reinterpret_cast<char const *>(sqlite3_column_text(st, 6)),
                                         sqlite3_column_bytes(st, 6));
-            item.type = RsType(r.get<int>(7));
+            item.type      = RsType(r.get<int>(7));
 
-            item.ownerName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 8)),
+            item.ownerName = QByteArray(reinterpret_cast<char const *>(sqlite3_column_text(st, 8)),
                                         sqlite3_column_bytes(st, 8));
 
-            if(r.column_type(8) != SQLITE_NULL)
+            if (r.column_type(8) != SQLITE_NULL)
             {
-                item.ownerCustomName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 9)),
-                                                  sqlite3_column_bytes(st, 9));
+                item.ownerCustomName =
+                  QByteArray(reinterpret_cast<char const *>(sqlite3_column_text(st, 9)),
+                             sqlite3_column_bytes(st, 9));
             }
             i--;
         }
-        if(i > -1)
+        if (i > -1)
             vec.remove(0, i + 1);
     }
     else
     {
         int i = 0;
 
-        for(; it != end; ++it)
+        for (; it != end; ++it)
         {
-            auto r = *it;
-            RSItem &item = vec[i];
-            item.importdRsId = r.get<db_id>(0);
-            item.import = r.get<int>(1) == 1;
+            auto r               = *it;
+            RSItem &item         = vec[i];
+            item.importdRsId     = r.get<db_id>(0);
+            item.import          = r.get<int>(1) == 1;
             item.importedModelId = r.get<db_id>(2);
             item.importedOwnerId = r.get<db_id>(3);
 
-            item.number = r.get<int>(4);
+            item.number          = r.get<int>(4);
 
-            if(r.column_type(5) == SQLITE_NULL)
+            if (r.column_type(5) == SQLITE_NULL)
                 item.new_number = -1;
             else
                 item.new_number = r.get<int>(5);
 
-            item.modelName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 6)),
+            item.modelName = QByteArray(reinterpret_cast<char const *>(sqlite3_column_text(st, 6)),
                                         sqlite3_column_bytes(st, 6));
-            item.type = RsType(r.get<int>(7));
+            item.type      = RsType(r.get<int>(7));
 
-            item.ownerName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 8)),
+            item.ownerName = QByteArray(reinterpret_cast<char const *>(sqlite3_column_text(st, 8)),
                                         sqlite3_column_bytes(st, 8));
 
-            if(r.column_type(8) != SQLITE_NULL)
+            if (r.column_type(8) != SQLITE_NULL)
             {
-                item.ownerCustomName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 9)),
-                                                  sqlite3_column_bytes(st, 9));
+                item.ownerCustomName =
+                  QByteArray(reinterpret_cast<char const *>(sqlite3_column_text(st, 9)),
+                             sqlite3_column_bytes(st, 9));
             }
             i++;
         }
-        if(i < BatchSize)
+        if (i < BatchSize)
             vec.remove(i, BatchSize - i);
     }
 
-
     RSResultEvent *ev = new RSResultEvent;
-    ev->items = vec;
-    ev->firstRow = first;
+    ev->items         = vec;
+    ev->firstRow      = first;
 
     qApp->postEvent(this, ev);
 }
 
-void RSImportedRollingstockModel::handleResult(const QVector<RSItem>& items, int firstRow)
+void RSImportedRollingstockModel::handleResult(const QVector<RSItem> &items, int firstRow)
 {
-    if(firstRow == cacheFirstRow + cache.size())
+    if (firstRow == cacheFirstRow + cache.size())
     {
         qDebug() << "RES: appending First:" << cacheFirstRow;
         cache.append(items);
-        if(cache.size() > ItemsPerPage)
+        if (cache.size() > ItemsPerPage)
         {
-            const int extra = cache.size() - ItemsPerPage; //Round up to BatchSize
+            const int extra     = cache.size() - ItemsPerPage; // Round up to BatchSize
             const int remainder = extra % BatchSize;
-            const int n = remainder ? extra + BatchSize - remainder : extra;
+            const int n         = remainder ? extra + BatchSize - remainder : extra;
             qDebug() << "RES: removing last" << n;
             cache.remove(0, n);
             cacheFirstRow += n;
@@ -329,13 +336,13 @@ void RSImportedRollingstockModel::handleResult(const QVector<RSItem>& items, int
     }
     else
     {
-        if(firstRow + items.size() == cacheFirstRow)
+        if (firstRow + items.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
             QVector<RSItem> tmp = items;
             tmp.append(cache);
             cache = tmp;
-            if(cache.size() > ItemsPerPage)
+            if (cache.size() > ItemsPerPage)
             {
                 const int n = cache.size() - ItemsPerPage;
                 cache.remove(ItemsPerPage, n);
@@ -351,10 +358,10 @@ void RSImportedRollingstockModel::handleResult(const QVector<RSItem>& items, int
         qDebug() << "NEW First:" << cacheFirstRow;
     }
 
-    firstPendingRow = -BatchSize;
+    firstPendingRow      = -BatchSize;
 
     QModelIndex firstIdx = index(firstRow, 0);
-    QModelIndex lastIdx = index(firstRow + items.count() - 1, NCols - 1);
+    QModelIndex lastIdx  = index(firstRow + items.count() - 1, NCols - 1);
     emit dataChanged(firstIdx, lastIdx);
 
     qDebug() << "TOTAL: From:" << cacheFirstRow << "To:" << cacheFirstRow + cache.size() - 1;
@@ -362,9 +369,10 @@ void RSImportedRollingstockModel::handleResult(const QVector<RSItem>& items, int
 
 /* QAbstractTableModel */
 
-QVariant RSImportedRollingstockModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant RSImportedRollingstockModel::headerData(int section, Qt::Orientation orientation,
+                                                 int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -399,14 +407,14 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    //qDebug() << "Data:" << idx.row();
+    // qDebug() << "Data:" << idx.row();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<RSImportedRollingstockModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return QVariant("...");
     }
 
@@ -423,11 +431,12 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
         case Number:
             return rs_utils::formatNum(item.type, item.number);
         case Owner:
-            if(item.ownerCustomName.isEmpty())
+            if (item.ownerCustomName.isEmpty())
                 return item.ownerName;
             return item.ownerName + " (" + item.ownerCustomName + ')';
         case NewNumber:
-            return item.new_number == -1 ? QVariant() : rs_utils::formatNum(item.type, item.new_number);
+            return item.new_number == -1 ? QVariant()
+                                         : rs_utils::formatNum(item.type, item.new_number);
         }
         break;
     }
@@ -442,14 +451,14 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
     }
     case Qt::TextAlignmentRole:
     {
-        if(idx.column() == Number || idx.column() == NewNumber)
+        if (idx.column() == Number || idx.column() == NewNumber)
             return Qt::AlignRight + Qt::AlignVCenter;
         break;
     }
     case Qt::BackgroundRole:
     {
-        if(!item.import || (idx.column() == NewNumber && item.new_number == -1))
-            return QBrush(Qt::lightGray); //If not imported mark background or no custom number set
+        if (!item.import || (idx.column() == NewNumber && item.new_number == -1))
+            return QBrush(Qt::lightGray); // If not imported mark background or no custom number set
         break;
     }
     case Qt::CheckStateRole:
@@ -459,7 +468,7 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
         case Import:
             return item.import ? Qt::Checked : Qt::Unchecked;
         case NewNumber:
-            if(item.new_number == -1)
+            if (item.new_number == -1)
                 return QVariant();
             return Qt::Checked;
         }
@@ -473,13 +482,14 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
 bool RSImportedRollingstockModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
-    RSItem &item = cache[row - cacheFirstRow];
+    RSItem &item      = cache[row - cacheFirstRow];
 
     QModelIndex first = idx;
-    QModelIndex last = idx;
+    QModelIndex last  = idx;
 
     switch (role)
     {
@@ -491,24 +501,25 @@ bool RSImportedRollingstockModel::setData(const QModelIndex &idx, const QVariant
         {
             int newNumber = value.toInt() % 10000;
 
-            if(item.new_number == newNumber)
+            if (item.new_number == newNumber)
                 return false;
 
             QString errText;
-            if(!checkNewNumberIsValid(item.importdRsId, item.importedModelId, item.importedModelMatchId,
-                                      item.type, item.number, newNumber, &errText))
+            if (!checkNewNumberIsValid(item.importdRsId, item.importedModelId,
+                                       item.importedModelMatchId, item.type, item.number, newNumber,
+                                       &errText))
             {
                 emit modelError(errText);
                 return false;
             }
 
             command set_newNumber(mDb, "UPDATE imported_rs_list SET new_number=? WHERE id=?");
-            if(newNumber == -1)
-                set_newNumber.bind(1); //Bind NULL
+            if (newNumber == -1)
+                set_newNumber.bind(1); // Bind NULL
             else
                 set_newNumber.bind(1, newNumber);
             set_newNumber.bind(2, item.importdRsId);
-            if(set_newNumber.execute() != SQLITE_OK)
+            if (set_newNumber.execute() != SQLITE_OK)
                 return false;
 
             item.new_number = newNumber;
@@ -528,15 +539,16 @@ bool RSImportedRollingstockModel::setData(const QModelIndex &idx, const QVariant
         {
             Qt::CheckState cs = value.value<Qt::CheckState>();
             const bool import = cs == Qt::Checked;
-            if(item.import == import)
-                return false; //No change
+            if (item.import == import)
+                return false; // No change
 
-            if(import)
+            if (import)
             {
-                //Newly imported, check if there are duplicates
+                // Newly imported, check if there are duplicates
                 QString errText;
-                if(!checkNewNumberIsValid(item.importdRsId, item.importedModelId, item.importedModelMatchId,
-                                          item.type, item.number, item.new_number, &errText))
+                if (!checkNewNumberIsValid(item.importdRsId, item.importedModelId,
+                                           item.importedModelMatchId, item.type, item.number,
+                                           item.new_number, &errText))
                 {
                     emit modelError(errText);
                     return false;
@@ -546,32 +558,32 @@ bool RSImportedRollingstockModel::setData(const QModelIndex &idx, const QVariant
             command set_imported(mDb, "UPDATE imported_rs_list SET import=? WHERE id=?");
             set_imported.bind(1, import ? 1 : 0);
             set_imported.bind(2, item.importdRsId);
-            if(set_imported.execute() != SQLITE_OK)
+            if (set_imported.execute() != SQLITE_OK)
                 return false;
 
             item.import = import;
 
-            if(sortColumn == Import)
+            if (sortColumn == Import)
             {
-                //This row has now changed position so we need to invalidate cache
-                //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-                //but the view will trigger fetching at same scroll position so it is enough
+                // This row has now changed position so we need to invalidate cache
+                // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+                // but the view will trigger fetching at same scroll position so it is enough
                 cache.clear();
                 cacheFirstRow = 0;
             }
 
             emit importCountChanged();
 
-            //Update all columns to update background
+            // Update all columns to update background
             first = index(row, 0);
-            last = index(row, NCols - 1);
+            last  = index(row, NCols - 1);
             break;
         }
         case NewNumber:
         {
             Qt::CheckState cs = value.value<Qt::CheckState>();
-            if(cs == Qt::Unchecked)
-                return setData(idx, -1, Qt::EditRole); //Set -1 as new_number -> NULL
+            if (cs == Qt::Unchecked)
+                return setData(idx, -1, Qt::EditRole); // Set -1 as new_number -> NULL
             return false;
         }
         default:
@@ -593,12 +605,12 @@ Qt::ItemFlags RSImportedRollingstockModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
 
-    if(idx.column() == Import)
+    if (idx.column() == Import)
         f.setFlag(Qt::ItemIsUserCheckable);
-    if(idx.column() == NewNumber)
+    if (idx.column() == NewNumber)
     {
         f.setFlag(Qt::ItemIsEditable);
         f.setFlag(Qt::ItemIsUserCheckable, cache.at(idx.row() - cacheFirstRow).new_number != -1);
@@ -629,14 +641,14 @@ void RSImportedRollingstockModel::clearCache()
 
 void RSImportedRollingstockModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col == NewNumber)
-        return; //Don't sort by NewNumber because some are NULL
+    if (sortColumn == col || col == NewNumber)
+        return; // Don't sort by NewNumber because some are NULL
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
@@ -655,26 +667,29 @@ int RSImportedRollingstockModel::countImported()
 
 /* ICheckName */
 
-bool RSImportedRollingstockModel::checkNewNumberIsValid(db_id importedRsId, db_id importedModelId, db_id matchExistingModelId,
-                                                        RsType rsType, int number, int newNumber, QString *errTextOut)
+bool RSImportedRollingstockModel::checkNewNumberIsValid(db_id importedRsId, db_id importedModelId,
+                                                        db_id matchExistingModelId, RsType rsType,
+                                                        int number, int newNumber,
+                                                        QString *errTextOut)
 {
     RsType type = RsType(rsType);
 
-    if(number == newNumber)
+    if (number == newNumber)
     {
-        if(errTextOut)
+        if (errTextOut)
         {
             *errTextOut = tr("You cannot set the same name in the 'Custom Name' field.\n"
-                             "If you meant to revert to original name then clear the custom name and leave the cell empty");
+                             "If you meant to revert to original name then clear the custom name "
+                             "and leave the cell empty");
         }
         return false;
     }
 
     int numberToCheck = newNumber;
-    if(newNumber == -1)
+    if (newNumber == -1)
         numberToCheck = number;
 
-    //First check if there is an imported RS with same number or new number
+    // First check if there is an imported RS with same number or new number
     query q(mDb, "SELECT imp.id, imp.new_number, m.name, m.new_name, rs_models.name"
                  " FROM imported_rs_models m"
                  " LEFT JOIN rs_models ON rs_models.id=m.match_existing_id"
@@ -688,60 +703,65 @@ bool RSImportedRollingstockModel::checkNewNumberIsValid(db_id importedRsId, db_i
     q.bind(3, importedRsId);
     q.bind(4, numberToCheck);
 
-    if(q.step() == SQLITE_ROW)
+    if (q.step() == SQLITE_ROW)
     {
-        auto r = q.getRows();
+        auto r      = q.getRows();
         db_id dupId = r.get<db_id>(0);
-        Q_UNUSED(dupId) //TODO: maybe use it?
+        Q_UNUSED(dupId) // TODO: maybe use it?
 
-        sqlite3_stmt *st = q.stmt();
+        sqlite3_stmt *st      = q.stmt();
 
         bool matchedNewNumber = true;
 
-        if(r.column_type(1) == SQLITE_NULL)
+        if (r.column_type(1) == SQLITE_NULL)
         {
-            matchedNewNumber = false; //We matched original number
+            matchedNewNumber = false; // We matched original number
         }
 
-        QByteArray modelName = QByteArray(reinterpret_cast<char const*>(sqlite3_column_text(st, 2)),
-                                          sqlite3_column_bytes(st, 2));
+        QByteArray modelName = QByteArray(
+          reinterpret_cast<char const *>(sqlite3_column_text(st, 2)), sqlite3_column_bytes(st, 2));
 
-        if(errTextOut)
+        if (errTextOut)
         {
-            if(r.column_type(3) != SQLITE_NULL)
+            if (r.column_type(3) != SQLITE_NULL)
             {
                 // 'name (new_name)'
                 modelName.append(" (", 2);
-                modelName.append(reinterpret_cast<char const*>(sqlite3_column_text(st, 3)),
+                modelName.append(reinterpret_cast<char const *>(sqlite3_column_text(st, 3)),
                                  sqlite3_column_bytes(st, 3));
                 modelName.append(')');
             }
 
-            if(r.column_type(4) != SQLITE_NULL)
+            if (r.column_type(4) != SQLITE_NULL)
             {
                 // 'name (match_existing name)'
                 modelName.append(" (", 2);
-                modelName.append(reinterpret_cast<char const*>(sqlite3_column_text(st, 4)),
+                modelName.append(reinterpret_cast<char const *>(sqlite3_column_text(st, 4)),
                                  sqlite3_column_bytes(st, 4));
                 modelName.append(')');
             }
 
             QString model = QString::fromUtf8(modelName);
 
-            if(matchedNewNumber)
+            if (matchedNewNumber)
             {
-                *errTextOut = tr("There is already another imported rollingstock with same 'New Number': <b>%1 %2</b>")
-                                  .arg(model, rs_utils::formatNum(type, numberToCheck));
-            }else{
-                *errTextOut = tr("There is already another imported rollingstock with same number: <b>%1 %2</b>")
-                                  .arg(model, rs_utils::formatNum(type, numberToCheck));
+                *errTextOut = tr("There is already another imported rollingstock with same 'New "
+                                 "Number': <b>%1 %2</b>")
+                                .arg(model, rs_utils::formatNum(type, numberToCheck));
+            }
+            else
+            {
+                *errTextOut =
+                  tr(
+                    "There is already another imported rollingstock with same number: <b>%1 %2</b>")
+                    .arg(model, rs_utils::formatNum(type, numberToCheck));
             }
         }
         return false;
     }
 
-    //Then check for an existing RS with same number if model is matched
-    if(matchExistingModelId)
+    // Then check for an existing RS with same number if model is matched
+    if (matchExistingModelId)
     {
         q.prepare("SELECT rs_list.id, rs_models.name"
                   " FROM rs_list"
@@ -750,18 +770,19 @@ bool RSImportedRollingstockModel::checkNewNumberIsValid(db_id importedRsId, db_i
         q.bind(1, matchExistingModelId);
         q.bind(2, numberToCheck);
 
-        if(q.step() == SQLITE_ROW)
+        if (q.step() == SQLITE_ROW)
         {
-            auto r = q.getRows();
+            auto r              = q.getRows();
             db_id dupExistingId = r.get<db_id>(0);
-            Q_UNUSED(dupExistingId) //TODO: maybe use it?
+            Q_UNUSED(dupExistingId) // TODO: maybe use it?
 
             QString modelName = r.get<QString>(1);
 
-            if(errTextOut)
+            if (errTextOut)
             {
-                *errTextOut = tr("There is already an existing rollingstock with same number: <b>%1 %2</b>")
-                                  .arg(modelName, rs_utils::formatNum(type, numberToCheck));
+                *errTextOut =
+                  tr("There is already an existing rollingstock with same number: <b>%1 %2</b>")
+                    .arg(modelName, rs_utils::formatNum(type, numberToCheck));
             }
             return false;
         }

@@ -22,5 +22,4 @@
 ShiftResultEvent::ShiftResultEvent() :
     QEvent(_Type)
 {
-
 }

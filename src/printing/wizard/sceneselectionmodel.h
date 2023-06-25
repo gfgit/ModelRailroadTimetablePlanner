@@ -59,7 +59,8 @@ public:
     SceneSelectionModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -67,13 +68,19 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
-    bool addEntry(const Entry& entry);
+    bool addEntry(const Entry &entry);
     void removeAt(int row);
     void moveRow(int row, bool up);
 
     void setMode(SelectionMode mode, LineGraphType type);
-    inline SelectionMode getMode() const { return selectionMode; }
-    inline LineGraphType getSelectedType() const { return selectedType; }
+    inline SelectionMode getMode() const
+    {
+        return selectionMode;
+    }
+    inline LineGraphType getSelectedType() const
+    {
+        return selectedType;
+    }
 
     // IGraphSceneCollection
     qint64 getItemCount() override;

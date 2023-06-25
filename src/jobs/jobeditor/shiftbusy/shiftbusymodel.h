@@ -30,14 +30,14 @@ namespace sqlite3pp {
 class database;
 }
 
-//TODO: move to shifts subdir
+// TODO: move to shifts subdir
 class ShiftBusyModel : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-
-    enum Columns {
+    enum Columns
+    {
         JobCol = 0,
         Start,
         End,
@@ -55,7 +55,8 @@ public:
     ShiftBusyModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -63,14 +64,26 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
-    void loadData(db_id shiftId, db_id jobId, const QTime& start, const QTime& end);
+    void loadData(db_id shiftId, db_id jobId, const QTime &start, const QTime &end);
 
-    inline bool hasConcurrentJobs() const { return m_data.size(); }
+    inline bool hasConcurrentJobs() const
+    {
+        return m_data.size();
+    }
 
-    inline QTime getStart() const { return m_start; }
-    inline QTime getEnd() const { return m_end; }
+    inline QTime getStart() const
+    {
+        return m_start;
+    }
+    inline QTime getEnd() const
+    {
+        return m_end;
+    }
 
-    inline QString getShiftName() const { return m_shiftName; }
+    inline QString getShiftName() const
+    {
+        return m_shiftName;
+    }
     QString getJobName() const;
 
 private:

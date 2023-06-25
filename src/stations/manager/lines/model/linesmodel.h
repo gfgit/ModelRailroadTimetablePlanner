@@ -36,9 +36,13 @@ class LinesModel : public IPagedItemModelImpl<LinesModel, LinesModelItem>
     Q_OBJECT
 
 public:
-    enum { BatchSize = 100 };
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum Columns {
+    enum Columns
+    {
         NameCol = 0,
         StartKm,
         NCols
@@ -52,7 +56,8 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
@@ -60,25 +65,25 @@ public:
     // IPagedItemModel
 
     // LinesModel
-    bool addLine(const QString& name, db_id *outLineId = nullptr);
+    bool addLine(const QString &name, db_id *outLineId = nullptr);
     bool removeLine(db_id lineId);
 
     // Convinience
     inline db_id getIdAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Invalid
+            return 0; // Invalid
 
-        const LineItem& item = cache.at(row - cacheFirstRow);
+        const LineItem &item = cache.at(row - cacheFirstRow);
         return item.lineId;
     }
 
     inline QString getNameAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return QString(); //Invalid
+            return QString(); // Invalid
 
-        const LineItem& item = cache.at(row - cacheFirstRow);
+        const LineItem &item = cache.at(row - cacheFirstRow);
         return item.name;
     }
 

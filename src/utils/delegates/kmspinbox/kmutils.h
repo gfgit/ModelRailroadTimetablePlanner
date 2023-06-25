@@ -33,8 +33,8 @@ namespace utils {
  * Example: 15.75 km -> KM 15+750
  */
 QString kmNumToText(int kmInMeters);
-int kmNumFromTextInMeters(const QString& str);
+int kmNumFromTextInMeters(const QString &str);
 
-} //namespace utils
+} // namespace utils
 
 #endif // KMUTILS_H

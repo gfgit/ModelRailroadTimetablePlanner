@@ -19,22 +19,20 @@
 
 #ifdef ENABLE_USER_QUERY
 
-#include "sqlresultmodel.h"
+#    include "sqlresultmodel.h"
 
-#include <sqlite3pp/sqlite3pp.h>
+#    include <sqlite3pp/sqlite3pp.h>
 
-#include "app/session.h"
+#    include "app/session.h"
 
 SQLResultModel::SQLResultModel(QObject *parent) :
     QAbstractTableModel(parent),
     colCount(0)
 {
-
 }
 
 SQLResultModel::~SQLResultModel()
 {
-
 }
 
 int SQLResultModel::rowCount(const QModelIndex &parent) const
@@ -49,16 +47,16 @@ int SQLResultModel::columnCount(const QModelIndex &parent) const
 
 QVariant SQLResultModel::data(const QModelIndex &idx, int role) const
 {
-    if(!idx.isValid() || !colCount || idx.row() >= (m_data.size() / colCount))
+    if (!idx.isValid() || !colCount || idx.row() >= (m_data.size() / colCount))
         return QVariant();
 
-    if(role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole)
     {
         int i = idx.row() * colCount + idx.column();
         return m_data.at(i);
     }
 
-    if(role == Qt::BackgroundRole)
+    if (role == Qt::BackgroundRole)
     {
         return backGround;
     }
@@ -68,7 +66,7 @@ QVariant SQLResultModel::data(const QModelIndex &idx, int role) const
 
 QVariant SQLResultModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         return colNames.value(section, "ERR");
     }
@@ -96,7 +94,7 @@ bool SQLResultModel::initFromQuery(sqlite3pp::query *q)
     m_data.squeeze();
     m_data.reserve(colCount);
 
-    for(int i = 0; i < colCount; i++)
+    for (int i = 0; i < colCount; i++)
     {
         colNames.append(q->column_name(i));
     }
@@ -104,7 +102,7 @@ bool SQLResultModel::initFromQuery(sqlite3pp::query *q)
     int ret = q->step();
     while (ret == SQLITE_ROW)
     {
-        for(int c = 0; c < colCount; c++)
+        for (int c = 0; c < colCount; c++)
         {
             auto r = q->getRows();
             QVariant val;
@@ -148,7 +146,7 @@ bool SQLResultModel::initFromQuery(sqlite3pp::query *q)
 
     endResetModel();
 
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit error(ret, Session->m_Db.extended_error_code(), Session->m_Db.error_msg());
         return false;

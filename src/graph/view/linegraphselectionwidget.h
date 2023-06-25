@@ -51,7 +51,7 @@ public:
 
     db_id getObjectId() const;
     const QString &getObjectName() const;
-    void setObjectId(db_id objectId, const QString& name);
+    void setObjectId(db_id objectId, const QString &name);
 
     void setName(const QString &newName);
 

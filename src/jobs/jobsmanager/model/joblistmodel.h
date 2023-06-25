@@ -48,9 +48,13 @@ class JobListModel : public IPagedItemModelImpl<JobListModel, JobListModelItem>
 {
     Q_OBJECT
 public:
-    enum { BatchSize = 100 };
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum Columns {
+    enum Columns
+    {
         IdCol = 0,
         Category,
         ShiftCol,
@@ -69,7 +73,8 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
@@ -77,35 +82,35 @@ public:
 
     virtual void setSortingColumn(int col) override;
 
-    //Filter
+    // Filter
     std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
-    bool setFilterAtCol(int col, const QString& str) override;
+    bool setFilterAtCol(int col, const QString &str) override;
 
     // Convinience
     inline db_id getIdAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Invalid
+            return 0; // Invalid
 
-        const JobItem& item = cache.at(row - cacheFirstRow);
+        const JobItem &item = cache.at(row - cacheFirstRow);
         return item.jobId;
     }
 
     inline QPair<db_id, JobCategory> getShiftAnCatAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return {0, JobCategory::NCategories}; //Invalid
+            return {0, JobCategory::NCategories}; // Invalid
 
-        const JobItem& item = cache.at(row - cacheFirstRow);
+        const JobItem &item = cache.at(row - cacheFirstRow);
         return {item.shiftId, item.category};
     }
 
     inline QPair<QTime, QTime> getOrigAndDestTimeAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return {}; //Invalid
+            return {}; // Invalid
 
-        const JobItem& item = cache.at(row - cacheFirstRow);
+        const JobItem &item = cache.at(row - cacheFirstRow);
         return {item.originTime, item.destTime};
     }
 

@@ -35,9 +35,10 @@ ShiftBusyModel::ShiftBusyModel(sqlite3pp::database &db, QObject *parent) :
 
 QVariant ShiftBusyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
-        switch (section) {
+        switch (section)
+        {
         case JobCol:
             return tr("Job");
         case Start:
@@ -66,7 +67,7 @@ QVariant ShiftBusyModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= m_data.size() || idx.column() >= NCols)
         return QVariant();
 
-    const JobInfo& info = m_data.at(row);
+    const JobInfo &info = m_data.at(row);
 
     switch (role)
     {
@@ -94,13 +95,13 @@ void ShiftBusyModel::loadData(db_id shiftId, db_id jobId, const QTime &start, co
     m_data.clear();
 
     m_shiftId = shiftId;
-    m_jobId = jobId;
-    m_start = start;
-    m_end = end;
+    m_jobId   = jobId;
+    m_start   = start;
+    m_end     = end;
 
     query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
     q.bind(1, m_shiftId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
     {
         endResetModel();
         return;
@@ -118,7 +119,7 @@ void ShiftBusyModel::loadData(db_id shiftId, db_id jobId, const QTime &start, co
     q.bind(2, m_start);
     q.bind(3, m_end);
     q.step();
-    int count = q.getRows().get<int>(0) - 1; //Do not count ourself
+    int count = q.getRows().get<int>(0) - 1; // Do not count ourself
     m_data.reserve(count);
 
     q.prepare("SELECT jobs.id, jobs.category,"
@@ -133,20 +134,20 @@ void ShiftBusyModel::loadData(db_id shiftId, db_id jobId, const QTime &start, co
     q.bind(2, m_start);
     q.bind(3, m_end);
 
-    for(auto j : q)
+    for (auto j : q)
     {
         JobInfo info;
-        info.jobId = j.get<db_id>(0);
+        info.jobId  = j.get<db_id>(0);
         info.jobCat = JobCategory(j.get<int>(1));
 
-        if(info.jobId == m_jobId)
+        if (info.jobId == m_jobId)
         {
             m_jobCat = info.jobCat;
             continue;
         }
 
         info.start = j.get<QTime>(3);
-        info.end = j.get<QTime>(4);
+        info.end   = j.get<QTime>(4);
 
         m_data.append(info);
     }

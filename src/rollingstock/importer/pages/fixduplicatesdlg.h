@@ -32,8 +32,10 @@ class FixDuplicatesDlg : public QDialog
 {
     Q_OBJECT
 public:
-
-    enum { GoBackToPrevPage = QDialog::Accepted + 1 };
+    enum
+    {
+        GoBackToPrevPage = QDialog::Accepted + 1
+    };
 
     FixDuplicatesDlg(IDuplicatesItemModel *m, bool enableGoBack, QWidget *parent = nullptr);
 

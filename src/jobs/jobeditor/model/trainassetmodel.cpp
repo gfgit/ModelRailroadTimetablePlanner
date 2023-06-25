@@ -28,7 +28,7 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-TrainAssetModel::TrainAssetModel(database& db, QObject *parent) :
+TrainAssetModel::TrainAssetModel(database &db, QObject *parent) :
     RSListOnDemandModel(db, parent),
     m_jobId(0),
     m_mode(BeforeStop)
@@ -45,30 +45,33 @@ qint64 TrainAssetModel::recalcTotalItemCount()
                  " GROUP BY coupling.rs_id"
                  " HAVING coupling.operation=1)");
     q.bind(1, m_jobId);
-    //HACK: 1 minute is the min interval between stops,
-    //by adding 1 minute we include the current stop but leave out the next one
-    if(m_mode == AfterStop)
+    // HACK: 1 minute is the min interval between stops,
+    // by adding 1 minute we include the current stop but leave out the next one
+    if (m_mode == AfterStop)
         q.bind(2, m_arrival.addSecs(60));
     else
         q.bind(2, m_arrival);
     int ret = q.step();
-    if(ret != SQLITE_ROW)
+    if (ret != SQLITE_ROW)
         qWarning() << "TrainAssetModel: " << mDb.error_msg() << mDb.error_code();
 
     const qint64 count = q.getRows().get<int>(0);
     return count;
 }
 
-void TrainAssetModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant &/*val*/)
+void TrainAssetModel::internalFetch(int first, int sortCol, int /*valRow*/,
+                                    const QVariant & /*val*/)
 {
     query q(mDb);
 
     int offset = first + curPage * ItemsPerPage;
 
-    //const char *whereCol;
+    // const char *whereCol;
 
     QByteArray sql = "SELECT sub.rs_id,sub.number,sub.name,sub.suffix,sub.type FROM("
-                     "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,MAX(stops.arrival)"
+                     "SELECT "
+                     "coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
+                     "MAX(stops.arrival)"
                      " FROM stops"
                      " JOIN coupling ON coupling.stop_id=stops.id"
                      " JOIN rs_list ON rs_list.id=rs_id"
@@ -103,49 +106,47 @@ void TrainAssetModel::internalFetch(int first, int sortCol, int /*valRow*/, cons
     //        sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
     q.bind(3, m_jobId);
-    //HACK: 1 minute is the min interval between stops,
-    //by adding 1 minute we include the current stop but leave out the next one
-    if(m_mode == AfterStop)
+    // HACK: 1 minute is the min interval between stops,
+    // by adding 1 minute we include the current stop but leave out the next one
+    if (m_mode == AfterStop)
         q.bind(4, m_arrival.addSecs(60));
     else
         q.bind(4, m_arrival);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
     QVector<RSItem> vec(BatchSize);
 
-    auto it = q.begin();
+    auto it        = q.begin();
     const auto end = q.end();
 
-    int i = 0;
-    for(; it != end; ++it)
+    int i          = 0;
+    for (; it != end; ++it)
     {
-        auto r = *it;
-        RSItem &item = vec[i];
-        item.rsId = r.get<db_id>(0);
+        auto r                  = *it;
+        RSItem &item            = vec[i];
+        item.rsId               = r.get<db_id>(0);
 
-        int number = r.get<int>(1);
-        int modelNameLen = sqlite3_column_bytes(q.stmt(), 2);
-        const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q.stmt(), 2));
+        int number              = r.get<int>(1);
+        int modelNameLen        = sqlite3_column_bytes(q.stmt(), 2);
+        const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(q.stmt(), 2));
 
-        int modelSuffixLen = sqlite3_column_bytes(q.stmt(), 3);
-        const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q.stmt(), 3));
-        item.type = RsType(sqlite3_column_int(q.stmt(), 4));
+        int modelSuffixLen      = sqlite3_column_bytes(q.stmt(), 3);
+        const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(q.stmt(), 3));
+        item.type               = RsType(sqlite3_column_int(q.stmt(), 4));
 
-        item.name = rs_utils::formatNameRef(modelName, modelNameLen,
-                                            number,
-                                            modelSuffix, modelSuffixLen,
-                                            item.type);
+        item.name = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix,
+                                            modelSuffixLen, item.type);
         i++;
     }
 
-    if(i < BatchSize)
+    if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
@@ -153,9 +154,9 @@ void TrainAssetModel::internalFetch(int first, int sortCol, int /*valRow*/, cons
 
 void TrainAssetModel::setStop(db_id jobId, QTime arrival, Mode mode)
 {
-    m_jobId = jobId;
+    m_jobId   = jobId;
     m_arrival = arrival;
-    m_mode = mode;
+    m_mode    = mode;
 
     refreshData(true);
 }

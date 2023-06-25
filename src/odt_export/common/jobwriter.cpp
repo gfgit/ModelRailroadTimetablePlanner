@@ -29,65 +29,61 @@
 
 #include <QDebug>
 
-
-void writeJobSummary(QXmlStreamWriter& xml,
-                     const QString& from, const QString& dep,
-                     const QString& to, const QString& arr,
-                     int axes)
+void writeJobSummary(QXmlStreamWriter &xml, const QString &from, const QString &dep,
+                     const QString &to, const QString &arr, int axes)
 {
-    //Table 'job_summary'
+    // Table 'job_summary'
     xml.writeStartElement("table:table");
     xml.writeAttribute("table:name", "job_summary");
     xml.writeAttribute("table:style-name", "job_5f_summary");
 
-    xml.writeEmptyElement("table:table-column"); //A
+    xml.writeEmptyElement("table:table-column"); // A
     xml.writeAttribute("table:style-name", "job_5f_summary.A");
 
-    xml.writeEmptyElement("table:table-column"); //B
+    xml.writeEmptyElement("table:table-column"); // B
     xml.writeAttribute("table:style-name", "job_5f_summary.B");
 
-    xml.writeEmptyElement("table:table-column"); //C
+    xml.writeEmptyElement("table:table-column"); // C
     xml.writeAttribute("table:style-name", "job_5f_summary.C");
 
-    xml.writeEmptyElement("table:table-column"); //D
+    xml.writeEmptyElement("table:table-column"); // D
     xml.writeAttribute("table:style-name", "job_5f_summary.D");
 
-    //Row
+    // Row
     xml.writeStartElement("table:table-row");
 
-    //Cells
+    // Cells
     writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryFrom));
     writeCell(xml, "job_5f_summary_cell", "P3", from);
     writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryDep));
     writeCell(xml, "job_5f_summary_cell", "P3", dep);
 
-    xml.writeEndElement(); //table-row
+    xml.writeEndElement(); // table-row
 
-    //Row 2
+    // Row 2
     xml.writeStartElement("table:table-row");
 
-    //Cells
+    // Cells
     writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryTo));
     writeCell(xml, "job_5f_summary_cell", "P3", to);
     writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryArr));
     writeCell(xml, "job_5f_summary_cell", "P3", arr);
 
-    xml.writeEndElement(); //table-row
+    xml.writeEndElement(); // table-row
 
-    //Row 3
+    // Row 3
     xml.writeStartElement("table:table-row");
 
-    //Cells
+    // Cells
     writeCell(xml, "job_5f_summary_cell", "P2", Odt::text(Odt::jobSummaryAxes));
     writeCell(xml, "job_5f_summary_cell", "P3", QString::number(axes));
     writeCell(xml, "job_5f_summary_cell", "P2", QString());
     writeCell(xml, "job_5f_summary_cell", "P3", QString());
 
-    xml.writeEndElement(); //table-row
+    xml.writeEndElement(); // table-row
 
-    xml.writeEndElement(); //table:table END
+    xml.writeEndElement(); // table:table END
 }
-
 
 JobWriter::JobWriter(database &db) :
     mDb(db),
@@ -128,7 +124,8 @@ JobWriter::JobWriter(database &db) :
                           "stops.arrival,stops.departure"
                           " FROM stops"
                           " JOIN jobs ON jobs.id=stops.job_id"
-                          " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? AND stops.job_id<>?"),
+                          " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? "
+                          "AND stops.job_id<>?"),
 
     q_getStopCouplings(mDb, "SELECT coupling.rs_id,"
                             "rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
@@ -141,21 +138,21 @@ JobWriter::JobWriter(database &db) :
 
 void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
 {
-    //job_summary columns
+    // job_summary columns
     writeColumnStyle(xml, "job_5f_summary.A", "1.60cm");
     writeColumnStyle(xml, "job_5f_summary.B", "8.30cm");
     writeColumnStyle(xml, "job_5f_summary.C", "2.90cm");
     writeColumnStyle(xml, "job_5f_summary.D", "4.20cm");
 
-    //job_stops columns
-    writeColumnStyle(xml, "job_5f_stops.A", "2.60cm"); //Station      (IT: Stazione)
-    writeColumnStyle(xml, "job_5f_stops.B", "1.60cm"); //Arrival      (IT: Arrivo)
-    writeColumnStyle(xml, "job_5f_stops.C", "2.10cm"); //Departure    (IT: Partenza)
-    writeColumnStyle(xml, "job_5f_stops.D", "1.cm");   //Platorm 'Platf' (IT: Binario 'Bin')
-    writeColumnStyle(xml, "job_5f_stops.E", "3.00cm"); //Rollingstock (IT: Rotabili)
-    writeColumnStyle(xml, "job_5f_stops.F", "2.30cm"); //Crossings
-    writeColumnStyle(xml, "job_5f_stops.G", "2.30cm"); //Passings
-    writeColumnStyle(xml, "job_5f_stops.H", "3.20cm"); //Description  (IT: Note)
+    // job_stops columns
+    writeColumnStyle(xml, "job_5f_stops.A", "2.60cm"); // Station      (IT: Stazione)
+    writeColumnStyle(xml, "job_5f_stops.B", "1.60cm"); // Arrival      (IT: Arrivo)
+    writeColumnStyle(xml, "job_5f_stops.C", "2.10cm"); // Departure    (IT: Partenza)
+    writeColumnStyle(xml, "job_5f_stops.D", "1.cm");   // Platorm 'Platf' (IT: Binario 'Bin')
+    writeColumnStyle(xml, "job_5f_stops.E", "3.00cm"); // Rollingstock (IT: Rotabili)
+    writeColumnStyle(xml, "job_5f_stops.F", "2.30cm"); // Crossings
+    writeColumnStyle(xml, "job_5f_stops.G", "2.30cm"); // Passings
+    writeColumnStyle(xml, "job_5f_stops.H", "3.20cm"); // Description  (IT: Note)
 
     /* Style: job_5f_stops.A1
      *
@@ -181,8 +178,8 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "none");
     xml.writeAttribute("fo:border-top", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_stops.H1
      *
@@ -206,8 +203,8 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:padding-bottom", "0.15cm");
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_stops.A2
      *
@@ -230,8 +227,8 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_stops.H2
      *
@@ -254,10 +251,10 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
-    //job_5f_asset columns
+    // job_5f_asset columns
     writeColumnStyle(xml, "job_5f_asset.A", "3.0cm");
     writeColumnStyle(xml, "job_5f_asset.B", "14.0cm");
 
@@ -281,8 +278,8 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-right", "none");
     xml.writeAttribute("fo:border-top", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_asset.B1
      *
@@ -302,8 +299,8 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:padding", "0.049cm");
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_asset.A2
      *
@@ -326,8 +323,8 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_asset.B2
      *
@@ -350,11 +347,11 @@ void JobWriter::writeJobAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 }
 
-void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
+void JobWriter::writeJobStyles(QXmlStreamWriter &xml)
 {
     /* Style: job_5f_summary
      *
@@ -374,8 +371,8 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeAttribute("style:shadow", "none");
     xml.writeAttribute("table:align", "left");
     xml.writeAttribute("style:width", "8.0cm");
-    xml.writeEndElement(); //style:table-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_summary_cell
      *
@@ -393,8 +390,8 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeStartElement("style:table-cell-properties");
     xml.writeAttribute("fo:border", "none");
     xml.writeAttribute("fo:padding", "0.097cm");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_stops
      *
@@ -414,19 +411,19 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeAttribute("table:align", "left");
     xml.writeAttribute("style:width", "16.0cm");
 
-    xml.writeEndElement(); //style:table-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-properties
+    xml.writeEndElement(); // style
 
     /* Style: job_5f_asset
-    *
-    * Type:         table
-    * Display name: job_asset
-    * Align:        left
-    * Width:        16.0cm
-    *
-    * Usage:
-    *  - job_stops table: displays job rollingstock asset summary
-    */
+     *
+     * Type:         table
+     * Display name: job_asset
+     * Align:        left
+     * Width:        16.0cm
+     *
+     * Usage:
+     *  - job_stops table: displays job rollingstock asset summary
+     */
     xml.writeStartElement("style:style");
     xml.writeAttribute("style:family", "table");
     xml.writeAttribute("style:name", "job_5f_asset");
@@ -435,8 +432,8 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeAttribute("table:align", "left");
     xml.writeAttribute("style:width", "16.0cm");
 
-    xml.writeEndElement(); //style:table-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-properties
+    xml.writeEndElement(); // style
 
     /* Style P2
      * type:        paragraph
@@ -454,14 +451,14 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "start");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "16pt");
     xml.writeAttribute("fo:font-weight", "bold");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
     /* Style P3
      * type: paragraph
@@ -481,13 +478,13 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "start");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "16pt");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
     /* Style P5
      * type: paragraph
@@ -498,7 +495,8 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
      *  Like P4 but not bold
      *
      * Usages:
-     * - job_stops: stop cell text for normal stops and transit Rollingstock/Crossings/Passings/Description
+     * - job_stops: stop cell text for normal stops and transit
+     * Rollingstock/Crossings/Passings/Description
      */
     xml.writeStartElement("style:style");
     xml.writeAttribute("style:family", "paragraph");
@@ -507,13 +505,13 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "12pt");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
     /* Style P6
      * type: paragraph
@@ -526,7 +524,8 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
      *  (P4 + Italic, not bold)
      *
      * Usages:
-     * - job_stops: stop cell text for transit stops except for Rollingstock/Crossings/Passings/Description columns which have P5
+     * - job_stops: stop cell text for transit stops except for
+     * Rollingstock/Crossings/Passings/Description columns which have P5
      */
     xml.writeStartElement("style:style");
     xml.writeAttribute("style:family", "paragraph");
@@ -535,18 +534,17 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "12pt");
     xml.writeAttribute("fo:font-style", "italic");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
-
-    //stile interruzione di pagina
-    //TODO: quando useremo 'Page master style' vedere se vanno in conflitto
+    // stile interruzione di pagina
+    // TODO: quando useremo 'Page master style' vedere se vanno in conflitto
     xml.writeStartElement("style:style");
     xml.writeAttribute("style:family", "paragraph");
     xml.writeAttribute("style:name", "interruzione");
@@ -554,16 +552,16 @@ void JobWriter::writeJobStyles(QXmlStreamWriter& xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "start");
     xml.writeAttribute("fo:break-after", "page");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "1pt");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 }
 
-void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
+void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
 {
     query q_getRSInfo(mDb, "SELECT rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
                            " FROM rs_list"
@@ -572,33 +570,34 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
 
     QList<QPair<QString, QList<db_id>>> stopsRS;
 
-    //Title
+    // Title
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeCharacters(JobCategoryName::jobNameSpaced(jobId, jobCat));
     xml.writeEndElement();
 
-    //Vertical space
+    // Vertical space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeEndElement();
 
     db_id firstStopId = 0;
-    db_id lastStopId = 0;
+    db_id lastStopId  = 0;
 
     QTime start, end;
     QString fromStation, toStation;
     int axesCount = 0;
 
-    //Job summary
+    // Job summary
     q_getFirstStop.bind(1, jobId);
-    if(q_getFirstStop.step() == SQLITE_ROW && q_getFirstStop.getRows().column_type(0) != SQLITE_NULL)
+    if (q_getFirstStop.step() == SQLITE_ROW
+        && q_getFirstStop.getRows().column_type(0) != SQLITE_NULL)
     {
-        auto r = q_getFirstStop.getRows();
+        auto r      = q_getFirstStop.getRows();
 
         firstStopId = r.get<db_id>(0);
         fromStation = r.get<QString>(1);
-        start = r.get<QTime>(2);
+        start       = r.get<QTime>(2);
 
         q_initialJobAxes.bind(1, firstStopId);
         q_initialJobAxes.step();
@@ -608,21 +607,19 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
     q_getFirstStop.reset();
 
     q_getLastStop.bind(1, jobId);
-    if(q_getLastStop.step() == SQLITE_ROW && q_getLastStop.getRows().column_type(0) != SQLITE_NULL)
+    if (q_getLastStop.step() == SQLITE_ROW && q_getLastStop.getRows().column_type(0) != SQLITE_NULL)
     {
-        auto r = q_getLastStop.getRows();
+        auto r     = q_getLastStop.getRows();
 
         lastStopId = r.get<db_id>(0);
-        toStation = r.get<QString>(1);
-        end = r.get<QTime>(2);
+        toStation  = r.get<QString>(1);
+        end        = r.get<QTime>(2);
     }
     q_getLastStop.reset();
 
-    if(firstStopId && lastStopId)
+    if (firstStopId && lastStopId)
     {
-        writeJobSummary(xml,
-                        fromStation, start.toString("HH:mm"),
-                        toStation, end.toString("HH:mm"),
+        writeJobSummary(xml, fromStation, start.toString("HH:mm"), toStation, end.toString("HH:mm"),
                         axesCount);
     }
     else
@@ -633,41 +630,41 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         writeJobSummary(xml, err, err, err, err, 0);
     }
 
-    //Vertical space
+    // Vertical space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeEndElement();
 
-    //Table 'job_stops'
+    // Table 'job_stops'
     xml.writeStartElement("table:table");
     xml.writeAttribute("table:name", "job_stops");
     xml.writeAttribute("table:style-name", "job_5f_stops");
 
-    xml.writeEmptyElement("table:table-column"); //Station
+    xml.writeEmptyElement("table:table-column"); // Station
     xml.writeAttribute("table:style-name", "job_5f_stops.A");
 
-    xml.writeEmptyElement("table:table-column"); //Arrival
+    xml.writeEmptyElement("table:table-column"); // Arrival
     xml.writeAttribute("table:style-name", "job_5f_stops.B");
 
-    xml.writeEmptyElement("table:table-column"); //Departure
+    xml.writeEmptyElement("table:table-column"); // Departure
     xml.writeAttribute("table:style-name", "job_5f_stops.C");
 
-    xml.writeEmptyElement("table:table-column"); //Platform (Platf)
+    xml.writeEmptyElement("table:table-column"); // Platform (Platf)
     xml.writeAttribute("table:style-name", "job_5f_stops.D");
 
-    xml.writeEmptyElement("table:table-column"); //Rollingstock
+    xml.writeEmptyElement("table:table-column"); // Rollingstock
     xml.writeAttribute("table:style-name", "job_5f_stops.E");
 
-    xml.writeEmptyElement("table:table-column"); //Crossings
+    xml.writeEmptyElement("table:table-column"); // Crossings
     xml.writeAttribute("table:style-name", "job_5f_stops.F");
 
-    xml.writeEmptyElement("table:table-column"); //Passings
+    xml.writeEmptyElement("table:table-column"); // Passings
     xml.writeAttribute("table:style-name", "job_5f_stops.G");
 
-    xml.writeEmptyElement("table:table-column"); //Description
+    xml.writeEmptyElement("table:table-column"); // Description
     xml.writeAttribute("table:style-name", "job_5f_stops.H");
 
-    //Row 1 (Heading)
+    // Row 1 (Heading)
     xml.writeStartElement("table:table-header-rows");
     xml.writeStartElement("table:table-row");
 
@@ -679,40 +676,41 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
     writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::rollingstock));
     writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::jobStopCross));
     writeCell(xml, "job_5f_stops.A1", P4_Style, Odt::text(Odt::jobStopPassings));
-    writeCell(xml, "job_5f_stops.H1", P4_Style, Odt::text(Odt::notes)); //Description
+    writeCell(xml, "job_5f_stops.H1", P4_Style, Odt::text(Odt::notes)); // Description
 
-    xml.writeEndElement(); //end of row
-    xml.writeEndElement(); //header section
+    xml.writeEndElement(); // end of row
+    xml.writeEndElement(); // header section
 
     QList<db_id> rsAsset;
 
     const QString P5_style = "P5";
 
-    //Fill stops table
+    // Fill stops table
     q_getJobStops.bind(1, jobId);
-    for(auto stop : q_getJobStops)
+    for (auto stop : q_getJobStops)
     {
-        db_id stopId = stop.get<db_id>(0);
-        db_id stationId = stop.get<db_id>(1);
+        db_id stopId        = stop.get<db_id>(0);
+        db_id stationId     = stop.get<db_id>(1);
         QString stationName = stop.get<QString>(2);
-        QTime arr = stop.get<QTime>(3);
-        QTime dep = stop.get<QTime>(4);
-        const int stopType = stop.get<int>(5);
-        QString descr = stop.get<QString>(6);
+        QTime arr           = stop.get<QTime>(3);
+        QTime dep           = stop.get<QTime>(4);
+        const int stopType  = stop.get<int>(5);
+        QString descr       = stop.get<QString>(6);
 
-        QString trackName = stop.get<QString>(7);
-        if(trackName.isEmpty())
-            trackName = stop.get<QString>(8); //Use out gate to get track name
+        QString trackName   = stop.get<QString>(7);
+        if (trackName.isEmpty())
+            trackName = stop.get<QString>(8); // Use out gate to get track name
 
         utils::Side entranceSide = utils::Side(stop.get<int>(9));
-        utils::Side exitSide = utils::Side(stop.get<int>(10));
+        utils::Side exitSide     = utils::Side(stop.get<int>(10));
 
-        if(entranceSide == exitSide && stop.column_type(9) != SQLITE_NULL && stop.column_type(10) != SQLITE_NULL)
+        if (entranceSide == exitSide && stop.column_type(9) != SQLITE_NULL
+            && stop.column_type(10) != SQLITE_NULL)
         {
-            //Train enters and leaves from same track side, add reversal to description
+            // Train enters and leaves from same track side, add reversal to description
             QString descr2 = Odt::text(Odt::jobReverseDirection);
-            if(!descr.isEmpty())
-                descr2.append('\n'); //Separate from manually set description
+            if (!descr.isEmpty())
+                descr2.append('\n'); // Separate from manually set description
             descr2.append(descr);
             descr = descr2;
         }
@@ -721,58 +719,59 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
 
         qDebug() << "(Loop) Job:" << jobId << "Stop:" << stopId;
 
-        xml.writeStartElement("table:table-row"); //start new row
+        xml.writeStartElement("table:table-row"); // start new row
 
-        const QString styleName = isTransit ? "P6" : P5_style; //If it's transit use italic style
+        const QString styleName = isTransit ? "P6" : P5_style; // If it's transit use italic style
 
-        //Station
+        // Station
         writeCell(xml, "job_5f_stops.A2", styleName, stationName);
 
-        //Arrival
-        writeCell(xml, "job_5f_stops.A2", styleName, stopId == firstStopId ? QString() : arr.toString("HH:mm"));
+        // Arrival
+        writeCell(xml, "job_5f_stops.A2", styleName,
+                  stopId == firstStopId ? QString() : arr.toString("HH:mm"));
 
-        //Departure
-        //If it's transit then and arrival is equal to departure (should be always but if is different show both to warn user about the error)
-        //then show only arrival
-        writeCell(xml, "job_5f_stops.A2", styleName, (stopId == lastStopId || (isTransit && arr == dep)) ? QString() : dep.toString("HH:mm"));
+        // Departure
+        // If it's transit then and arrival is equal to departure (should be always but if is
+        // different show both to warn user about the error) then show only arrival
+        writeCell(xml, "job_5f_stops.A2", styleName,
+                  (stopId == lastStopId || (isTransit && arr == dep)) ? QString()
+                                                                      : dep.toString("HH:mm"));
 
-        //Platform
+        // Platform
         writeCell(xml, "job_5f_stops.A2", styleName, trackName);
 
-        //Rollingstock
+        // Rollingstock
         sqlite3_stmt *stmt = q_getStopCouplings.stmt();
         writeCellListStart(xml, "job_5f_stops.A2", P5_style);
 
-        //Coupled rollingstock
+        // Coupled rollingstock
         bool firstCoupRow = true;
         q_getStopCouplings.bind(1, stopId);
         q_getStopCouplings.bind(2, int(RsOp::Coupled));
-        for(auto coup : q_getStopCouplings)
+        for (auto coup : q_getStopCouplings)
         {
             db_id rsId = coup.get<db_id>(0);
             rsAsset.append(rsId);
 
-            int number = coup.get<int>(1);
-            int modelNameLen = sqlite3_column_bytes(stmt, 2);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
+            int number              = coup.get<int>(1);
+            int modelNameLen        = sqlite3_column_bytes(stmt, 2);
+            const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 2));
 
-            int modelSuffixLen = sqlite3_column_bytes(stmt, 3);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 3));
-            RsType type = RsType(sqlite3_column_int(stmt, 4));
+            int modelSuffixLen      = sqlite3_column_bytes(stmt, 3);
+            const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 3));
+            RsType type             = RsType(sqlite3_column_int(stmt, 4));
 
-            const QString rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                           number,
-                                                           modelSuffix, modelSuffixLen,
-                                                           type);
+            const QString rsName    = rs_utils::formatNameRef(modelName, modelNameLen, number,
+                                                              modelSuffix, modelSuffixLen, type);
 
-            if(firstCoupRow)
+            if (firstCoupRow)
             {
                 firstCoupRow = false;
-                //Use bold font
+                // Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
                 xml.writeCharacters(Odt::text(Odt::CoupledAbbr));
-                xml.writeEndElement(); //test:span
+                xml.writeEndElement(); // test:span
             }
 
             xml.writeEmptyElement("text:line-break");
@@ -780,38 +779,36 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         }
         q_getStopCouplings.reset();
 
-        //Unoupled rollingstock
+        // Unoupled rollingstock
         bool firstUncoupRow = true;
         q_getStopCouplings.bind(1, stopId);
         q_getStopCouplings.bind(2, int(RsOp::Uncoupled));
-        for(auto coup : q_getStopCouplings)
+        for (auto coup : q_getStopCouplings)
         {
             db_id rsId = coup.get<db_id>(0);
             rsAsset.removeAll(rsId);
 
-            int number = coup.get<int>(1);
-            int modelNameLen = sqlite3_column_bytes(stmt, 2);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
+            int number              = coup.get<int>(1);
+            int modelNameLen        = sqlite3_column_bytes(stmt, 2);
+            const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 2));
 
-            int modelSuffixLen = sqlite3_column_bytes(stmt, 3);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 3));
-            RsType type = RsType(sqlite3_column_int(stmt, 4));
+            int modelSuffixLen      = sqlite3_column_bytes(stmt, 3);
+            const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 3));
+            RsType type             = RsType(sqlite3_column_int(stmt, 4));
 
-            const QString rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                           number,
-                                                           modelSuffix, modelSuffixLen,
-                                                           type);
+            const QString rsName    = rs_utils::formatNameRef(modelName, modelNameLen, number,
+                                                              modelSuffix, modelSuffixLen, type);
 
-            if(firstUncoupRow)
+            if (firstUncoupRow)
             {
-                if(!firstCoupRow) //Not first row, there were coupled rs
-                    xml.writeEmptyElement("text:line-break"); //Separate from coupled
+                if (!firstCoupRow) // Not first row, there were coupled rs
+                    xml.writeEmptyElement("text:line-break"); // Separate from coupled
                 firstUncoupRow = false;
-                //Use bold font
+                // Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
                 xml.writeCharacters(Odt::text(Odt::UncoupledAbbr));
-                xml.writeEndElement(); //test:span
+                xml.writeEndElement(); // test:span
             }
 
             xml.writeEmptyElement("text:line-break");
@@ -822,7 +819,7 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
 
         stopsRS.append({stationName, rsAsset});
 
-        //Crossings / Passings
+        // Crossings / Passings
 
         JobStopDirectionHelper dirHelper(mDb);
 
@@ -835,25 +832,25 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         q_selectPassings.bind(3, dep);
         q_selectPassings.bind(4, jobId);
 
-        //Incroci
+        // Incroci
         firstCoupRow = true;
         writeCellListStart(xml, "job_5f_stops.A2", P5_style);
-        for(auto pass : q_selectPassings)
+        for (auto pass : q_selectPassings)
         {
-            db_id otherStopId = pass.get<db_id>(0);
-            db_id otherJobId = pass.get<db_id>(1);
+            db_id otherStopId       = pass.get<db_id>(0);
+            db_id otherJobId        = pass.get<db_id>(1);
             JobCategory otherJobCat = JobCategory(pass.get<int>(2));
 
-            //QTime otherArr = pass.get<QTime>(3);
-            //QTime otherDep = pass.get<QTime>(4);
+            // QTime otherArr = pass.get<QTime>(3);
+            // QTime otherDep = pass.get<QTime>(4);
 
             utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
-            if(myDir == otherDir)
+            if (myDir == otherDir)
                 passings.append({otherJobId, otherJobCat});
             else
             {
-                if(firstCoupRow)
+                if (firstCoupRow)
                     firstCoupRow = false;
                 else
                     xml.writeEmptyElement("text:line-break");
@@ -863,12 +860,12 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         q_selectPassings.reset();
         writeCellListEnd(xml);
 
-        //Passings
+        // Passings
         firstCoupRow = true;
         writeCellListStart(xml, "job_5f_stops.A2", P5_style);
-        for(auto entry : passings)
+        for (auto entry : passings)
         {
-            if(firstCoupRow)
+            if (firstCoupRow)
                 firstCoupRow = false;
             else
                 xml.writeEmptyElement("text:line-break");
@@ -876,107 +873,105 @@ void JobWriter::writeJob(QXmlStreamWriter& xml, db_id jobId, JobCategory jobCat)
         }
         writeCellListEnd(xml);
 
-        //Description
+        // Description
         writeCellListStart(xml, "job_5f_stops.H2", P5_style);
-        if(!descr.isEmpty())
+        if (!descr.isEmpty())
         {
-            //Split in lines
+            // Split in lines
             int lastIdx = 0;
-            while(true)
+            while (true)
             {
-                int idx = descr.indexOf('\n', lastIdx);
+                int idx      = descr.indexOf('\n', lastIdx);
                 QString line = descr.mid(lastIdx, idx == -1 ? idx : idx - lastIdx);
                 xml.writeCharacters(line.simplified());
-                if(idx < 0)
-                    break; //Last line
+                if (idx < 0)
+                    break; // Last line
                 lastIdx = idx + 1;
                 xml.writeEmptyElement("text:line-break");
             }
         }
         writeCellListEnd(xml);
 
-        xml.writeEndElement(); //end of row
+        xml.writeEndElement(); // end of row
     }
     q_getJobStops.reset();
 
-    xml.writeEndElement(); //table:table END
+    xml.writeEndElement(); // table:table END
 
-    //text:p as separator
+    // text:p as separator
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeEndElement();
 
-    //Table 'job_asset'
+    // Table 'job_asset'
     xml.writeStartElement("table:table");
     xml.writeAttribute("table:name", "job_asset");
     xml.writeAttribute("table:style-name", "job_5f_asset");
 
-    xml.writeEmptyElement("table:table-column"); //Stazione
+    xml.writeEmptyElement("table:table-column"); // Stazione
     xml.writeAttribute("table:style-name", "job_5f_asset.A");
 
-    xml.writeEmptyElement("table:table-column"); //Assetto
+    xml.writeEmptyElement("table:table-column"); // Assetto
     xml.writeAttribute("table:style-name", "job_5f_asset.B");
 
-    //Duplicate second-last asset to last stop because last stop would be always empty
-    if(stopsRS.size() >= 2)
+    // Duplicate second-last asset to last stop because last stop would be always empty
+    if (stopsRS.size() >= 2)
     {
-        int i = stopsRS.size() - 2; //Get second-last (IT: penultima fermata)
+        int i                 = stopsRS.size() - 2; // Get second-last (IT: penultima fermata)
         stopsRS[i + 1].second = stopsRS[i].second;
     }
     else
     {
-        //Error!
+        // Error!
         qWarning() << __FUNCTION__ << "At least 2 stops required!";
     }
 
     bool firstRow = true;
-    for(auto &s : qAsConst(stopsRS))
+    for (auto &s : qAsConst(stopsRS))
     {
-        xml.writeStartElement("table:table-row"); //start new row
+        xml.writeStartElement("table:table-row"); // start new row
 
         writeCell(xml, firstRow ? "job_5f_asset.A1" : "job_5f_asset.A2", P5_style, s.first);
 
         writeCellListStart(xml, firstRow ? "job_5f_asset.B1" : "job_5f_asset.B2", P5_style);
-        for(int i = 0; i < s.second.size(); i++)
+        for (int i = 0; i < s.second.size(); i++)
         {
             q_getRSInfo.reset();
             q_getRSInfo.bind(1, s.second.at(i));
             int ret = q_getRSInfo.step();
-            if(ret != SQLITE_ROW)
+            if (ret != SQLITE_ROW)
             {
-                //Error: RS does not exist!
+                // Error: RS does not exist!
                 continue;
             }
 
-            sqlite3_stmt *stmt = q_getRSInfo.stmt();
-            int number = sqlite3_column_int(stmt, 0);
-            int modelNameLen = sqlite3_column_bytes(stmt, 1);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 1));
+            sqlite3_stmt *stmt      = q_getRSInfo.stmt();
+            int number              = sqlite3_column_int(stmt, 0);
+            int modelNameLen        = sqlite3_column_bytes(stmt, 1);
+            const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 1));
 
-            int modelSuffixLen = sqlite3_column_bytes(stmt, 2);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
-            RsType type = RsType(sqlite3_column_int(stmt, 3));
+            int modelSuffixLen      = sqlite3_column_bytes(stmt, 2);
+            const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 2));
+            RsType type             = RsType(sqlite3_column_int(stmt, 3));
 
-            const QString name = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                         number,
-                                                         modelSuffix, modelSuffixLen,
-                                                         type);
+            const QString name      = rs_utils::formatNameRef(modelName, modelNameLen, number,
+                                                              modelSuffix, modelSuffixLen, type);
 
             xml.writeCharacters(name);
-            if(i < s.second.size() - 1)
+            if (i < s.second.size() - 1)
                 xml.writeCharacters(" + ");
         }
         writeCellListEnd(xml);
 
-        xml.writeEndElement(); //end of row
+        xml.writeEndElement(); // end of row
 
-        if(firstRow)
+        if (firstRow)
             firstRow = false;
     }
 
     xml.writeEndElement();
 
-    //Interruzione pagina TODO: see style 'interruzione'
+    // Interruzione pagina TODO: see style 'interruzione'
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "interruzione");
     xml.writeEndElement();

@@ -43,7 +43,6 @@ ShiftSheetExport::ShiftSheetExport(sqlite3pp::database &db, db_id shiftId) :
     logoWidthCm(0),
     logoHeightCm(0)
 {
-
 }
 
 void ShiftSheetExport::write()
@@ -51,12 +50,12 @@ void ShiftSheetExport::write()
     qDebug() << "TEMP:" << odt.dir.path();
     odt.initDocument();
 
-    //styles.xml font declarations
+    // styles.xml font declarations
     odt.stylesXml.writeStartElement("office:font-face-decls");
     writeLiberationFontFaces(odt.stylesXml);
-    odt.stylesXml.writeEndElement(); //office:font-face-decls
+    odt.stylesXml.writeEndElement(); // office:font-face-decls
 
-    //Styles
+    // Styles
     odt.stylesXml.writeStartElement("office:styles");
     writeStandardStyle(odt.stylesXml);
     writeGraphicsStyle(odt.stylesXml);
@@ -65,57 +64,58 @@ void ShiftSheetExport::write()
     writeFooterStyle(odt.stylesXml);
     odt.stylesXml.writeEndElement();
 
-    //Automatic styles
+    // Automatic styles
     odt.stylesXml.writeStartElement("office:automatic-styles");
     writePageLayout(odt.stylesXml);
     odt.stylesXml.writeEndElement();
 
     MetaDataManager *meta = Session->getMetaDataManager();
 
-    //Retrive header and footer: give precedence to database metadata and then fallback to global application settings
-    //If the text was explicitly set to empty in metadata no header/footer will be displayed
+    // Retrive header and footer: give precedence to database metadata and then fallback to global
+    // application settings If the text was explicitly set to empty in metadata no header/footer
+    // will be displayed
     QString header;
-    if(meta->getString(header, MetaDataKey::SheetHeaderText) != MetaDataKey::Result::ValueFound)
+    if (meta->getString(header, MetaDataKey::SheetHeaderText) != MetaDataKey::Result::ValueFound)
     {
         header = AppSettings.getSheetHeader();
     }
 
     QString footer;
-    if(meta->getString(footer, MetaDataKey::SheetFooterText) != MetaDataKey::Result::ValueFound)
+    if (meta->getString(footer, MetaDataKey::SheetFooterText) != MetaDataKey::Result::ValueFound)
     {
         footer = AppSettings.getSheetFooter();
     }
 
-    //Master styles
+    // Master styles
     odt.stylesXml.writeStartElement("office:master-styles");
     writeHeaderFooter(odt.stylesXml, header, footer);
     odt.stylesXml.writeEndElement();
 
-    //Content font declarations
+    // Content font declarations
     odt.contentXml.writeStartElement("office:font-face-decls");
     writeLiberationFontFaces(odt.contentXml);
-    odt.contentXml.writeEndElement(); //office:font-face-decls
+    odt.contentXml.writeEndElement(); // office:font-face-decls
 
-    //Content Automatic styles
+    // Content Automatic styles
     odt.contentXml.writeStartElement("office:automatic-styles");
     JobWriter::writeJobAutomaticStyles(odt.contentXml);
 
     bool hasLogo = (meta->hasKey(MetaDataKey::MeetingLogoPicture) == MetaDataKey::ValueFound);
-    if(hasLogo)
+    if (hasLogo)
     {
-        //Save image
+        // Save image
         saveLogoPicture();
     }
     writeCoverStyles(odt.contentXml, hasLogo);
 
-    //Body
+    // Body
     odt.startBody();
 
     QString shiftName;
 
     query q(mDb, "SELECT name FROM jobshifts WHERE id=?");
     q.bind(1, m_shiftId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
         qWarning() << "ShiftSheetExport: shift does not exist, id" << m_shiftId;
 
     shiftName = q.getRows().get<QString>(0);
@@ -133,9 +133,9 @@ void ShiftSheetExport::write()
               " GROUP BY jobs.id"
               " ORDER BY s1.arrival ASC");
     q.bind(1, m_shiftId);
-    for(auto r : q)
+    for (auto r : q)
     {
-        db_id jobId = r.get<db_id>(0);
+        db_id jobId     = r.get<db_id>(0);
         JobCategory cat = JobCategory(r.get<int>(1));
         w.writeJob(odt.contentXml, jobId, cat);
     }
@@ -150,7 +150,7 @@ void ShiftSheetExport::save(const QString &fileName)
 
 void ShiftSheetExport::writeCoverStyles(QXmlStreamWriter &xml, bool hasImage)
 {
-    if(hasImage)
+    if (hasImage)
     {
         /* Style logo_style
          *
@@ -182,8 +182,8 @@ void ShiftSheetExport::writeCoverStyles(QXmlStreamWriter &xml, bool hasImage)
         xml.writeAttribute("draw:luminance", "0%");
         xml.writeAttribute("draw:image-opacity", "100%");
         xml.writeAttribute("fo:clip", "rect(0cm, 0cm, 0cm, 0cm)");
-        xml.writeEndElement(); //style:graphic-properties
-        xml.writeEndElement(); //style
+        xml.writeEndElement(); // style:graphic-properties
+        xml.writeEndElement(); // style
     }
 
     /* Style P7
@@ -203,16 +203,16 @@ void ShiftSheetExport::writeCoverStyles(QXmlStreamWriter &xml, bool hasImage)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("style:font-name", "Liberation Serif");
     xml.writeAttribute("fo:font-size", "24pt");
     xml.writeAttribute("fo:font-weight", "bold");
 
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
     /* Style P8
      * type:        paragraph
@@ -234,16 +234,16 @@ void ShiftSheetExport::writeCoverStyles(QXmlStreamWriter &xml, bool hasImage)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("style:font-name", "Liberation Sans");
     xml.writeAttribute("fo:font-size", "24pt");
     xml.writeAttribute("fo:font-weight", "bold");
 
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
     /* Style shift_name_style
      * type:        paragraph
@@ -264,7 +264,7 @@ void ShiftSheetExport::writeCoverStyles(QXmlStreamWriter &xml, bool hasImage)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("style:font-name", "Liberation Sans");
@@ -277,46 +277,46 @@ void ShiftSheetExport::writeCoverStyles(QXmlStreamWriter &xml, bool hasImage)
     xml.writeAttribute("fo:padding-bottom", "0.15cm");
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
 
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 }
 
 bool ShiftSheetExport::calculateLogoSize(QIODevice *dev)
 {
     QImageReader reader(dev, "PNG");
-    if(!reader.canRead())
+    if (!reader.canRead())
     {
         qWarning() << "ShiftSheetExport: cannot read picture," << reader.errorString();
         return false;
     }
     QImage img;
-    if(!reader.read(&img))
+    if (!reader.read(&img))
     {
         qWarning() << "ShiftSheetExport: cannot read picture," << reader.errorString();
         return false;
     }
 
-    const int widthPx = img.width();
+    const int widthPx  = img.width();
     const int heightPx = img.height();
 
     const double dotsX = img.dotsPerMeterX();
     const double dotsY = img.dotsPerMeterY();
 
-    logoWidthCm = 100.0 * double(widthPx) / dotsX;
-    logoHeightCm = 100.0 * double(heightPx) / dotsY;
+    logoWidthCm        = 100.0 * double(widthPx) / dotsX;
+    logoHeightCm       = 100.0 * double(heightPx) / dotsY;
 
-    if(logoWidthCm > 20.0 || logoWidthCm < 2.0)
+    if (logoWidthCm > 20.0 || logoWidthCm < 2.0)
     {
-        //Try with 15 cm wide
-        logoWidthCm = 15.0;
-        logoHeightCm = 15.0 * double(heightPx)/double(widthPx);
+        // Try with 15 cm wide
+        logoWidthCm  = 15.0;
+        logoHeightCm = 15.0 * double(heightPx) / double(widthPx);
     }
 
-    if(logoHeightCm > 10.0)
+    if (logoHeightCm > 10.0)
     {
-        //Maximum 10 cm tall
-        logoWidthCm = 10.0 * double(widthPx)/double(heightPx);
+        // Maximum 10 cm tall
+        logoWidthCm  = 10.0 * double(widthPx) / double(heightPx);
         logoHeightCm = 10.0;
     }
 
@@ -327,20 +327,20 @@ void ShiftSheetExport::saveLogoPicture()
 {
     std::unique_ptr<ImageMetaData::ImageBlobDevice> imageIO;
     imageIO.reset(ImageMetaData::getImage(Session->m_Db, MetaDataKey::MeetingLogoPicture));
-    if(!imageIO || !imageIO->open(QIODevice::ReadOnly))
+    if (!imageIO || !imageIO->open(QIODevice::ReadOnly))
     {
         qWarning() << "ShiftSheetExport: error query image," << Session->m_Db.error_msg();
         return;
     }
 
-    if(!calculateLogoSize(imageIO.get()))
-        return; //Image is not valid
+    if (!calculateLogoSize(imageIO.get()))
+        return; // Image is not valid
 
-    imageIO->seek(0); //Reset device
+    imageIO->seek(0); // Reset device
 
     QString fileNamePath = odt.addImage("logo.png", "image/png");
     QFile f(fileNamePath);
-    if(!f.open(QFile::WriteOnly | QFile::Truncate))
+    if (!f.open(QFile::WriteOnly | QFile::Truncate))
     {
         qWarning() << "ShiftSheetExport: error saving image," << f.errorString();
         return;
@@ -352,25 +352,25 @@ void ShiftSheetExport::saveLogoPicture()
     while (!imageIO->atEnd() || size < 0)
     {
         size = imageIO->read(buf, bufSize);
-        if(f.write(buf, size) != size)
+        if (f.write(buf, size) != size)
             qWarning() << "ShiftSheetExport: error witing image," << f.errorString();
     }
     f.close();
 }
 
-void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftName, bool hasLogo)
+void ShiftSheetExport::writeCover(QXmlStreamWriter &xml, const QString &shiftName, bool hasLogo)
 {
     MetaDataManager *meta = Session->getMetaDataManager();
 
-    //Add some space
+    // Add some space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P4");
     xml.writeEndElement();
 
-    //Host association
+    // Host association
     QString str;
     meta->getString(str, MetaDataKey::MeetingHostAssociation);
-    if(!str.isEmpty())
+    if (!str.isEmpty())
     {
         xml.writeStartElement("text:p");
         xml.writeAttribute("text:style-name", "P7");
@@ -379,13 +379,13 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
         str.clear();
     }
 
-    //Add some space
+    // Add some space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P4");
     xml.writeEndElement();
 
-    //Logo
-    if(hasLogo && !qFuzzyIsNull(logoWidthCm))
+    // Logo
+    if (hasLogo && !qFuzzyIsNull(logoWidthCm))
     {
         xml.writeStartElement("text:p");
         xml.writeAttribute("text:style-name", "P1");
@@ -405,54 +405,54 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
         xml.writeAttribute("xlink:type", "simple");
         xml.writeAttribute("xlink:show", "embed");
         xml.writeAttribute("xlink:actuate", "onLoad");
-        xml.writeEndElement(); //draw:image
+        xml.writeEndElement(); // draw:image
 
-        xml.writeEndElement(); //draw:frame
+        xml.writeEndElement(); // draw:frame
 
-        xml.writeEndElement(); //text:p
+        xml.writeEndElement(); // text:p
     }
 
-    //Meeting dates
+    // Meeting dates
     qint64 showDates = 1;
     meta->getInt64(showDates, MetaDataKey::MeetingShowDates);
-    if(showDates)
+    if (showDates)
     {
         QDate start, end;
         qint64 tmp = 0;
 
-        if(meta->getInt64(tmp, MetaDataKey::MeetingStartDate) == MetaDataKey::ValueFound)
+        if (meta->getInt64(tmp, MetaDataKey::MeetingStartDate) == MetaDataKey::ValueFound)
         {
             start = QDate::fromJulianDay(tmp);
         }
-        if(meta->getInt64(tmp, MetaDataKey::MeetingEndDate) == MetaDataKey::ValueFound)
+        if (meta->getInt64(tmp, MetaDataKey::MeetingEndDate) == MetaDataKey::ValueFound)
         {
             end = QDate::fromJulianDay(tmp);
-            if(!end.isValid() || end < start)
+            if (!end.isValid() || end < start)
                 end = start;
         }
 
-        if(start.isValid())
+        if (start.isValid())
         {
             xml.writeStartElement("text:p");
             xml.writeAttribute("text:style-name", "P1");
-            if(start == end)
+            if (start == end)
                 xml.writeCharacters(start.toString("dd/MM/yyyy"));
             else
-                xml.writeCharacters(Odt::text(Odt::meetingFromToShort)
-                                        .arg(start.toString("dd/MM/yyyy"),
-                                             end.toString("dd/MM/yyyy")));
+                xml.writeCharacters(
+                  Odt::text(Odt::meetingFromToShort)
+                    .arg(start.toString("dd/MM/yyyy"), end.toString("dd/MM/yyyy")));
             xml.writeEndElement();
         }
     }
 
-    //Add some space
+    // Add some space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P4");
     xml.writeEndElement();
 
-    //Location
+    // Location
     meta->getString(str, MetaDataKey::MeetingLocation);
-    if(!str.isEmpty())
+    if (!str.isEmpty())
     {
         xml.writeStartElement("text:p");
         xml.writeAttribute("text:style-name", "P8");
@@ -461,27 +461,27 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
         str.clear();
     }
 
-    //Add some space
+    // Add some space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P4");
     xml.writeEndElement();
 
-    //Description
+    // Description
     meta->getString(str, MetaDataKey::MeetingDescription);
-    if(!str.isEmpty())
+    if (!str.isEmpty())
     {
         xml.writeStartElement("text:p");
         xml.writeAttribute("text:style-name", "P1");
 
-        //Split in lines
+        // Split in lines
         int lastIdx = 0;
-        while(true)
+        while (true)
         {
-            int idx = str.indexOf('\n', lastIdx);
+            int idx      = str.indexOf('\n', lastIdx);
             QString line = str.mid(lastIdx, idx == -1 ? idx : idx - lastIdx);
             xml.writeCharacters(line.simplified());
-            if(idx < 0)
-                break; //Last line
+            if (idx < 0)
+                break; // Last line
             lastIdx = idx + 1;
             xml.writeEmptyElement("text:line-break");
         }
@@ -489,19 +489,19 @@ void ShiftSheetExport::writeCover(QXmlStreamWriter& xml, const QString& shiftNam
         str.clear();
     }
 
-    //Add some space
+    // Add some space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P4");
     xml.writeEndElement();
 
-    //Shift name
+    // Shift name
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "shift_name_style");
     xml.writeCharacters(Odt::text(Odt::shiftCoverTitle).arg(shiftName));
     xml.writeEndElement();
     str.clear();
 
-    //Interruzione pagina TODO: see style 'interruzione'
+    // Interruzione pagina TODO: see style 'interruzione'
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "interruzione");
     xml.writeEndElement();

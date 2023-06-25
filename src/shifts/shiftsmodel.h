@@ -42,7 +42,10 @@ class ShiftsModel : public IPagedItemModelImpl<ShiftsModel, ShiftsModelItem>
     Q_OBJECT
 
 public:
-    enum { BatchSize = 100 };
+    enum
+    {
+        BatchSize = 100
+    };
 
     enum Columns
     {
@@ -58,21 +61,21 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
-    //Filter
+    // Filter
     std::pair<QString, FilterFlags> getFilterAtCol(int col) override;
-    bool setFilterAtCol(int col, const QString& str) override;
+    bool setFilterAtCol(int col, const QString &str) override;
 
     // ShiftModel
 
@@ -84,16 +87,16 @@ public:
     // Convinience
     inline db_id shiftAtRow(int row) const
     {
-        if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Not fetched yet or invalid
+        if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+            return 0; // Not fetched yet or invalid
 
         return cache.at(row - cacheFirstRow).shiftId;
     }
 
     inline QString shiftNameAtRow(int row) const
     {
-        if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return QString(); //Not fetched yet or invalid
+        if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+            return QString(); // Not fetched yet or invalid
 
         return cache.at(row - cacheFirstRow).shiftName;
     }

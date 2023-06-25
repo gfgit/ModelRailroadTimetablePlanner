@@ -22,8 +22,8 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QObject>
-#include <QVector>
+#    include <QObject>
+#    include <QVector>
 
 class QAbstractItemModel;
 class QModelIndex;
@@ -47,13 +47,20 @@ public:
     bool startWorker();
     void abortTasks();
 
-    inline bool isRunning() const { return m_mainWorker || m_workers.size() > 0; }
+    inline bool isRunning() const
+    {
+        return m_mainWorker || m_workers.size() > 0;
+    }
 
-    inline QAbstractItemModel *getModel() const { return errorsModel; };
+    inline QAbstractItemModel *getModel() const
+    {
+        return errorsModel;
+    };
 
-    virtual QString getName() const = 0;
-    virtual void clearModel() = 0;
-    virtual void showContextMenu(QWidget *panel, const QPoint& globalPos, const QModelIndex& idx) const = 0;
+    virtual QString getName() const                            = 0;
+    virtual void clearModel()                                  = 0;
+    virtual void showContextMenu(QWidget *panel, const QPoint &globalPos,
+                                 const QModelIndex &idx) const = 0;
 
     virtual void sessionLoadedHandler();
 
@@ -64,13 +71,13 @@ signals:
 protected:
     void addSubTask(IQuittableTask *task);
 
-    virtual IQuittableTask *createMainWorker() = 0;
+    virtual IQuittableTask *createMainWorker()    = 0;
     virtual void setErrors(QEvent *e, bool merge) = 0;
 
 protected:
     sqlite3pp::database &mDb;
     QAbstractItemModel *errorsModel = nullptr;
-    int eventType = 0;
+    int eventType                   = 0;
 
 private:
     IQuittableTask *m_mainWorker = nullptr;

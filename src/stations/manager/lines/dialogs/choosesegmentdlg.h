@@ -42,14 +42,13 @@ public:
         DoNotLock = 0
     };
 
-    explicit ChooseSegmentDlg(sqlite3pp::database &db,
-                              QWidget *parent = nullptr);
+    explicit ChooseSegmentDlg(sqlite3pp::database &db, QWidget *parent = nullptr);
 
     virtual void done(int res) override;
 
     void setFilter(db_id fromStationId, db_id exceptSegment);
 
-    bool getData(db_id& outSegId, QString& segName, bool &outIsReversed);
+    bool getData(db_id &outSegId, QString &segName, bool &outIsReversed);
 
 private slots:
     void onStationChanged();

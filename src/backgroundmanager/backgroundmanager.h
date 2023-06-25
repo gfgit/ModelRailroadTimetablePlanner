@@ -22,12 +22,12 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QObject>
-#include <QVector>
+#    include <QObject>
+#    include <QVector>
 
 class IBackgroundChecker;
 
-//TODO: show a progress bar for all task like Qt Creator does
+// TODO: show a progress bar for all task like Qt Creator does
 class BackgroundManager : public QObject
 {
     Q_OBJECT

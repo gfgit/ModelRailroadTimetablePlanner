@@ -35,10 +35,13 @@ public:
     void startBody();
     void endDocument();
 
-    //Returns a 'path + file name' where you must save the image
-    QString addImage(const QString& name, const QString& mediaType);
+    // Returns a 'path + file name' where you must save the image
+    QString addImage(const QString &name, const QString &mediaType);
 
-    inline void setTitle(const QString& title) { documentTitle = title; }
+    inline void setTitle(const QString &title)
+    {
+        documentTitle = title;
+    }
 
 public:
     QTemporaryDir dir;
@@ -57,7 +60,7 @@ private:
 
 private:
     QString documentTitle;
-    //pair: fileName, mediaType
+    // pair: fileName, mediaType
     QList<QPair<QString, QString>> imageList;
 };
 

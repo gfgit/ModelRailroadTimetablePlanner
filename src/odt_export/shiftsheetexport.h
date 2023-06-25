@@ -34,9 +34,12 @@ public:
     ShiftSheetExport(sqlite3pp::database &db, db_id shiftId);
 
     void write();
-    void save(const QString& fileName);
+    void save(const QString &fileName);
 
-    inline void setShiftId(db_id shiftId) { m_shiftId = shiftId; }
+    inline void setShiftId(db_id shiftId)
+    {
+        m_shiftId = shiftId;
+    }
 
 private:
     void writeCoverStyles(QXmlStreamWriter &xml, bool hasImage);

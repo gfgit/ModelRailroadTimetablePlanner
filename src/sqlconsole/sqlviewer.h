@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_USER_QUERY
 
-#include <QWidget>
+#    include <QWidget>
 
 class QTableView;
 class SQLResultModel;
@@ -47,7 +47,7 @@ public slots:
     void timedExec();
     void resetColor();
 
-    void onError(int err, int extended, const QString& msg);
+    void onError(int err, int extended, const QString &msg);
 
 private:
     SQLResultModel *model;

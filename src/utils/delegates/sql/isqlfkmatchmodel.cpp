@@ -28,7 +28,6 @@ ISqlFKMatchModel::ISqlFKMatchModel(QObject *parent) :
     hasEmptyRow(true),
     size(0)
 {
-
 }
 
 int ISqlFKMatchModel::rowCount(const QModelIndex &parent) const
@@ -43,12 +42,10 @@ int ISqlFKMatchModel::columnCount(const QModelIndex &parent) const
 
 void ISqlFKMatchModel::refreshData()
 {
-
 }
 
 void ISqlFKMatchModel::clearCache()
 {
-
 }
 
 QString ISqlFKMatchModel::getName(db_id /*id*/) const
@@ -64,7 +61,7 @@ QFont initBoldFont()
     return f;
 }
 
-//static
+// static
 QVariant ISqlFKMatchModel::boldFont()
 {
     static QFont emptyRowF = initBoldFont();

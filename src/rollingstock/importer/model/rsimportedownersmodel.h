@@ -34,7 +34,10 @@ class RSImportedOwnersModel : public IRsImportModel, public IFKField
     Q_OBJECT
 
 public:
-    enum { BatchSize = 100 };
+    enum
+    {
+        BatchSize = 100
+    };
 
     enum Columns
     {
@@ -63,7 +66,8 @@ public:
     // QAbstractTableModel
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -72,11 +76,9 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // Editable:
-    bool setData(const QModelIndex &idx, const QVariant &value,
-                 int role = Qt::EditRole) override;
+    bool setData(const QModelIndex &idx, const QVariant &value, int role = Qt::EditRole) override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
-
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
@@ -86,14 +88,12 @@ public:
     // Sorting TODO: enable multiple columns sort/filter with custom QHeaderView
     virtual void setSortingColumn(int col) override;
 
-
     // IRsImportModel:
     int countImported() override;
 
-
     // ICheckName:
-    bool checkCustomNameValid(db_id importedOwnerId, const QString& originalName, const QString& newCustomName,
-                              QString *errTextOut) override;
+    bool checkCustomNameValid(db_id importedOwnerId, const QString &originalName,
+                              const QString &newCustomName, QString *errTextOut) override;
 
     // IFKField:
     bool getFieldData(int row, int col, db_id &ownerIdOut, QString &ownerNameOut) const override;
@@ -105,8 +105,8 @@ protected:
 
 private:
     void fetchRow(int row);
-    Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant& val);
-    void handleResult(const QVector<OwnerItem>& items, int firstRow);
+    Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant &val);
+    void handleResult(const QVector<OwnerItem> &items, int firstRow);
 
 private:
     QVector<OwnerItem> cache;

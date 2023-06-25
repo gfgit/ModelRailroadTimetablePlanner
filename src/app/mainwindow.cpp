@@ -24,7 +24,6 @@
 
 #include "viewmanager/viewmanager.h"
 
-
 #include "jobs/jobeditor/jobpatheditor.h"
 #include <QDockWidget>
 
@@ -52,7 +51,7 @@
 #include "printing/wizard/printwizard.h"
 
 #ifdef ENABLE_USER_QUERY
-#include "sqlconsole/sqlconsole.h"
+#    include "sqlconsole/sqlconsole.h"
 #endif
 
 #include <QActionGroup>
@@ -61,10 +60,10 @@
 #include "searchbox/searchresultmodel.h"
 
 #ifdef ENABLE_BACKGROUND_MANAGER
-#include "backgroundmanager/backgroundmanager.h"
-#include "backgroundmanager/backgroundresultpanel.h"
-#include "jobs/jobs_checker/crossing/jobcrossingchecker.h"
-#include "rollingstock/rs_checker/rscheckermanager.h"
+#    include "backgroundmanager/backgroundmanager.h"
+#    include "backgroundmanager/backgroundresultpanel.h"
+#    include "jobs/jobs_checker/crossing/jobcrossingchecker.h"
+#    include "rollingstock/rs_checker/rscheckermanager.h"
 #endif // ENABLE_BACKGROUND_MANAGER
 
 #include "propertiesdialog.h"
@@ -100,47 +99,47 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->actionAbout->setText(tr("About %1").arg(qApp->applicationDisplayName()));
 
-    auto viewMgr = Session->getViewManager();
+    auto viewMgr          = Session->getViewManager();
     viewMgr->m_mainWidget = this;
 
-    auto graphMgr = viewMgr->getLineGraphMgr();
+    auto graphMgr         = viewMgr->getLineGraphMgr();
     connect(graphMgr, &LineGraphManager::jobSelected, this, &MainWindow::onJobSelected);
 
-    //view = graphMgr->getView();
+    // view = graphMgr->getView();
     view = new LineGraphWidget(this);
 
-    //Welcome label
+    // Welcome label
     welcomeLabel = new QLabel(this);
     welcomeLabel->setTextFormat(Qt::RichText);
     welcomeLabel->setAlignment(Qt::AlignCenter);
     welcomeLabel->setFont(QFont("Arial", 15));
     welcomeLabel->setObjectName("WelcomeLabel");
 
-    //JobPathEditor dock
-    jobEditor = new JobPathEditor(this);
+    // JobPathEditor dock
+    jobEditor          = new JobPathEditor(this);
     viewMgr->jobEditor = jobEditor;
-    jobDock = new QDockWidget(tr("Job Editor"), this);
+    jobDock            = new QDockWidget(tr("Job Editor"), this);
     jobDock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     jobDock->setWidget(jobEditor);
-    jobDock->installEventFilter(this); //NOTE: see MainWindow::eventFilter() below
+    jobDock->installEventFilter(this); // NOTE: see MainWindow::eventFilter() below
 
     addDockWidget(Qt::RightDockWidgetArea, jobDock);
     ui->menuView->addAction(jobDock->toggleViewAction());
     connect(jobDock->toggleViewAction(), &QAction::triggered, jobEditor, &JobPathEditor::show);
 
 #ifdef ENABLE_BACKGROUND_MANAGER
-    //Background Errors dock
+    // Background Errors dock
     BackgroundResultPanel *resPanel = new BackgroundResultPanel(this);
-    resPanelDock = new QDockWidget(tr("Errors"), this);
+    resPanelDock                    = new QDockWidget(tr("Errors"), this);
     resPanelDock->setAllowedAreas(Qt::TopDockWidgetArea | Qt::BottomDockWidgetArea);
     resPanelDock->setWidget(resPanel);
-    resPanelDock->installEventFilter(this); //NOTE: see eventFilter() below
+    resPanelDock->installEventFilter(this); // NOTE: see eventFilter() below
 
     addDockWidget(Qt::BottomDockWidgetArea, resPanelDock);
     ui->menuView->addAction(resPanelDock->toggleViewAction());
     ui->mainToolBar->addAction(resPanelDock->toggleViewAction());
 
-    //Add checkers FIXME: move to session?
+    // Add checkers FIXME: move to session?
     JobCrossingChecker *jobCrossingChecker = new JobCrossingChecker(Session->m_Db, this);
     Session->getBackgroundManager()->addChecker(jobCrossingChecker);
 
@@ -148,22 +147,24 @@ MainWindow::MainWindow(QWidget *parent) :
     Session->getBackgroundManager()->addChecker(rsChecker);
 #endif // ENABLE_BACKGROUND_MANAGER
 
-    //Allow JobPathEditor to use all vertical space when RsErrorWidget dock is at bottom
+    // Allow JobPathEditor to use all vertical space when RsErrorWidget dock is at bottom
     setCorner(Qt::BottomRightCorner, Qt::RightDockWidgetArea);
     setCorner(Qt::BottomLeftCorner, Qt::LeftDockWidgetArea);
 
-    //Search Box
+    // Search Box
     SearchResultModel *searchModel = new SearchResultModel(Session->m_Db, this);
-    searchEdit = new CustomCompletionLineEdit(searchModel, this);
+    searchEdit                     = new CustomCompletionLineEdit(searchModel, this);
     searchEdit->setMinimumWidth(300);
     searchEdit->setMinimumHeight(25);
     searchEdit->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     searchEdit->setPlaceholderText(tr("Find"));
     searchEdit->setClearButtonEnabled(true);
-    connect(searchEdit, &CustomCompletionLineEdit::completionDone, this, &MainWindow::onJobSearchItemSelected);
-    connect(searchModel, &SearchResultModel::resultsReady, this, &MainWindow::onJobSearchResultsReady);
+    connect(searchEdit, &CustomCompletionLineEdit::completionDone, this,
+            &MainWindow::onJobSearchItemSelected);
+    connect(searchModel, &SearchResultModel::resultsReady, this,
+            &MainWindow::onJobSearchResultsReady);
 
-    QWidget* spacer = new QWidget();
+    QWidget *spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->mainToolBar->addWidget(spacer);
     ui->mainToolBar->addWidget(searchEdit);
@@ -172,12 +173,11 @@ MainWindow::MainWindow(QWidget *parent) :
     setCentralWidgetMode(CentralWidgetMode::StartPageMode);
 
     QMenu *recentFilesMenu = new QMenu(this);
-    for(int i = 0; i < MaxRecentFiles; i++)
+    for (int i = 0; i < MaxRecentFiles; i++)
     {
         recentFileActs[i] = new QAction(this);
         recentFileActs[i]->setVisible(false);
-        connect(recentFileActs[i], &QAction::triggered,
-                this, &MainWindow::onOpenRecent);
+        connect(recentFileActs[i], &QAction::triggered, this, &MainWindow::onOpenRecent);
 
         recentFilesMenu->addAction(recentFileActs[i]);
     }
@@ -186,7 +186,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->actionOpen_Recent->setMenu(recentFilesMenu);
 
-    //Listen to changes to display welcomeLabel or view
+    // Listen to changes to display welcomeLabel or view
     connect(Session, &MeetingSession::segmentAdded, this, &MainWindow::checkLineNumber);
     connect(Session, &MeetingSession::segmentRemoved, this, &MainWindow::checkLineNumber);
     connect(Session, &MeetingSession::lineAdded, this, &MainWindow::checkLineNumber);
@@ -240,11 +240,13 @@ void MainWindow::setup_actions()
     connect(ui->actionProperties, &QAction::triggered, this, &MainWindow::onProperties);
 
     connect(ui->actionStations, &QAction::triggered, this, &MainWindow::onStationManager);
-    connect(ui->actionRollingstockManager, &QAction::triggered, this, &MainWindow::onRollingStockManager);
+    connect(ui->actionRollingstockManager, &QAction::triggered, this,
+            &MainWindow::onRollingStockManager);
     connect(ui->actionJob_Shifts, &QAction::triggered, this, &MainWindow::onShiftManager);
     connect(ui->action_JobsMgr, &QAction::triggered, this, &MainWindow::onJobsManager);
     connect(ui->actionRS_Session_Viewer, &QAction::triggered, this, &MainWindow::onSessionRSViewer);
-    connect(ui->actionMeeting_Information, &QAction::triggered, this, &MainWindow::onMeetingInformation);
+    connect(ui->actionMeeting_Information, &QAction::triggered, this,
+            &MainWindow::onMeetingInformation);
 
     connect(ui->actionAddJob, &QAction::triggered, this, &MainWindow::onAddJob);
     connect(ui->actionRemoveJob, &QAction::triggered, this, &MainWindow::onRemoveJob);
@@ -263,16 +265,22 @@ void MainWindow::setup_actions()
 
     connect(ui->actionExit, &QAction::triggered, this, &MainWindow::close);
 
-    ui->actionNext_Job_Segment->setToolTip(tr("Hold shift and click to go to <b>last</b> job stop."));
-    ui->actionPrev_Job_Segment->setToolTip(tr("Hold shift and click to go to <b>first</b> job stop."));
-    connect(ui->actionNext_Job_Segment, &QAction::triggered, this, []()
+    ui->actionNext_Job_Segment->setToolTip(
+      tr("Hold shift and click to go to <b>last</b> job stop."));
+    ui->actionPrev_Job_Segment->setToolTip(
+      tr("Hold shift and click to go to <b>first</b> job stop."));
+    connect(ui->actionNext_Job_Segment, &QAction::triggered, this,
+            []()
             {
-                bool shiftPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+                bool shiftPressed =
+                  QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
                 Session->getViewManager()->requestJobShowPrevNextSegment(false, shiftPressed);
             });
-    connect(ui->actionPrev_Job_Segment, &QAction::triggered, this, []()
+    connect(ui->actionPrev_Job_Segment, &QAction::triggered, this,
+            []()
             {
-                bool shiftPressed = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
+                bool shiftPressed =
+                  QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
                 Session->getViewManager()->requestJobShowPrevNextSegment(true, shiftPressed);
             });
 }
@@ -284,15 +292,14 @@ void MainWindow::about()
     msgBox->setWindowTitle(tr("About %1").arg(qApp->applicationDisplayName()));
 
     const QString translatedText =
-        tr(
-            "<h3>%1</h3>"
-            "<p>This program makes it easier to deal with timetables and trains.</p>"
-            "<p>Version: <b>%2</b></p>"
-            "<p>Built: %3</p>"
-            "<p>Website: <a href='%4'>%4</a></p>")
-            .arg(qApp->applicationDisplayName(), qApp->applicationVersion(),
-                 QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy"),
-                 AppProjectWebSite);
+      tr("<h3>%1</h3>"
+         "<p>This program makes it easier to deal with timetables and trains.</p>"
+         "<p>Version: <b>%2</b></p>"
+         "<p>Built: %3</p>"
+         "<p>Website: <a href='%4'>%4</a></p>")
+        .arg(qApp->applicationDisplayName(), qApp->applicationVersion(),
+             QDate::fromString(AppBuildDate, QLatin1String("MMM dd yyyy")).toString("dd/MM/yyyy"),
+             AppProjectWebSite);
 
     msgBox->setTextFormat(Qt::RichText);
     msgBox->setText(translatedText);
@@ -309,15 +316,14 @@ void MainWindow::onOpen()
 #endif
 
 #ifdef ENABLE_BACKGROUND_MANAGER
-    if(Session->getBackgroundManager()->isRunning())
+    if (Session->getBackgroundManager()->isRunning())
     {
-        int ret = QMessageBox::warning(this,
-                                       tr("Backgroung Task"),
-                                       tr("Background task for checking rollingstock errors is still running.\n"
-                                          "Do you want to cancel it?"),
-                                       QMessageBox::Yes, QMessageBox::No,
-                                       QMessageBox::Yes);
-        if(ret == QMessageBox::Yes)
+        int ret = QMessageBox::warning(
+          this, tr("Backgroung Task"),
+          tr("Background task for checking rollingstock errors is still running.\n"
+             "Do you want to cancel it?"),
+          QMessageBox::Yes, QMessageBox::No, QMessageBox::Yes);
+        if (ret == QMessageBox::Yes)
             Session->getBackgroundManager()->abortAllTasks();
         else
             return;
@@ -335,22 +341,21 @@ void MainWindow::onOpen()
     filters << FileFormats::tr(FileFormats::allFiles);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(directory_key::session, fileName);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    if(!QThreadPool::globalInstance()->waitForDone(2000))
+    if (!QThreadPool::globalInstance()->waitForDone(2000))
     {
-        QMessageBox::warning(this,
-                             tr("Background Tasks"),
+        QMessageBox::warning(this, tr("Background Tasks"),
                              tr("Some background tasks are still running.\n"
                                 "The file was not opened. Try again."));
         QApplication::restoreOverrideCursor();
@@ -362,10 +367,10 @@ void MainWindow::onOpen()
     loadFile(fileName);
 }
 
-void MainWindow::loadFile(const QString& fileName)
+void MainWindow::loadFile(const QString &fileName)
 {
     DEBUG_ENTRY;
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     qDebug() << "Loading:" << fileName;
@@ -376,86 +381,91 @@ void MainWindow::loadFile(const QString& fileName)
 
     QApplication::restoreOverrideCursor();
 
-    if(err == DB_Error::FormatTooOld)
+    if (err == DB_Error::FormatTooOld)
     {
-        int but = QMessageBox::warning(this, tr("Version is old"),
-                                       tr("This file was created by an older version of %1.\n"
-                                          "Opening it without conversion might not work and even crash the application.\n"
-                                          "Do you want to open it anyway?").arg(qApp->applicationDisplayName()),
-                                       QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-        if(but == QMessageBox::Yes)
+        int but = QMessageBox::warning(
+          this, tr("Version is old"),
+          tr("This file was created by an older version of %1.\n"
+             "Opening it without conversion might not work and even crash the application.\n"
+             "Do you want to open it anyway?")
+            .arg(qApp->applicationDisplayName()),
+          QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (but == QMessageBox::Yes)
             err = Session->openDB(fileName, true);
     }
-    else if(err == DB_Error::FormatTooNew)
+    else if (err == DB_Error::FormatTooNew)
     {
-        if(err == DB_Error::FormatTooOld)
+        if (err == DB_Error::FormatTooOld)
         {
             int but = QMessageBox::warning(this, tr("Version is too new"),
                                            tr("This file was created by a newer version of %1.\n"
-                                              "You should update the application first. Opening this file might not work or even crash.\n"
-                                              "Do you want to open it anyway?").arg(qApp->applicationDisplayName()),
+                                              "You should update the application first. Opening "
+                                              "this file might not work or even crash.\n"
+                                              "Do you want to open it anyway?")
+                                             .arg(qApp->applicationDisplayName()),
                                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-            if(but == QMessageBox::Yes)
+            if (but == QMessageBox::Yes)
                 err = Session->openDB(fileName, true);
         }
     }
 
-    if(err == DB_Error::DbBusyWhenClosing)
+    if (err == DB_Error::DbBusyWhenClosing)
         showCloseWarning();
 
-    if(err != DB_Error::NoError)
+    if (err != DB_Error::NoError)
         return;
 
     setCurrentFile(fileName);
 
-    //Fake we are coming from Start Page
-    //Otherwise we cannot show the first line
+    // Fake we are coming from Start Page
+    // Otherwise we cannot show the first line
     m_mode = CentralWidgetMode::StartPageMode;
     checkLineNumber();
 
-
-    if(!Session->checkImportRSTablesEmpty())
+    if (!Session->checkImportRSTablesEmpty())
     {
-        //Probably the application crashed before finishing RS importation
-        //Give user choice to resume it or discard
+        // Probably the application crashed before finishing RS importation
+        // Give user choice to resume it or discard
 
-        OwningQPointer<QMessageBox> msgBox = new QMessageBox(
-            QMessageBox::Warning,
-            tr("RS Import"),
-            tr("There is some rollingstock import data left in this file. "
-               "Probably the application has crashed!<br>"
-               "Before deleting it would you like to resume importation?<br>"
-               "<i>(Sorry for the crash, would you like to contact me and share information about it?)</i>"),
-            QMessageBox::NoButton, this);
+        OwningQPointer<QMessageBox> msgBox =
+          new QMessageBox(QMessageBox::Warning, tr("RS Import"),
+                          tr("There is some rollingstock import data left in this file. "
+                             "Probably the application has crashed!<br>"
+                             "Before deleting it would you like to resume importation?<br>"
+                             "<i>(Sorry for the crash, would you like to contact me and share "
+                             "information about it?)</i>"),
+                          QMessageBox::NoButton, this);
         auto resumeBut = msgBox->addButton(tr("Resume importation"), QMessageBox::YesRole);
         msgBox->addButton(tr("Just delete it"), QMessageBox::NoRole);
         msgBox->setDefaultButton(resumeBut);
         msgBox->setTextFormat(Qt::RichText);
 
         msgBox->exec();
-        if(!msgBox)
+        if (!msgBox)
             return;
 
-        if(msgBox->clickedButton() == resumeBut)
+        if (msgBox->clickedButton() == resumeBut)
         {
             Session->getViewManager()->resumeRSImportation();
-        }else{
+        }
+        else
+        {
             Session->clearImportRSTables();
         }
     }
 }
 
-void MainWindow::setCurrentFile(const QString& fileName)
+void MainWindow::setCurrentFile(const QString &fileName)
 {
     DEBUG_ENTRY;
 
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
     {
-        setWindowFilePath(QString()); //Reset title bar
+        setWindowFilePath(QString()); // Reset title bar
         return;
     }
 
-    //Qt automatically takes care of showing stripped filename in window title
+    // Qt automatically takes care of showing stripped filename in window title
     setWindowFilePath(fileName);
 
     QStringList files = AppSettings.getRecentFiles();
@@ -472,22 +482,23 @@ void MainWindow::setCurrentFile(const QString& fileName)
 QString MainWindow::strippedName(const QString &fullFileName, bool *ok)
 {
     QFileInfo fi(fullFileName);
-    if(ok) *ok = fi.exists();
+    if (ok)
+        *ok = fi.exists();
     return fi.fileName();
 }
 
 void MainWindow::updateRecentFileActions()
 {
     DEBUG_ENTRY;
-    QStringList files = AppSettings.getRecentFiles();
+    QStringList files  = AppSettings.getRecentFiles();
 
     int numRecentFiles = qMin(files.size(), int(MaxRecentFiles));
 
     for (int i = 0; i < numRecentFiles; i++)
     {
-        bool ok = true;
+        bool ok      = true;
         QString name = strippedName(files[i], &ok);
-        if(name.isEmpty() || !ok)
+        if (name.isEmpty() || !ok)
         {
             files.removeAt(i);
             i--;
@@ -511,8 +522,8 @@ void MainWindow::updateRecentFileActions()
 void MainWindow::onOpenRecent()
 {
     DEBUG_ENTRY;
-    QAction *act = qobject_cast<QAction*>(sender());
-    if(!act)
+    QAction *act = qobject_cast<QAction *>(sender());
+    if (!act)
         return;
 
     loadFile(act->data().toString());
@@ -527,15 +538,14 @@ void MainWindow::onNew()
 #endif
 
 #ifdef ENABLE_BACKGROUND_MANAGER
-    if(Session->getBackgroundManager()->isRunning())
+    if (Session->getBackgroundManager()->isRunning())
     {
-        int ret = QMessageBox::warning(this,
-                                       tr("Backgroung Task"),
-                                       tr("Background task for checking rollingstock errors is still running.\n"
-                                          "Do you want to cancel it?"),
-                                       QMessageBox::Yes, QMessageBox::No,
-                                       QMessageBox::Yes);
-        if(ret == QMessageBox::Yes)
+        int ret = QMessageBox::warning(
+          this, tr("Backgroung Task"),
+          tr("Background task for checking rollingstock errors is still running.\n"
+             "Do you want to cancel it?"),
+          QMessageBox::Yes, QMessageBox::No, QMessageBox::Yes);
+        if (ret == QMessageBox::Yes)
             Session->getBackgroundManager()->abortAllTasks();
         else
             return;
@@ -553,22 +563,21 @@ void MainWindow::onNew()
     filters << FileFormats::tr(FileFormats::allFiles);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(directory_key::session, fileName);
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-    if(!QThreadPool::globalInstance()->waitForDone(2000))
+    if (!QThreadPool::globalInstance()->waitForDone(2000))
     {
-        QMessageBox::warning(this,
-                             tr("Background Tasks"),
+        QMessageBox::warning(this, tr("Background Tasks"),
                              tr("Some background tasks are still running.\n"
                                 "The new file was not created. Try again."));
         QApplication::restoreOverrideCursor();
@@ -576,17 +585,17 @@ void MainWindow::onNew()
     }
 
     QFile f(fileName);
-    if(f.exists())
+    if (f.exists())
         f.remove();
 
     DB_Error err = Session->createNewDB(fileName);
 
     QApplication::restoreOverrideCursor();
 
-    if(err == DB_Error::DbBusyWhenClosing)
+    if (err == DB_Error::DbBusyWhenClosing)
         showCloseWarning();
 
-    if(err != DB_Error::NoError)
+    if (err != DB_Error::NoError)
         return;
 
     setCurrentFile(fileName);
@@ -595,7 +604,7 @@ void MainWindow::onNew()
 
 void MainWindow::onSave()
 {
-    if(!Session->getViewManager()->closeEditors())
+    if (!Session->getViewManager()->closeEditors())
         return;
 
     Session->releaseAllSavepoints();
@@ -605,7 +614,7 @@ void MainWindow::onSaveCopyAs()
 {
     DEBUG_ENTRY;
 
-    if(!Session->getViewManager()->closeEditors())
+    if (!Session->getViewManager()->closeEditors())
         return;
 
     OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Session Copy"));
@@ -619,29 +628,30 @@ void MainWindow::onSaveCopyAs()
     filters << FileFormats::tr(FileFormats::allFiles);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(directory_key::session, fileName);
 
     QFile f(fileName);
-    if(f.exists())
+    if (f.exists())
         f.remove();
 
     database backupDB(fileName.toUtf8(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
 
-    int rc = Session->m_Db.backup(backupDB, [](int pageCount, int remaining, int res)
+    int rc = Session->m_Db.backup(backupDB,
+                                  [](int pageCount, int remaining, int res)
                                   {
                                       Q_UNUSED(res)
                                       qDebug() << pageCount << "/" << remaining;
                                   });
 
-    if(rc != SQLITE_OK && rc != SQLITE_DONE)
+    if (rc != SQLITE_OK && rc != SQLITE_DONE)
     {
         QString errMsg = Session->m_Db.error_msg();
         qDebug() << Session->m_Db.error_code() << errMsg;
@@ -651,7 +661,7 @@ void MainWindow::onSaveCopyAs()
 
 void MainWindow::closeEvent(QCloseEvent *e)
 {
-    if(closeSession())
+    if (closeSession())
         e->accept();
     else
         e->ignore();
@@ -659,15 +669,14 @@ void MainWindow::closeEvent(QCloseEvent *e)
 
 void MainWindow::showCloseWarning()
 {
-    QMessageBox::warning(this,
-                         tr("Error while Closing"),
+    QMessageBox::warning(this, tr("Error while Closing"),
                          tr("There was an error while closing the database.\n"
                             "Make sure there aren't any background tasks running and try again."));
 }
 
 void MainWindow::stopCloseTimer()
 {
-    if(closeTimerId)
+    if (closeTimerId)
     {
         killTimer(closeTimerId);
         closeTimerId = 0;
@@ -701,36 +710,36 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
 #endif // ENABLE_BACKGROUND_MANAGER
 
         welcomeLabel->setText(
-            tr("<p><b>There are no lines in this session</b></p>"
-               "<p>"
-               "<table align=\"center\">"
-               "<tr>"
-               "<td>Start by creating the railway layout for this session:</td>"
-               "</tr>"
-               "<tr>"
-               "<td>"
-               "<table>"
-               "<tr>"
-               "<td>1.</td>"
-               "<td>Create stations (<b>Edit</b> > <b>Stations</b>)</td>"
-               "</tr>"
-               "<tr>"
-               "<td>2.</td>"
-               "<td>Create railway lines (<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b>)</td>"
-               "</tr>"
-               "<tr>"
-               "<td>3.</td>"
-               "<td>Add stations to railway lines</td>"
-               "</tr>"
-               "<tr>"
-               "<td></td>"
-               "<td>(<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b> > <b>Edit Line</b>)</td>"
-               "</tr>"
-               "</table>"
-               "</td>"
-               "</tr>"
-               "</table>"
-               "</p>"));
+          tr("<p><b>There are no lines in this session</b></p>"
+             "<p>"
+             "<table align=\"center\">"
+             "<tr>"
+             "<td>Start by creating the railway layout for this session:</td>"
+             "</tr>"
+             "<tr>"
+             "<td>"
+             "<table>"
+             "<tr>"
+             "<td>1.</td>"
+             "<td>Create stations (<b>Edit</b> > <b>Stations</b>)</td>"
+             "</tr>"
+             "<tr>"
+             "<td>2.</td>"
+             "<td>Create railway lines (<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b>)</td>"
+             "</tr>"
+             "<tr>"
+             "<td>3.</td>"
+             "<td>Add stations to railway lines</td>"
+             "</tr>"
+             "<tr>"
+             "<td></td>"
+             "<td>(<b>Edit</b> > <b>Stations</b> > <b>Lines Tab</b> > <b>Edit Line</b>)</td>"
+             "</tr>"
+             "</table>"
+             "</td>"
+             "</tr>"
+             "</table>"
+             "</p>"));
         break;
     }
     case CentralWidgetMode::ViewSessionMode:
@@ -748,37 +757,39 @@ void MainWindow::setCentralWidgetMode(MainWindow::CentralWidgetMode mode)
 
     enableDBActions(mode != CentralWidgetMode::StartPageMode);
 
-    if(mode == CentralWidgetMode::ViewSessionMode)
+    if (mode == CentralWidgetMode::ViewSessionMode)
     {
-        if(centralWidget() != view)
+        if (centralWidget() != view)
         {
-            takeCentralWidget(); //Remove ownership from welcomeLabel
+            takeCentralWidget(); // Remove ownership from welcomeLabel
             setCentralWidget(view);
             view->show();
             welcomeLabel->hide();
         }
 
-        //Enable Job Creation
+        // Enable Job Creation
         ui->actionAddJob->setEnabled(true);
         ui->actionAddJob->setToolTip(tr("Add train job"));
 
-        //Update actions based on Job selection
-        JobStopEntry selectedJob = Session->getViewManager()->getLineGraphMgr()->getCurrentSelectedJob();
+        // Update actions based on Job selection
+        JobStopEntry selectedJob =
+          Session->getViewManager()->getLineGraphMgr()->getCurrentSelectedJob();
         onJobSelected(selectedJob.jobId);
     }
     else
     {
-        if(centralWidget() != welcomeLabel)
+        if (centralWidget() != welcomeLabel)
         {
-            takeCentralWidget(); //Remove ownership from LineGraphWidget
+            takeCentralWidget(); // Remove ownership from LineGraphWidget
             setCentralWidget(welcomeLabel);
             view->hide();
             welcomeLabel->show();
         }
 
-        //If there aren't lines prevent from creating jobs
+        // If there aren't lines prevent from creating jobs
         ui->actionAddJob->setEnabled(false);
-        ui->actionAddJob->setToolTip(tr("You must create at least one railway segment before adding job to this session"));
+        ui->actionAddJob->setToolTip(
+          tr("You must create at least one railway segment before adding job to this session"));
         ui->actionRemoveJob->setEnabled(false);
     }
 
@@ -799,8 +810,8 @@ void MainWindow::onProperties()
 void MainWindow::onMeetingInformation()
 {
     OwningQPointer<MeetingInformationDialog> dlg = new MeetingInformationDialog(this);
-    int ret = dlg->exec();
-    if(dlg && ret == QDialog::Accepted)
+    int ret                                      = dlg->exec();
+    if (dlg && ret == QDialog::Accepted)
         dlg->saveData();
 }
 
@@ -808,11 +819,11 @@ bool MainWindow::closeSession()
 {
     DB_Error err = Session->closeDB();
 
-    if(err == DB_Error::DbBusyWhenClosing)
+    if (err == DB_Error::DbBusyWhenClosing)
     {
-        if(closeTimerId)
+        if (closeTimerId)
         {
-            //We already tried again
+            // We already tried again
 
             stopCloseTimer();
 
@@ -820,19 +831,19 @@ bool MainWindow::closeSession()
             return false;
         }
 
-        //Start a timer to try again
+        // Start a timer to try again
         closeTimerId = startTimer(1500);
         return false;
     }
 
     stopCloseTimer();
 
-    if(err != DB_Error::NoError && err != DB_Error::DbNotOpen)
+    if (err != DB_Error::NoError && err != DB_Error::DbNotOpen)
         return false;
 
     setCentralWidgetMode(CentralWidgetMode::StartPageMode);
 
-    //Reset filePath to refresh title
+    // Reset filePath to refresh title
     setCurrentFile(QString());
 
     return true;
@@ -842,7 +853,7 @@ void MainWindow::enableDBActions(bool enable)
 {
     databaseActionGroup->setEnabled(enable);
     searchEdit->setEnabled(enable);
-    if(!enable)
+    if (!enable)
         jobEditor->setEnabled(false);
 
 #ifdef ENABLE_BACKGROUND_MANAGER
@@ -924,30 +935,30 @@ void MainWindow::checkLineNumber()
 {
     RailwaySegmentHelper helper(Session->m_Db);
 
-    bool isLine = false;
+    bool isLine      = false;
     db_id graphObjId = 0;
 
-    if(!helper.findFirstLineOrSegment(graphObjId, isLine))
+    if (!helper.findFirstLineOrSegment(graphObjId, isLine))
         graphObjId = 0;
-    if(graphObjId && m_mode != CentralWidgetMode::ViewSessionMode)
+    if (graphObjId && m_mode != CentralWidgetMode::ViewSessionMode)
     {
-        //First line was added or newly opened file -> Session has at least one line
+        // First line was added or newly opened file -> Session has at least one line
         setCentralWidgetMode(CentralWidgetMode::ViewSessionMode);
 
-        //Load first line or segment
+        // Load first line or segment
         view->tryLoadGraph(graphObjId,
                            isLine ? LineGraphType::RailwayLine : LineGraphType::RailwaySegment);
     }
-    else if(graphObjId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
+    else if (graphObjId == 0 && m_mode != CentralWidgetMode::NoLinesWarningMode)
     {
-        //Last line removed -> Session has no line
+        // Last line removed -> Session has no line
         setCentralWidgetMode(CentralWidgetMode::NoLinesWarningMode);
     }
 }
 
 void MainWindow::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == closeTimerId)
+    if (e->timerId() == closeTimerId)
     {
         closeSession();
         return;
@@ -964,38 +975,32 @@ void MainWindow::onJobSelected(db_id jobId)
     ui->actionRemoveJob->setEnabled(selected);
 
     QString removeJobTooltip;
-    if(selected)
+    if (selected)
         removeJobTooltip = tr("Remove selected Job");
     else
         removeJobTooltip = tr("First select a Job by double click on graph or type in search box");
     ui->actionRemoveJob->setToolTip(removeJobTooltip);
 }
 
-//QT-BUG 69922: If user closes a floating dock widget, when shown again it cannot dock anymore
-//HACK: intercept dock close event and manually re-dock and hide so next time is shown it's docked
-//NOTE: calling directly 'QDockWidget::setFloating(false)' from inside 'eventFinter()' causes CRASH
-//      so queue it. Cannot use 'QMetaObject::invokeMethod()' because it's not a slot.
+// QT-BUG 69922: If user closes a floating dock widget, when shown again it cannot dock anymore
+// HACK: intercept dock close event and manually re-dock and hide so next time is shown it's docked
+// NOTE: calling directly 'QDockWidget::setFloating(false)' from inside 'eventFinter()' causes CRASH
+//       so queue it. Cannot use 'QMetaObject::invokeMethod()' because it's not a slot.
 bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 {
-    if(watched == jobDock && event->type() == QEvent::Close)
+    if (watched == jobDock && event->type() == QEvent::Close)
     {
-        if(jobDock->isFloating())
+        if (jobDock->isFloating())
         {
-            QTimer::singleShot(0, jobDock, [this]()
-                               {
-                                   jobDock->setFloating(false);
-                               });
+            QTimer::singleShot(0, jobDock, [this]() { jobDock->setFloating(false); });
         }
     }
 #ifdef ENABLE_BACKGROUND_MANAGER
-    else if(watched == resPanelDock && event->type() == QEvent::Close)
+    else if (watched == resPanelDock && event->type() == QEvent::Close)
     {
-        if(resPanelDock->isFloating())
+        if (resPanelDock->isFloating())
         {
-            QTimer::singleShot(0, resPanelDock, [this]()
-                               {
-                                   resPanelDock->setFloating(false);
-                               });
+            QTimer::singleShot(0, resPanelDock, [this]() { resPanelDock->setFloating(false); });
         }
     }
 #endif // ENABLE_BACKGROUND_MANAGER
@@ -1012,10 +1017,10 @@ void MainWindow::onJobSearchItemSelected()
 {
     db_id jobId = 0;
     QString tmp;
-    if(!searchEdit->getData(jobId, tmp))
+    if (!searchEdit->getData(jobId, tmp))
         return;
 
-    searchEdit->clear(); //Clear text
+    searchEdit->clear(); // Clear text
     Session->getViewManager()->requestJobSelection(jobId, true, true);
 }
 

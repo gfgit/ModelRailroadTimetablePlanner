@@ -37,6 +37,7 @@ private slots:
     void modeChanged();
 
     void exportSheet();
+
 private:
     SessionStartEndModel *model;
 

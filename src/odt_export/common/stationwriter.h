@@ -31,9 +31,9 @@ class QXmlStreamWriter;
 class StationWriter
 {
 public:
-    StationWriter(database& db);
+    StationWriter(database &db);
 
-    static void writeStationAutomaticStyles(QXmlStreamWriter& xml);
+    static void writeStationAutomaticStyles(QXmlStreamWriter &xml);
 
     void writeStation(QXmlStreamWriter &xml, db_id stationId, QString *stNameOut = nullptr);
 
@@ -54,7 +54,7 @@ private:
         JobCategory jobCat;
     };
 
-    void insertStop(QXmlStreamWriter &xml, const Stop& stop, bool first, bool transit);
+    void insertStop(QXmlStreamWriter &xml, const Stop &stop, bool first, bool transit);
 
 private:
     database &mDb;

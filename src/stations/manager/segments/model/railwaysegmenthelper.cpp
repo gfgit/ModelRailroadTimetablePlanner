@@ -26,22 +26,20 @@ using namespace sqlite3pp;
 
 #include <QCoreApplication>
 
-//Error messages
+// Error messages
 class RailwaySegmentHelperStrings
 {
     Q_DECLARE_TR_FUNCTIONS(RailwaySegmentHelperStrings)
 };
 
-static constexpr char
-    errorSegmentInUseText[] =
-    QT_TRANSLATE_NOOP("RailwaySegmentHelperStrings",
-                      "Cannot delete segment <b>%1</b> because it is still referenced.<br>"
-                      "Please delete all jobs travelling on this segment or change their path.");
+static constexpr char errorSegmentInUseText[] =
+  QT_TRANSLATE_NOOP("RailwaySegmentHelperStrings",
+                    "Cannot delete segment <b>%1</b> because it is still referenced.<br>"
+                    "Please delete all jobs travelling on this segment or change their path.");
 
 RailwaySegmentHelper::RailwaySegmentHelper(sqlite3pp::database &db) :
     mDb(db)
 {
-
 }
 
 bool RailwaySegmentHelper::getSegmentInfo(utils::RailwaySegmentInfo &info)
@@ -54,20 +52,20 @@ bool RailwaySegmentHelper::getSegmentInfo(utils::RailwaySegmentInfo &info)
                  " JOIN station_gates g2 ON g2.id=s.out_gate_id"
                  " WHERE s.id=?");
     q.bind(1, info.segmentId);
-    if(q.step() != SQLITE_ROW)
-        return false; //FIXME: show error to user
+    if (q.step() != SQLITE_ROW)
+        return false; // FIXME: show error to user
 
-    auto r = q.getRows();
-    info.segmentName = r.get<QString>(0);
-    info.maxSpeedKmH = r.get<int>(1);
-    info.type = utils::RailwaySegmentType(r.get<db_id>(2));
+    auto r              = q.getRows();
+    info.segmentName    = r.get<QString>(0);
+    info.maxSpeedKmH    = r.get<int>(1);
+    info.type           = utils::RailwaySegmentType(r.get<db_id>(2));
     info.distanceMeters = r.get<db_id>(3);
 
-    info.from.gateId = r.get<db_id>(4);
+    info.from.gateId    = r.get<db_id>(4);
     info.from.stationId = r.get<db_id>(5);
 
-    info.to.gateId = r.get<db_id>(6);
-    info.to.stationId = r.get<db_id>(7);
+    info.to.gateId      = r.get<db_id>(6);
+    info.to.stationId   = r.get<db_id>(7);
 
     return true;
 }
@@ -84,45 +82,46 @@ bool RailwaySegmentHelper::getSegmentInfoFromGate(db_id gateId, utils::RailwaySe
                  " JOIN stations st2 ON st2.id=g2.station_id"
                  " WHERE g1.id=?1 OR g2.id=?1");
     q.bind(1, gateId);
-    if(q.step() != SQLITE_ROW)
-        return false; //FIXME: show error to user
+    if (q.step() != SQLITE_ROW)
+        return false; // FIXME: show error to user
 
-    auto r = q.getRows();
-    info.segmentId = r.get<db_id>(0);
-    info.segmentName = r.get<QString>(1);
-    info.maxSpeedKmH = r.get<int>(2);
-    info.type = utils::RailwaySegmentType(r.get<db_id>(3));
-    info.distanceMeters = r.get<db_id>(4);
+    auto r                = q.getRows();
+    info.segmentId        = r.get<db_id>(0);
+    info.segmentName      = r.get<QString>(1);
+    info.maxSpeedKmH      = r.get<int>(2);
+    info.type             = utils::RailwaySegmentType(r.get<db_id>(3));
+    info.distanceMeters   = r.get<db_id>(4);
 
-    info.from.gateId = r.get<db_id>(5);
-    info.from.gateLetter = r.get<const char*>(6)[0];
-    info.from.stationId = r.get<db_id>(7);
+    info.from.gateId      = r.get<db_id>(5);
+    info.from.gateLetter  = r.get<const char *>(6)[0];
+    info.from.stationId   = r.get<db_id>(7);
     info.from.stationName = r.get<QString>(8);
 
-    info.to.gateId = r.get<db_id>(9);
-    info.to.gateLetter = r.get<const char*>(10)[0];
-    info.to.stationId = r.get<db_id>(11);
-    info.to.stationName = r.get<QString>(12);
+    info.to.gateId        = r.get<db_id>(9);
+    info.to.gateLetter    = r.get<const char *>(10)[0];
+    info.to.stationId     = r.get<db_id>(11);
+    info.to.stationName   = r.get<QString>(12);
 
     return true;
 }
 
-bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
-                                          const QString &name, utils::RailwaySegmentType type,
-                                          int distance, int speed,
-                                          db_id fromGateId, db_id toGateId,
-                                          QString *outErrMsg)
+bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create, const QString &name,
+                                          utils::RailwaySegmentType type, int distance, int speed,
+                                          db_id fromGateId, db_id toGateId, QString *outErrMsg)
 {
     command cmd(mDb);
-    if(create)
+    if (create)
     {
         cmd.prepare("INSERT INTO railway_segments"
                     "(id, in_gate_id, out_gate_id, name, max_speed_kmh, type, distance_meters)"
                     " VALUES(NULL,?1,?2,?3,?4,?5,?6)");
-    }else{
-        cmd.prepare("UPDATE railway_segments SET"
-                    " in_gate_id=?1, out_gate_id=?2, name=?3, max_speed_kmh=?4, type=?5, distance_meters=?6"
-                    " WHERE id=?7");
+    }
+    else
+    {
+        cmd.prepare(
+          "UPDATE railway_segments SET"
+          " in_gate_id=?1, out_gate_id=?2, name=?3, max_speed_kmh=?4, type=?5, distance_meters=?6"
+          " WHERE id=?7");
         cmd.bind(7, segmentId);
     }
 
@@ -134,14 +133,14 @@ bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
     cmd.bind(6, distance);
 
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        if(outErrMsg)
+        if (outErrMsg)
             *outErrMsg = mDb.error_msg();
-        return false; //FIXME: show error to user
+        return false; // FIXME: show error to user
     }
 
-    if(create)
+    if (create)
     {
         segmentId = mDb.last_insert_rowid();
         emit Session->segmentAdded(segmentId);
@@ -152,27 +151,28 @@ bool RailwaySegmentHelper::setSegmentInfo(db_id &segmentId, bool create,
 
 bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
 {
-    //Use transaction so if one query fails, the other is restored
+    // Use transaction so if one query fails, the other is restored
     sqlite3pp::transaction t(mDb);
 
-    //First remove all connections belonging to this segments
+    // First remove all connections belonging to this segments
     command cmd(mDb, "DELETE FROM railway_connections WHERE seg_id=?");
     cmd.bind(1, segmentId);
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        if(outErrMsg)
+        if (outErrMsg)
         {
-            if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+            if (ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
             {
-                //Get name
+                // Get name
                 query q(mDb, "SELECT name FROM railway_segments WHERE id=?");
                 q.bind(1, segmentId);
                 q.step();
                 QString segName = q.getRows().get<QString>(0);
                 q.finish();
 
-                *outErrMsg = RailwaySegmentHelperStrings::tr(errorSegmentInUseText).arg(segName.toHtmlEscaped());
+                *outErrMsg = RailwaySegmentHelperStrings::tr(errorSegmentInUseText)
+                               .arg(segName.toHtmlEscaped());
             }
             else
             {
@@ -182,13 +182,13 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
         return false;
     }
 
-    //Then remove actual segment
+    // Then remove actual segment
     cmd.prepare("DELETE FROM railway_segments WHERE id=?");
     cmd.bind(1, segmentId);
     ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        if(outErrMsg)
+        if (outErrMsg)
             *outErrMsg = mDb.error_msg();
         return false;
     }
@@ -202,20 +202,20 @@ bool RailwaySegmentHelper::removeSegment(db_id segmentId, QString *outErrMsg)
 
 bool RailwaySegmentHelper::findFirstLineOrSegment(db_id &graphObjId, bool &isLine)
 {
-    //Try to find first Railway Line
+    // Try to find first Railway Line
     query q(mDb, "SELECT id, MIN(name) FROM lines");
-    if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+    if (q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
     {
-        isLine = true;
+        isLine     = true;
         graphObjId = q.getRows().get<db_id>(0);
         return true;
     }
 
-    //Try with Railway Segment
+    // Try with Railway Segment
     q.prepare("SELECT id, MIN(name) FROM railway_segments");
-    if(q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
+    if (q.step() == SQLITE_ROW && q.getRows().column_type(0) != SQLITE_NULL)
     {
-        isLine = false;
+        isLine     = false;
         graphObjId = q.getRows().get<db_id>(0);
         return true;
     }

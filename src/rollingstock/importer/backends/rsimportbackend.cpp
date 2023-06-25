@@ -21,10 +21,8 @@
 
 RSImportBackend::RSImportBackend()
 {
-
 }
 
 RSImportBackend::~RSImportBackend()
 {
-
 }

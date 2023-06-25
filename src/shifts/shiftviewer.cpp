@@ -38,7 +38,7 @@ ShiftViewer::ShiftViewer(QWidget *parent) :
 {
     QVBoxLayout *l = new QVBoxLayout(this);
 
-    view = new QTableView(this);
+    view           = new QTableView(this);
     l->addWidget(view);
 
     setMinimumSize(600, 200);
@@ -51,15 +51,14 @@ ShiftViewer::ShiftViewer(QWidget *parent) :
 
 ShiftViewer::~ShiftViewer()
 {
-
 }
 
 void ShiftViewer::updateName()
 {
     q_shiftName.bind(1, shiftId);
-    if(q_shiftName.step() != SQLITE_ROW)
+    if (q_shiftName.step() != SQLITE_ROW)
     {
-        //Error
+        // Error
     }
     else
     {
@@ -79,23 +78,23 @@ void ShiftViewer::updateJobsModel()
     model->loadShiftJobs(shiftId);
 }
 
-void ShiftViewer::showContextMenu(const QPoint& pos)
+void ShiftViewer::showContextMenu(const QPoint &pos)
 {
     QModelIndex idx = view->indexAt(pos);
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
-    db_id jobId = model->getJobAt(idx.row());
+    db_id jobId                = model->getJobAt(idx.row());
 
     OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
+    QAction *showInJobEditor   = new QAction(tr("Show in Job Editor"), menu);
     menu->addAction(showInJobEditor);
 
     QAction *act = menu->exec(view->viewport()->mapToGlobal(pos));
-    if(act == showInJobEditor)
+    if (act == showInJobEditor)
     {
-        //TODO: requestJobEditor() doesn't select item in graph
+        // TODO: requestJobEditor() doesn't select item in graph
         Session->getViewManager()->requestJobSelection(jobId, true, true);
     }
 }

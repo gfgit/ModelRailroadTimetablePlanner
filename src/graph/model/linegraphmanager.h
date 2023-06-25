@@ -82,7 +82,10 @@ public:
      * \brief get active scene
      * \return Scene instance or nullptr if no scene is active
      */
-    inline LineGraphScene *getActiveScene() const { return activeScene; }
+    inline LineGraphScene *getActiveScene() const
+    {
+        return activeScene;
+    }
 
     /*!
      * \brief get current selected job
@@ -151,32 +154,32 @@ public slots:
     void setActiveScene(IGraphScene *scene);
 
 private slots:
-    //Scenes
+    // Scenes
     void onSceneDestroyed(QObject *obj);
     void onGraphChanged(int graphType_, db_id graphObjId, LineGraphScene *scene);
     void onJobSelected(db_id jobId, int category, db_id stopId);
 
-    //Stations
+    // Stations
     void onStationNameChanged(db_id stationId);
     void onStationJobPlanChanged(const QSet<db_id> &stationIds);
     void onStationTrackPlanChanged(const QSet<db_id> &stationIds);
     void onStationRemoved(db_id stationId);
 
-    //Segments
+    // Segments
     void onSegmentNameChanged(db_id segmentId);
     void onSegmentStationsChanged(db_id segmentId);
     void onSegmentRemoved(db_id segmentId);
 
-    //Lines
+    // Lines
     void onLineNameChanged(db_id lineId);
     void onLineSegmentsChanged(db_id lineId);
     void onLineRemoved(db_id lineId);
 
-    //Jobs
+    // Jobs
     void onJobChanged(db_id jobId, db_id oldJobId);
     void onJobRemoved(db_id jobId);
 
-    //Settings
+    // Settings
     void updateGraphOptions();
 
 private:

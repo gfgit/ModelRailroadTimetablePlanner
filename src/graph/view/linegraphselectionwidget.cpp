@@ -49,20 +49,22 @@ LineGraphSelectionWidget::LineGraphSelectionWidget(QWidget *parent) :
 
     QStringList items;
     items.reserve(int(LineGraphType::NTypes));
-    for(int i = 0; i < int(LineGraphType::NTypes); i++)
+    for (int i = 0; i < int(LineGraphType::NTypes); i++)
         items.append(utils::getLineGraphTypeName(LineGraphType(i)));
     graphTypeCombo->addItems(items);
     graphTypeCombo->setCurrentIndex(0);
 
-    connect(graphTypeCombo, qOverload<int>(&QComboBox::activated), this, &LineGraphSelectionWidget::onTypeComboActivated);
-    connect(objectCombo, &CustomCompletionLineEdit::completionDone, this, &LineGraphSelectionWidget::onCompletionDone);
+    connect(graphTypeCombo, qOverload<int>(&QComboBox::activated), this,
+            &LineGraphSelectionWidget::onTypeComboActivated);
+    connect(objectCombo, &CustomCompletionLineEdit::completionDone, this,
+            &LineGraphSelectionWidget::onCompletionDone);
 
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 }
 
 LineGraphSelectionWidget::~LineGraphSelectionWidget()
 {
-    if(matchModel)
+    if (matchModel)
     {
         objectCombo->setModel(nullptr);
         delete matchModel;
@@ -77,7 +79,7 @@ LineGraphType LineGraphSelectionWidget::getGraphType() const
 
 void LineGraphSelectionWidget::setGraphType(LineGraphType type)
 {
-    if(getGraphType() == type)
+    if (getGraphType() == type)
         return;
 
     graphTypeCombo->setCurrentIndex(int(type));
@@ -98,16 +100,16 @@ const QString &LineGraphSelectionWidget::getObjectName() const
 
 void LineGraphSelectionWidget::setObjectId(db_id objectId, const QString &name)
 {
-    if(m_graphType == LineGraphType::NoGraph)
-        return; //Object ID must be null
+    if (m_graphType == LineGraphType::NoGraph)
+        return; // Object ID must be null
 
     m_name = name;
-    if(!objectId)
+    if (!objectId)
         m_name.clear();
 
     objectCombo->setData(objectId, name);
 
-    if(m_objectId != objectId)
+    if (m_objectId != objectId)
         emit graphChanged(int(m_graphType), m_objectId);
 }
 
@@ -119,7 +121,7 @@ void LineGraphSelectionWidget::onTypeComboActivated(int index)
 
 void LineGraphSelectionWidget::onCompletionDone()
 {
-    if(!objectCombo->getData(m_objectId, m_name))
+    if (!objectCombo->getData(m_objectId, m_name))
         return;
 
     emit graphChanged(int(m_graphType), m_objectId);
@@ -127,17 +129,17 @@ void LineGraphSelectionWidget::onCompletionDone()
 
 void LineGraphSelectionWidget::setupModel(LineGraphType type)
 {
-    if(type != m_graphType)
+    if (type != m_graphType)
     {
-        //Clear old model
-        if(matchModel)
+        // Clear old model
+        if (matchModel)
         {
             objectCombo->setModel(nullptr);
             delete matchModel;
             matchModel = nullptr;
         }
 
-        //Manually clear line edit
+        // Manually clear line edit
         m_objectId = 0;
         m_name.clear();
         objectCombo->setData(m_objectId, m_name);
@@ -147,7 +149,7 @@ void LineGraphSelectionWidget::setupModel(LineGraphType type)
         case LineGraphType::NoGraph:
         default:
         {
-            //Prevent recursion on loadGraph() calling back to us
+            // Prevent recursion on loadGraph() calling back to us
             type = LineGraphType::NoGraph;
             break;
         }
@@ -168,14 +170,13 @@ void LineGraphSelectionWidget::setupModel(LineGraphType type)
         case LineGraphType::RailwayLine:
         {
             LinesMatchModel *m = new LinesMatchModel(Session->m_Db, true, this);
-            matchModel = m;
+            matchModel         = m;
             break;
         }
         }
 
-        if(matchModel)
+        if (matchModel)
             objectCombo->setModel(matchModel);
     }
     m_graphType = type;
 }
-

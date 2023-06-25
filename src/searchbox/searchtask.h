@@ -22,12 +22,12 @@
 
 #ifdef SEARCHBOX_MODE_ASYNC
 
-#include "utils/thread/iquittabletask.h"
+#    include "utils/thread/iquittabletask.h"
 
-#include <QString>
-#include "utils/types.h"
+#    include <QString>
+#    include "utils/types.h"
 
-#include <sqlite3pp/sqlite3pp.h>
+#    include <sqlite3pp/sqlite3pp.h>
 
 struct SearchResultItem;
 class QRegularExpression;
@@ -36,7 +36,7 @@ class SearchTask : public IQuittableTask
 {
 public:
     SearchTask(QObject *receiver, int limitRows, sqlite3pp::database &db,
-               const QStringList& catNames_, const QStringList& catNamesAbbr_);
+               const QStringList &catNames_, const QStringList &catNamesAbbr_);
     ~SearchTask();
 
     void run() override;
@@ -45,7 +45,8 @@ public:
 
 private:
     void searchByCat(const QList<int> &categories, QVector<SearchResultItem> &jobs);
-    void searchByCatAndNum(const QList<int> &categories, const QString &num, QVector<SearchResultItem> &jobs);
+    void searchByCatAndNum(const QList<int> &categories, const QString &num,
+                           QVector<SearchResultItem> &jobs);
     void searchByNum(const QString &num, QVector<SearchResultItem> &jobs);
 
 private:
@@ -64,9 +65,9 @@ private:
     QString mQuery;
     int limitResultRows;
     QueryType queryType;
-    QStringList catNames, catNamesAbbr; //FIXME: store in search engine cache
+    QStringList catNames, catNamesAbbr; // FIXME: store in search engine cache
 };
 
-#endif //SEARCHBOX_MODE_ASYNC
+#endif // SEARCHBOX_MODE_ASYNC
 
 #endif // SEARCHTASK_H

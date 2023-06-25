@@ -86,9 +86,9 @@ StationsManager::~StationsManager()
 {
     delete ui;
 
-    for(int i = 0; i < NTabs; i++)
+    for (int i = 0; i < NTabs; i++)
     {
-        if(clearModelTimers[i] > 0)
+        if (clearModelTimers[i] > 0)
         {
             killTimer(clearModelTimers[i]);
             clearModelTimers[i] = 0;
@@ -99,7 +99,7 @@ StationsManager::~StationsManager()
 void StationsManager::setup_StationPage()
 {
     QVBoxLayout *vboxLayout = new QVBoxLayout(ui->stationsTab);
-    stationToolBar = new QToolBar(ui->stationsTab);
+    stationToolBar          = new QToolBar(ui->stationsTab);
     vboxLayout->addWidget(stationToolBar);
 
     stationView = new QTableView(ui->stationsTab);
@@ -116,22 +116,24 @@ void StationsManager::setup_StationPage()
     vboxLayout->addWidget(ps);
     ps->setModel(stationsModel);
 
-    //Station Type Delegate
+    // Station Type Delegate
     QStringList types;
     types.reserve(int(utils::StationType::NTypes));
-    for(int i = 0; i < int(utils::StationType::NTypes); i++)
+    for (int i = 0; i < int(utils::StationType::NTypes); i++)
         types.append(utils::StationUtils::name(utils::StationType(i)));
-    stationView->setItemDelegateForColumn(StationsModel::TypeCol, new ComboDelegate(types, Qt::EditRole, this));
+    stationView->setItemDelegateForColumn(StationsModel::TypeCol,
+                                          new ComboDelegate(types, Qt::EditRole, this));
 
-    act_addSt = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
-    act_remSt = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
+    act_addSt  = stationToolBar->addAction(tr("Add"), this, &StationsManager::onNewStation);
+    act_remSt  = stationToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveStation);
     act_editSt = stationToolBar->addAction(tr("Edit"), this, &StationsManager::onEditStation);
     stationToolBar->addSeparator();
     act_stJobs = stationToolBar->addAction(tr("Jobs"), this, &StationsManager::showStJobViewer);
-    act_stSVG = stationToolBar->addAction(tr("SVG Plan"), this, &StationsManager::showStSVGPlan);
+    act_stSVG  = stationToolBar->addAction(tr("SVG Plan"), this, &StationsManager::showStSVGPlan);
     act_freeRs = stationToolBar->addAction(tr("Free RS"), this, &StationsManager::onShowFreeRS);
     stationToolBar->addSeparator();
-    QAction *act_ImportSt = stationToolBar->addAction(tr("Import"), this, &StationsManager::onImportStations);
+    QAction *act_ImportSt =
+      stationToolBar->addAction(tr("Import"), this, &StationsManager::onImportStations);
 
     act_addSt->setToolTip(tr("Create new Station"));
     act_remSt->setToolTip(tr("Remove selected Station"));
@@ -141,16 +143,16 @@ void StationsManager::setup_StationPage()
     act_freeRs->setToolTip(tr("Show free Rollingstock items in selected Station"));
     act_ImportSt->setToolTip(tr("Import Stations"));
 
-    connect(stationView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &StationsManager::onStationSelectionChanged);
-    connect(stationsModel, &QAbstractItemModel::modelReset,
-            this, &StationsManager::onStationSelectionChanged);
+    connect(stationView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &StationsManager::onStationSelectionChanged);
+    connect(stationsModel, &QAbstractItemModel::modelReset, this,
+            &StationsManager::onStationSelectionChanged);
 }
 
 void StationsManager::setup_SegmentPage()
 {
     QVBoxLayout *vboxLayout = new QVBoxLayout(ui->segmentsTab);
-    segmentsToolBar = new QToolBar;
+    segmentsToolBar         = new QToolBar;
     vboxLayout->addWidget(segmentsToolBar);
 
     segmentsView = new QTableView;
@@ -167,27 +169,29 @@ void StationsManager::setup_SegmentPage()
     vboxLayout->addWidget(ps);
     ps->setModel(segmentsModel);
 
-    QAction *act_addSeg = segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
-    act_remSeg = segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
+    QAction *act_addSeg =
+      segmentsToolBar->addAction(tr("Add"), this, &StationsManager::onNewSegment);
+    act_remSeg  = segmentsToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveSegment);
     act_editSeg = segmentsToolBar->addAction(tr("Edit"), this, &StationsManager::onEditSegment);
     segmentsToolBar->addSeparator();
-    QAction *act_splitSeg = segmentsToolBar->addAction(tr("Split"), this, &StationsManager::onSplitSegment);
+    QAction *act_splitSeg =
+      segmentsToolBar->addAction(tr("Split"), this, &StationsManager::onSplitSegment);
 
     act_addSeg->setToolTip(tr("Create new Railway Segment"));
     act_remSeg->setToolTip(tr("Delete selected Railway Segment"));
     act_editSeg->setToolTip(tr("Edit selected Railway Segment"));
     act_splitSeg->setToolTip(tr("Split Railway Segment in 2 parts"));
 
-    connect(segmentsView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &StationsManager::onSegmentSelectionChanged);
-    connect(segmentsModel, &QAbstractItemModel::modelReset,
-            this, &StationsManager::onSegmentSelectionChanged);
+    connect(segmentsView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &StationsManager::onSegmentSelectionChanged);
+    connect(segmentsModel, &QAbstractItemModel::modelReset, this,
+            &StationsManager::onSegmentSelectionChanged);
 }
 
 void StationsManager::setup_LinePage()
 {
     QVBoxLayout *vboxLayout = new QVBoxLayout(ui->linesTab);
-    linesToolBar = new QToolBar(ui->linesTab);
+    linesToolBar            = new QToolBar(ui->linesTab);
     vboxLayout->addWidget(linesToolBar);
 
     linesView = new QTableView(ui->linesTab);
@@ -205,25 +209,25 @@ void StationsManager::setup_LinePage()
     ps->setModel(linesModel);
 
     QAction *act_addLine = linesToolBar->addAction(tr("Add"), this, &StationsManager::onNewLine);
-    act_remLine = linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
+    act_remLine  = linesToolBar->addAction(tr("Remove"), this, &StationsManager::onRemoveLine);
     act_editLine = linesToolBar->addAction(tr("Edit"), this, &StationsManager::onEditLine);
 
     act_addLine->setToolTip(tr("Create new Railway Line"));
     act_remLine->setToolTip(tr("Delete selected Railway Line"));
     act_editLine->setToolTip(tr("Edit selected Railway Line"));
 
-    connect(linesView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &StationsManager::onLineSelectionChanged);
-    connect(linesModel, &QAbstractItemModel::modelReset,
-            this, &StationsManager::onLineSelectionChanged);
+    connect(linesView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &StationsManager::onLineSelectionChanged);
+    connect(linesModel, &QAbstractItemModel::modelReset, this,
+            &StationsManager::onLineSelectionChanged);
 }
 
 void StationsManager::showEvent(QShowEvent *e)
 {
-    if(!windowConnected)
+    if (!windowConnected)
     {
         QWindow *w = windowHandle();
-        if(w)
+        if (w)
         {
             windowConnected = true;
             connect(w, &QWindow::visibilityChanged, this, &StationsManager::visibilityChanged);
@@ -235,21 +239,21 @@ void StationsManager::showEvent(QShowEvent *e)
 
 void StationsManager::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == clearModelTimers[StationsTab])
+    if (e->timerId() == clearModelTimers[StationsTab])
     {
         stationsModel->clearCache();
         killTimer(e->timerId());
         clearModelTimers[StationsTab] = ModelCleared;
         return;
     }
-    else if(e->timerId() == clearModelTimers[RailwaySegmentsTab])
+    else if (e->timerId() == clearModelTimers[RailwaySegmentsTab])
     {
         segmentsModel->clearCache();
         killTimer(e->timerId());
         clearModelTimers[RailwaySegmentsTab] = ModelCleared;
         return;
     }
-    else if(e->timerId() == clearModelTimers[LinesTab])
+    else if (e->timerId() == clearModelTimers[LinesTab])
     {
         linesModel->clearCache();
         killTimer(e->timerId());
@@ -262,15 +266,17 @@ void StationsManager::timerEvent(QTimerEvent *e)
 
 void StationsManager::visibilityChanged(int v)
 {
-    if(v == QWindow::Minimized || v == QWindow::Hidden)
+    if (v == QWindow::Minimized || v == QWindow::Hidden)
     {
-        //If the window is minimized start timer to clear model cache of current tab
-        //The other tabs already have been cleared or are waiting with their timers
-        if(clearModelTimers[oldCurrentTab] == ModelLoaded)
+        // If the window is minimized start timer to clear model cache of current tab
+        // The other tabs already have been cleared or are waiting with their timers
+        if (clearModelTimers[oldCurrentTab] == ModelLoaded)
         {
             clearModelTimers[oldCurrentTab] = startTimer(ClearModelTimeout, Qt::VeryCoarseTimer);
         }
-    }else{
+    }
+    else
+    {
         updateModels();
     }
 }
@@ -279,14 +285,14 @@ void StationsManager::updateModels()
 {
     int curTab = ui->tabWidget->currentIndex();
 
-    if(clearModelTimers[curTab] > 0)
+    if (clearModelTimers[curTab] > 0)
     {
-        //This page was already cached, stop it from clearing
+        // This page was already cached, stop it from clearing
         killTimer(clearModelTimers[curTab]);
     }
-    else if(clearModelTimers[curTab] == ModelCleared)
+    else if (clearModelTimers[curTab] == ModelCleared)
     {
-        //This page wasn't already cached
+        // This page wasn't already cached
         switch (curTab)
         {
         case StationsTab:
@@ -308,8 +314,9 @@ void StationsManager::updateModels()
     }
     clearModelTimers[curTab] = ModelLoaded;
 
-    //Now start timer to clear old current page if not already done
-    if(oldCurrentTab != curTab && clearModelTimers[oldCurrentTab] == ModelLoaded) //Wait 10 seconds and then clear cache
+    // Now start timer to clear old current page if not already done
+    if (oldCurrentTab != curTab
+        && clearModelTimers[oldCurrentTab] == ModelLoaded) // Wait 10 seconds and then clear cache
     {
         clearModelTimers[oldCurrentTab] = startTimer(ClearModelTimeout, Qt::VeryCoarseTimer);
     }
@@ -321,20 +328,20 @@ void StationsManager::onRemoveStation()
 {
     DEBUG_ENTRY;
 
-    if(!stationView->selectionModel()->hasSelection())
+    if (!stationView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = stationView->currentIndex();
 
-    //Ask confirmation
+    // Ask confirmation
     int ret = QMessageBox::question(this, tr("Remove Station?"),
                                     tr("Are you sure you want to remove station <b>%1</b>?")
-                                        .arg(stationsModel->getNameAtRow(idx.row())));
-    if(ret != QMessageBox::Yes)
+                                      .arg(stationsModel->getNameAtRow(idx.row())));
+    if (ret != QMessageBox::Yes)
         return;
 
     db_id stId = stationsModel->getIdAtRow(idx.row());
-    if(!stId)
+    if (!stId)
         return;
 
     stationsModel->removeStation(stId);
@@ -349,35 +356,35 @@ void StationsManager::onNewStation()
     dlg->setLabelText(tr("Please choose a name for the new station."));
     dlg->setTextValue(QString());
 
-    do{
+    do
+    {
         int ret = dlg->exec();
-        if(ret != QDialog::Accepted || !dlg)
+        if (ret != QDialog::Accepted || !dlg)
         {
-            break; //User canceled
+            break; // User canceled
         }
 
         const QString name = dlg->textValue().simplified();
-        if(name.isEmpty())
+        if (name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Station name cannot be empty."));
-            continue; //Second chance
+            continue; // Second chance
         }
 
-        if(stationsModel->addStation(name))
+        if (stationsModel->addStation(name))
         {
-            break; //Done!
+            break; // Done!
         }
-    }
-    while (true);
+    } while (true);
 
-    //TODO
-    //    QModelIndex idx = stationsModel->index(row, 0);
-    //    stationView->setCurrentIndex(idx);
-    //    stationView->scrollTo(idx);
-    //    stationView->edit(idx);
+    // TODO
+    //     QModelIndex idx = stationsModel->index(row, 0);
+    //     stationView->setCurrentIndex(idx);
+    //     stationView->scrollTo(idx);
+    //     stationView->edit(idx);
 }
 
-void StationsManager::onModelError(const QString& msg)
+void StationsManager::onModelError(const QString &msg)
 {
     QMessageBox::warning(this, tr("Station Error"), msg);
 }
@@ -385,12 +392,12 @@ void StationsManager::onModelError(const QString& msg)
 void StationsManager::onEditStation()
 {
     DEBUG_ENTRY;
-    if(!stationView->selectionModel()->hasSelection())
+    if (!stationView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = stationView->currentIndex();
-    db_id stId = stationsModel->getIdAtRow(idx.row());
-    if(!stId)
+    db_id stId      = stationsModel->getIdAtRow(idx.row());
+    if (!stId)
         return;
 
     OwningQPointer<StationEditDialog> dlg(new StationEditDialog(Session->m_Db, this));
@@ -398,27 +405,27 @@ void StationsManager::onEditStation()
     dlg->setStationExternalEditingEnabled(true);
     dlg->setStation(stId);
     int ret = dlg->exec();
-    if(!dlg || ret != QDialog::Accepted)
+    if (!dlg || ret != QDialog::Accepted)
         return;
 
-    //Refresh stations model
+    // Refresh stations model
     stationsModel->refreshData(true);
 
-    //FIXME: check if actually changed
+    // FIXME: check if actually changed
     emit Session->stationNameChanged(stId);
     emit Session->stationTrackPlanChanged({stId});
     emit Session->stationJobsPlanChanged({stId});
 
-    //Refresh segments
+    // Refresh segments
     int &segmentsTimer = clearModelTimers[RailwaySegmentsTab];
-    if(segmentsTimer != ModelCleared)
+    if (segmentsTimer != ModelCleared)
     {
-        //If model was loaded clear cache and refresh row count
+        // If model was loaded clear cache and refresh row count
         segmentsModel->refreshData(true);
 
-        if(segmentsTimer != ModelLoaded)
+        if (segmentsTimer != ModelLoaded)
         {
-            //Mark as cleared
+            // Mark as cleared
             killTimer(segmentsTimer);
             segmentsTimer = ModelCleared;
         }
@@ -428,12 +435,12 @@ void StationsManager::onEditStation()
 void StationsManager::showStJobViewer()
 {
     DEBUG_ENTRY;
-    if(!stationView->selectionModel()->hasSelection())
+    if (!stationView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = stationView->currentIndex();
-    db_id stId = stationsModel->getIdAtRow(idx.row());
-    if(!stId)
+    db_id stId      = stationsModel->getIdAtRow(idx.row());
+    if (!stId)
         return;
     Session->getViewManager()->requestStJobViewer(stId);
 }
@@ -441,12 +448,12 @@ void StationsManager::showStJobViewer()
 void StationsManager::showStSVGPlan()
 {
     DEBUG_ENTRY;
-    if(!stationView->selectionModel()->hasSelection())
+    if (!stationView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = stationView->currentIndex();
-    db_id stId = stationsModel->getIdAtRow(idx.row());
-    if(!stId)
+    db_id stId      = stationsModel->getIdAtRow(idx.row());
+    if (!stId)
         return;
     Session->getViewManager()->requestStSVGPlan(stId);
 }
@@ -454,97 +461,99 @@ void StationsManager::showStSVGPlan()
 void StationsManager::onShowFreeRS()
 {
     DEBUG_COLOR_ENTRY(SHELL_BLUE);
-    if(!stationView->selectionModel()->hasSelection())
+    if (!stationView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = stationView->currentIndex();
-    db_id stId = stationsModel->getIdAtRow(idx.row());
-    if(!stId)
+    db_id stId      = stationsModel->getIdAtRow(idx.row());
+    if (!stId)
         return;
     Session->getViewManager()->requestStFreeRSViewer(stId);
 }
 
 void StationsManager::onRemoveSegment()
 {
-    if(!segmentsView->selectionModel()->hasSelection())
+    if (!segmentsView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = segmentsView->currentIndex();
 
-    //Ask confirmation
+    // Ask confirmation
     int ret = QMessageBox::question(this, tr("Remove Segment?"),
                                     tr("Are you sure you want to remove segment <b>%1</b>?")
-                                        .arg(segmentsModel->getNameAtRow(idx.row())));
-    if(ret != QMessageBox::Yes)
+                                      .arg(segmentsModel->getNameAtRow(idx.row())));
+    if (ret != QMessageBox::Yes)
         return;
 
     db_id segmentId = segmentsModel->getIdAtRow(idx.row());
-    if(!segmentId)
+    if (!segmentId)
         return;
 
     QString errMsg;
     RailwaySegmentHelper helper(Session->m_Db);
-    if(!helper.removeSegment(segmentId, &errMsg))
+    if (!helper.removeSegment(segmentId, &errMsg))
     {
         onModelError(errMsg);
         return;
     }
 
-    //Re-calc row count
+    // Re-calc row count
     segmentsModel->refreshData();
 }
 
 void StationsManager::onNewSegment()
 {
-    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, nullptr, this);
+    OwningQPointer<EditRailwaySegmentDlg> dlg =
+      new EditRailwaySegmentDlg(Session->m_Db, nullptr, this);
     dlg->setSegment(0, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
-    //Re-calc row count
+    // Re-calc row count
     segmentsModel->refreshData();
 }
 
 void StationsManager::onEditSegment()
 {
-    if(!segmentsView->selectionModel()->hasSelection())
+    if (!segmentsView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = segmentsView->currentIndex();
     db_id segmentId = segmentsModel->getIdAtRow(idx.row());
-    if(!segmentId)
+    if (!segmentId)
         return;
 
-    OwningQPointer<EditRailwaySegmentDlg> dlg = new EditRailwaySegmentDlg(Session->m_Db, nullptr, this);
+    OwningQPointer<EditRailwaySegmentDlg> dlg =
+      new EditRailwaySegmentDlg(Session->m_Db, nullptr, this);
     dlg->setSegment(segmentId, EditRailwaySegmentDlg::DoNotLock, EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
 
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
-    //FIXME: check if actually changed
+    // FIXME: check if actually changed
     emit Session->segmentNameChanged(segmentId);
     emit Session->segmentStationsChanged(segmentId);
 
-    //Refresh fields
+    // Refresh fields
     segmentsModel->refreshData(true);
 }
 
 void StationsManager::onSplitSegment()
 {
     OwningQPointer<SplitRailwaySegmentDlg> dlg = new SplitRailwaySegmentDlg(Session->m_Db, this);
-    int ret = dlg->exec();
+    int ret                                    = dlg->exec();
 
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
-    //FIXME: get segments ID
-    //emit Session->segmentNameChanged(segmentId);
-    //emit Session->segmentStationsChanged(segmentId);
+    // FIXME: get segments ID
+    // emit Session->segmentNameChanged(segmentId);
+    // emit Session->segmentStationsChanged(segmentId);
 
-    //Refresh fields
+    // Refresh fields
     segmentsModel->refreshData(true);
 }
 
@@ -557,51 +566,51 @@ void StationsManager::onNewLine()
     dlg->setLabelText(tr("Please choose a name for the new railway line."));
     dlg->setTextValue(QString());
 
-    do{
+    do
+    {
         int ret = dlg->exec();
-        if(ret != QDialog::Accepted || !dlg)
+        if (ret != QDialog::Accepted || !dlg)
         {
-            break; //User canceled
+            break; // User canceled
         }
 
         const QString name = dlg->textValue().simplified();
-        if(name.isEmpty())
+        if (name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Line name cannot be empty."));
-            continue; //Second chance
+            continue; // Second chance
         }
 
-        if(linesModel->addLine(name))
+        if (linesModel->addLine(name))
         {
-            break; //Done!
+            break; // Done!
         }
-    }
-    while (true);
+    } while (true);
 
-    //TODO
-    //    QModelIndex idx = linesModel->index(row, 0);
-    //    linesView->setCurrentIndex(idx);
-    //    linesView->scrollTo(idx);
-    //    linesView->edit(idx);
+    // TODO
+    //     QModelIndex idx = linesModel->index(row, 0);
+    //     linesView->setCurrentIndex(idx);
+    //     linesView->scrollTo(idx);
+    //     linesView->edit(idx);
 }
 
 void StationsManager::onRemoveLine()
 {
     DEBUG_ENTRY;
-    if(!linesView->selectionModel()->hasSelection())
+    if (!linesView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = linesView->currentIndex();
 
-    //Ask confirmation
+    // Ask confirmation
     int ret = QMessageBox::question(this, tr("Remove Line?"),
                                     tr("Are you sure you want to remove line <b>%1</b>?")
-                                        .arg(linesModel->getNameAtRow(idx.row())));
-    if(ret != QMessageBox::Yes)
+                                      .arg(linesModel->getNameAtRow(idx.row())));
+    if (ret != QMessageBox::Yes)
         return;
 
     db_id lineId = linesModel->getIdAtRow(idx.row());
-    if(!lineId)
+    if (!lineId)
         return;
 
     linesModel->removeLine(lineId);
@@ -610,26 +619,26 @@ void StationsManager::onRemoveLine()
 void StationsManager::onEditLine()
 {
     DEBUG_ENTRY;
-    if(!linesView->selectionModel()->hasSelection())
+    if (!linesView->selectionModel()->hasSelection())
         return;
 
-    int row = linesView->currentIndex().row();
+    int row      = linesView->currentIndex().row();
     db_id lineId = linesModel->getIdAtRow(row);
-    if(!lineId)
+    if (!lineId)
         return;
 
     OwningQPointer<EditLineDlg> dlg(new EditLineDlg(Session->m_Db, this));
     dlg->setLineId(lineId);
     int ret = dlg->exec();
 
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
-    //FIXME: check if actually changed
+    // FIXME: check if actually changed
     emit Session->lineNameChanged(lineId);
     emit Session->lineSegmentsChanged(lineId);
 
-    //Refresh fields
+    // Refresh fields
     linesModel->refreshData(true);
 }
 
@@ -667,7 +676,7 @@ void StationsManager::onImportStations()
 
 void StationsManager::setReadOnly(bool readOnly)
 {
-    if(m_readOnly == readOnly)
+    if (m_readOnly == readOnly)
         return;
 
     m_readOnly = readOnly;
@@ -679,7 +688,7 @@ void StationsManager::setReadOnly(bool readOnly)
     act_remSt->setDisabled(m_readOnly);
     act_editSt->setDisabled(m_readOnly);
 
-    if(m_readOnly)
+    if (m_readOnly)
     {
         stationView->setEditTriggers(QTableView::NoEditTriggers);
         segmentsView->setEditTriggers(QTableView::NoEditTriggers);

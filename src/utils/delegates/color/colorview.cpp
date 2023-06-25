@@ -31,12 +31,12 @@ ColorView::ColorView(QWidget *parent) :
 
 void ColorView::setColor(const QColor &color, bool user)
 {
-    if(mColor == color)
+    if (mColor == color)
         return;
 
     mColor = color;
 
-    if(user)
+    if (user)
     {
         emit colorChanged(mColor);
     }
@@ -44,9 +44,7 @@ void ColorView::setColor(const QColor &color, bool user)
 
 void ColorView::openColorDialog()
 {
-    QColor col = QColorDialog::getColor(mColor,
-                           this,
-                           tr("Choose a color"));
+    QColor col = QColorDialog::getColor(mColor, this, tr("Choose a color"));
     setColor(col, true);
 
     emit editingFinished();

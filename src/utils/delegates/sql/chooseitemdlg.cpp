@@ -33,7 +33,7 @@ ChooseItemDlg::ChooseItemDlg(ISqlFKMatchModel *matchModel, QWidget *parent) :
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    label = new QLabel;
+    label            = new QLabel;
     lay->addWidget(label);
 
     lineEdit = new CustomCompletionLineEdit(matchModel);
@@ -64,10 +64,10 @@ void ChooseItemDlg::setPlaceholder(const QString &text)
 
 void ChooseItemDlg::done(int res)
 {
-    if(res == QDialog::Accepted)
+    if (res == QDialog::Accepted)
     {
         QString errMsg;
-        if(m_callback && !m_callback(itemId, errMsg))
+        if (m_callback && !m_callback(itemId, errMsg))
         {
             QMessageBox::warning(this, tr("Error"), errMsg);
             return;
@@ -79,13 +79,15 @@ void ChooseItemDlg::done(int res)
 
 void ChooseItemDlg::itemChosen(db_id id)
 {
-    itemId = id;
+    itemId             = id;
     QPushButton *okBut = buttonBox->button(QDialogButtonBox::Ok);
-    if(itemId)
+    if (itemId)
     {
         okBut->setToolTip(QString());
         okBut->setEnabled(true);
-    }else{
+    }
+    else
+    {
         okBut->setToolTip(tr("In order to proceed you must select a valid item."));
         okBut->setEnabled(false);
     }

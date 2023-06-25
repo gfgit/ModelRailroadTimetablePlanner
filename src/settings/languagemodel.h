@@ -32,7 +32,8 @@ public:
     explicit LanguageModel(QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &p = QModelIndex()) const override;
@@ -43,7 +44,7 @@ public:
 
     QLocale getLocaleAt(int idx);
 
-    int findMatchingRow(const QLocale& loc);
+    int findMatchingRow(const QLocale &loc);
 
 private:
     QVector<QLocale> m_data;

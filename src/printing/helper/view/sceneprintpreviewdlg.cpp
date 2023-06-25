@@ -40,7 +40,7 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     QDialog(parent),
     m_printer(nullptr)
 {
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    QVBoxLayout *lay  = new QVBoxLayout(this);
 
     QToolBar *toolBar = new QToolBar;
     lay->addWidget(toolBar);
@@ -52,8 +52,7 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     zoomSlider->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     zoomSlider->setValue(100);
     zoomSlider->setToolTip(tr("Double click to reset zoom"));
-    connect(zoomSlider, &QSlider::valueChanged, this,
-            &ScenePrintPreviewDlg::updateZoomLevel);
+    connect(zoomSlider, &QSlider::valueChanged, this, &ScenePrintPreviewDlg::updateZoomLevel);
     zoomSlider->installEventFilter(this);
     QAction *zoomAct = toolBar->addWidget(zoomSlider);
     zoomAct->setText(tr("Zoom:"));
@@ -63,8 +62,8 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     zoomSpinBox->setValue(100);
     zoomSpinBox->setSuffix(QChar('%'));
     zoomSpinBox->setToolTip(tr("Zoom"));
-    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged),
-            this, &ScenePrintPreviewDlg::updateZoomLevel);
+    connect(zoomSpinBox, qOverload<int>(&QSpinBox::valueChanged), this,
+            &ScenePrintPreviewDlg::updateZoomLevel);
     toolBar->addWidget(zoomSpinBox);
 
     toolBar->addSeparator();
@@ -74,18 +73,18 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
     sceneScaleSpinBox->setValue(100);
     sceneScaleSpinBox->setSuffix(QChar('%'));
     sceneScaleSpinBox->setToolTip(tr("Source scale factor"));
-    connect(sceneScaleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
-            this, &ScenePrintPreviewDlg::onScaleChanged);
+    connect(sceneScaleSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+            &ScenePrintPreviewDlg::onScaleChanged);
     QAction *scaleAct = toolBar->addWidget(sceneScaleSpinBox);
     scaleAct->setText(tr("Scale:"));
 
     marginSpinBox = new QDoubleSpinBox;
     marginSpinBox->setRange(0, 200);
     marginSpinBox->setValue(20);
-    marginSpinBox->setSuffix(QLatin1String(" pt")); //Points
+    marginSpinBox->setSuffix(QLatin1String(" pt")); // Points
     marginSpinBox->setToolTip(tr("Margins"));
-    connect(marginSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
-            this, &ScenePrintPreviewDlg::setMarginsWidth);
+    connect(marginSpinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), this,
+            &ScenePrintPreviewDlg::setMarginsWidth);
     QAction *marginsAct = toolBar->addWidget(marginSpinBox);
     marginsAct->setText(tr("Margins:"));
 
@@ -101,10 +100,10 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
 
     previewScene = new PrintPreviewSceneProxy(this);
     graphView->setScene(previewScene);
-    connect(previewScene, &PrintPreviewSceneProxy::pageCountChanged,
-            this, &ScenePrintPreviewDlg::updatePageCount);
+    connect(previewScene, &PrintPreviewSceneProxy::pageCountChanged, this,
+            &ScenePrintPreviewDlg::updatePageCount);
 
-    //Default to A4 Portraint page
+    // Default to A4 Portraint page
     printerPageLay.setPageSize(QPageSize(QPageSize::A4));
     printerPageLay.setOrientation(QPageLayout::Portrait);
     updateModelPageSize();
@@ -114,9 +113,9 @@ ScenePrintPreviewDlg::ScenePrintPreviewDlg(QWidget *parent) :
 
 bool ScenePrintPreviewDlg::eventFilter(QObject *watched, QEvent *ev)
 {
-    if(watched == zoomSlider && ev->type() == QEvent::MouseButtonDblClick)
+    if (watched == zoomSlider && ev->type() == QEvent::MouseButtonDblClick)
     {
-        //Zoom Slider was double clicked, reset zoom level to 100
+        // Zoom Slider was double clicked, reset zoom level to 100
         updateZoomLevel(100);
     }
 
@@ -131,7 +130,7 @@ void ScenePrintPreviewDlg::setSourceScene(IGraphScene *sourceScene)
 void ScenePrintPreviewDlg::setSceneScale(double scaleFactor)
 {
     Print::PageLayoutOpt pageLay = previewScene->getPageLay();
-    if(qFuzzyCompare(pageLay.sourceScaleFactor, scaleFactor))
+    if (qFuzzyCompare(pageLay.sourceScaleFactor, scaleFactor))
         return;
 
     sceneScaleSpinBox->setValue(scaleFactor * 100);
@@ -148,9 +147,9 @@ void ScenePrintPreviewDlg::setPrinter(QPrinter *newPrinter)
 {
     m_printer = newPrinter;
 
-    if(m_printer)
+    if (m_printer)
     {
-        //Update page rect
+        // Update page rect
         QPageLayout printerLay = m_printer->pageLayout();
         printerLay.setMargins(QMarginsF());
         setPrinterPageLay(printerLay);
@@ -160,7 +159,7 @@ void ScenePrintPreviewDlg::setPrinter(QPrinter *newPrinter)
 void ScenePrintPreviewDlg::setPrinterPageLay(const QPageLayout &pageLay)
 {
     printerPageLay = pageLay;
-    if(m_printer)
+    if (m_printer)
         m_printer->setPageLayout(printerPageLay);
     updateModelPageSize();
 }
@@ -180,10 +179,10 @@ void ScenePrintPreviewDlg::setScenePageLay(const Print::PageLayoutOpt &newSceneP
 
 void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 {
-    if(graphView->getZoomLevel() == zoom)
+    if (graphView->getZoomLevel() == zoom)
         return;
 
-    //Set for view first because it checks minimum and mazimum values
+    // Set for view first because it checks minimum and mazimum values
     graphView->setZoomLevel(zoom);
 
     zoom = graphView->getZoomLevel();
@@ -194,14 +193,14 @@ void ScenePrintPreviewDlg::updateZoomLevel(int zoom)
 
 void ScenePrintPreviewDlg::onScaleChanged(double zoom)
 {
-    //Convert from 0%-100% to 0-1
+    // Convert from 0%-100% to 0-1
     setSceneScale(zoom / 100);
 }
 
 void ScenePrintPreviewDlg::setMarginsWidth(double margins)
 {
     Print::PageLayoutOpt pageLay = previewScene->getPageLay();
-    if(qFuzzyCompare(pageLay.marginWidthPoints, margins))
+    if (qFuzzyCompare(pageLay.marginWidthPoints, margins))
         return;
 
     marginSpinBox->setValue(margins);
@@ -211,38 +210,38 @@ void ScenePrintPreviewDlg::setMarginsWidth(double margins)
 
 void ScenePrintPreviewDlg::showPageSetupDlg()
 {
-    if(m_printer && m_printer->outputFormat() == QPrinter::NativeFormat)
+    if (m_printer && m_printer->outputFormat() == QPrinter::NativeFormat)
     {
-        //For native printers use standard page dialog
+        // For native printers use standard page dialog
         OwningQPointer<QPageSetupDialog> dlg = new QPageSetupDialog(m_printer, this);
         dlg->exec();
 
-        //Fix possible wrong page size
-        QPageLayout pageLay = m_printer->pageLayout();
-        QPageSize pageSz = pageLay.pageSize();
+        // Fix possible wrong page size
+        QPageLayout pageLay             = m_printer->pageLayout();
+        QPageSize pageSz                = pageLay.pageSize();
         QPageLayout::Orientation orient = pageLay.orientation();
-        pageSz = PrintHelper::fixPageSize(pageSz, orient);
+        pageSz                          = PrintHelper::fixPageSize(pageSz, orient);
         pageLay.setPageSize(pageSz);
         pageLay.setOrientation(orient);
-        pageLay.setMargins(QMarginsF()); //Reset margins
+        pageLay.setMargins(QMarginsF()); // Reset margins
         m_printer->setPageLayout(pageLay);
 
-        //Update page rect
+        // Update page rect
         setPrinterPageLay(m_printer->pageLayout());
     }
     else
     {
-        //Show custom dialog
+        // Show custom dialog
         OwningQPointer<CustomPageSetupDlg> dlg = new CustomPageSetupDlg(this);
         dlg->setPageSize(printerPageLay.pageSize());
         dlg->setPageOrient(printerPageLay.orientation());
-        if(dlg->exec() != QDialog::Accepted || !dlg)
+        if (dlg->exec() != QDialog::Accepted || !dlg)
             return;
 
         printerPageLay.setPageSize(dlg->getPageSize());
         printerPageLay.setOrientation(dlg->getPageOrient());
 
-        //Update page rect
+        // Update page rect
         setPrinterPageLay(printerPageLay);
     }
 }
@@ -250,16 +249,18 @@ void ScenePrintPreviewDlg::showPageSetupDlg()
 void ScenePrintPreviewDlg::updatePageCount()
 {
     Print::PageLayoutOpt pageLay = previewScene->getPageLay();
-    const int totalCount = pageLay.pageCountVert * pageLay.pageCountHoriz;
+    const int totalCount         = pageLay.pageCountVert * pageLay.pageCountHoriz;
     pageCountLabel->setText(tr("Rows: %1, Cols: %2, Total Pages: %3")
-                                .arg(pageLay.pageCountVert).arg(pageLay.pageCountHoriz).arg(totalCount));
+                              .arg(pageLay.pageCountVert)
+                              .arg(pageLay.pageCountHoriz)
+                              .arg(totalCount));
 }
 
 void ScenePrintPreviewDlg::updateModelPageSize()
 {
-    Print::PageLayoutOpt pageLay = previewScene->getPageLay();
+    Print::PageLayoutOpt pageLay        = previewScene->getPageLay();
 
-    QPageSize pageSize = printerPageLay.pageSize();
+    QPageSize pageSize                  = printerPageLay.pageSize();
     QPageLayout::Orientation pageOrient = printerPageLay.orientation();
     PrintHelper::applyPageSize(pageSize, pageOrient, pageLay);
 

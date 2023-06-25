@@ -31,27 +31,28 @@
 LineGraphView::LineGraphView(QWidget *parent) :
     BasicGraphView(parent)
 {
-
 }
 
 bool LineGraphView::viewportEvent(QEvent *e)
 {
     LineGraphScene *lineScene = qobject_cast<LineGraphScene *>(scene());
 
-    if(e->type() == QEvent::ToolTip && lineScene && lineScene->getGraphType() != LineGraphType::NoGraph)
+    if (e->type() == QEvent::ToolTip && lineScene
+        && lineScene->getGraphType() != LineGraphType::NoGraph)
     {
-        QHelpEvent *ev = static_cast<QHelpEvent *>(e);
+        QHelpEvent *ev         = static_cast<QHelpEvent *>(e);
 
         const QPointF scenePos = mapToScene(ev->pos());
 
-        JobStopEntry job = lineScene->getJobAt(scenePos, Session->platformOffset / 2);
+        JobStopEntry job       = lineScene->getJobAt(scenePos, Session->platformOffset / 2);
 
-        if(job.jobId)
+        if (job.jobId)
         {
-            QToolTip::showText(ev->globalPos(),
-                               JobCategoryName::jobName(job.jobId, job.category),
+            QToolTip::showText(ev->globalPos(), JobCategoryName::jobName(job.jobId, job.category),
                                viewport());
-        }else{
+        }
+        else
+        {
             QToolTip::hideText();
         }
 
@@ -71,11 +72,11 @@ void LineGraphView::mouseDoubleClickEvent(QMouseEvent *e)
 {
     LineGraphScene *lineScene = qobject_cast<LineGraphScene *>(scene());
 
-    if(!lineScene || lineScene->getGraphType() == LineGraphType::NoGraph)
-        return; //Nothing to select
+    if (!lineScene || lineScene->getGraphType() == LineGraphType::NoGraph)
+        return; // Nothing to select
 
     const QPointF scenePos = mapToScene(e->pos());
 
-    JobStopEntry job = lineScene->getJobAt(scenePos, Session->platformOffset / 2);
+    JobStopEntry job       = lineScene->getJobAt(scenePos, Session->platformOffset / 2);
     lineScene->setSelectedJob(job);
 }

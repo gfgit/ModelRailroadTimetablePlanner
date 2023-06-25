@@ -31,7 +31,6 @@
 StationSheetExport::StationSheetExport(db_id stationId) :
     m_stationId(stationId)
 {
-
 }
 
 void StationSheetExport::write()
@@ -39,54 +38,55 @@ void StationSheetExport::write()
     qDebug() << "TEMP:" << odt.dir.path();
     odt.initDocument();
 
-    //styles.xml font declarations
+    // styles.xml font declarations
     odt.stylesXml.writeStartElement("office:font-face-decls");
     writeLiberationFontFaces(odt.stylesXml);
-    odt.stylesXml.writeEndElement(); //office:font-face-decls
+    odt.stylesXml.writeEndElement(); // office:font-face-decls
 
-    //Styles
+    // Styles
     odt.stylesXml.writeStartElement("office:styles");
     writeStandardStyle(odt.stylesXml);
     writeFooterStyle(odt.stylesXml);
     odt.stylesXml.writeEndElement();
 
-    //Automatic styles
+    // Automatic styles
     odt.stylesXml.writeStartElement("office:automatic-styles");
     writePageLayout(odt.stylesXml);
     odt.stylesXml.writeEndElement();
 
     MetaDataManager *meta = Session->getMetaDataManager();
 
-    //Retrive header and footer: give precedence to database metadata and then fallback to global application settings
-    //If the text was explicitly set to empty in metadata no header/footer will be displayed
+    // Retrive header and footer: give precedence to database metadata and then fallback to global
+    // application settings If the text was explicitly set to empty in metadata no header/footer
+    // will be displayed
     QString header;
-    if(meta->getString(header, MetaDataKey::SheetHeaderText) != MetaDataKey::Result::ValueFound)
+    if (meta->getString(header, MetaDataKey::SheetHeaderText) != MetaDataKey::Result::ValueFound)
     {
         header = AppSettings.getSheetHeader();
     }
 
     QString footer;
-    if(meta->getString(footer, MetaDataKey::SheetFooterText) != MetaDataKey::Result::ValueFound)
+    if (meta->getString(footer, MetaDataKey::SheetFooterText) != MetaDataKey::Result::ValueFound)
     {
         footer = AppSettings.getSheetFooter();
     }
 
-    //Master styles
+    // Master styles
     odt.stylesXml.writeStartElement("office:master-styles");
     writeHeaderFooter(odt.stylesXml, header, footer);
     odt.stylesXml.writeEndElement();
 
-    //Content font declarations
+    // Content font declarations
     odt.contentXml.writeStartElement("office:font-face-decls");
     writeLiberationFontFaces(odt.contentXml);
-    odt.contentXml.writeEndElement(); //office:font-face-decls
+    odt.contentXml.writeEndElement(); // office:font-face-decls
 
-    //Content Automatic styles
+    // Content Automatic styles
     odt.contentXml.writeStartElement("office:automatic-styles");
     writeCommonStyles(odt.contentXml);
     StationWriter::writeStationAutomaticStyles(odt.contentXml);
 
-    //Body
+    // Body
     odt.startBody();
 
     StationWriter w(Session->m_Db);

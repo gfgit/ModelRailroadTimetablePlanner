@@ -55,18 +55,19 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     mJobTimer(0),
     m_zoom(100)
 {
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    QVBoxLayout *lay     = new QVBoxLayout(this);
 
-    mSvg = new QSvgRenderer(this);
-    m_plan = new ssplib::StationPlan;
-    m_station = new StationSVGJobStops;
+    mSvg                 = new QSvgRenderer(this);
+    m_plan               = new ssplib::StationPlan;
+    m_station            = new StationSVGJobStops;
     m_station->stationId = 0;
 
-    view = new ssplib::SSPViewer(m_plan);
+    view                 = new ssplib::SSPViewer(m_plan);
     view->setRenderer(mSvg);
     connect(view, &ssplib::SSPViewer::labelClicked, this, &StationSVGPlanDlg::onLabelClicked);
     connect(view, &ssplib::SSPViewer::trackClicked, this, &StationSVGPlanDlg::onTrackClicked);
-    connect(view, &ssplib::SSPViewer::trackConnClicked, this, &StationSVGPlanDlg::onTrackConnClicked);
+    connect(view, &ssplib::SSPViewer::trackConnClicked, this,
+            &StationSVGPlanDlg::onTrackConnClicked);
 
     toolBar = new QToolBar;
     lay->addWidget(toolBar);
@@ -77,13 +78,14 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     scrollArea->setWidget(view);
     lay->addWidget(scrollArea);
 
-    //Actions
+    // Actions
     toolBar->addAction(tr("Reload"), this, &StationSVGPlanDlg::reloadPlan);
     toolBar->addSeparator();
 
     QSpinBox *zoomSpin = new QSpinBox;
     zoomSpin->setRange(25, 400);
-    connect(zoomSpin, qOverload<int>(&QSpinBox::valueChanged), this, &StationSVGPlanDlg::setZoom_slot);
+    connect(zoomSpin, qOverload<int>(&QSpinBox::valueChanged), this,
+            &StationSVGPlanDlg::setZoom_slot);
     connect(this, &StationSVGPlanDlg::zoomChanged, zoomSpin, &QSpinBox::setValue);
 
     QAction *zoomAction = toolBar->addWidget(zoomSpin);
@@ -105,12 +107,14 @@ StationSVGPlanDlg::StationSVGPlanDlg(sqlite3pp::database &db, QWidget *parent) :
     act_timeEdit->setVisible(m_showJobs);
 
     act_prevTime = toolBar->addAction(tr("Previous"));
-    act_prevTime->setToolTip(tr("Update time to go to <b>previous</b> Job arrival or departure in this station"));
+    act_prevTime->setToolTip(
+      tr("Update time to go to <b>previous</b> Job arrival or departure in this station"));
     connect(act_prevTime, &QAction::triggered, this, &StationSVGPlanDlg::goToPrevStop);
     act_prevTime->setVisible(m_showJobs);
 
     act_nextTime = toolBar->addAction(tr("Next"));
-    act_nextTime->setToolTip(tr("Update time to go to <b>next</b> Job arrival or departure in this station"));
+    act_nextTime->setToolTip(
+      tr("Update time to go to <b>next</b> Job arrival or departure in this station"));
     connect(act_nextTime, &QAction::triggered, this, &StationSVGPlanDlg::goToNextStop);
     act_nextTime->setVisible(m_showJobs);
 
@@ -134,7 +138,7 @@ StationSVGPlanDlg::~StationSVGPlanDlg()
 
 void StationSVGPlanDlg::setStation(db_id stId)
 {
-    stationId = stId;
+    stationId            = stId;
     m_station->stationId = stationId;
 }
 
@@ -142,12 +146,12 @@ void StationSVGPlanDlg::reloadSVG(QIODevice *dev)
 {
     m_plan->clear();
 
-    //TODO: load station data from DB
+    // TODO: load station data from DB
 
     ssplib::StreamParser parser(m_plan, dev);
     parser.parse();
 
-    //Sort items
+    // Sort items
     std::sort(m_plan->labels.begin(), m_plan->labels.end());
     std::sort(m_plan->platforms.begin(), m_plan->platforms.end());
     std::sort(m_plan->trackConnections.begin(), m_plan->trackConnections.end());
@@ -165,15 +169,15 @@ void StationSVGPlanDlg::reloadDBData()
 {
     clearDBData();
 
-    //Reload from database
-    if(!StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan, true))
+    // Reload from database
+    if (!StationSVGHelper::loadStationFromDB(mDb, stationId, m_plan, true))
     {
         QMessageBox::warning(this, tr("Error Loading Station"),
                              tr("Cannot load station from database"));
         return;
     }
 
-    if(m_showJobs)
+    if (m_showJobs)
         reloadJobs();
 
     setWindowTitle(tr("%1 Station Plan").arg(m_plan->stationName));
@@ -181,34 +185,34 @@ void StationSVGPlanDlg::reloadDBData()
 
 void StationSVGPlanDlg::clearDBData()
 {
-    //Clear previous data obtained from Database
-    for(ssplib::LabelItem& item : m_plan->labels)
+    // Clear previous data obtained from Database
+    for (ssplib::LabelItem &item : m_plan->labels)
     {
         item.visible = false;
-        item.itemId = 0;
+        item.itemId  = 0;
         item.labelText.clear();
     }
 
-    for(ssplib::TrackItem& item : m_plan->platforms)
+    for (ssplib::TrackItem &item : m_plan->platforms)
     {
         item.visible = false;
-        item.itemId = 0;
+        item.itemId  = 0;
 
-        item.color = ssplib::whiteRGB;
+        item.color   = ssplib::whiteRGB;
         item.tooltip.clear();
 
         item.trackName.clear();
     }
 
-    for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
+    for (ssplib::TrackConnectionItem &item : m_plan->trackConnections)
     {
         item.visible = false;
-        item.itemId = 0;
+        item.itemId  = 0;
 
-        item.color = ssplib::whiteRGB;
+        item.color   = ssplib::whiteRGB;
         item.tooltip.clear();
 
-        item.info.gateId = 0;
+        item.info.gateId  = 0;
         item.info.trackId = 0;
     }
 }
@@ -223,7 +227,7 @@ void StationSVGPlanDlg::reloadJobs()
 {
     clearJobs_internal();
 
-    if(m_showJobs)
+    if (m_showJobs)
     {
         StationSVGHelper::loadStationJobsFromDB(mDb, m_station);
         StationSVGHelper::applyStationJobsToPlan(m_station, m_plan);
@@ -234,7 +238,7 @@ void StationSVGPlanDlg::reloadJobs()
 
 void StationSVGPlanDlg::showJobs(bool val)
 {
-    if(m_showJobs == val)
+    if (m_showJobs == val)
         return;
 
     m_showJobs = val;
@@ -243,7 +247,7 @@ void StationSVGPlanDlg::showJobs(bool val)
     act_prevTime->setVisible(m_showJobs);
     act_nextTime->setVisible(m_showJobs);
 
-    if(m_station->time.isNull())
+    if (m_station->time.isNull())
         m_station->time = QTime(0, 0);
 
     reloadJobs();
@@ -253,15 +257,15 @@ void StationSVGPlanDlg::setJobTime(const QTime &t)
 {
     stopJobTimer();
 
-    //Remove seconds part, round to minutes
+    // Remove seconds part, round to minutes
     QTime rounded = QTime(t.hour(), t.minute());
 
-    if(m_station->time == rounded)
+    if (m_station->time == rounded)
         return;
 
     m_station->time = rounded;
 
-    //Avoid starting timer
+    // Avoid starting timer
     mTimeEdit->blockSignals(true);
     mTimeEdit->setTime(rounded);
     mTimeEdit->blockSignals(false);
@@ -279,14 +283,13 @@ void StationSVGPlanDlg::reloadPlan()
     std::unique_ptr<QIODevice> dev;
     dev.reset(StationSVGHelper::loadImage(mDb, stationId));
 
-    if(!dev)
+    if (!dev)
     {
-        QMessageBox::warning(this, tr("Error Loading SVG"),
-                             tr("Cannot find SVG data"));
+        QMessageBox::warning(this, tr("Error Loading SVG"), tr("Cannot find SVG data"));
         return;
     }
 
-    if(!dev->open(QIODevice::ReadOnly))
+    if (!dev->open(QIODevice::ReadOnly))
     {
         QMessageBox::warning(this, tr("Error Loading SVG"),
                              tr("Cannot read data: %1").arg(dev->errorString()));
@@ -301,14 +304,14 @@ void StationSVGPlanDlg::setZoom(int val, bool force)
 {
     val = qBound(10, val, 500);
 
-    if(val == m_zoom && !force)
+    if (val == m_zoom && !force)
         return;
 
     m_zoom = val;
     emit zoomChanged(m_zoom);
 
     QSize s = scrollArea->widget()->sizeHint();
-    s = s * m_zoom / 100;
+    s       = s * m_zoom / 100;
     scrollArea->widget()->resize(s);
 }
 
@@ -320,12 +323,12 @@ void StationSVGPlanDlg::setZoom_slot(int val)
 void StationSVGPlanDlg::zoomToFit()
 {
     const QSize available = scrollArea->size();
-    const QSize contents = scrollArea->widget()->sizeHint();
+    const QSize contents  = scrollArea->widget()->sizeHint();
 
-    const int zoomH = 100 * available.width() / contents.width();
-    const int zoomV = 100 * available.height() / contents.height();
+    const int zoomH       = 100 * available.width() / contents.width();
+    const int zoomV       = 100 * available.height() / contents.height();
 
-    const int val = qMin(zoomH, zoomV);
+    const int val         = qMin(zoomH, zoomV);
     setZoom(val, true);
 }
 
@@ -333,23 +336,23 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
 {
     RailwaySegmentHelper helper(mDb);
     utils::RailwaySegmentInfo info;
-    if(!helper.getSegmentInfoFromGate(gateId, info))
+    if (!helper.getSegmentInfoFromGate(gateId, info))
     {
         QMessageBox::warning(this, tr("Database Error"),
                              tr("Cannot retrive details for gate %1 (%2)").arg(letter).arg(text));
         return;
     }
 
-    if(info.to.stationId == stationId)
+    if (info.to.stationId == stationId)
     {
-        //Reverse segment
+        // Reverse segment
         qSwap(info.from, info.to);
     }
-    else if(info.from.stationId != stationId)
+    else if (info.from.stationId != stationId)
     {
-        //Segment not of this station
-        qWarning() << "StationSVGPlanDlg::onLabelClicked segment" << info.segmentId << info.segmentName
-                   << "NOT OF THIS STATION" << stationId;
+        // Segment not of this station
+        qWarning() << "StationSVGPlanDlg::onLabelClicked segment" << info.segmentId
+                   << info.segmentName << "NOT OF THIS STATION" << stationId;
     }
 
     OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
@@ -357,24 +360,21 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
     msgBox->setWindowTitle(tr("Gate %1").arg(letter));
 
     const QString translatedText =
-        tr(
-            "<h3>Railway Segment Details</h3>"
-            "<table><tr>"
-            "<td>Segment:</td><td><b>%1</b></td>"
-            "</tr><tr>"
-            "<td>From:</td><td><b>%2</b> (Gate: %3)</td>"
-            "</tr><tr>"
-            "<td>To:</td><td><b>%4</b> (Gate: %5)</td>"
-            "</tr><tr>"
-            "<td>Distance:</td><td><b>%6 Km</b></td>"
-            "</tr><tr>"
-            "<td>Max. Speed:</td><td><b>%7 km/h</b></td>"
-            "</tr></table>")
-            .arg(info.segmentName,
-                 info.from.stationName, info.from.gateLetter,
-                 info.to.stationName, info.to.gateLetter,
-                 utils::kmNumToText(info.distanceMeters))
-            .arg(info.maxSpeedKmH);
+      tr("<h3>Railway Segment Details</h3>"
+         "<table><tr>"
+         "<td>Segment:</td><td><b>%1</b></td>"
+         "</tr><tr>"
+         "<td>From:</td><td><b>%2</b> (Gate: %3)</td>"
+         "</tr><tr>"
+         "<td>To:</td><td><b>%4</b> (Gate: %5)</td>"
+         "</tr><tr>"
+         "<td>Distance:</td><td><b>%6 Km</b></td>"
+         "</tr><tr>"
+         "<td>Max. Speed:</td><td><b>%7 km/h</b></td>"
+         "</tr></table>")
+        .arg(info.segmentName, info.from.stationName, info.from.gateLetter, info.to.stationName,
+             info.to.gateLetter, utils::kmNumToText(info.distanceMeters))
+        .arg(info.maxSpeedKmH);
 
     msgBox->setTextFormat(Qt::RichText);
     msgBox->setText(translatedText);
@@ -384,28 +384,29 @@ void StationSVGPlanDlg::onLabelClicked(qint64 gateId, QChar letter, const QStrin
     msgBox->setDefaultButton(QMessageBox::Ok);
 
     msgBox->exec();
-    if(!msgBox)
+    if (!msgBox)
         return;
 
-    if(msgBox->clickedButton() == showSVGBut)
+    if (msgBox->clickedButton() == showSVGBut)
     {
         Session->getViewManager()->requestStSVGPlan(info.to.stationId);
     }
 }
 
-void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *plan,
+void showTrackMsgBox(const StationSVGJobStops::Stop &stop, ssplib::StationPlan *plan,
                      db_id stationId, QWidget *parent)
 {
     const QString jobName = JobCategoryName::jobName(stop.job.jobId, stop.job.category);
 
     OwningQPointer<QMessageBox> msgBox = new QMessageBox(parent);
     msgBox->setIcon(QMessageBox::Information);
-    msgBox->setWindowTitle(StationSVGPlanDlg::tr("Job %1", "Message box title on double click").arg(jobName));
+    msgBox->setWindowTitle(
+      StationSVGPlanDlg::tr("Job %1", "Message box title on double click").arg(jobName));
 
     QString platformName;
-    for(const ssplib::TrackItem& track : qAsConst(plan->platforms))
+    for (const ssplib::TrackItem &track : qAsConst(plan->platforms))
     {
-        if(track.itemId == stop.in_gate.trackId || track.itemId == stop.out_gate.trackId)
+        if (track.itemId == stop.in_gate.trackId || track.itemId == stop.out_gate.trackId)
         {
             platformName = track.trackName;
             break;
@@ -413,48 +414,48 @@ void showTrackMsgBox(const StationSVGJobStops::Stop& stop, ssplib::StationPlan *
     }
 
     const QString translatedText =
-        StationSVGPlanDlg::tr(
-            "<h3>%1</h3>"
-            "<table><tr>"
-            "<td>Job:</td><td><b>%2</b></td>"
-            "</tr><tr>"
-            "<td>From:</td><td><b>%3</b></td>"
-            "</tr><tr>"
-            "<td>To:</td><td><b>%4</b></td>"
-            "</tr><tr>"
-            "<td>Platform:</td><td><b>%5</b></td>"
-            "</tr></table>")
-            .arg(plan->stationName, jobName,
-                 stop.arrival.toString("HH:mm"), stop.departure.toString("HH:mm"),
-                 platformName);
+      StationSVGPlanDlg::tr("<h3>%1</h3>"
+                            "<table><tr>"
+                            "<td>Job:</td><td><b>%2</b></td>"
+                            "</tr><tr>"
+                            "<td>From:</td><td><b>%3</b></td>"
+                            "</tr><tr>"
+                            "<td>To:</td><td><b>%4</b></td>"
+                            "</tr><tr>"
+                            "<td>Platform:</td><td><b>%5</b></td>"
+                            "</tr></table>")
+        .arg(plan->stationName, jobName, stop.arrival.toString("HH:mm"),
+             stop.departure.toString("HH:mm"), platformName);
 
     msgBox->setTextFormat(Qt::RichText);
     msgBox->setText(translatedText);
 
-    QPushButton *showJobEditor = msgBox->addButton(StationSVGPlanDlg::tr("Show in Job Editor"), QMessageBox::YesRole);
-    QPushButton *showStJobs = msgBox->addButton(StationSVGPlanDlg::tr("Show Station Jobs"), QMessageBox::YesRole);
+    QPushButton *showJobEditor =
+      msgBox->addButton(StationSVGPlanDlg::tr("Show in Job Editor"), QMessageBox::YesRole);
+    QPushButton *showStJobs =
+      msgBox->addButton(StationSVGPlanDlg::tr("Show Station Jobs"), QMessageBox::YesRole);
     msgBox->addButton(QMessageBox::Ok);
     msgBox->setDefaultButton(QMessageBox::Ok);
 
     msgBox->exec();
-    if(!msgBox)
+    if (!msgBox)
         return;
 
-    if(msgBox->clickedButton() == showJobEditor)
+    if (msgBox->clickedButton() == showJobEditor)
     {
         Session->getViewManager()->requestJobEditor(stop.job.jobId, stop.job.stopId);
     }
-    else if(msgBox->clickedButton() == showStJobs)
+    else if (msgBox->clickedButton() == showStJobs)
     {
         Session->getViewManager()->requestStJobViewer(stationId);
     }
 }
 
-void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &/*name*/)
+void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString & /*name*/)
 {
-    for(const StationSVGJobStops::Stop& stop : qAsConst(m_station->stops))
+    for (const StationSVGJobStops::Stop &stop : qAsConst(m_station->stops))
     {
-        if(stop.in_gate.trackId == trackId || stop.out_gate.trackId == trackId)
+        if (stop.in_gate.trackId == trackId || stop.out_gate.trackId == trackId)
         {
             showTrackMsgBox(stop, m_plan, stationId, this);
             break;
@@ -465,9 +466,9 @@ void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString &/*name*/)
 void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 /*trackId*/, qint64 /*gateId*/,
                                            int /*gateTrackPos*/, int /*trackSide*/)
 {
-    for(const StationSVGJobStops::Stop& stop : qAsConst(m_station->stops))
+    for (const StationSVGJobStops::Stop &stop : qAsConst(m_station->stops))
     {
-        if(stop.in_gate.connId == connId || stop.out_gate.connId == connId)
+        if (stop.in_gate.connId == connId || stop.out_gate.connId == connId)
         {
             showTrackMsgBox(stop, m_plan, stationId, this);
             break;
@@ -483,7 +484,7 @@ void StationSVGPlanDlg::startJobTimer()
 
 void StationSVGPlanDlg::stopJobTimer()
 {
-    if(mJobTimer)
+    if (mJobTimer)
     {
         killTimer(mJobTimer);
         mJobTimer = 0;
@@ -498,12 +499,12 @@ void StationSVGPlanDlg::applyJobTime()
 void StationSVGPlanDlg::goToPrevStop()
 {
     QTime time = m_station->time;
-    if(!StationSVGHelper::getPrevNextStop(mDb, stationId, false, time))
+    if (!StationSVGHelper::getPrevNextStop(mDb, stationId, false, time))
     {
         QMessageBox::warning(this, tr("No Stop Found"),
                              tr("No Jobs found to arrive or depart from station <b>%1</b>"
                                 " before <b>%2</b>")
-                                 .arg(m_plan->stationName, m_station->time.toString("HH:mm")));
+                               .arg(m_plan->stationName, m_station->time.toString("HH:mm")));
         return;
     }
 
@@ -513,12 +514,12 @@ void StationSVGPlanDlg::goToPrevStop()
 void StationSVGPlanDlg::goToNextStop()
 {
     QTime time = m_station->time;
-    if(!StationSVGHelper::getPrevNextStop(mDb, stationId, true, time))
+    if (!StationSVGHelper::getPrevNextStop(mDb, stationId, true, time))
     {
         QMessageBox::warning(this, tr("No Stop Found"),
                              tr("No Jobs found to arrive or depart from station <b>%1</b>"
                                 " after <b>%2</b>")
-                                 .arg(m_plan->stationName, m_station->time.toString("HH:mm")));
+                               .arg(m_plan->stationName, m_station->time.toString("HH:mm")));
         return;
     }
 
@@ -527,16 +528,16 @@ void StationSVGPlanDlg::goToNextStop()
 
 void StationSVGPlanDlg::showEvent(QShowEvent *)
 {
-    //NOTE: when dialog is created it is hidden so it cannot zoom
-    //We load the station and then show the dialog
-    //Since dialog is hidden at first it cannot calculate zoom
-    //So when the dialog is first shown we trigger zoom again.
+    // NOTE: when dialog is created it is hidden so it cannot zoom
+    // We load the station and then show the dialog
+    // Since dialog is hidden at first it cannot calculate zoom
+    // So when the dialog is first shown we trigger zoom again.
     zoomToFit();
 }
 
 void StationSVGPlanDlg::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == mJobTimer)
+    if (e->timerId() == mJobTimer)
     {
         applyJobTime();
         return;
@@ -547,19 +548,19 @@ void StationSVGPlanDlg::timerEvent(QTimerEvent *e)
 
 void StationSVGPlanDlg::clearJobs_internal()
 {
-    for(ssplib::TrackItem& item : m_plan->platforms)
+    for (ssplib::TrackItem &item : m_plan->platforms)
     {
         item.visible = false;
 
-        item.color = ssplib::whiteRGB;
+        item.color   = ssplib::whiteRGB;
         item.tooltip.clear();
     }
 
-    for(ssplib::TrackConnectionItem& item : m_plan->trackConnections)
+    for (ssplib::TrackConnectionItem &item : m_plan->trackConnections)
     {
         item.visible = false;
 
-        item.color = ssplib::whiteRGB;
+        item.color   = ssplib::whiteRGB;
         item.tooltip.clear();
     }
 }

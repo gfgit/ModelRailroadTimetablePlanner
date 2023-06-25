@@ -31,8 +31,8 @@ public:
         Images
     };
 
-    static QString getDir(const QString& key, DefaultDir kind);
-    static void setPath(const QString& key, const QString& path);
+    static QString getDir(const QString &key, DefaultDir kind);
+    static void setPath(const QString &key, const QString &path);
 };
 
 #endif // RECENTDIRSTORE_H

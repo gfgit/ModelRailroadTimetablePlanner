@@ -26,16 +26,16 @@
 
 #ifdef SEARCHBOX_MODE_ASYNC
 
-#ifndef ENABLE_BACKGROUND_MANAGER
-#error "Cannot use SEARCHBOX_MODE_ASYNC without ENABLE_BACKGROUND_MANAGER"
-#endif
+#    ifndef ENABLE_BACKGROUND_MANAGER
+#        error "Cannot use SEARCHBOX_MODE_ASYNC without ENABLE_BACKGROUND_MANAGER"
+#    endif
 
-#include "searchtask.h"
-#include "searchresultevent.h"
-#include <QThreadPool>
+#    include "searchtask.h"
+#    include "searchresultevent.h"
+#    include <QThreadPool>
 
-#include "app/session.h"
-#include "backgroundmanager/backgroundmanager.h"
+#    include "app/session.h"
+#    include "backgroundmanager/backgroundmanager.h"
 #endif
 
 SearchResultModel::SearchResultModel(sqlite3pp::database &db, QObject *parent) :
@@ -46,7 +46,8 @@ SearchResultModel::SearchResultModel(sqlite3pp::database &db, QObject *parent) :
 {
     m_font.setPointSize(13);
     setHasEmptyRow(false);
-    connect(Session->getBackgroundManager(), &BackgroundManager::abortTrivialTasks, this, &SearchResultModel::stopAllTasks);
+    connect(Session->getBackgroundManager(), &BackgroundManager::abortTrivialTasks, this,
+            &SearchResultModel::stopAllTasks);
 }
 
 SearchResultModel::~SearchResultModel()
@@ -63,10 +64,10 @@ int SearchResultModel::columnCount(const QModelIndex &parent) const
 
 QVariant SearchResultModel::data(const QModelIndex &idx, int role) const
 {
-    if(!idx.isValid() || idx.row() >= size)
+    if (!idx.isValid() || idx.row() >= size)
         return QVariant();
 
-    const SearchResultItem& item = m_data.at(idx.row());
+    const SearchResultItem &item = m_data.at(idx.row());
 
     switch (role)
     {
@@ -76,7 +77,7 @@ QVariant SearchResultModel::data(const QModelIndex &idx, int role) const
         {
         case JobCategoryCol:
         {
-            if(isEllipsesRow(idx.row()))
+            if (isEllipsesRow(idx.row()))
             {
                 break;
             }
@@ -84,7 +85,7 @@ QVariant SearchResultModel::data(const QModelIndex &idx, int role) const
         }
         case JobNumber:
         {
-            if(isEllipsesRow(idx.row()))
+            if (isEllipsesRow(idx.row()))
             {
                 return ellipsesString;
             }
@@ -95,7 +96,7 @@ QVariant SearchResultModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::ForegroundRole:
     {
-        if(isEllipsesRow(idx.row()))
+        if (isEllipsesRow(idx.row()))
         {
             break;
         }
@@ -132,7 +133,7 @@ QVariant SearchResultModel::data(const QModelIndex &idx, int role) const
 void SearchResultModel::autoSuggest(const QString &text)
 {
 #ifdef SEARCHBOX_MODE_ASYNC
-    abortSearch(); //Stop previous search
+    abortSearch(); // Stop previous search
 
     SearchTask *task = createTask(text);
     tasks.append(task);
@@ -140,7 +141,7 @@ void SearchResultModel::autoSuggest(const QString &text)
     QThreadPool::globalInstance()->start(task);
 #else
 
-    searchFor(editor->text()); //TODO
+    searchFor(editor->text()); // TODO
 #endif
 }
 
@@ -155,29 +156,29 @@ void SearchResultModel::clearCache()
 
 db_id SearchResultModel::getIdAtRow(int row) const
 {
-    if(row >= m_data.size())
+    if (row >= m_data.size())
         return 0;
     return m_data.at(row).jobId;
 }
 
 QString SearchResultModel::getNameAtRow(int row) const
 {
-    if(row >= m_data.size())
+    if (row >= m_data.size())
         return QString();
-    const SearchResultItem& item = m_data.at(row);
+    const SearchResultItem &item = m_data.at(row);
     return JobCategoryName::jobName(item.jobId, item.category);
 }
 
 #ifdef SEARCHBOX_MODE_ASYNC
 void SearchResultModel::abortSearch()
 {
-    if(!tasks.isEmpty())
+    if (!tasks.isEmpty())
         tasks.last()->stop();
 }
 
 void SearchResultModel::stopAllTasks()
 {
-    for(SearchTask *task : qAsConst(tasks))
+    for (SearchTask *task : qAsConst(tasks))
     {
         task->stop();
         task->cleanup();
@@ -188,42 +189,45 @@ void SearchResultModel::stopAllTasks()
 
 void SearchResultModel::disposeTask(SearchTask *task)
 {
-    if(reusableTask)
+    if (reusableTask)
     {
-        delete task; //We already have a reusable task
-    }else{
-        reusableTask = task;
-        deleteReusableTaskTimerId = startTimer(3000, Qt::VeryCoarseTimer); //3 sec, then delete
+        delete task; // We already have a reusable task
+    }
+    else
+    {
+        reusableTask              = task;
+        deleteReusableTaskTimerId = startTimer(3000, Qt::VeryCoarseTimer); // 3 sec, then delete
     }
 }
 
-SearchTask *SearchResultModel::createTask(const QString& text)
+SearchTask *SearchResultModel::createTask(const QString &text)
 {
-    if(catNames.isEmpty())
+    if (catNames.isEmpty())
     {
-        //Load categories names
+        // Load categories names
         catNames.reserve(int(JobCategory::NCategories));
-        for(int cat = 0; cat < int(JobCategory::NCategories); cat++)
+        for (int cat = 0; cat < int(JobCategory::NCategories); cat++)
         {
             catNames.append(JobCategoryName::tr(JobCategoryFullNameTable[cat]));
         }
 
         catNamesAbbr.reserve(int(JobCategory::NCategories));
-        for(int cat = 0; cat < int(JobCategory::NCategories); cat++)
+        for (int cat = 0; cat < int(JobCategory::NCategories); cat++)
         {
             catNamesAbbr.append(JobCategoryName::tr(JobCategoryAbbrNameTable[cat]));
         }
     }
 
     SearchTask *task;
-    if(reusableTask)
+    if (reusableTask)
     {
         killTimer(deleteReusableTaskTimerId);
         deleteReusableTaskTimerId = 0;
-        task = reusableTask;
-        reusableTask = nullptr;
+        task                      = reusableTask;
+        reusableTask              = nullptr;
 
-        //NOTE: SearchTask gets disposed after finishing running so IQuittableTask has set mReceiver to nullptr
+        // NOTE: SearchTask gets disposed after finishing running so IQuittableTask has set
+        // mReceiver to nullptr
         task->setReceiver(this);
     }
     else
@@ -236,17 +240,17 @@ SearchTask *SearchResultModel::createTask(const QString& text)
 
 void SearchResultModel::clearReusableTask()
 {
-    if(deleteReusableTaskTimerId)
+    if (deleteReusableTaskTimerId)
     {
         killTimer(deleteReusableTaskTimerId);
         deleteReusableTaskTimerId = 0;
     }
-    if(reusableTask)
+    if (reusableTask)
     {
         delete reusableTask;
         reusableTask = nullptr;
     }
-    if(tasks.isEmpty())
+    if (tasks.isEmpty())
     {
         catNames.clear();
         catNamesAbbr.clear();
@@ -255,29 +259,30 @@ void SearchResultModel::clearReusableTask()
 
 bool SearchResultModel::event(QEvent *ev)
 {
-    if(ev->type() == QEvent::Timer && static_cast<QTimerEvent *>(ev)->timerId() == deleteReusableTaskTimerId)
+    if (ev->type() == QEvent::Timer
+        && static_cast<QTimerEvent *>(ev)->timerId() == deleteReusableTaskTimerId)
     {
         clearReusableTask();
         return true;
     }
-    if(ev->type() == SearchResultEvent::_Type)
+    if (ev->type() == SearchResultEvent::_Type)
     {
         SearchResultEvent *e = static_cast<SearchResultEvent *>(ev);
         e->setAccepted(true);
         int idx = tasks.indexOf(e->task);
-        if(idx != -1)
+        if (idx != -1)
         {
             bool wasLast = idx == tasks.size() - 1;
             tasks.removeAt(idx);
             disposeTask(e->task);
 
-            if(wasLast)
+            if (wasLast)
             {
                 beginResetModel();
                 m_data = e->results;
 
-                if(m_data.size() > MaxMatchItems)
-                    size = MaxMatchItems + 1; //There would be still rows, show Ellipses
+                if (m_data.size() > MaxMatchItems)
+                    size = MaxMatchItems + 1; // There would be still rows, show Ellipses
                 else
                     size = m_data.size();
 

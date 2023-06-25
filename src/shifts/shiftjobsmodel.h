@@ -62,7 +62,8 @@ public:
     ShiftJobsModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -75,7 +76,7 @@ public:
     db_id getJobAt(int row);
 
 private:
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
 
     QVector<ShiftJobItem> m_data;
 };

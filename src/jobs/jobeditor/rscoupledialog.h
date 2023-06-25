@@ -32,14 +32,15 @@ namespace sqlite3pp {
 class database;
 }
 
-//FIXME: on-demand load and filter
+// FIXME: on-demand load and filter
 class RSCoupleDialog : public QDialog
 {
     Q_OBJECT
 public:
     RSCoupleDialog(RSCouplingInterface *mgr, RsOp o, QWidget *parent = nullptr);
 
-    void loadProxyModels(sqlite3pp::database &db, db_id jobId, db_id stopId, db_id stationId, const QTime &arrival);
+    void loadProxyModels(sqlite3pp::database &db, db_id jobId, db_id stopId, db_id stationId,
+                         const QTime &arrival);
 
 protected:
     void done(int ret) override;

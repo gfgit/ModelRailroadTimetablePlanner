@@ -30,18 +30,25 @@
 class LoadSQLiteTask : public ILoadRSTask
 {
 public:
-    //5 steps
-    //Load DB, Load Owners, Load Models, Load RS, Unselect Owners
-    enum { StepSize = 100, MaxProgress = 5 * StepSize };
+    // 5 steps
+    // Load DB, Load Owners, Load Models, Load RS, Unselect Owners
+    enum
+    {
+        StepSize    = 100,
+        MaxProgress = 5 * StepSize
+    };
 
-    LoadSQLiteTask(sqlite3pp::database &db, int mode, const QString& fileName, QObject *receiver);
+    LoadSQLiteTask(sqlite3pp::database &db, int mode, const QString &fileName, QObject *receiver);
 
     void run() override;
 
 private:
-    void endWithDbError(const QString& text);
+    void endWithDbError(const QString &text);
 
-    inline int calcProgress() const { return currentProgress + localProgress / localCount * StepSize; }
+    inline int calcProgress() const
+    {
+        return currentProgress + localProgress / localCount * StepSize;
+    }
 
     bool attachDB();
     bool copyOwners();

@@ -28,19 +28,20 @@ Scope::Scope(const char *fn, const char *s, const char *e) :
     start(s),
     end(e)
 {
-    qDebug().nospace().noquote()
-            << start << QByteArray(" ").repeated(stackLevel) << ">>> " << func << end;
+    qDebug().nospace().noquote() << start << QByteArray(" ").repeated(stackLevel) << ">>> " << func
+                                 << end;
     stackLevel++;
 }
 
 Scope::~Scope()
 {
     stackLevel--;
-    qDebug().nospace().noquote()
-            << start << QByteArray(" ").repeated(stackLevel) << "<<< " << func << end;
+    qDebug().nospace().noquote() << start << QByteArray(" ").repeated(stackLevel) << "<<< " << func
+                                 << end;
 }
 
-ScopeTimer::ScopeTimer(const char *fn, const char *s, const char *e) :Scope(fn, s, e)
+ScopeTimer::ScopeTimer(const char *fn, const char *s, const char *e) :
+    Scope(fn, s, e)
 {
     timer.start();
 }

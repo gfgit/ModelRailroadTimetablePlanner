@@ -19,21 +19,20 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "ibackgroundchecker.h"
-#include "backgroundresultwidget.h"
+#    include "ibackgroundchecker.h"
+#    include "backgroundresultwidget.h"
 
-#include <QTreeView>
-#include <QHeaderView>
-#include <QProgressBar>
-#include <QPushButton>
+#    include <QTreeView>
+#    include <QHeaderView>
+#    include <QProgressBar>
+#    include <QPushButton>
 
-#include <QGridLayout>
+#    include <QGridLayout>
 
-#include <QMenu>
-#include <QAction>
+#    include <QMenu>
+#    include <QAction>
 
-#include <QTimerEvent>
-
+#    include <QTimerEvent>
 
 BackgroundResultWidget::BackgroundResultWidget(IBackgroundChecker *mgr_, QWidget *parent) :
     QWidget(parent),
@@ -45,8 +44,8 @@ BackgroundResultWidget::BackgroundResultWidget(IBackgroundChecker *mgr_, QWidget
     view->setSelectionBehavior(QTreeView::SelectRows);
 
     progressBar = new QProgressBar;
-    startBut = new QPushButton(tr("Start"));
-    stopBut = new QPushButton(tr("Stop"));
+    startBut    = new QPushButton(tr("Start"));
+    stopBut     = new QPushButton(tr("Stop"));
 
     startBut->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
     stopBut->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
@@ -68,7 +67,8 @@ BackgroundResultWidget::BackgroundResultWidget(IBackgroundChecker *mgr_, QWidget
     connect(stopBut, &QPushButton::clicked, this, &BackgroundResultWidget::stopTask);
 
     view->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(view, &QTreeView::customContextMenuRequested, this, &BackgroundResultWidget::showContextMenu);
+    connect(view, &QTreeView::customContextMenuRequested, this,
+            &BackgroundResultWidget::showContextMenu);
 
     setWindowTitle(tr("Error Results"));
 
@@ -79,11 +79,11 @@ void BackgroundResultWidget::startTask()
 {
     progressBar->setValue(0);
 
-    if(mgr->startWorker())
+    if (mgr->startWorker())
     {
-        if(timerId)
+        if (timerId)
         {
-            killTimer(timerId); //Stop progressBar from hiding in 1 second
+            killTimer(timerId); // Stop progressBar from hiding in 1 second
             timerId = 0;
         }
     }
@@ -105,14 +105,14 @@ void BackgroundResultWidget::taskFinished()
 {
     progressBar->setValue(progressBar->maximum());
 
-    if(timerId)
+    if (timerId)
         killTimer(timerId);
-    timerId = startTimer(1000); //Hide progressBar after 1 second
+    timerId = startTimer(1000); // Hide progressBar after 1 second
 }
 
 void BackgroundResultWidget::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == timerId)
+    if (e->timerId() == timerId)
     {
         killTimer(timerId);
         timerId = 0;
@@ -120,10 +120,10 @@ void BackgroundResultWidget::timerEvent(QTimerEvent *e)
     }
 }
 
-void BackgroundResultWidget::showContextMenu(const QPoint& pos)
+void BackgroundResultWidget::showContextMenu(const QPoint &pos)
 {
     QModelIndex idx = view->indexAt(pos);
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
     mgr->showContextMenu(this, view->viewport()->mapToGlobal(pos), idx);

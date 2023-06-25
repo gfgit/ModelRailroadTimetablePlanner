@@ -21,10 +21,8 @@
 
 IGraphSceneCollection::IGraphSceneCollection()
 {
-
 }
 
 IGraphSceneCollection::~IGraphSceneCollection()
 {
-
 }

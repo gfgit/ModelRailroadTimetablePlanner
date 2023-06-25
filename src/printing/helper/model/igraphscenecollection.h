@@ -32,15 +32,14 @@ class IGraphScene;
 class IGraphSceneCollection
 {
 public:
-
     /*!
      * \brief The SceneItem struct
      */
     struct SceneItem
     {
         IGraphScene *scene = nullptr; //! pointer to scene
-        QString name; //! scene title
-        QString type; //! scene type name
+        QString name;                 //! scene title
+        QString type;                 //! scene type name
     };
 
     IGraphSceneCollection();

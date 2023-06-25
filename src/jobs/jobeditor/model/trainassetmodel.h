@@ -27,12 +27,13 @@ class TrainAssetModel : public RSListOnDemandModel
 {
     Q_OBJECT
 public:
-    enum Mode {
+    enum Mode
+    {
         BeforeStop,
         AfterStop
     };
 
-    TrainAssetModel(sqlite3pp::database& db, QObject *parent = nullptr);
+    TrainAssetModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // TrainAssetModel
     void setStop(db_id jobId, QTime arrival, Mode mode);

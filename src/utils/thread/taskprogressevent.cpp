@@ -23,7 +23,6 @@ GenericTaskEvent::GenericTaskEvent(Type type_, IQuittableTask *self) :
     QEvent(type_),
     task(self)
 {
-
 }
 
 TaskProgressEvent::TaskProgressEvent(IQuittableTask *self, int pr, int max, const QString &descr) :
@@ -32,5 +31,4 @@ TaskProgressEvent::TaskProgressEvent(IQuittableTask *self, int pr, int max, cons
     progressMax(max),
     description(descr)
 {
-
 }

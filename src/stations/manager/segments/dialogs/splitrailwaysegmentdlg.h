@@ -62,29 +62,29 @@ private slots:
 
 private:
     void setMiddleStation(db_id stationId);
-    void setNewSegmentName(const QString& possibleName);
+    void setNewSegmentName(const QString &possibleName);
 
 private:
     sqlite3pp::database &mDb;
 
-    //Original Segment
+    // Original Segment
     QLabel *segmentLabel;
     QPushButton *selectSegBut;
 
-    //From
+    // From
     QGroupBox *fromBox;
     QLabel *fromStationLabel;
     QLabel *fromGateLabel;
     QPushButton *editOldSegBut;
 
-    //Middle insert
+    // Middle insert
     QGroupBox *middleBox;
     CustomCompletionLineEdit *middleStationEdit;
     CustomCompletionLineEdit *middleInGateEdit;
     CustomCompletionLineEdit *middleOutGateEdit;
     QPushButton *editNewSegBut;
 
-    //To
+    // To
     QGroupBox *toBox;
     QLabel *toGateLabel;
     QLabel *toStationLabel;

@@ -19,15 +19,15 @@
 
 #ifdef SEARCHBOX_MODE_ASYNC
 
-#include "searchtask.h"
-#include "searchresultitem.h"
-#include "searchresultevent.h"
+#    include "searchtask.h"
+#    include "searchresultitem.h"
+#    include "searchresultevent.h"
 
-#include <QRegularExpression>
+#    include <QRegularExpression>
 
-#include "app/session.h"
+#    include "app/session.h"
 
-#include <sqlite3pp/sqlite3pp.h>
+#    include <sqlite3pp/sqlite3pp.h>
 
 SearchTask::SearchTask(QObject *receiver, int limitRows, sqlite3pp::database &db,
                        const QStringList &catNames_, const QStringList &catNamesAbbr_) :
@@ -44,7 +44,7 @@ SearchTask::SearchTask(QObject *receiver, int limitRows, sqlite3pp::database &db
 
 SearchTask::~SearchTask()
 {
-    if(regExp)
+    if (regExp)
     {
         delete regExp;
         regExp = nullptr;
@@ -55,86 +55,86 @@ void SearchTask::run()
 {
     QVector<SearchResultItem> results;
 
-    if(!regExp)
+    if (!regExp)
         regExp = new QRegularExpression("(?<name>[^0-9\\s]*)\\s*(?<num>\\d*)");
 
     QRegularExpressionMatch match = regExp->match(mQuery);
-    if(!match.hasMatch())
+    if (!match.hasMatch())
     {
         sendEvent(new SearchResultEvent(this, results), true);
         return;
     }
 
     QString name = match.captured("name");
-    QString num = match.captured("num");
+    QString num  = match.captured("num");
 
-    if(wasStopped())
+    if (wasStopped())
     {
         sendEvent(new SearchResultEvent(this, results), true);
         return;
     }
 
-    if(!name.isEmpty())
+    if (!name.isEmpty())
     {
-        //Find the matching category
+        // Find the matching category
         name = name.toUpper();
         QList<int> categories;
 
         int cat = catNamesAbbr.indexOf(name);
 
-        if(cat == -1) //Retry with full names
+        if (cat == -1) // Retry with full names
             cat = catNames.indexOf(name);
 
-        if(cat != -1)
+        if (cat != -1)
         {
             categories.append(cat);
         }
         else
         {
-            //Retry with full names that start with ... (partial names)
-            for(int i = 0; i < catNames.size(); i++)
+            // Retry with full names that start with ... (partial names)
+            for (int i = 0; i < catNames.size(); i++)
             {
-                if(catNames.at(i).startsWith(name, Qt::CaseInsensitive))
+                if (catNames.at(i).startsWith(name, Qt::CaseInsensitive))
                 {
-                    categories.append(i); //Don't break, allow multiple categories
+                    categories.append(i); // Don't break, allow multiple categories
                 }
             }
         }
 
-        if(categories.isEmpty())
-            return; //Failed to find a category
+        if (categories.isEmpty())
+            return; // Failed to find a category
 
-        if(num.isEmpty())
+        if (num.isEmpty())
         {
-            //It's a category like 'IC'
-            //Match all jobs with that category
+            // It's a category like 'IC'
+            // Match all jobs with that category
             searchByCat(categories, results);
         }
         else
         {
-            //Category + number
-            //Match all jobs beggining with this number and with this category
+            // Category + number
+            // Match all jobs beggining with this number and with this category
             searchByCatAndNum(categories, num, results);
         }
     }
-    else if(!num.isEmpty())
+    else if (!num.isEmpty())
     {
-        //Search all jobs beginning with this number
+        // Search all jobs beginning with this number
         searchByNum(num, results);
     }
 
     sendEvent(new SearchResultEvent(this, results), true);
 }
 
-void SearchTask::searchByCat(const QList<int>& categories, QVector<SearchResultItem>& jobs)
+void SearchTask::searchByCat(const QList<int> &categories, QVector<SearchResultItem> &jobs)
 {
-    if(queryType != ByCat)
+    if (queryType != ByCat)
     {
         q_selectJobs.prepare("SELECT id FROM jobs WHERE category=?1 ORDER BY id LIMIT ?2");
         queryType = ByCat;
     }
 
-    for(const int cat : categories)
+    for (const int cat : categories)
     {
         SearchResultItem item;
         item.category = JobCategory(cat);
@@ -142,10 +142,10 @@ void SearchTask::searchByCat(const QList<int>& categories, QVector<SearchResultI
         q_selectJobs.bind(1, cat);
         q_selectJobs.bind(2, limitResultRows);
 
-        for(auto job : q_selectJobs)
+        for (auto job : q_selectJobs)
         {
-            //Check every 4 items
-            if(jobs.size() % 4 == 0 && wasStopped())
+            // Check every 4 items
+            if (jobs.size() % 4 == 0 && wasStopped())
                 return;
 
             item.jobId = job.get<db_id>(0);
@@ -155,9 +155,10 @@ void SearchTask::searchByCat(const QList<int>& categories, QVector<SearchResultI
     }
 }
 
-void SearchTask::searchByCatAndNum(const QList<int>& categories, const QString& num, QVector<SearchResultItem>& jobs)
+void SearchTask::searchByCatAndNum(const QList<int> &categories, const QString &num,
+                                   QVector<SearchResultItem> &jobs)
 {
-    if(queryType != ByCatAndNum)
+    if (queryType != ByCatAndNum)
     {
         q_selectJobs.prepare("SELECT id, id LIKE ?2 as job_rank FROM jobs"
                              " WHERE category=?1 AND id LIKE ?3"
@@ -165,7 +166,7 @@ void SearchTask::searchByCatAndNum(const QList<int>& categories, const QString& 
         queryType = ByCatAndNum;
     }
 
-    for(const int cat : categories)
+    for (const int cat : categories)
     {
         SearchResultItem item;
         item.category = JobCategory(cat);
@@ -175,10 +176,10 @@ void SearchTask::searchByCatAndNum(const QList<int>& categories, const QString& 
         q_selectJobs.bind(3, '%' + num + '%');
         q_selectJobs.bind(4, limitResultRows);
 
-        for(auto job : q_selectJobs)
+        for (auto job : q_selectJobs)
         {
-            //Check every 4 items
-            if(jobs.size() % 4 == 0 && wasStopped())
+            // Check every 4 items
+            if (jobs.size() % 4 == 0 && wasStopped())
                 return;
 
             item.jobId = job.get<db_id>(0);
@@ -188,9 +189,9 @@ void SearchTask::searchByCatAndNum(const QList<int>& categories, const QString& 
     }
 }
 
-void SearchTask::searchByNum(const QString& num, QVector<SearchResultItem>& jobs)
+void SearchTask::searchByNum(const QString &num, QVector<SearchResultItem> &jobs)
 {
-    if(queryType != ByNum)
+    if (queryType != ByNum)
     {
         q_selectJobs.prepare("SELECT id, category, id LIKE ?1 as job_rank FROM jobs"
                              " WHERE id LIKE ?2"
@@ -202,14 +203,14 @@ void SearchTask::searchByNum(const QString& num, QVector<SearchResultItem>& jobs
     q_selectJobs.bind(2, '%' + num + '%');
     q_selectJobs.bind(3, limitResultRows);
 
-    for(auto job : q_selectJobs)
+    for (auto job : q_selectJobs)
     {
-        //Check every 4 items
-        if(jobs.size() % 4 == 0 && wasStopped())
+        // Check every 4 items
+        if (jobs.size() % 4 == 0 && wasStopped())
             return;
 
         SearchResultItem item;
-        item.jobId = job.get<db_id>(0);
+        item.jobId    = job.get<db_id>(0);
         item.category = JobCategory(job.get<int>(1));
         jobs.append(item);
     }
@@ -221,4 +222,4 @@ void SearchTask::setQuery(const QString &query)
     mQuery = query;
 }
 
-#endif //SEARCHBOX_MODE_ASYNC
+#endif // SEARCHBOX_MODE_ASYNC

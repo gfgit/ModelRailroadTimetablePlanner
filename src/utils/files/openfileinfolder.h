@@ -50,7 +50,10 @@ public:
     void setFilePath(const QString &newFilePath);
     void setLabelText(const QString &text);
 
-    inline QFileInfo getInfo() const { return info; }
+    inline QFileInfo getInfo() const
+    {
+        return info;
+    }
 
     /*!
      * \brief askUser
@@ -60,7 +63,7 @@ public:
      *
      * This convinience function opens standard dialog with default text
      */
-    static void askUser(const QString& title, const QString& filePath, QWidget *parent);
+    static void askUser(const QString &title, const QString &filePath, QWidget *parent);
 
 private slots:
     void onOpenFile();
@@ -75,6 +78,6 @@ private:
     QFileInfo info;
 };
 
-}
+} // namespace utils
 
 #endif // OPENFILEINFOLDER_H

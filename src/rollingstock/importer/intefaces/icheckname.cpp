@@ -21,7 +21,6 @@
 
 ICheckName::~ICheckName()
 {
-
 }
 
 bool ICheckName::checkCustomNameValid(db_id, const QString &, const QString &, QString *)
@@ -29,7 +28,7 @@ bool ICheckName::checkCustomNameValid(db_id, const QString &, const QString &, Q
     return false;
 }
 
-bool ICheckName::checkNewNumberIsValid(db_id, db_id, db_id, RsType , int, int, QString *)
+bool ICheckName::checkNewNumberIsValid(db_id, db_id, db_id, RsType, int, int, QString *)
 {
     return false;
 }

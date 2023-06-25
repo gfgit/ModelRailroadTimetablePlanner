@@ -30,13 +30,14 @@
 
 #include "utils/types.h"
 
-//TODO: on-demand load and let SQL do the sorting
+// TODO: on-demand load and let SQL do the sorting
 class StationFreeRSModel : public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
-    enum Columns {
+    enum Columns
+    {
         RSNameCol = 0,
         FreeFromTimeCol,
         FreeUpToTimeCol,
@@ -48,13 +49,13 @@ public:
     struct Item
     {
         db_id rsId = 0;
-        QTime from; //Time at which RS is uncoupled (from now it's free)
-        QTime to; //Time at which is coupled (not free anymore)
+        QTime from; // Time at which RS is uncoupled (from now it's free)
+        QTime to;   // Time at which is coupled (not free anymore)
         QString name;
-        db_id fromJob = 0;
+        db_id fromJob    = 0;
         db_id fromStopId = 0;
-        db_id toJob = 0;
-        db_id toStopId = 0;
+        db_id toJob      = 0;
+        db_id toStopId   = 0;
         JobCategory fromJobCat;
         JobCategory toJobCat;
     };
@@ -62,7 +63,8 @@ public:
     StationFreeRSModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -83,7 +85,7 @@ public:
     };
 
     ErrorCodes getNextOpTime(QTime &time);
-    ErrorCodes getPrevOpTime(QTime& time);
+    ErrorCodes getPrevOpTime(QTime &time);
 
     QTime getTime() const;
     db_id getStationId() const;
@@ -104,7 +106,7 @@ private:
 
     QVector<Item> m_data;
 
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
 };
 
 #endif // STATIONFREERSMODEL_H

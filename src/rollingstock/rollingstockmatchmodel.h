@@ -49,7 +49,7 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // ISqlFKMatchModel
-    void autoSuggest(const QString& text) override;
+    void autoSuggest(const QString &text) override;
     virtual void refreshData() override;
     QString getName(db_id id) const override;
 
@@ -72,7 +72,7 @@ private:
     query q_getMatches;
 
     QRegularExpression regExp;
-    QByteArray model,owner,number;
+    QByteArray model, owner, number;
 };
 
 #endif // ROLLINGSTOCKMATCHMODEL_H

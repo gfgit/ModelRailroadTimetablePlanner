@@ -39,7 +39,7 @@ public:
 
     bool getData(db_id &idOut, QString &nameOut) const;
 
-    void setData(db_id id, const QString& name = QString());
+    void setData(db_id id, const QString &name = QString());
 
     void setModel(ISqlFKMatchModel *m);
 
@@ -49,7 +49,7 @@ public:
 signals:
     void completionDone(CustomCompletionLineEdit *self);
     void dataIdChanged(db_id id);
-    void indexSelected(const QModelIndex& idx);
+    void indexSelected(const QModelIndex &idx);
 
 public slots:
     void setData_slot(db_id id);

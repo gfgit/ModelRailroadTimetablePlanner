@@ -60,12 +60,18 @@ public:
     Print::PrintBasicOptions getPrintOpt() const;
     void setPrintOpt(const Print::PrintBasicOptions &newPrintOpt);
 
-    //Get first selected scene, ownership is passed to the caller
+    // Get first selected scene, ownership is passed to the caller
     IGraphScene *getFirstScene();
 
-    inline sqlite3pp::database& getDb() const { return mDb; }
+    inline sqlite3pp::database &getDb() const
+    {
+        return mDb;
+    }
 
-    inline SceneSelectionModel* getSelectionModel() const { return selectionModel; }
+    inline SceneSelectionModel *getSelectionModel() const
+    {
+        return selectionModel;
+    }
 
     bool taskRunning() const;
 
@@ -74,8 +80,8 @@ protected:
 
 private slots:
     void progressMaxChanged(int max);
-    void progressChanged(int val, const QString& msg);
-    void handleProgressFinished(bool success, const QString& errMsg);
+    void progressChanged(int val, const QString &msg);
+    void handleProgressFinished(bool success, const QString &errMsg);
 
 private:
     sqlite3pp::database &mDb;

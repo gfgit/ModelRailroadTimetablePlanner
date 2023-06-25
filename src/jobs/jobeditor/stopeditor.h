@@ -49,16 +49,19 @@ public:
     StopEditor(sqlite3pp::database &db, StopModel *m, QWidget *parent = nullptr);
     ~StopEditor();
 
-    void setStop(const StopItem& item, const StopItem& prev);
+    void setStop(const StopItem &item, const StopItem &prev);
 
-    const StopItem& getCurItem() const;
-    const StopItem& getPrevItem() const;
+    const StopItem &getCurItem() const;
+    const StopItem &getPrevItem() const;
 
     /*!
      * \brief closeOnSegmentChosen
      * \return true if editor should be closed after user has chosen a valid next segment
      */
-    inline bool closeOnSegmentChosen() const { return m_closeOnSegmentChosen; };
+    inline bool closeOnSegmentChosen() const
+    {
+        return m_closeOnSegmentChosen;
+    };
     void setCloseOnSegmentChosen(bool value);
 
 signals:

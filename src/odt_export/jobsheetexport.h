@@ -24,14 +24,13 @@
 
 #include "utils/types.h"
 
-
 class JobSheetExport
 {
 public:
     JobSheetExport(db_id jobId, JobCategory cat);
 
     void write();
-    void save(const QString& fileName);
+    void save(const QString &fileName);
 
 private:
     OdtDocument odt;

@@ -92,9 +92,13 @@ public:
      * NOTE: this must be called when task in not running (before starting or after finished)
      *
      * This is useful if you want to re-use the task.
-     * To do so, set again the receiver before re-starting, because it got cleared when task finished.
+     * To do so, set again the receiver before re-starting, because it got cleared when task
+     * finished.
      */
-    inline void setReceiver(QObject *obj) { mReceiver = obj; }
+    inline void setReceiver(QObject *obj)
+    {
+        mReceiver = obj;
+    }
 
     /*!
      * \brief lock task to prevent it from being deleted
@@ -107,7 +111,7 @@ public:
     {
         while (!mPointerGuard.testAndSetOrdered(false, true))
         {
-            //Busy wait
+            // Busy wait
         }
     }
 

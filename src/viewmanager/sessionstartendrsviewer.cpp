@@ -42,7 +42,7 @@
 SessionStartEndRSViewer::SessionStartEndRSViewer(QWidget *parent) :
     QWidget(parent)
 {
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    QVBoxLayout *lay  = new QVBoxLayout(this);
 
     QToolBar *toolBar = new QToolBar;
     lay->addWidget(toolBar);
@@ -57,8 +57,10 @@ SessionStartEndRSViewer::SessionStartEndRSViewer(QWidget *parent) :
     orderCombo->addItem(tr("Order By Owner"), int(SessionRSOrder::ByOwner));
     toolBar->addWidget(orderCombo);
 
-    connect(modeCombo, qOverload<int>(&QComboBox::activated), this, &SessionStartEndRSViewer::modeChanged);
-    connect(orderCombo, qOverload<int>(&QComboBox::activated), this, &SessionStartEndRSViewer::orderChanged);
+    connect(modeCombo, qOverload<int>(&QComboBox::activated), this,
+            &SessionStartEndRSViewer::modeChanged);
+    connect(orderCombo, qOverload<int>(&QComboBox::activated), this,
+            &SessionStartEndRSViewer::orderChanged);
 
     toolBar->addAction(tr("Export Sheet"), this, &SessionStartEndRSViewer::exportSheet);
 
@@ -100,7 +102,7 @@ void SessionStartEndRSViewer::exportSheet()
 {
     const QLatin1String session_rs_key = QLatin1String("session_rs_dir");
 
-    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Expoert RS session plan"));
+    OwningQPointer<QFileDialog> dlg    = new QFileDialog(this, tr("Expoert RS session plan"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
     dlg->setDirectory(RecentDirStore::getDir(session_rs_key, RecentDirStore::Documents));
@@ -109,11 +111,11 @@ void SessionStartEndRSViewer::exportSheet()
     filters << FileFormats::tr(FileFormats::odtFormat);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(session_rs_key, fileName);

@@ -61,8 +61,8 @@ public:
     {
         db_id otherJobId = 0;
         db_id couplingId = 0;
-        db_id rsId = 0;
-        db_id stopId = 0;
+        db_id rsId       = 0;
+        db_id stopId     = 0;
 
         QString rsName;
         QTime opTime;
@@ -73,7 +73,8 @@ public:
     NextPrevRSJobsModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     int rowCount(const QModelIndex &p = QModelIndex()) const override;
@@ -93,7 +94,6 @@ public:
     Item getItemAtRow(int row) const;
 
 private:
-
     sqlite3pp::database &mDb;
 
     db_id m_jobId = 0;

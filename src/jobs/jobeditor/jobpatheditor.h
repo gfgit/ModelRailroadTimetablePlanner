@@ -48,7 +48,7 @@ class JobPathEditor : public QDialog
 
 public:
     explicit JobPathEditor(QWidget *parent = nullptr);
-    ~JobPathEditor()override;
+    ~JobPathEditor() override;
 
     bool setJob(db_id jobId);
     bool createNewJob(db_id *out = nullptr);
@@ -122,10 +122,10 @@ private:
 
     int jobNumberTimerId;
 
-    //TODO: there are too many bools
+    // TODO: there are too many bools
     bool isClear;
 
-    bool canSetJob; //TODO: better name
+    bool canSetJob; // TODO: better name
     bool m_readOnly;
 };
 

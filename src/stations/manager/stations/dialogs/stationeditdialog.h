@@ -60,36 +60,36 @@ public slots:
     void done(int res) override;
 
 private slots:
-    void modelError(const QString& msg);
+    void modelError(const QString &msg);
 
-    //Gates
+    // Gates
     void onGatesChanged();
     void addGate();
     void removeSelectedGate();
 
-    //Tracks
+    // Tracks
     void onTracksChanged();
     void addTrack();
     void removeSelectedTrack();
     void moveTrackUp();
     void moveTrackDown();
 
-    //Track Connections
+    // Track Connections
     void onTrackConnRemoved();
     void removeSelectedTrackConn();
 
-    //Gate Connections
+    // Gate Connections
     void addGateConnection();
     void editGateConnection();
     void removeSelectedGateConnection();
 
-    //SVG Image
+    // SVG Image
     void addSVGImage();
     void removeSVGImage();
     void saveSVGToFile();
     void importConnFromSVG();
 
-    //Xml Plan
+    // Xml Plan
     void saveXmlPlan();
 
 private:

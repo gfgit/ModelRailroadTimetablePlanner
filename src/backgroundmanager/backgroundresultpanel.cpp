@@ -19,13 +19,13 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "backgroundresultpanel.h"
+#    include "backgroundresultpanel.h"
 
-#include "backgroundmanager/ibackgroundchecker.h"
-#include "backgroundresultwidget.h"
+#    include "backgroundmanager/ibackgroundchecker.h"
+#    include "backgroundresultwidget.h"
 
-#include "app/session.h"
-#include "backgroundmanager.h"
+#    include "app/session.h"
+#    include "backgroundmanager.h"
 
 BackgroundResultPanel::BackgroundResultPanel(QWidget *parent) :
     QTabWidget(parent)
@@ -34,7 +34,7 @@ BackgroundResultPanel::BackgroundResultPanel(QWidget *parent) :
     connect(bkMgr, &BackgroundManager::checkerAdded, this, &BackgroundResultPanel::addChecker);
     connect(bkMgr, &BackgroundManager::checkerRemoved, this, &BackgroundResultPanel::removeChecker);
 
-    for(auto mgr : bkMgr->checkers)
+    for (auto mgr : bkMgr->checkers)
         addChecker(mgr);
 }
 
@@ -46,10 +46,10 @@ void BackgroundResultPanel::addChecker(IBackgroundChecker *mgr)
 
 void BackgroundResultPanel::removeChecker(IBackgroundChecker *mgr)
 {
-    for(int i = 0; i < count(); i++)
+    for (int i = 0; i < count(); i++)
     {
         BackgroundResultWidget *w = static_cast<BackgroundResultWidget *>(widget(i));
-        if(w->mgr == mgr)
+        if (w->mgr == mgr)
         {
             removeTab(i);
             delete w;

@@ -22,13 +22,14 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "rs_error_data.h"
-#include "utils/singledepthtreemodelhelper.h"
+#    include "rs_error_data.h"
+#    include "utils/singledepthtreemodelhelper.h"
 
 class RsErrorTreeModel;
-typedef SingleDepthTreeModelHelper<RsErrorTreeModel, RsErrors::RSErrorMap, RsErrors::RSErrorData> RsErrorTreeModelBase;
+typedef SingleDepthTreeModelHelper<RsErrorTreeModel, RsErrors::RSErrorMap, RsErrors::RSErrorData>
+  RsErrorTreeModelBase;
 
-//TODO: make on-demand
+// TODO: make on-demand
 class RsErrorTreeModel : public RsErrorTreeModelBase
 {
     Q_OBJECT
@@ -45,7 +46,8 @@ public:
     RsErrorTreeModel(QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 

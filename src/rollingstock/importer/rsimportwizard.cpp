@@ -41,7 +41,7 @@
 #include "backends/importtask.h"
 #include <QThreadPool>
 
-//Backends
+// Backends
 #include "backends/ods/rsimportodsbackend.h"
 #include "backends/sqlite/rsimportsqlitebackend.h"
 
@@ -51,7 +51,7 @@
 #include "utils/owningqpointer.h"
 
 RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
-    QWizard (parent),
+    QWizard(parent),
     loadTask(nullptr),
     importTask(nullptr),
     isStoppingTask(false),
@@ -60,21 +60,21 @@ RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     importMode(RSImportMode::ImportRSPieces),
     backendIdx(0)
 {
-    //Load backends
+    // Load backends
     backends = new RSImportBackendsModel(this);
     backends->addBackend(new RSImportODSBackend);
     backends->addBackend(new RSImportSQLiteBackend);
 
-    modelsModel = new RSImportedModelsModel(Session->m_Db, this);
-    ownersModel = new RSImportedOwnersModel(Session->m_Db, this);
-    listModel   = new RSImportedRollingstockModel(Session->m_Db, this);
+    modelsModel  = new RSImportedModelsModel(Session->m_Db, this);
+    ownersModel  = new RSImportedOwnersModel(Session->m_Db, this);
+    listModel    = new RSImportedRollingstockModel(Session->m_Db, this);
 
     loadFilePage = new LoadingPage(this);
     loadFilePage->setCommitPage(true);
     loadFilePage->setTitle(RsImportStrings::tr("File loading"));
     loadFilePage->setSubTitle(RsImportStrings::tr("Parsing file data..."));
 
-    //HACK: I don't like the 'Commit' button. This hack makes it similar to 'Next' button
+    // HACK: I don't like the 'Commit' button. This hack makes it similar to 'Next' button
     loadFilePage->setButtonText(QWizard::CommitButton, buttonText(QWizard::NextButton));
 
     importPage = new LoadingPage(this);
@@ -89,19 +89,26 @@ RSImportWizard::RSImportWizard(bool resume, QWidget *parent) :
     ChooseFilePage *chooseFilePage = new ChooseFilePage;
     connect(chooseFilePage, &ChooseFilePage::fileChosen, this, &RSImportWizard::onFileChosen);
 
-    setPage(OptionsPageIdx,  new OptionsPage);
-    setPage(ChooseFileIdx,   chooseFilePage);
-    setPage(LoadFileIdx,     loadFilePage);
-    setPage(SelectOwnersIdx, new ItemSelectionPage(this, ownersModel, nullptr, ownersModel,   RSImportedOwnersModel::MatchExisting, ModelModes::Owners));
-    setPage(SelectModelsIdx, new ItemSelectionPage(this, modelsModel, nullptr, modelsModel,   RSImportedModelsModel::MatchExisting, ModelModes::Models));
-    setPage(SelectRsIdx,     new ItemSelectionPage(this, listModel, spinFactory, nullptr, RSImportedRollingstockModel::NewNumber, ModelModes::Rollingstock));
-    setPage(ImportRsIdx,     importPage);
+    setPage(OptionsPageIdx, new OptionsPage);
+    setPage(ChooseFileIdx, chooseFilePage);
+    setPage(LoadFileIdx, loadFilePage);
+    setPage(SelectOwnersIdx,
+            new ItemSelectionPage(this, ownersModel, nullptr, ownersModel,
+                                  RSImportedOwnersModel::MatchExisting, ModelModes::Owners));
+    setPage(SelectModelsIdx,
+            new ItemSelectionPage(this, modelsModel, nullptr, modelsModel,
+                                  RSImportedModelsModel::MatchExisting, ModelModes::Models));
+    setPage(SelectRsIdx, new ItemSelectionPage(this, listModel, spinFactory, nullptr,
+                                               RSImportedRollingstockModel::NewNumber,
+                                               ModelModes::Rollingstock));
+    setPage(ImportRsIdx, importPage);
 
-    if(resume)
+    if (resume)
     {
         setStartId(SelectOwnersIdx);
         setWindowTitle(tr("Continue Rollingstock Importation"));
-    }else
+    }
+    else
     {
         setWindowTitle(tr("Import Rollingstock"));
     }
@@ -118,34 +125,36 @@ RSImportWizard::~RSImportWizard()
 
 void RSImportWizard::done(int result)
 {
-    if(result == QDialog::Rejected || result == RejectWithoutAsking)
+    if (result == QDialog::Rejected || result == RejectWithoutAsking)
     {
-        if(!isStoppingTask)
+        if (!isStoppingTask)
         {
-            if(result == QDialog::Rejected) //RejectWithoutAsking skips this
+            if (result == QDialog::Rejected) // RejectWithoutAsking skips this
             {
                 OwningQPointer<QMessageBox> msgBox = new QMessageBox(this);
                 msgBox->setIcon(QMessageBox::Question);
                 msgBox->setWindowTitle(RsImportStrings::tr("Abort import?"));
-                msgBox->setText(RsImportStrings::tr("Do you want to import process? No data will be imported"));
+                msgBox->setText(
+                  RsImportStrings::tr("Do you want to import process? No data will be imported"));
                 QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
-                QPushButton *noBut = msgBox->addButton(QMessageBox::No);
+                QPushButton *noBut    = msgBox->addButton(QMessageBox::No);
                 msgBox->setDefaultButton(noBut);
-                msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
+                msgBox->setEscapeButton(
+                  noBut); // Do not Abort if dialog is closed by Esc or X window button
                 msgBox->exec();
                 bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
-                if(!abortClicked)
+                if (!abortClicked)
                     return;
             }
 
-            if(loadTask)
+            if (loadTask)
             {
                 loadTask->stop();
                 isStoppingTask = true;
                 loadFilePage->setSubTitle(RsImportStrings::tr("Aborting..."));
             }
 
-            if(importTask)
+            if (importTask)
             {
                 importTask->stop();
                 isStoppingTask = true;
@@ -154,15 +163,15 @@ void RSImportWizard::done(int result)
         }
         else
         {
-            if(loadTask || importTask)
-                return; //Already sent 'stop', just wait
+            if (loadTask || importTask)
+                return; // Already sent 'stop', just wait
         }
 
-        //Reset to standard value because QWizard doesn't know about RejectWithoutAsking
+        // Reset to standard value because QWizard doesn't know about RejectWithoutAsking
         result = QDialog::Rejected;
     }
 
-    //Clear tables after import process completed or was aborted
+    // Clear tables after import process completed or was aborted
     Session->clearImportRSTables();
 
     QWizard::done(result);
@@ -170,9 +179,9 @@ void RSImportWizard::done(int result)
 
 bool RSImportWizard::validateCurrentPage()
 {
-    if(QWizard::validateCurrentPage())
+    if (QWizard::validateCurrentPage())
     {
-        if(nextId() == ImportRsIdx)
+        if (nextId() == ImportRsIdx)
         {
             startImportTask();
         }
@@ -188,27 +197,27 @@ int RSImportWizard::nextId() const
     {
     case LoadFileIdx:
     {
-        if((importMode & RSImportMode::ImportRSOwners) == 0)
+        if ((importMode & RSImportMode::ImportRSOwners) == 0)
         {
-            //Skip owners page
+            // Skip owners page
             id = SelectModelsIdx;
         }
         break;
     }
     case SelectOwnersIdx:
     {
-        if((importMode & RSImportMode::ImportRSModels) == 0)
+        if ((importMode & RSImportMode::ImportRSModels) == 0)
         {
-            //Skip models and rollingstock pages
+            // Skip models and rollingstock pages
             id = ImportRsIdx;
         }
         break;
     }
     case SelectModelsIdx:
     {
-        if((importMode & RSImportMode::ImportRSPieces) == 0)
+        if ((importMode & RSImportMode::ImportRSPieces) == 0)
         {
-            //Skip rollingstock page
+            // Skip rollingstock page
             id = ImportRsIdx;
         }
         break;
@@ -219,24 +228,25 @@ int RSImportWizard::nextId() const
 
 bool RSImportWizard::event(QEvent *e)
 {
-    if(e->type() == LoadProgressEvent::_Type)
+    if (e->type() == LoadProgressEvent::_Type)
     {
         LoadProgressEvent *ev = static_cast<LoadProgressEvent *>(e);
         ev->setAccepted(true);
 
-        if(ev->task == loadTask)
+        if (ev->task == loadTask)
         {
             QString errText;
-            if(ev->max == LoadProgressEvent::ProgressMaxFinished)
+            if (ev->max == LoadProgressEvent::ProgressMaxFinished)
             {
-                if(ev->progress == LoadProgressEvent::ProgressError)
+                if (ev->progress == LoadProgressEvent::ProgressError)
                 {
                     errText = loadTask->getErrorText();
                 }
 
                 loadFilePage->setSubTitle(tr("Completed."));
 
-                //Delete task before handling event because otherwise it is detected as still running
+                // Delete task before handling event because otherwise it is detected as still
+                // running
                 delete loadTask;
                 loadTask = nullptr;
                 loadFilePage->setProgressCompleted(true);
@@ -244,21 +254,22 @@ bool RSImportWizard::event(QEvent *e)
 
             loadFilePage->handleProgress(ev->progress, ev->max);
 
-            if(ev->progress == LoadProgressEvent::ProgressError)
+            if (ev->progress == LoadProgressEvent::ProgressError)
             {
                 QMessageBox::warning(this, RsImportStrings::tr("Loading Error"), errText);
                 reject();
             }
-            else if(ev->progress == LoadProgressEvent::ProgressAbortedByUser)
+            else if (ev->progress == LoadProgressEvent::ProgressAbortedByUser)
             {
-                reject(); //Reject the second time
+                reject(); // Reject the second time
             }
         }
-        else if(ev->task == importTask)
+        else if (ev->task == importTask)
         {
-            if(ev->max == LoadProgressEvent::ProgressMaxFinished)
+            if (ev->max == LoadProgressEvent::ProgressMaxFinished)
             {
-                //Delete task before handling event because otherwise it is detected as still running
+                // Delete task before handling event because otherwise it is detected as still
+                // running
                 delete importTask;
                 importTask = nullptr;
                 importPage->setProgressCompleted(true);
@@ -266,20 +277,20 @@ bool RSImportWizard::event(QEvent *e)
 
             importPage->handleProgress(ev->progress, ev->max);
 
-            if(ev->progress == LoadProgressEvent::ProgressError)
+            if (ev->progress == LoadProgressEvent::ProgressError)
             {
-                //QMessageBox::warning(this, RsImportStrings::tr("Loading Error"), errText); TODO
+                // QMessageBox::warning(this, RsImportStrings::tr("Loading Error"), errText); TODO
                 reject();
             }
-            else if(ev->progress == LoadProgressEvent::ProgressAbortedByUser)
+            else if (ev->progress == LoadProgressEvent::ProgressAbortedByUser)
             {
-                reject(); //Reject the second time
+                reject(); // Reject the second time
             }
         }
 
         return true;
     }
-    else if(e->type() == QEvent::Type(CustomEvents::RsImportGoBackPrevPage))
+    else if (e->type() == QEvent::Type(CustomEvents::RsImportGoBackPrevPage))
     {
         e->setAccepted(true);
         back();
@@ -292,16 +303,16 @@ void RSImportWizard::onFileChosen(const QString &filename)
     startLoadTask(filename);
 }
 
-bool RSImportWizard::startLoadTask(const QString& fileName)
+bool RSImportWizard::startLoadTask(const QString &fileName)
 {
     abortLoadTask();
-    
-    //Clear tables before starting new import process
+
+    // Clear tables before starting new import process
     Session->clearImportRSTables();
 
     loadTask = createLoadTask(optionsMap, fileName);
 
-    if(!loadTask)
+    if (!loadTask)
     {
         QMessageBox::warning(this, RsImportStrings::tr("Error"),
                              RsImportStrings::tr("Invalid option selected. Please try again."));
@@ -315,7 +326,7 @@ bool RSImportWizard::startLoadTask(const QString& fileName)
 
 void RSImportWizard::abortLoadTask()
 {
-    if(loadTask)
+    if (loadTask)
     {
         loadTask->stop();
         loadTask->cleanup();
@@ -334,7 +345,7 @@ void RSImportWizard::startImportTask()
 
 void RSImportWizard::abortImportTask()
 {
-    if(importTask)
+    if (importTask)
     {
         importTask->stop();
         importTask->cleanup();
@@ -350,14 +361,14 @@ void RSImportWizard::goToPrevPageQueued()
 void RSImportWizard::setDefaultTypeAndSpeed(RsType t, int speed)
 {
     defaultRsType = t;
-    defaultSpeed = speed;
+    defaultSpeed  = speed;
 }
 
 void RSImportWizard::setImportMode(int m)
 {
-    if(m == 0)
+    if (m == 0)
         m = RSImportMode::ImportRSPieces;
-    if(m & RSImportMode::ImportRSPieces)
+    if (m & RSImportMode::ImportRSPieces)
         m |= RSImportMode::ImportRSOwners | RSImportMode::ImportRSModels;
     importMode = m;
 }
@@ -370,11 +381,11 @@ QAbstractItemModel *RSImportWizard::getBackendsModel() const
 IOptionsWidget *RSImportWizard::createOptionsWidget(int idx, QWidget *parent)
 {
     RSImportBackend *back = backends->getBackend(idx);
-    if(!back)
+    if (!back)
         return nullptr;
 
     IOptionsWidget *w = back->createOptionsWidget();
-    if(!w)
+    if (!w)
         return nullptr;
 
     w->setParent(parent);
@@ -388,7 +399,7 @@ void RSImportWizard::setSource(int idx, IOptionsWidget *options)
     optionsMap.clear();
     options->saveSettings(optionsMap);
 
-    //Update ChooseFilePage
+    // Update ChooseFilePage
     ChooseFilePage *chooseFilePage = static_cast<ChooseFilePage *>(page(ChooseFileIdx));
     QString dlgTitle;
     QStringList fileFormats;
@@ -397,14 +408,14 @@ void RSImportWizard::setSource(int idx, IOptionsWidget *options)
     chooseFilePage->setFileDlgOptions(dlgTitle, fileFormats);
 }
 
-ILoadRSTask *RSImportWizard::createLoadTask(const QMap<QString, QVariant> &arguments, const QString& fileName)
+ILoadRSTask *RSImportWizard::createLoadTask(const QMap<QString, QVariant> &arguments,
+                                            const QString &fileName)
 {
     RSImportBackend *back = backends->getBackend(backendIdx);
-    if(!back)
+    if (!back)
         return nullptr;
 
-    ILoadRSTask *task = back->createLoadTask(arguments, Session->m_Db, importMode,
-                                             defaultSpeed, defaultRsType, fileName,
-                                             this);
+    ILoadRSTask *task = back->createLoadTask(arguments, Session->m_Db, importMode, defaultSpeed,
+                                             defaultRsType, fileName, this);
     return task;
 }

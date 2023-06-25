@@ -43,14 +43,13 @@ class QSpinBox;
 class QCheckBox;
 class QLineEdit;
 
-
 class EditRailwaySegmentDlg : public QDialog
 {
     Q_OBJECT
 public:
     enum LockField
     {
-        DoNotLock = 0,
+        DoNotLock          = 0,
         LockToCurrentValue = -1
     };
 
@@ -70,15 +69,14 @@ public:
      *
      * \sa RailwaySegmentConnectionsModel
      */
-    EditRailwaySegmentDlg(sqlite3pp::database &db,
-                          RailwaySegmentConnectionsModel *conn = nullptr,
+    EditRailwaySegmentDlg(sqlite3pp::database &db, RailwaySegmentConnectionsModel *conn = nullptr,
                           QWidget *parent = nullptr);
     ~EditRailwaySegmentDlg();
 
     virtual void done(int res) override;
 
     void setSegment(db_id segmentId, db_id lockStId, db_id lockGateId);
-    void setSegmentInfo(const utils::RailwaySegmentInfo& info);
+    void setSegmentInfo(const utils::RailwaySegmentInfo &info);
 
     void setGatesReadOnly(bool val);
 

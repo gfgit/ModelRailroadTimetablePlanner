@@ -41,7 +41,7 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // ISqlFKMatchModel:
-    void autoSuggest(const QString& text) override;
+    void autoSuggest(const QString &text) override;
     virtual void refreshData() override;
     QString getName(db_id id) const override;
 
@@ -77,7 +77,10 @@ public:
 
     virtual ISqlFKMatchModel *createModel() override;
 
-    inline void setStationId(db_id stationId) { m_stationId = stationId; }
+    inline void setStationId(db_id stationId)
+    {
+        m_stationId = stationId;
+    }
 
 private:
     db_id m_stationId;

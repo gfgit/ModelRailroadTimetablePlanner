@@ -28,21 +28,19 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-//Error messages
+// Error messages
 
-static constexpr char
-    errorNameAlreadyUsedText[] = QT_TRANSLATE_NOOP("StationTracksModel",
-                        "The track name <b>%1</b> is already used by another track of this station.");
+static constexpr char errorNameAlreadyUsedText[] =
+  QT_TRANSLATE_NOOP("StationTracksModel",
+                    "The track name <b>%1</b> is already used by another track of this station.");
 
-static constexpr char
-    errorLengthGreaterThanTrackText[] = QT_TRANSLATE_NOOP("StationTracksModel",
-                        "Passenger and Freight train length must be less than or equal to track length.");
+static constexpr char errorLengthGreaterThanTrackText[] = QT_TRANSLATE_NOOP(
+  "StationTracksModel",
+  "Passenger and Freight train length must be less than or equal to track length.");
 
-static constexpr char
-    errorTrackInUseText[] = QT_TRANSLATE_NOOP("StationTracksModel",
-                        "This track is still referenced.\n"
-                        "Please remove all references before deleting it.");
-
+static constexpr char errorTrackInUseText[] =
+  QT_TRANSLATE_NOOP("StationTracksModel", "This track is still referenced.\n"
+                                          "Please remove all references before deleting it.");
 
 StationTracksModel::StationTracksModel(sqlite3pp::database &db, QObject *parent) :
     BaseClass(BatchSize, db, parent),
@@ -54,7 +52,7 @@ StationTracksModel::StationTracksModel(sqlite3pp::database &db, QObject *parent)
 
 QVariant StationTracksModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal)
     {
         switch (role)
         {
@@ -105,7 +103,7 @@ QVariant StationTracksModel::headerData(int section, Qt::Orientation orientation
         }
         }
     }
-    else if(role == Qt::DisplayRole)
+    else if (role == Qt::DisplayRole)
     {
         return section + curPage * ItemsPerPage + 1;
     }
@@ -119,16 +117,16 @@ QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<StationTracksModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const TrackItem& item = cache.at(row - cacheFirstRow);
+    const TrackItem &item = cache.at(row - cacheFirstRow);
 
     const QString fmt(QStringLiteral("%1 cm"));
 
@@ -186,9 +184,11 @@ QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case IsElectrifiedCol:
-            return item.type.testFlag(utils::StationTrackType::Electrified) ? Qt::Checked : Qt::Unchecked;
+            return item.type.testFlag(utils::StationTrackType::Electrified) ? Qt::Checked
+                                                                            : Qt::Unchecked;
         case IsThroughCol:
-            return item.type.testFlag(utils::StationTrackType::Through) ? Qt::Checked : Qt::Unchecked;
+            return item.type.testFlag(utils::StationTrackType::Through) ? Qt::Checked
+                                                                        : Qt::Unchecked;
         case PassengerLegthCol:
             return item.platfLength ? Qt::Checked : Qt::Unchecked;
         case FreightLengthCol:
@@ -198,7 +198,7 @@ QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
     }
     case COLOR_ROLE:
     {
-        if(idx.column() == ColorCol)
+        if (idx.column() == ColorCol)
             return item.color;
         break;
     }
@@ -209,16 +209,17 @@ QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
 
 bool StationTracksModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
-    if(!editable)
+    if (!editable)
         return false;
 
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
-    TrackItem &item = cache[row - cacheFirstRow];
+    TrackItem &item   = cache[row - cacheFirstRow];
     QModelIndex first = idx;
-    QModelIndex last = idx;
+    QModelIndex last  = idx;
 
     switch (role)
     {
@@ -229,7 +230,7 @@ bool StationTracksModel::setData(const QModelIndex &idx, const QVariant &value, 
         case NameCol:
         {
             QString str = value.toString().simplified();
-            if(str.isEmpty() || !setName(item, str))
+            if (str.isEmpty() || !setName(item, str))
                 return false;
             break;
         }
@@ -237,7 +238,7 @@ bool StationTracksModel::setData(const QModelIndex &idx, const QVariant &value, 
         {
             bool ok = false;
             int val = value.toInt(&ok);
-            if(!ok || !setLength(item, val, Columns(idx.column())))
+            if (!ok || !setLength(item, val, Columns(idx.column())))
                 return false;
             break;
         }
@@ -250,32 +251,32 @@ bool StationTracksModel::setData(const QModelIndex &idx, const QVariant &value, 
         {
         case IsElectrifiedCol:
         {
-            Qt::CheckState cs = value.value<Qt::CheckState>();
+            Qt::CheckState cs                    = value.value<Qt::CheckState>();
             QFlags<utils::StationTrackType> type = item.type;
             type.setFlag(utils::StationTrackType::Electrified, cs == Qt::Checked);
 
-            if(!setType(item, type))
+            if (!setType(item, type))
                 return false;
             break;
         }
         case IsThroughCol:
         {
-            Qt::CheckState cs = value.value<Qt::CheckState>();
+            Qt::CheckState cs                    = value.value<Qt::CheckState>();
             QFlags<utils::StationTrackType> type = item.type;
             type.setFlag(utils::StationTrackType::Through, cs == Qt::Checked);
 
-            if(!setType(item, type))
+            if (!setType(item, type))
                 return false;
             break;
         }
         case PassengerLegthCol:
         {
             Qt::CheckState cs = value.value<Qt::CheckState>();
-            if(cs == Qt::Unchecked && item.platfLength != 0)
+            if (cs == Qt::Unchecked && item.platfLength != 0)
             {
                 return setLength(item, 0, PassengerLegthCol);
             }
-            else if(cs == Qt::Checked && item.platfLength == 0)
+            else if (cs == Qt::Checked && item.platfLength == 0)
             {
                 return setLength(item, item.trackLegth, PassengerLegthCol);
             }
@@ -284,11 +285,11 @@ bool StationTracksModel::setData(const QModelIndex &idx, const QVariant &value, 
         case FreightLengthCol:
         {
             Qt::CheckState cs = value.value<Qt::CheckState>();
-            if(cs == Qt::Unchecked && item.freightLength != 0)
+            if (cs == Qt::Unchecked && item.freightLength != 0)
             {
                 return setLength(item, 0, FreightLengthCol);
             }
-            else if(cs == Qt::Checked && item.freightLength == 0)
+            else if (cs == Qt::Checked && item.freightLength == 0)
             {
                 return setLength(item, item.trackLegth, FreightLengthCol);
             }
@@ -299,12 +300,12 @@ bool StationTracksModel::setData(const QModelIndex &idx, const QVariant &value, 
     }
     case COLOR_ROLE:
     {
-        if(idx.column() != ColorCol)
+        if (idx.column() != ColorCol)
             return false;
-        bool ok = false;
+        bool ok  = false;
         QRgb val = value.toInt(&ok);
-        if(!ok || !setColor(item, val))
-        break;
+        if (!ok || !setColor(item, val))
+            break;
     }
     }
 
@@ -319,25 +320,25 @@ Qt::ItemFlags StationTracksModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
 
-    if(idx.column() == PassengerLegthCol || idx.column() == FreightLengthCol)
+    if (idx.column() == PassengerLegthCol || idx.column() == FreightLengthCol)
     {
         f.setFlag(Qt::ItemIsUserCheckable);
     }
 
-    if(idx.column() == IsElectrifiedCol || idx.column() == IsThroughCol)
+    if (idx.column() == IsElectrifiedCol || idx.column() == IsThroughCol)
     {
         f.setFlag(Qt::ItemIsUserCheckable);
     }
-    else if(editable)
+    else if (editable)
     {
         const TrackItem &item = cache[idx.row() - cacheFirstRow];
-        if(idx.column() == PassengerLegthCol && item.platfLength == 0)
-            return f; //Not editable until ticking the checkbox
-        if(idx.column() == FreightLengthCol && item.freightLength == 0)
-            return f; //Not editable until ticking the checkbox
+        if (idx.column() == PassengerLegthCol && item.platfLength == 0)
+            return f; // Not editable until ticking the checkbox
+        if (idx.column() == FreightLengthCol && item.freightLength == 0)
+            return f; // Not editable until ticking the checkbox
 
         f.setFlag(Qt::ItemIsEditable);
     }
@@ -348,7 +349,7 @@ Qt::ItemFlags StationTracksModel::flags(const QModelIndex &idx) const
 void StationTracksModel::setSortingColumn(int col)
 {
     Q_UNUSED(col);
-    return; //TODO: should enable sorting???
+    return; // TODO: should enable sorting???
 }
 
 bool StationTracksModel::setStation(db_id stationId)
@@ -362,20 +363,21 @@ bool StationTracksModel::addTrack(int pos, const QString &name, db_id *outTrackI
 {
     constexpr const int defaultTrackLength_cm = 150;
 
-    if(name.isEmpty())
+    if (name.isEmpty())
         return false;
 
     query q_getMaxPos(mDb, "SELECT MAX(pos) FROM station_tracks WHERE station_id=?");
     q_getMaxPos.bind(1, m_stationId);
     q_getMaxPos.step();
     int maxPos = 0;
-    if(q_getMaxPos.getRows().column_type(0) != SQLITE_NULL)
+    if (q_getMaxPos.getRows().column_type(0) != SQLITE_NULL)
         maxPos = q_getMaxPos.getRows().get<int>(0) + 1;
     q_getMaxPos.finish();
 
     command q_newTrack(mDb, "INSERT INTO station_tracks"
-                           "(id, station_id, pos, type, track_length_cm, platf_length_cm, freight_length_cm, max_axes, color_rgb, name)"
-                           " VALUES (NULL, ?, ?, 0, ?, 0, 0, 2, NULL, ?)");
+                            "(id, station_id, pos, type, track_length_cm, platf_length_cm, "
+                            "freight_length_cm, max_axes, color_rgb, name)"
+                            " VALUES (NULL, ?, ?, 0, ?, 0, 0, 2, NULL, ?)");
     q_newTrack.bind(1, m_stationId);
     q_newTrack.bind(2, maxPos);
     q_newTrack.bind(3, defaultTrackLength_cm);
@@ -383,18 +385,18 @@ bool StationTracksModel::addTrack(int pos, const QString &name, db_id *outTrackI
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
-    int ret = q_newTrack.execute();
+    int ret       = q_newTrack.execute();
     db_id trackId = mDb.last_insert_rowid();
     sqlite3_mutex_leave(mutex);
     q_newTrack.reset();
 
-    if((ret != SQLITE_OK && ret != SQLITE_DONE) || trackId == 0)
+    if ((ret != SQLITE_OK && ret != SQLITE_DONE) || trackId == 0)
     {
-        //Error
-        if(outTrackId)
+        // Error
+        if (outTrackId)
             *outTrackId = 0;
 
-        if(ret == SQLITE_CONSTRAINT_UNIQUE)
+        if (ret == SQLITE_CONSTRAINT_UNIQUE)
         {
             emit modelError(tr(errorNameAlreadyUsedText).arg(name));
         }
@@ -405,14 +407,14 @@ bool StationTracksModel::addTrack(int pos, const QString &name, db_id *outTrackI
         return false;
     }
 
-    if(outTrackId)
+    if (outTrackId)
         *outTrackId = trackId;
 
-    if(pos >= 0)
+    if (pos >= 0)
         moveTrack(trackId, pos);
 
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
+    refreshData();   // Recalc row count
+    switchToPage(0); // Reset to first page and so it is shown as first row
 
     return true;
 }
@@ -425,11 +427,11 @@ bool StationTracksModel::removeTrack(db_id trackId)
     int ret = q.execute();
     q.reset();
 
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        if(ret == SQLITE_CONSTRAINT_TRIGGER)
+        if (ret == SQLITE_CONSTRAINT_TRIGGER)
         {
-            //TODO: show more information to the user, like where it's still referenced
+            // TODO: show more information to the user, like where it's still referenced
             emit modelError(tr(errorTrackInUseText));
         }
         else
@@ -440,7 +442,7 @@ bool StationTracksModel::removeTrack(db_id trackId)
         return false;
     }
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
 
     emit trackRemoved(trackId);
 
@@ -450,24 +452,28 @@ bool StationTracksModel::removeTrack(db_id trackId)
 bool StationTracksModel::moveTrackUpDown(db_id trackId, bool up, bool topOrBottom)
 {
     query q(mDb);
-    if(topOrBottom)
+    if (topOrBottom)
     {
-        if(up)
+        if (up)
         {
             q.prepare("SELECT MIN(pos) FROM station_tracks WHERE station_id=?");
-        }else{
+        }
+        else
+        {
             q.prepare("SELECT MAX(pos) FROM station_tracks WHERE station_id=?");
         }
     }
     else
     {
-        //Move by one
-        if(up)
+        // Move by one
+        if (up)
         {
             q.prepare("SELECT MAX(t1.pos) FROM station_tracks t1"
                       " JOIN station_tracks t ON t.id=?2"
                       " WHERE t1.station_id=?1 AND t.pos>t1.pos");
-        }else{
+        }
+        else
+        {
             q.prepare("SELECT MIN(t1.pos) FROM station_tracks t1"
                       " JOIN station_tracks t ON t.id=?2"
                       " WHERE t1.station_id=?1 AND t.pos<t1.pos");
@@ -477,15 +483,15 @@ bool StationTracksModel::moveTrackUpDown(db_id trackId, bool up, bool topOrBotto
     q.bind(1, m_stationId);
     q.step();
     auto r = q.getRows();
-    if(r.column_type(0) == SQLITE_NULL)
-        return false; //Already in position
+    if (r.column_type(0) == SQLITE_NULL)
+        return false; // Already in position
 
     int pos = r.get<int>(0);
     q.finish();
 
     moveTrack(trackId, pos);
 
-    //Refresh model
+    // Refresh model
     clearCache();
     emit dataChanged(index(0, 0), index(curItemCount - 1, NCols - 1));
 
@@ -494,7 +500,7 @@ bool StationTracksModel::moveTrackUpDown(db_id trackId, bool up, bool topOrBotto
 
 qint64 StationTracksModel::recalcTotalItemCount()
 {
-    //TODO: consider filters
+    // TODO: consider filters
     query q(mDb, "SELECT COUNT(1) FROM station_tracks WHERE station_id=?");
     q.bind(1, m_stationId);
     q.step();
@@ -506,27 +512,28 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
 {
     query q(mDb);
 
-    int offset = first - valRow + curPage * ItemsPerPage;
+    int offset   = first - valRow + curPage * ItemsPerPage;
     bool reverse = false;
 
-    if(valRow > first)
+    if (valRow > first)
     {
-        offset = 0;
+        offset  = 0;
         reverse = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset
+             << "Reverse:" << reverse;
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT id, type, track_length_cm, platf_length_cm, freight_length_cm,"
-                     "max_axes, color_rgb, name FROM station_tracks";
+    QByteArray sql       = "SELECT id, type, track_length_cm, platf_length_cm, freight_length_cm,"
+                           "max_axes, color_rgb, name FROM station_tracks";
     switch (sortCol)
     {
     case PosCol:
     default:
     {
-        whereCol = "pos"; //Order by 1 column, no where clause
+        whereCol = "pos"; // Order by 1 column, no where clause
         break;
     }
     }
@@ -545,16 +552,16 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
     sql += " ORDER BY ";
     sql += whereCol;
 
-    if(reverse)
+    if (reverse)
         sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
     q.bind(4, m_stationId);
@@ -573,25 +580,25 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
 
     QVector<TrackItem> vec(BatchSize);
 
-    auto it = q.begin();
-    const auto end = q.end();
+    auto it               = q.begin();
+    const auto end        = q.end();
 
     const QRgb whiteColor = qRgb(255, 255, 255);
 
-    int i = reverse ? BatchSize - 1 : 0;
-    const int increment = reverse ? -1 : 1;
+    int i                 = reverse ? BatchSize - 1 : 0;
+    const int increment   = reverse ? -1 : 1;
 
-    for(; it != end; ++it)
+    for (; it != end; ++it)
     {
-        auto r = *it;
-        TrackItem &item = vec[i];
-        item.trackId = r.get<db_id>(0);
-        item.type = utils::StationTrackType(r.get<int>(1));
-        item.trackLegth = r.get<int>(2);
-        item.platfLength = r.get<int>(3);
+        auto r             = *it;
+        TrackItem &item    = vec[i];
+        item.trackId       = r.get<db_id>(0);
+        item.type          = utils::StationTrackType(r.get<int>(1));
+        item.trackLegth    = r.get<int>(2);
+        item.platfLength   = r.get<int>(3);
         item.freightLength = r.get<int>(4);
-        item.maxAxesCount = r.get<db_id>(5);
-        if(r.column_type(6) == SQLITE_NULL)
+        item.maxAxesCount  = r.get<db_id>(5);
+        if (r.column_type(6) == SQLITE_NULL)
             item.color = whiteColor;
         else
             item.color = QRgb(r.get<int>(6));
@@ -600,9 +607,9 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
         i += increment;
     }
 
-    if(reverse && i > -1)
+    if (reverse && i > -1)
         vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    else if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
@@ -610,15 +617,15 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
 
 bool StationTracksModel::setName(StationTracksModel::TrackItem &item, const QString &name)
 {
-    //TODO: check non valid characters
+    // TODO: check non valid characters
 
     command q(mDb, "UPDATE station_tracks SET name=? WHERE id=?");
     q.bind(1, name);
     q.bind(2, item.trackId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
-        if(ret == SQLITE_CONSTRAINT_UNIQUE)
+        if (ret == SQLITE_CONSTRAINT_UNIQUE)
         {
             emit modelError(tr(errorNameAlreadyUsedText).arg(name));
         }
@@ -632,11 +639,11 @@ bool StationTracksModel::setName(StationTracksModel::TrackItem &item, const QStr
     item.name = name;
     emit trackNameChanged(item.trackId, item.name);
 
-    if(sortColumn != PosCol)
+    if (sortColumn != PosCol)
     {
-        //This row has now changed position so we need to invalidate cache
-        //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-        //but the view will trigger fetching at same scroll position so it is enough
+        // This row has now changed position so we need to invalidate cache
+        // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+        // but the view will trigger fetching at same scroll position so it is enough
         cache.clear();
         cacheFirstRow = 0;
     }
@@ -644,18 +651,19 @@ bool StationTracksModel::setName(StationTracksModel::TrackItem &item, const QStr
     return true;
 }
 
-bool StationTracksModel::setType(StationTracksModel::TrackItem &item, QFlags<utils::StationTrackType> type)
+bool StationTracksModel::setType(StationTracksModel::TrackItem &item,
+                                 QFlags<utils::StationTrackType> type)
 {
-    if(item.type == type)
+    if (item.type == type)
         return false;
 
-    //TODO: check through tracks must be default in at least 1 gate per side
+    // TODO: check through tracks must be default in at least 1 gate per side
 
     command q(mDb, "UPDATE station_tracks SET type=? WHERE id=?");
     q.bind(1, type);
     q.bind(2, item.trackId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
@@ -666,35 +674,36 @@ bool StationTracksModel::setType(StationTracksModel::TrackItem &item, QFlags<uti
     return true;
 }
 
-bool StationTracksModel::setLength(StationTracksModel::TrackItem &item, int val, StationTracksModel::Columns column)
+bool StationTracksModel::setLength(StationTracksModel::TrackItem &item, int val,
+                                   StationTracksModel::Columns column)
 {
-    if(val < 0)
+    if (val < 0)
         return false;
 
-    int *length = nullptr;
+    int *length         = nullptr;
     const char *colName = nullptr;
-    switch(column)
+    switch (column)
     {
     case TrackLengthCol:
     {
-        length = &item.trackLegth;
+        length  = &item.trackLegth;
         colName = "track_length_cm";
         break;
     }
     case PassengerLegthCol:
     {
-        length = &item.platfLength;
+        length  = &item.platfLength;
         colName = "platf_length_cm";
         break;
     }
     case FreightLengthCol:
     {
-        length = &item.freightLength;
+        length  = &item.freightLength;
         colName = "freight_length_cm";
         break;
     case MaxAxesCol:
     {
-        length = &item.maxAxesCount;
+        length  = &item.maxAxesCount;
         colName = "max_axes";
         break;
     }
@@ -703,10 +712,10 @@ bool StationTracksModel::setLength(StationTracksModel::TrackItem &item, int val,
         return false;
     }
 
-    if(val == *length)
+    if (val == *length)
         return false;
 
-    if(val > item.trackLegth && column != TrackLengthCol && column != MaxAxesCol)
+    if (val > item.trackLegth && column != TrackLengthCol && column != MaxAxesCol)
     {
         emit modelError(errorLengthGreaterThanTrackText);
         return false;
@@ -720,7 +729,7 @@ bool StationTracksModel::setLength(StationTracksModel::TrackItem &item, int val,
     q.bind(1, val);
     q.bind(2, item.trackId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
@@ -733,19 +742,19 @@ bool StationTracksModel::setLength(StationTracksModel::TrackItem &item, int val,
 
 bool StationTracksModel::setColor(StationTracksModel::TrackItem &item, QRgb color)
 {
-    if(item.color == color)
+    if (item.color == color)
         return false;
 
     const QRgb whiteColor = qRgb(255, 255, 255);
 
     command q(mDb, "UPDATE station_tracks SET color_rgb=? WHERE id=?");
-    if(color == whiteColor)
-        q.bind(1); //Bind NULL
+    if (color == whiteColor)
+        q.bind(1); // Bind NULL
     else
         q.bind(1, int(color));
     q.bind(2, item.trackId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
@@ -761,36 +770,37 @@ void StationTracksModel::moveTrack(db_id trackId, int pos)
     command q_setPos(mDb, "UPDATE station_tracks SET pos=? WHERE id=?");
     query q(mDb);
 
-    //Get max pos
+    // Get max pos
     q.prepare("SELECT MAX(pos) FROM station_tracks WHERE station_id=?");
     q.bind(1, m_stationId);
     q.step();
     const int max = q.getRows().get<int>(0);
 
-    //Save old pos
+    // Save old pos
     q.prepare("SELECT pos FROM station_tracks WHERE id=?");
     q.bind(1, trackId);
     q.step();
     const int oldPos = q.getRows().get<int>(0);
 
-    //Move our track to max+1
+    // Move our track to max+1
     q_setPos.bind(1, max + 1);
     q_setPos.bind(2, trackId);
     q_setPos.execute();
     q_setPos.reset();
 
-    if(pos > oldPos)
+    if (pos > oldPos)
     {
-        //Moving down (towards higher pos number)
+        // Moving down (towards higher pos number)
 
         int otherPos = oldPos;
 
-        //Shift tracks by one (caution: there is UNIQUE constraint on pos)
-        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos BETWEEN ? AND ? ORDER BY pos ASC");
+        // Shift tracks by one (caution: there is UNIQUE constraint on pos)
+        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos BETWEEN ? AND ? ORDER "
+                  "BY pos ASC");
         q.bind(1, m_stationId);
         q.bind(2, oldPos);
         q.bind(3, pos);
-        for(auto track : q)
+        for (auto track : q)
         {
             db_id otherId = track.get<db_id>(0);
             q_setPos.bind(1, otherPos);
@@ -800,18 +810,19 @@ void StationTracksModel::moveTrack(db_id trackId, int pos)
             otherPos++;
         }
     }
-    else if(oldPos > pos)
+    else if (oldPos > pos)
     {
-        //Moving up (towards lower pos number)
+        // Moving up (towards lower pos number)
 
         int otherPos = oldPos;
 
-        //Shift tracks by one (caution: there is UNIQUE constraint on pos)
-        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos BETWEEN ? AND ? ORDER BY pos DESC");
+        // Shift tracks by one (caution: there is UNIQUE constraint on pos)
+        q.prepare("SELECT id FROM station_tracks WHERE station_id=? AND pos BETWEEN ? AND ? ORDER "
+                  "BY pos DESC");
         q.bind(1, m_stationId);
         q.bind(2, pos);
         q.bind(3, oldPos);
-        for(auto track : q)
+        for (auto track : q)
         {
             db_id otherId = track.get<db_id>(0);
             q_setPos.bind(1, otherPos);
@@ -822,7 +833,7 @@ void StationTracksModel::moveTrack(db_id trackId, int pos)
         }
     }
 
-    //Move our track to pos
+    // Move our track to pos
     q_setPos.bind(1, pos);
     q_setPos.bind(2, trackId);
     q_setPos.execute();

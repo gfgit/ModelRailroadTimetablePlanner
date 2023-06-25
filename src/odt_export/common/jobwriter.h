@@ -30,9 +30,9 @@ class QXmlStreamWriter;
 class JobWriter
 {
 public:
-    JobWriter(database& db);
+    JobWriter(database &db);
 
-    static void writeJobAutomaticStyles(QXmlStreamWriter& xml);
+    static void writeJobAutomaticStyles(QXmlStreamWriter &xml);
     static void writeJobStyles(QXmlStreamWriter &xml);
 
     void writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat);

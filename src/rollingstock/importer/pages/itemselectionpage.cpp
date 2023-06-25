@@ -41,31 +41,28 @@
 #include "../rsimportstrings.h"
 #include "utils/rs_types_names.h"
 
-static const char *title_strings[] = {
-    QT_TRANSLATE_NOOP("RsTypeNames", "Owners"),
-    QT_TRANSLATE_NOOP("RsTypeNames", "Models"),
-    QT_TRANSLATE_NOOP("RsTypeNames", "Rollingstock")
-};
+static const char *title_strings[] = {QT_TRANSLATE_NOOP("RsTypeNames", "Owners"),
+                                      QT_TRANSLATE_NOOP("RsTypeNames", "Models"),
+                                      QT_TRANSLATE_NOOP("RsTypeNames", "Rollingstock")};
 
 static const char *descr_strings[] = {
-    QT_TRANSLATE_NOOP("RsImportStrings", "Select owners of rollingstock you want to import"),
-    QT_TRANSLATE_NOOP("RsImportStrings", "Select models of rollingstock you want to import"),
-    QT_TRANSLATE_NOOP("RsImportStrings", "Select rollingstock pieces you want to import")
-};
+  QT_TRANSLATE_NOOP("RsImportStrings", "Select owners of rollingstock you want to import"),
+  QT_TRANSLATE_NOOP("RsImportStrings", "Select models of rollingstock you want to import"),
+  QT_TRANSLATE_NOOP("RsImportStrings", "Select rollingstock pieces you want to import")};
 
 static const char *error_strings[] = {
-    QT_TRANSLATE_NOOP("RsImportStrings", "You must select at least 1 owner"),
-    QT_TRANSLATE_NOOP("RsImportStrings", "You must select at least 1 model"),
-    QT_TRANSLATE_NOOP("RsImportStrings", "You must select at least 1 rollingsock piece")
-};
+  QT_TRANSLATE_NOOP("RsImportStrings", "You must select at least 1 owner"),
+  QT_TRANSLATE_NOOP("RsImportStrings", "You must select at least 1 model"),
+  QT_TRANSLATE_NOOP("RsImportStrings", "You must select at least 1 rollingsock piece")};
 
-static const char *display_strings[] = { //FIXME plurals
-    QT_TRANSLATE_NOOP("RsImportStrings", "%1 owners selected"),
-    QT_TRANSLATE_NOOP("RsImportStrings", "%1 models selected"),
-    QT_TRANSLATE_NOOP("RsImportStrings", "%1 rollingstock pieces selected")
-};
+static const char *display_strings[] = { // FIXME plurals
+  QT_TRANSLATE_NOOP("RsImportStrings", "%1 owners selected"),
+  QT_TRANSLATE_NOOP("RsImportStrings", "%1 models selected"),
+  QT_TRANSLATE_NOOP("RsImportStrings", "%1 rollingstock pieces selected")};
 
-ItemSelectionPage::ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItemEditorFactory *edFactory, IFKField *ifaceDelegate, int delegateCol, ModelModes::Mode mode, QWidget *parent) :
+ItemSelectionPage::ItemSelectionPage(RSImportWizard *w, IRsImportModel *m,
+                                     QItemEditorFactory *edFactory, IFKField *ifaceDelegate,
+                                     int delegateCol, ModelModes::Mode mode, QWidget *parent) :
     QWizardPage(parent),
     mWizard(w),
     model(m),
@@ -74,10 +71,11 @@ ItemSelectionPage::ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItem
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    //TODO: add SelectAll, SelectNone
+    // TODO: add SelectAll, SelectNone
 
     view = new QTableView(this);
-    view->setEditTriggers(QTableView::DoubleClicked); //Prevent changing names by accidentally pressing a key
+    view->setEditTriggers(
+      QTableView::DoubleClicked); // Prevent changing names by accidentally pressing a key
     lay->addWidget(view);
 
     auto ps = new ModelPageSwitcher(false, this);
@@ -90,21 +88,21 @@ ItemSelectionPage::ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItem
     ps->setModel(model);
     connect(model, &IRsImportModel::modelError, this, &ItemSelectionPage::showModelError);
 
-    if(ifaceDelegate)
+    if (ifaceDelegate)
     {
-        SqlFKFieldDelegate *delegate = new SqlFKFieldDelegate(new RSMatchModelFactory(m_mode, model->getDb(), this), ifaceDelegate, this);
+        SqlFKFieldDelegate *delegate = new SqlFKFieldDelegate(
+          new RSMatchModelFactory(m_mode, model->getDb(), this), ifaceDelegate, this);
         view->setItemDelegateForColumn(delegateCol, delegate);
-
     }
-    else if(editorFactory)
+    else if (editorFactory)
     {
         QStyledItemDelegate *delegate = new QStyledItemDelegate(this);
         delegate->setItemEditorFactory(editorFactory);
         view->setItemDelegateForColumn(delegateCol, delegate);
     }
 
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
+    // Custom colun sorting
+    // NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
     QHeaderView *header = view->horizontalHeader();
     disconnect(header, SIGNAL(sectionPressed(int)), view, SLOT(selectColumn(int)));
     disconnect(header, SIGNAL(sectionEntered(int)), view, SLOT(_q_selectColumn(int)));
@@ -119,7 +117,7 @@ ItemSelectionPage::ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItem
     setTitle(RsTypeNames::tr(title_strings[m_mode]));
     setSubTitle(RsImportStrings::tr(descr_strings[m_mode]));
 
-    if(m_mode == ModelModes::Rollingstock)
+    if (m_mode == ModelModes::Rollingstock)
     {
         setCommitPage(true);
         setButtonText(QWizard::CommitButton, RsImportStrings::tr("Import"));
@@ -128,22 +126,22 @@ ItemSelectionPage::ItemSelectionPage(RSImportWizard *w, IRsImportModel *m, QItem
 
 void ItemSelectionPage::initializePage()
 {
-    //Check for duplicates
+    // Check for duplicates
     std::unique_ptr<IDuplicatesItemModel> dupModel;
     dupModel.reset(IDuplicatesItemModel::createModel(m_mode, model->getDb(), model, this));
 
-    bool canGoBack = mWizard->currentId() != RSImportWizard::SelectOwnersIdx;
+    bool canGoBack                       = mWizard->currentId() != RSImportWizard::SelectOwnersIdx;
     OwningQPointer<FixDuplicatesDlg> dlg = new FixDuplicatesDlg(dupModel.get(), canGoBack, this);
-    if(m_mode == ModelModes::Rollingstock && editorFactory)
+    if (m_mode == ModelModes::Rollingstock && editorFactory)
     {
         QStyledItemDelegate *delegate = new QStyledItemDelegate(this);
         delegate->setItemEditorFactory(editorFactory);
         dlg->setItemDelegateForColumn(DuplicatesImportedRSModel::NewNumber, delegate);
     }
 
-    //First load
+    // First load
     int res = dlg->blockingReloadCount(IDuplicatesItemModel::LoadingData);
-    if(res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
+    if (res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
     {
         /* HACK:
          * we are inside 'initializePage()' which is called before QWizard
@@ -155,32 +153,32 @@ void ItemSelectionPage::initializePage()
         mWizard->goToPrevPageQueued();
         return;
     }
-    else if(res != QDialog::Accepted)
+    else if (res != QDialog::Accepted)
     {
-        //Prevent showing another message box asking user if he is sure about quitting
+        // Prevent showing another message box asking user if he is sure about quitting
         mWizard->done(RSImportWizard::RejectWithoutAsking);
         return;
     }
 
-    if(dupModel->getItemCount() > 0)
+    if (dupModel->getItemCount() > 0)
     {
-        //We have duplicates, run dialog
+        // We have duplicates, run dialog
         res = dlg->exec();
-        if(res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
+        if (res == FixDuplicatesDlg::GoBackToPrevPage && canGoBack)
         {
             /* HACK: see above */
             mWizard->goToPrevPageQueued();
             return;
         }
-        else if(res != QDialog::Accepted)
+        else if (res != QDialog::Accepted)
         {
-            //Prevent showing another message box asking user if he is sure about quitting
+            // Prevent showing another message box asking user if he is sure about quitting
             mWizard->done(RSImportWizard::RejectWithoutAsking);
             return;
         }
     }
 
-    //Duplicates are now fixed, refresh main model
+    // Duplicates are now fixed, refresh main model
     model->refreshData();
 }
 
@@ -192,15 +190,16 @@ void ItemSelectionPage::cleanupPage()
 bool ItemSelectionPage::validatePage()
 {
     int count = model->countImported();
-    if(count == 0)
+    if (count == 0)
     {
-        QMessageBox::warning(this, RsImportStrings::tr("Invalid Operation"), RsImportStrings::tr(error_strings[m_mode]));
+        QMessageBox::warning(this, RsImportStrings::tr("Invalid Operation"),
+                             RsImportStrings::tr(error_strings[m_mode]));
         return false;
     }
 
     model->clearCache();
 
-    if(m_mode == ModelModes::Rollingstock)
+    if (m_mode == ModelModes::Rollingstock)
     {
         mWizard->startImportTask();
     }
@@ -220,7 +219,7 @@ void ItemSelectionPage::sectionClicked(int col)
     view->horizontalHeader()->setSortIndicator(model->getSortingColumn(), Qt::AscendingOrder);
 }
 
-void ItemSelectionPage::showModelError(const QString& text)
+void ItemSelectionPage::showModelError(const QString &text)
 {
     QMessageBox::warning(this, RsImportStrings::tr("Invalid Operation"), text);
 }

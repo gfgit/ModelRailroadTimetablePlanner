@@ -38,9 +38,13 @@ class RSListOnDemandModel : public IPagedItemModelImpl<RSListOnDemandModel, RSLi
     Q_OBJECT
 
 public:
-    enum { BatchSize = 50 };
+    enum
+    {
+        BatchSize = 50
+    };
 
-    enum Columns {
+    enum Columns
+    {
         Name = 0,
         NCols
     };

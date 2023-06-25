@@ -28,31 +28,29 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-//Error messages
+// Error messages
 
-static constexpr char
-    errorTrackConnInUseText[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
-                        "This track connection is still referenced.\n"
-                        "Please change remove or change path to all Jobs travelling on this connection.");
+static constexpr char errorTrackConnInUseText[] = QT_TRANSLATE_NOOP(
+  "StationTrackConnectionsModel",
+  "This track connection is still referenced.\n"
+  "Please change remove or change path to all Jobs travelling on this connection.");
 
-static constexpr char
-    errorConnAlreadyExistsText[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
-                        "This track is already connected to this gade track by this side.");
+static constexpr char errorConnAlreadyExistsText[] =
+  QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
+                    "This track is already connected to this gade track by this side.");
 
-static constexpr char
-    errorInvalidGateId[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
-                        "Please select a valid Gate.");
+static constexpr char errorInvalidGateId[] =
+  QT_TRANSLATE_NOOP("StationTrackConnectionsModel", "Please select a valid Gate.");
 
-static constexpr char
-    errorGateOnDifferentStation[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
-                        "The selected Gate belongs to a different station.");
+static constexpr char errorGateOnDifferentStation[] = QT_TRANSLATE_NOOP(
+  "StationTrackConnectionsModel", "The selected Gate belongs to a different station.");
 
-static constexpr char
-    errorGateTrackOutOfBound[] = QT_TRANSLATE_NOOP("StationTrackConnectionsModel",
-                        "Gate track is out of bound.<br>"
-                        "The selected Gate has only <b>%1</b> tracks.");
+static constexpr char errorGateTrackOutOfBound[] =
+  QT_TRANSLATE_NOOP("StationTrackConnectionsModel", "Gate track is out of bound.<br>"
+                                                    "The selected Gate has only <b>%1</b> tracks.");
 
-StationTrackConnectionsModel::StationTrackConnectionsModel(sqlite3pp::database &db, QObject *parent) :
+StationTrackConnectionsModel::StationTrackConnectionsModel(sqlite3pp::database &db,
+                                                           QObject *parent) :
     BaseClass(500, db, parent),
     m_stationId(0),
     editable(false)
@@ -60,9 +58,10 @@ StationTrackConnectionsModel::StationTrackConnectionsModel(sqlite3pp::database &
     sortColumn = TrackCol;
 }
 
-QVariant StationTrackConnectionsModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant StationTrackConnectionsModel::headerData(int section, Qt::Orientation orientation,
+                                                  int role) const
 {
-    if(orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal)
     {
         switch (role)
         {
@@ -83,7 +82,7 @@ QVariant StationTrackConnectionsModel::headerData(int section, Qt::Orientation o
         }
         }
     }
-    else if(role == Qt::DisplayRole)
+    else if (role == Qt::DisplayRole)
     {
         return section + curPage * ItemsPerPage + 1;
     }
@@ -97,16 +96,16 @@ QVariant StationTrackConnectionsModel::data(const QModelIndex &idx, int role) co
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<StationTrackConnectionsModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const TrackConnItem& item = cache.at(row - cacheFirstRow);
+    const TrackConnItem &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -155,16 +154,17 @@ QVariant StationTrackConnectionsModel::data(const QModelIndex &idx, int role) co
 
 bool StationTrackConnectionsModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
-    if(!editable)
+    if (!editable)
         return false;
 
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
     TrackConnItem &item = cache[row - cacheFirstRow];
-    QModelIndex first = idx;
-    QModelIndex last = idx;
+    QModelIndex first   = idx;
+    QModelIndex last    = idx;
 
     switch (role)
     {
@@ -176,7 +176,7 @@ bool StationTrackConnectionsModel::setData(const QModelIndex &idx, const QVarian
         {
             bool ok = false;
             int val = value.toInt(&ok);
-            if(!ok || !setTrackSide(item, val))
+            if (!ok || !setTrackSide(item, val))
                 return false;
             break;
         }
@@ -184,7 +184,7 @@ bool StationTrackConnectionsModel::setData(const QModelIndex &idx, const QVarian
         {
             bool ok = false;
             int val = value.toInt(&ok);
-            if(!ok || !setGateTrack(item, val))
+            if (!ok || !setGateTrack(item, val))
                 return false;
             break;
         }
@@ -204,8 +204,8 @@ Qt::ItemFlags StationTrackConnectionsModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(!editable || idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (!editable || idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
 
     f.setFlag(Qt::ItemIsEditable);
     return f;
@@ -213,35 +213,36 @@ Qt::ItemFlags StationTrackConnectionsModel::flags(const QModelIndex &idx) const
 
 void StationTrackConnectionsModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col >= NCols)
+    if (sortColumn == col || col >= NCols)
         return;
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
-bool StationTrackConnectionsModel::getFieldData(int row, int col, db_id &idOut, QString &nameOut) const
+bool StationTrackConnectionsModel::getFieldData(int row, int col, db_id &idOut,
+                                                QString &nameOut) const
 {
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false;
 
-    const TrackConnItem& item = cache[row - cacheFirstRow];
+    const TrackConnItem &item = cache[row - cacheFirstRow];
 
     switch (col)
     {
     case TrackCol:
     {
-        idOut = item.trackId;
+        idOut   = item.trackId;
         nameOut = item.trackName;
         break;
     }
     case GateCol:
     {
-        idOut = item.gateId;
+        idOut   = item.gateId;
         nameOut = item.gateName;
         break;
     }
@@ -263,11 +264,11 @@ bool StationTrackConnectionsModel::validateData(int row, int col, db_id id, cons
 
 bool StationTrackConnectionsModel::setFieldData(int row, int col, db_id id, const QString &name)
 {
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false;
 
-    TrackConnItem& item = cache[row - cacheFirstRow];
-    bool ret = false;
+    TrackConnItem &item = cache[row - cacheFirstRow];
+    bool ret            = false;
     switch (col)
     {
     case TrackCol:
@@ -282,7 +283,7 @@ bool StationTrackConnectionsModel::setFieldData(int row, int col, db_id id, cons
     }
     }
 
-    if(ret)
+    if (ret)
     {
         QModelIndex idx = index(row, col);
         emit dataChanged(idx, idx);
@@ -298,13 +299,15 @@ bool StationTrackConnectionsModel::setStation(db_id stationId)
     return true;
 }
 
-bool StationTrackConnectionsModel::addTrackConnection(db_id trackId, utils::Side trackSide, db_id gateId, int gateTrack)
+bool StationTrackConnectionsModel::addTrackConnection(db_id trackId, utils::Side trackSide,
+                                                      db_id gateId, int gateTrack)
 {
-    if(!trackId || !gateId || gateTrack < 0)
+    if (!trackId || !gateId || gateTrack < 0)
         return false;
 
-    command q_newTrackConn(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
-                                " VALUES(NULL,?,?,?,?)");
+    command q_newTrackConn(
+      mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+           " VALUES(NULL,?,?,?,?)");
     q_newTrackConn.bind(1, trackId);
     q_newTrackConn.bind(2, int(trackSide));
     q_newTrackConn.bind(3, gateId);
@@ -312,16 +315,16 @@ bool StationTrackConnectionsModel::addTrackConnection(db_id trackId, utils::Side
 
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
-    int ret = q_newTrackConn.execute();
+    int ret      = q_newTrackConn.execute();
     db_id connId = mDb.last_insert_rowid();
     sqlite3_mutex_leave(mutex);
     q_newTrackConn.reset();
 
-    if((ret != SQLITE_OK && ret != SQLITE_DONE) || connId == 0)
+    if ((ret != SQLITE_OK && ret != SQLITE_DONE) || connId == 0)
     {
-        //Error
+        // Error
 
-        if(ret == SQLITE_CONSTRAINT_UNIQUE)
+        if (ret == SQLITE_CONSTRAINT_UNIQUE)
         {
             emit modelError(tr(errorConnAlreadyExistsText));
         }
@@ -332,8 +335,8 @@ bool StationTrackConnectionsModel::addTrackConnection(db_id trackId, utils::Side
         return false;
     }
 
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
+    refreshData();   // Recalc row count
+    switchToPage(0); // Reset to first page and so it is shown as first row
 
     return true;
 }
@@ -346,11 +349,11 @@ bool StationTrackConnectionsModel::removeTrackConnection(db_id connId)
     int ret = q.execute();
     q.reset();
 
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+        if (ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
-            //TODO: show more information to the user, like where it's still referenced
+            // TODO: show more information to the user, like where it's still referenced
             emit modelError(tr(errorTrackConnInUseText));
         }
         else
@@ -361,42 +364,45 @@ bool StationTrackConnectionsModel::removeTrackConnection(db_id connId)
         return false;
     }
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
 
     emit trackConnRemoved(connId, 0, 0);
 
     return true;
 }
 
-bool StationTrackConnectionsModel::addTrackToAllGatesOnSide(db_id trackId, utils::Side side, int preferredGateTrack)
+bool StationTrackConnectionsModel::addTrackToAllGatesOnSide(db_id trackId, utils::Side side,
+                                                            int preferredGateTrack)
 {
-    if(!trackId)
+    if (!trackId)
         return false;
 
-    if(preferredGateTrack < 0)
+    if (preferredGateTrack < 0)
         preferredGateTrack = 0;
 
-    command q_newTrackConn(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
-                                " VALUES(NULL,?,?,?,?)");
+    command q_newTrackConn(
+      mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+           " VALUES(NULL,?,?,?,?)");
 
-    //Select all gates on requested side
-    query q_selectGates(mDb, "SELECT id,out_track_count FROM station_gates WHERE station_id=? AND side=?");
+    // Select all gates on requested side
+    query q_selectGates(
+      mDb, "SELECT id,out_track_count FROM station_gates WHERE station_id=? AND side=?");
     q_selectGates.bind(1, m_stationId);
     q_selectGates.bind(2, int(side));
 
-    for(auto gate : q_selectGates)
+    for (auto gate : q_selectGates)
     {
-        db_id gateId = gate.get<db_id>(0);
+        db_id gateId      = gate.get<db_id>(0);
         int outTrackCount = gate.get<int>(1);
 
-        //If gate track is out of bound chose the highest
+        // If gate track is out of bound chose the highest
         int gateTrack = preferredGateTrack;
-        if(gateTrack >= outTrackCount)
+        if (gateTrack >= outTrackCount)
             gateTrack = outTrackCount - 1;
 
-        //Ignore return codes
-        //Some connections may already exist
-        //Skip them by ignoring failed inserts
+        // Ignore return codes
+        // Some connections may already exist
+        // Skip them by ignoring failed inserts
         q_newTrackConn.bind(1, trackId);
         q_newTrackConn.bind(2, int(side));
         q_newTrackConn.bind(3, gateId);
@@ -405,63 +411,64 @@ bool StationTrackConnectionsModel::addTrackToAllGatesOnSide(db_id trackId, utils
         q_newTrackConn.reset();
     }
 
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
+    refreshData();   // Recalc row count
+    switchToPage(0); // Reset to first page and so it is shown as first row
 
     return true;
 }
 
 bool StationTrackConnectionsModel::addGateToAllTracks(db_id gateId, int gateTrack)
 {
-    if(!gateId)
+    if (!gateId)
         return false;
 
-    if(gateTrack < 0)
+    if (gateTrack < 0)
         gateTrack = 0;
 
-    command q_newTrackConn(mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
-                                " VALUES(NULL,?,?,?,?)");
+    command q_newTrackConn(
+      mDb, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
+           " VALUES(NULL,?,?,?,?)");
 
-    //Select gate side and track count
+    // Select gate side and track count
     query q(mDb, "SELECT station_id,out_track_count,side FROM station_gates WHERE id=?");
     q.bind(1, gateId);
     int ret = q.step();
-    if(ret != SQLITE_ROW)
+    if (ret != SQLITE_ROW)
     {
-        //Invalid Id
+        // Invalid Id
         emit modelError(tr(errorInvalidGateId));
         return false;
     }
 
     db_id gateStationId = q.getRows().get<db_id>(0);
-    if(gateStationId != m_stationId)
+    if (gateStationId != m_stationId)
     {
-        //Gate belongs to a different station.
+        // Gate belongs to a different station.
         emit modelError(tr(errorGateOnDifferentStation));
         return false;
     }
 
-    int outTrackCount = q.getRows().get<int>(1);
+    int outTrackCount     = q.getRows().get<int>(1);
     utils::Side trackSide = utils::Side(q.getRows().get<int>(2));
 
-    if(gateTrack >= outTrackCount)
+    if (gateTrack >= outTrackCount)
     {
-        //Gate track out of bound
+        // Gate track out of bound
         emit modelError(tr(errorGateTrackOutOfBound).arg(outTrackCount));
         return false;
     }
 
-    //Select all tracks
+    // Select all tracks
     q.prepare("SELECT id FROM station_tracks WHERE station_id=?");
     q.bind(1, m_stationId);
 
-    for(auto track : q)
+    for (auto track : q)
     {
         db_id trackId = track.get<db_id>(0);
 
-        //Ignore return codes
-        //Some connections may already exist
-        //Skip them by ignoring failed inserts
+        // Ignore return codes
+        // Some connections may already exist
+        // Skip them by ignoring failed inserts
         q_newTrackConn.bind(1, trackId);
         q_newTrackConn.bind(2, int(trackSide));
         q_newTrackConn.bind(3, gateId);
@@ -470,15 +477,15 @@ bool StationTrackConnectionsModel::addGateToAllTracks(db_id gateId, int gateTrac
         q_newTrackConn.reset();
     }
 
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
+    refreshData();   // Recalc row count
+    switchToPage(0); // Reset to first page and so it is shown as first row
 
     return true;
 }
 
 qint64 StationTrackConnectionsModel::recalcTotalItemCount()
 {
-    //TODO: consider filters
+    // TODO: consider filters
     query q(mDb, "SELECT COUNT(1) FROM station_gate_connections c"
                  " JOIN station_gates g ON g.id=c.gate_id WHERE g.station_id=?");
     q.bind(1, m_stationId);
@@ -487,27 +494,29 @@ qint64 StationTrackConnectionsModel::recalcTotalItemCount()
     return count;
 }
 
-void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int valRow, const QVariant &val)
+void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int valRow,
+                                                 const QVariant &val)
 {
     query q(mDb);
 
-    int offset = first - valRow + curPage * ItemsPerPage;
+    int offset   = first - valRow + curPage * ItemsPerPage;
     bool reverse = false;
 
-    if(valRow > first)
+    if (valRow > first)
     {
-        offset = 0;
+        offset  = 0;
         reverse = true;
     }
 
-    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset << "Reverse:" << reverse;
+    qDebug() << "Fetching:" << first << "ValRow:" << valRow << val << "Offset:" << offset
+             << "Reverse:" << reverse;
 
     const char *whereCol = nullptr;
 
-    QByteArray sql = "SELECT c.id, c.track_id, c.track_side, t.name,"
-                     "c.gate_id, g.name, c.gate_track FROM station_gate_connections c"
-                     " JOIN station_tracks t ON t.id=c.track_id"
-                     " JOIN station_gates g ON g.id=c.gate_id";
+    QByteArray sql       = "SELECT c.id, c.track_id, c.track_side, t.name,"
+                           "c.gate_id, g.name, c.gate_track FROM station_gate_connections c"
+                           " JOIN station_tracks t ON t.id=c.track_id"
+                           " JOIN station_gates g ON g.id=c.gate_id";
     switch (sortCol)
     {
     case TrackCol:
@@ -538,16 +547,16 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
     sql += " ORDER BY ";
     sql += whereCol;
 
-    if(reverse)
+    if (reverse)
         sql += " DESC";
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
     q.bind(4, m_stationId);
@@ -566,46 +575,47 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
 
     QVector<TrackConnItem> vec(BatchSize);
 
-    auto it = q.begin();
-    const auto end = q.end();
+    auto it             = q.begin();
+    const auto end      = q.end();
 
-    int i = reverse ? BatchSize - 1 : 0;
+    int i               = reverse ? BatchSize - 1 : 0;
     const int increment = reverse ? -1 : 1;
 
-    for(; it != end; ++it)
+    for (; it != end; ++it)
     {
-        auto r = *it;
+        auto r              = *it;
         TrackConnItem &item = vec[i];
-        item.connId = r.get<db_id>(0);
-        item.trackId = r.get<db_id>(1);
-        item.trackSide = utils::Side(r.get<int>(2));
-        item.trackName = r.get<QString>(3);
-        item.gateId = r.get<db_id>(4);
-        item.gateName = r.get<QString>(5);
-        item.gateTrack = r.get<int>(6);
+        item.connId         = r.get<db_id>(0);
+        item.trackId        = r.get<db_id>(1);
+        item.trackSide      = utils::Side(r.get<int>(2));
+        item.trackName      = r.get<QString>(3);
+        item.gateId         = r.get<db_id>(4);
+        item.gateName       = r.get<QString>(5);
+        item.gateTrack      = r.get<int>(6);
 
         i += increment;
     }
 
-    if(reverse && i > -1)
+    if (reverse && i > -1)
         vec.remove(0, i + 1);
-    else if(i < BatchSize)
+    else if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
 }
 
-bool StationTrackConnectionsModel::setTrackSide(StationTrackConnectionsModel::TrackConnItem &item, int val)
+bool StationTrackConnectionsModel::setTrackSide(StationTrackConnectionsModel::TrackConnItem &item,
+                                                int val)
 {
     utils::Side side = utils::Side(val);
-    if(item.trackSide == side)
+    if (item.trackSide == side)
         return false;
 
     command q(mDb, "UPDATE station_gate_connections SET track_side=? WHERE id=?");
     q.bind(1, val);
     q.bind(2, item.connId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
@@ -613,25 +623,26 @@ bool StationTrackConnectionsModel::setTrackSide(StationTrackConnectionsModel::Tr
 
     item.trackSide = side;
 
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
+    // This row has now changed position so we need to invalidate cache
+    // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    // but the view will trigger fetching at same scroll position so it is enough
     cache.clear();
     cacheFirstRow = 0;
 
     return true;
 }
 
-bool StationTrackConnectionsModel::setGateTrack(StationTrackConnectionsModel::TrackConnItem &item, int track)
+bool StationTrackConnectionsModel::setGateTrack(StationTrackConnectionsModel::TrackConnItem &item,
+                                                int track)
 {
-    if(item.gateTrack == track)
+    if (item.gateTrack == track)
         return false;
 
     command q(mDb, "UPDATE station_gate_connections SET gate_track=? WHERE id=?");
     q.bind(1, track);
     q.bind(2, item.connId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
@@ -639,9 +650,9 @@ bool StationTrackConnectionsModel::setGateTrack(StationTrackConnectionsModel::Tr
 
     item.gateTrack = track;
 
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
+    // This row has now changed position so we need to invalidate cache
+    // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    // but the view will trigger fetching at same scroll position so it is enough
     cache.clear();
     cacheFirstRow = 0;
 
@@ -649,66 +660,67 @@ bool StationTrackConnectionsModel::setGateTrack(StationTrackConnectionsModel::Tr
 }
 
 bool StationTrackConnectionsModel::setTrack(StationTrackConnectionsModel::TrackConnItem &item,
-                                            db_id trackId, const QString& trackName)
+                                            db_id trackId, const QString &trackName)
 {
-    if(item.trackId == trackId)
+    if (item.trackId == trackId)
         return false;
 
     command q(mDb, "UPDATE station_gate_connections SET track_id=? WHERE id=?");
-    if(trackId)
+    if (trackId)
         q.bind(1, trackId);
     else
-        q.bind(1); //Bind NULL
+        q.bind(1); // Bind NULL
     q.bind(2, item.connId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
     }
 
-    //Old track is no more connected by this connection
+    // Old track is no more connected by this connection
     emit trackConnRemoved(item.connId, item.trackId, item.gateId);
 
-    item.trackId = trackId;
+    item.trackId   = trackId;
     item.trackName = trackName;
 
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
+    // This row has now changed position so we need to invalidate cache
+    // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    // but the view will trigger fetching at same scroll position so it is enough
     cache.clear();
     cacheFirstRow = 0;
 
     return true;
 }
 
-bool StationTrackConnectionsModel::setGate(StationTrackConnectionsModel::TrackConnItem &item, db_id gateId, const QString &gateName)
+bool StationTrackConnectionsModel::setGate(StationTrackConnectionsModel::TrackConnItem &item,
+                                           db_id gateId, const QString &gateName)
 {
-    if(item.gateId == gateId)
+    if (item.gateId == gateId)
         return false;
 
     command q(mDb, "UPDATE station_gate_connections SET gate_id=? WHERE id=?");
-    if(gateId)
+    if (gateId)
         q.bind(1, gateId);
     else
-        q.bind(1); //Bind NULL
+        q.bind(1); // Bind NULL
     q.bind(2, item.connId);
     int ret = q.step();
-    if(ret != SQLITE_OK && ret != SQLITE_DONE)
+    if (ret != SQLITE_OK && ret != SQLITE_DONE)
     {
         emit modelError(tr("Error: %1").arg(mDb.error_msg()));
         return false;
     }
 
-    //Old gate is no more connected by this connection
+    // Old gate is no more connected by this connection
     emit trackConnRemoved(item.connId, item.trackId, item.gateId);
 
-    item.gateId = gateId;
+    item.gateId   = gateId;
     item.gateName = gateName;
 
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
+    // This row has now changed position so we need to invalidate cache
+    // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    // but the view will trigger fetching at same scroll position so it is enough
     cache.clear();
     cacheFirstRow = 0;
 

@@ -26,39 +26,38 @@
 
 #include "utils/scene/igraphscene.h"
 
-
 PrintOptionsPage::PrintOptionsPage(PrintWizard *w, QWidget *parent) :
-    QWizardPage (parent),
+    QWizardPage(parent),
     mWizard(w),
     m_scene(nullptr)
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
-    optionsWidget = new PrinterOptionsWidget;
+    optionsWidget    = new PrinterOptionsWidget;
     lay->addWidget(optionsWidget);
 
-    connect(optionsWidget, &PrinterOptionsWidget::completeChanged,
-            this, &QWizardPage::completeChanged);
+    connect(optionsWidget, &PrinterOptionsWidget::completeChanged, this,
+            &QWizardPage::completeChanged);
 
     setTitle(tr("Print Options"));
 
     setCommitPage(true);
 
-    //Change 'Commit' to 'Print' so user understands better
+    // Change 'Commit' to 'Print' so user understands better
     setButtonText(QWizard::CommitButton, tr("Print"));
 }
 
 PrintOptionsPage::~PrintOptionsPage()
 {
-    //Reset scene
+    // Reset scene
     setScene(nullptr);
 }
 
 bool PrintOptionsPage::validatePage()
 {
-    if(!optionsWidget->validateOptions())
+    if (!optionsWidget->validateOptions())
         return false;
 
-    //Update options
+    // Update options
     mWizard->setPrintOpt(optionsWidget->getOptions());
     mWizard->setScenePageLay(optionsWidget->getScenePageLay());
     return true;
@@ -79,7 +78,7 @@ void PrintOptionsPage::setupPage()
 
 void PrintOptionsPage::setScene(IGraphScene *scene)
 {
-    if(m_scene)
+    if (m_scene)
         delete m_scene;
     m_scene = scene;
     optionsWidget->setSourceScene(m_scene);

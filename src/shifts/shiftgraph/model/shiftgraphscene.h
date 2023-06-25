@@ -31,7 +31,7 @@
 namespace sqlite3pp {
 class database;
 class query;
-}
+} // namespace sqlite3pp
 
 /*!
  * \brief Class to store shift information
@@ -45,13 +45,12 @@ class ShiftGraphScene : public IGraphScene
 {
     Q_OBJECT
 public:
-
     struct JobItem
     {
         JobEntry job;
 
         db_id fromStId = 0;
-        db_id toStId = 0;
+        db_id toStId   = 0;
 
         QTime start;
         QTime end;
@@ -65,15 +64,15 @@ public:
         QVector<JobItem> jobList;
     };
 
-    ShiftGraphScene(sqlite3pp::database& db, QObject *parent = nullptr);
+    ShiftGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    virtual void renderContents(QPainter *painter, const QRectF& sceneRect) override;
-    virtual void renderHeader(QPainter *painter, const QRectF& sceneRect,
-                              Qt::Orientation orient, double scroll) override;
+    virtual void renderContents(QPainter *painter, const QRectF &sceneRect) override;
+    virtual void renderHeader(QPainter *painter, const QRectF &sceneRect, Qt::Orientation orient,
+                              double scroll) override;
 
-    void drawShifts(QPainter *painter, const QRectF& sceneRect);
+    void drawShifts(QPainter *painter, const QRectF &sceneRect);
     void drawHourLines(QPainter *painter, const QRectF &sceneRect);
-    void drawShiftHeader(QPainter *painter, const QRectF& rect);
+    void drawShiftHeader(QPainter *painter, const QRectF &rect);
     void drawHourHeader(QPainter *painter, const QRectF &rect);
 
     /*!
@@ -82,12 +81,12 @@ public:
      * \param scenePos Point in scene coordinates
      * \param outShiftName If job is found, gets filled with its shift name
      */
-    JobItem getJobAt(const QPointF& scenePos, QString& outShiftName) const;
+    JobItem getJobAt(const QPointF &scenePos, QString &outShiftName) const;
 
     inline QString getStationFullName(db_id stationId) const
     {
         auto st = m_stationCache.constFind(stationId);
-        if(st == m_stationCache.constEnd())
+        if (st == m_stationCache.constEnd())
             return QString();
         return st.value().name;
     }
@@ -96,58 +95,58 @@ public slots:
     bool loadShifts();
 
 private slots:
-    //Settings
+    // Settings
     void updateShiftGraphOptions();
 
-    //Shifts
+    // Shifts
     void onShiftNameChanged(db_id shiftId);
     void onShiftRemoved(db_id shiftId);
 
-    //Stations
+    // Stations
     void onStationNameChanged(db_id stationId);
 
-    //Jobs
+    // Jobs
     void onShiftJobsChanged(db_id shiftId);
     void onJobRemoved(db_id jobId);
 
 private:
     void recalcContentSize();
 
-    bool loadShiftRow(ShiftGraph& shiftObj, sqlite3pp::query& q_getStName,
-                      sqlite3pp::query& q_countJobs, sqlite3pp::query& q_getJobs);
-    void loadStationName(db_id stationId, sqlite3pp::query& q_getStName);
+    bool loadShiftRow(ShiftGraph &shiftObj, sqlite3pp::query &q_getStName,
+                      sqlite3pp::query &q_countJobs, sqlite3pp::query &q_getJobs);
+    void loadStationName(db_id stationId, sqlite3pp::query &q_getStName);
 
-    std::pair<int, int> lowerBound(db_id shiftId, const QString& name);
+    std::pair<int, int> lowerBound(db_id shiftId, const QString &name);
 
     static constexpr qreal MSEC_PER_HOUR = 1000 * 60 * 60;
-    inline qreal jobPos(const QTime& t)
+    inline qreal jobPos(const QTime &t)
     {
         return t.msecsSinceStartOfDay() / MSEC_PER_HOUR * hourOffset + horizOffset;
     }
 
 private:
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
 
     QVector<ShiftGraph> m_shifts;
 
     struct StationCache
     {
-        //Full Name of station
+        // Full Name of station
         QString name;
 
-        //Short Name if available or fallback to Full Name
+        // Short Name if available or fallback to Full Name
         QString shortNameOrFallback;
     };
 
     QHash<db_id, StationCache> m_stationCache;
 
-    //Options
-    qreal hourOffset = 150;
-    qreal shiftRowHeight = 50;
-    qreal rowSpaceOffset = 10;
+    // Options
+    qreal hourOffset      = 150;
+    qreal shiftRowHeight  = 50;
+    qreal rowSpaceOffset  = 10;
 
-    qreal horizOffset = 50;
-    qreal vertOffset = 20;
+    qreal horizOffset     = 50;
+    qreal vertOffset      = 20;
 
     bool hideSameStations = true;
 };

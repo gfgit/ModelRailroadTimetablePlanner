@@ -35,10 +35,10 @@ public:
     bool validatePage() override;
     void initializePage() override;
 
-    void setFileDlgOptions(const QString& dlgTitle, const QStringList& fileFormats);
+    void setFileDlgOptions(const QString &dlgTitle, const QStringList &fileFormats);
 
 signals:
-    void fileChosen(const QString& fileName);
+    void fileChosen(const QString &fileName);
 
 private slots:
     void onChoose();

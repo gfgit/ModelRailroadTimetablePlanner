@@ -85,7 +85,7 @@ RollingStockManager::RollingStockManager(QWidget *parent) :
 
 void RollingStockManager::setupPages()
 {
-    //RollingStock Page
+    // RollingStock Page
     QWidget *rollingstockTab = new QWidget;
     tabWidget->addTab(rollingstockTab, RsTypeNames::tr("Rollingstock"));
     QVBoxLayout *rsLay = new QVBoxLayout(rollingstockTab);
@@ -94,22 +94,19 @@ void RollingStockManager::setupPages()
     rsToolBar = new QToolBar;
     rsLay->addWidget(rsToolBar);
 
-    actNewRs      = rsToolBar->addAction(tr("New Rollingstock"),
-                                            this, &RollingStockManager::onNewRs);
-    actDeleteRs   = rsToolBar->addAction(tr("Remove"),
-                                            this, &RollingStockManager::onRemoveRs);
+    actNewRs    = rsToolBar->addAction(tr("New Rollingstock"), this, &RollingStockManager::onNewRs);
+    actDeleteRs = rsToolBar->addAction(tr("Remove"), this, &RollingStockManager::onRemoveRs);
     rsToolBar->addSeparator();
 
-    actViewRSPlan = rsToolBar->addAction(tr("View Plan"),
-                                            this, &RollingStockManager::onViewRSPlan);
+    actViewRSPlan = rsToolBar->addAction(tr("View Plan"), this, &RollingStockManager::onViewRSPlan);
     QMenu *actionRsPlanMenu = new QMenu;
-    actViewRSPlanSearch = actionRsPlanMenu->addAction(tr("Search rollingstock item"),
-                                                         this, &RollingStockManager::onViewRSPlanSearch);
+    actViewRSPlanSearch     = actionRsPlanMenu->addAction(tr("Search rollingstock item"), this,
+                                                          &RollingStockManager::onViewRSPlanSearch);
     actViewRSPlan->setMenu(actionRsPlanMenu);
     rsToolBar->addSeparator();
 
-    actDeleteAllRs = rsToolBar->addAction(tr("Delete All Rollingstock"),
-                                             this, &RollingStockManager::onRemoveAllRs);
+    actDeleteAllRs = rsToolBar->addAction(tr("Delete All Rollingstock"), this,
+                                          &RollingStockManager::onRemoveAllRs);
     rsToolBar->addSeparator();
 
     rsToolBar->addAction(tr("Import"), this, &RollingStockManager::onImportRS);
@@ -129,14 +126,14 @@ void RollingStockManager::setupPages()
     rsLay->addWidget(ps);
     ps->setModel(rsSQLModel);
 
-    connect(rsView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &RollingStockManager::onRollingstockSelectionChanged);
-    connect(rsSQLModel, &QAbstractItemModel::modelReset,
-            this, &RollingStockManager::onRollingstockSelectionChanged);
-    connect(rsSQLModel, &RollingstockSQLModel::modelError,
-            this, &RollingStockManager::onModelError);
+    connect(rsView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &RollingStockManager::onRollingstockSelectionChanged);
+    connect(rsSQLModel, &QAbstractItemModel::modelReset, this,
+            &RollingStockManager::onRollingstockSelectionChanged);
+    connect(rsSQLModel, &RollingstockSQLModel::modelError, this,
+            &RollingStockManager::onModelError);
 
-    //Models Page
+    // Models Page
     QWidget *modelsTab = new QWidget;
     tabWidget->addTab(modelsTab, RsTypeNames::tr("Models"));
     QVBoxLayout *modelsLay = new QVBoxLayout(modelsTab);
@@ -145,24 +142,26 @@ void RollingStockManager::setupPages()
     modelToolBar = new QToolBar;
     modelsLay->addWidget(modelToolBar);
 
-    actNewModel    = modelToolBar->addAction(tr("New Model"),
-                                                this, &RollingStockManager::onNewRsModel);
-    actDeleteModel = modelToolBar->addAction(tr("Remove"),
-                                                this, &RollingStockManager::onRemoveRsModel);
-    actMergeModels = modelToolBar->addAction(tr("Merge Models"),
-                                                this, &RollingStockManager::onMergeModels);
-    actNewModelWithSuffix = modelToolBar->addAction(tr("New with suffix"),
-                                                       this, &RollingStockManager::onNewRsModelWithDifferentSuffixFromCurrent);
+    actNewModel =
+      modelToolBar->addAction(tr("New Model"), this, &RollingStockManager::onNewRsModel);
+    actDeleteModel =
+      modelToolBar->addAction(tr("Remove"), this, &RollingStockManager::onRemoveRsModel);
+    actMergeModels =
+      modelToolBar->addAction(tr("Merge Models"), this, &RollingStockManager::onMergeModels);
+    actNewModelWithSuffix =
+      modelToolBar->addAction(tr("New with suffix"), this,
+                              &RollingStockManager::onNewRsModelWithDifferentSuffixFromCurrent);
     QMenu *actionModelSuffixMenu = new QMenu;
-    actNewModelWithSuffixSearch = actionModelSuffixMenu->addAction(tr("Search rollingstock model"),
-                                                                      this, &RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch);
+    actNewModelWithSuffixSearch  = actionModelSuffixMenu->addAction(
+      tr("Search rollingstock model"), this,
+      &RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch);
     actNewModelWithSuffix->setMenu(actionModelSuffixMenu);
 
     modelToolBar->addSeparator();
-    actDeleteAllRsModels = modelToolBar->addAction(tr("Delete All Models"),
-                                                      this, &RollingStockManager::onRemoveAllRsModels);
+    actDeleteAllRsModels = modelToolBar->addAction(tr("Delete All Models"), this,
+                                                   &RollingStockManager::onRemoveAllRsModels);
 
-    rsModelsView = new QTableView;
+    rsModelsView         = new QTableView;
     rsModelsView->setSelectionMode(QTableView::SingleSelection);
     modelsLay->addWidget(rsModelsView);
 
@@ -176,14 +175,14 @@ void RollingStockManager::setupPages()
     modelsLay->addWidget(ps);
     ps->setModel(modelsSQLModel);
 
-    connect(rsModelsView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &RollingStockManager::onRsModelSelectionChanged);
-    connect(modelsSQLModel, &QAbstractItemModel::modelReset,
-            this, &RollingStockManager::onRsModelSelectionChanged);
-    connect(modelsSQLModel, &RSModelsSQLModel::modelError,
-            this, &RollingStockManager::onModelError);
+    connect(rsModelsView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &RollingStockManager::onRsModelSelectionChanged);
+    connect(modelsSQLModel, &QAbstractItemModel::modelReset, this,
+            &RollingStockManager::onRsModelSelectionChanged);
+    connect(modelsSQLModel, &RSModelsSQLModel::modelError, this,
+            &RollingStockManager::onModelError);
 
-    //Owners Page
+    // Owners Page
     QWidget *ownersTab = new QWidget;
     tabWidget->addTab(ownersTab, RsTypeNames::tr("Owners"));
     QVBoxLayout *ownersLay = new QVBoxLayout(ownersTab);
@@ -192,17 +191,16 @@ void RollingStockManager::setupPages()
     ownersToolBar = new QToolBar;
     ownersLay->addWidget(ownersToolBar);
 
-    actNewOwner    = ownersToolBar->addAction(tr("New Owner"), this,
-                                                 &RollingStockManager::onNewOwner);
-    actDeleteOwner = ownersToolBar->addAction(tr("Remove"), this,
-                                                 &RollingStockManager::onRemoveOwner);
-    actMergeOwners = ownersToolBar->addAction(tr("Merge Owners"), this,
-                                                 &RollingStockManager::onMergeOwners);
+    actNewOwner = ownersToolBar->addAction(tr("New Owner"), this, &RollingStockManager::onNewOwner);
+    actDeleteOwner =
+      ownersToolBar->addAction(tr("Remove"), this, &RollingStockManager::onRemoveOwner);
+    actMergeOwners =
+      ownersToolBar->addAction(tr("Merge Owners"), this, &RollingStockManager::onMergeOwners);
     ownersToolBar->addSeparator();
-    actDeleteAllRsOwners = ownersToolBar->addAction(tr("Delete All Owners"),
-                                                       this, &RollingStockManager::onRemoveAllRsOwners);
+    actDeleteAllRsOwners = ownersToolBar->addAction(tr("Delete All Owners"), this,
+                                                    &RollingStockManager::onRemoveAllRsOwners);
 
-    ownersView = new QTableView;
+    ownersView           = new QTableView;
     ownersView->setSelectionMode(QTableView::SingleSelection);
     ownersLay->addWidget(ownersView);
 
@@ -216,27 +214,29 @@ void RollingStockManager::setupPages()
     ownersLay->addWidget(ps);
     ps->setModel(ownersSQLModel);
 
-    connect(ownersView->selectionModel(), &QItemSelectionModel::selectionChanged,
-            this, &RollingStockManager::onRsOwnerSelectionChanged);
-    connect(ownersSQLModel, &QAbstractItemModel::modelReset,
-            this, &RollingStockManager::onRsOwnerSelectionChanged);
-    connect(ownersSQLModel, &RSOwnersSQLModel::modelError,
-            this, &RollingStockManager::onModelError);
+    connect(ownersView->selectionModel(), &QItemSelectionModel::selectionChanged, this,
+            &RollingStockManager::onRsOwnerSelectionChanged);
+    connect(ownersSQLModel, &QAbstractItemModel::modelReset, this,
+            &RollingStockManager::onRsOwnerSelectionChanged);
+    connect(ownersSQLModel, &RSOwnersSQLModel::modelError, this,
+            &RollingStockManager::onModelError);
 
-    //Setup Delegates
-    //auto modelDelegate = new RSModelDelegate(modelsModel, this);
-    auto modelDelegate = new SqlFKFieldDelegate(new RSMatchModelFactory(ModelModes::Models, Session->m_Db, this), rsSQLModel, this);
+    // Setup Delegates
+    // auto modelDelegate = new RSModelDelegate(modelsModel, this);
+    auto modelDelegate = new SqlFKFieldDelegate(
+      new RSMatchModelFactory(ModelModes::Models, Session->m_Db, this), rsSQLModel, this);
     rsView->setItemDelegateForColumn(RollingstockSQLModel::Model, modelDelegate);
 
-    //auto ownerDelegate = new RSOwnerDelegate(ownersModel, this);
-    auto ownerDelegate = new SqlFKFieldDelegate(new RSMatchModelFactory(ModelModes::Owners, Session->m_Db, this), rsSQLModel, this);
+    // auto ownerDelegate = new RSOwnerDelegate(ownersModel, this);
+    auto ownerDelegate = new SqlFKFieldDelegate(
+      new RSMatchModelFactory(ModelModes::Owners, Session->m_Db, this), rsSQLModel, this);
     rsView->setItemDelegateForColumn(RollingstockSQLModel::Owner, ownerDelegate);
 
     auto numberDelegate = new RsNumberDelegate(this);
     rsView->setItemDelegateForColumn(RollingstockSQLModel::Number, numberDelegate);
 
     auto rsSpeedDelegate = new QStyledItemDelegate(this);
-    speedSpinFactory = new SpinBoxEditorFactory;
+    speedSpinFactory     = new SpinBoxEditorFactory;
     speedSpinFactory->setRange(1, 999);
     speedSpinFactory->setSuffix(" km/h");
     speedSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -244,7 +244,7 @@ void RollingStockManager::setupPages()
     rsModelsView->setItemDelegateForColumn(RSModelsSQLModel::MaxSpeed, rsSpeedDelegate);
 
     auto rsAxesDelegate = new QStyledItemDelegate(this);
-    axesSpinFactory = new SpinBoxEditorFactory;
+    axesSpinFactory     = new SpinBoxEditorFactory;
     axesSpinFactory->setRange(2, 999);
     axesSpinFactory->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     rsAxesDelegate->setItemEditorFactory(axesSpinFactory);
@@ -256,7 +256,7 @@ void RollingStockManager::setupPages()
     auto rsSubTypeDelegate = new RSTypeDelegate(true, this);
     rsModelsView->setItemDelegateForColumn(RSModelsSQLModel::SubTypeCol, rsSubTypeDelegate);
 
-    //Setup actions
+    // Setup actions
     editActGroup = new QActionGroup(this);
     editActGroup->addAction(actNewRs);
     editActGroup->addAction(actDeleteRs);
@@ -278,9 +278,9 @@ RollingStockManager::~RollingStockManager()
     delete speedSpinFactory;
     delete axesSpinFactory;
 
-    for(int i = 0; i < NTabs; i++)
+    for (int i = 0; i < NTabs; i++)
     {
-        if(clearModelTimers[i] > 0)
+        if (clearModelTimers[i] > 0)
         {
             killTimer(clearModelTimers[i]);
             clearModelTimers[i] = 0;
@@ -290,14 +290,14 @@ RollingStockManager::~RollingStockManager()
 
 void RollingStockManager::setReadOnly(bool readOnly)
 {
-    if(m_readOnly == readOnly)
+    if (m_readOnly == readOnly)
         return;
 
     m_readOnly = readOnly;
 
     editActGroup->setDisabled(m_readOnly);
 
-    if(m_readOnly)
+    if (m_readOnly)
     {
         rsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
         rsModelsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -315,14 +315,14 @@ void RollingStockManager::updateModels()
 {
     int curTab = tabWidget->currentIndex();
 
-    if(clearModelTimers[curTab] > 0)
+    if (clearModelTimers[curTab] > 0)
     {
-        //This page was already cached, stop it from clearing
+        // This page was already cached, stop it from clearing
         killTimer(clearModelTimers[curTab]);
     }
-    else if(clearModelTimers[curTab] == ModelCleared)
+    else if (clearModelTimers[curTab] == ModelCleared)
     {
-        //This page wasn't already cached
+        // This page wasn't already cached
         switch (curTab)
         {
         case RollingstockTab:
@@ -344,8 +344,9 @@ void RollingStockManager::updateModels()
     }
     clearModelTimers[curTab] = ModelLoaded;
 
-    //Now start timer to clear old current page if not already done
-    if(oldCurrentTab != curTab && clearModelTimers[oldCurrentTab] == ModelLoaded) //Wait 10 seconds and then clear cache
+    // Now start timer to clear old current page if not already done
+    if (oldCurrentTab != curTab
+        && clearModelTimers[oldCurrentTab] == ModelLoaded) // Wait 10 seconds and then clear cache
     {
         clearModelTimers[oldCurrentTab] = startTimer(ClearModelTimeout, Qt::VeryCoarseTimer);
     }
@@ -355,15 +356,17 @@ void RollingStockManager::updateModels()
 
 void RollingStockManager::visibilityChanged(int v)
 {
-    if(v == QWindow::Minimized || v == QWindow::Hidden)
+    if (v == QWindow::Minimized || v == QWindow::Hidden)
     {
-        //If the window is minimized start timer to clear model cache of current tab
-        //The other tabs already have been cleared or are waiting with their timers
-        if(clearModelTimers[oldCurrentTab] == ModelLoaded)
+        // If the window is minimized start timer to clear model cache of current tab
+        // The other tabs already have been cleared or are waiting with their timers
+        if (clearModelTimers[oldCurrentTab] == ModelLoaded)
         {
             clearModelTimers[oldCurrentTab] = startTimer(ClearModelTimeout, Qt::VeryCoarseTimer);
         }
-    }else{
+    }
+    else
+    {
         updateModels();
     }
 }
@@ -382,11 +385,11 @@ void RollingStockManager::importRS(bool resume, QWidget *parent)
 void RollingStockManager::onViewRSPlan()
 {
     QModelIndex idx = rsView->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
     db_id rsId = rsSQLModel->getIdAtRow(idx.row());
-    if(!rsId)
+    if (!rsId)
         return;
     Session->getViewManager()->requestRSInfo(rsId);
 }
@@ -403,7 +406,7 @@ void RollingStockManager::onViewRSPlanSearch()
 
     int ret = dlg->exec();
 
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
     Session->getViewManager()->requestRSInfo(dlg->getItemId());
@@ -411,13 +414,13 @@ void RollingStockManager::onViewRSPlanSearch()
 
 void RollingStockManager::onNewRs()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     QString errText;
-    int row = 0;
+    int row    = 0;
     db_id rsId = rsSQLModel->addRSItem(&row, &errText);
-    if(!rsId)
+    if (!rsId)
     {
         QMessageBox::warning(this, tr("Error adding rollingstock piece"), errText);
         return;
@@ -426,47 +429,49 @@ void RollingStockManager::onNewRs()
 
 void RollingStockManager::onRemoveRs()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     QModelIndex idx = rsView->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
-    if(!rsSQLModel->removeRSItemAt(idx.row()))
+    if (!rsSQLModel->removeRSItemAt(idx.row()))
     {
-        //ERRORMSG: display error
+        // ERRORMSG: display error
         return;
     }
 }
 
 void RollingStockManager::onRemoveAllRs()
 {
-    int ret = QMessageBox::question(this, tr("Delete All Rollingstock?"),
-                                    tr("Are you really sure you want to delete all rollingstock from this session?\n"
-                                       "NOTE: this will not erease model and owners, just rollingstock pieces."));
-    if(ret == QMessageBox::Yes)
+    int ret = QMessageBox::question(
+      this, tr("Delete All Rollingstock?"),
+      tr("Are you really sure you want to delete all rollingstock from this session?\n"
+         "NOTE: this will not erease model and owners, just rollingstock pieces."));
+    if (ret == QMessageBox::Yes)
     {
-        if(!rsSQLModel->removeAllRS())
+        if (!rsSQLModel->removeAllRS())
         {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Failed to remove rollingstock.\n"
-                                    "Make sure there are no more couplings in this session.\n"
-                                    "NOTE: you can remove all jobs at once from the Jobs Manager."));
+            QMessageBox::warning(
+              this, tr("Error"),
+              tr("Failed to remove rollingstock.\n"
+                 "Make sure there are no more couplings in this session.\n"
+                 "NOTE: you can remove all jobs at once from the Jobs Manager."));
         }
     }
 }
 
 void RollingStockManager::onNewRsModel()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     int row = 0;
 
     QString errText;
     db_id modelId = modelsSQLModel->addRSModel(&row, 0, QString(), &errText);
-    if(!modelId)
+    if (!modelId)
     {
         QMessageBox::warning(this, tr("Error adding model"), errText);
         return;
@@ -476,23 +481,24 @@ void RollingStockManager::onNewRsModel()
 
     rsModelsView->setCurrentIndex(idx);
     rsModelsView->scrollTo(idx);
-    rsModelsView->edit(idx); //TODO: delay call until row is fetched!!! Like save it and wait for a signal from model
+    rsModelsView->edit(idx); // TODO: delay call until row is fetched!!! Like save it and wait for a
+                             // signal from model
 }
 
 void RollingStockManager::onNewRsModelWithDifferentSuffixFromCurrent()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     QModelIndex idx = rsModelsView->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
     db_id modelId = modelsSQLModel->getModelIdAtRow(idx.row());
-    if(modelId)
+    if (modelId)
     {
         QString errMsg;
-        if(!createRsModelWithDifferentSuffix(modelId, errMsg, this))
+        if (!createRsModelWithDifferentSuffix(modelId, errMsg, this))
         {
             QMessageBox::warning(this, tr("Error"), errMsg);
         }
@@ -501,7 +507,7 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromCurrent()
 
 void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     RSMatchModelFactory factory(ModelModes::Models, Session->m_Db, this);
@@ -511,77 +517,81 @@ void RollingStockManager::onNewRsModelWithDifferentSuffixFromSearch()
     OwningQPointer<ChooseItemDlg> dlg = new ChooseItemDlg(matchModel.get(), this);
     dlg->setDescription(tr("Please choose a rollingstock model"));
     dlg->setPlaceholder(tr("Model"));
-    dlg->setCallback([this, &dlg](db_id modelId, QString &errMsg) -> bool
-    {
-        if(!modelId)
-        {
-            errMsg = tr("You must select a valid rollingstock model.");
-            return false;
-        }
+    dlg->setCallback(
+      [this, &dlg](db_id modelId, QString &errMsg) -> bool
+      {
+          if (!modelId)
+          {
+              errMsg = tr("You must select a valid rollingstock model.");
+              return false;
+          }
 
-        return createRsModelWithDifferentSuffix(modelId, errMsg, dlg);
-    });
+          return createRsModelWithDifferentSuffix(modelId, errMsg, dlg);
+      });
 
-    if(dlg->exec() != QDialog::Accepted)
+    if (dlg->exec() != QDialog::Accepted)
         return;
 
-    //TODO: select and edit the new item
+    // TODO: select and edit the new item
 }
 
-bool RollingStockManager::createRsModelWithDifferentSuffix(db_id sourceModelId, QString &errMsg, QWidget *w)
+bool RollingStockManager::createRsModelWithDifferentSuffix(db_id sourceModelId, QString &errMsg,
+                                                           QWidget *w)
 {
     OwningQPointer<QInputDialog> dlg = new QInputDialog(w);
     dlg->setLabelText(tr("Please choose an unique suffix for this model, or leave empty"));
     dlg->setWindowTitle(tr("Choose Suffix"));
     dlg->setInputMode(QInputDialog::TextInput);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
-        return true; //Default: Abort without errors
+    if (dlg->exec() != QDialog::Accepted || !dlg)
+        return true; // Default: Abort without errors
 
     return modelsSQLModel->addRSModel(nullptr, sourceModelId, dlg->textValue(), &errMsg);
 }
 
 void RollingStockManager::onRemoveRsModel()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     QModelIndex idx = rsModelsView->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
-    if(!modelsSQLModel->removeRSModelAt(idx.row()))
+    if (!modelsSQLModel->removeRSModelAt(idx.row()))
     {
-        //ERRORMSG:
+        // ERRORMSG:
     }
 }
 
 void RollingStockManager::onRemoveAllRsModels()
 {
-    int ret = QMessageBox::question(this, tr("Delete All Rollingstock Models?"),
-                                    tr("Are you really sure you want to delete all rollingstock models from this session?\n"
-                                       "NOTE: this can be done only if there are no rollingstock pieces in this session."));
-    if(ret == QMessageBox::Yes)
+    int ret = QMessageBox::question(
+      this, tr("Delete All Rollingstock Models?"),
+      tr("Are you really sure you want to delete all rollingstock models from this session?\n"
+         "NOTE: this can be done only if there are no rollingstock pieces in this session."));
+    if (ret == QMessageBox::Yes)
     {
-        if(!modelsSQLModel->removeAllRSModels())
+        if (!modelsSQLModel->removeAllRSModels())
         {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Failed to remove rollingstock models.\n"
-                                    "Make sure there are no more rollingstock pieces in this session.\n"
-                                    "NOTE: you can remove all rollinstock pieces at once from the Rollingstock tab."));
+            QMessageBox::warning(
+              this, tr("Error"),
+              tr("Failed to remove rollingstock models.\n"
+                 "Make sure there are no more rollingstock pieces in this session.\n"
+                 "NOTE: you can remove all rollinstock pieces at once from the Rollingstock tab."));
         }
     }
 }
 
 void RollingStockManager::onNewOwner()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     int row = 0;
-    if(!ownersSQLModel->addRSOwner(&row))
+    if (!ownersSQLModel->addRSOwner(&row))
     {
-        //ERRORMSG: display
+        // ERRORMSG: display
         return;
     }
 
@@ -594,49 +604,52 @@ void RollingStockManager::onNewOwner()
 
 void RollingStockManager::onRemoveOwner()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     QModelIndex idx = ownersView->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
-    if(!ownersSQLModel->removeRSOwnerAt(idx.row()))
+    if (!ownersSQLModel->removeRSOwnerAt(idx.row()))
     {
-        //ERRORMSG: display error
+        // ERRORMSG: display error
     }
 }
 
 void RollingStockManager::onRemoveAllRsOwners()
 {
-    int ret = QMessageBox::question(this, tr("Delete All Rollingstock Owners?"),
-                                    tr("Are you really sure you want to delete all rollingstock owners from this session?\n"
-                                       "NOTE: this can be done only if there are no rollingstock pieces in this session."));
-    if(ret == QMessageBox::Yes)
+    int ret = QMessageBox::question(
+      this, tr("Delete All Rollingstock Owners?"),
+      tr("Are you really sure you want to delete all rollingstock owners from this session?\n"
+         "NOTE: this can be done only if there are no rollingstock pieces in this session."));
+    if (ret == QMessageBox::Yes)
     {
-        if(!ownersSQLModel->removeAllRSOwners())
+        if (!ownersSQLModel->removeAllRSOwners())
         {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Failed to remove rollingstock owners.\n"
-                                    "Make sure there are no more rollingstock pieces in this session.\n"
-                                    "NOTE: you can remove all rollingstock pieces at once from the Rollingstock tab."));
+            QMessageBox::warning(
+              this, tr("Error"),
+              tr(
+                "Failed to remove rollingstock owners.\n"
+                "Make sure there are no more rollingstock pieces in this session.\n"
+                "NOTE: you can remove all rollingstock pieces at once from the Rollingstock tab."));
         }
     }
 }
 
 void RollingStockManager::onMergeModels()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     OwningQPointer<MergeModelsDialog> dlg = new MergeModelsDialog(Session->m_Db, this);
     dlg->exec();
 
-    if(clearModelTimers[ModelsTab] == ModelLoaded)
+    if (clearModelTimers[ModelsTab] == ModelLoaded)
     {
         modelsSQLModel->refreshData();
     }
-    if(clearModelTimers[RollingstockTab] == ModelLoaded)
+    if (clearModelTimers[RollingstockTab] == ModelLoaded)
     {
         rsSQLModel->refreshData(true);
     }
@@ -644,17 +657,17 @@ void RollingStockManager::onMergeModels()
 
 void RollingStockManager::onMergeOwners()
 {
-    if(m_readOnly)
+    if (m_readOnly)
         return;
 
     OwningQPointer<MergeOwnersDialog> dlg = new MergeOwnersDialog(Session->m_Db, this);
     dlg->exec();
 
-    if(clearModelTimers[OwnersTab] == ModelLoaded)
+    if (clearModelTimers[OwnersTab] == ModelLoaded)
     {
         ownersSQLModel->refreshData();
     }
-    if(clearModelTimers[RollingstockTab] == ModelLoaded)
+    if (clearModelTimers[RollingstockTab] == ModelLoaded)
     {
         rsSQLModel->refreshData(true);
     }
@@ -698,21 +711,21 @@ void RollingStockManager::onRsOwnerSelectionChanged()
 
 void RollingStockManager::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == clearModelTimers[RollingstockTab])
+    if (e->timerId() == clearModelTimers[RollingstockTab])
     {
         rsSQLModel->clearCache();
         killTimer(e->timerId());
         clearModelTimers[RollingstockTab] = ModelCleared;
         return;
     }
-    else if(e->timerId() == clearModelTimers[ModelsTab])
+    else if (e->timerId() == clearModelTimers[ModelsTab])
     {
         modelsSQLModel->clearCache();
         killTimer(e->timerId());
         clearModelTimers[ModelsTab] = ModelCleared;
         return;
     }
-    else if(e->timerId() == clearModelTimers[OwnersTab])
+    else if (e->timerId() == clearModelTimers[OwnersTab])
     {
         ownersSQLModel->clearCache();
         killTimer(e->timerId());
@@ -725,10 +738,10 @@ void RollingStockManager::timerEvent(QTimerEvent *e)
 
 void RollingStockManager::showEvent(QShowEvent *e)
 {
-    if(!windowConnected)
+    if (!windowConnected)
     {
         QWindow *w = windowHandle();
-        if(w)
+        if (w)
         {
             windowConnected = true;
             connect(w, &QWindow::visibilityChanged, this, &RollingStockManager::visibilityChanged);

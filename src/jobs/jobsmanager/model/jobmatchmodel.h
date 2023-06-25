@@ -29,8 +29,8 @@
 #include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-//TODO: share common code with SearchResultModel
-//TODO: allow filter byy job category
+// TODO: share common code with SearchResultModel
+// TODO: allow filter byy job category
 
 /*!
  * \brief Match model for Jobs
@@ -67,7 +67,7 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // ISqlFKMatchModel:
-    void autoSuggest(const QString& text) override;
+    void autoSuggest(const QString &text) override;
     virtual void refreshData() override;
     QString getName(db_id jobId) const override;
 
@@ -75,7 +75,7 @@ public:
     QString getNameAtRow(int row) const override;
 
     // JobMatchModel:
-    void setFilter(db_id exceptJobId, db_id stopsInStationId, const QTime& maxStopArr);
+    void setFilter(db_id exceptJobId, db_id stopsInStationId, const QTime &maxStopArr);
 
     void setDefaultId(DefaultId defaultId);
 

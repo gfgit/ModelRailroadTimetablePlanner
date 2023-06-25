@@ -41,18 +41,21 @@ public:
     explicit StationImportWizard(QWidget *parent = nullptr);
     ~StationImportWizard();
 
-    inline sqlite3pp::database *getTempDB() const { return mTempDB; }
+    inline sqlite3pp::database *getTempDB() const
+    {
+        return mTempDB;
+    }
 
 private slots:
-    void onFileChosen(const QString& fileName);
+    void onFileChosen(const QString &fileName);
 
 private:
-    bool createDatabase(bool inMemory, const QString& fileName);
+    bool createDatabase(bool inMemory, const QString &fileName);
     bool closeDatabase();
 
     friend class SelectStationPage;
-    bool checkNames(db_id sourceStId, const QString& newName, QString &outShortName);
-    bool addStation(db_id sourceStId, const QString& fullName, const QString &shortName);
+    bool checkNames(db_id sourceStId, const QString &newName, QString &outShortName);
+    bool addStation(db_id sourceStId, const QString &fullName, const QString &shortName);
 
     bool copySVGData(db_id sourceStId, db_id destStId);
 

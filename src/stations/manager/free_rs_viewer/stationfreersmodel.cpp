@@ -33,12 +33,11 @@ StationFreeRSModel::StationFreeRSModel(sqlite3pp::database &db, QObject *parent)
     sortCol(RSNameCol),
     mDb(db)
 {
-
 }
 
 QVariant StationFreeRSModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -70,10 +69,11 @@ int StationFreeRSModel::columnCount(const QModelIndex &parent) const
 
 QVariant StationFreeRSModel::data(const QModelIndex &idx, int role) const
 {
-    if (role != Qt::DisplayRole || !idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols)
+    if (role != Qt::DisplayRole || !idx.isValid() || idx.row() >= m_data.size()
+        || idx.column() >= NCols)
         return QVariant();
 
-    const Item& item = m_data.at(idx.row());
+    const Item &item = m_data.at(idx.row());
 
     switch (idx.column())
     {
@@ -84,11 +84,11 @@ QVariant StationFreeRSModel::data(const QModelIndex &idx, int role) const
     case FreeUpToTimeCol:
         return item.to;
     case FromJobCol:
-        if(item.fromJob)
+        if (item.fromJob)
             return JobCategoryName::jobName(item.fromJob, item.fromJobCat);
         break;
     case ToJobCol:
-        if(item.toJob)
+        if (item.toJob)
             return JobCategoryName::jobName(item.toJob, item.toJobCat);
         break;
     }
@@ -96,9 +96,9 @@ QVariant StationFreeRSModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-const StationFreeRSModel::Item* StationFreeRSModel::getItemAt(int row) const
+const StationFreeRSModel::Item *StationFreeRSModel::getItemAt(int row) const
 {
-    if(row < m_data.size())
+    if (row < m_data.size())
         return &m_data.at(row);
     return nullptr;
 }
@@ -116,15 +116,15 @@ void StationFreeRSModel::setTime(QTime time)
 }
 
 template <typename Container, typename ItemType, typename LessThan>
-void insertSorted(Container &vec, const ItemType& item, const LessThan& cmp)
+void insertSorted(Container &vec, const ItemType &item, const LessThan &cmp)
 {
     std::ptrdiff_t len = vec.size();
-    auto first = vec.begin();
+    auto first         = vec.begin();
 
     while (len > 0)
     {
         std::ptrdiff_t half = len >> 1;
-        auto middle = first + half;
+        auto middle         = first + half;
         if (cmp(item, *middle))
             len = half;
         else
@@ -145,83 +145,91 @@ void StationFreeRSModel::reloadData()
     m_data.clear();
     QHash<db_id, Item> tempLookup;
 
-    query q(mDb, "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
-                 "MAX(stops.arrival),stops.job_id,jobs.category,stops.id"
-                 " FROM coupling"
-                 " JOIN stops ON stops.id=coupling.stop_id"
-                 " JOIN jobs ON jobs.id=stops.job_id"
-                 " JOIN rs_list ON rs_list.id=coupling.rs_id"
-                 " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-                 " WHERE stops.station_id=? AND stops.arrival<=?" //Less than OR equal (this includes RS uncoupled exactly at that time)
+    query q(mDb,
+            "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
+            "MAX(stops.arrival),stops.job_id,jobs.category,stops.id"
+            " FROM coupling"
+            " JOIN stops ON stops.id=coupling.stop_id"
+            " JOIN jobs ON jobs.id=stops.job_id"
+            " JOIN rs_list ON rs_list.id=coupling.rs_id"
+            " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
+            " WHERE stops.station_id=? AND stops.arrival<=?" // Less than OR equal (this includes RS
+                                                             // uncoupled exactly at that time)
             " GROUP BY coupling.rs_id"
             " HAVING coupling.operation=0");
     q.bind(1, m_stationId);
     q.bind(2, m_time);
 
-    //Select uncoupled before m_time
-    for(auto r : q)
+    // Select uncoupled before m_time
+    for (auto r : q)
     {
         Item item;
-        item.rsId = r.get<db_id>(0);
+        item.rsId               = r.get<db_id>(0);
 
-        int number = r.get<int>(1);
-        int modelNameLen = sqlite3_column_bytes(q.stmt(), 2);
-        const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q.stmt(), 2));
+        int number              = r.get<int>(1);
+        int modelNameLen        = sqlite3_column_bytes(q.stmt(), 2);
+        const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(q.stmt(), 2));
 
-        int modelSuffixLen = sqlite3_column_bytes(q.stmt(), 3);
-        const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q.stmt(), 3));
-        RsType type = RsType(sqlite3_column_int(q.stmt(), 4));
+        int modelSuffixLen      = sqlite3_column_bytes(q.stmt(), 3);
+        const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(q.stmt(), 3));
+        RsType type             = RsType(sqlite3_column_int(q.stmt(), 4));
 
-        item.from = r.get<QTime>(5);
-        item.fromJob = r.get<db_id>(6);
-        item.fromJobCat = JobCategory(r.get<int>(7));
-        item.fromStopId = r.get<db_id>(8);
-        item.name = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix, modelSuffixLen, type);
+        item.from               = r.get<QTime>(5);
+        item.fromJob            = r.get<db_id>(6);
+        item.fromJobCat         = JobCategory(r.get<int>(7));
+        item.fromStopId         = r.get<db_id>(8);
+        item.name = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix,
+                                            modelSuffixLen, type);
 
         tempLookup.insert(item.rsId, item);
     }
 
-    q.prepare("SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
-              "MIN(stops.arrival),stops.job_id,jobs.category,stops.id"
-              " FROM coupling"
-              " JOIN stops ON stops.id=coupling.stop_id"
-              " JOIN jobs ON jobs.id=stops.job_id"
-              " JOIN rs_list ON rs_list.id=coupling.rs_id"
-              " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
-              " WHERE stops.station_id=? AND stops.arrival>?" //Greater than NOT equal (this exclude RS coupled at exactly that time)
-              " GROUP BY coupling.rs_id"
-              " HAVING coupling.operation=1");
+    q.prepare(
+      "SELECT coupling.rs_id,rs_list.number,rs_models.name,rs_models.suffix,rs_models.type,"
+      "MIN(stops.arrival),stops.job_id,jobs.category,stops.id"
+      " FROM coupling"
+      " JOIN stops ON stops.id=coupling.stop_id"
+      " JOIN jobs ON jobs.id=stops.job_id"
+      " JOIN rs_list ON rs_list.id=coupling.rs_id"
+      " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
+      " WHERE stops.station_id=? AND stops.arrival>?" // Greater than NOT equal (this exclude RS
+                                                      // coupled at exactly that time)
+      " GROUP BY coupling.rs_id"
+      " HAVING coupling.operation=1");
     q.bind(1, m_stationId);
     q.bind(2, m_time);
 
-    //Select coupled after m_time
-    for(auto r : q)
+    // Select coupled after m_time
+    for (auto r : q)
     {
         db_id rsId = r.get<db_id>(0);
-        Item& item = tempLookup[rsId]; //Create entry if key doesn't exist
-        if(!item.rsId)
+        Item &item = tempLookup[rsId]; // Create entry if key doesn't exist
+        if (!item.rsId)
         {
-            item.rsId = rsId;
+            item.rsId        = rsId;
 
-            int number = r.get<int>(1);
+            int number       = r.get<int>(1);
             int modelNameLen = sqlite3_column_bytes(q.stmt(), 2);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q.stmt(), 2));
+            const char *modelName =
+              reinterpret_cast<char const *>(sqlite3_column_text(q.stmt(), 2));
 
             int modelSuffixLen = sqlite3_column_bytes(q.stmt(), 3);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q.stmt(), 3));
+            const char *modelSuffix =
+              reinterpret_cast<char const *>(sqlite3_column_text(q.stmt(), 3));
             RsType type = RsType(sqlite3_column_int(q.stmt(), 4));
 
-            item.name = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix, modelSuffixLen, type);
+            item.name   = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix,
+                                                  modelSuffixLen, type);
         }
-        item.to = r.get<QTime>(5);
-        item.toJob = r.get<db_id>(6);
+        item.to       = r.get<QTime>(5);
+        item.toJob    = r.get<db_id>(6);
         item.toJobCat = JobCategory(r.get<int>(7));
         item.toStopId = r.get<db_id>(8);
     }
 
     m_data.reserve(tempLookup.size());
 
-    //Insert and sort
+    // Insert and sort
     switch (sortCol)
     {
     default:
@@ -230,13 +238,13 @@ void StationFreeRSModel::reloadData()
         class NameLessThan
         {
         public:
-            inline bool operator()(const Item& lhs, const Item& rhs) const
+            inline bool operator()(const Item &lhs, const Item &rhs) const
             {
                 return lhs.name < rhs.name;
             }
         };
 
-        for(const Item &it : qAsConst(tempLookup))
+        for (const Item &it : qAsConst(tempLookup))
         {
             insertSorted(m_data, it, NameLessThan());
         }
@@ -247,13 +255,13 @@ void StationFreeRSModel::reloadData()
         class FromTimeLessThan
         {
         public:
-            inline bool operator()(const Item& lhs, const Item& rhs) const
+            inline bool operator()(const Item &lhs, const Item &rhs) const
             {
                 return lhs.from < rhs.from || (lhs.from == rhs.from && lhs.name < rhs.name);
             }
         };
 
-        for(const Item &it : qAsConst(tempLookup))
+        for (const Item &it : qAsConst(tempLookup))
         {
             insertSorted(m_data, it, FromTimeLessThan());
         }
@@ -264,13 +272,13 @@ void StationFreeRSModel::reloadData()
         class UpToTimeLessThan
         {
         public:
-            inline bool operator()(const Item& lhs, const Item& rhs) const
+            inline bool operator()(const Item &lhs, const Item &rhs) const
             {
                 return lhs.to < rhs.to || (lhs.to == rhs.to && lhs.name < rhs.name);
             }
         };
 
-        for(const Item &it : qAsConst(tempLookup))
+        for (const Item &it : qAsConst(tempLookup))
         {
             insertSorted(m_data, it, UpToTimeLessThan());
         }
@@ -281,13 +289,14 @@ void StationFreeRSModel::reloadData()
         class FromJobLessThan
         {
         public:
-            inline bool operator()(const Item& lhs, const Item& rhs) const
+            inline bool operator()(const Item &lhs, const Item &rhs) const
             {
-                return lhs.fromJob < rhs.fromJob || (lhs.fromJob == rhs.fromJob && lhs.name < rhs.name);
+                return lhs.fromJob < rhs.fromJob
+                       || (lhs.fromJob == rhs.fromJob && lhs.name < rhs.name);
             }
         };
 
-        for(const Item &it : qAsConst(tempLookup))
+        for (const Item &it : qAsConst(tempLookup))
         {
             insertSorted(m_data, it, FromJobLessThan());
         }
@@ -298,13 +307,13 @@ void StationFreeRSModel::reloadData()
         class ToJobLessThan
         {
         public:
-            inline bool operator()(const Item& lhs, const Item& rhs) const
+            inline bool operator()(const Item &lhs, const Item &rhs) const
             {
                 return lhs.toJob < rhs.toJob || (lhs.toJob == rhs.toJob && lhs.name < rhs.name);
             }
         };
 
-        for(const Item &it : qAsConst(tempLookup))
+        for (const Item &it : qAsConst(tempLookup))
         {
             insertSorted(m_data, it, ToJobLessThan());
         }
@@ -350,23 +359,24 @@ StationFreeRSModel::ErrorCodes StationFreeRSModel::getNextOpTime(QTime &time)
     q_getNextOpTime.bind(1, m_stationId);
     q_getNextOpTime.bind(2, m_time);
 
-    if(q_getNextOpTime.step() == SQLITE_ROW)
+    if (q_getNextOpTime.step() == SQLITE_ROW)
     {
         auto r = q_getNextOpTime.getRows();
-        if(r.column_type(1) != SQLITE_NULL)
+        if (r.column_type(1) != SQLITE_NULL)
         {
             time = r.get<QTime>(1);
         }
         else
         {
-            //There aren't operations next to m_time
+            // There aren't operations next to m_time
             err = NoOperationFound;
         }
     }
     else
     {
-        //Error
-        qDebug() << __PRETTY_FUNCTION__ << "DB Error:" << mDb.error_code() << mDb.error_msg() << mDb.extended_error_code();
+        // Error
+        qDebug() << __PRETTY_FUNCTION__ << "DB Error:" << mDb.error_code() << mDb.error_msg()
+                 << mDb.extended_error_code();
         err = DBError;
     }
 
@@ -376,7 +386,7 @@ StationFreeRSModel::ErrorCodes StationFreeRSModel::getNextOpTime(QTime &time)
 
 StationFreeRSModel::ErrorCodes StationFreeRSModel::getPrevOpTime(QTime &time)
 {
-    //TODO: if on last/first operation increment by 1 to see after/before prev, last operation
+    // TODO: if on last/first operation increment by 1 to see after/before prev, last operation
     ErrorCodes err = NoError;
 
     query q_getPrevOpTime(mDb, "SELECT coupling.rs_id, MAX(stops.arrival) FROM coupling"
@@ -385,29 +395,30 @@ StationFreeRSModel::ErrorCodes StationFreeRSModel::getPrevOpTime(QTime &time)
     q_getPrevOpTime.bind(1, m_stationId);
     q_getPrevOpTime.bind(2, m_time);
 
-    if(q_getPrevOpTime.step() == SQLITE_ROW)
+    if (q_getPrevOpTime.step() == SQLITE_ROW)
     {
         auto r = q_getPrevOpTime.getRows();
-        if(r.column_type(1) != SQLITE_NULL)
+        if (r.column_type(1) != SQLITE_NULL)
         {
             time = r.get<QTime>(1);
         }
         else
         {
-            //There aren't operations previous to m_time
-            //But because RS uncoupled before m_time are taken with 'less than OR equal'
-            //we should show also the situation before this time.
+            // There aren't operations previous to m_time
+            // But because RS uncoupled before m_time are taken with 'less than OR equal'
+            // we should show also the situation before this time.
 
-            //err = NoOperationFound;
+            // err = NoOperationFound;
 
-            //Fake operation at first morning
+            // Fake operation at first morning
             time = QTime(0, 0);
         }
     }
     else
     {
-        //Error
-        qDebug() << __PRETTY_FUNCTION__ << "DB Error:" << mDb.error_code() << mDb.error_msg() << mDb.extended_error_code();
+        // Error
+        qDebug() << __PRETTY_FUNCTION__ << "DB Error:" << mDb.error_code() << mDb.error_msg()
+                 << mDb.extended_error_code();
         err = DBError;
     }
 
@@ -417,7 +428,7 @@ StationFreeRSModel::ErrorCodes StationFreeRSModel::getPrevOpTime(QTime &time)
 
 bool StationFreeRSModel::sortByColumn(int col)
 {
-    if(col == sortCol || col < 0 || col >= NCols)
+    if (col == sortCol || col < 0 || col >= NCols)
         return false;
 
     sortCol = col;
@@ -431,7 +442,7 @@ bool StationFreeRSModel::sortByColumn(int col)
         class CompName : public std::binary_function<Item, Item, bool>
         {
         public:
-            inline bool operator()(const Item& l, const Item& r)
+            inline bool operator()(const Item &l, const Item &r)
             {
                 return l.name < r.name;
             }
@@ -445,9 +456,9 @@ bool StationFreeRSModel::sortByColumn(int col)
         class CompFrom : public std::binary_function<Item, Item, bool>
         {
         public:
-            inline bool operator()(const Item& l, const Item& r)
+            inline bool operator()(const Item &l, const Item &r)
             {
-                if(l.from == r.from)
+                if (l.from == r.from)
                     return l.name < r.name;
                 return l.from < r.from;
             }
@@ -461,9 +472,9 @@ bool StationFreeRSModel::sortByColumn(int col)
         class CompTo : public std::binary_function<Item, Item, bool>
         {
         public:
-            inline bool operator()(const Item& l, const Item& r)
+            inline bool operator()(const Item &l, const Item &r)
             {
-                if(l.to == r.to)
+                if (l.to == r.to)
                     return l.name < r.name;
                 return l.to < r.to;
             }
@@ -477,9 +488,9 @@ bool StationFreeRSModel::sortByColumn(int col)
         class CompJobFrom : public std::binary_function<Item, Item, bool>
         {
         public:
-            inline bool operator()(const Item& l, const Item& r)
+            inline bool operator()(const Item &l, const Item &r)
             {
-                if(l.fromJob == r.fromJob)
+                if (l.fromJob == r.fromJob)
                     return l.name < r.name;
                 return l.fromJob < r.fromJob;
             }
@@ -493,9 +504,9 @@ bool StationFreeRSModel::sortByColumn(int col)
         class CompJobTo : public std::binary_function<Item, Item, bool>
         {
         public:
-            inline bool operator()(const Item& l, const Item& r)
+            inline bool operator()(const Item &l, const Item &r)
             {
-                if(l.toJob == r.toJob)
+                if (l.toJob == r.toJob)
                     return l.name < r.name;
                 return l.toJob < r.toJob;
             }

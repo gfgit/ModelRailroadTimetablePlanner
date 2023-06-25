@@ -34,7 +34,7 @@ SceneSelectionModel::SceneSelectionModel(sqlite3pp::database &db, QObject *paren
 
 QVariant SceneSelectionModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal)
     {
         switch (role)
         {
@@ -70,7 +70,7 @@ QVariant SceneSelectionModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= entries.size() || role != Qt::DisplayRole)
         return QVariant();
 
-    const Entry& entry = entries.at(idx.row());
+    const Entry &entry = entries.at(idx.row());
 
     switch (idx.column())
     {
@@ -89,13 +89,13 @@ QVariant SceneSelectionModel::data(const QModelIndex &idx, int role) const
 
 bool SceneSelectionModel::addEntry(const Entry &entry)
 {
-    if(selectionMode == AllOfTypeExceptSelected && entry.type != selectedType)
-        return false; //Not the right type
+    if (selectionMode == AllOfTypeExceptSelected && entry.type != selectedType)
+        return false; // Not the right type
 
-    for(const Entry& e : qAsConst(entries))
+    for (const Entry &e : qAsConst(entries))
     {
-        if(e.objectId == entry.objectId && e.type == entry.type)
-            return false; //Already added
+        if (e.objectId == entry.objectId && e.type == entry.type)
+            return false; // Already added
     }
 
     const int row = entries.size();
@@ -121,9 +121,9 @@ void SceneSelectionModel::removeAt(int row)
 
 void SceneSelectionModel::moveRow(int row, bool up)
 {
-    if(row == 0 && !up)
+    if (row == 0 && !up)
         return;
-    if(row == entries.size() - 1 && up)
+    if (row == entries.size() - 1 && up)
         return;
 
     const int dest = up ? row + 2 : row - 1;
@@ -135,18 +135,18 @@ void SceneSelectionModel::moveRow(int row, bool up)
 
 void SceneSelectionModel::setMode(SelectionMode mode, LineGraphType type)
 {
-    if(mode == UseSelectedEntries)
+    if (mode == UseSelectedEntries)
         type = LineGraphType::NoGraph;
-    else if(type == LineGraphType::NoGraph)
-        return; //Must set a valid type
+    else if (type == LineGraphType::NoGraph)
+        return; // Must set a valid type
 
-    if(selectionMode == mode && selectedType == type)
+    if (selectionMode == mode && selectedType == type)
         return;
 
     selectionMode = mode;
-    selectedType = type;
+    selectedType  = type;
 
-    if(selectionMode == AllOfTypeExceptSelected)
+    if (selectionMode == AllOfTypeExceptSelected)
         keepOnlyType(selectedType);
 
     emit selectionModeChanged(int(mode), int(type));
@@ -157,10 +157,10 @@ void SceneSelectionModel::setMode(SelectionMode mode, LineGraphType type)
 
 qint64 SceneSelectionModel::getItemCount()
 {
-    if(cachedCount >= 0)
+    if (cachedCount >= 0)
         return cachedCount;
 
-    if(selectionMode == UseSelectedEntries)
+    if (selectionMode == UseSelectedEntries)
     {
         cachedCount = entries.size();
     }
@@ -179,16 +179,16 @@ qint64 SceneSelectionModel::getItemCount()
             sql.append("lines");
             break;
         default:
-            return -1; //Error
+            return -1; // Error
         }
 
         sqlite3pp::query q(mDb);
-        if(q.prepare(sql) != SQLITE_OK || q.step() != SQLITE_ROW)
+        if (q.prepare(sql) != SQLITE_OK || q.step() != SQLITE_ROW)
             return -1;
 
         qint64 totalCount = q.getRows().get<qint64>(0);
         totalCount -= entries.size(); // "Except" selected
-        if(totalCount < 0)
+        if (totalCount < 0)
             totalCount = 0;
 
         cachedCount = totalCount;
@@ -199,7 +199,7 @@ qint64 SceneSelectionModel::getItemCount()
 
 bool SceneSelectionModel::startIteration()
 {
-    if(selectionMode == UseSelectedEntries)
+    if (selectionMode == UseSelectedEntries)
     {
         iterationIdx = 0;
         return true;
@@ -218,7 +218,7 @@ bool SceneSelectionModel::startIteration()
         sql.append("lines");
         break;
     default:
-        return false; //Error
+        return false; // Error
     }
 
     int ret = mQuery.prepare(sql);
@@ -230,16 +230,16 @@ IGraphSceneCollection::SceneItem SceneSelectionModel::getNextItem()
     SceneItem item;
 
     Entry entry = getNextEntry();
-    if(!entry.objectId)
+    if (!entry.objectId)
         return item;
 
-    //Create new scene without parent so ownership is passed to caller
+    // Create new scene without parent so ownership is passed to caller
     LineGraphScene *lineScene = new LineGraphScene(mDb);
     lineScene->loadGraph(entry.objectId, entry.type);
 
     item.scene = lineScene;
-    item.name = lineScene->getGraphObjectName();
-    item.type = utils::getLineGraphTypeName(entry.type);
+    item.name  = lineScene->getGraphObjectName();
+    item.type  = utils::getLineGraphTypeName(entry.type);
     return item;
 }
 
@@ -272,45 +272,45 @@ SceneSelectionModel::Entry SceneSelectionModel::getNextEntry()
 {
     Entry entry{0, QString(), selectedType};
 
-    if(selectionMode == UseSelectedEntries)
+    if (selectionMode == UseSelectedEntries)
     {
-        if(iterationIdx < 0 || iterationIdx >= entries.size())
+        if (iterationIdx < 0 || iterationIdx >= entries.size())
             return entry;
 
         entry = entries.at(iterationIdx);
         iterationIdx++;
 
-        if(iterationIdx == entries.size())
-            iterationIdx = -1; //End iteration
+        if (iterationIdx == entries.size())
+            iterationIdx = -1; // End iteration
     }
     else
     {
-        if(!mQuery.stmt())
-            return entry; //Error: not iteration not started
+        if (!mQuery.stmt())
+            return entry; // Error: not iteration not started
 
         while (true)
         {
             int ret = mQuery.step();
-            if(ret != SQLITE_ROW)
+            if (ret != SQLITE_ROW)
             {
-                if(ret == SQLITE_OK || ret == SQLITE_DONE)
-                    mQuery.finish(); //End iteration
+                if (ret == SQLITE_OK || ret == SQLITE_DONE)
+                    mQuery.finish(); // End iteration
                 return entry;
             }
 
             entry.objectId = mQuery.getRows().get<db_id>(0);
 
-            bool exclude = false;
-            for(const Entry& e : qAsConst(entries))
+            bool exclude   = false;
+            for (const Entry &e : qAsConst(entries))
             {
-                if(e.objectId == entry.objectId)
+                if (e.objectId == entry.objectId)
                 {
                     exclude = true;
                     break;
                 }
             }
 
-            if(!exclude)
+            if (!exclude)
                 break;
         }
     }
@@ -325,7 +325,7 @@ void SceneSelectionModel::keepOnlyType(LineGraphType type)
     auto it = entries.begin();
     while (it != entries.end())
     {
-        if(it->type != type)
+        if (it->type != type)
             it = entries.erase(it);
         else
             it++;

@@ -24,10 +24,10 @@ KmDelegate::KmDelegate(QObject *parent) :
     QStyledItemDelegate(parent),
     minimum(0)
 {
-
 }
 
-QWidget *KmDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem &/*option*/, const QModelIndex &/*index*/) const
+QWidget *KmDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                                  const QModelIndex & /*index*/) const
 {
     KmSpinBox *spin = new KmSpinBox(parent);
     spin->setMinimum(minimum);
@@ -41,13 +41,15 @@ void KmDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
     spin->setValue(index.data(Qt::EditRole).toInt());
 }
 
-void KmDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+void KmDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
+                              const QModelIndex &index) const
 {
     KmSpinBox *spin = static_cast<KmSpinBox *>(editor);
     model->setData(index, spin->value(), Qt::EditRole);
 }
 
-void KmDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &/*index*/) const
+void KmDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                                      const QModelIndex & /*index*/) const
 {
     editor->setGeometry(option.rect);
 }
@@ -55,5 +57,5 @@ void KmDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewIte
 void KmDelegate::setMinAndPrefix(int min, const QString &pref)
 {
     minimum = min;
-    prefix = pref;
+    prefix  = pref;
 }

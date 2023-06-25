@@ -21,7 +21,7 @@
 
 #include "app/session.h"
 
-#include  "graph/model/linegraphscene.h"
+#include "graph/model/linegraphscene.h"
 #include "utils/jobcategorystrings.h"
 
 #include <QPainter>
@@ -31,9 +31,9 @@
 
 #include <QDebug>
 
-void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect)
+void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF &rect)
 {
-    //TODO: settings
+    // TODO: settings
     QFont hourTextFont;
     setFontPointSizeDPI(hourTextFont, 15, painter);
 
@@ -45,14 +45,14 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect)
     painter->setFont(hourTextFont);
     painter->setPen(hourTextPen);
 
-    //qDebug() << "Drawing hours..." << rect << scroll;
+    // qDebug() << "Drawing hours..." << rect << scroll;
     const QString fmt(QStringLiteral("%1:00"));
 
-    const qreal top = rect.top() - vertOffset;
+    const qreal top    = rect.top() - vertOffset;
     const qreal bottom = rect.bottom();
 
-    int h = qFloor(top / hourOffset);
-    if(h < 0)
+    int h              = qFloor(top / hourOffset);
+    if (h < 0)
         h = 0;
 
     QRectF labelRect = rect;
@@ -60,9 +60,9 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect)
     labelRect.setHeight(hourOffset);
     labelRect.moveTop(h * hourOffset + vertOffset - hourOffset / 2);
 
-    for(; h <= 24 && labelRect.top() <= bottom; h++)
+    for (; h <= 24 && labelRect.top() <= bottom; h++)
     {
-        //qDebug() << "Y:" << y << fmt.arg(h);
+        // qDebug() << "Y:" << y << fmt.arg(h);
         painter->drawText(labelRect, fmt.arg(h), QTextOption(Qt::AlignVCenter | Qt::AlignRight));
         labelRect.moveTop(labelRect.top() + hourOffset);
     }
@@ -71,39 +71,38 @@ void BackgroundHelper::drawHourPanel(QPainter *painter, const QRectF& rect)
 void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &rect)
 {
     const double horizOffset = Session->horizOffset;
-    const double vertOffset = Session->vertOffset;
-    const double hourOffset = Session->hourOffset;
+    const double vertOffset  = Session->vertOffset;
+    const double hourOffset  = Session->hourOffset;
 
     QPen hourLinePen(AppSettings.getHourLineColor(), AppSettings.getHourLineWidth());
 
     const qreal x1 = qMax(qreal(horizOffset), rect.left());
     const qreal x2 = rect.right();
-    const qreal t = qMax(rect.top(), vertOffset);
-    const qreal b = rect.bottom();
+    const qreal t  = qMax(rect.top(), vertOffset);
+    const qreal b  = rect.bottom();
 
-
-    if(x1 > x2 || b < vertOffset || t > b)
+    if (x1 > x2 || b < vertOffset || t > b)
         return;
 
     int firstH = qCeil((t - vertOffset) / hourOffset);
-    int lastH = qFloor((b - vertOffset) / hourOffset);
+    int lastH  = qFloor((b - vertOffset) / hourOffset);
 
-    if(firstH > 24 || lastH < 0)
+    if (firstH > 24 || lastH < 0)
         return;
 
-    if(firstH < 0)
+    if (firstH < 0)
         firstH = 0;
-    if(lastH > 24)
+    if (lastH > 24)
         lastH = 24;
 
     const int n = lastH - firstH + 1;
-    if(n <= 0)
+    if (n <= 0)
         return;
 
-    qreal y = vertOffset + firstH * hourOffset;
+    qreal y     = vertOffset + firstH * hourOffset;
 
     QLineF *arr = new QLineF[n];
-    for(int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
     {
         arr[i] = QLineF(x1, y, x2, y);
         y += hourOffset;
@@ -111,10 +110,11 @@ void BackgroundHelper::drawBackgroundHourLines(QPainter *painter, const QRectF &
 
     painter->setPen(hourLinePen);
     painter->drawLines(arr, n);
-    delete [] arr;
+    delete[] arr;
 }
 
-void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scene, const QRectF &rect)
+void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scene,
+                                         const QRectF &rect)
 {
     QFont stationFont;
     stationFont.setBold(true);
@@ -132,23 +132,23 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
     QPen nonElectricPlatfPen(Qt::black);
 
     const qreal platformOffset = Session->platformOffset;
-    const int stationOffset = Session->stationOffset;
+    const int stationOffset    = Session->stationOffset;
 
-    //On left go back by half station offset to center station label
-    //and center platform label by going a back of half platformOffset
-    const int leftOffset = -stationOffset/2 - platformOffset /2;
+    // On left go back by half station offset to center station label
+    // and center platform label by going a back of half platformOffset
+    const int leftOffset = -stationOffset / 2 - platformOffset / 2;
 
-    const double margin = stationOffset * 0.1;
+    const double margin  = stationOffset * 0.1;
 
-    QRectF r = rect;
+    QRectF r             = rect;
 
-    for(auto st : qAsConst(scene->stations))
+    for (auto st : qAsConst(scene->stations))
     {
-        const double left = st.xPos + leftOffset;
+        const double left  = st.xPos + leftOffset;
         const double right = left + st.platforms.count() * platformOffset + stationOffset;
 
-        if(right < r.left() || left >= r.right())
-            continue; //Skip station, it's not visible
+        if (right < r.left() || left >= r.right())
+            continue; // Skip station, it's not visible
 
         QRectF labelRect = r;
         labelRect.setLeft(left + margin);
@@ -160,20 +160,20 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
         painter->drawText(labelRect, Qt::AlignVCenter | Qt::AlignCenter, st.stationName);
 
         labelRect = r;
-        labelRect.setTop(r.top() + r.height() * 2/3);
+        labelRect.setTop(r.top() + r.height() * 2 / 3);
 
-        //Go to start of station (first platform)
-        //We need to compensate the half stationOffset used to center station label
-        double xPos = left + stationOffset/2;
+        // Go to start of station (first platform)
+        // We need to compensate the half stationOffset used to center station label
+        double xPos = left + stationOffset / 2;
         labelRect.setWidth(platformOffset);
-        for(const StationGraphObject::PlatformGraph& platf : qAsConst(st.platforms))
+        for (const StationGraphObject::PlatformGraph &platf : qAsConst(st.platforms))
         {
-            if(platf.platformType.testFlag(utils::StationTrackType::Electrified))
+            if (platf.platformType.testFlag(utils::StationTrackType::Electrified))
                 painter->setPen(electricPlatfPen);
             else
                 painter->setPen(nonElectricPlatfPen);
 
-            if(platf.platformType.testFlag(utils::StationTrackType::Through))
+            if (platf.platformType.testFlag(utils::StationTrackType::Through))
                 painter->setFont(platfBoldFont);
             else
                 painter->setFont(platfNormalFont);
@@ -191,33 +191,33 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
 {
     const QRgb white = qRgb(255, 255, 255);
 
-    //const int horizOffset = Session->horizOffset;
+    // const int horizOffset = Session->horizOffset;
     const int vertOffset = Session->vertOffset;
-    //const int stationOffset = Session->stationOffset;
-    const double platfOffset = Session->platformOffset;
-    const int lastY = vertOffset + Session->hourOffset * 24 + 10;
+    // const int stationOffset = Session->stationOffset;
+    const double platfOffset    = Session->platformOffset;
+    const int lastY             = vertOffset + Session->hourOffset * 24 + 10;
 
-    const int width = AppSettings.getPlatformLineWidth();
+    const int width             = AppSettings.getPlatformLineWidth();
     const QColor mainPlatfColor = AppSettings.getMainPlatfColor();
 
-    QPen platfPen (mainPlatfColor,  width);
+    QPen platfPen(mainPlatfColor, width);
 
     QPointF top(0, vertOffset);
     QPointF bottom(0, lastY);
 
-    for(const StationGraphObject &st : qAsConst(scene->stations))
+    for (const StationGraphObject &st : qAsConst(scene->stations))
     {
-        const double left = st.xPos;
+        const double left  = st.xPos;
         const double right = left + st.platforms.count() * platfOffset;
 
-        if(left > rect.right() || right < rect.left())
-            continue; //Skip station, it's not visible
+        if (left > rect.right() || right < rect.left())
+            continue; // Skip station, it's not visible
 
         top.rx() = bottom.rx() = st.xPos;
 
-        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+        for (const StationGraphObject::PlatformGraph &platf : st.platforms)
         {
-            if(platf.color == white)
+            if (platf.color == white)
                 platfPen.setColor(mainPlatfColor);
             else
                 platfPen.setColor(platf.color);
@@ -232,9 +232,10 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
     }
 }
 
-void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
+void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, const QRectF &rect,
+                                    bool drawSelection)
 {
-    const double platfOffset = Session->platformOffset;
+    const double platfOffset   = Session->platformOffset;
     const double stationOffset = Session->stationOffset;
 
     QFont jobNameFont;
@@ -249,7 +250,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     QPen selectedJobPen;
 
     const JobStopEntry selectedJob = scene->getSelectedJob();
-    if(drawSelection && selectedJob.jobId)
+    if (drawSelection && selectedJob.jobId)
     {
         selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
         selectedJobPen.setCapStyle(Qt::RoundCap);
@@ -266,48 +267,48 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     JobCategory lastJobCategory = JobCategory::NCategories;
     QTextOption textOption(Qt::AlignTop | Qt::AlignLeft);
 
-    for(const StationGraphObject &st : qAsConst(scene->stations))
+    for (const StationGraphObject &st : qAsConst(scene->stations))
     {
-        const double left = st.xPos;
+        const double left  = st.xPos;
         const double right = left + st.platforms.count() * platfOffset;
 
-        //Set a maximum right edge to Job labels
-        //This allows to determine if they have to be drawn
+        // Set a maximum right edge to Job labels
+        // This allows to determine if they have to be drawn
         const double maxJobLabelX = right + stationOffset;
 
-        if(left > rect.right() || maxJobLabelX < rect.left())
-            continue; //Skip station, it's not visible
+        if (left > rect.right() || maxJobLabelX < rect.left())
+            continue; // Skip station, it's not visible
 
         top.rx() = bottom.rx() = st.xPos;
 
-        for(const StationGraphObject::PlatformGraph& platf : st.platforms)
+        for (const StationGraphObject::PlatformGraph &platf : st.platforms)
         {
-            for(const StationGraphObject::JobStopGraph& jobStop : platf.jobStops)
+            for (const StationGraphObject::JobStopGraph &jobStop : platf.jobStops)
             {
-                //NOTE: departure comes AFTER arrival in time, opposite than job segment
-                if(jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
-                    continue; //Skip, job not visible
+                // NOTE: departure comes AFTER arrival in time, opposite than job segment
+                if (jobStop.arrivalY > rect.bottom() || jobStop.departureY < rect.top())
+                    continue; // Skip, job not visible
 
                 top.setY(jobStop.arrivalY);
                 bottom.setY(jobStop.departureY);
 
                 const bool nullStopDuration = qFuzzyCompare(top.y(), bottom.y());
 
-                if(drawSelection && selectedJob.jobId == jobStop.stop.jobId)
+                if (drawSelection && selectedJob.jobId == jobStop.stop.jobId)
                 {
-                    //Draw selection around segment
+                    // Draw selection around segment
                     painter->setPen(selectedJobPen);
 
-                    if(nullStopDuration)
+                    if (nullStopDuration)
                         painter->drawPoint(top);
                     else
                         painter->drawLine(top, bottom);
 
-                    //Reset pen
+                    // Reset pen
                     painter->setPen(jobPen);
                 }
 
-                if(lastJobCategory != jobStop.stop.category)
+                if (lastJobCategory != jobStop.stop.category)
                 {
                     QColor color = Session->colorForCat(jobStop.stop.category);
                     jobPen.setColor(color);
@@ -315,17 +316,18 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
                     lastJobCategory = jobStop.stop.category;
                 }
 
-                if(nullStopDuration)
+                if (nullStopDuration)
                     painter->drawPoint(top);
                 else
                     painter->drawLine(top, bottom);
 
-                if(jobStop.drawLabel)
+                if (jobStop.drawLabel)
                 {
-                    const QString jobName = JobCategoryName::jobName(jobStop.stop.jobId, jobStop.stop.category);
+                    const QString jobName =
+                      JobCategoryName::jobName(jobStop.stop.jobId, jobStop.stop.category);
 
-                    //Put label a bit to the left in respect to the stop arrival point
-                    //Calculate width so it doesn't go after maxJobLabelX
+                    // Put label a bit to the left in respect to the stop arrival point
+                    // Calculate width so it doesn't go after maxJobLabelX
                     const qreal topWithMargin = top.x() + platfOffset / 2;
                     QRectF r(topWithMargin, top.y(), maxJobLabelX - topWithMargin, 25);
                     painter->drawText(r, jobName, textOption);
@@ -338,7 +340,8 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     }
 }
 
-void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect, bool drawSelection)
+void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene, const QRectF &rect,
+                                       bool drawSelection)
 {
     const double stationOffset = Session->stationOffset;
 
@@ -357,7 +360,7 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
     QPen selectedJobPen;
 
     const JobStopEntry selectedJob = scene->getSelectedJob();
-    if(drawSelection && selectedJob.jobId)
+    if (drawSelection && selectedJob.jobId)
     {
         selectedJobPen.setWidthF(jobPen.widthF() * SelectedJobWidthFactor);
         selectedJobPen.setCapStyle(Qt::RoundCap);
@@ -371,47 +374,47 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
     JobCategory lastJobCategory = JobCategory::NCategories;
     QTextOption textOption(Qt::AlignCenter);
 
-    //Iterate until one but last
-    //This way we can always acces next station
-    for(int i = 0; i < scene->stationPositions.size() - 1; i++)
+    // Iterate until one but last
+    // This way we can always acces next station
+    for (int i = 0; i < scene->stationPositions.size() - 1; i++)
     {
-        const LineGraphScene::StationPosEntry& stPos = scene->stationPositions.at(i);
+        const LineGraphScene::StationPosEntry &stPos = scene->stationPositions.at(i);
 
-        const double left = stPos.xPos;
-        double right = 0;
+        const double left                            = stPos.xPos;
+        double right                                 = 0;
 
-        if(i < scene->stationPositions.size() - 2)
+        if (i < scene->stationPositions.size() - 2)
         {
-            const LineGraphScene::StationPosEntry& afterNextPos = scene->stationPositions.at(i + 2);
-            right = afterNextPos.xPos - stationOffset;
+            const LineGraphScene::StationPosEntry &afterNextPos = scene->stationPositions.at(i + 2);
+            right                                               = afterNextPos.xPos - stationOffset;
         }
         else
         {
-            right = rect.right(); //Last station, use all space on right side
+            right = rect.right(); // Last station, use all space on right side
         }
 
-        if(left > rect.right() || right < rect.left())
-            continue; //Skip station, it's not visible
+        if (left > rect.right() || right < rect.left())
+            continue; // Skip station, it's not visible
 
-        for(const LineGraphScene::JobSegmentGraph& job : stPos.nextSegmentJobGraphs)
+        for (const LineGraphScene::JobSegmentGraph &job : stPos.nextSegmentJobGraphs)
         {
-            //NOTE: departure comes BEFORE arrival in time, opposite than job stop
-            if(job.fromDeparture.y() > rect.bottom() || job.toArrival.y() < rect.top())
-                continue; //Skip, job not visible
+            // NOTE: departure comes BEFORE arrival in time, opposite than job stop
+            if (job.fromDeparture.y() > rect.bottom() || job.toArrival.y() < rect.top())
+                continue; // Skip, job not visible
 
             const QLineF line(job.fromDeparture, job.toArrival);
 
-            if(drawSelection && selectedJob.jobId == job.jobId)
+            if (drawSelection && selectedJob.jobId == job.jobId)
             {
-                //Draw selection around segment
+                // Draw selection around segment
                 painter->setPen(selectedJobPen);
                 painter->drawLine(line);
 
-                //Reset pen
+                // Reset pen
                 painter->setPen(jobPen);
             }
 
-            if(lastJobCategory != job.category)
+            if (lastJobCategory != job.category)
             {
                 QColor color = Session->colorForCat(job.category);
                 jobPen.setColor(color);
@@ -423,35 +426,35 @@ void BackgroundHelper::drawJobSegments(QPainter *painter, LineGraphScene *scene,
 
             const QString jobName = JobCategoryName::jobName(job.jobId, job.category);
 
-            //Save old transformation to reset it after drawing text
+            // Save old transformation to reset it after drawing text
             const QTransform oldTransf = painter->transform();
 
-            //Move to line center, it will be rotation pivot
+            // Move to line center, it will be rotation pivot
             painter->translate(line.center());
 
-            //Rotate by line angle
+            // Rotate by line angle
             qreal angle = line.angle();
-            if(job.fromDeparture.x() > job.toArrival.x())
-                angle += 180.0; //Prevent flipping text
+            if (job.fromDeparture.x() > job.toArrival.x())
+                angle += 180.0; // Prevent flipping text
 
-            painter->rotate(-angle); //minus because QPainter wants clockwise angle
+            painter->rotate(-angle); // minus because QPainter wants clockwise angle
 
             const double lineLength = line.length();
             QRectF textRect(-lineLength / 2, -30, lineLength, 25);
 
-            //Try to avoid overlapping text of crossing jobs, move text towards arrival
-            if(job.toArrival.x() > job.fromDeparture.x())
+            // Try to avoid overlapping text of crossing jobs, move text towards arrival
+            if (job.toArrival.x() > job.fromDeparture.x())
                 textRect.moveLeft(textRect.left() + lineLength / 5);
             else
                 textRect.moveLeft(textRect.left() - lineLength / 5);
 
             textRect = painter->boundingRect(textRect, jobName, textOption);
 
-            //Draw a semi transparent background to ease text reading
+            // Draw a semi transparent background to ease text reading
             painter->fillRect(textRect, textBackground);
             painter->drawText(textRect, jobName, textOption);
 
-            //Reset to old transformation
+            // Reset to old transformation
             painter->setTransform(oldTransf);
         }
     }

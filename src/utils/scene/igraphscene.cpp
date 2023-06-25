@@ -22,5 +22,4 @@
 IGraphScene::IGraphScene(QObject *parent) :
     QObject(parent)
 {
-
 }

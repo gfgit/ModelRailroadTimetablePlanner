@@ -31,7 +31,7 @@
 namespace sqlite3pp {
 class database;
 class query;
-}
+} // namespace sqlite3pp
 
 class JobCrossingTask;
 
@@ -40,7 +40,8 @@ class JobCrossingResultEvent : public GenericTaskEvent
 public:
     static const Type _Type = Type(CustomEvents::JobsCrossingCheckResult);
 
-    JobCrossingResultEvent(JobCrossingTask *worker, const JobCrossingErrorMap::ErrorMap &data, bool merge);
+    JobCrossingResultEvent(JobCrossingTask *worker, const JobCrossingErrorMap::ErrorMap &data,
+                           bool merge);
 
     QMap<db_id, JobCrossingErrorList> results;
     bool mergeErrors;
@@ -49,11 +50,11 @@ public:
 class JobCrossingTask : public IQuittableTask
 {
 public:
-    JobCrossingTask(sqlite3pp::database &db, QObject *receiver, const QVector<db_id>& jobs);
+    JobCrossingTask(sqlite3pp::database &db, QObject *receiver, const QVector<db_id> &jobs);
 
     void run() override;
 
-    void checkCrossAndPassSegments(JobCrossingErrorMap::ErrorMap& errMap, sqlite3pp::query &q);
+    void checkCrossAndPassSegments(JobCrossingErrorMap::ErrorMap &errMap, sqlite3pp::query &q);
 
 private:
     sqlite3pp::database &mDb;

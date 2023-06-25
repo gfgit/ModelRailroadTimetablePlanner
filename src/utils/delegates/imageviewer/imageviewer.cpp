@@ -29,7 +29,7 @@ ImageViewer::ImageViewer(QWidget *parent) :
 {
     QVBoxLayout *lay = new QVBoxLayout(this);
 
-    infoLabel = new QLabel;
+    infoLabel        = new QLabel;
     lay->addWidget(infoLabel);
 
     slider = new QSlider(Qt::Horizontal);
@@ -53,15 +53,14 @@ ImageViewer::ImageViewer(QWidget *parent) :
 
 void ImageViewer::setImage(const QImage &img)
 {
-    originalImg = img;
+    originalImg           = img;
 
+    const int widthPx     = img.width();
+    const int heightPx    = img.height();
+    const int dotsX       = img.dotsPerMeterX();
+    const int dotsY       = img.dotsPerMeterY();
 
-    const int widthPx = img.width();
-    const int heightPx = img.height();
-    const int dotsX = img.dotsPerMeterX();
-    const int dotsY = img.dotsPerMeterY();
-
-    const double widthCm = 100.0 * double(widthPx) / double(dotsX);
+    const double widthCm  = 100.0 * double(widthPx) / double(dotsX);
     const double heightCm = 100.0 * double(heightPx) / double(dotsY);
 
     QString info;
@@ -70,7 +69,7 @@ void ImageViewer::setImage(const QImage &img)
     info.append(QStringLiteral("Height: %1 cm\n").arg(heightCm, 0, 'f', 2));
 
     QStringList keys = img.textKeys();
-    for(const QString& key : keys)
+    for (const QString &key : keys)
     {
         info.append("'");
         info.append(key);
@@ -82,7 +81,7 @@ void ImageViewer::setImage(const QImage &img)
 
     setScale(100);
 
-    if(originalImg.isNull())
+    if (originalImg.isNull())
     {
         imageLabel->setPixmap(QPixmap());
         imageLabel->setText(tr("No image"));
@@ -92,7 +91,7 @@ void ImageViewer::setImage(const QImage &img)
 
 void ImageViewer::setScale(int val)
 {
-    if(originalImg.isNull())
+    if (originalImg.isNull())
         return;
 
     slider->setValue(val);
@@ -100,11 +99,14 @@ void ImageViewer::setScale(int val)
     imageLabel->setToolTip(tip);
     slider->setToolTip(tip);
 
-    if(val == 100)
+    if (val == 100)
     {
         scaledImg = originalImg;
-    }else{
-        scaledImg = originalImg.scaledToWidth(originalImg.width() * val / 100, Qt::SmoothTransformation);
+    }
+    else
+    {
+        scaledImg =
+          originalImg.scaledToWidth(originalImg.width() * val / 100, Qt::SmoothTransformation);
     }
 
     imageLabel->setPixmap(QPixmap::fromImage(scaledImg));

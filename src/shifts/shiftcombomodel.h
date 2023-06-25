@@ -47,7 +47,7 @@ public:
     bool event(QEvent *e) override;
 
     // ISqlFKMatchModel:
-    void autoSuggest(const QString& text) override;
+    void autoSuggest(const QString &text) override;
     void refreshData() override;
     void clearCache() override;
     QString getName(db_id shiftId) const override;

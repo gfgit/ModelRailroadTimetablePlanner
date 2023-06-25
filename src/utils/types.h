@@ -22,14 +22,14 @@
 
 #include <QtGlobal>
 
-//64 bit signed integer used for SQL Primary Key ID
+// 64 bit signed integer used for SQL Primary Key ID
 typedef qint64 db_id;
 
 enum class RsType : qint8
 {
     Engine = 0,
     FreightWagon,
-    Coach ,
+    Coach,
     NTypes
 };
 
@@ -42,15 +42,17 @@ enum class RsEngineSubType : qint8
     NTypes
 };
 
-enum class StopType {
-    ToggleType = -1, //Used as flag in StopModel::setStopTypeRange()
-    Normal = 0,
+enum class StopType
+{
+    ToggleType = -1, // Used as flag in StopModel::setStopTypeRange()
+    Normal     = 0,
     Transit,
     First,
     Last
 };
 
-enum class RsOp {
+enum class RsOp
+{
     Uncoupled = 0,
     Coupled   = 1
 };
@@ -58,11 +60,11 @@ enum class RsOp {
 enum class JobCategory : qint8
 {
     FREIGHT = 0,
-    LIS, //Locomotiva In Spostamento (Rimando)
+    LIS, // Locomotiva In Spostamento (Rimando)
     POSTAL,
 
-    REGIONAL, //Passenger
-    FAST_REGIONAL, //RV - Regionale veloce
+    REGIONAL,      // Passenger
+    FAST_REGIONAL, // RV - Regionale veloce
     LOCAL,
     INTERCITY,
     EXPRESS,
@@ -72,19 +74,19 @@ enum class JobCategory : qint8
     NCategories
 };
 
-constexpr JobCategory LastFreightCategory = JobCategory::POSTAL;
+constexpr JobCategory LastFreightCategory    = JobCategory::POSTAL;
 constexpr JobCategory FirstPassengerCategory = JobCategory::REGIONAL;
 
 struct JobEntry
 {
-    db_id jobId = 0;
+    db_id jobId          = 0;
     JobCategory category = JobCategory::NCategories;
 };
 
 struct JobStopEntry
 {
-    db_id stopId = 0;
-    db_id jobId = 0;
+    db_id stopId         = 0;
+    db_id jobId          = 0;
     JobCategory category = JobCategory::NCategories;
 };
 

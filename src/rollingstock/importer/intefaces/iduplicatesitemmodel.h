@@ -49,12 +49,16 @@ public:
 
     bool event(QEvent *e) override;
 
-    static IDuplicatesItemModel *createModel(ModelModes::Mode mode, sqlite3pp::database &db, ICheckName *iface, QObject *parent = nullptr);
+    static IDuplicatesItemModel *createModel(ModelModes::Mode mode, sqlite3pp::database &db,
+                                             ICheckName *iface, QObject *parent = nullptr);
 
-    inline State getState() const { return mState; }
+    inline State getState() const
+    {
+        return mState;
+    }
     inline int getItemCount() const
     {
-        if(mState == Loaded || mState == LoadingData)
+        if (mState == Loaded || mState == LoadingData)
             return cachedCount;
         return -1;
     }
@@ -63,14 +67,14 @@ public:
     void cancelLoading();
 
 signals:
-    void error(const QString& text);
+    void error(const QString &text);
     void stateChanged(int state);
     void progressChanged(int progress, int max);
     void progressFinished();
     void processAborted();
 
 protected:
-    virtual IQuittableTask* createTask(int mode) = 0;
+    virtual IQuittableTask *createTask(int mode)    = 0;
     virtual void handleResult(IQuittableTask *task) = 0;
 
 protected:

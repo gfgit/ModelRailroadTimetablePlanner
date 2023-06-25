@@ -32,18 +32,18 @@ namespace sqlite3pp {
 class database;
 }
 
-//FIXME: make incremental loading, cached like other on-demand models
+// FIXME: make incremental loading, cached like other on-demand models
 class SessionStartEndModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    //Station or RS Owner
+    // Station or RS Owner
     struct ParentItem
     {
         db_id id;
         QString name;
-        int firstIdx; //First RS index
+        int firstIdx; // First RS index
     };
 
     struct RSItem
@@ -69,12 +69,11 @@ public:
         NCols
     };
 
-
-
     SessionStartEndModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     QModelIndex index(int row, int column,
@@ -90,12 +89,18 @@ public:
 
     QModelIndex sibling(int row, int column, const QModelIndex &idx) const override;
 
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     void setMode(SessionRSMode m, SessionRSOrder o, bool forceReload = false);
 
-    inline SessionRSMode mode() const { return m_mode; }
-    inline SessionRSOrder order() const { return m_order; }
+    inline SessionRSMode mode() const
+    {
+        return m_mode;
+    }
+    inline SessionRSOrder order() const
+    {
+        return m_order;
+    }
 
 private:
     sqlite3pp::database &mDb;

@@ -49,13 +49,13 @@ QString Print::getOutputTypeName(Print::OutputType type)
     return QString();
 }
 
-QString Print::getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
-                           const QString& name, const QString &type, int i)
+QString Print::getFileName(const QString &baseDir, const QString &pattern, const QString &extension,
+                           const QString &name, const QString &type, int i)
 {
     QString result = pattern;
-    if(result.contains(phNameUnderscore))
+    if (result.contains(phNameUnderscore))
     {
-        //Replace spaces with underscores
+        // Replace spaces with underscores
         QString nameUnderscores = name;
         nameUnderscores.replace(' ', '_');
         result.replace(phNameUnderscore, nameUnderscores);
@@ -65,7 +65,7 @@ QString Print::getFileName(const QString& baseDir, const QString& pattern, const
     result.replace(phType, type);
     result.replace(phProgressive, QString::number(i).rightJustified(2, '0'));
 
-    if(!baseDir.endsWith('/'))
+    if (!baseDir.endsWith('/'))
         result.prepend('/');
     result.prepend(baseDir);
 
@@ -74,26 +74,28 @@ QString Print::getFileName(const QString& baseDir, const QString& pattern, const
     return result;
 }
 
-void Print::validatePrintOptions(Print::PrintBasicOptions& printOpt, QPrinter *printer)
+void Print::validatePrintOptions(Print::PrintBasicOptions &printOpt, QPrinter *printer)
 {
-    if(printOpt.outputType == Print::OutputType::Svg)
+    if (printOpt.outputType == Print::OutputType::Svg)
     {
-        //Svg can only be printed in multiple files
+        // Svg can only be printed in multiple files
         printOpt.useOneFileForEachScene = true;
 
-        //Svg will always be on single page
+        // Svg will always be on single page
         printOpt.printSceneInOnePage = true;
     }
-    else if(printOpt.outputType == Print::OutputType::Native)
+    else if (printOpt.outputType == Print::OutputType::Native)
     {
-        //Printers always need to split in multiple pages
+        // Printers always need to split in multiple pages
         printOpt.printSceneInOnePage = false;
     }
 
-    if(printer)
+    if (printer)
     {
-        //Update printer output format
-        printer->setOutputFormat(printOpt.outputType == Print::OutputType::Native ? QPrinter::NativeFormat : QPrinter::PdfFormat);
+        // Update printer output format
+        printer->setOutputFormat(printOpt.outputType == Print::OutputType::Native
+                                   ? QPrinter::NativeFormat
+                                   : QPrinter::PdfFormat);
     }
 }
 
@@ -104,7 +106,7 @@ bool Print::askUserToAbortPrinting(bool wasAlreadyStarted, QWidget *parent)
     msgBox->setWindowTitle(PrintWizard::tr("Abort Printing?"));
 
     QString msg;
-    if(wasAlreadyStarted)
+    if (wasAlreadyStarted)
         msg = PrintWizard::tr("Do you want to abort printing?\n"
                               "Some items may have already be printed.");
     else
@@ -112,15 +114,15 @@ bool Print::askUserToAbortPrinting(bool wasAlreadyStarted, QWidget *parent)
 
     msgBox->setText(msg);
     QPushButton *abortBut = msgBox->addButton(QMessageBox::Abort);
-    QPushButton *noBut = msgBox->addButton(QMessageBox::No);
+    QPushButton *noBut    = msgBox->addButton(QMessageBox::No);
     msgBox->setDefaultButton(noBut);
-    msgBox->setEscapeButton(noBut); //Do not Abort if dialog is closed by Esc or X window button
+    msgBox->setEscapeButton(noBut); // Do not Abort if dialog is closed by Esc or X window button
     msgBox->exec();
     bool abortClicked = msgBox && msgBox->clickedButton() == abortBut;
     return abortClicked;
 }
 
-bool Print::askUserToTryAgain(const QString& errMsg, QWidget *parent)
+bool Print::askUserToTryAgain(const QString &errMsg, QWidget *parent)
 {
     OwningQPointer<QMessageBox> msgBox = new QMessageBox(parent);
     msgBox->setIcon(QMessageBox::Warning);
@@ -131,7 +133,7 @@ bool Print::askUserToTryAgain(const QString& errMsg, QWidget *parent)
     msgBox->setWindowTitle(PrintWizard::tr("Print Error"));
 
     msgBox->exec();
-    if(!msgBox)
+    if (!msgBox)
         return false;
 
     bool shouldTryAgain = msgBox->clickedButton() == tryAgainBut;
@@ -139,35 +141,36 @@ bool Print::askUserToTryAgain(const QString& errMsg, QWidget *parent)
 }
 
 PrintWizard::PrintWizard(sqlite3pp::database &db, QWidget *parent) :
-    QWizard (parent),
+    QWizard(parent),
     mDb(db),
     m_printer(nullptr)
 {
     printTaskHandler = new PrintWorkerHandler(mDb, this);
-    connect(printTaskHandler, &PrintWorkerHandler::progressMaxChanged,
-            this, &PrintWizard::progressMaxChanged);
-    connect(printTaskHandler, &PrintWorkerHandler::progressChanged,
-            this, &PrintWizard::progressChanged);
-    connect(printTaskHandler, &PrintWorkerHandler::progressFinished,
-            this, &PrintWizard::handleProgressFinished);
+    connect(printTaskHandler, &PrintWorkerHandler::progressMaxChanged, this,
+            &PrintWizard::progressMaxChanged);
+    connect(printTaskHandler, &PrintWorkerHandler::progressChanged, this,
+            &PrintWizard::progressChanged);
+    connect(printTaskHandler, &PrintWorkerHandler::progressFinished, this,
+            &PrintWizard::handleProgressFinished);
 
     m_printer = new QPrinter;
     m_printer->setOutputFormat(QPrinter::PdfFormat);
 
-    //Initialize to a default pattern
+    // Initialize to a default pattern
     Print::PrintBasicOptions printOpt;
     printOpt.fileNamePattern = Print::phType + QLatin1Char('_') + Print::phNameUnderscore;
     printTaskHandler->setOptions(printOpt, m_printer);
 
-    //Remove page margins
+    // Remove page margins
     QPageLayout printerPageLay = m_printer->pageLayout();
     printerPageLay.setMode(QPageLayout::FullPageMode);
     printerPageLay.setMargins(QMarginsF());
     m_printer->setPageLayout(printerPageLay);
 
-    //Apply page size to scene layout
+    // Apply page size to scene layout
     Print::PageLayoutOpt scenePageLay;
-    PrintHelper::applyPageSize(printerPageLay.pageSize(), printerPageLay.orientation(), scenePageLay);
+    PrintHelper::applyPageSize(printerPageLay.pageSize(), printerPageLay.orientation(),
+                               scenePageLay);
     printTaskHandler->setScenePageLay(scenePageLay);
 
     selectionModel = new SceneSelectionModel(mDb, this);
@@ -189,25 +192,25 @@ PrintWizard::~PrintWizard()
 bool PrintWizard::validateCurrentPage()
 {
     QWizardPage *curPage = currentPage();
-    if(!curPage)
+    if (!curPage)
         return true;
 
-    if(!curPage->validatePage())
+    if (!curPage->validatePage())
         return false;
 
-    //NOTE: needed because when going back and then again forward
-    //initializePage() is not called again
-    //So we need to manually initialize again next page
+    // NOTE: needed because when going back and then again forward
+    // initializePage() is not called again
+    // So we need to manually initialize again next page
     int id = currentId();
-    if(id == 0)
+    if (id == 0)
     {
-        //Setup PrintOptionsPage
+        // Setup PrintOptionsPage
         PrintOptionsPage *optionsPage = static_cast<PrintOptionsPage *>(page(1));
         optionsPage->setupPage();
     }
-    else if(id == 1)
+    else if (id == 1)
     {
-        //After PrintOptionsPage start task
+        // After PrintOptionsPage start task
         printTaskHandler->startPrintTask(m_printer, selectionModel);
     }
 
@@ -222,7 +225,7 @@ QPrinter *PrintWizard::getPrinter() const
 void PrintWizard::setOutputType(Print::OutputType type)
 {
     Print::PrintBasicOptions printOpt = printTaskHandler->getOptions();
-    printOpt.outputType = type;
+    printOpt.outputType               = type;
     printTaskHandler->setOptions(printOpt, m_printer);
 }
 
@@ -248,14 +251,14 @@ void PrintWizard::setPrintOpt(const Print::PrintBasicOptions &newPrintOpt)
 
 IGraphScene *PrintWizard::getFirstScene()
 {
-    if(!selectionModel->startIteration())
+    if (!selectionModel->startIteration())
         return nullptr;
 
     IGraphSceneCollection::SceneItem item = selectionModel->getNextItem();
-    if(!item.scene)
+    if (!item.scene)
         return nullptr;
 
-    //Caller is responsible for deleting
+    // Caller is responsible for deleting
     return item.scene;
 }
 
@@ -266,20 +269,20 @@ bool PrintWizard::taskRunning() const
 
 void PrintWizard::done(int result)
 {
-    //When we finish, we disable Cancel button
-    //If finished do not prompt about aborting printing
-    //Tasks is already cleaned up
+    // When we finish, we disable Cancel button
+    // If finished do not prompt about aborting printing
+    // Tasks is already cleaned up
     const bool printingFinished = !button(CancelButton)->isEnabled();
 
-    if(result == QDialog::Rejected && !printingFinished)
+    if (result == QDialog::Rejected && !printingFinished)
     {
-        if(!printTaskHandler->waitingForTaskToStop())
+        if (!printTaskHandler->waitingForTaskToStop())
         {
-            //Ask user if he wants to abort printing
-            if(!Print::askUserToAbortPrinting(printTaskHandler->taskIsRunning(), this))
+            // Ask user if he wants to abort printing
+            if (!Print::askUserToAbortPrinting(printTaskHandler->taskIsRunning(), this))
                 return;
 
-            if(printTaskHandler->taskIsRunning())
+            if (printTaskHandler->taskIsRunning())
             {
                 printTaskHandler->stopTaskGracefully();
                 return;
@@ -287,8 +290,8 @@ void PrintWizard::done(int result)
         }
         else
         {
-            if(printTaskHandler->taskIsRunning())
-                return; //Already sent 'stop', just wait
+            if (printTaskHandler->taskIsRunning())
+                return; // Already sent 'stop', just wait
         }
     }
 
@@ -307,16 +310,16 @@ void PrintWizard::progressChanged(int val, const QString &msg)
 
 void PrintWizard::handleProgressFinished(bool success, const QString &errMsg)
 {
-    if(!success)
+    if (!success)
     {
-        if(Print::askUserToTryAgain(errMsg, this))
+        if (Print::askUserToTryAgain(errMsg, this))
         {
-            //Go back to options page
+            // Go back to options page
             back();
             return;
         }
     }
 
-    //When finished, disable Cancel button.
+    // When finished, disable Cancel button.
     button(CancelButton)->setEnabled(false);
 }

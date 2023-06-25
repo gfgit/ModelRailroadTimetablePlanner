@@ -22,7 +22,6 @@
 
 #include "rslistondemandmodel.h"
 
-
 class StopCouplingModel : public RSListOnDemandModel
 {
     Q_OBJECT

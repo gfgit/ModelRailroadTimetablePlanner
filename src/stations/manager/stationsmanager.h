@@ -25,7 +25,6 @@
 
 #include "utils/types.h"
 
-
 class QToolBar;
 class QToolButton;
 class QTableView;
@@ -43,7 +42,6 @@ class StationsManager : public QWidget
     Q_OBJECT
 
 public:
-
     enum Tabs
     {
         StationsTab = 0,
@@ -55,10 +53,13 @@ public:
     enum ModelState
     {
         ModelCleared = 0,
-        ModelLoaded = -1
+        ModelLoaded  = -1
     };
 
-    enum { ClearModelTimeout = 5000 }; // 5 seconds
+    enum
+    {
+        ClearModelTimeout = 5000
+    }; // 5 seconds
 
     explicit StationsManager(QWidget *parent = nullptr);
     ~StationsManager() override;

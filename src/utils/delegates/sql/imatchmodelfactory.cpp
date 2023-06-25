@@ -22,5 +22,4 @@
 IMatchModelFactory::IMatchModelFactory(QObject *parent) :
     QObject(parent)
 {
-
 }

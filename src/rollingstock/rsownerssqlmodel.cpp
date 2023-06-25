@@ -28,16 +28,14 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-static constexpr char
-errorOwnerNameAlreadyUsed[] = QT_TRANSLATE_NOOP("RSOwnersSQLModel",
-                                                "This owner name (<b>%1</b>) is already used.");
+static constexpr char errorOwnerNameAlreadyUsed[] =
+  QT_TRANSLATE_NOOP("RSOwnersSQLModel", "This owner name (<b>%1</b>) is already used.");
 
-static constexpr char
-errorOwnerInUseCannotDelete[]
-    = QT_TRANSLATE_NOOP("RSOwnersSQLModel",
-                        "There are rollingstock pieces of owner <b>%1</b> so it cannot be removed.<br>"
-                        "If you wish to remove it, please first delete all pieces belonging to <b>%1</b> "
-                        "or change their owner.");
+static constexpr char errorOwnerInUseCannotDelete[] = QT_TRANSLATE_NOOP(
+  "RSOwnersSQLModel",
+  "There are rollingstock pieces of owner <b>%1</b> so it cannot be removed.<br>"
+  "If you wish to remove it, please first delete all pieces belonging to <b>%1</b> "
+  "or change their owner.");
 
 RSOwnersSQLModel::RSOwnersSQLModel(sqlite3pp::database &db, QObject *parent) :
     BaseClass(500, db, parent)
@@ -47,9 +45,9 @@ RSOwnersSQLModel::RSOwnersSQLModel(sqlite3pp::database &db, QObject *parent) :
 
 QVariant RSOwnersSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole)
     {
-        if(orientation == Qt::Horizontal)
+        if (orientation == Qt::Horizontal)
         {
             switch (section)
             {
@@ -73,18 +71,18 @@ QVariant RSOwnersSQLModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    //qDebug() << "Data:" << idx.row();
+    // qDebug() << "Data:" << idx.row();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<RSOwnersSQLModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const RSOwner& item = cache.at(row - cacheFirstRow);
+    const RSOwner &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -107,12 +105,13 @@ QVariant RSOwnersSQLModel::data(const QModelIndex &idx, int role) const
 bool RSOwnersSQLModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
-    RSOwner &item = cache[row - cacheFirstRow];
+    RSOwner &item     = cache[row - cacheFirstRow];
     QModelIndex first = idx;
-    QModelIndex last = idx;
+    QModelIndex last  = idx;
 
     switch (role)
     {
@@ -123,33 +122,33 @@ bool RSOwnersSQLModel::setData(const QModelIndex &idx, const QVariant &value, in
         case Name:
         {
             QString newName = value.toString().simplified();
-            if(item.name == newName)
-                return false; //No change
+            if (item.name == newName)
+                return false; // No change
 
             command set_name(mDb, "UPDATE rs_owners SET name=? WHERE id=?");
 
-            if(newName.isEmpty())
-                set_name.bind(1); //Bind NULL
+            if (newName.isEmpty())
+                set_name.bind(1); // Bind NULL
             else
                 set_name.bind(1, newName);
             set_name.bind(2, item.ownerId);
             int ret = set_name.execute();
-            if(ret == SQLITE_CONSTRAINT_UNIQUE)
+            if (ret == SQLITE_CONSTRAINT_UNIQUE)
             {
                 emit modelError(tr(errorOwnerNameAlreadyUsed).arg(newName));
                 return false;
             }
-            else if(ret != SQLITE_OK)
+            else if (ret != SQLITE_OK)
             {
                 return false;
             }
 
             item.name = newName;
-            //FIXME: maybe emit some signals?
+            // FIXME: maybe emit some signals?
 
-            //This row has now changed position so we need to invalidate cache
-            //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-            //but the view will trigger fetching at same scroll position so it is enough
+            // This row has now changed position so we need to invalidate cache
+            // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+            // but the view will trigger fetching at same scroll position so it is enough
             cache.clear();
             cacheFirstRow = 0;
 
@@ -174,8 +173,8 @@ Qt::ItemFlags RSOwnersSQLModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
     f.setFlag(Qt::ItemIsEditable);
     return f;
 }
@@ -199,8 +198,8 @@ bool RSOwnersSQLModel::setFilterAtCol(int col, const QString &str)
     {
     case Name:
     {
-        if(isNull)
-            return false; //Cannot have NULL OwnerName
+        if (isNull)
+            return false; // Cannot have NULL OwnerName
         m_ownerFilter = str;
         break;
     }
@@ -212,21 +211,21 @@ bool RSOwnersSQLModel::setFilterAtCol(int col, const QString &str)
     return true;
 }
 
-bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
+bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString &name)
 {
-    if(!ownerId)
+    if (!ownerId)
         return false;
 
     command cmd(mDb, "DELETE FROM rs_owners WHERE id=?");
     cmd.bind(1, ownerId);
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
         ret = mDb.extended_error_code();
-        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+        if (ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
             QString tmp = name;
-            if(name.isNull())
+            if (name.isNull())
             {
                 query q(mDb, "SELECT name FROM rs_owners WHERE id=?");
                 q.bind(1, ownerId);
@@ -241,14 +240,14 @@ bool RSOwnersSQLModel::removeRSOwner(db_id ownerId, const QString& name)
         return false;
     }
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
     return true;
 }
 
 bool RSOwnersSQLModel::removeRSOwnerAt(int row)
 {
-    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
     const RSOwner &item = cache.at(row - cacheFirstRow);
 
@@ -263,36 +262,37 @@ db_id RSOwnersSQLModel::addRSOwner(int *outRow)
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
     int ret = cmd.execute();
-    if(ret == SQLITE_OK)
+    if (ret == SQLITE_OK)
     {
         ownerId = mDb.last_insert_rowid();
     }
     sqlite3_mutex_leave(mutex);
 
-    if(ret == SQLITE_CONSTRAINT_UNIQUE)
+    if (ret == SQLITE_CONSTRAINT_UNIQUE)
     {
-        //There is already an empty owner, use that instead
+        // There is already an empty owner, use that instead
         query findEmpty(mDb, "SELECT id FROM rs_owners WHERE name='' OR name IS NULL LIMIT 1");
-        if(findEmpty.step() == SQLITE_ROW)
+        if (findEmpty.step() == SQLITE_ROW)
         {
             ownerId = findEmpty.getRows().get<db_id>(0);
         }
     }
-    else if(ret != SQLITE_OK)
+    else if (ret != SQLITE_OK)
     {
-        qDebug() << "RS Owner Error adding:" << ret << mDb.error_msg() << mDb.error_code() << mDb.extended_error_code();
+        qDebug() << "RS Owner Error adding:" << ret << mDb.error_msg() << mDb.error_code()
+                 << mDb.extended_error_code();
     }
 
-    //Clear filters
+    // Clear filters
     m_ownerFilter.clear();
     m_ownerFilter.squeeze();
     emit filterChanged();
 
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
+    refreshData();   // Recalc row count
+    switchToPage(0); // Reset to first page and so it is shown as first row
 
-    if(outRow)
-        *outRow = ownerId ? 0 : -1; //Empty name is always the first
+    if (outRow)
+        *outRow = ownerId ? 0 : -1; // Empty name is always the first
 
     return ownerId;
 }
@@ -301,27 +301,28 @@ bool RSOwnersSQLModel::removeAllRSOwners()
 {
     command cmd(mDb, "DELETE FROM rs_owners");
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        qWarning() << "Removing ALL RS OWNERS:" << ret << mDb.extended_error_code() << "Err:" << mDb.error_msg();
+        qWarning() << "Removing ALL RS OWNERS:" << ret << mDb.extended_error_code()
+                   << "Err:" << mDb.error_msg();
         return false;
     }
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
     return true;
 }
 
 qint64 RSOwnersSQLModel::recalcTotalItemCount()
 {
     QByteArray sql = "SELECT COUNT(1) FROM rs_owners";
-    if(!m_ownerFilter.isEmpty())
+    if (!m_ownerFilter.isEmpty())
     {
         sql.append(" WHERE rs_owners.name LIKE ?1");
     }
 
     query q(mDb, sql);
 
-    if(!m_ownerFilter.isEmpty())
+    if (!m_ownerFilter.isEmpty())
     {
         QByteArray ownerFilter;
         ownerFilter.reserve(m_ownerFilter.size() + 2);
@@ -336,7 +337,8 @@ qint64 RSOwnersSQLModel::recalcTotalItemCount()
     return count;
 }
 
-void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
+void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
+                                     const QVariant & /*val*/)
 {
     query q(mDb);
 
@@ -344,9 +346,8 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, con
 
     qDebug() << "Fetching:" << first << "Offset:" << offset;
 
-
     QByteArray sql = "SELECT id,name FROM rs_owners";
-    if(!m_ownerFilter.isEmpty())
+    if (!m_ownerFilter.isEmpty())
     {
         sql.append(" WHERE rs_owners.name LIKE ?3");
     }
@@ -356,7 +357,7 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, con
     {
     case Name:
     {
-        sertColExpr = "name"; //Order by 2 columns, no where clause
+        sertColExpr = "name"; // Order by 2 columns, no where clause
         break;
     }
     }
@@ -365,15 +366,15 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, con
     sql += sertColExpr;
 
     sql += " LIMIT ?1";
-    if(offset)
+    if (offset)
         sql += " OFFSET ?2";
 
     q.prepare(sql);
     q.bind(1, BatchSize);
-    if(offset)
+    if (offset)
         q.bind(2, offset);
 
-    if(!m_ownerFilter.isEmpty())
+    if (!m_ownerFilter.isEmpty())
     {
         QByteArray ownerFilter;
         ownerFilter.reserve(m_ownerFilter.size() + 2);
@@ -385,21 +386,21 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, con
 
     QVector<RSOwner> vec(BatchSize);
 
-    auto it = q.begin();
+    auto it        = q.begin();
     const auto end = q.end();
 
-    int i = 0;
-    for(; it != end; ++it)
+    int i          = 0;
+    for (; it != end; ++it)
     {
-        auto r = *it;
+        auto r        = *it;
         RSOwner &item = vec[i];
-        item.ownerId = r.get<db_id>(0);
-        item.name = r.get<QString>(1);
+        item.ownerId  = r.get<db_id>(0);
+        item.name     = r.get<QString>(1);
 
         i += 1;
     }
 
-    if(i < BatchSize)
+    if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);

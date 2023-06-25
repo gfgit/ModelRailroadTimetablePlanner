@@ -38,7 +38,7 @@ public:
     void openColorDialog();
 
 signals:
-    void colorChanged(const QColor&);
+    void colorChanged(const QColor &);
     void editingFinished();
 
 protected:

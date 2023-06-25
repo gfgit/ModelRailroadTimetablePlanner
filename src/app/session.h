@@ -33,7 +33,6 @@ using namespace sqlite3pp;
 
 #include <settings/appsettings.h>
 
-
 class ViewManager;
 class MetaDataManager;
 
@@ -65,53 +64,60 @@ class MeetingSession : public QObject
     Q_OBJECT
 
 private:
-    static MeetingSession* session;
+    static MeetingSession *session;
+
 public:
     MeetingSession();
     ~MeetingSession();
 
-    static MeetingSession* Get();
+    static MeetingSession *Get();
 
-    inline ViewManager* getViewManager() { return viewManager.get(); }
+    inline ViewManager *getViewManager()
+    {
+        return viewManager.get();
+    }
 
-    inline MetaDataManager* getMetaDataManager() { return metaDataMgr.get(); }
+    inline MetaDataManager *getMetaDataManager()
+    {
+        return metaDataMgr.get();
+    }
 
 #ifdef ENABLE_BACKGROUND_MANAGER
     BackgroundManager *getBackgroundManager() const;
 #endif
 
 signals:
-    //Shifts
+    // Shifts
     void shiftAdded(db_id shiftId);
     void shiftRemoved(db_id shiftId);
     void shiftNameChanged(db_id shiftId);
 
-    //A job was added/removed/modified belonging to this shift
+    // A job was added/removed/modified belonging to this shift
     void shiftJobsChanged(db_id shiftId, db_id jobId);
 
-    //Rollingstock
+    // Rollingstock
     void rollingstockRemoved(db_id rsId);
     void rollingStockPlanChanged(QSet<db_id> rsIds);
     void rollingStockModified(db_id rsId);
 
-    //Jobs
+    // Jobs
     void jobAdded(db_id jobId);
-    void jobChanged(db_id jobId, db_id oldJobId); //Updated id/category/stops
+    void jobChanged(db_id jobId, db_id oldJobId); // Updated id/category/stops
     void jobRemoved(db_id jobId);
 
-    //Stations
+    // Stations
     void stationNameChanged(db_id stationId);
-    void stationJobsPlanChanged(const QSet<db_id>& stationIds);
-    void stationTrackPlanChanged(const QSet<db_id>& stationIds);
+    void stationJobsPlanChanged(const QSet<db_id> &stationIds);
+    void stationTrackPlanChanged(const QSet<db_id> &stationIds);
     void stationRemoved(db_id stationId);
 
-    //Segments
+    // Segments
     void segmentAdded(db_id segmentId);
     void segmentNameChanged(db_id segmentId);
     void segmentStationsChanged(db_id segmentId);
     void segmentRemoved(db_id segmentId);
 
-    //Lines
+    // Lines
     void lineAdded(db_id lineId);
     void lineNameChanged(db_id lineId);
     void lineSegmentsChanged(db_id lineId);
@@ -126,45 +132,48 @@ private:
     std::unique_ptr<BackgroundManager> backgroundManager;
 #endif
 
-//Settings TODO: remove
+    // Settings TODO: remove
 public:
     void loadSettings(const QString &settings_file);
 
     MRTPSettings settings;
 
-    int    hourOffset;
-    int    stationOffset;
-    qreal  platformOffset;
+    int hourOffset;
+    int stationOffset;
+    qreal platformOffset;
 
-    int    horizOffset;
-    int    vertOffset;
+    int horizOffset;
+    int vertOffset;
 
     int jobLineWidth;
 
-//Database
+    // Database
 public:
     database m_Db;
 
-//Job Categories:
+    // Job Categories:
 public:
     QColor colorForCat(JobCategory cat);
 
-//Savepoints TODO: seem unused
+    // Savepoints TODO: seem unused
 public:
-    inline bool getDBDirty() { return !savepointList.isEmpty(); }
+    inline bool getDBDirty()
+    {
+        return !savepointList.isEmpty();
+    }
 
-    bool setSavepoint(const QString& pointname = "RESTOREPOINT");
-    bool releaseSavepoint(const QString& pointname = "RESTOREPOINT");
-    bool revertToSavepoint(const QString& pointname = "RESTOREPOINT");
+    bool setSavepoint(const QString &pointname = "RESTOREPOINT");
+    bool releaseSavepoint(const QString &pointname = "RESTOREPOINT");
+    bool revertToSavepoint(const QString &pointname = "RESTOREPOINT");
     bool releaseAllSavepoints();
     bool revertAll();
 
     QStringList savepointList;
 
-//DB
+    // DB
 public:
     DB_Error createNewDB(const QString &file);
-    DB_Error openDB(const QString& str, bool ignoreVersion);
+    DB_Error openDB(const QString &str, bool ignoreVersion);
     DB_Error closeDB();
 
     bool checkImportRSTablesEmpty();
@@ -172,7 +181,7 @@ public:
 
     QString fileName;
 
-//AppData
+    // AppData
 public:
     static void locateAppdata();
     static QString appDataPath;
@@ -228,14 +237,25 @@ public:
      */
     static const QLocale embeddedLocale;
 
-    void setSheetExportTranslator(QTranslator *translator, const QLocale& loc);
+    void setSheetExportTranslator(QTranslator *translator, const QLocale &loc);
 
-    inline QTranslator *getSheetExportTranslator() const { return sheetExportTranslator; }
-    inline QLocale getSheetExportLocale() const { return sheetExportLocale; }
-    inline QLocale getAppLanguage() const { return originalAppLocale; }
+    inline QTranslator *getSheetExportTranslator() const
+    {
+        return sheetExportTranslator;
+    }
+
+    inline QLocale getSheetExportLocale() const
+    {
+        return sheetExportLocale;
+    }
+
+    inline QLocale getAppLanguage() const
+    {
+        return originalAppLocale;
+    }
 };
 
-#define Session MeetingSession::Get()
+#define Session     MeetingSession::Get()
 
 #define AppSettings Session->settings
 

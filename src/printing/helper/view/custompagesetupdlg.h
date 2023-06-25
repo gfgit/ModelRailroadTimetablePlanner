@@ -41,11 +41,17 @@ class CustomPageSetupDlg : public QDialog
 public:
     explicit CustomPageSetupDlg(QWidget *parent = nullptr);
 
-    void setPageSize(const QPageSize& pageSz);
-    inline QPageSize getPageSize() const { return m_pageSize; }
+    void setPageSize(const QPageSize &pageSz);
+    inline QPageSize getPageSize() const
+    {
+        return m_pageSize;
+    }
 
     void setPageOrient(QPageLayout::Orientation orient);
-    inline QPageLayout::Orientation getPageOrient() const { return m_pageOrient; }
+    inline QPageLayout::Orientation getPageOrient() const
+    {
+        return m_pageOrient;
+    }
 
 private slots:
     void onPageComboActivated(int idx);

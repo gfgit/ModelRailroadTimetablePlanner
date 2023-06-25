@@ -35,18 +35,18 @@ QVariant RSListOnDemandModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    //qDebug() << "Data:" << idx.row();
+    // qDebug() << "Data:" << idx.row();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<RSListOnDemandModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const RSItem& item = cache.at(row - cacheFirstRow);
+    const RSItem &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -63,9 +63,9 @@ QVariant RSListOnDemandModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::FontRole:
     {
-        if(item.type == RsType::Engine)
+        if (item.type == RsType::Engine)
         {
-            //Engines in bold
+            // Engines in bold
             QFont f;
             f.setBold(true);
             return f;

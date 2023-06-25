@@ -27,25 +27,26 @@ class QPrinter;
 
 namespace Print {
 
-enum class OutputType {
+enum class OutputType
+{
     Native = 0,
     Pdf,
     Svg,
     NTypes
 };
 
-//Implemented in printwizard.cpp
+// Implemented in printwizard.cpp
 QString getOutputTypeName(OutputType type);
 
-//Place holders for file names
+// Place holders for file names
 const QLatin1String phNameUnderscore = QLatin1String("%n");
 const QLatin1String phNameKeepSpaces = QLatin1String("%N");
-const QLatin1String phType = QLatin1String("%t");
-const QLatin1String phProgressive = QLatin1String("%i");
+const QLatin1String phType           = QLatin1String("%t");
+const QLatin1String phProgressive    = QLatin1String("%i");
 
-//Implemented in printing/wizard/printwizard.cpp
-QString getFileName(const QString& baseDir, const QString& pattern, const QString& extension,
-                    const QString& name, const QString &type, int i);
+// Implemented in printing/wizard/printwizard.cpp
+QString getFileName(const QString &baseDir, const QString &pattern, const QString &extension,
+                    const QString &name, const QString &type, int i);
 
 struct PrintBasicOptions
 {
@@ -53,18 +54,18 @@ struct PrintBasicOptions
     QString fileNamePattern;
     QString filePath;
     bool useOneFileForEachScene = true;
-    bool printSceneInOnePage = false;
+    bool printSceneInOnePage    = false;
 };
 
-//Implemented in printing/wizard/printwizard.cpp
-void validatePrintOptions(PrintBasicOptions& printOpt, QPrinter *printer);
+// Implemented in printing/wizard/printwizard.cpp
+void validatePrintOptions(PrintBasicOptions &printOpt, QPrinter *printer);
 
-//Implemented in printing/wizard/printwizard.cpp
+// Implemented in printing/wizard/printwizard.cpp
 bool askUserToAbortPrinting(bool wasAlreadyStarted, QWidget *parent);
 
-//Implemented in printing/wizard/printwizard.cpp
-bool askUserToTryAgain(const QString& errMsg, QWidget *parent);
+// Implemented in printing/wizard/printwizard.cpp
+bool askUserToTryAgain(const QString &errMsg, QWidget *parent);
 
-}
+} // namespace Print
 
 #endif // DEFS_H

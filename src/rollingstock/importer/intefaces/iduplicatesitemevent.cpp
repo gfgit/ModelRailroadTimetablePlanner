@@ -27,5 +27,4 @@ IDuplicatesItemEvent::IDuplicatesItemEvent(QRunnable *self, int pr, int m, int c
     ducplicatesCount(count),
     state(st)
 {
-
 }

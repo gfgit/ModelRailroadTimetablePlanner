@@ -21,25 +21,23 @@
 
 #include "utils/jobcategorystrings.h"
 
-static const char* error_texts[] = {
-    nullptr,
-    QT_TRANSLATE_NOOP("JobErrors", "Job crosses another Job on same track."),
-    QT_TRANSLATE_NOOP("JobErrors", "Job passes another Job on same track.")
-};
+static const char *error_texts[] = {
+  nullptr, QT_TRANSLATE_NOOP("JobErrors", "Job crosses another Job on same track."),
+  QT_TRANSLATE_NOOP("JobErrors", "Job passes another Job on same track.")};
 
 class JobErrors
 {
     Q_DECLARE_TR_FUNCTIONS(JobErrors)
 };
 
-JobCrossingModel::JobCrossingModel(QObject *parent) : JobCrossingModelBase(parent)
+JobCrossingModel::JobCrossingModel(QObject *parent) :
+    JobCrossingModelBase(parent)
 {
-
 }
 
 QVariant JobCrossingModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -63,11 +61,11 @@ QVariant JobCrossingModel::headerData(int section, Qt::Orientation orientation, 
 
 QVariant JobCrossingModel::data(const QModelIndex &idx, int role) const
 {
-    if(!idx.isValid() || role != Qt::DisplayRole)
+    if (!idx.isValid() || role != Qt::DisplayRole)
         return QVariant();
 
     const JobCrossingErrorData *item = getItem(idx);
-    if(item)
+    if (item)
     {
         switch (idx.column())
         {
@@ -87,8 +85,8 @@ QVariant JobCrossingModel::data(const QModelIndex &idx, int role) const
     }
     else
     {
-        //Caption
-        if(idx.row() >= m_data.topLevelCount() || idx.column() != 0)
+        // Caption
+        if (idx.row() >= m_data.topLevelCount() || idx.column() != 0)
             return QVariant();
 
         auto topLevel = m_data.getTopLevelAtRow(idx.row());
@@ -135,5 +133,4 @@ void JobCrossingModel::renameJob(db_id newJobId, db_id oldJobId)
 
 void JobCrossingModel::renameStation(db_id stationId, const QString &name)
 {
-
 }

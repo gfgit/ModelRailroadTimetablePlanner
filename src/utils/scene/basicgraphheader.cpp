@@ -31,7 +31,6 @@ BasicGraphHeader::BasicGraphHeader(Qt::Orientation orient, QWidget *parent) :
     mZoom(100),
     m_orientation(orient)
 {
-
 }
 
 void BasicGraphHeader::setScene(IGraphScene *scene)
@@ -57,21 +56,21 @@ void BasicGraphHeader::paintEvent(QPaintEvent *e)
     QColor c(255, 255, 255, 220);
     painter.fillRect(rect(), c);
 
-    if(!m_scene)
-        return; //Nothing to draw
+    if (!m_scene)
+        return; // Nothing to draw
 
-    //FIXME: consider QPaintEvent rect?
+    // FIXME: consider QPaintEvent rect?
     Q_UNUSED(e)
 
     const double scaleFactor = mZoom / 100.0;
 
-    //Map to scene
+    // Map to scene
     const double sceneScroll = m_scroll / scaleFactor;
-    QRectF sceneRect = rect();
+    QRectF sceneRect         = rect();
     sceneRect.setSize(sceneRect.size() / scaleFactor);
 
-    //Apply scrolling
-    if(m_orientation == Qt::Horizontal)
+    // Apply scrolling
+    if (m_orientation == Qt::Horizontal)
         sceneRect.moveLeft(sceneScroll);
     else
         sceneRect.moveTop(sceneScroll);

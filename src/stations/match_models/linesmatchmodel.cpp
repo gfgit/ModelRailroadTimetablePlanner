@@ -31,7 +31,7 @@ LinesMatchModel::LinesMatchModel(database &db, bool useTimer, QObject *parent) :
 
 LinesMatchModel::~LinesMatchModel()
 {
-    if(timerId > 0)
+    if (timerId > 0)
     {
         killTimer(timerId);
         timerId = 0;
@@ -47,11 +47,11 @@ QVariant LinesMatchModel::data(const QModelIndex &idx, int role) const
     {
     case Qt::DisplayRole:
     {
-        if(isEmptyRow(idx.row()))
+        if (isEmptyRow(idx.row()))
         {
             return ISqlFKMatchModel::tr("Empty");
         }
-        else if(isEllipsesRow(idx.row()))
+        else if (isEllipsesRow(idx.row()))
         {
             return ellipsesString;
         }
@@ -60,7 +60,7 @@ QVariant LinesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::FontRole:
     {
-        if(isEmptyRow(idx.row()))
+        if (isEmptyRow(idx.row()))
         {
             return boldFont();
         }
@@ -74,7 +74,7 @@ QVariant LinesMatchModel::data(const QModelIndex &idx, int role) const
 void LinesMatchModel::autoSuggest(const QString &text)
 {
     mQuery.clear();
-    if(!text.isEmpty())
+    if (!text.isEmpty())
     {
         mQuery.reserve(text.size() + 2);
         mQuery.append('%');
@@ -87,40 +87,41 @@ void LinesMatchModel::autoSuggest(const QString &text)
 
 void LinesMatchModel::refreshData()
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
-    if(!q_getMatches.stmt())
-        q_getMatches.prepare("SELECT id,name FROM lines WHERE name LIKE ?1 LIMIT " QT_STRINGIFY(MaxMatchItems + 1));
+    if (!q_getMatches.stmt())
+        q_getMatches.prepare(
+          "SELECT id,name FROM lines WHERE name LIKE ?1 LIMIT " QT_STRINGIFY(MaxMatchItems + 1));
 
     beginResetModel();
 
     char emptyQuery = '%';
 
-    if(mQuery.isEmpty())
+    if (mQuery.isEmpty())
         sqlite3_bind_text(q_getMatches.stmt(), 1, &emptyQuery, 1, SQLITE_STATIC);
     else
         sqlite3_bind_text(q_getMatches.stmt(), 1, mQuery, mQuery.size(), SQLITE_STATIC);
 
     auto end = q_getMatches.end();
-    auto it = q_getMatches.begin();
-    int i = 0;
-    for(; i < MaxMatchItems && it != end; i++)
+    auto it  = q_getMatches.begin();
+    int i    = 0;
+    for (; i < MaxMatchItems && it != end; i++)
     {
         items[i].lineId = (*it).get<db_id>(0);
-        items[i].name = (*it).get<QString>(1);
+        items[i].name   = (*it).get<QString>(1);
         ++it;
     }
 
     size = i;
 
-    if(hasEmptyRow)
-        size++; //Items + Empty, add 1 row
+    if (hasEmptyRow)
+        size++; // Items + Empty, add 1 row
 
-    if(it != end)
+    if (it != end)
     {
-        //There would be still rows, show Ellipses
-        size++; //Items + Empty + Ellispses
+        // There would be still rows, show Ellipses
+        size++; // Items + Empty + Ellispses
     }
 
     q_getMatches.reset();
@@ -128,9 +129,9 @@ void LinesMatchModel::refreshData()
 
     emit resultsReady(false);
 
-    if(timerId < 0)
-        return; //Do not use timer
-    if(timerId == 0)
+    if (timerId < 0)
+        return; // Do not use timer
+    if (timerId == 0)
         timerId = startTimer(3000);
     timer.start();
 }
@@ -144,12 +145,12 @@ void LinesMatchModel::clearCache()
 
 QString LinesMatchModel::getName(db_id id) const
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return QString();
 
     query q(mDb, "SELECT name FROM lines WHERE id=?");
     q.bind(1, id);
-    if(q.step() == SQLITE_ROW)
+    if (q.step() == SQLITE_ROW)
         return q.getRows().get<QString>(0);
     return QString();
 }
@@ -166,10 +167,10 @@ QString LinesMatchModel::getNameAtRow(int row) const
 
 void LinesMatchModel::timerEvent(QTimerEvent *e)
 {
-    if(timerId > 0 && e->timerId() == timerId)
+    if (timerId > 0 && e->timerId() == timerId)
     {
-        if(timer.isValid() && timer.elapsed() < 3000)
-            return; //Do another round
+        if (timer.isValid() && timer.elapsed() < 3000)
+            return; // Do another round
 
         killTimer(timerId);
         timerId = 0;

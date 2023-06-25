@@ -31,7 +31,6 @@ StationTracksMatchModel::StationTracksMatchModel(sqlite3pp::database &db, QObjec
                       " ORDER BY pos"),
     m_stationId(0)
 {
-
 }
 
 QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
@@ -39,19 +38,19 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= size)
         return QVariant();
 
-    const bool emptyRow = hasEmptyRow &&
-                          (idx.row() == ItemCount || (size < ItemCount + 2 && idx.row() == size - 1));
+    const bool emptyRow =
+      hasEmptyRow && (idx.row() == ItemCount || (size < ItemCount + 2 && idx.row() == size - 1));
     const bool ellipsesRow = idx.row() == (ItemCount - 1 - (hasEmptyRow ? 0 : 1));
 
     switch (role)
     {
     case Qt::DisplayRole:
     {
-        if(emptyRow)
+        if (emptyRow)
         {
             return ISqlFKMatchModel::tr("Empty");
         }
-        else if(ellipsesRow)
+        else if (ellipsesRow)
         {
             return ellipsesString;
         }
@@ -60,14 +59,14 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::ToolTipRole:
     {
-        if(!emptyRow && !ellipsesRow)
+        if (!emptyRow && !ellipsesRow)
         {
             QString typeStr;
-            if(items[idx.row()].passenger && items[idx.row()].freight)
+            if (items[idx.row()].passenger && items[idx.row()].freight)
                 typeStr = tr("All");
-            else if(items[idx.row()].passenger)
+            else if (items[idx.row()].passenger)
                 typeStr = tr("Passenger");
-            else if(items[idx.row()].freight)
+            else if (items[idx.row()].freight)
                 typeStr = tr("Freight");
             return tr("Track <b>%1</b> for %2 traffic.").arg(items[idx.row()].name, typeStr);
         }
@@ -75,11 +74,11 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::FontRole:
     {
-        if(emptyRow)
+        if (emptyRow)
         {
             return boldFont();
         }
-        if(!ellipsesRow && items[idx.row()].type.testFlag(utils::StationTrackType::Through))
+        if (!ellipsesRow && items[idx.row()].type.testFlag(utils::StationTrackType::Through))
         {
             return boldFont();
         }
@@ -87,20 +86,20 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::TextAlignmentRole:
     {
-        if(!emptyRow && !ellipsesRow)
+        if (!emptyRow && !ellipsesRow)
             return Qt::AlignRight + Qt::AlignVCenter;
         break;
     }
     case Qt::BackgroundRole:
     {
-        if(!emptyRow && !ellipsesRow)
+        if (!emptyRow && !ellipsesRow)
         {
             QColor color;
-            if(items[idx.row()].passenger && items[idx.row()].freight)
+            if (items[idx.row()].passenger && items[idx.row()].freight)
                 color = Qt::red;
-            else if(items[idx.row()].passenger)
+            else if (items[idx.row()].passenger)
                 color = Qt::yellow;
-            else if(items[idx.row()].freight)
+            else if (items[idx.row()].freight)
                 color = Qt::green;
             color.setAlpha(70);
             return QBrush(color);
@@ -109,9 +108,9 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::DecorationRole:
     {
-        if(!emptyRow && !ellipsesRow)
+        if (!emptyRow && !ellipsesRow)
         {
-            if(items[idx.row()].type.testFlag(utils::StationTrackType::Electrified))
+            if (items[idx.row()].type.testFlag(utils::StationTrackType::Electrified))
                 return QColor(Qt::blue);
         }
         break;
@@ -124,7 +123,7 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
 void StationTracksMatchModel::autoSuggest(const QString &text)
 {
     mQuery.clear();
-    if(!text.isEmpty())
+    if (!text.isEmpty())
     {
         mQuery.clear();
         mQuery.reserve(text.size() + 2);
@@ -138,14 +137,14 @@ void StationTracksMatchModel::autoSuggest(const QString &text)
 
 void StationTracksMatchModel::refreshData()
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
     beginResetModel();
 
     char emptyQuery = '%';
 
-    if(mQuery.isEmpty())
+    if (mQuery.isEmpty())
         sqlite3_bind_text(q_getMatches.stmt(), 1, &emptyQuery, 1, SQLITE_STATIC);
     else
         sqlite3_bind_text(q_getMatches.stmt(), 1, mQuery, mQuery.size(), SQLITE_STATIC);
@@ -153,27 +152,27 @@ void StationTracksMatchModel::refreshData()
     q_getMatches.bind(2, m_stationId);
 
     auto end = q_getMatches.end();
-    auto it = q_getMatches.begin();
-    int i = 0;
-    for(; i < ItemCount && it != end; i++)
+    auto it  = q_getMatches.begin();
+    int i    = 0;
+    for (; i < ItemCount && it != end; i++)
     {
-        auto track = *it;
-        items[i].trackId = track.get<db_id>(0);
-        items[i].type = utils::StationTrackType(track.get<int>(1));
+        auto track         = *it;
+        items[i].trackId   = track.get<db_id>(0);
+        items[i].type      = utils::StationTrackType(track.get<int>(1));
         items[i].passenger = track.get<int>(2) != 0;
-        items[i].freight = track.get<int>(3) != 0;
-        items[i].name = track.get<QString>(4);
+        items[i].freight   = track.get<int>(3) != 0;
+        items[i].name      = track.get<QString>(4);
         ++it;
     }
 
     size = i;
-    if(hasEmptyRow)
-        size++; //Items + Empty
+    if (hasEmptyRow)
+        size++; // Items + Empty
 
-    if(it != end)
+    if (it != end)
     {
-        //There would be still rows, show Ellipses
-        size++; //Items + Empty + Ellispses
+        // There would be still rows, show Ellipses
+        size++; // Items + Empty + Ellispses
     }
 
     q_getMatches.reset();
@@ -184,12 +183,12 @@ void StationTracksMatchModel::refreshData()
 
 QString StationTracksMatchModel::getName(db_id id) const
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return QString();
 
     query q(mDb, "SELECT name FROM station_tracks WHERE id=?");
     q.bind(1, id);
-    if(q.step() == SQLITE_ROW)
+    if (q.step() == SQLITE_ROW)
         return q.getRows().get<QString>(0);
     return QString();
 }
@@ -215,7 +214,6 @@ StationTracksMatchFactory::StationTracksMatchFactory(database &db, QObject *pare
     m_stationId(0),
     mDb(db)
 {
-
 }
 
 ISqlFKMatchModel *StationTracksMatchFactory::createModel()

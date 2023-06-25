@@ -37,18 +37,17 @@
 
 #include "utils/owningqpointer.h"
 
-
 EditLineDlg::EditLineDlg(sqlite3pp::database &db, QWidget *parent) :
     QDialog(parent),
     mDb(db)
 {
     model = new LineSegmentsModel(mDb, this);
 
-    //Details Tab
-    QWidget *detailsTab = new QWidget;
+    // Details Tab
+    QWidget *detailsTab        = new QWidget;
     QFormLayout *detailsTabLay = new QFormLayout(detailsTab);
 
-    lineNameEdit = new QLineEdit;
+    lineNameEdit               = new QLineEdit;
     lineNameEdit->setPlaceholderText(tr("Name..."));
     detailsTabLay->addRow(tr("Name:"), lineNameEdit);
 
@@ -56,12 +55,12 @@ EditLineDlg::EditLineDlg(sqlite3pp::database &db, QWidget *parent) :
     lineStartKmSpin->setPrefix(tr("Km "));
     detailsTabLay->addRow(tr("Start at:"), lineStartKmSpin);
 
-    //Path Tab
-    QWidget *pathTab = new QWidget;
+    // Path Tab
+    QWidget *pathTab        = new QWidget;
     QVBoxLayout *pathTabLay = new QVBoxLayout(pathTab);
 
-    //Buttons
-    QHBoxLayout *toolsLay = new QHBoxLayout;
+    // Buttons
+    QHBoxLayout *toolsLay      = new QHBoxLayout;
 
     QToolButton *addStationBut = new QToolButton;
     addStationBut->setText(tr("Add station"));
@@ -78,7 +77,7 @@ EditLineDlg::EditLineDlg(sqlite3pp::database &db, QWidget *parent) :
 
     pathTabLay->addWidget(view);
 
-    QVBoxLayout *lay = new QVBoxLayout(this);
+    QVBoxLayout *lay      = new QVBoxLayout(this);
     QTabWidget *tabWidget = new QTabWidget;
     tabWidget->addTab(detailsTab, tr("Details"));
     tabWidget->addTab(pathTab, tr("Path"));
@@ -101,23 +100,23 @@ EditLineDlg::EditLineDlg(sqlite3pp::database &db, QWidget *parent) :
 
 void EditLineDlg::done(int res)
 {
-    //FIXME: cannot cancel editings made to path so always accept
+    // FIXME: cannot cancel editings made to path so always accept
     res = QDialog::Accepted;
 
-    if(res == QDialog::Accepted)
+    if (res == QDialog::Accepted)
     {
         QString lineName = lineNameEdit->text().simplified();
-        int startMeters = lineStartKmSpin->value();
+        int startMeters  = lineStartKmSpin->value();
 
-        if(lineName.isEmpty())
+        if (lineName.isEmpty())
         {
             onModelError(tr("Line name cannot be empty."));
             return;
         }
 
-        if(!model->setLineInfo(lineName, startMeters))
+        if (!model->setLineInfo(lineName, startMeters))
         {
-            return; //Error
+            return; // Error
         }
     }
 
@@ -128,12 +127,12 @@ void EditLineDlg::setLineId(db_id lineId)
 {
     model->setLine(lineId);
 
-    //Reload UI
+    // Reload UI
     QString lineName;
     int startMeters = 0;
-    if(!model->getLineInfo(lineName, startMeters))
+    if (!model->getLineInfo(lineName, startMeters))
     {
-        return; //Error
+        return; // Error
     }
 
     lineNameEdit->setText(lineName);
@@ -147,13 +146,13 @@ void EditLineDlg::onModelError(const QString &msg)
 
 void EditLineDlg::addStation()
 {
-    if(model->getSegmentCount() >= MaxSegmentsPerLine)
+    if (model->getSegmentCount() >= MaxSegmentsPerLine)
     {
         QMessageBox::warning(this, tr("Error"),
                              tr("Cannot add another segment to line <b>%1</b>.<br>"
                                 "Each line can have a maximum of <b>%2 segments</b>.")
-                             .arg(lineNameEdit->text())
-                                 .arg(MaxSegmentsPerLine));
+                               .arg(lineNameEdit->text())
+                               .arg(MaxSegmentsPerLine));
         return;
     }
 
@@ -163,14 +162,14 @@ void EditLineDlg::addStation()
     OwningQPointer<ChooseSegmentDlg> dlg(new ChooseSegmentDlg(mDb, this));
     dlg->setFilter(lastStationId, lastSegmentId);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
     db_id segmentId = 0;
     QString segmentName;
     bool isReversed = false;
 
-    if(dlg->getData(segmentId, segmentName, isReversed))
+    if (dlg->getData(segmentId, segmentName, isReversed))
     {
         model->addStation(segmentId, isReversed);
     }
@@ -178,7 +177,7 @@ void EditLineDlg::addStation()
 
 void EditLineDlg::removeAfterCurrentPos()
 {
-    if(!view->selectionModel()->hasSelection())
+    if (!view->selectionModel()->hasSelection())
     {
         onModelError(tr("Please select a segment to remove.\n"
                         "All segments after it are also removed."));
@@ -186,25 +185,24 @@ void EditLineDlg::removeAfterCurrentPos()
     }
 
     QModelIndex idx = view->currentIndex();
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
-    int pos = model->getItemIndex(idx.row());
+    int pos                = model->getItemIndex(idx.row());
     const int segmentCount = model->getSegmentCount();
-    if(pos >= segmentCount)
-        pos = segmentCount - 1; //Remove only the last one
+    if (pos >= segmentCount)
+        pos = segmentCount - 1; // Remove only the last one
     const QString stationName = model->getStationNameAt(pos);
 
     const QString msg =
-        tr("Remove last <b>%1</b> segments?"
-           "%2")
-            .arg(segmentCount - pos)
-            .arg(stationName.isEmpty()
-                     ? QString()
-                     : tr("<br>(From station <b>%1</b>)").arg(stationName));
+      tr("Remove last <b>%1</b> segments?"
+         "%2")
+        .arg(segmentCount - pos)
+        .arg(stationName.isEmpty() ? QString()
+                                   : tr("<br>(From station <b>%1</b>)").arg(stationName));
 
     int ret = QMessageBox::question(this, tr("Are you sure?"), msg);
-    if(ret != QMessageBox::Yes)
+    if (ret != QMessageBox::Yes)
         return;
 
     model->removeSegmentsAfterPosInclusive(pos);

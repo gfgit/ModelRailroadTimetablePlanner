@@ -41,19 +41,19 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= size)
         return QVariant();
 
-    const bool emptyRow = hasEmptyRow &&
-                          (idx.row() == ItemCount || (size < ItemCount + 2 && idx.row() == size - 1));
+    const bool emptyRow =
+      hasEmptyRow && (idx.row() == ItemCount || (size < ItemCount + 2 && idx.row() == size - 1));
     const bool ellipsesRow = idx.row() == (ItemCount - 1 - (hasEmptyRow ? 0 : 1));
 
     switch (role)
     {
     case Qt::DisplayRole:
     {
-        if(emptyRow)
+        if (emptyRow)
         {
             return ISqlFKMatchModel::tr("Empty");
         }
-        else if(ellipsesRow)
+        else if (ellipsesRow)
         {
             return ellipsesString;
         }
@@ -62,19 +62,19 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::ToolTipRole:
     {
-        if(!emptyRow && !ellipsesRow)
+        if (!emptyRow && !ellipsesRow)
         {
-            QString tip = tr("Gate <b>%1</b> is %2")
-                              .arg(items[idx.row()].gateLetter,
-                                   utils::StationUtils::name(items[idx.row()].side));
-            if(m_markConnectedGates)
+            QString tip =
+              tr("Gate <b>%1</b> is %2")
+                .arg(items[idx.row()].gateLetter, utils::StationUtils::name(items[idx.row()].side));
+            if (m_markConnectedGates)
             {
                 QString state;
                 db_id segId = items[idx.row()].segmentId;
-                if(segId)
+                if (segId)
                 {
                     state = tr("Segment: <b>%1</b>").arg(items[idx.row()].segmentName);
-                    if(segId == m_excludeSegmentId)
+                    if (segId == m_excludeSegmentId)
                         state.append(tr("<br>Current"));
                 }
                 else
@@ -82,7 +82,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
                     state = tr("Not connected");
                 }
 
-                //New line, then append
+                // New line, then append
                 tip.append("<br>");
                 tip.append(state);
             }
@@ -92,7 +92,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::FontRole:
     {
-        if(emptyRow)
+        if (emptyRow)
         {
             return boldFont();
         }
@@ -100,18 +100,18 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::TextAlignmentRole:
     {
-        if(!emptyRow && !ellipsesRow && !m_showOnlySegments)
-            return Qt::AlignRight + Qt::AlignVCenter; //Segments will be Left aligned
+        if (!emptyRow && !ellipsesRow && !m_showOnlySegments)
+            return Qt::AlignRight + Qt::AlignVCenter; // Segments will be Left aligned
         break;
     }
     case Qt::BackgroundRole:
     {
-        if(!emptyRow && !ellipsesRow && m_markConnectedGates)
+        if (!emptyRow && !ellipsesRow && m_markConnectedGates)
         {
             db_id segId = items[idx.row()].segmentId;
-            if(segId && segId != m_excludeSegmentId)
+            if (segId && segId != m_excludeSegmentId)
             {
-                //Cyan if gate is connected to a segment
+                // Cyan if gate is connected to a segment
                 return QBrush(Qt::cyan);
             }
         }
@@ -119,16 +119,16 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::DecorationRole:
     {
-        if(!emptyRow && !ellipsesRow)
+        if (!emptyRow && !ellipsesRow)
         {
             QColor color;
-            if(items[idx.row()].type.testFlag(utils::GateType::Bidirectional))
-                break; //Default color
+            if (items[idx.row()].type.testFlag(utils::GateType::Bidirectional))
+                break; // Default color
 
-            if(items[idx.row()].type.testFlag(utils::GateType::Entrance))
-                color = Qt::green; //Entrance only
-            else if(items[idx.row()].type.testFlag(utils::GateType::Exit))
-                color = Qt::red; //Exit only
+            if (items[idx.row()].type.testFlag(utils::GateType::Entrance))
+                color = Qt::green; // Entrance only
+            else if (items[idx.row()].type.testFlag(utils::GateType::Exit))
+                color = Qt::red; // Exit only
             return color;
         }
         break;
@@ -141,7 +141,7 @@ QVariant StationGatesMatchModel::data(const QModelIndex &idx, int role) const
 void StationGatesMatchModel::autoSuggest(const QString &text)
 {
     mQuery.clear();
-    if(!text.isEmpty())
+    if (!text.isEmpty())
     {
         mQuery.clear();
         mQuery.reserve(text.size() + 2);
@@ -155,14 +155,14 @@ void StationGatesMatchModel::autoSuggest(const QString &text)
 
 void StationGatesMatchModel::refreshData()
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
     beginResetModel();
 
     char emptyQuery = '%';
 
-    if(mQuery.isEmpty())
+    if (mQuery.isEmpty())
         sqlite3_bind_text(q_getMatches.stmt(), 1, &emptyQuery, 1, SQLITE_STATIC);
     else
         sqlite3_bind_text(q_getMatches.stmt(), 1, mQuery, mQuery.size(), SQLITE_STATIC);
@@ -170,30 +170,30 @@ void StationGatesMatchModel::refreshData()
     q_getMatches.bind(2, m_stationId);
 
     auto end = q_getMatches.end();
-    auto it = q_getMatches.begin();
-    int i = 0;
-    for(; i < ItemCount && it != end; i++)
+    auto it  = q_getMatches.begin();
+    int i    = 0;
+    for (; i < ItemCount && it != end; i++)
     {
-        auto track = *it;
-        items[i].gateId = track.get<db_id>(0);
+        auto track             = *it;
+        items[i].gateId        = track.get<db_id>(0);
         items[i].outTrackCount = track.get<int>(1);
-        items[i].type = utils::GateType(track.get<int>(2));
-        items[i].gateLetter = sqlite3_column_text(q_getMatches.stmt(), 3)[0];
-        items[i].side = utils::Side(track.get<int>(4));
+        items[i].type          = utils::GateType(track.get<int>(2));
+        items[i].gateLetter    = sqlite3_column_text(q_getMatches.stmt(), 3)[0];
+        items[i].side          = utils::Side(track.get<int>(4));
 
-        if(m_markConnectedGates)
+        if (m_markConnectedGates)
         {
             items[i].segmentId = track.get<db_id>(5);
-            if(m_showOnlySegments && !items[i].segmentId)
+            if (m_showOnlySegments && !items[i].segmentId)
             {
-                //Skip this gate because it is not connected to a segment
-                i--; //Overwrite with new item
-                ++it; //Step query to next record
+                // Skip this gate because it is not connected to a segment
+                i--;  // Overwrite with new item
+                ++it; // Step query to next record
                 continue;
             }
 
-            items[i].segmentName = track.get<QString>(6);
-            const db_id inGateId = track.get<db_id>(7);
+            items[i].segmentName     = track.get<QString>(6);
+            const db_id inGateId     = track.get<db_id>(7);
             items[i].segmentReversed = (inGateId != items[i].gateId);
         }
         else
@@ -207,13 +207,13 @@ void StationGatesMatchModel::refreshData()
     }
 
     size = i;
-    if(hasEmptyRow)
-        size++; //Items + Empty
+    if (hasEmptyRow)
+        size++; // Items + Empty
 
-    if(it != end)
+    if (it != end)
     {
-        //There would be still rows, show Ellipses
-        size++; //Items + Empty + Ellispses
+        // There would be still rows, show Ellipses
+        size++; // Items + Empty + Ellispses
     }
 
     q_getMatches.reset();
@@ -224,20 +224,20 @@ void StationGatesMatchModel::refreshData()
 
 QString StationGatesMatchModel::getName(db_id id) const
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return QString();
 
     query q(mDb, "SELECT name FROM station_gates WHERE id=?");
     q.bind(1, id);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
         return QString();
 
     QString str = q.getRows().get<QString>(0);
-    if(m_showOnlySegments)
+    if (m_showOnlySegments)
     {
         q.prepare("SELECT name FROM railway_segments WHERE in_gate_id=?1 OR out_gate_id=?1");
         q.bind(1, id);
-        if(q.step() == SQLITE_ROW)
+        if (q.step() == SQLITE_ROW)
         {
             str.append(QLatin1String(": "));
             str.append(q.getRows().get<QString>(0));
@@ -254,7 +254,7 @@ db_id StationGatesMatchModel::getIdAtRow(int row) const
 QString StationGatesMatchModel::getNameAtRow(int row) const
 {
     QString str = items[row].gateLetter;
-    if(m_showOnlySegments)
+    if (m_showOnlySegments)
     {
         str.reserve(3 + items[row].segmentName.size());
         str.append(QLatin1String(": "));
@@ -263,20 +263,21 @@ QString StationGatesMatchModel::getNameAtRow(int row) const
     return str;
 }
 
-void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates, db_id excludeSegmentId, bool showOnlySegments)
+void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates,
+                                       db_id excludeSegmentId, bool showOnlySegments)
 {
-    m_stationId = stationId;
+    m_stationId          = stationId;
     m_markConnectedGates = markConnectedGates;
-    m_excludeSegmentId = m_markConnectedGates ? excludeSegmentId : 0;
-    m_showOnlySegments = showOnlySegments;
+    m_excludeSegmentId   = m_markConnectedGates ? excludeSegmentId : 0;
+    m_showOnlySegments   = showOnlySegments;
 
-    QByteArray sql = "SELECT g.id,g.out_track_count,g.type,g.name,g.side";
-    if(m_markConnectedGates)
+    QByteArray sql       = "SELECT g.id,g.out_track_count,g.type,g.name,g.side";
+    if (m_markConnectedGates)
     {
         sql += ",s.id,s.name,s.in_gate_id";
     }
     sql += " FROM station_gates g";
-    if(m_markConnectedGates)
+    if (m_markConnectedGates)
     {
         sql += " LEFT JOIN railway_segments s ON s.in_gate_id=g.id OR s.out_gate_id=g.id";
     }
@@ -292,9 +293,9 @@ void StationGatesMatchModel::setFilter(db_id stationId, bool markConnectedGates,
 
 int StationGatesMatchModel::getOutTrackCount(db_id gateId) const
 {
-    for(const GateItem& item : items)
+    for (const GateItem &item : items)
     {
-        if(item.gateId == gateId)
+        if (item.gateId == gateId)
             return item.outTrackCount;
     }
     return 0;
@@ -302,9 +303,9 @@ int StationGatesMatchModel::getOutTrackCount(db_id gateId) const
 
 utils::Side StationGatesMatchModel::getGateSide(db_id gateId) const
 {
-    for(const GateItem& item : items)
+    for (const GateItem &item : items)
     {
-        if(item.gateId == gateId)
+        if (item.gateId == gateId)
             return item.side;
     }
     return utils::Side::West;
@@ -312,26 +313,26 @@ utils::Side StationGatesMatchModel::getGateSide(db_id gateId) const
 
 db_id StationGatesMatchModel::getSegmentIdAtRow(int row) const
 {
-    if(row < 0 || row >= size)
+    if (row < 0 || row >= size)
         return 0;
     return items[row].segmentId;
 }
 
 db_id StationGatesMatchModel::isSegmentReversedAtRow(int row) const
 {
-    if(row < 0 || row >= size)
+    if (row < 0 || row >= size)
         return 0;
     return items[row].segmentReversed;
 }
 
 int StationGatesMatchModel::getGateTrackCount(db_id gateId) const
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return 0;
 
     query q(mDb, "SELECT out_track_count FROM station_gates WHERE id=?");
     q.bind(1, gateId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
         return 0;
     return q.getRows().get<int>(0);
 }
@@ -343,7 +344,6 @@ StationGatesMatchFactory::StationGatesMatchFactory(database &db, QObject *parent
     markConnectedGates(false),
     mDb(db)
 {
-
 }
 
 ISqlFKMatchModel *StationGatesMatchFactory::createModel()

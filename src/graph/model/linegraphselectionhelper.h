@@ -33,16 +33,15 @@ class database;
 class LineGraphSelectionHelper
 {
 public:
-
     /*!
      * \brief The SegmentInfo struct
      */
     struct SegmentInfo
     {
-        db_id segmentId = 0;
-        db_id firstStationId = 0;
+        db_id segmentId       = 0;
+        db_id firstStationId  = 0;
         db_id secondStationId = 0;
-        db_id firstStopId = 0;
+        db_id firstStopId     = 0;
 
         /*!
          * \brief arrival and start
@@ -56,7 +55,7 @@ public:
 
     LineGraphSelectionHelper(sqlite3pp::database &db);
 
-    //Low level API
+    // Low level API
 
     /*!
      * \brief find job in current graph
@@ -69,7 +68,7 @@ public:
      * If scene has NoGraph or does not contain requested job then returns false
      * SegmentInfo::secondStId is always left empty
      */
-    bool tryFindJobStopInGraph(LineGraphScene *scene, db_id jobId, SegmentInfo& info);
+    bool tryFindJobStopInGraph(LineGraphScene *scene, db_id jobId, SegmentInfo &info);
 
     /*!
      * \brief find 2 job stops after requested hour
@@ -93,10 +92,11 @@ public:
      * Try to find a railway line containing the job. If not found try with a railway segment.
      * If neither line nor segment are found try with first stop station.
      */
-    bool tryFindNewGraphForJob(db_id jobId, SegmentInfo &info, db_id &outGraphObjId, LineGraphType &outGraphType);
+    bool tryFindNewGraphForJob(db_id jobId, SegmentInfo &info, db_id &outGraphObjId,
+                               LineGraphType &outGraphType);
 
 public:
-    //High level API
+    // High level API
 
     /*!
      * \brief request job selection

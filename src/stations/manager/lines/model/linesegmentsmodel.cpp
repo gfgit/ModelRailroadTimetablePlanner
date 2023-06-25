@@ -37,7 +37,10 @@ class LineSegmentsModelResultEvent : public QEvent
 {
 public:
     static constexpr Type _Type = Type(CustomEvents::LineSegmentsModelResult);
-    inline LineSegmentsModelResultEvent() : QEvent(_Type) {}
+    inline LineSegmentsModelResultEvent() :
+        QEvent(_Type)
+    {
+    }
 
     QVector<LineSegmentsModel::LineSegmentItem> items;
 };
@@ -52,16 +55,16 @@ LineSegmentsModel::LineSegmentsModel(sqlite3pp::database &db, QObject *parent) :
 
 bool LineSegmentsModel::event(QEvent *e)
 {
-    if(e->type() == LineSegmentsModelResultEvent::_Type)
+    if (e->type() == LineSegmentsModelResultEvent::_Type)
     {
         LineSegmentsModelResultEvent *ev = static_cast<LineSegmentsModelResultEvent *>(e);
         ev->setAccepted(true);
 
-        segments = ev->items;
-        isFetching = false; //Done fetching
+        segments             = ev->items;
+        isFetching           = false; // Done fetching
 
         QModelIndex firstIdx = index(0, 0);
-        QModelIndex lastIdx = index(totalItemsCount - 1, NCols - 1);
+        QModelIndex lastIdx  = index(totalItemsCount - 1, NCols - 1);
         emit dataChanged(firstIdx, lastIdx);
         emit itemsReady(0, totalItemsCount - 1);
 
@@ -73,7 +76,7 @@ bool LineSegmentsModel::event(QEvent *e)
 
 QVariant LineSegmentsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal)
+    if (orientation == Qt::Horizontal)
     {
         switch (role)
         {
@@ -94,15 +97,15 @@ QVariant LineSegmentsModel::headerData(int section, Qt::Orientation orientation,
         }
         }
     }
-    else if(role == Qt::DisplayRole)
+    else if (role == Qt::DisplayRole)
     {
-        //Vertical row numbers
+        // Vertical row numbers
 
-        //Station rows: show station index position (start from 1)
-        if(getRowType(section) == StationRow)
+        // Station rows: show station index position (start from 1)
+        if (getRowType(section) == StationRow)
             return section / 2 + 1;
 
-        return QVariant(); //Hide number on segment rows
+        return QVariant(); // Hide number on segment rows
     }
 
     return QAbstractTableModel::headerData(section, orientation, role);
@@ -125,13 +128,13 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= totalItemsCount || idx.column() >= NCols)
         return QVariant();
 
-    if(segments.isEmpty())
+    if (segments.isEmpty())
     {
         const_cast<LineSegmentsModel *>(this)->fetchRows();
         return QVariant();
     }
 
-    const LineSegmentItem& item = segments.at(segmentIdx);
+    const LineSegmentItem &item = segments.at(segmentIdx);
 
     switch (getRowType(idx.row()))
     {
@@ -152,7 +155,7 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
         }
         case Qt::FontRole:
         {
-            //Station names in bold
+            // Station names in bold
             switch (idx.column())
             {
             case StationOrSegmentNameCol:
@@ -175,8 +178,8 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
         }
         case Qt::BackgroundRole:
         {
-            //Light cyan background for stations
-            return QBrush(qRgb(158, 226, 255)); //#9EE2FF
+            // Light cyan background for stations
+            return QBrush(qRgb(158, 226, 255)); // #9EE2FF
         }
         }
         break;
@@ -200,12 +203,12 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
         }
         case Qt::DecorationRole:
         {
-            //Draw a small blue square for electified segments
+            // Draw a small blue square for electified segments
             switch (idx.column())
             {
             case StationOrSegmentNameCol:
             {
-                if(item.segmentType.testFlag(utils::RailwaySegmentType::Electrified))
+                if (item.segmentType.testFlag(utils::RailwaySegmentType::Electrified))
                     return QColor(Qt::blue);
             }
             }
@@ -215,21 +218,21 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
         {
             QStringList tips;
 
-            //Electrification
-            if(item.segmentType.testFlag(utils::RailwaySegmentType::Electrified))
+            // Electrification
+            if (item.segmentType.testFlag(utils::RailwaySegmentType::Electrified))
                 tips.append(tr("Electrified"));
             else
                 tips.append(tr("Non electrified"));
 
-            //Direction
-            if(item.reversed)
+            // Direction
+            if (item.reversed)
                 tips.append(tr("Segment is reversed."));
 
             return tr("Segment <b>%1</b><br>%2").arg(item.segmentName, tips.join("<br>"));
         }
         case Qt::TextAlignmentRole:
         {
-            //Align segment names to right
+            // Align segment names to right
             switch (idx.column())
             {
             case StationOrSegmentNameCol:
@@ -255,33 +258,33 @@ void LineSegmentsModel::clearCache()
 
 void LineSegmentsModel::refreshData(bool forceUpdate)
 {
-    //NOTE: custom implementation
-    if(!mDb.db())
+    // NOTE: custom implementation
+    if (!mDb.db())
         return;
 
-    emit itemsReady(-1, -1); //Notify we are about to refresh
+    emit itemsReady(-1, -1); // Notify we are about to refresh
 
-    //TODO: consider filters
+    // TODO: consider filters
     query q(mDb, "SELECT COUNT(1) FROM line_segments WHERE line_id=?");
     q.bind(1, m_lineId);
     q.step();
 
-    //Store segment count
+    // Store segment count
     curItemCount = q.getRows().get<int>(0);
 
-    //Each segment has 2 row + 1 extra row for last station
+    // Each segment has 2 row + 1 extra row for last station
     int actualRowCount = curItemCount * 2 + 1;
-    if(curItemCount == 0)
-        actualRowCount = 0; //No segments -> Line is Empty
+    if (curItemCount == 0)
+        actualRowCount = 0; // No segments -> Line is Empty
 
-    if(actualRowCount != totalItemsCount || forceUpdate)
+    if (actualRowCount != totalItemsCount || forceUpdate)
     {
         beginResetModel();
 
         clearCache();
         totalItemsCount = actualRowCount;
 
-        //Always 1 page
+        // Always 1 page
         pageCount = 1;
 
         emit totalItemsCountChanged(totalItemsCount);
@@ -301,10 +304,10 @@ bool LineSegmentsModel::getLineInfo(QString &nameOut, int &startMetersOut) const
 {
     query q(mDb, "SELECT name, start_meters FROM lines WHERE id=?");
     q.bind(1, m_lineId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
         return false;
 
-    nameOut = q.getRows().get<QString>(0);
+    nameOut        = q.getRows().get<QString>(0);
     startMetersOut = q.getRows().get<int>(1);
     return true;
 }
@@ -315,13 +318,13 @@ bool LineSegmentsModel::setLineInfo(const QString &name, int startMeters)
     cmd.bind(1, name);
     cmd.bind(2, startMeters);
     cmd.bind(3, m_lineId);
-    if(cmd.execute() != SQLITE_OK)
+    if (cmd.execute() != SQLITE_OK)
     {
         emit modelError(mDb.error_msg());
         return false;
     }
 
-    //Update model km field
+    // Update model km field
     refreshData(true);
     return true;
 }
@@ -331,7 +334,7 @@ bool LineSegmentsModel::removeSegmentsAfterPosInclusive(int pos)
     command cmd(mDb, "DELETE FROM line_segments WHERE line_id=? AND pos>=?");
     cmd.bind(1, m_lineId);
     cmd.bind(2, pos);
-    if(cmd.execute() != SQLITE_OK)
+    if (cmd.execute() != SQLITE_OK)
     {
         emit modelError(mDb.error_msg());
         return false;
@@ -343,24 +346,25 @@ bool LineSegmentsModel::removeSegmentsAfterPosInclusive(int pos)
 
 bool LineSegmentsModel::addStation(db_id railwaySegmentId, bool reverse)
 {
-    //FIXME: check if valid (if adjacent to previous, if should be reversed or not)
+    // FIXME: check if valid (if adjacent to previous, if should be reversed or not)
 
     query q(mDb, "SELECT MAX(pos) FROM line_segments WHERE line_id=?");
     q.bind(1, m_lineId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
         return false;
 
-    int nextPos = 0; //If it's the first segment
-    if(q.getRows().column_type(0) != SQLITE_NULL)
+    int nextPos = 0; // If it's the first segment
+    if (q.getRows().column_type(0) != SQLITE_NULL)
         nextPos = q.getRows().get<int>(0) + 1;
 
-    command cmd(mDb, "INSERT INTO line_segments(id,line_id,seg_id,direction,pos) VALUES(NULL, ?, ?, ?, ?)");
+    command cmd(
+      mDb, "INSERT INTO line_segments(id,line_id,seg_id,direction,pos) VALUES(NULL, ?, ?, ?, ?)");
     cmd.bind(1, m_lineId);
     cmd.bind(2, railwaySegmentId);
     cmd.bind(3, reverse ? 1 : 0);
     cmd.bind(4, nextPos);
 
-    if(cmd.execute() != SQLITE_OK)
+    if (cmd.execute() != SQLITE_OK)
     {
         emit modelError(mDb.error_msg());
         return false;
@@ -372,26 +376,26 @@ bool LineSegmentsModel::addStation(db_id railwaySegmentId, bool reverse)
 
 void LineSegmentsModel::fetchRows()
 {
-    if(!mDb.db())
+    if (!mDb.db())
         return;
 
-    //Prevent multiple requests
-    if(isFetching)
+    // Prevent multiple requests
+    if (isFetching)
         return;
 
     isFetching = true;
 
-    //FIXME: consider also station types
-    //and gate names and rail track connections count
+    // FIXME: consider also station types
+    // and gate names and rail track connections count
 
     query q(mDb, "SELECT start_meters FROM lines WHERE id=?");
     q.bind(1, m_lineId);
-    if(q.step() != SQLITE_ROW)
+    if (q.step() != SQLITE_ROW)
     {
         qWarning() << "INVALID LINE:" << m_lineId;
     }
 
-    //First station of the line has this position
+    // First station of the line has this position
     int currentPosMeters = q.getRows().get<int>(0);
 
     q.prepare("SELECT ls.id, ls.seg_id, ls.direction,"
@@ -408,7 +412,7 @@ void LineSegmentsModel::fetchRows()
 
     q.bind(1, m_lineId);
 
-    //Reserve for 1 extra item (which will hold last station)
+    // Reserve for 1 extra item (which will hold last station)
 
     QVector<LineSegmentItem> vec;
     vec.reserve(curItemCount + 1);
@@ -416,42 +420,42 @@ void LineSegmentsModel::fetchRows()
     db_id lastStationId = 0;
     QString lastStationName;
 
-    for(auto seg : q)
+    for (auto seg : q)
     {
         LineSegmentItem item;
 
-        item.lineSegmentId = seg.get<db_id>(0);
+        item.lineSegmentId    = seg.get<db_id>(0);
         item.railwaySegmentId = seg.get<db_id>(1);
-        item.reversed = seg.get<int>(2) != 0;
+        item.reversed         = seg.get<int>(2) != 0;
 
-        item.segmentName = seg.get<QString>(3);
-        item.maxSpeedKmH = seg.get<int>(4);
-        item.segmentType = utils::RailwaySegmentType(seg.get<int>(5));
-        item.distanceMeters = seg.get<int>(6);
+        item.segmentName      = seg.get<QString>(3);
+        item.maxSpeedKmH      = seg.get<int>(4);
+        item.segmentType      = utils::RailwaySegmentType(seg.get<int>(5));
+        item.distanceMeters   = seg.get<int>(6);
 
-        //Store first segment end
-        item.fromStationId = seg.get<db_id>(7);
+        // Store first segment end
+        item.fromStationId   = seg.get<db_id>(7);
         item.fromStationName = seg.get<QString>(8);
 
-        //Store also the other end of segment for last item
-        db_id otherStationId = seg.get<db_id>(9);
+        // Store also the other end of segment for last item
+        db_id otherStationId     = seg.get<db_id>(9);
         QString otherStationName = seg.get<QString>(10);
 
-        if(item.reversed)
+        if (item.reversed)
         {
-            //Swap segments ends
+            // Swap segments ends
             qSwap(item.fromStationId, otherStationId);
             qSwap(item.fromStationName, otherStationName);
         }
 
-        if(lastStationId && item.fromStationId != lastStationId)
+        if (lastStationId && item.fromStationId != lastStationId)
         {
             qWarning() << "Line segments are not adjacent, ID:" << item.lineSegmentId
                        << "LINE:" << m_lineId;
         }
 
-        lastStationId = otherStationId;
-        lastStationName = otherStationName;
+        lastStationId      = otherStationId;
+        lastStationName    = otherStationName;
 
         item.fromPosMeters = currentPosMeters;
         currentPosMeters += item.distanceMeters;
@@ -459,31 +463,31 @@ void LineSegmentsModel::fetchRows()
         vec.append(item);
     }
 
-    if(lastStationId)
+    if (lastStationId)
     {
-        //Add a fake item to show last station (other end of last segment)
-        //This item is shown without a SegmentRow
+        // Add a fake item to show last station (other end of last segment)
+        // This item is shown without a SegmentRow
         LineSegmentItem lastItem;
-        lastItem.fromStationId = lastStationId;
+        lastItem.fromStationId   = lastStationId;
         lastItem.fromStationName = lastStationName;
-        lastItem.fromPosMeters = currentPosMeters;
-        //Fields relevant only for SegmentRow so we don't use them
-        lastItem.lineSegmentId = 0;
+        lastItem.fromPosMeters   = currentPosMeters;
+        // Fields relevant only for SegmentRow so we don't use them
+        lastItem.lineSegmentId    = 0;
         lastItem.railwaySegmentId = 0;
-        lastItem.distanceMeters = 0;
-        lastItem.maxSpeedKmH = 0;
-        lastItem.reversed = false;
+        lastItem.distanceMeters   = 0;
+        lastItem.maxSpeedKmH      = 0;
+        lastItem.reversed         = false;
         vec.append(lastItem);
     }
 
-    //NOTE: Send items in queued event
-    //We are called from inside data()
-    //If we update directly the rowCount() will change
-    //while the view is traversing the model -> BAD
-    //By sending in queue we ensure no view is currently traversing the model
+    // NOTE: Send items in queued event
+    // We are called from inside data()
+    // If we update directly the rowCount() will change
+    // while the view is traversing the model -> BAD
+    // By sending in queue we ensure no view is currently traversing the model
 
     LineSegmentsModelResultEvent *ev = new LineSegmentsModelResultEvent;
-    ev->items = vec;
+    ev->items                        = vec;
 
     qApp->postEvent(this, ev);
 }

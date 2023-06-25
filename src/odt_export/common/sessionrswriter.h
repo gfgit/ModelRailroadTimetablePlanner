@@ -35,7 +35,7 @@ public:
 
     static void writeStyles(QXmlStreamWriter &xml);
 
-    db_id writeTable(QXmlStreamWriter& xml, const QString& parentName);
+    db_id writeTable(QXmlStreamWriter &xml, const QString &parentName);
 
     void writeContent(QXmlStreamWriter &xml);
 

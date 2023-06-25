@@ -47,7 +47,7 @@ PropertiesDialog::PropertiesDialog(QWidget *parent) :
     pathReadOnlyEdit->setPlaceholderText(tr("No opened file"));
     pathReadOnlyEdit->setReadOnly(true);
 
-    //TODO: make pretty and maybe add other informations like metadata versions
+    // TODO: make pretty and maybe add other informations like metadata versions
 
     setMinimumSize(200, 200);
 }

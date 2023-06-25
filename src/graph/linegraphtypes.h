@@ -27,10 +27,10 @@
  */
 enum class LineGraphType
 {
-    NoGraph = 0, //!< No content displayed
-    SingleStation, //!< Show a single station
+    NoGraph = 0,    //!< No content displayed
+    SingleStation,  //!< Show a single station
     RailwaySegment, //!< Show two adjacent stations and the segment in between
-    RailwayLine, //!< Show a complete railway line (multiple adjacent segments)
+    RailwayLine,    //!< Show a complete railway line (multiple adjacent segments)
     NTypes
 };
 

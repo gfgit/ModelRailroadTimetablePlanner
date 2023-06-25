@@ -51,7 +51,7 @@ private:
     QCheckBox *importOwners;
     QCheckBox *importModels;
     QCheckBox *importRS;
-    QSpinBox  *defaultSpeedSpin;
+    QSpinBox *defaultSpeedSpin;
     QComboBox *defaultTypeCombo;
 
     QGroupBox *specificBox;

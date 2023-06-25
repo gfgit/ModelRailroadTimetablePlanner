@@ -58,12 +58,13 @@ const QLatin1String station_svg_key = QLatin1String("station_svg_dir");
 
 void setupView(QTableView *view, IPagedItemModel *model)
 {
-    //Custom colun sorting
-    //NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
+    // Custom colun sorting
+    // NOTE: leave disconnect() in the old SIGLAL()/SLOT() version in order to work
     QHeaderView *header = view->horizontalHeader();
     QObject::disconnect(header, SIGNAL(sectionPressed(int)), view, SLOT(selectColumn(int)));
     QObject::disconnect(header, SIGNAL(sectionEntered(int)), view, SLOT(_q_selectColumn(int)));
-    QObject::connect(header, &QHeaderView::sectionClicked, model, [model, header](int section)
+    QObject::connect(header, &QHeaderView::sectionClicked, model,
+                     [model, header](int section)
                      {
                          model->setSortingColumn(section);
                          header->setSortIndicator(model->getSortingColumn(), Qt::AscendingOrder);
@@ -81,18 +82,18 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //Enum names
+    // Enum names
     QStringList stationTypeEnum;
     stationTypeEnum.reserve(int(utils::StationType::NTypes));
-    for(int i = 0; i < int(utils::StationType::NTypes); i++)
+    for (int i = 0; i < int(utils::StationType::NTypes); i++)
         stationTypeEnum.append(utils::StationUtils::name(utils::StationType(i)));
 
     QStringList sideTypeEnum;
     sideTypeEnum.reserve(int(utils::Side::NSides));
-    for(int i = 0; i < int(utils::Side::NSides); i++)
+    for (int i = 0; i < int(utils::Side::NSides); i++)
         sideTypeEnum.append(utils::StationUtils::name(utils::Side(i)));
 
-    //Delegate Factories
+    // Delegate Factories
     trackLengthSpinFactory = new SpinBoxEditorFactory;
     trackLengthSpinFactory->setRange(1, 9999);
     trackLengthSpinFactory->setSuffix(" cm");
@@ -101,7 +102,7 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     trackFactory = new StationTracksMatchFactory(mDb, this);
     gatesFactory = new StationGatesMatchFactory(mDb, this);
 
-    //Station Tab
+    // Station Tab
     ui->stationTypeCombo->addItems(stationTypeEnum);
 
     connect(ui->addSVGBut, &QPushButton::clicked, this, &StationEditDialog::addSVGImage);
@@ -110,13 +111,15 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     connect(ui->importConnBut, &QPushButton::clicked, this, &StationEditDialog::importConnFromSVG);
     connect(ui->saveXMLBut, &QPushButton::clicked, this, &StationEditDialog::saveXmlPlan);
 
-    ui->importConnBut->setToolTip(tr("Import connections between gates and station tracks from SVG image.\n"
-                                     "NOTE: image must contain track data"));
+    ui->importConnBut->setToolTip(
+      tr("Import connections between gates and station tracks from SVG image.\n"
+         "NOTE: image must contain track data"));
 
-    //Gates Tab
+    // Gates Tab
     gatesModel = new StationGatesModel(mDb, this);
     connect(gatesModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
-    connect(gatesModel, &StationGatesModel::gateNameChanged, this, &StationEditDialog::onGatesChanged);
+    connect(gatesModel, &StationGatesModel::gateNameChanged, this,
+            &StationEditDialog::onGatesChanged);
     connect(gatesModel, &StationGatesModel::gateRemoved, this, &StationEditDialog::onGatesChanged);
 
     ModelPageSwitcher *ps = new ModelPageSwitcher(false, this);
@@ -130,13 +133,16 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
                                             new SqlFKFieldDelegate(trackFactory, gatesModel, this));
 
     connect(ui->addGateButton, &QToolButton::clicked, this, &StationEditDialog::addGate);
-    connect(ui->removeGateButton, &QToolButton::clicked, this, &StationEditDialog::removeSelectedGate);
+    connect(ui->removeGateButton, &QToolButton::clicked, this,
+            &StationEditDialog::removeSelectedGate);
 
-    //Tracks Tab
+    // Tracks Tab
     tracksModel = new StationTracksModel(mDb, this);
     connect(tracksModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
-    connect(tracksModel, &StationTracksModel::trackNameChanged, this, &StationEditDialog::onTracksChanged);
-    connect(tracksModel, &StationTracksModel::trackRemoved, this, &StationEditDialog::onTracksChanged);
+    connect(tracksModel, &StationTracksModel::trackNameChanged, this,
+            &StationEditDialog::onTracksChanged);
+    connect(tracksModel, &StationTracksModel::trackRemoved, this,
+            &StationEditDialog::onTracksChanged);
 
     ps = new ModelPageSwitcher(false, this);
     ui->tracksLayout->addWidget(ps);
@@ -146,51 +152,53 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
 
     auto trackLengthDelegate = new QStyledItemDelegate(this);
     trackLengthDelegate->setItemEditorFactory(trackLengthSpinFactory);
-    ui->trackView->setItemDelegateForColumn(StationTracksModel::TrackLengthCol,    trackLengthDelegate);
-    ui->trackView->setItemDelegateForColumn(StationTracksModel::PassengerLegthCol, trackLengthDelegate);
-    ui->trackView->setItemDelegateForColumn(StationTracksModel::FreightLengthCol,  trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::TrackLengthCol,
+                                            trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::PassengerLegthCol,
+                                            trackLengthDelegate);
+    ui->trackView->setItemDelegateForColumn(StationTracksModel::FreightLengthCol,
+                                            trackLengthDelegate);
 
     connect(ui->addTrackButton, &QToolButton::clicked, this, &StationEditDialog::addTrack);
-    connect(ui->removeTrackButton, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrack);
+    connect(ui->removeTrackButton, &QToolButton::clicked, this,
+            &StationEditDialog::removeSelectedTrack);
 
     ui->moveTrackUpBut->setToolTip(tr("Hold shift to move selected track to the top."));
     ui->moveTrackDownBut->setToolTip(tr("Hold shift to move selected track to the bottom."));
     connect(ui->moveTrackUpBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackUp);
     connect(ui->moveTrackDownBut, &QToolButton::clicked, this, &StationEditDialog::moveTrackDown);
 
-    //Track Connections Tab
+    // Track Connections Tab
     trackConnModel = new StationTrackConnectionsModel(mDb, this);
     connect(trackConnModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
-    connect(trackConnModel, &StationTrackConnectionsModel::trackConnRemoved,
-            this, &StationEditDialog::onTrackConnRemoved);
+    connect(trackConnModel, &StationTrackConnectionsModel::trackConnRemoved, this,
+            &StationEditDialog::onTrackConnRemoved);
 
     ps = new ModelPageSwitcher(false, this);
     ui->trackConnLayout->addWidget(ps);
     ps->setModel(trackConnModel);
     setupView(ui->trackConnView, trackConnModel);
 
-    ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::TrackSideCol,
-                                                new ComboDelegate(sideTypeEnum, Qt::EditRole, this));
-    ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::TrackCol,
-                                                new SqlFKFieldDelegate(trackFactory, trackConnModel, this));
-    ui->trackConnView->setItemDelegateForColumn(StationTrackConnectionsModel::GateCol,
-                                                new SqlFKFieldDelegate(gatesFactory, trackConnModel, this));
+    ui->trackConnView->setItemDelegateForColumn(
+      StationTrackConnectionsModel::TrackSideCol,
+      new ComboDelegate(sideTypeEnum, Qt::EditRole, this));
+    ui->trackConnView->setItemDelegateForColumn(
+      StationTrackConnectionsModel::TrackCol,
+      new SqlFKFieldDelegate(trackFactory, trackConnModel, this));
+    ui->trackConnView->setItemDelegateForColumn(
+      StationTrackConnectionsModel::GateCol,
+      new SqlFKFieldDelegate(gatesFactory, trackConnModel, this));
 
-    connect(ui->removeTrackConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedTrackConn);
-    connect(ui->addTrackConnBut, &QToolButton::clicked, this, [this]()
-            {
-                addTrackConnInternal(NewTrackConnDlg::SingleConnection);
-            });
-    connect(ui->trackToAllGatesBut, &QToolButton::clicked, this, [this]()
-            {
-                addTrackConnInternal(NewTrackConnDlg::TrackToAllGates);
-            });
-    connect(ui->gateToAllTracksBut, &QToolButton::clicked, this, [this]()
-            {
-                addTrackConnInternal(NewTrackConnDlg::GateToAllTracks);
-            });
+    connect(ui->removeTrackConnBut, &QToolButton::clicked, this,
+            &StationEditDialog::removeSelectedTrackConn);
+    connect(ui->addTrackConnBut, &QToolButton::clicked, this,
+            [this]() { addTrackConnInternal(NewTrackConnDlg::SingleConnection); });
+    connect(ui->trackToAllGatesBut, &QToolButton::clicked, this,
+            [this]() { addTrackConnInternal(NewTrackConnDlg::TrackToAllGates); });
+    connect(ui->gateToAllTracksBut, &QToolButton::clicked, this,
+            [this]() { addTrackConnInternal(NewTrackConnDlg::GateToAllTracks); });
 
-    //Gate Connections Tab
+    // Gate Connections Tab
     gateConnModel = new RailwaySegmentsModel(mDb, this);
     connect(gateConnModel, &IPagedItemModel::modelError, this, &StationEditDialog::modelError);
 
@@ -198,12 +206,14 @@ StationEditDialog::StationEditDialog(sqlite3pp::database &db, QWidget *parent) :
     ui->gateConnLayout->addWidget(ps);
     ps->setModel(gateConnModel);
     setupView(ui->gateConnView, gateConnModel);
-    //From station column shows always our station, because of filetering, so hide it
+    // From station column shows always our station, because of filetering, so hide it
     ui->gateConnView->hideColumn(RailwaySegmentsModel::FromStationCol);
 
     connect(ui->addGateConnBut, &QToolButton::clicked, this, &StationEditDialog::addGateConnection);
-    connect(ui->editGateConnBut, &QToolButton::clicked, this, &StationEditDialog::editGateConnection);
-    connect(ui->removeGateConnBut, &QToolButton::clicked, this, &StationEditDialog::removeSelectedGateConnection);
+    connect(ui->editGateConnBut, &QToolButton::clicked, this,
+            &StationEditDialog::editGateConnection);
+    connect(ui->removeGateConnBut, &QToolButton::clicked, this,
+            &StationEditDialog::removeSelectedGateConnection);
 }
 
 StationEditDialog::~StationEditDialog()
@@ -214,36 +224,36 @@ StationEditDialog::~StationEditDialog()
 
 bool StationEditDialog::setStation(db_id stationId)
 {
-    //Update models
-    if(!gatesModel->setStation(stationId))
+    // Update models
+    if (!gatesModel->setStation(stationId))
         return false;
     tracksModel->setStation(stationId);
     trackConnModel->setStation(stationId);
     gateConnModel->setFilterFromStationId(stationId);
 
-    //Update factories
+    // Update factories
     trackFactory->setStationId(stationId);
     gatesFactory->setStationId(stationId);
 
-    //Update station details
+    // Update station details
     QString stationName;
     QString shortName;
     utils::StationType type = utils::StationType::Normal;
-    qint64 phoneNumber = -1;
-    bool hasImage = false;
-    if(!gatesModel->getStationInfo(stationName, shortName, type, phoneNumber, hasImage))
+    qint64 phoneNumber      = -1;
+    bool hasImage           = false;
+    if (!gatesModel->getStationInfo(stationName, shortName, type, phoneNumber, hasImage))
         return false;
 
     ui->stationNameEdit->setText(stationName);
     ui->shortNameEdit->setText(shortName);
     ui->stationTypeCombo->setCurrentIndex(int(type));
 
-    if(phoneNumber == -1)
+    if (phoneNumber == -1)
         ui->phoneEdit->setText(QString());
     else
         ui->phoneEdit->setText(QString::number(phoneNumber));
 
-    //Update title
+    // Update title
     setWindowTitle(stationName.isEmpty() ? tr("New Station") : stationName);
 
     updateSVGButtons(hasImage);
@@ -260,7 +270,7 @@ void StationEditDialog::setStationInternalEditingEnabled(bool enable)
 {
     mEnableInternalEdititing = enable;
 
-    //Gates, Tracks, Track connections
+    // Gates, Tracks, Track connections
     gatesModel->setEditable(enable);
     tracksModel->setEditable(enable);
     trackConnModel->setEditable(enable);
@@ -278,23 +288,23 @@ void StationEditDialog::setStationInternalEditingEnabled(bool enable)
     ui->trackToAllGatesBut->setEnabled(enable);
     ui->gateToAllTracksBut->setEnabled(enable);
 
-    //Station Details (but not phone)
+    // Station Details (but not phone)
     ui->stationNameEdit->setEnabled(enable);
     ui->shortNameEdit->setEnabled(enable);
     ui->stationTypeCombo->setEnabled(enable);
 
-    //SVG Image
+    // SVG Image
     updateSVGButtons(false);
 }
 
 void StationEditDialog::setStationExternalEditingEnabled(bool enable)
 {
-    //Gate connections
+    // Gate connections
     ui->addGateConnBut->setEnabled(enable);
     ui->editGateConnBut->setEnabled(enable);
     ui->removeGateConnBut->setEnabled(enable);
 
-    //Phone number
+    // Phone number
     ui->phoneEdit->setEnabled(enable);
 }
 
@@ -303,55 +313,56 @@ void StationEditDialog::setGateConnectionsVisible(bool enable)
     int idx = ui->tabWidget->indexOf(ui->gateConnectionsTab);
     ui->tabWidget->setTabVisible(idx, enable);
 
-    //Refresh model
+    // Refresh model
     gateConnModel->clearCache();
     gateConnModel->refreshData();
 }
 
 void StationEditDialog::done(int res)
 {
-    if(res == QDialog::Accepted)
+    if (res == QDialog::Accepted)
     {
-        const QString stationName = ui->stationNameEdit->text().simplified();
-        const QString shortName = ui->shortNameEdit->text().simplified();
+        const QString stationName     = ui->stationNameEdit->text().simplified();
+        const QString shortName       = ui->shortNameEdit->text().simplified();
         const utils::StationType type = utils::StationType(ui->stationTypeCombo->currentIndex());
 
-        qint64 phoneNumber = -1;
-        const QString phoneNumberStr = ui->phoneEdit->text().simplified();
-        if(!phoneNumberStr.isEmpty())
+        qint64 phoneNumber            = -1;
+        const QString phoneNumberStr  = ui->phoneEdit->text().simplified();
+        if (!phoneNumberStr.isEmpty())
         {
-            bool ok = false;
+            bool ok     = false;
             phoneNumber = phoneNumberStr.toLongLong(&ok);
-            if(!ok)
+            if (!ok)
                 phoneNumber = -1;
         }
 
-        if(stationName.isEmpty())
+        if (stationName.isEmpty())
         {
             modelError(tr("Station name cannot be empty."));
             return;
         }
-        if(stationName == shortName)
+        if (stationName == shortName)
         {
             modelError(tr("Station short name cannot be equal to full name.\n"
                           "Leave empty if you want to use the full name in all places."));
             return;
         }
-        //FIXME: StationsModel does other checks on names and outputs better error messages
-        if(!gatesModel->setStationInfo(stationName, shortName, type, phoneNumber))
+        // FIXME: StationsModel does other checks on names and outputs better error messages
+        if (!gatesModel->setStationInfo(stationName, shortName, type, phoneNumber))
         {
-            modelError(tr("Check station <b>name</b>, <b>short name</b> and <b>phone number</b> to be <b>unique</b> for this station."));
+            modelError(tr("Check station <b>name</b>, <b>short name</b> and <b>phone number</b> to "
+                          "be <b>unique</b> for this station."));
             return;
         }
 
-        if(!gatesModel->hasAtLeastOneGate())
+        if (!gatesModel->hasAtLeastOneGate())
         {
-            //TODO: provide a way to delete the station to exit dialog
+            // TODO: provide a way to delete the station to exit dialog
             modelError(tr("A station should at least have 1 gate"));
             return;
         }
 
-        if(!tracksModel->hasAtLeastOneTrack())
+        if (!tracksModel->hasAtLeastOneTrack())
         {
             modelError(tr("A station should at least have 1 track"));
             return;
@@ -359,11 +370,11 @@ void StationEditDialog::done(int res)
     }
     else
     {
-        //Warning rejecting dialog
-        //TODO: this is because modification to gates/tacks/connections
-        //Are applied immediatley so closing dialog always "saves" changes.
-        //Hitting cancel one would expect not to see the changes applied.
-        //FIXME: find a way to hold changes and apply only if accepting dialog
+        // Warning rejecting dialog
+        // TODO: this is because modification to gates/tacks/connections
+        // Are applied immediatley so closing dialog always "saves" changes.
+        // Hitting cancel one would expect not to see the changes applied.
+        // FIXME: find a way to hold changes and apply only if accepting dialog
         modelError(tr("Cannot cancel changes. Changes will be applied."));
     }
 
@@ -377,13 +388,13 @@ void StationEditDialog::modelError(const QString &msg)
 
 void StationEditDialog::onGatesChanged()
 {
-    //A gate was removed or changed name
+    // A gate was removed or changed name
 
-    //Update platform connections
+    // Update platform connections
     //(refresh because some may be deleted)
     trackConnModel->refreshData(true);
 
-    //Update gate connections
+    // Update gate connections
     gateConnModel->refreshData(true);
 }
 
@@ -394,36 +405,35 @@ void StationEditDialog::addGate()
     dlg->setLabelText(tr("Please choose a letter for the new station gate."));
     dlg->setTextValue(QString());
 
-    do{
+    do
+    {
         int ret = dlg->exec();
-        if(ret != QDialog::Accepted || !dlg)
+        if (ret != QDialog::Accepted || !dlg)
         {
-            break; //User canceled
+            break; // User canceled
         }
 
         const QString name = dlg->textValue().simplified();
-        if(name.isEmpty())
+        if (name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Gate name cannot be empty."));
-            continue; //Second chance
+            continue; // Second chance
         }
 
-
-        if(gatesModel->addGate(name.at(0)))
+        if (gatesModel->addGate(name.at(0)))
         {
-            break; //Done!
+            break; // Done!
         }
-    }
-    while (true);
+    } while (true);
 }
 
 void StationEditDialog::removeSelectedGate()
 {
-    if(!ui->gatesView->selectionModel()->hasSelection())
+    if (!ui->gatesView->selectionModel()->hasSelection())
         return;
 
     db_id gateId = gatesModel->getIdAtRow(ui->gatesView->currentIndex().row());
-    if(!gateId)
+    if (!gateId)
         return;
 
     gatesModel->removeGate(gateId);
@@ -431,12 +441,12 @@ void StationEditDialog::removeSelectedGate()
 
 void StationEditDialog::onTracksChanged()
 {
-    //A track was removed or changed name
+    // A track was removed or changed name
 
-    //Update gates (has a Default Platform column)
+    // Update gates (has a Default Platform column)
     gatesModel->refreshData(true);
 
-    //Update platform connections
+    // Update platform connections
     //(refresh because some may be deleted)
     trackConnModel->refreshData(true);
 }
@@ -448,36 +458,35 @@ void StationEditDialog::addTrack()
     dlg->setLabelText(tr("Please choose a name for the new station track."));
     dlg->setTextValue(QString());
 
-    do{
+    do
+    {
         int ret = dlg->exec();
-        if(ret != QDialog::Accepted || !dlg)
+        if (ret != QDialog::Accepted || !dlg)
         {
-            break; //User canceled
+            break; // User canceled
         }
 
         const QString name = dlg->textValue().simplified();
-        if(name.isEmpty())
+        if (name.isEmpty())
         {
             QMessageBox::warning(this, tr("Error"), tr("Track name cannot be empty."));
-            continue; //Second chance
+            continue; // Second chance
         }
 
-
-        if(tracksModel->addTrack(-1, name))
+        if (tracksModel->addTrack(-1, name))
         {
-            break; //Done!
+            break; // Done!
         }
-    }
-    while (true);
+    } while (true);
 }
 
 void StationEditDialog::removeSelectedTrack()
 {
-    if(!ui->trackView->selectionModel()->hasSelection())
+    if (!ui->trackView->selectionModel()->hasSelection())
         return;
 
     db_id trackId = tracksModel->getIdAtRow(ui->trackView->currentIndex().row());
-    if(!trackId)
+    if (!trackId)
         return;
 
     tracksModel->removeTrack(trackId);
@@ -485,17 +494,17 @@ void StationEditDialog::removeSelectedTrack()
 
 void StationEditDialog::moveTrackUp()
 {
-    if(!ui->trackView->selectionModel()->hasSelection())
+    if (!ui->trackView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = ui->trackView->currentIndex();
 
-    db_id trackId = tracksModel->getIdAtRow(idx.row());
-    if(!trackId)
+    db_id trackId   = tracksModel->getIdAtRow(idx.row());
+    if (!trackId)
         return;
 
     bool top = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
-    if(!tracksModel->moveTrackUpDown(trackId, true, top))
+    if (!tracksModel->moveTrackUpDown(trackId, true, top))
         return;
 
     idx = idx.siblingAtRow(top ? 0 : idx.row() - 1);
@@ -504,17 +513,17 @@ void StationEditDialog::moveTrackUp()
 
 void StationEditDialog::moveTrackDown()
 {
-    if(!ui->trackView->selectionModel()->hasSelection())
+    if (!ui->trackView->selectionModel()->hasSelection())
         return;
 
     QModelIndex idx = ui->trackView->currentIndex();
 
-    db_id trackId = tracksModel->getIdAtRow(idx.row());
-    if(!trackId)
+    db_id trackId   = tracksModel->getIdAtRow(idx.row());
+    if (!trackId)
         return;
 
     bool bottom = QGuiApplication::keyboardModifiers() & Qt::ShiftModifier;
-    if(!tracksModel->moveTrackUpDown(trackId, false, bottom))
+    if (!tracksModel->moveTrackUpDown(trackId, false, bottom))
         return;
 
     idx = idx.siblingAtRow(bottom ? tracksModel->rowCount() - 1 : idx.row() + 1);
@@ -523,9 +532,9 @@ void StationEditDialog::moveTrackDown()
 
 void StationEditDialog::onTrackConnRemoved()
 {
-    //A track connection was removed
+    // A track connection was removed
 
-    //Update gates (has a Default Platform column)
+    // Update gates (has a Default Platform column)
     gatesModel->refreshData(true);
 }
 
@@ -536,22 +545,22 @@ void StationEditDialog::addTrackConnInternal(int mode)
     QScopedPointer<ISqlFKMatchModel> tracks(trackFactory->createModel());
     QScopedPointer<ISqlFKMatchModel> gates(gatesFactory->createModel());
 
-    OwningQPointer<NewTrackConnDlg> dlg = new NewTrackConnDlg(tracks.get(),
-                                                              static_cast<StationGatesMatchModel *>(gates.get()),
-                                                              this);
+    OwningQPointer<NewTrackConnDlg> dlg =
+      new NewTrackConnDlg(tracks.get(), static_cast<StationGatesMatchModel *>(gates.get()), this);
     dlg->setMode(dlgMode);
 
-    do{
+    do
+    {
         int ret = dlg->exec();
-        if(ret != QDialog::Accepted || !dlg)
+        if (ret != QDialog::Accepted || !dlg)
         {
-            break; //User canceled
+            break; // User canceled
         }
 
-        db_id trackId = 0;
+        db_id trackId         = 0;
         utils::Side trackSide = utils::Side::East;
-        db_id gateId = 0;
-        int gateTrack = 0;
+        db_id gateId          = 0;
+        int gateTrack         = 0;
         dlg->getData(trackId, trackSide, gateId, gateTrack);
 
         bool success = false;
@@ -568,12 +577,11 @@ void StationEditDialog::addTrackConnInternal(int mode)
             break;
         }
 
-        if(success)
+        if (success)
         {
-            break; //Done!
+            break; // Done!
         }
-    }
-    while (true);
+    } while (true);
 }
 
 void StationEditDialog::updateSVGButtons(bool hasImage)
@@ -586,11 +594,11 @@ void StationEditDialog::updateSVGButtons(bool hasImage)
 
 void StationEditDialog::removeSelectedTrackConn()
 {
-    if(!ui->trackConnView->selectionModel()->hasSelection())
+    if (!ui->trackConnView->selectionModel()->hasSelection())
         return;
 
     db_id connId = trackConnModel->getIdAtRow(ui->trackConnView->currentIndex().row());
-    if(!connId)
+    if (!connId)
         return;
 
     trackConnModel->removeTrackConnection(connId);
@@ -601,48 +609,48 @@ void StationEditDialog::addGateConnection()
     OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, nullptr, this));
     dlg->setSegment(0, getStation(), EditRailwaySegmentDlg::DoNotLock);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
-    gateConnModel->refreshData(); //Recalc row count
+    gateConnModel->refreshData(); // Recalc row count
 }
 
 void StationEditDialog::editGateConnection()
 {
-    if(!ui->gateConnView->selectionModel()->hasSelection())
+    if (!ui->gateConnView->selectionModel()->hasSelection())
         return;
 
     db_id segId = gateConnModel->getIdAtRow(ui->gateConnView->currentIndex().row());
-    if(!segId)
+    if (!segId)
         return;
 
     OwningQPointer<EditRailwaySegmentDlg> dlg(new EditRailwaySegmentDlg(mDb, nullptr, this));
     dlg->setSegment(segId, getStation(), EditRailwaySegmentDlg::LockToCurrentValue);
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
-    gateConnModel->refreshData(true); //Refresh fields
+    gateConnModel->refreshData(true); // Refresh fields
 }
 
 void StationEditDialog::removeSelectedGateConnection()
 {
-    if(!ui->gateConnView->selectionModel()->hasSelection())
+    if (!ui->gateConnView->selectionModel()->hasSelection())
         return;
 
     db_id segId = gateConnModel->getIdAtRow(ui->gateConnView->currentIndex().row());
-    if(!segId)
+    if (!segId)
         return;
 
     QString errMsg;
     RailwaySegmentHelper helper(mDb);
-    if(!helper.removeSegment(segId, &errMsg))
+    if (!helper.removeSegment(segId, &errMsg))
     {
         QMessageBox::warning(this, tr("Error"), errMsg);
         return;
     }
 
-    gateConnModel->refreshData(); //Recalc row count
+    gateConnModel->refreshData(); // Recalc row count
 }
 
 void StationEditDialog::addSVGImage()
@@ -657,25 +665,25 @@ void StationEditDialog::addSVGImage()
     filters << FileFormats::tr(FileFormats::allFiles);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(station_svg_key, fileName);
 
     QFile f(fileName);
-    if(!f.open(QFile::ReadOnly))
+    if (!f.open(QFile::ReadOnly))
     {
         QMessageBox::warning(this, tr("Cannot Read File"), f.errorString());
         return;
     }
 
     QString errMsg;
-    if(!StationSVGHelper::addImage(mDb, getStation(), &f, &errMsg))
+    if (!StationSVGHelper::addImage(mDb, getStation(), &f, &errMsg))
     {
         QMessageBox::warning(this, tr("Error Adding SVG"), errMsg);
         return;
@@ -688,11 +696,11 @@ void StationEditDialog::removeSVGImage()
 {
     int ret = QMessageBox::question(this, tr("Delete Image?"),
                                     tr("Are you sure to delete SVG plan of this station?"));
-    if(ret != QMessageBox::Yes)
+    if (ret != QMessageBox::Yes)
         return;
 
     QString errMsg;
-    if(!StationSVGHelper::removeImage(mDb, getStation(), &errMsg))
+    if (!StationSVGHelper::removeImage(mDb, getStation(), &errMsg))
     {
         QMessageBox::warning(this, tr("Error Deleting SVG"), errMsg);
         return;
@@ -713,24 +721,24 @@ void StationEditDialog::saveSVGToFile()
     filters << FileFormats::tr(FileFormats::allFiles);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(station_svg_key, fileName);
 
     QFile f(fileName);
-    if(!f.open(QFile::WriteOnly))
+    if (!f.open(QFile::WriteOnly))
     {
         QMessageBox::warning(this, tr("Cannot Save File"), f.errorString());
         return;
     }
 
     QString errMsg;
-    if(!StationSVGHelper::saveImage(mDb, getStation(), &f, &errMsg))
+    if (!StationSVGHelper::saveImage(mDb, getStation(), &f, &errMsg))
     {
         QMessageBox::warning(this, tr("Error Saving SVG"), errMsg);
     }
@@ -741,27 +749,26 @@ void StationEditDialog::importConnFromSVG()
     std::unique_ptr<QIODevice> dev;
     dev.reset(StationSVGHelper::loadImage(mDb, getStation()));
 
-    if(!dev || !dev->open(QIODevice::ReadOnly))
+    if (!dev || !dev->open(QIODevice::ReadOnly))
     {
-        QMessageBox::warning(this, tr("Import Error"),
-                             tr("Could not open SVG image. Make sure you added one to this station."));
+        QMessageBox::warning(
+          this, tr("Import Error"),
+          tr("Could not open SVG image. Make sure you added one to this station."));
         return;
     }
 
     bool ret = StationSVGHelper::importTrackConnFromSVGDev(mDb, getStation(), dev.get());
-    if(ret)
+    if (ret)
     {
         QMessageBox::information(this, tr("Done Importation"),
                                  tr("Track to gate connections have been successfully imported."));
     }
     else
     {
-        QMessageBox::warning(this, tr("Import Error"),
-                             tr("Generic error"));
-
+        QMessageBox::warning(this, tr("Import Error"), tr("Generic error"));
     }
 
-    trackConnModel->refreshData(); //Recalc row count
+    trackConnModel->refreshData(); // Recalc row count
 }
 
 void StationEditDialog::saveXmlPlan()
@@ -776,23 +783,23 @@ void StationEditDialog::saveXmlPlan()
     filters << FileFormats::tr(FileFormats::allFiles);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(station_svg_key, fileName);
 
     QFile f(fileName);
-    if(!f.open(QFile::WriteOnly))
+    if (!f.open(QFile::WriteOnly))
     {
         QMessageBox::warning(this, tr("Cannot Save File"), f.errorString());
         return;
     }
 
-    if(!StationSVGHelper::writeStationXmlFromDB(mDb, getStation(), &f))
+    if (!StationSVGHelper::writeStationXmlFromDB(mDb, getStation(), &f))
     {
         QMessageBox::warning(this, tr("Error Saving XML"), tr("Unknow error"));
     }

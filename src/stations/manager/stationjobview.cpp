@@ -49,15 +49,16 @@ StationJobView::StationJobView(QWidget *parent) :
 
     ui->tableView->setModel(model);
 
-    ui->tableView->setColumnWidth(0, 60); //Arrival
-    ui->tableView->setColumnWidth(1, 60); //Departure
-    ui->tableView->setColumnWidth(2, 55); //Platform
-    ui->tableView->setColumnWidth(3, 90); //Job
-    ui->tableView->setColumnWidth(4, 115); //Notes
+    ui->tableView->setColumnWidth(0, 60);  // Arrival
+    ui->tableView->setColumnWidth(1, 60);  // Departure
+    ui->tableView->setColumnWidth(2, 55);  // Platform
+    ui->tableView->setColumnWidth(3, 90);  // Job
+    ui->tableView->setColumnWidth(4, 115); // Notes
     ui->tableView->setSelectionBehavior(QTableView::SelectRows);
 
     ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->tableView, &QTableView::customContextMenuRequested, this, &StationJobView::showContextMenu);
+    connect(ui->tableView, &QTableView::customContextMenuRequested, this,
+            &StationJobView::showContextMenu);
 
     connect(ui->sheetButton, &QPushButton::pressed, this, &StationJobView::onSaveSheet);
     connect(ui->updateButt, &QPushButton::clicked, this, &StationJobView::updateInfo);
@@ -95,35 +96,35 @@ void StationJobView::updateJobsList()
     model->loadPlan(m_stationId);
 }
 
-void StationJobView::showContextMenu(const QPoint& pos)
+void StationJobView::showContextMenu(const QPoint &pos)
 {
     DEBUG_ENTRY;
 
     QModelIndex idx = ui->tableView->indexAt(pos);
-    if(!idx.isValid())
+    if (!idx.isValid())
         return;
 
-    StPlanItem item = model->getItemAt(idx.row());
+    StPlanItem item            = model->getItemAt(idx.row());
 
     OwningQPointer<QMenu> menu = new QMenu(this);
 
-    QAction *showInJobEditor = new QAction(tr("Show in Job Editor"), menu);
-    QAction *selectJobInGraph = new QAction(tr("Show job in graph"), menu);
-    QAction *showSVGPlan = new QAction(tr("Show Station SVG Plan"), menu);
+    QAction *showInJobEditor   = new QAction(tr("Show in Job Editor"), menu);
+    QAction *selectJobInGraph  = new QAction(tr("Show job in graph"), menu);
+    QAction *showSVGPlan       = new QAction(tr("Show Station SVG Plan"), menu);
     menu->addAction(showInJobEditor);
     menu->addAction(selectJobInGraph);
     menu->addAction(showSVGPlan);
 
     QAction *act = menu->exec(ui->tableView->viewport()->mapToGlobal(pos));
-    if(act == showInJobEditor)
+    if (act == showInJobEditor)
     {
         Session->getViewManager()->requestJobEditor(item.jobId, item.stopId);
     }
-    else if(act == selectJobInGraph)
+    else if (act == selectJobInGraph)
     {
         Session->getViewManager()->requestJobSelection(item.jobId, true, true);
     }
-    else if(act == showSVGPlan)
+    else if (act == showSVGPlan)
     {
         Session->getViewManager()->requestStSVGPlan(m_stationId, true, item.arrival);
     }
@@ -135,7 +136,7 @@ void StationJobView::onSaveSheet()
 
     const QLatin1String station_sheet_key = QLatin1String("station_sheet_dir");
 
-    OwningQPointer<QFileDialog> dlg = new QFileDialog(this, tr("Save Station Sheet"));
+    OwningQPointer<QFileDialog> dlg       = new QFileDialog(this, tr("Save Station Sheet"));
     dlg->setFileMode(QFileDialog::AnyFile);
     dlg->setAcceptMode(QFileDialog::AcceptSave);
     dlg->setDirectory(RecentDirStore::getDir(station_sheet_key, RecentDirStore::Documents));
@@ -145,12 +146,12 @@ void StationJobView::onSaveSheet()
     filters << FileFormats::tr(FileFormats::odtFormat);
     dlg->setNameFilters(filters);
 
-    if(dlg->exec() != QDialog::Accepted || !dlg)
+    if (dlg->exec() != QDialog::Accepted || !dlg)
         return;
 
     QString fileName = dlg->selectedUrls().value(0).toLocalFile();
 
-    if(fileName.isEmpty())
+    if (fileName.isEmpty())
         return;
 
     RecentDirStore::setPath(station_sheet_key, fileName);

@@ -32,11 +32,11 @@ using namespace sqlite3pp;
 
 #include <QDebug>
 
-//ERRORMSG: show other errors
-static constexpr char
-    errorRSInUseCannotDelete[] = QT_TRANSLATE_NOOP("RollingstockSQLModel",
-                        "Rollingstock item <b>%1</b> is used in some jobs so it cannot be removed.<br>"
-                        "If you wish to remove it, please first remove it from its jobs.");
+// ERRORMSG: show other errors
+static constexpr char errorRSInUseCannotDelete[] =
+  QT_TRANSLATE_NOOP("RollingstockSQLModel",
+                    "Rollingstock item <b>%1</b> is used in some jobs so it cannot be removed.<br>"
+                    "If you wish to remove it, please first remove it from its jobs.");
 
 RollingstockSQLModel::RollingstockSQLModel(sqlite3pp::database &db, QObject *parent) :
     BaseClass(500, db, parent)
@@ -46,9 +46,9 @@ RollingstockSQLModel::RollingstockSQLModel(sqlite3pp::database &db, QObject *par
 
 QVariant RollingstockSQLModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole)
     {
-        if(orientation == Qt::Horizontal)
+        if (orientation == Qt::Horizontal)
         {
             switch (section)
             {
@@ -80,18 +80,18 @@ QVariant RollingstockSQLModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols)
         return QVariant();
 
-    //qDebug() << "Data:" << idx.row();
+    // qDebug() << "Data:" << idx.row();
 
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
     {
-        //Fetch above or below current cache
+        // Fetch above or below current cache
         const_cast<RollingstockSQLModel *>(this)->fetchRow(row);
 
-        //Temporarily return null
+        // Temporarily return null
         return role == Qt::DisplayRole ? QVariant("...") : QVariant();
     }
 
-    const RSItem& item = cache.at(row - cacheFirstRow);
+    const RSItem &item = cache.at(row - cacheFirstRow);
 
     switch (role)
     {
@@ -116,7 +116,7 @@ QVariant RollingstockSQLModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::TextAlignmentRole:
     {
-        if(idx.column() == Number)
+        if (idx.column() == Number)
         {
             return Qt::AlignVCenter + Qt::AlignRight;
         }
@@ -134,18 +134,19 @@ QVariant RollingstockSQLModel::data(const QModelIndex &idx, int role) const
 bool RollingstockSQLModel::setData(const QModelIndex &idx, const QVariant &value, int role)
 {
     const int row = idx.row();
-    if(!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (!idx.isValid() || row >= curItemCount || idx.column() >= NCols || row < cacheFirstRow
+        || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
-    RSItem &item = cache[row - cacheFirstRow];
+    RSItem &item      = cache[row - cacheFirstRow];
     QModelIndex first = idx;
-    QModelIndex last = idx;
+    QModelIndex last  = idx;
 
-    if(role == RS_NUMBER)
+    if (role == RS_NUMBER)
     {
-        bool ok = false;
+        bool ok    = false;
         int number = value.toInt(&ok);
-        if(!ok || !setNumber(item, number))
+        if (!ok || !setNumber(item, number))
             return false;
     }
 
@@ -159,25 +160,25 @@ Qt::ItemFlags RollingstockSQLModel::flags(const QModelIndex &idx) const
         return Qt::NoItemFlags;
 
     Qt::ItemFlags f = Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
-    if(idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
-        return f; //Not fetched yet
+    if (idx.row() < cacheFirstRow || idx.row() >= cacheFirstRow + cache.size())
+        return f; // Not fetched yet
 
-    if(idx.column() != Suffix && idx.column() != TypeCol)
-        f.setFlag(Qt::ItemIsEditable); //Suffix and TypeCol are deduced from Model
+    if (idx.column() != Suffix && idx.column() != TypeCol)
+        f.setFlag(Qt::ItemIsEditable); // Suffix and TypeCol are deduced from Model
 
     return f;
 }
 
 void RollingstockSQLModel::setSortingColumn(int col)
 {
-    if(sortColumn == col || col == Number || col == Suffix || col >= NCols)
+    if (sortColumn == col || col == Number || col == Suffix || col >= NCols)
         return;
 
     clearCache();
-    sortColumn = col;
+    sortColumn        = col;
 
     QModelIndex first = index(0, 0);
-    QModelIndex last = index(curItemCount - 1, NCols - 1);
+    QModelIndex last  = index(curItemCount - 1, NCols - 1);
     emit dataChanged(first, last);
 }
 
@@ -209,8 +210,8 @@ bool RollingstockSQLModel::setFilterAtCol(int col, const QString &str)
     }
     case Number:
     {
-        if(isNull)
-            return false; //Cannot have NULL Number
+        if (isNull)
+            return false; // Cannot have NULL Number
         m_numberFilter = str;
         break;
     }
@@ -229,22 +230,22 @@ bool RollingstockSQLModel::setFilterAtCol(int col, const QString &str)
 
 bool RollingstockSQLModel::getFieldData(int row, int col, db_id &idOut, QString &nameOut) const
 {
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false;
 
-    const RSItem& item = cache[row - cacheFirstRow];
+    const RSItem &item = cache[row - cacheFirstRow];
 
     switch (col)
     {
     case Model:
     {
-        idOut = item.modelId;
+        idOut   = item.modelId;
         nameOut = item.modelName;
         break;
     }
     case Owner:
     {
-        idOut = item.ownerId;
+        idOut   = item.ownerId;
         nameOut = item.ownerName;
         break;
     }
@@ -255,18 +256,19 @@ bool RollingstockSQLModel::getFieldData(int row, int col, db_id &idOut, QString 
     return true;
 }
 
-bool RollingstockSQLModel::validateData(int /*row*/, int /*col*/, db_id /*id*/, const QString &/*name*/)
+bool RollingstockSQLModel::validateData(int /*row*/, int /*col*/, db_id /*id*/,
+                                        const QString & /*name*/)
 {
     return true;
 }
 
 bool RollingstockSQLModel::setFieldData(int row, int col, db_id id, const QString &name)
 {
-    if(row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+    if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
         return false;
 
-    RSItem& item = cache[row - cacheFirstRow];
-    bool ret = false;
+    RSItem &item = cache[row - cacheFirstRow];
+    bool ret     = false;
     switch (col)
     {
     case Model:
@@ -283,7 +285,7 @@ bool RollingstockSQLModel::setFieldData(int row, int col, db_id id, const QStrin
         break;
     }
 
-    if(ret)
+    if (ret)
     {
         QModelIndex idx = index(row, col);
         emit dataChanged(idx, idx);
@@ -294,21 +296,22 @@ bool RollingstockSQLModel::setFieldData(int row, int col, db_id id, const QStrin
 
 bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
 {
-    if(!rsId)
+    if (!rsId)
         return false;
 
     command cmd(mDb, "DELETE FROM rs_list WHERE id=?");
     cmd.bind(1, rsId);
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
         ret = mDb.extended_error_code();
-        if(ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
+        if (ret == SQLITE_CONSTRAINT_FOREIGNKEY || ret == SQLITE_CONSTRAINT_TRIGGER)
         {
             QString name;
-            if(item)
+            if (item)
             {
-                name = rs_utils::formatName(item->modelName, item->number, item->modelSuffix, item->type);
+                name = rs_utils::formatName(item->modelName, item->number, item->modelSuffix,
+                                            item->type);
             }
             else
             {
@@ -321,19 +324,19 @@ bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
 
                 sqlite3_stmt *stmt = q.stmt();
 
-                int number = sqlite3_column_int(stmt, 0);
-                int modelNameLen = sqlite3_column_bytes(stmt, 1);
-                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 1));
+                int number         = sqlite3_column_int(stmt, 0);
+                int modelNameLen   = sqlite3_column_bytes(stmt, 1);
+                const char *modelName =
+                  reinterpret_cast<char const *>(sqlite3_column_text(stmt, 1));
 
                 int modelSuffixLen = sqlite3_column_bytes(stmt, 2);
-                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
+                const char *modelSuffix =
+                  reinterpret_cast<char const *>(sqlite3_column_text(stmt, 2));
 
                 RsType type = RsType(sqlite3_column_int(stmt, 3));
 
-                name = rs_utils::formatNameRef(modelName, modelNameLen,
-                                               number,
-                                               modelSuffix, modelSuffixLen,
-                                               type);
+                name        = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix,
+                                                      modelSuffixLen, type);
             }
 
             emit modelError(tr(errorRSInUseCannotDelete).arg(name));
@@ -345,14 +348,14 @@ bool RollingstockSQLModel::removeRSItem(db_id rsId, const RSItem *item)
 
     emit Session->rollingstockRemoved(rsId);
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
     return true;
 }
 
 bool RollingstockSQLModel::removeRSItemAt(int row)
 {
-    if(row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-        return false; //Not fetched yet or invalid
+    if (row >= curItemCount || row < cacheFirstRow || row >= cacheFirstRow + cache.size())
+        return false; // Not fetched yet or invalid
 
     const RSItem &item = cache.at(row - cacheFirstRow);
     return removeRSItem(item.rsId, &item);
@@ -366,29 +369,30 @@ db_id RollingstockSQLModel::addRSItem(int *outRow, QString *errOut)
     sqlite3_mutex *mutex = sqlite3_db_mutex(mDb.db());
     sqlite3_mutex_enter(mutex);
     int ret = cmd.execute();
-    if(ret == SQLITE_OK)
+    if (ret == SQLITE_OK)
     {
         rsId = mDb.last_insert_rowid();
     }
     sqlite3_mutex_leave(mutex);
 
-    if(ret == SQLITE_CONSTRAINT_UNIQUE)
+    if (ret == SQLITE_CONSTRAINT_UNIQUE)
     {
-        //There is already an RS with no model set, use that instead
+        // There is already an RS with no model set, use that instead
         query findEmpty(mDb, "SELECT id FROM rs_list WHERE model_id=0 OR model_id IS NULL LIMIT 1");
-        if(findEmpty.step() == SQLITE_ROW)
+        if (findEmpty.step() == SQLITE_ROW)
         {
             rsId = findEmpty.getRows().get<db_id>(0);
         }
     }
-    else if(ret != SQLITE_OK)
+    else if (ret != SQLITE_OK)
     {
-        if(errOut)
+        if (errOut)
             *errOut = mDb.error_msg();
-        qDebug() << "RollingstockSQLModel Error adding:" << ret << mDb.error_msg() << mDb.error_code() << mDb.extended_error_code();
+        qDebug() << "RollingstockSQLModel Error adding:" << ret << mDb.error_msg()
+                 << mDb.error_code() << mDb.extended_error_code();
     }
 
-    //Clear filters
+    // Clear filters
     m_modelFilter.clear();
     m_modelFilter.squeeze();
     m_numberFilter.clear();
@@ -397,11 +401,11 @@ db_id RollingstockSQLModel::addRSItem(int *outRow, QString *errOut)
     m_ownerFilter.squeeze();
     emit filterChanged();
 
-    refreshData(); //Recalc row count
-    switchToPage(0); //Reset to first page and so it is shown as first row
+    refreshData();   // Recalc row count
+    switchToPage(0); // Reset to first page and so it is shown as first row
 
-    if(outRow)
-        *outRow = rsId ? 0 : -1; //Empty model is always the first
+    if (outRow)
+        *outRow = rsId ? 0 : -1; // Empty model is always the first
 
     return rsId;
 }
@@ -410,13 +414,14 @@ bool RollingstockSQLModel::removeAllRS()
 {
     command cmd(mDb, "DELETE FROM rs_list");
     int ret = cmd.execute();
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
     {
-        qWarning() << "Removing ALL RS:" << ret << mDb.extended_error_code() << "Err:" << mDb.error_msg();
+        qWarning() << "Removing ALL RS:" << ret << mDb.extended_error_code()
+                   << "Err:" << mDb.error_msg();
         return false;
     }
 
-    refreshData(); //Recalc row count
+    refreshData(); // Recalc row count
     return true;
 }
 
@@ -433,7 +438,7 @@ qint64 RollingstockSQLModel::recalcTotalItemCount()
 void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offset, bool fullData)
 {
     QByteArray sql;
-    if(fullData)
+    if (fullData)
     {
         sql = "SELECT rs_list.id,rs_list.number,rs_list.model_id,rs_list.owner_id,"
               "rs_models.name,rs_models.suffix,rs_models.type,rs_owners.name"
@@ -444,23 +449,23 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
         sql = "SELECT COUNT(1) FROM rs_list";
     }
 
-    //If counting but filtering by model name (not null) we need to JOIN rs_models
+    // If counting but filtering by model name (not null) we need to JOIN rs_models
     bool modelIsNull = m_modelFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
-    if(fullData || (!modelIsNull && !m_modelFilter.isEmpty()))
+    if (fullData || (!modelIsNull && !m_modelFilter.isEmpty()))
         sql += " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id";
 
-    //If counting but filtering by owner name (not null) we need to JOIN rs_owners
+    // If counting but filtering by owner name (not null) we need to JOIN rs_owners
     bool ownerIsNull = m_ownerFilter.startsWith(nullFilterStr, Qt::CaseInsensitive);
-    if(fullData || (!ownerIsNull && !m_ownerFilter.isEmpty()))
+    if (fullData || (!ownerIsNull && !m_ownerFilter.isEmpty()))
         sql += " LEFT JOIN rs_owners ON rs_owners.id=rs_list.owner_id";
 
     bool whereClauseAdded = false;
 
-    if(!m_modelFilter.isEmpty())
+    if (!m_modelFilter.isEmpty())
     {
         sql.append(" WHERE ");
 
-        if(modelIsNull)
+        if (modelIsNull)
         {
             sql.append("rs_list.model_id IS NULL");
         }
@@ -472,9 +477,9 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
         whereClauseAdded = true;
     }
 
-    if(!m_numberFilter.isEmpty())
+    if (!m_numberFilter.isEmpty())
     {
-        if(whereClauseAdded)
+        if (whereClauseAdded)
             sql.append(" AND ");
         else
             sql.append(" WHERE ");
@@ -484,14 +489,14 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
         whereClauseAdded = true;
     }
 
-    if(!m_ownerFilter.isEmpty())
+    if (!m_ownerFilter.isEmpty())
     {
-        if(whereClauseAdded)
+        if (whereClauseAdded)
             sql.append(" AND ");
         else
             sql.append(" WHERE ");
 
-        if(ownerIsNull)
+        if (ownerIsNull)
         {
             sql.append("rs_list.owner_id IS NULL");
         }
@@ -501,25 +506,27 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
         }
     }
 
-    if(fullData)
+    if (fullData)
     {
-        //Apply sorting
+        // Apply sorting
         const char *sortColExpr = nullptr;
         switch (sortCol)
         {
         case Model:
         {
-            sortColExpr = "rs_models.name,rs_list.number"; //Order by 2 columns, no where clause
+            sortColExpr = "rs_models.name,rs_list.number"; // Order by 2 columns, no where clause
             break;
         }
         case Owner:
         {
-            sortColExpr = "rs_owners.name,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+            sortColExpr =
+              "rs_owners.name,rs_models.name,rs_list.number"; // Order by 3 columns, no where clause
             break;
         }
         case TypeCol:
         {
-            sortColExpr = "rs_models.type,rs_models.name,rs_list.number"; //Order by 3 columns, no where clause
+            sortColExpr =
+              "rs_models.type,rs_models.name,rs_list.number"; // Order by 3 columns, no where clause
             break;
         }
         }
@@ -528,23 +535,23 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
         sql += sortColExpr;
 
         sql += " LIMIT ?1";
-        if(offset)
+        if (offset)
             sql += " OFFSET ?2";
     }
 
     q.prepare(sql);
 
-    if(fullData)
+    if (fullData)
     {
-        //Apply offset and batch size
+        // Apply offset and batch size
         q.bind(1, BatchSize);
-        if(offset)
+        if (offset)
             q.bind(2, offset);
     }
 
-    //Apply filters
+    // Apply filters
     QByteArray modelFilter;
-    if(!m_modelFilter.isEmpty() && !modelIsNull)
+    if (!m_modelFilter.isEmpty() && !modelIsNull)
     {
         modelFilter.reserve(m_modelFilter.size() + 2);
         modelFilter.append('%');
@@ -555,19 +562,19 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
     }
 
     QByteArray numberFilter;
-    if(!m_numberFilter.isEmpty())
+    if (!m_numberFilter.isEmpty())
     {
         numberFilter.reserve(m_numberFilter.size() + 2);
         numberFilter.append('%');
         numberFilter.append(m_numberFilter.toUtf8());
         numberFilter.append('%');
-        numberFilter.replace('-', nullptr); //Remove dashes
+        numberFilter.replace('-', nullptr); // Remove dashes
 
         sqlite3_bind_text(q.stmt(), 4, numberFilter, numberFilter.size(), SQLITE_STATIC);
     }
 
     QByteArray ownerFilter;
-    if(!m_ownerFilter.isEmpty() && !ownerIsNull)
+    if (!m_ownerFilter.isEmpty() && !ownerIsNull)
     {
         ownerFilter.reserve(m_ownerFilter.size() + 2);
         ownerFilter.append('%');
@@ -578,7 +585,8 @@ void RollingstockSQLModel::buildQuery(sqlite3pp::query &q, int sortCol, int offs
     }
 }
 
-void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/, const QVariant& /*val*/)
+void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
+                                         const QVariant & /*val*/)
 {
     query q(mDb);
 
@@ -590,27 +598,27 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
 
     QVector<RSItem> vec(BatchSize);
 
-    auto it = q.begin();
+    auto it        = q.begin();
     const auto end = q.end();
 
-    int i = 0;
-    for(; it != end; ++it)
+    int i          = 0;
+    for (; it != end; ++it)
     {
-        auto r = *it;
-        RSItem &item = vec[i];
-        item.rsId = r.get<db_id>(0);
-        item.number = r.get<int>(1);
-        item.modelId = r.get<db_id>(2);
-        item.ownerId = r.get<db_id>(3);
-        item.modelName = r.get<QString>(4);
+        auto r           = *it;
+        RSItem &item     = vec[i];
+        item.rsId        = r.get<db_id>(0);
+        item.number      = r.get<int>(1);
+        item.modelId     = r.get<db_id>(2);
+        item.ownerId     = r.get<db_id>(3);
+        item.modelName   = r.get<QString>(4);
         item.modelSuffix = r.get<QString>(5);
-        item.type = RsType(r.get<int>(6));
-        item.ownerName = r.get<QString>(7);
+        item.type        = RsType(r.get<int>(6));
+        item.ownerName   = r.get<QString>(7);
 
         i += 1;
     }
 
-    if(i < BatchSize)
+    if (i < BatchSize)
         vec.remove(i, BatchSize - i);
 
     postResult(vec, first);
@@ -618,30 +626,31 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
 
 bool RollingstockSQLModel::setModel(RSItem &item, db_id modelId, const QString &name)
 {
-    if(item.modelId == modelId)
+    if (item.modelId == modelId)
         return false;
 
-    //FIXME: should be already handled by UNIQUE constraints
-    //Check if there is already that combination of
-    //Model.Number, if so set an higher number
-    query q_hasModelNumCombination(mDb, "SELECT id, model_id, number FROM rs_list WHERE model_id=? AND number=?");
+    // FIXME: should be already handled by UNIQUE constraints
+    // Check if there is already that combination of
+    // Model.Number, if so set an higher number
+    query q_hasModelNumCombination(
+      mDb, "SELECT id, model_id, number FROM rs_list WHERE model_id=? AND number=?");
     q_hasModelNumCombination.bind(1, modelId);
     q_hasModelNumCombination.bind(2, item.number);
     int ret = q_hasModelNumCombination.step();
     q_hasModelNumCombination.reset();
 
-    if(ret == SQLITE_ROW)
+    if (ret == SQLITE_ROW)
     {
-        //There's already that Model.Number, change our number
+        // There's already that Model.Number, change our number
         query q_getMaxNumberOfThatModel(mDb, "SELECT MAX(number) FROM rs_list WHERE model_id=?");
         q_getMaxNumberOfThatModel.bind(1, modelId);
         q_getMaxNumberOfThatModel.step();
-        auto r = q_getMaxNumberOfThatModel.getRows();
-        int number = r.get<int>(0) + 1; //Max + 1
+        auto r     = q_getMaxNumberOfThatModel.getRows();
+        int number = r.get<int>(0) + 1; // Max + 1
         q_getMaxNumberOfThatModel.reset();
 
-        //BIG TODO: numeri carri/carrozze hanno cifra di controllo, non posono essere aumentati di +1 a caso
-        //ERRORMSG: ask user
+        // BIG TODO: numeri carri/carrozze hanno cifra di controllo, non posono essere aumentati di
+        // +1 a caso ERRORMSG: ask user
 
         command q_setNumber(mDb, "UPDATE rs_list SET number=? WHERE id=?");
         q_setNumber.bind(1, number);
@@ -649,7 +658,7 @@ bool RollingstockSQLModel::setModel(RSItem &item, db_id modelId, const QString &
         ret = q_setNumber.execute();
         q_setNumber.reset();
 
-        if(ret != SQLITE_OK)
+        if (ret != SQLITE_OK)
             return false;
 
         item.number = number;
@@ -661,15 +670,15 @@ bool RollingstockSQLModel::setModel(RSItem &item, db_id modelId, const QString &
     ret = q_setModel.execute();
     q_setModel.reset();
 
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
         return false;
 
     item.modelId = modelId;
-    Q_UNUSED(name) //We clear the cache so the name will be re-queried
+    Q_UNUSED(name) // We clear the cache so the name will be re-queried
 
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
+    // This row has now changed position so we need to invalidate cache
+    // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    // but the view will trigger fetching at same scroll position so it is enough
     cache.clear();
     cacheFirstRow = 0;
 
@@ -678,9 +687,9 @@ bool RollingstockSQLModel::setModel(RSItem &item, db_id modelId, const QString &
     return true;
 }
 
-bool RollingstockSQLModel::setOwner(RSItem &item, db_id ownerId, const QString& name)
+bool RollingstockSQLModel::setOwner(RSItem &item, db_id ownerId, const QString &name)
 {
-    if(item.ownerId == ownerId)
+    if (item.ownerId == ownerId)
         return false;
 
     command q_setOwner(mDb, "UPDATE rs_list SET owner_id=? WHERE id=?");
@@ -689,19 +698,19 @@ bool RollingstockSQLModel::setOwner(RSItem &item, db_id ownerId, const QString& 
     int ret = q_setOwner.execute();
     q_setOwner.reset();
 
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
         return false;
 
-    item.ownerId = ownerId;
+    item.ownerId   = ownerId;
     item.ownerName = name;
 
     emit Session->rollingStockModified(item.rsId);
 
-    if(sortColumn == Owner)
+    if (sortColumn == Owner)
     {
-        //This row has now changed position so we need to invalidate cache
-        //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-        //but the view will trigger fetching at same scroll position so it is enough
+        // This row has now changed position so we need to invalidate cache
+        // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+        // but the view will trigger fetching at same scroll position so it is enough
         cache.clear();
         cacheFirstRow = 0;
     }
@@ -711,20 +720,21 @@ bool RollingstockSQLModel::setOwner(RSItem &item, db_id ownerId, const QString& 
 
 bool RollingstockSQLModel::setNumber(RSItem &item, int number)
 {
-    if(item.number == number)
+    if (item.number == number)
         return false;
 
-    //Check if there is already that combination of
-    //Model.Number, if so don't set new number
-    //ERRORMSG: show error to user (emit error(int code, QString msg))
-    //TODO: use UNIQUE constraint???
-    command q_hasModelNumCombination(mDb, "SELECT id,model_id,number FROM rs_list WHERE model_id=? AND number=?");
+    // Check if there is already that combination of
+    // Model.Number, if so don't set new number
+    // ERRORMSG: show error to user (emit error(int code, QString msg))
+    // TODO: use UNIQUE constraint???
+    command q_hasModelNumCombination(
+      mDb, "SELECT id,model_id,number FROM rs_list WHERE model_id=? AND number=?");
     q_hasModelNumCombination.bind(1, item.modelId);
     q_hasModelNumCombination.bind(2, number);
     int ret = q_hasModelNumCombination.step();
     q_hasModelNumCombination.reset();
 
-    if(ret == SQLITE_ROW) //We already have one
+    if (ret == SQLITE_ROW) // We already have one
         return false;
 
     command q_setNumber(mDb, "UPDATE rs_list SET number=? WHERE id=?");
@@ -733,13 +743,13 @@ bool RollingstockSQLModel::setNumber(RSItem &item, int number)
     ret = q_setNumber.execute();
     q_setNumber.reset();
 
-    if(ret != SQLITE_OK)
+    if (ret != SQLITE_OK)
         return false;
 
     item.number = number;
-    //This row has now changed position so we need to invalidate cache
-    //HACK: we emit dataChanged for this index (that doesn't exist anymore)
-    //but the view will trigger fetching at same scroll position so it is enough
+    // This row has now changed position so we need to invalidate cache
+    // HACK: we emit dataChanged for this index (that doesn't exist anymore)
+    // but the view will trigger fetching at same scroll position so it is enough
     cache.clear();
     cacheFirstRow = 0;
 

@@ -31,9 +31,12 @@ class database;
 class ILoadRSTask : public IQuittableTask
 {
 public:
-    ILoadRSTask(sqlite3pp::database &db, const QString& fileName, QObject *receiver);
+    ILoadRSTask(sqlite3pp::database &db, const QString &fileName, QObject *receiver);
 
-    inline QString getErrorText() const { return errText; }
+    inline QString getErrorText() const
+    {
+        return errText;
+    }
 
 protected:
     sqlite3pp::database &mDb;
@@ -46,7 +49,10 @@ class LoadTaskUtils
 {
     Q_DECLARE_TR_FUNCTIONS(LoadTaskUtils)
 public:
-    enum { BatchSize = 50 };
+    enum
+    {
+        BatchSize = 50
+    };
 };
 
 #endif // LOADTASKUTILS_H

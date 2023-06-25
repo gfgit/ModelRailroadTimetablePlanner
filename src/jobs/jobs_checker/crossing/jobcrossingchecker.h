@@ -22,9 +22,9 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "backgroundmanager/ibackgroundchecker.h"
+#    include "backgroundmanager/ibackgroundchecker.h"
 
-#include "utils/types.h"
+#    include "utils/types.h"
 
 class JobCrossingChecker : public IBackgroundChecker
 {
@@ -34,7 +34,7 @@ public:
 
     QString getName() const override;
     void clearModel() override;
-    void showContextMenu(QWidget *panel, const QPoint& pos, const QModelIndex& idx) const override;
+    void showContextMenu(QWidget *panel, const QPoint &pos, const QModelIndex &idx) const override;
 
     void sessionLoadedHandler() override;
 

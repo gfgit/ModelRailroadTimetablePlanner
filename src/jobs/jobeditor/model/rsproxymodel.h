@@ -33,11 +33,7 @@ class RSProxyModel : public QAbstractListModel
     Q_OBJECT
 
 public:
-
-    RSProxyModel(RSCouplingInterface *mgr,
-                 RsOp o,
-                 RsType type,
-                 QObject *parent = nullptr);
+    RSProxyModel(RSCouplingInterface *mgr, RsOp o, RsType type, QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent) const override;
 
@@ -48,28 +44,28 @@ public:
 
     enum RSItemFlg
     {
-        NoFlag = 0,
-        WrongStation = 1,
-        LastOperation = 2,
-        HasNextOperation = 3,
-        FirstUseOfRS = 4,
-        UnusedRS = 5,
+        NoFlag              = 0,
+        WrongStation        = 1,
+        LastOperation       = 2,
+        HasNextOperation    = 3,
+        FirstUseOfRS        = 4,
+        UnusedRS            = 5,
         ErrNotCoupledBefore = 6,
-        ErrAlreadyCoupled = 7
+        ErrAlreadyCoupled   = 7
     };
 
     struct RsItem
     {
         db_id rsId;
-        db_id jobId; //Can be next job or previous job
+        db_id jobId; // Can be next job or previous job
         QString rsName;
         int flag;
-        QTime time; //Can be next or previous operation time
+        QTime time; // Can be next or previous operation time
         JobCategory jobCat;
         RsEngineSubType engineType;
     };
 
-    void loadData(const QVector<RsItem>& items);
+    void loadData(const QVector<RsItem> &items);
 
 private:
     QVector<RsItem> m_data;

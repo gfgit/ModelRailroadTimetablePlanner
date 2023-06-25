@@ -46,16 +46,20 @@ struct RailwaySegmentsModelItem
     bool reversed;
 };
 
-class RailwaySegmentsModel : public IPagedItemModelImpl<RailwaySegmentsModel, RailwaySegmentsModelItem>
+class RailwaySegmentsModel
+    : public IPagedItemModelImpl<RailwaySegmentsModel, RailwaySegmentsModelItem>
 {
     Q_OBJECT
 
 public:
+    enum
+    {
+        BatchSize = 100
+    };
 
-    enum { BatchSize = 100 };
-
-    enum Columns {
-        NameCol = 0,
+    enum Columns
+    {
+        NameCol        = 0,
         FromStationCol = 1,
         FromGateCol,
         ToStationCol,
@@ -72,11 +76,12 @@ public:
     RailwaySegmentsModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // Header:
-    QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+                        int role = Qt::DisplayRole) const override;
 
     // Basic functionality:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
-    Qt::ItemFlags flags(const QModelIndex& idx) const override;
+    Qt::ItemFlags flags(const QModelIndex &idx) const override;
 
     // IPagedItemModel
 
@@ -91,18 +96,18 @@ public:
     inline db_id getIdAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return 0; //Invalid
+            return 0; // Invalid
 
-        const RailwaySegmentItem& item = cache.at(row - cacheFirstRow);
+        const RailwaySegmentItem &item = cache.at(row - cacheFirstRow);
         return item.segmentId;
     }
 
     inline QString getNameAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
-            return QString(); //Invalid
+            return QString(); // Invalid
 
-        const RailwaySegmentItem& item = cache.at(row - cacheFirstRow);
+        const RailwaySegmentItem &item = cache.at(row - cacheFirstRow);
         return item.segmentName;
     }
 

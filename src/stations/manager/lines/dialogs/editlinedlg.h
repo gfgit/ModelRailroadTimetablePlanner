@@ -45,12 +45,12 @@ public:
     void setLineId(db_id lineId);
 
 private slots:
-    void onModelError(const QString& msg);
+    void onModelError(const QString &msg);
     void addStation();
     void removeAfterCurrentPos();
 
 private:
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
     LineSegmentsModel *model;
 
     QTableView *view;

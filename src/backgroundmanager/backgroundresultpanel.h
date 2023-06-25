@@ -22,7 +22,7 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include <QTabWidget>
+#    include <QTabWidget>
 
 class IBackgroundChecker;
 

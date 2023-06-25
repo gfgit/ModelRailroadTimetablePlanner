@@ -39,16 +39,16 @@ class TaskProgressEvent : public GenericTaskEvent
 public:
     enum
     {
-        ProgressError = -1,
+        ProgressError         = -1,
         ProgressAbortedByUser = -2,
-        ProgressFinished = -3
+        ProgressFinished      = -3
     };
 
     static constexpr Type _Type = Type(CustomEvents::TaskProgress);
 
-    TaskProgressEvent(IQuittableTask *self, int pr, int max, const QString& descr = QString());
+    TaskProgressEvent(IQuittableTask *self, int pr, int max, const QString &descr = QString());
 
-    int progress = 0;
+    int progress    = 0;
     int progressMax = 0;
     QString description;
 };

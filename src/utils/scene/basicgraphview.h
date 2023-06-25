@@ -50,9 +50,8 @@ public:
      * the nearest valid position. The default value for both margins is 50 pixels.
      *
      * Vertical and horizontal headers are excluded from the visible zone
-    */
+     */
     void ensureVisible(double x, double y, double xmargin, double ymargin);
-
 
     /*!
      * \brief getZoomLevel
@@ -63,7 +62,10 @@ public:
      * \sa setZoomLevel()
      * \sa zoomLevelChanged()
      */
-    inline int getZoomLevel() const { return mZoom; }
+    inline int getZoomLevel() const
+    {
+        return mZoom;
+    }
 
     /*!
      * \brief mapToScene
@@ -72,7 +74,7 @@ public:
      *
      * Applies scrolling and scaling
      */
-    QPointF mapToScene(const QPointF& pos) const;
+    QPointF mapToScene(const QPointF &pos) const;
 
 signals:
     void zoomLevelChanged(int zoom);
@@ -90,7 +92,7 @@ public slots:
      *
      * \sa ensureVisible()
      */
-    void ensureRectVisible(const QRectF& r);
+    void ensureRectVisible(const QRectF &r);
 
     /*!
      * \brief setZoomLevel

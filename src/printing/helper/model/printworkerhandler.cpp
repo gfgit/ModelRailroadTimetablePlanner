@@ -28,7 +28,6 @@ PrintWorkerHandler::PrintWorkerHandler(sqlite3pp::database &db, QObject *parent)
     printTask(nullptr),
     isStoppingTask(false)
 {
-
 }
 
 void PrintWorkerHandler::setOptions(const Print::PrintBasicOptions &opt, QPrinter *printer)
@@ -39,35 +38,35 @@ void PrintWorkerHandler::setOptions(const Print::PrintBasicOptions &opt, QPrinte
 
 bool PrintWorkerHandler::event(QEvent *e)
 {
-    if(e->type() == PrintProgressEvent::_Type)
+    if (e->type() == PrintProgressEvent::_Type)
     {
         PrintProgressEvent *ev = static_cast<PrintProgressEvent *>(e);
         ev->setAccepted(true);
 
-        if(ev->task == printTask)
+        if (ev->task == printTask)
         {
-            if(ev->progress < 0)
+            if (ev->progress < 0)
             {
-                //Task finished, delete it
+                // Task finished, delete it
                 delete printTask;
                 printTask = nullptr;
             }
 
             QString description;
-            if(ev->progress == PrintProgressEvent::ProgressError)
+            if (ev->progress == PrintProgressEvent::ProgressError)
                 description = tr("Error");
-            else if(ev->progress == PrintProgressEvent::ProgressAbortedByUser)
+            else if (ev->progress == PrintProgressEvent::ProgressAbortedByUser)
                 description = tr("Canceled");
-            else if(ev->progress == PrintProgressEvent::ProgressMaxFinished)
+            else if (ev->progress == PrintProgressEvent::ProgressMaxFinished)
                 description = tr("Done!");
             else
                 description = tr("Printing %1...").arg(ev->descriptionOrError);
 
             emit progressChanged(ev->progress, description);
 
-            if(ev->progress < 0)
+            if (ev->progress < 0)
             {
-                //Consider Abort succesful, on error send error message
+                // Consider Abort succesful, on error send error message
                 bool success = ev->progress != PrintProgressEvent::ProgressError;
                 emit progressFinished(success, success ? description : ev->descriptionOrError);
             }
@@ -93,14 +92,14 @@ void PrintWorkerHandler::startPrintTask(QPrinter *printer, IGraphSceneCollection
 
     QThreadPool::globalInstance()->start(printTask);
 
-    //Start progress
+    // Start progress
     emit progressMaxChanged(printTask->getMaxProgress());
     emit progressChanged(0, tr("Starting..."));
 }
 
 void PrintWorkerHandler::abortPrintTask()
 {
-    if(printTask)
+    if (printTask)
     {
         printTask->stop();
         printTask->cleanup();
@@ -110,13 +109,13 @@ void PrintWorkerHandler::abortPrintTask()
 
 void PrintWorkerHandler::stopTaskGracefully()
 {
-    if(printTask)
+    if (printTask)
     {
-        //If printing was already started, stop it.
+        // If printing was already started, stop it.
         printTask->stop();
 
-        //Set this flag to wait a bit before print task is really stopped
-        //This also prevents asking user to Abort a second time
+        // Set this flag to wait a bit before print task is really stopped
+        // This also prevents asking user to Abort a second time
         isStoppingTask = true;
 
         emit progressChanged(0, tr("Aborting..."));

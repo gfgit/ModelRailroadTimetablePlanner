@@ -32,7 +32,7 @@ ShiftJobsModel::ShiftJobsModel(sqlite3pp::database &db, QObject *parent) :
 
 QVariant ShiftJobsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -51,7 +51,7 @@ QVariant ShiftJobsModel::headerData(int section, Qt::Orientation orientation, in
         }
     }
     return QAbstractTableModel::headerData(section, orientation, role);
-    }
+}
 
 int ShiftJobsModel::rowCount(const QModelIndex &parent) const
 {
@@ -65,10 +65,11 @@ int ShiftJobsModel::columnCount(const QModelIndex &parent) const
 
 QVariant ShiftJobsModel::data(const QModelIndex &idx, int role) const
 {
-    if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols || role != Qt::DisplayRole)
+    if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols
+        || role != Qt::DisplayRole)
         return QVariant();
 
-    const ShiftJobItem& item = m_data.at(idx.row());
+    const ShiftJobItem &item = m_data.at(idx.row());
 
     switch (idx.column())
     {
@@ -108,16 +109,16 @@ void ShiftJobsModel::loadShiftJobs(db_id shiftId)
 
     q.bind(1, shiftId);
 
-    for(auto r : q)
+    for (auto r : q)
     {
         ShiftJobItem item;
-        item.jobId = r.get<db_id>(0);
-        item.cat = JobCategory(r.get<int>(1));
-        item.start = r.get<QTime>(2);
-        item.originStId = r.get<db_id>(3);
-        item.end = r.get<QTime>(4);
-        item.destinationStId = r.get<db_id>(5);
-        item.originStName = r.get<QString>(6);
+        item.jobId            = r.get<db_id>(0);
+        item.cat              = JobCategory(r.get<int>(1));
+        item.start            = r.get<QTime>(2);
+        item.originStId       = r.get<db_id>(3);
+        item.end              = r.get<QTime>(4);
+        item.destinationStId  = r.get<db_id>(5);
+        item.originStName     = r.get<QString>(6);
         item.desinationStName = r.get<QString>(7);
         m_data.append(item);
     }
@@ -129,7 +130,7 @@ void ShiftJobsModel::loadShiftJobs(db_id shiftId)
 
 db_id ShiftJobsModel::getJobAt(int row)
 {
-    if(row < m_data.size())
+    if (row < m_data.size())
         return m_data.at(row).jobId;
     return 0;
 }

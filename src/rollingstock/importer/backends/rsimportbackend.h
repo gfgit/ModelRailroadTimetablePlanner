@@ -39,13 +39,14 @@ public:
     RSImportBackend();
     virtual ~RSImportBackend();
 
-    virtual QString getBackendName() = 0;
+    virtual QString getBackendName()                       = 0;
 
-    virtual IOptionsWidget *createOptionsWidget() = 0;
+    virtual IOptionsWidget *createOptionsWidget()          = 0;
 
-    virtual ILoadRSTask *createLoadTask(const QMap<QString, QVariant>& arguments, sqlite3pp::database &db,
-                                        int mode, int defSpeed, RsType defType,
-                                        const QString& fileName, QObject *receiver) = 0;
+    virtual ILoadRSTask *createLoadTask(const QMap<QString, QVariant> &arguments,
+                                        sqlite3pp::database &db, int mode, int defSpeed,
+                                        RsType defType, const QString &fileName,
+                                        QObject *receiver) = 0;
 };
 
 #endif // RSIMPORTBACKEND_H

@@ -48,7 +48,6 @@
 
 #include "app/scopedebug.h"
 
-
 EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::EditStopDialog),
@@ -57,12 +56,13 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //Stop
-    helper = new StopEditingHelper(Session->m_Db, stopModel,
-                                   ui->outGateTrackSpin, ui->arrivalTimeEdit, ui->departureTimeEdit,
-                                   this);
-    connect(helper, &StopEditingHelper::nextSegmentChosen, this, &EditStopDialog::updateAdditionalNotes);
-    connect(helper, &StopEditingHelper::stationTrackChosen, this, &EditStopDialog::updateAdditionalNotes);
+    // Stop
+    helper = new StopEditingHelper(Session->m_Db, stopModel, ui->outGateTrackSpin,
+                                   ui->arrivalTimeEdit, ui->departureTimeEdit, this);
+    connect(helper, &StopEditingHelper::nextSegmentChosen, this,
+            &EditStopDialog::updateAdditionalNotes);
+    connect(helper, &StopEditingHelper::stationTrackChosen, this,
+            &EditStopDialog::updateAdditionalNotes);
 
     CustomCompletionLineEdit *mStationEdit = helper->getStationEdit();
     CustomCompletionLineEdit *mStTrackEdit = helper->getStTrackEdit();
@@ -72,17 +72,17 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
     ui->curStopLay->setWidget(2, QFormLayout::FieldRole, mStTrackEdit);
     ui->curStopLay->setWidget(3, QFormLayout::FieldRole, mOutGateEdit);
 
-    //Coupling
-    couplingMgr = new RSCouplingInterface(Session->m_Db, this);
+    // Coupling
+    couplingMgr  = new RSCouplingInterface(Session->m_Db, this);
 
     coupledModel = new StopCouplingModel(Session->m_Db, this);
-    auto ps = new ModelPageSwitcher(true, this);
+    auto ps      = new ModelPageSwitcher(true, this);
     ps->setModel(coupledModel);
     ui->coupledView->setModel(coupledModel);
     ui->coupledLayout->insertWidget(1, ps);
 
     uncoupledModel = new StopCouplingModel(Session->m_Db, this);
-    ps = new ModelPageSwitcher(true, this);
+    ps             = new ModelPageSwitcher(true, this);
     ps->setModel(uncoupledModel);
     ui->uncoupledView->setModel(uncoupledModel);
     ui->uncoupledLayout->insertWidget(1, ps);
@@ -93,28 +93,32 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
 
     ui->coupledView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->uncoupledView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->coupledView, &QAbstractItemView::customContextMenuRequested, this, &EditStopDialog::couplingCustomContextMenuRequested);
-    connect(ui->uncoupledView, &QAbstractItemView::customContextMenuRequested, this, &EditStopDialog::couplingCustomContextMenuRequested);
+    connect(ui->coupledView, &QAbstractItemView::customContextMenuRequested, this,
+            &EditStopDialog::couplingCustomContextMenuRequested);
+    connect(ui->uncoupledView, &QAbstractItemView::customContextMenuRequested, this,
+            &EditStopDialog::couplingCustomContextMenuRequested);
 
-    //Setup train asset models
+    // Setup train asset models
     trainAssetModelBefore = new TrainAssetModel(Session->m_Db, this);
-    ps = new ModelPageSwitcher(true, this);
+    ps                    = new ModelPageSwitcher(true, this);
     ps->setModel(trainAssetModelBefore);
     ui->assetBeforeView->setModel(trainAssetModelBefore);
     ui->trainAssetGridLayout->addWidget(ps, 2, 0);
 
     trainAssetModelAfter = new TrainAssetModel(Session->m_Db, this);
-    ps = new ModelPageSwitcher(true, this);
+    ps                   = new ModelPageSwitcher(true, this);
     ps->setModel(trainAssetModelAfter);
     ui->assetAfterView->setModel(trainAssetModelAfter);
     ui->trainAssetGridLayout->addWidget(ps, 2, 1);
 
     ui->assetBeforeView->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->assetAfterView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->assetBeforeView, &QAbstractItemView::customContextMenuRequested, this, &EditStopDialog::couplingCustomContextMenuRequested);
-    connect(ui->assetAfterView, &QAbstractItemView::customContextMenuRequested, this, &EditStopDialog::couplingCustomContextMenuRequested);
+    connect(ui->assetBeforeView, &QAbstractItemView::customContextMenuRequested, this,
+            &EditStopDialog::couplingCustomContextMenuRequested);
+    connect(ui->assetAfterView, &QAbstractItemView::customContextMenuRequested, this,
+            &EditStopDialog::couplingCustomContextMenuRequested);
 
-    //Setup Crossings/Passings
+    // Setup Crossings/Passings
     passingsModel = new JobPassingsModel(this);
     ui->passingsView->setModel(passingsModel);
 
@@ -123,13 +127,15 @@ EditStopDialog::EditStopDialog(StopModel *m, QWidget *parent) :
 
     connect(ui->calcPassingsBut, &QPushButton::clicked, this, &EditStopDialog::calcPassings);
 
-    //BIG TODO: temporarily disable option to Cancel dialog
-    //This is because at the moment it doesn't seem Coupling are canceled
-    //So you get a mixed state: Arrival/Departure/Descriptio ecc changes are canceled but Coupling changes are still applied
+    // BIG TODO: temporarily disable option to Cancel dialog
+    // This is because at the moment it doesn't seem Coupling are canceled
+    // So you get a mixed state: Arrival/Departure/Descriptio ecc changes are canceled but Coupling
+    // changes are still applied
     ui->buttonBox->setStandardButtons(QDialogButtonBox::Ok);
 
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setToolTip(tr("Press SHIFT modifier and click to save changes"
-                                                               " without recalculating travel times."));
+    ui->buttonBox->button(QDialogButtonBox::Ok)
+      ->setToolTip(tr("Press SHIFT modifier and click to save changes"
+                      " without recalculating travel times."));
 
     connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -149,15 +155,15 @@ void EditStopDialog::clearUi()
 {
     helper->stopOutTrackTimer();
 
-    stopIdx = QModelIndex();
+    stopIdx  = QModelIndex();
 
-    m_jobId = 0;
+    m_jobId  = 0;
     m_jobCat = JobCategory::FREIGHT;
 
     trainAssetModelBefore->setStop(0, QTime(), TrainAssetModel::BeforeStop);
     trainAssetModelAfter->setStop(0, QTime(), TrainAssetModel::AfterStop);
 
-    //TODO: clear UI properly
+    // TODO: clear UI properly
 }
 
 void EditStopDialog::showBeforeAsset(bool val)
@@ -172,78 +178,79 @@ void EditStopDialog::showAfterAsset(bool val)
     ui->assetAfterLabel->setVisible(val);
 }
 
-void EditStopDialog::setStop(const QModelIndex& idx)
+void EditStopDialog::setStop(const QModelIndex &idx)
 {
     DEBUG_ENTRY;
 
-    if(!idx.isValid())
+    if (!idx.isValid())
     {
         clearUi();
         return;
     }
 
-    m_jobId = stopModel->getJobId();
-    m_jobCat = stopModel->getCategory();
+    m_jobId                 = stopModel->getJobId();
+    m_jobCat                = stopModel->getCategory();
 
-    stopIdx = idx;
+    stopIdx                 = idx;
 
-    const StopItem& curStop = stopModel->getItemAt(idx.row());
+    const StopItem &curStop = stopModel->getItemAt(idx.row());
     StopItem prevStop;
-    if(idx.row() == 0)
-        prevStop = StopItem(); //First stop has no previous stop
+    if (idx.row() == 0)
+        prevStop = StopItem(); // First stop has no previous stop
     else
         prevStop = stopModel->getItemAt(idx.row() - 1);
 
     helper->setStop(curStop, prevStop);
 
-    //Setup Train Asset
+    // Setup Train Asset
     trainAssetModelBefore->setStop(m_jobId, curStop.arrival, TrainAssetModel::BeforeStop);
     trainAssetModelAfter->setStop(m_jobId, curStop.arrival, TrainAssetModel::AfterStop);
 
-    //Hide train asset before stop on First stop
+    // Hide train asset before stop on First stop
     showBeforeAsset(curStop.type != StopType::First);
 
-    //Hide train asset after stop on Last stop
+    // Hide train asset after stop on Last stop
     showAfterAsset(curStop.type != StopType::Last);
 
-    //Coupling operations
+    // Coupling operations
     coupledModel->setStop(curStop.stopId, RsOp::Coupled);
     uncoupledModel->setStop(curStop.stopId, RsOp::Uncoupled);
 
-    //Update UI
+    // Update UI
     updateInfo();
 
-    //Calc passings
+    // Calc passings
     calcPassings();
 
-    //Update Title
+    // Update Title
     const QString jobName = JobCategoryName::jobName(m_jobId, m_jobCat);
     setWindowTitle(jobName);
 }
 
 void EditStopDialog::updateInfo()
 {
-    const StopItem& curStop = helper->getCurItem();
-    const StopItem& prevStop = helper->getPrevItem();
+    const StopItem &curStop  = helper->getCurItem();
+    const StopItem &prevStop = helper->getPrevItem();
 
-    const QString inGateStr = helper->getGateString(curStop.fromGate.gateId,
-                                                    prevStop.nextSegment.reversed);
+    const QString inGateStr =
+      helper->getGateString(curStop.fromGate.gateId, prevStop.nextSegment.reversed);
     ui->inGateEdit->setText(inGateStr);
 
-    if(curStop.type == StopType::First)
+    if (curStop.type == StopType::First)
     {
-        //Hide box of previous stop
+        // Hide box of previous stop
         ui->prevStopBox->setVisible(false);
         ui->curStopBox->setTitle(tr("First Stop"));
     }
     else
     {
-        //Show box of previous stop
+        // Show box of previous stop
         ui->prevStopBox->setVisible(true);
-        ui->curStopBox->setTitle(curStop.type == StopType::Last ? tr("Last Stop") : tr("Current Stop"));
+        ui->curStopBox->setTitle(curStop.type == StopType::Last ? tr("Last Stop")
+                                                                : tr("Current Stop"));
 
         QString prevStName;
-        if(prevStop.stationId)
+        if (prevStop.stationId)
         {
             query q(Session->m_Db, "SELECT name FROM stations WHERE id=?");
             q.bind(1, prevStop.stationId);
@@ -252,17 +259,17 @@ void EditStopDialog::updateInfo()
         }
         ui->prevStEdit->setText(prevStName);
 
-        const QString outGateStr = helper->getGateString(prevStop.toGate.gateId,
-                                                         prevStop.nextSegment.reversed);
+        const QString outGateStr =
+          helper->getGateString(prevStop.toGate.gateId, prevStop.nextSegment.reversed);
         ui->prevOutGateEdit->setText(outGateStr);
     }
 
     const QString descr = stopModel->getDescription(curStop);
     ui->descriptionEdit->setPlainText(descr);
 
-    if(curStop.type == StopType::Transit)
+    if (curStop.type == StopType::Transit)
     {
-        //On transit you cannot couple/uncouple rollingstock
+        // On transit you cannot couple/uncouple rollingstock
         ui->editCoupledBut->setEnabled(false);
         ui->editUncoupledBut->setEnabled(false);
     }
@@ -276,13 +283,12 @@ void EditStopDialog::saveDataToModel()
 {
     DEBUG_ENTRY;
 
-    const StopItem& curStop = helper->getCurItem();
-    const StopItem& prevStop = helper->getPrevItem();
+    const StopItem &curStop  = helper->getCurItem();
+    const StopItem &prevStop = helper->getPrevItem();
 
-    if(ui->descriptionEdit->document()->isModified())
+    if (ui->descriptionEdit->document()->isModified())
     {
-        stopModel->setDescription(stopIdx,
-                                  ui->descriptionEdit->toPlainText());
+        stopModel->setDescription(stopIdx, ui->descriptionEdit->toPlainText());
     }
 
     bool avoidTimeRecalc = QGuiApplication::keyboardModifiers().testFlag(Qt::ShiftModifier);
@@ -291,8 +297,8 @@ void EditStopDialog::saveDataToModel()
 
 void EditStopDialog::importJobRS()
 {
-    const StopItem& curStop = helper->getCurItem();
-    if(!curStop.stationId)
+    const StopItem &curStop = helper->getCurItem();
+    if (!curStop.stationId)
     {
         QMessageBox::warning(this, tr("Import Error"),
                              tr("In order to import rollingstock from other<br>"
@@ -305,48 +311,49 @@ void EditStopDialog::importJobRS()
     jobsMatch.setDefaultId(JobMatchModel::StopId);
     jobsMatch.setFilter(m_jobId, curStop.stationId, curStop.departure);
 
-    QString stName = helper->getStationEdit()->text();
+    QString stName                    = helper->getStationEdit()->text();
 
     OwningQPointer<ChooseItemDlg> dlg = new ChooseItemDlg(&jobsMatch, this);
-    dlg->setDescription(tr("Please choose a Job among the ones stopping at <b>%1</b> before <b>%2</b>.<br>"
-                           "All rollingstock uncoupled by selected Job at current station<br>"
-                           "will be coupled to current Job.")
-                            .arg(stName,
-                                 curStop.departure.toString("HH:mm")));
+    dlg->setDescription(
+      tr("Please choose a Job among the ones stopping at <b>%1</b> before <b>%2</b>.<br>"
+         "All rollingstock uncoupled by selected Job at current station<br>"
+         "will be coupled to current Job.")
+        .arg(stName, curStop.departure.toString("HH:mm")));
     dlg->setPlaceholder(tr("Job number without category"));
 
-    //Select model
+    // Select model
     int ret = dlg->exec();
-    if(ret != QDialog::Accepted || !dlg)
+    if (ret != QDialog::Accepted || !dlg)
         return;
 
     db_id otherJobStopId = dlg->getItemId();
-    if(!otherJobStopId)
+    if (!otherJobStopId)
         return;
 
-    //Import rollingstock
+    // Import rollingstock
     int count = couplingMgr->importRSFromJob(otherJobStopId);
 
-    //Refresh views
+    // Refresh views
     coupledModel->refreshData(true);
     trainAssetModelAfter->refreshData(true);
 
-    //Tell user it's completed
-    QMessageBox::information(this, tr("Importation Finished"),
-                             tr("<b>%1</b> rollingstock items were successfully imported")
-                             .arg(count));
+    // Tell user it's completed
+    QMessageBox::information(
+      this, tr("Importation Finished"),
+      tr("<b>%1</b> rollingstock items were successfully imported").arg(count));
 }
 
 void EditStopDialog::editCoupled()
 {
-    const StopItem& curStop = helper->getCurItem();
+    const StopItem &curStop = helper->getCurItem();
 
     coupledModel->clearCache();
     trainAssetModelAfter->clearCache();
 
     OwningQPointer<RSCoupleDialog> dlg = new RSCoupleDialog(couplingMgr, RsOp::Coupled, this);
     dlg->setWindowTitle(tr("Couple"));
-    dlg->loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, curStop.arrival);
+    dlg->loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId,
+                         curStop.arrival);
 
     dlg->exec();
 
@@ -356,14 +363,15 @@ void EditStopDialog::editCoupled()
 
 void EditStopDialog::editUncoupled()
 {
-    const StopItem& curStop = helper->getCurItem();
+    const StopItem &curStop = helper->getCurItem();
 
     uncoupledModel->clearCache();
     trainAssetModelAfter->clearCache();
 
     OwningQPointer<RSCoupleDialog> dlg = new RSCoupleDialog(couplingMgr, RsOp::Uncoupled, this);
     dlg->setWindowTitle(tr("Uncouple"));
-    dlg->loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId, curStop.arrival);
+    dlg->loadProxyModels(Session->m_Db, m_jobId, curStop.stopId, curStop.stationId,
+                         curStop.arrival);
 
     dlg->exec();
 
@@ -381,20 +389,21 @@ void EditStopDialog::calcPassings()
 {
     DEBUG_ENTRY;
 
-    const StopItem& curStop = helper->getCurItem();
+    const StopItem &curStop = helper->getCurItem();
 
     JobStopDirectionHelper dirHelper(Session->m_Db);
     utils::Side myDirection = dirHelper.getStopOutSide(curStop.stopId);
 
-    query q(Session->m_Db, "SELECT s.id, s.job_id, jobs.category, s.arrival, s.departure,"
-                           "t1.name,t2.name"
-                           " FROM stops s"
-                           " JOIN jobs ON jobs.id=s.job_id"
-                           " LEFT JOIN station_gate_connections g1 ON g1.id=s.in_gate_conn"
-                           " LEFT JOIN station_gate_connections g2 ON g2.id=s.out_gate_conn"
-                           " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
-                           " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
-                           " WHERE s.station_id=? AND s.departure >=? AND s.arrival<=? AND s.job_id <> ?");
+    query q(Session->m_Db,
+            "SELECT s.id, s.job_id, jobs.category, s.arrival, s.departure,"
+            "t1.name,t2.name"
+            " FROM stops s"
+            " JOIN jobs ON jobs.id=s.job_id"
+            " LEFT JOIN station_gate_connections g1 ON g1.id=s.in_gate_conn"
+            " LEFT JOIN station_gate_connections g2 ON g2.id=s.out_gate_conn"
+            " LEFT JOIN station_tracks t1 ON t1.id=g1.track_id"
+            " LEFT JOIN station_tracks t2 ON t2.id=g2.track_id"
+            " WHERE s.station_id=? AND s.departure >=? AND s.arrival<=? AND s.job_id <> ?");
 
     q.bind(1, curStop.stationId);
     q.bind(2, curStop.arrival);
@@ -403,27 +412,27 @@ void EditStopDialog::calcPassings()
 
     QVector<JobPassingsModel::Entry> passings, crossings;
 
-    for(auto r : q)
+    for (auto r : q)
     {
         JobPassingsModel::Entry e;
 
         db_id otherStopId = r.get<db_id>(0);
-        e.jobId = r.get<db_id>(1);
-        e.category = JobCategory(r.get<int>(2));
-        e.arrival = r.get<QTime>(3);
-        e.departure = r.get<QTime>(4);
-        e.platform = r.get<int>(5);
+        e.jobId           = r.get<db_id>(1);
+        e.category        = JobCategory(r.get<int>(2));
+        e.arrival         = r.get<QTime>(3);
+        e.departure       = r.get<QTime>(4);
+        e.platform        = r.get<int>(5);
 
-        e.platform = r.get<QString>(6);
-        if(e.platform.isEmpty())
-            e.platform = r.get<QString>(7); //Use out gate to get track name
+        e.platform        = r.get<QString>(6);
+        if (e.platform.isEmpty())
+            e.platform = r.get<QString>(7); // Use out gate to get track name
 
         utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
-        if(myDirection == otherDir)
-            passings.append(e); //Same direction -> Passing
+        if (myDirection == otherDir)
+            passings.append(e); // Same direction -> Passing
         else
-            crossings.append(e); //Opposite direction -> Crossing
+            crossings.append(e); // Opposite direction -> Crossing
     }
 
     q.reset();
@@ -435,20 +444,21 @@ void EditStopDialog::calcPassings()
     ui->crossingsView->resizeColumnsToContents();
 }
 
-void EditStopDialog::couplingCustomContextMenuRequested(const QPoint& pos)
+void EditStopDialog::couplingCustomContextMenuRequested(const QPoint &pos)
 {
     OwningQPointer<QMenu> menu = new QMenu(this);
-    QAction *act = menu->addAction(tr("Refresh"));
+    QAction *act               = menu->addAction(tr("Refresh"));
 
-    //HACK: could be ui->coupledView or ui->uncoupledView or ui->assetBeforeView or ui->assetAfterView
+    // HACK: could be ui->coupledView or ui->uncoupledView or ui->assetBeforeView or
+    // ui->assetAfterView
     QAbstractItemView *view = qobject_cast<QAbstractItemView *>(sender());
-    if(!view)
-        return; //Error: not called by the view?
+    if (!view)
+        return; // Error: not called by the view?
 
-    if(menu->exec(view->viewport()->mapToGlobal(pos)) != act)
-        return; //User didn't select 'Refresh' action
+    if (menu->exec(view->viewport()->mapToGlobal(pos)) != act)
+        return; // User didn't select 'Refresh' action
 
-    //Refresh data
+    // Refresh data
     coupledModel->refreshData(true);
     uncoupledModel->refreshData(true);
     trainAssetModelBefore->refreshData(true);
@@ -457,7 +467,7 @@ void EditStopDialog::couplingCustomContextMenuRequested(const QPoint& pos)
 
 int EditStopDialog::getTrainSpeedKmH(bool afterStop)
 {
-    const StopItem& curStop = helper->getCurItem();
+    const StopItem &curStop = helper->getCurItem();
 
     query q(Session->m_Db, "SELECT MIN(rs_models.max_speed), rs_id FROM("
                            "SELECT coupling.rs_id AS rs_id, MAX(stops.arrival)"
@@ -468,11 +478,11 @@ int EditStopDialog::getTrainSpeedKmH(bool afterStop)
                            " HAVING coupling.operation=1)"
                            " JOIN rs_list ON rs_list.id=rs_id"
                            " JOIN rs_models ON rs_models.id=rs_list.model_id");
-    q.bind(1, m_jobId); //TODO: maybe move to model
+    q.bind(1, m_jobId); // TODO: maybe move to model
 
-    //HACK: 1 minute is the min interval between stops,
-    //by adding 1 minute we include the current stop but leave out the next one
-    if(afterStop)
+    // HACK: 1 minute is the min interval between stops,
+    // by adding 1 minute we include the current stop but leave out the next one
+    if (afterStop)
         q.bind(2, curStop.arrival.addSecs(60));
     else
         q.bind(2, curStop.arrival);
@@ -483,48 +493,48 @@ int EditStopDialog::getTrainSpeedKmH(bool afterStop)
 
 void EditStopDialog::updateAdditionalNotes()
 {
-    const StopItem& curStop = helper->getCurItem();
+    const StopItem &curStop = helper->getCurItem();
 
     QString msg;
 
-    //Check direction
-    if(curStop.fromGate.gateConnId && curStop.toGate.gateConnId
-        && curStop.type != StopType::First && curStop.type != StopType::Last)
+    // Check direction
+    if (curStop.fromGate.gateConnId && curStop.toGate.gateConnId && curStop.type != StopType::First
+        && curStop.type != StopType::Last)
     {
-        //Ignore First and Last stop (sometimes they have fake in/out gates set which might trigger this message)
-        //Both entry and exit path are set, check direction
-        if(curStop.fromGate.stationTrackSide == curStop.toGate.stationTrackSide)
+        // Ignore First and Last stop (sometimes they have fake in/out gates set which might trigger
+        // this message) Both entry and exit path are set, check direction
+        if (curStop.fromGate.stationTrackSide == curStop.toGate.stationTrackSide)
         {
-            //Train leaves station track from same side of entrance
+            // Train leaves station track from same side of entrance
             msg = tr("Train reverses direction.");
         }
     }
 
-    //Check line traction
-    if(curStop.type != StopType::Last && curStop.nextSegment.segmentId)
+    // Check line traction
+    if (curStop.type != StopType::Last && curStop.nextSegment.segmentId)
     {
-        //Last has no next segment so do not show traction type
+        // Last has no next segment so do not show traction type
 
         bool nextSegmentElectrified = stopModel->isRailwayElectrifiedAfterRow(stopIdx.row());
-        bool prevSegmentElectrified = !nextSegmentElectrified; //Trigger change on First stop
+        bool prevSegmentElectrified = !nextSegmentElectrified; // Trigger change on First stop
 
-        if(curStop.type != StopType::First && stopIdx.row() >= 0)
+        if (curStop.type != StopType::First && stopIdx.row() >= 0)
         {
-            //Get real previous railway type
+            // Get real previous railway type
             prevSegmentElectrified = stopModel->isRailwayElectrifiedAfterRow(stopIdx.row() - 1);
         }
 
-        if(!msg.isEmpty())
-            msg.append("\n\n"); //Separate from previous message
+        if (!msg.isEmpty())
+            msg.append("\n\n"); // Separate from previous message
 
-        if(nextSegmentElectrified)
+        if (nextSegmentElectrified)
             msg.append(tr("Electric traction is ALLOWED."));
         else
             msg.append(tr("Electric traction is NOT ALLOWED."));
 
-        if(nextSegmentElectrified != prevSegmentElectrified && curStop.type != StopType::First)
+        if (nextSegmentElectrified != prevSegmentElectrified && curStop.type != StopType::First)
         {
-            //Railway type changed
+            // Railway type changed
             msg.append('\n');
             msg.append(tr("(Different traction then previous line!)"));
         }
@@ -536,7 +546,7 @@ void EditStopDialog::updateAdditionalNotes()
 
 void EditStopDialog::setReadOnly(bool value)
 {
-    readOnly = value;
+    readOnly                               = value;
 
     CustomCompletionLineEdit *mStationEdit = helper->getStationEdit();
     CustomCompletionLineEdit *mStTrackEdit = helper->getStTrackEdit();
@@ -557,73 +567,78 @@ void EditStopDialog::setReadOnly(bool value)
 
 void EditStopDialog::done(int val)
 {
-    if(val == QDialog::Accepted)
+    if (val == QDialog::Accepted)
     {
-        if(stopIdx.row() < stopModel->rowCount() - 2)
+        if (stopIdx.row() < stopModel->rowCount() - 2)
         {
-            //We are not last stop
+            // We are not last stop
 
-            //Check if train has at least one engine after this stop
-            //But not if we are Last stop (size - 1 - AddHere)
-            //because the train doesn't have to leave the station
+            // Check if train has at least one engine after this stop
+            // But not if we are Last stop (size - 1 - AddHere)
+            // because the train doesn't have to leave the station
             bool electricOnNonElectrifiedLine = false;
-            if(!couplingMgr->hasEngineAfterStop(&electricOnNonElectrifiedLine) || electricOnNonElectrifiedLine)
+            if (!couplingMgr->hasEngineAfterStop(&electricOnNonElectrifiedLine)
+                || electricOnNonElectrifiedLine)
             {
-                int ret = QMessageBox::warning(this,
-                                               tr("No Engine Left"),
-                                               electricOnNonElectrifiedLine ?
-                                                   tr("It seems you have uncoupled all job engines except for electric ones "
-                                                      "but the line is not electrified\n"
-                                                      "(The train isn't able to move)\n"
-                                                      "Do you want to couple a non electric engine?") :
-                                                   tr("It seems you have uncoupled all job engines\n"
-                                                      "(The train isn't able to move)\n"
-                                                      "Do you want to couple an engine?"),
-                                               QMessageBox::Yes | QMessageBox::No);
+                int ret = QMessageBox::warning(
+                  this, tr("No Engine Left"),
+                  electricOnNonElectrifiedLine
+                    ? tr("It seems you have uncoupled all job engines except for electric ones "
+                         "but the line is not electrified\n"
+                         "(The train isn't able to move)\n"
+                         "Do you want to couple a non electric engine?")
+                    : tr("It seems you have uncoupled all job engines\n"
+                         "(The train isn't able to move)\n"
+                         "Do you want to couple an engine?"),
+                  QMessageBox::Yes | QMessageBox::No);
 
-                if(ret == QMessageBox::Yes)
+                if (ret == QMessageBox::Yes)
                 {
-                    return; //Second chance to edit couplings
+                    return; // Second chance to edit couplings
                 }
             }
 
 #ifdef ENABLE_AUTO_TIME_RECALC
-            if(originalSpeedAfterStop != newSpeedAfterStop)
+            if (originalSpeedAfterStop != newSpeedAfterStop)
             {
-                int speedBefore = originalSpeedAfterStop;
-                int speedAfter = newSpeedAfterStop;
+                int speedBefore        = originalSpeedAfterStop;
+                int speedAfter         = newSpeedAfterStop;
 
                 LinesModel *linesModel = stopModel->getLinesModel();
-                db_id lineId = curLine ? curLine : stopIdx.data(NEXT_LINE_ROLE).toLongLong();
+                db_id lineId  = curLine ? curLine : stopIdx.data(NEXT_LINE_ROLE).toLongLong();
                 int lineSpeed = linesModel->getLineSpeed(lineId);
-                if(speedBefore == 0)
+                if (speedBefore == 0)
                 {
-                    //If speed is null (likely because there weren't RS coupled before)
-                    //Fall back to line max speed
+                    // If speed is null (likely because there weren't RS coupled before)
+                    // Fall back to line max speed
                     speedBefore = lineSpeed;
                 }
-                if(speedAfter == 0)
+                if (speedAfter == 0)
                 {
-                    //If speed is null (likely because there isn't RS coupled after this stop)
-                    //Fall back to line max speed
+                    // If speed is null (likely because there isn't RS coupled after this stop)
+                    // Fall back to line max speed
                     speedAfter = lineSpeed;
                 }
-                int ret = QMessageBox::question(this,
-                                                tr("Train Speed Changed"),
-                                                tr("Train speed after this stop has changed from a value of %1 km/h to <b>%2 km/h</b><br>"
-                                                   "Do you want to rebase travel times to this new speed?<br>"
-                                                   "NOTE: this doesn't affect stop times but you will lose manual adjustments to travel times")
-                                                    .arg(speedBefore).arg(speedAfter),
-                                                QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
+                int ret = QMessageBox::question(
+                  this, tr("Train Speed Changed"),
+                  tr("Train speed after this stop has changed from a value of %1 km/h to <b>%2 "
+                     "km/h</b><br>"
+                     "Do you want to rebase travel times to this new speed?<br>"
+                     "NOTE: this doesn't affect stop times but you will lose manual adjustments to "
+                     "travel times")
+                    .arg(speedBefore)
+                    .arg(speedAfter),
+                  QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Yes);
 
-                if(ret == QMessageBox::Cancel)
+                if (ret == QMessageBox::Cancel)
                 {
-                    return; //Second chance to edit couplings
+                    return; // Second chance to edit couplings
                 }
 
-                if(ret == QMessageBox::Yes)
+                if (ret == QMessageBox::Yes)
                 {
-                    stopModel->rebaseTimesToSpeed(stopIdx.row(), ui->arrivalTimeEdit->time(), ui->departureTimeEdit->time());
+                    stopModel->rebaseTimesToSpeed(stopIdx.row(), ui->arrivalTimeEdit->time(),
+                                                  ui->departureTimeEdit->time());
                 }
             }
 #endif

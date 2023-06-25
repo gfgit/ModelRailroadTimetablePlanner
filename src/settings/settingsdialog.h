@@ -61,7 +61,7 @@ private slots:
 
 private:
     void setupLanguageBox();
-    void setSheetLanguage(const QLocale& sheetLoc);
+    void setSheetLanguage(const QLocale &sheetLoc);
 
 private:
     Ui::SettingsDialog *ui;
@@ -71,7 +71,7 @@ private:
     bool updateJobGraphOptions;
     bool updateShiftGraphOptions;
 
-    QSpinBox* m_timeSpinBoxArr[int(JobCategory::NCategories)];
+    QSpinBox *m_timeSpinBoxArr[int(JobCategory::NCategories)];
     ColorView *m_colorViews[int(JobCategory::NCategories)];
     void setupJobColorsPage();
 };

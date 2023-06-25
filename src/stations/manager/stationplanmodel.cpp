@@ -50,7 +50,7 @@ StationPlanModel::StationPlanModel(sqlite3pp::database &db, QObject *parent) :
 
 QVariant StationPlanModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -86,7 +86,7 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols)
         return QVariant();
 
-    const StPlanItem& item = m_data.at(idx.row());
+    const StPlanItem &item = m_data.at(idx.row());
 
     switch (role)
     {
@@ -97,8 +97,8 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
         {
         case Arrival:
         {
-            if(item.type == StPlanItem::ItemType::Departure)
-                break; //Don't repeat arrival also in the second row.
+            if (item.type == StPlanItem::ItemType::Departure)
+                break; // Don't repeat arrival also in the second row.
             return item.arrival;
         }
         case Departure:
@@ -109,12 +109,13 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
             return JobCategoryName::jobName(item.jobId, item.cat);
         case Notes:
         {
-            if(item.type == StPlanItem::ItemType::Departure)
-                return StationPlanModel::tr("Departure"); //Don't repeat description also in the second row.
+            if (item.type == StPlanItem::ItemType::Departure)
+                return StationPlanModel::tr(
+                  "Departure"); // Don't repeat description also in the second row.
 
-            if(item.reversesDirection)
+            if (item.reversesDirection)
                 return tr("Reverse direction");
-            if(item.type == StPlanItem::ItemType::Transit)
+            if (item.type == StPlanItem::ItemType::Transit)
                 return tr("Transit");
             break;
         }
@@ -123,13 +124,13 @@ QVariant StationPlanModel::data(const QModelIndex &idx, int role) const
     }
     case Qt::ForegroundRole:
     {
-        if(item.type == StPlanItem::ItemType::Transit)
-            return QColor(0, 0, 255); //Transit in blue
+        if (item.type == StPlanItem::ItemType::Transit)
+            return QColor(0, 0, 255); // Transit in blue
         break;
     }
     case Qt::ToolTipRole:
     {
-        if(item.type == StPlanItem::ItemType::Transit)
+        if (item.type == StPlanItem::ItemType::Transit)
             return tr("Transit");
         break;
     }
@@ -157,41 +158,42 @@ void StationPlanModel::loadPlan(db_id stId)
     int count = q_countPlanItems.getRows().get<int>(0);
     q_countPlanItems.reset();
 
-    if(count > 0)
+    if (count > 0)
     {
-        QMap<QTime, StPlanItem> stopMap; //Order by Departure ASC
+        QMap<QTime, StPlanItem> stopMap; // Order by Departure ASC
         m_data.reserve(count);
 
         q_selectPlan.bind(1, stId);
-        for(auto r : q_selectPlan)
+        for (auto r : q_selectPlan)
         {
             StPlanItem curStop;
-            curStop.stopId = r.get<db_id>(0);
-            curStop.jobId = r.get<db_id>(1);
-            curStop.cat = JobCategory(r.get<int>(2));
-            curStop.arrival = r.get<QTime>(3);
+            curStop.stopId    = r.get<db_id>(0);
+            curStop.jobId     = r.get<db_id>(1);
+            curStop.cat       = JobCategory(r.get<int>(2));
+            curStop.arrival   = r.get<QTime>(3);
             curStop.departure = r.get<QTime>(4);
-            curStop.type = StPlanItem::ItemType::Normal;
+            curStop.type      = StPlanItem::ItemType::Normal;
             StopType stopType = StopType(r.get<int>(5));
 
-            curStop.platform = r.get<QString>(6);
-            if(curStop.platform.isEmpty())
-                curStop.platform = r.get<QString>(7); //Use out gate to get track name
+            curStop.platform  = r.get<QString>(6);
+            if (curStop.platform.isEmpty())
+                curStop.platform = r.get<QString>(7); // Use out gate to get track name
 
-            utils::Side entranceSide = utils::Side(r.get<int>(8));
-            utils::Side exitSide = utils::Side(r.get<int>(9));
+            utils::Side entranceSide  = utils::Side(r.get<int>(8));
+            utils::Side exitSide      = utils::Side(r.get<int>(9));
 
             curStop.reversesDirection = false;
-            if(entranceSide == exitSide && r.column_type(8) != SQLITE_NULL && r.column_type(9) != SQLITE_NULL)
-                curStop.reversesDirection = true; //Train enters and leaves from same track side
+            if (entranceSide == exitSide && r.column_type(8) != SQLITE_NULL
+                && r.column_type(9) != SQLITE_NULL)
+                curStop.reversesDirection = true; // Train enters and leaves from same track side
 
-            for(auto stop = stopMap.begin(); stop != stopMap.end(); /*nothing because of erase */)
+            for (auto stop = stopMap.begin(); stop != stopMap.end(); /*nothing because of erase */)
             {
-                if(stop->departure <= curStop.arrival)
+                if (stop->departure <= curStop.arrival)
                 {
                     m_data.append(stop.value());
                     m_data.last().type = StPlanItem::ItemType::Departure;
-                    stop = stopMap.erase(stop);
+                    stop               = stopMap.erase(stop);
                 }
                 else
                 {
@@ -200,20 +202,20 @@ void StationPlanModel::loadPlan(db_id stId)
             }
 
             m_data.append(curStop);
-            if(stopType == StopType::Transit)
+            if (stopType == StopType::Transit)
             {
                 m_data.last().type = StPlanItem::ItemType::Transit;
             }
             else
             {
-                //Transit should not be repeated
+                // Transit should not be repeated
                 curStop.type = StPlanItem::ItemType::Departure;
                 stopMap.insert(curStop.departure, std::move(curStop));
             }
         }
         q_selectPlan.reset();
 
-        for(const StPlanItem& stop : stopMap)
+        for (const StPlanItem &stop : stopMap)
         {
             m_data.append(stop);
         }

@@ -23,12 +23,12 @@
 #include "rsownersmatchmodel.h"
 #include "rollingstockmatchmodel.h"
 
-RSMatchModelFactory::RSMatchModelFactory(ModelModes::Mode mode, sqlite3pp::database &db, QObject *parent) :
+RSMatchModelFactory::RSMatchModelFactory(ModelModes::Mode mode, sqlite3pp::database &db,
+                                         QObject *parent) :
     IMatchModelFactory(parent),
     mDb(db),
     m_mode(mode)
 {
-
 }
 
 ISqlFKMatchModel *RSMatchModelFactory::createModel()

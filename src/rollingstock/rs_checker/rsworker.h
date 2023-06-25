@@ -22,25 +22,23 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "utils/thread/iquittabletask.h"
-#include "utils/thread/taskprogressevent.h"
+#    include "utils/thread/iquittabletask.h"
+#    include "utils/thread/taskprogressevent.h"
 
-#include <QMap>
-#include <QVector>
+#    include <QMap>
+#    include <QVector>
 
-#include "rs_error_data.h"
+#    include "rs_error_data.h"
 
-
-namespace sqlite3pp
-{
+namespace sqlite3pp {
 class database;
 class query;
-}
+} // namespace sqlite3pp
 
 class RsErrWorker : public IQuittableTask
 {
 public:
-    RsErrWorker(sqlite3pp::database& db, QObject *receiver, const QVector<db_id>& vec);
+    RsErrWorker(sqlite3pp::database &db, QObject *receiver, const QVector<db_id> &vec);
 
     void run() override;
 
@@ -59,7 +57,8 @@ class RsWorkerResultEvent : public GenericTaskEvent
 public:
     static const Type _Type = Type(CustomEvents::RsErrWorkerResult);
 
-    RsWorkerResultEvent(RsErrWorker *worker, const QMap<db_id, RsErrors::RSErrorList> &data, bool merge);
+    RsWorkerResultEvent(RsErrWorker *worker, const QMap<db_id, RsErrors::RSErrorList> &data,
+                        bool merge);
     ~RsWorkerResultEvent();
 
     QMap<db_id, RsErrors::RSErrorList> results;

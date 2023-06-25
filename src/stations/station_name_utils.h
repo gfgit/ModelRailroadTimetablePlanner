@@ -26,11 +26,9 @@
 
 namespace utils {
 
-static const char* StationTypeNamesTable[] = {
-    QT_TRANSLATE_NOOP("StationUtils", "Normal"),
-    QT_TRANSLATE_NOOP("StationUtils", "Simple Stop"),
-    QT_TRANSLATE_NOOP("StationUtils", "Junction")
-};
+static const char *StationTypeNamesTable[] = {QT_TRANSLATE_NOOP("StationUtils", "Normal"),
+                                              QT_TRANSLATE_NOOP("StationUtils", "Simple Stop"),
+                                              QT_TRANSLATE_NOOP("StationUtils", "Junction")};
 
 class StationUtils
 {
@@ -39,7 +37,7 @@ class StationUtils
 public:
     static inline QString name(StationType t)
     {
-        if(t >= StationType::NTypes)
+        if (t >= StationType::NTypes)
             return QString();
         return tr(StationTypeNamesTable[int(t)]);
     }

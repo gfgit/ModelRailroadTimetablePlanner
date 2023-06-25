@@ -38,21 +38,36 @@ class PrintWorkerHandler : public QObject
 public:
     explicit PrintWorkerHandler(sqlite3pp::database &db, QObject *parent = nullptr);
 
-    inline Print::PrintBasicOptions getOptions() const { return printOpt; }
-    void setOptions(const Print::PrintBasicOptions& opt, QPrinter *printer);
+    inline Print::PrintBasicOptions getOptions() const
+    {
+        return printOpt;
+    }
+    void setOptions(const Print::PrintBasicOptions &opt, QPrinter *printer);
 
-    inline Print::PageLayoutOpt getScenePageLay() const { return scenePageLay; }
-    inline void setScenePageLay(const Print::PageLayoutOpt& lay) { scenePageLay = lay; }
+    inline Print::PageLayoutOpt getScenePageLay() const
+    {
+        return scenePageLay;
+    }
+    inline void setScenePageLay(const Print::PageLayoutOpt &lay)
+    {
+        scenePageLay = lay;
+    }
 
     bool event(QEvent *e) override;
 
-    inline bool taskIsRunning() const { return printTask != nullptr; }
-    inline bool waitingForTaskToStop() const { return isStoppingTask; }
+    inline bool taskIsRunning() const
+    {
+        return printTask != nullptr;
+    }
+    inline bool waitingForTaskToStop() const
+    {
+        return isStoppingTask;
+    }
 
 signals:
     void progressMaxChanged(int max);
-    void progressChanged(int val, const QString& msg);
-    void progressFinished(bool success, const QString& msg);
+    void progressChanged(int val, const QString &msg);
+    void progressFinished(bool success, const QString &msg);
 
 public:
     void startPrintTask(QPrinter *printer, IGraphSceneCollection *collection);

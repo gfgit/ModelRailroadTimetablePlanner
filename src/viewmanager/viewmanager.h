@@ -46,19 +46,22 @@ class JobPathEditor;
 
 class LineGraphManager;
 
-
 class ViewManager : public QObject
 {
     Q_OBJECT
 
     friend class MainWindow;
+
 public:
     explicit ViewManager(QObject *parent = nullptr);
 
     bool closeEditors();
     void clearAllLineGraphs();
 
-    inline LineGraphManager *getLineGraphMgr() const { return lineGraphManager; }
+    inline LineGraphManager *getLineGraphMgr() const
+    {
+        return lineGraphManager;
+    }
 
     bool requestJobSelection(db_id jobId, bool select, bool ensureVisible) const;
     bool requestJobEditor(db_id jobId, db_id stopId = 0);
@@ -80,7 +83,7 @@ public:
 
     void requestRSInfo(db_id rsId);
     void requestStJobViewer(db_id stId);
-    void requestStSVGPlan(db_id stId, bool showJobs = false, const QTime& time = QTime());
+    void requestStSVGPlan(db_id stId, bool showJobs = false, const QTime &time = QTime());
     void requestStFreeRSViewer(db_id stId);
     void requestShiftViewer(db_id id);
     void requestShiftGraphEditor();
@@ -95,26 +98,26 @@ public:
     void resumeRSImportation();
 
 private slots:
-    //Rollingstock
+    // Rollingstock
     void onRSRemoved(db_id rsId);
     void onRSPlanChanged(QSet<db_id> set);
     void onRSInfoChanged(db_id rsId);
 
-    //Stations
+    // Stations
     void onStRemoved(db_id stId);
     void onStNameChanged(db_id stId);
     void onStPlanChanged(const QSet<db_id> &stationIds);
 
-    //Jobs
+    // Jobs
     void onJobRemoved(db_id jobId);
 
-    //Shifts
+    // Shifts
     void onShiftRemoved(db_id shiftId);
     void onShiftEdited(db_id shiftId);
     void onShiftJobsChanged(db_id shiftId);
 
 private:
-    RSJobViewer* createRSViewer(db_id rsId);
+    RSJobViewer *createRSViewer(db_id rsId);
     StationJobView *createStJobViewer(db_id stId);
     StationSVGPlanDlg *createStPlanDlg(db_id stId, QString &stNameOut);
     StationFreeRSViewer *createStFreeRSViewer(db_id stId);

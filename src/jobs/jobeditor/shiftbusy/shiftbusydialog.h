@@ -36,6 +36,7 @@ public:
     explicit ShiftBusyDlg(QWidget *parent = nullptr);
 
     void setModel(ShiftBusyModel *m);
+
 private:
     QLabel *m_label;
     QTableView *view;

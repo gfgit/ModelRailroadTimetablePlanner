@@ -22,11 +22,11 @@
 
 #ifdef SEARCHBOX_MODE_ASYNC
 
-#include <QEvent>
+#    include <QEvent>
 
-#include <QVector>
+#    include <QVector>
 
-#include "utils/worker_event_types.h"
+#    include "utils/worker_event_types.h"
 
 class SearchTask;
 struct SearchResultItem;
@@ -44,6 +44,6 @@ public:
     QVector<SearchResultItem> results;
 };
 
-#endif //SEARCHBOX_MODE_ASYNC
+#endif // SEARCHBOX_MODE_ASYNC
 
 #endif // SEARCHRESULTEVENT_H

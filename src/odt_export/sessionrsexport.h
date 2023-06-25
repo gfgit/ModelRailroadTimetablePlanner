@@ -31,7 +31,7 @@ public:
     SessionRSExport(SessionRSMode mode, SessionRSOrder order);
 
     void write();
-    void save(const QString& fileName);
+    void save(const QString &fileName);
 
 private:
     OdtDocument odt;

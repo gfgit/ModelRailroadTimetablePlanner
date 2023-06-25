@@ -34,10 +34,10 @@ FilterHeaderLineEdit::FilterHeaderLineEdit(int col, QWidget *parent) :
     setPlaceholderText(tr("Filter"));
     setClearButtonEnabled(true);
 
-    //Delay text changed until user stops typing
+    // Delay text changed until user stops typing
     connect(this, &QLineEdit::textEdited, this, &FilterHeaderLineEdit::startTextTimer);
 
-    //Bypass timer when losing focus or pressing Enter
+    // Bypass timer when losing focus or pressing Enter
     connect(this, &QLineEdit::editingFinished, this, &FilterHeaderLineEdit::delayedTimerFinished);
 
     actionFilterNull = new QAction(tr("Filter #NULL"), this);
@@ -71,7 +71,7 @@ void FilterHeaderLineEdit::startTextTimer()
 
 void FilterHeaderLineEdit::stopTextTimer()
 {
-    if(m_textTimerId)
+    if (m_textTimerId)
     {
         killTimer(m_textTimerId);
         m_textTimerId = 0;
@@ -81,7 +81,7 @@ void FilterHeaderLineEdit::stopTextTimer()
 void FilterHeaderLineEdit::delayedTimerFinished()
 {
     stopTextTimer();
-    if(lastValue != text())
+    if (lastValue != text())
     {
         lastValue = text();
         emit delayedTextChanged(this, lastValue);
@@ -90,17 +90,17 @@ void FilterHeaderLineEdit::delayedTimerFinished()
 
 void FilterHeaderLineEdit::setNULLFilter()
 {
-    if(!m_allowNull)
+    if (!m_allowNull)
         return;
     setText(IPagedItemModel::nullFilterStr);
-    delayedTimerFinished(); //Skip timer, emit now
+    delayedTimerFinished(); // Skip timer, emit now
 }
 
 bool FilterHeaderLineEdit::event(QEvent *e)
 {
-    if(e->type() == QEvent::ToolTip)
+    if (e->type() == QEvent::ToolTip)
     {
-        //Send tooltip request to FilterHeaderView
+        // Send tooltip request to FilterHeaderView
         QHelpEvent *ev = static_cast<QHelpEvent *>(e);
         emit tooltipRequested(this, ev->globalPos());
         return true;
@@ -111,7 +111,7 @@ bool FilterHeaderLineEdit::event(QEvent *e)
 
 void FilterHeaderLineEdit::timerEvent(QTimerEvent *e)
 {
-    if(e->timerId() == m_textTimerId)
+    if (e->timerId() == m_textTimerId)
     {
         delayedTimerFinished();
         return;
@@ -127,7 +127,7 @@ void FilterHeaderLineEdit::contextMenuEvent(QContextMenuEvent *e)
 
     QAction *firstAction = menu->actions().value(0, nullptr);
     menu->insertAction(firstAction, actionFilterNull);
-    if(firstAction)
+    if (firstAction)
         menu->insertSeparator(firstAction);
     menu->popup(e->globalPos());
 }

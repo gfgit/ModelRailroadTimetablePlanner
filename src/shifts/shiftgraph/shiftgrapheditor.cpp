@@ -43,7 +43,6 @@ ShiftGraphEditor::ShiftGraphEditor(QWidget *parent) :
     toolBar->addAction(tr("Save PDF"), this, &ShiftGraphEditor::exportPDF);
     toolBar->addAction(tr("Save SVG"), this, &ShiftGraphEditor::exportSVG);
 
-
     m_scene = new ShiftGraphScene(Session->m_Db, this);
     m_scene->loadShifts();
 
@@ -60,7 +59,6 @@ ShiftGraphEditor::ShiftGraphEditor(QWidget *parent) :
 
 ShiftGraphEditor::~ShiftGraphEditor()
 {
-
 }
 
 void ShiftGraphEditor::redrawGraph()

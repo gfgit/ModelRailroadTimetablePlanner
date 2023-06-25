@@ -29,7 +29,8 @@ class RSTypeDelegate : public QStyledItemDelegate
 public:
     explicit RSTypeDelegate(bool subType, QObject *parent = nullptr);
 
-    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &options, const QModelIndex &idx) const override;
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &options,
+                          const QModelIndex &idx) const override;
     void setEditorData(QWidget *editor, const QModelIndex &index) const override;
     void setModelData(QWidget *editor, QAbstractItemModel *model,
                       const QModelIndex &index) const override;

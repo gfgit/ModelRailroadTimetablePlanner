@@ -36,9 +36,9 @@ struct StopItem
 {
     struct Gate
     {
-        db_id gateConnId = 0;
-        db_id gateId = 0;
-        int gateTrackNum = -1;
+        db_id gateConnId             = 0;
+        db_id gateId                 = 0;
+        int gateTrackNum             = -1;
         utils::Side stationTrackSide = utils::Side::NSides;
     };
 
@@ -48,7 +48,7 @@ struct StopItem
         db_id segmentId = 0;
         int inTrackNum  = -1;
         int outTrackNum = -1;
-        bool reversed = false;
+        bool reversed   = false;
     };
 
     db_id stopId    = 0;
@@ -62,11 +62,10 @@ struct StopItem
     QTime arrival;
     QTime departure;
 
-    int addHere = 0;
+    int addHere   = 0;
 
     StopType type = StopType::Normal;
 };
-
 
 /*!
  * \brief The StopModel class
@@ -80,7 +79,7 @@ class StopModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    StopModel(sqlite3pp::database& db, QObject *parent = nullptr);
+    StopModel(sqlite3pp::database &db, QObject *parent = nullptr);
 
     // QAbstractListModel
     QVariant data(const QModelIndex &index, int role) const override;
@@ -105,7 +104,7 @@ public:
 
     // Editing
     void addStop();
-    void removeStop(const QModelIndex& idx);
+    void removeStop(const QModelIndex &idx);
     void removeLastIfEmpty();
 
     void uncoupleStillCoupledAtLastStop();
@@ -118,7 +117,8 @@ public:
     db_id getNewShiftId() const;
 
     // Setters
-    void setStopInfo(const QModelIndex& idx, StopItem newStop, StopItem::Segment prevSeg, bool avoidTimeRecalc = false);
+    void setStopInfo(const QModelIndex &idx, StopItem newStop, StopItem::Segment prevSeg,
+                     bool avoidTimeRecalc = false);
 
     bool setStopTypeRange(int firstRow, int lastRow, StopType type);
 
@@ -129,7 +129,7 @@ public:
     // Convinience
     int getStopRow(db_id stopId) const;
 
-    bool isAddHere(const QModelIndex& idx);
+    bool isAddHere(const QModelIndex &idx);
 
     std::pair<QTime, QTime> getFirstLastTimes() const;
 
@@ -139,10 +139,18 @@ public:
     bool isRailwayElectrifiedAfterStop(db_id stopId) const;
     bool isRailwayElectrifiedAfterRow(int row) const;
 
-    inline StopItem getItemAt(int row) const { return stops.at(row); }
-    inline StopType getItemTypeAt(int row) const { return stops.at(row).type; }
-    inline db_id getItemStationAt(int row) const { return stops.at(row).stationId; }
-
+    inline StopItem getItemAt(int row) const
+    {
+        return stops.at(row);
+    }
+    inline StopType getItemTypeAt(int row) const
+    {
+        return stops.at(row).type;
+    }
+    inline db_id getItemStationAt(int row) const
+    {
+        return stops.at(row).stationId;
+    }
 
 #ifdef ENABLE_AUTO_TIME_RECALC
     void rebaseTimesToSpeed(int firstIdx, QTime firstArr, QTime firstDep);
@@ -150,8 +158,7 @@ public:
 
     bool trySelectTrackForStop(StopItem &item);
 
-    bool trySetTrackConnections(StopItem &item, db_id trackId,
-                               QString *outErr);
+    bool trySetTrackConnections(StopItem &item, db_id trackId, QString *outErr);
 
     bool trySelectNextSegment(StopItem &item, db_id segmentId, int suggestedOutGateTrk,
                               db_id nextStationId, db_id &out_gateId, db_id &out_suggestedTrackId);
@@ -162,7 +169,7 @@ signals:
     void categoryChanged(int newCat);
     void jobIdChanged(db_id jobId);
     void jobShiftChanged(db_id shiftId);
-    void errorSetShiftWithoutStops(); //TODO: find better way to show errors
+    void errorSetShiftWithoutStops(); // TODO: find better way to show errors
 
 public slots:
     void setCategory(int value);
@@ -182,25 +189,29 @@ private:
     db_id createStop(db_id jobId, const QTime &arr, const QTime &dep, StopType type);
     void deleteStop(db_id stopId);
 
-    bool updateCurrentInGate(StopItem& curStop, const StopItem::Segment& prevSeg);
-    bool updateStopTime(StopItem& item, int row, bool propagate, const QTime &oldArr, const QTime &oldDep);
+    bool updateCurrentInGate(StopItem &curStop, const StopItem::Segment &prevSeg);
+    bool updateStopTime(StopItem &item, int row, bool propagate, const QTime &oldArr,
+                        const QTime &oldDep);
 
     int calcTravelTime(db_id segmentId);
     int defaultStopTimeSec();
 
-    void shiftStopsBy24hoursFrom(const QTime& startTime);
+    void shiftStopsBy24hoursFrom(const QTime &startTime);
 
     friend class RSCouplingInterface;
     bool startInfoEditing();
     bool startStopsEditing();
     bool endStopsEditing();
-    inline void markRsToUpdate(db_id rsId) { rsToUpdate.insert(rsId); }
+    inline void markRsToUpdate(db_id rsId)
+    {
+        rsToUpdate.insert(rsId);
+    }
 
 private:
-    //To simulate acceleration/braking we add 4 km to distance
+    // To simulate acceleration/braking we add 4 km to distance
     static constexpr double accelerationDistMeters = 4000.0;
 
-    sqlite3pp::database& mDb;
+    sqlite3pp::database &mDb;
 
     QVector<StopItem> stops;
 
@@ -218,8 +229,8 @@ private:
 
     enum EditState
     {
-        NotEditing = 0,
-        InfoEditing = 1,
+        NotEditing   = 0,
+        InfoEditing  = 1,
         StopsEditing = 2
     };
 

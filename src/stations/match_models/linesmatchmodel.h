@@ -40,7 +40,7 @@ public:
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
     // ISqlFKMatchModel:
-    void autoSuggest(const QString& text) override;
+    void autoSuggest(const QString &text) override;
     virtual void refreshData() override;
     void clearCache() override;
 

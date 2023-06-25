@@ -19,16 +19,16 @@
 
 #ifdef ENABLE_BACKGROUND_MANAGER
 
-#include "rsworker.h"
+#    include "rsworker.h"
 
-#include "utils/types.h"
-#include "utils/rs_utils.h"
+#    include "utils/types.h"
+#    include "utils/rs_utils.h"
 
-#include <QDebug>
+#    include <QDebug>
 
-#include <QVector>
+#    include <QVector>
 
-#include <sqlite3pp/sqlite3pp.h>
+#    include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
 RsErrWorker::RsErrWorker(database &db, QObject *receiver, const QVector<db_id> &vec) :
@@ -44,7 +44,8 @@ void RsErrWorker::run()
 
     QMap<db_id, RSErrorList> data;
 
-    try{
+    try
+    {
 
         query q_selectCoupling(mDb, "SELECT coupling.id, coupling.operation, coupling.stop_id,"
                                     " stops.job_id, jobs.category,"
@@ -58,7 +59,7 @@ void RsErrWorker::run()
 
         qDebug() << "Starting WORKER: rs check";
 
-        if(rsToCheck.isEmpty())
+        if (rsToCheck.isEmpty())
         {
             query q_countRs(mDb, "SELECT COUNT() FROM rs_list");
             query q_selectRs(mDb, "SELECT rs_list.id,rs_list.number,"
@@ -73,35 +74,35 @@ void RsErrWorker::run()
             int i = 0;
             sendEvent(new TaskProgressEvent(this, 0, rsCount), false);
 
-            for(auto r : q_selectRs)
+            for (auto r : q_selectRs)
             {
-                if(++i % 4 == 0) //Check every 4 RS to keep overhead low.
+                if (++i % 4 == 0) // Check every 4 RS to keep overhead low.
                 {
-                    if(wasStopped())
+                    if (wasStopped())
                         break;
 
                     sendEvent(new TaskProgressEvent(this, i, rsCount), false);
                 }
 
                 RSErrorList rs;
-                rs.rsId = r.get<db_id>(0);
+                rs.rsId          = r.get<db_id>(0);
 
-                int number = r.get<int>(1);
+                int number       = r.get<int>(1);
                 int modelNameLen = sqlite3_column_bytes(q_selectRs.stmt(), 2);
-                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_selectRs.stmt(), 2));
+                const char *modelName =
+                  reinterpret_cast<char const *>(sqlite3_column_text(q_selectRs.stmt(), 2));
 
                 int modelSuffixLen = sqlite3_column_bytes(q_selectRs.stmt(), 3);
-                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_selectRs.stmt(), 3));
+                const char *modelSuffix =
+                  reinterpret_cast<char const *>(sqlite3_column_text(q_selectRs.stmt(), 3));
                 RsType type = RsType(r.get<int>(4));
 
-                rs.rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                    number,
-                                                    modelSuffix, modelSuffixLen,
-                                                    type);
+                rs.rsName   = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix,
+                                                      modelSuffixLen, type);
 
                 checkRs(rs, q_selectCoupling);
 
-                if(rs.errors.size()) //Insert only if there are errors
+                if (rs.errors.size()) // Insert only if there are errors
                     data.insert(rs.rsId, rs);
             }
         }
@@ -113,38 +114,38 @@ void RsErrWorker::run()
                                    " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
                                    " WHERE rs_list.id=?");
             int i = 0;
-            for(db_id rsId : qAsConst(rsToCheck))
+            for (db_id rsId : qAsConst(rsToCheck))
             {
-                if(++i % 4 == 0 && wasStopped()) //Check every 4 RS to keep overhead low.
+                if (++i % 4 == 0 && wasStopped()) // Check every 4 RS to keep overhead low.
                     break;
 
                 RSErrorList rs;
                 rs.rsId = rsId;
 
                 q_getRsInfo.bind(1, rs.rsId);
-                if(q_getRsInfo.step() != SQLITE_ROW)
+                if (q_getRsInfo.step() != SQLITE_ROW)
                 {
                     q_getRsInfo.reset();
-                    continue; //RS does not exist!
+                    continue; // RS does not exist!
                 }
 
-                int number = sqlite3_column_int(q_getRsInfo.stmt(), 0);
+                int number       = sqlite3_column_int(q_getRsInfo.stmt(), 0);
                 int modelNameLen = sqlite3_column_bytes(q_getRsInfo.stmt(), 1);
-                const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(q_getRsInfo.stmt(), 1));
+                const char *modelName =
+                  reinterpret_cast<char const *>(sqlite3_column_text(q_getRsInfo.stmt(), 1));
 
                 int modelSuffixLen = sqlite3_column_bytes(q_getRsInfo.stmt(), 2);
-                const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(q_getRsInfo.stmt(), 2));
+                const char *modelSuffix =
+                  reinterpret_cast<char const *>(sqlite3_column_text(q_getRsInfo.stmt(), 2));
                 RsType type = RsType(sqlite3_column_int(q_getRsInfo.stmt(), 3));
 
-                rs.rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                    number,
-                                                    modelSuffix, modelSuffixLen,
-                                                    type);
+                rs.rsName   = rs_utils::formatNameRef(modelName, modelNameLen, number, modelSuffix,
+                                                      modelSuffixLen, type);
                 q_getRsInfo.reset();
 
                 checkRs(rs, q_selectCoupling);
 
-                //Insert also if there aren't errors to tell RsErrorTreeModel to remove this RS
+                // Insert also if there aren't errors to tell RsErrorTreeModel to remove this RS
                 data.insert(rs.rsId, rs);
             }
         }
@@ -152,86 +153,85 @@ void RsErrWorker::run()
         sendEvent(new RsWorkerResultEvent(this, data, !rsToCheck.isEmpty()), true);
         return;
     }
-    catch(std::exception& e)
+    catch (std::exception &e)
     {
         qWarning() << "RsErrWorker: exception " << e.what();
     }
-    catch(...)
+    catch (...)
     {
         qWarning() << "RsErrWorker: generic exception";
     }
 
-    //FIXME: Send error
+    // FIXME: Send error
     sendEvent(new RsWorkerResultEvent(this, data, !rsToCheck.isEmpty()), true);
 }
 
-void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
+void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query &q_selectCoupling)
 {
     using namespace RsErrors;
     RSErrorData err;
-    err.rsId = rs.rsId;
+    err.rsId             = rs.rsId;
 
-    RsOp prevOp = RsOp::Uncoupled;
+    RsOp prevOp          = RsOp::Uncoupled;
 
     db_id prevCouplingId = 0;
-    db_id prevStopId = 0;
-    db_id prevStation = 0;
+    db_id prevStopId     = 0;
+    db_id prevStation    = 0;
     JobEntry prevJob;
     QTime prevTime;
 
     q_selectCoupling.bind(1, err.rsId);
-    for(auto coup : q_selectCoupling)
+    for (auto coup : q_selectCoupling)
     {
-        err.couplingId = coup.get<db_id>(0);
-        RsOp op = RsOp(coup.get<int>(1));
-        err.stopId = coup.get<db_id>(2);
-        err.job.jobId = coup.get<db_id>(3);
+        err.couplingId   = coup.get<db_id>(0);
+        RsOp op          = RsOp(coup.get<int>(1));
+        err.stopId       = coup.get<db_id>(2);
+        err.job.jobId    = coup.get<db_id>(3);
         err.job.category = JobCategory(coup.get<int>(4));
-        err.stationId = coup.get<db_id>(5);
-        err.stationName = coup.get<QString>(6);
-        int transit = coup.get<int>(7);
-        QTime arrival = coup.get<QTime>(8);
-        //QTime departure = coup.get<QTime>(9); TODO: check departure less than next arrival
+        err.stationId    = coup.get<db_id>(5);
+        err.stationName  = coup.get<QString>(6);
+        int transit      = coup.get<int>(7);
+        QTime arrival    = coup.get<QTime>(8);
+        // QTime departure = coup.get<QTime>(9); TODO: check departure less than next arrival
 
-        err.time = arrival; //TODO: maybe arrival or departure depending
+        err.time    = arrival; // TODO: maybe arrival or departure depending
 
         err.otherId = prevCouplingId;
 
-        if(op == prevOp)
+        if (op == prevOp)
         {
-            if(op == RsOp::Coupled)
+            if (op == RsOp::Coupled)
             {
-                if(err.job.jobId != prevJob.jobId && prevJob.jobId != 0)
+                if (err.job.jobId != prevJob.jobId && prevJob.jobId != 0)
                 {
-                    //Rs was not uncoupled at the end of the job
-                    //Or it was coupled by another job before prevJob uncouples it
-                    //NOTE: this might be a false positive. Example below:
-                    // 00:00 - Job 1 couples Rs
-                    // 00:30 - Job 2 couples Rs
-                    // --> here we detect 'Coupled twice' and 'Not uncoupled at end of job'
-                    // 00:45 - Job 2 uncouples Rs
-                    // 00:50 - Job 1 uncouples Rs
-                    // --> here we detect 'Uncoupled when not coupled'
-                    // because Job 2 already has uncoupled.
-                    // But this also means that it's not true that Rs isn't uncoupled at end of the jobs
+                    // Rs was not uncoupled at the end of the job
+                    // Or it was coupled by another job before prevJob uncouples it
+                    // NOTE: this might be a false positive. Example below:
+                    //  00:00 - Job 1 couples Rs
+                    //  00:30 - Job 2 couples Rs
+                    //  --> here we detect 'Coupled twice' and 'Not uncoupled at end of job'
+                    //  00:45 - Job 2 uncouples Rs
+                    //  00:50 - Job 1 uncouples Rs
+                    //  --> here we detect 'Uncoupled when not coupled'
+                    //  because Job 2 already has uncoupled.
+                    //  But this also means that it's not true that Rs isn't uncoupled at end of the
+                    //  jobs
 
-
-                    //Here we create another structure to fill it with previous data
+                    // Here we create another structure to fill it with previous data
                     RSErrorData e;
                     e.couplingId = prevCouplingId;
-                    e.rsId = rs.rsId;
-                    e.stopId = prevStopId;
-                    e.stationId = prevStation;
-                    e.job = prevJob;
-                    e.otherId = e.couplingId;
-                    e.time = prevTime;
-                    e.errorType = NotUncoupledAtJobEnd;
+                    e.rsId       = rs.rsId;
+                    e.stopId     = prevStopId;
+                    e.stationId  = prevStation;
+                    e.job        = prevJob;
+                    e.otherId    = e.couplingId;
+                    e.time       = prevTime;
+                    e.errorType  = NotUncoupledAtJobEnd;
                     rs.errors.append(e);
                 }
 
-                //Inform Rs was also coupled twice
+                // Inform Rs was also coupled twice
                 err.errorType = CoupledWhileBusy;
-
             }
             else
             {
@@ -240,57 +240,59 @@ void RsErrWorker::checkRs(RsErrors::RSErrorList &rs, query& q_selectCoupling)
             rs.errors.append(err);
         }
 
-        if(transit)
+        if (transit)
         {
             err.errorType = StopIsTransit;
             rs.errors.append(err);
         }
 
-        if(op == RsOp::Coupled && prevOp == RsOp::Uncoupled && err.stationId != prevStation && prevStation != 0)
+        if (op == RsOp::Coupled && prevOp == RsOp::Uncoupled && err.stationId != prevStation
+            && prevStation != 0)
         {
             err.errorType = CoupledInDifferentStation;
             rs.errors.append(err);
         }
 
-        if(op == RsOp::Uncoupled && prevOp == RsOp::Coupled && err.job.jobId != prevJob.jobId && prevJob.jobId != 0)
+        if (op == RsOp::Uncoupled && prevOp == RsOp::Coupled && err.job.jobId != prevJob.jobId
+            && prevJob.jobId != 0)
         {
             err.errorType = UncoupledWhenNotCoupled;
             rs.errors.append(err);
         }
 
-        if(err.stopId == prevStopId)
+        if (err.stopId == prevStopId)
         {
             err.errorType = UncoupledInSameStop;
             rs.errors.append(err);
         }
 
-        prevOp = op;
+        prevOp         = op;
         prevCouplingId = err.couplingId;
-        prevStopId = err.stopId;
-        prevStation = err.stationId;
-        prevJob = err.job;
-        prevTime = err.time;
+        prevStopId     = err.stopId;
+        prevStation    = err.stationId;
+        prevJob        = err.job;
+        prevTime       = err.time;
     }
     q_selectCoupling.reset();
 
-    if(prevOp == RsOp::Coupled)
+    if (prevOp == RsOp::Coupled)
     {
         err.errorType = NotUncoupledAtJobEnd;
         rs.errors.append(err);
     }
 }
 
-RsWorkerResultEvent::RsWorkerResultEvent(RsErrWorker *worker, const QMap<db_id, RsErrors::RSErrorList> &data, bool merge) :
+RsWorkerResultEvent::RsWorkerResultEvent(RsErrWorker *worker,
+                                         const QMap<db_id, RsErrors::RSErrorList> &data,
+                                         bool merge) :
     GenericTaskEvent(_Type, worker),
     results(data),
     mergeErrors(merge)
 {
-
 }
 
 RsWorkerResultEvent::~RsWorkerResultEvent()
 {
-
 }
 
 #endif // ENABLE_BACKGROUND_MANAGER

@@ -37,16 +37,15 @@
 class LoadODSTask : public ILoadRSTask
 {
 public:
-    LoadODSTask(const QMap<QString, QVariant>& arguments, sqlite3pp::database &db,
-                int mode, int defSpeed, RsType defType,
-                const QString& fileName, QObject *receiver);
+    LoadODSTask(const QMap<QString, QVariant> &arguments, sqlite3pp::database &db, int mode,
+                int defSpeed, RsType defType, const QString &fileName, QObject *receiver);
 
     void run() override;
 
 private:
-    int m_tblFirstRow;     //Start from 1 (not 0)
-    int m_tblRSNumberCol;  //Start from 1 (not 0)
-    int m_tblModelNameCol; //Start from 1 (not 0)
+    int m_tblFirstRow;     // Start from 1 (not 0)
+    int m_tblRSNumberCol;  // Start from 1 (not 0)
+    int m_tblModelNameCol; // Start from 1 (not 0)
     int importMode;
 
     int defaultSpeed;

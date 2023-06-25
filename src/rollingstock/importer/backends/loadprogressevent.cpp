@@ -25,5 +25,4 @@ LoadProgressEvent::LoadProgressEvent(QRunnable *self, int pr, int m) :
     progress(pr),
     max(m)
 {
-
 }

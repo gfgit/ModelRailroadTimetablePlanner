@@ -26,17 +26,15 @@ using namespace sqlite3pp;
 
 #include <QBrush>
 
-RsPlanModel::RsPlanModel(sqlite3pp::database &db,
-                         QObject *parent) :
+RsPlanModel::RsPlanModel(sqlite3pp::database &db, QObject *parent) :
     QAbstractTableModel(parent),
     mDb(db)
 {
-
 }
 
 QVariant RsPlanModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
         switch (section)
         {
@@ -72,9 +70,9 @@ QVariant RsPlanModel::data(const QModelIndex &idx, int role) const
     if (!idx.isValid() || idx.row() >= m_data.size() || idx.column() >= NCols)
         return QVariant();
 
-    const RsPlanItem& item = m_data.at(idx.row());
+    const RsPlanItem &item     = m_data.at(idx.row());
     const RsPlanItem *prevItem = nullptr;
-    if(idx.row() > 0)
+    if (idx.row() > 0)
         prevItem = &m_data.at(idx.row() - 1);
 
     switch (role)
@@ -92,28 +90,27 @@ QVariant RsPlanModel::data(const QModelIndex &idx, int role) const
         case Departure:
             return item.departure;
         case Operation:
-            return item.op == RsOp::Coupled ?
-                       tr("Coupled") : tr("Uncoupled");
+            return item.op == RsOp::Coupled ? tr("Coupled") : tr("Uncoupled");
         }
         break;
     }
     case Qt::BackgroundRole:
     {
-        //Mark cells with errors
+        // Mark cells with errors
         switch (idx.column())
         {
         case Station:
         {
-            //Coupled in a different station than previous, this means it gets teleported
-            if(item.op == RsOp::Coupled && prevItem && prevItem->stationId != item.stationId)
-                return QBrush(QColor(255, 0, 183)); //Magenta
+            // Coupled in a different station than previous, this means it gets teleported
+            if (item.op == RsOp::Coupled && prevItem && prevItem->stationId != item.stationId)
+                return QBrush(QColor(255, 0, 183)); // Magenta
             break;
         }
         case Operation:
         {
-            //Coupled while already coupled or uncoupled while not coupled
-            if(prevItem && item.op == prevItem->op)
-                return QBrush(QColor(255, 110, 110)); //Light red
+            // Coupled while already coupled or uncoupled while not coupled
+            if (prevItem && item.op == prevItem->op)
+                return QBrush(QColor(255, 110, 110)); // Light red
             break;
         }
         }
@@ -130,33 +127,32 @@ void RsPlanModel::loadPlan(db_id rsId)
 
     m_data.clear();
 
-    //TODO: load in thread with same query prepared form many models
-    query q_selectOps(mDb,
-                     "SELECT stops.id,"
-                     "stops.job_id,"
-                     "jobs.category,"
-                     "stops.station_id,"
-                     "stops.arrival,"
-                     "stops.departure,"
-                     "coupling.operation,"
-                     "stations.name"
-                     " FROM stops"
-                     " JOIN coupling ON coupling.stop_id=stops.id AND coupling.rs_id=?"
-                     " JOIN jobs ON jobs.id=stops.job_id"
-                     " JOIN stations ON stations.id=stops.station_id"
-                     " ORDER BY stops.arrival");
+    // TODO: load in thread with same query prepared form many models
+    query q_selectOps(mDb, "SELECT stops.id,"
+                           "stops.job_id,"
+                           "jobs.category,"
+                           "stops.station_id,"
+                           "stops.arrival,"
+                           "stops.departure,"
+                           "coupling.operation,"
+                           "stations.name"
+                           " FROM stops"
+                           " JOIN coupling ON coupling.stop_id=stops.id AND coupling.rs_id=?"
+                           " JOIN jobs ON jobs.id=stops.job_id"
+                           " JOIN stations ON stations.id=stops.station_id"
+                           " ORDER BY stops.arrival");
 
     q_selectOps.bind(1, rsId);
-    for(auto r : q_selectOps)
+    for (auto r : q_selectOps)
     {
         RsPlanItem item;
-        item.stopId = r.get<db_id>(0);
-        item.jobId = r.get<db_id>(1);
-        item.jobCat = JobCategory(r.get<int>(2));
-        item.stationId = r.get<db_id>(3);
-        item.arrival = r.get<QTime>(4);
-        item.departure = r.get<QTime>(5);
-        item.op = RsOp(r.get<int>(6));
+        item.stopId      = r.get<db_id>(0);
+        item.jobId       = r.get<db_id>(1);
+        item.jobCat      = JobCategory(r.get<int>(2));
+        item.stationId   = r.get<db_id>(3);
+        item.arrival     = r.get<QTime>(4);
+        item.departure   = r.get<QTime>(5);
+        item.op          = RsOp(r.get<int>(6));
         item.stationName = r.get<QString>(7);
 
         m_data.append(item);

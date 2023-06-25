@@ -30,46 +30,48 @@
 
 #include <QDebug>
 
-//first == true for the first time the stop is writter
-//the second time it should be false to skip the repetition of Arrival, Crossings, Passings
-void StationWriter::insertStop(QXmlStreamWriter &xml, const Stop& stop, bool first, bool transit)
+// first == true for the first time the stop is writter
+// the second time it should be false to skip the repetition of Arrival, Crossings, Passings
+void StationWriter::insertStop(QXmlStreamWriter &xml, const Stop &stop, bool first, bool transit)
 {
     const QString P3_style = "P3";
 
-    //Row
+    // Row
     xml.writeStartElement("table:table-row");
 
-    //Cells, hide Arrival the second time
-    if(first)
+    // Cells, hide Arrival the second time
+    if (first)
     {
-        //Arrival in bold, if transit bold + italic
+        // Arrival in bold, if transit bold + italic
         writeCell(xml, "stationtable.A2", transit ? "P5" : "P4", stop.arrival.toString("HH:mm"));
 
-        //Departure, if transit don't repeat it
-        writeCell(xml, "stationtable.A2", P3_style, transit ? "-/-" : stop.departure.toString("HH:mm"));
+        // Departure, if transit don't repeat it
+        writeCell(xml, "stationtable.A2", P3_style,
+                  transit ? "-/-" : stop.departure.toString("HH:mm"));
     }
     else
     {
-        writeCell(xml, "stationtable.A2", P3_style, QString()); //Don't repeat Arrival
-        writeCell(xml, "stationtable.A2", "P4", stop.departure.toString("HH:mm")); //Departure in bold
+        writeCell(xml, "stationtable.A2", P3_style, QString()); // Don't repeat Arrival
+        writeCell(xml, "stationtable.A2", "P4",
+                  stop.departure.toString("HH:mm")); // Departure in bold
     }
 
-    //Job N
+    // Job N
     writeCell(xml, "stationtable.A2", P3_style, JobCategoryName::jobName(stop.jobId, stop.jobCat));
-    writeCell(xml, "stationtable.A2", P3_style, stop.platform); //Platform
+    writeCell(xml, "stationtable.A2", P3_style, stop.platform); // Platform
 
-    //From Previous Station, write only first time
+    // From Previous Station, write only first time
     writeCell(xml, "stationtable.A2", P3_style, first ? stop.prevSt : QString());
     writeCell(xml, "stationtable.A2", P3_style, stop.nextSt);
 
-    if(!first)
+    if (!first)
     {
-        //Fill with empty cells, needed to keep the order
-        writeCell(xml, "stationtable.A2", P3_style, QString()); //Rollingstock
-        writeCell(xml, "stationtable.A2", P3_style, QString()); //Crossings
-        writeCell(xml, "stationtable.A2", P3_style, QString()); //Passings
+        // Fill with empty cells, needed to keep the order
+        writeCell(xml, "stationtable.A2", P3_style, QString()); // Rollingstock
+        writeCell(xml, "stationtable.A2", P3_style, QString()); // Crossings
+        writeCell(xml, "stationtable.A2", P3_style, QString()); // Passings
 
-        //Notes, description, repaeat to user the arrival to better link the 2 rows
+        // Notes, description, repaeat to user the arrival to better link the 2 rows
         writeCell(xml, "stationtable.L2", P3_style, stop.arrival.toString("HH:mm"));
     }
 }
@@ -97,7 +99,8 @@ StationWriter::StationWriter(database &db) :
     q_selectPassings(mDb, "SELECT stops.id,stops.job_id,jobs.category"
                           " FROM stops"
                           " JOIN jobs ON jobs.id=stops.job_id"
-                          " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? AND stops.job_id<>?"),
+                          " WHERE stops.station_id=? AND stops.departure>=? AND stops.arrival<=? "
+                          "AND stops.job_id<>?"),
     q_getStopCouplings(mDb, "SELECT coupling.rs_id,"
                             "rs_list.number,rs_models.name,rs_models.suffix,rs_models.type"
                             " FROM coupling"
@@ -105,22 +108,21 @@ StationWriter::StationWriter(database &db) :
                             " JOIN rs_models ON rs_models.id=rs_list.model_id"
                             " WHERE coupling.stop_id=? AND coupling.operation=?")
 {
-
 }
 
-//TODO: common styles with JobWriter should go in common
+// TODO: common styles with JobWriter should go in common
 void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
 {
     /* Style: stationtable
-    *
-    * Type:         table
-    * Display name: Station Table
-    * Align:        center
-    * Width:        20.0cm
-    *
-    * Usage:
-    *  - StationWriter: station sheet main table showing jobs that stop in this station
-    */
+     *
+     * Type:         table
+     * Display name: Station Table
+     * Align:        center
+     * Width:        20.0cm
+     *
+     * Usage:
+     *  - StationWriter: station sheet main table showing jobs that stop in this station
+     */
     xml.writeStartElement("style:style");
     xml.writeAttribute("style:family", "table");
     xml.writeAttribute("style:name", "stationtable");
@@ -129,20 +131,20 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("style:shadow", "none");
     xml.writeAttribute("table:align", "center");
     xml.writeAttribute("style:width", "20.0cm");
-    xml.writeEndElement(); //style:table-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-properties
+    xml.writeEndElement(); // style
 
-    //stationtable columns
-    writeColumnStyle(xml, "stationtable.A", "1.74cm"); //1  Arrival
-    writeColumnStyle(xml, "stationtable.B", "1.80cm"); //2  Departure
-    writeColumnStyle(xml, "stationtable.C", "1.93cm"); //3  Job N
-    writeColumnStyle(xml, "stationtable.D", "1.00cm"); //4  Platform (Platf)
-    writeColumnStyle(xml, "stationtable.E", "3.09cm"); //5  From (Previous Station)
-    writeColumnStyle(xml, "stationtable.F", "3.11cm"); //6  To (Next Station)
-    writeColumnStyle(xml, "stationtable.G", "3.00cm"); //7  Rollingstock
-    writeColumnStyle(xml, "stationtable.H", "2.10cm"); //8  Crossings
-    writeColumnStyle(xml, "stationtable.I", "2.10cm"); //9  Passings
-    writeColumnStyle(xml, "stationtable.L", "2.21cm"); //10 Description
+    // stationtable columns
+    writeColumnStyle(xml, "stationtable.A", "1.74cm"); // 1  Arrival
+    writeColumnStyle(xml, "stationtable.B", "1.80cm"); // 2  Departure
+    writeColumnStyle(xml, "stationtable.C", "1.93cm"); // 3  Job N
+    writeColumnStyle(xml, "stationtable.D", "1.00cm"); // 4  Platform (Platf)
+    writeColumnStyle(xml, "stationtable.E", "3.09cm"); // 5  From (Previous Station)
+    writeColumnStyle(xml, "stationtable.F", "3.11cm"); // 6  To (Next Station)
+    writeColumnStyle(xml, "stationtable.G", "3.00cm"); // 7  Rollingstock
+    writeColumnStyle(xml, "stationtable.H", "2.10cm"); // 8  Crossings
+    writeColumnStyle(xml, "stationtable.I", "2.10cm"); // 9  Passings
+    writeColumnStyle(xml, "stationtable.L", "2.21cm"); // 10 Description
 
     /* Style: stationtable.A1
      *
@@ -165,8 +167,8 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "0.05pt solid #000000");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: stationtable.L1
      *
@@ -186,8 +188,8 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border", "0.05pt solid #000000");
     xml.writeAttribute("fo:padding", "0.097cm");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: stationtable.A2
      *
@@ -210,8 +212,8 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style: stationtable.L2
      *
@@ -234,8 +236,8 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeAttribute("fo:border-top", "none");
     xml.writeAttribute("fo:border-bottom", "0.05pt solid #000000");
     xml.writeAttribute("style:vertical-align", "middle");
-    xml.writeEndElement(); //style:table-cell-properties
-    xml.writeEndElement(); //style
+    xml.writeEndElement(); // style:table-cell-properties
+    xml.writeEndElement(); // style
 
     /* Style P2
      * type:        paragraph
@@ -253,14 +255,14 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "13pt");
     xml.writeAttribute("fo:font-weight", "bold");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
     /* Style P3
      * type:        paragraph
@@ -277,15 +279,15 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "10pt");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 
-    //P5 - Bold, Italics, for Transits
+    // P5 - Bold, Italics, for Transits
     /* Style P5
      * type:        paragraph
      * text-align:  center
@@ -294,7 +296,8 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
      * font-style:  italic
      *
      * Usages:
-     * - stationtable table: Arrival for transit jobs (Normal stops have bold Arrival, transits have Bold + Italic)
+     * - stationtable table: Arrival for transit jobs (Normal stops have bold Arrival, transits have
+     * Bold + Italic)
      */
     xml.writeStartElement("style:style");
     xml.writeAttribute("style:family", "paragraph");
@@ -303,20 +306,20 @@ void StationWriter::writeStationAutomaticStyles(QXmlStreamWriter &xml)
     xml.writeStartElement("style:paragraph-properties");
     xml.writeAttribute("fo:text-align", "center");
     xml.writeAttribute("style:justify-single-word", "false");
-    xml.writeEndElement(); //style:paragraph-properties
+    xml.writeEndElement(); // style:paragraph-properties
 
     xml.writeStartElement("style:text-properties");
     xml.writeAttribute("fo:font-size", "12pt");
     xml.writeAttribute("fo:font-weight", "bold");
     xml.writeAttribute("fo:font-style", "italic");
-    xml.writeEndElement(); //style:text-properties
+    xml.writeEndElement(); // style:text-properties
 
-    xml.writeEndElement(); //style:style
+    xml.writeEndElement(); // style:style
 }
 
 void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString *stNameOut)
 {
-    QMap<QTime, Stop> stops; //Order by Departure ASC
+    QMap<QTime, Stop> stops; // Order by Departure ASC
 
     query q_getStName(mDb, "SELECT name,short_name FROM stations WHERE id=?");
 
@@ -328,71 +331,71 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     QString stationName;
     QString shortName;
     q_getStName.bind(1, stationId);
-    if(q_getStName.step() == SQLITE_ROW)
+    if (q_getStName.step() == SQLITE_ROW)
     {
-        auto r = q_getStName.getRows();
+        auto r      = q_getStName.getRows();
         stationName = r.get<QString>(0);
-        shortName = r.get<QString>(1);
+        shortName   = r.get<QString>(1);
     }
     q_getStName.reset();
-    if(stNameOut)
+    if (stNameOut)
         *stNameOut = stationName;
 
     QString stationNameStr = stationName;
-    if(!shortName.isEmpty())
+    if (!shortName.isEmpty())
     {
         stationNameStr.append(QLatin1String(" ("));
         stationNameStr.append(shortName);
         stationNameStr.append(')');
     }
 
-    //Title
+    // Title
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeCharacters(Odt::text(Odt::stationPageTitle).arg(stationNameStr));
     xml.writeEndElement();
 
-    //Vertical space
+    // Vertical space
     xml.writeStartElement("text:p");
     xml.writeAttribute("text:style-name", "P1");
     xml.writeEndElement();
 
-    //stationtable
+    // stationtable
     xml.writeStartElement("table:table");
-    //xml.writeAttribute("table:name", "stationtable");
+    // xml.writeAttribute("table:name", "stationtable");
     xml.writeAttribute("table:style-name", "stationtable");
 
-    xml.writeEmptyElement("table:table-column"); //Arrival
+    xml.writeEmptyElement("table:table-column"); // Arrival
     xml.writeAttribute("table:style-name", "stationtable.A");
 
-    xml.writeEmptyElement("table:table-column"); //Departure
+    xml.writeEmptyElement("table:table-column"); // Departure
     xml.writeAttribute("table:style-name", "stationtable.B");
 
-    xml.writeEmptyElement("table:table-column"); //Job N
+    xml.writeEmptyElement("table:table-column"); // Job N
     xml.writeAttribute("table:style-name", "stationtable.C");
 
-    xml.writeEmptyElement("table:table-column"); //Platform (Bin)
+    xml.writeEmptyElement("table:table-column"); // Platform (Bin)
     xml.writeAttribute("table:style-name", "stationtable.D");
 
-    xml.writeEmptyElement("table:table-column"); //Comes From
+    xml.writeEmptyElement("table:table-column"); // Comes From
     xml.writeAttribute("table:style-name", "stationtable.E");
 
-    xml.writeEmptyElement("table:table-column"); //Goes To
+    xml.writeEmptyElement("table:table-column"); // Goes To
     xml.writeAttribute("table:style-name", "stationtable.F");
 
-    xml.writeEmptyElement("table:table-column"); //Rollingstock
+    xml.writeEmptyElement("table:table-column"); // Rollingstock
     xml.writeAttribute("table:style-name", "stationtable.G");
 
-    xml.writeEmptyElement("table:table-column"); //Crossings
+    xml.writeEmptyElement("table:table-column"); // Crossings
     xml.writeAttribute("table:style-name", "stationtable.H");
 
-    xml.writeEmptyElement("table:table-column"); //Passings
+    xml.writeEmptyElement("table:table-column"); // Passings
     xml.writeAttribute("table:style-name", "stationtable.I");
 
-    xml.writeEmptyElement("table:table-column"); //Notes
+    xml.writeEmptyElement("table:table-column"); // Notes
     xml.writeAttribute("table:style-name", "stationtable.L");
 
-    //Row 1 (Heading)
+    // Row 1 (Heading)
     xml.writeStartElement("table:table-header-rows");
     xml.writeStartElement("table:table-row");
 
@@ -405,54 +408,55 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
     writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::rollingstock));
     writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::jobStopCrossShort));
     writeCell(xml, "stationtable.A1", "P2", Odt::text(Odt::jobStopPassingsShort));
-    writeCell(xml, "stationtable.L1", "P2", Odt::text(Odt::notes)); //Description
+    writeCell(xml, "stationtable.L1", "P2", Odt::text(Odt::notes)); // Description
 
-    xml.writeEndElement(); //end of row
-    xml.writeEndElement(); //header section
+    xml.writeEndElement(); // end of row
+    xml.writeEndElement(); // header section
 
-    //Stops
+    // Stops
     q_getJobsByStation.bind(1, stationId);
-    for(auto r : q_getJobsByStation)
+    for (auto r : q_getJobsByStation)
     {
         db_id stopId = r.get<db_id>(0);
         Stop stop;
-        stop.jobId = r.get<db_id>(1);
-        stop.jobCat = JobCategory(r.get<int>(2));
-        stop.arrival = r.get<QTime>(3);
-        stop.departure = r.get<QTime>(4);
+        stop.jobId         = r.get<db_id>(1);
+        stop.jobCat        = JobCategory(r.get<int>(2));
+        stop.arrival       = r.get<QTime>(3);
+        stop.departure     = r.get<QTime>(4);
         const int stopType = r.get<int>(5);
-        stop.description = r.get<QString>(6);
+        stop.description   = r.get<QString>(6);
 
-        stop.platform = r.get<QString>(7);
-        if(stop.platform.isEmpty())
-            stop.platform = r.get<QString>(8); //Use out gate to get track name
+        stop.platform      = r.get<QString>(7);
+        if (stop.platform.isEmpty())
+            stop.platform = r.get<QString>(8); // Use out gate to get track name
 
         utils::Side entranceSide = utils::Side(r.get<int>(9));
-        utils::Side exitSide = utils::Side(r.get<int>(10));
+        utils::Side exitSide     = utils::Side(r.get<int>(10));
 
-        if(entranceSide == exitSide && r.column_type(9) != SQLITE_NULL && r.column_type(10) != SQLITE_NULL)
+        if (entranceSide == exitSide && r.column_type(9) != SQLITE_NULL
+            && r.column_type(10) != SQLITE_NULL)
         {
-            //Train enters and leaves from same track side, add reversal to description
+            // Train enters and leaves from same track side, add reversal to description
             QString descr2 = Odt::text(Odt::jobReverseDirection);
-            if(!stop.description.isEmpty())
-                descr2.append('\n'); //Separate from manually set description
+            if (!stop.description.isEmpty())
+                descr2.append('\n'); // Separate from manually set description
             descr2.append(stop.description);
             stop.description = descr2;
         }
 
         const bool isTransit = stopType == 1;
 
-        //BIG TODO: if this is First or Last stop of this job
-        //then it shouldn't be duplicated in 2 rows
+        // BIG TODO: if this is First or Last stop of this job
+        // then it shouldn't be duplicated in 2 rows
 
-        //Comes from station
+        // Comes from station
         q_getPrevStop.bind(1, stop.jobId);
         q_getPrevStop.bind(2, stop.arrival);
-        if(q_getPrevStop.step() == SQLITE_ROW)
+        if (q_getPrevStop.step() == SQLITE_ROW)
         {
             db_id prevStId = q_getPrevStop.getRows().get<db_id>(1);
             q_getStName.bind(1, prevStId);
-            if(q_getStName.step() == SQLITE_ROW)
+            if (q_getStName.step() == SQLITE_ROW)
             {
                 stop.prevSt = q_getStName.getRows().get<QString>(0);
             }
@@ -460,14 +464,14 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         }
         q_getPrevStop.reset();
 
-        //Goes to station
+        // Goes to station
         q_getNextStop.bind(1, stop.jobId);
         q_getNextStop.bind(2, stop.arrival);
-        if(q_getNextStop.step() == SQLITE_ROW)
+        if (q_getNextStop.step() == SQLITE_ROW)
         {
             db_id nextStId = q_getNextStop.getRows().get<db_id>(1);
             q_getStName.bind(1, nextStId);
-            if(q_getStName.step() == SQLITE_ROW)
+            if (q_getStName.step() == SQLITE_ROW)
             {
                 stop.nextSt = q_getStName.getRows().get<QString>(0);
             }
@@ -475,62 +479,60 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         }
         q_getNextStop.reset();
 
-        for(auto s = stops.begin(); s != stops.end(); /*nothing because of erase*/)
+        for (auto s = stops.begin(); s != stops.end(); /*nothing because of erase*/)
         {
-            //If 's' departs after 'stop' arrives then skip 's' for now
-            if(s->departure >= stop.arrival)
+            // If 's' departs after 'stop' arrives then skip 's' for now
+            if (s->departure >= stop.arrival)
             {
                 ++s;
                 continue;
             }
 
             //'s' departs before 'stop' arrives so we
-            //insert it again to remind station master (IT: capostazione)
+            // insert it again to remind station master (IT: capostazione)
             insertStop(xml, s.value(), false, false);
-            xml.writeEndElement(); //table-row
+            xml.writeEndElement(); // table-row
 
-            //Then remove from the list otherwise it gets inserted infinite times
+            // Then remove from the list otherwise it gets inserted infinite times
             s = stops.erase(s);
         }
 
-        //Fill with basic data
+        // Fill with basic data
         insertStop(xml, stop, true, isTransit);
 
-        //First time this stop is written, fill with other data
+        // First time this stop is written, fill with other data
 
-        //Rollingstock
+        // Rollingstock
         sqlite3_stmt *stmt = q_getStopCouplings.stmt();
         writeCellListStart(xml, "stationtable.A2", "P3");
 
-        //Coupled rollingstock
+        // Coupled rollingstock
         bool firstCoupRow = true;
         q_getStopCouplings.bind(1, stopId);
         q_getStopCouplings.bind(2, int(RsOp::Coupled));
-        for(auto coup : q_getStopCouplings)
+        for (auto coup : q_getStopCouplings)
         {
-            //db_id rsId = coup.get<db_id>(0);
+            // db_id rsId = coup.get<db_id>(0);
 
-            int number = coup.get<int>(1);
-            int modelNameLen = sqlite3_column_bytes(stmt, 2);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
+            int number              = coup.get<int>(1);
+            int modelNameLen        = sqlite3_column_bytes(stmt, 2);
+            const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 2));
 
-            int modelSuffixLen = sqlite3_column_bytes(stmt, 3);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 3));
-            RsType type = RsType(sqlite3_column_int(stmt, 4));
+            int modelSuffixLen      = sqlite3_column_bytes(stmt, 3);
+            const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 3));
+            RsType type             = RsType(sqlite3_column_int(stmt, 4));
 
-            const QString rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                           number,
-                                                           modelSuffix, modelSuffixLen,
-                                                           type);
+            const QString rsName    = rs_utils::formatNameRef(modelName, modelNameLen, number,
+                                                              modelSuffix, modelSuffixLen, type);
 
-            if(firstCoupRow)
+            if (firstCoupRow)
             {
                 firstCoupRow = false;
-                //Use bold font
+                // Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
                 xml.writeCharacters(Odt::text(Odt::CoupledAbbr));
-                xml.writeEndElement(); //test:span
+                xml.writeEndElement(); // test:span
             }
 
             xml.writeEmptyElement("text:line-break");
@@ -538,38 +540,36 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         }
         q_getStopCouplings.reset();
 
-        //Unoupled rollingstock
+        // Unoupled rollingstock
         bool firstUncoupRow = true;
         q_getStopCouplings.bind(1, stopId);
         q_getStopCouplings.bind(2, int(RsOp::Uncoupled));
-        for(auto coup : q_getStopCouplings)
+        for (auto coup : q_getStopCouplings)
         {
-            //db_id rsId = coup.get<db_id>(0);
+            // db_id rsId = coup.get<db_id>(0);
 
-            int number = coup.get<int>(1);
-            int modelNameLen = sqlite3_column_bytes(stmt, 2);
-            const char *modelName = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 2));
+            int number              = coup.get<int>(1);
+            int modelNameLen        = sqlite3_column_bytes(stmt, 2);
+            const char *modelName   = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 2));
 
-            int modelSuffixLen = sqlite3_column_bytes(stmt, 3);
-            const char *modelSuffix = reinterpret_cast<char const*>(sqlite3_column_text(stmt, 3));
-            RsType type = RsType(sqlite3_column_int(stmt, 4));
+            int modelSuffixLen      = sqlite3_column_bytes(stmt, 3);
+            const char *modelSuffix = reinterpret_cast<char const *>(sqlite3_column_text(stmt, 3));
+            RsType type             = RsType(sqlite3_column_int(stmt, 4));
 
-            const QString rsName = rs_utils::formatNameRef(modelName, modelNameLen,
-                                                           number,
-                                                           modelSuffix, modelSuffixLen,
-                                                           type);
+            const QString rsName    = rs_utils::formatNameRef(modelName, modelNameLen, number,
+                                                              modelSuffix, modelSuffixLen, type);
 
-            if(firstUncoupRow)
+            if (firstUncoupRow)
             {
-                if(!firstCoupRow) //Not first row, there were coupled rs
-                    xml.writeEmptyElement("text:line-break"); //Separate from coupled
+                if (!firstCoupRow) // Not first row, there were coupled rs
+                    xml.writeEmptyElement("text:line-break"); // Separate from coupled
                 firstUncoupRow = false;
 
-                //Use bold font
+                // Use bold font
                 xml.writeStartElement("text:span");
                 xml.writeAttribute("text:style-name", "T1");
                 xml.writeCharacters(Odt::text(Odt::UncoupledAbbr));
-                xml.writeEndElement(); //test:span
+                xml.writeEndElement(); // test:span
             }
 
             xml.writeEmptyElement("text:line-break");
@@ -578,7 +578,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         q_getStopCouplings.reset();
         writeCellListEnd(xml);
 
-        //Crossings, Passings
+        // Crossings, Passings
         QVector<JobEntry> passings;
         JobStopDirectionHelper dirHelper(mDb);
         utils::Side myDirection = dirHelper.getStopOutSide(stopId);
@@ -589,24 +589,24 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         q_selectPassings.bind(4, stop.jobId);
         firstCoupRow = true;
 
-        //Incroci
+        // Incroci
         writeCellListStart(xml, "stationtable.A2", "P3");
-        for(auto pass : q_selectPassings)
+        for (auto pass : q_selectPassings)
         {
-            db_id otherStopId = pass.get<db_id>(0);
-            db_id otherJobId = pass.get<db_id>(1);
+            db_id otherStopId       = pass.get<db_id>(0);
+            db_id otherJobId        = pass.get<db_id>(1);
             JobCategory otherJobCat = JobCategory(pass.get<int>(2));
 
-            //QTime otherArr = pass.get<QTime>(3);
-            //QTime otherDep = pass.get<QTime>(4);
+            // QTime otherArr = pass.get<QTime>(3);
+            // QTime otherDep = pass.get<QTime>(4);
 
             utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 
-            if(myDirection == otherDir)
+            if (myDirection == otherDir)
                 passings.append({otherJobId, otherJobCat});
             else
             {
-                if(firstCoupRow)
+                if (firstCoupRow)
                     firstCoupRow = false;
                 else
                     xml.writeEmptyElement("text:line-break");
@@ -616,12 +616,12 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         q_selectPassings.reset();
         writeCellListEnd(xml);
 
-        //Passings
+        // Passings
         firstCoupRow = true;
         writeCellListStart(xml, "stationtable.A2", "P3");
-        for(auto entry : passings)
+        for (auto entry : passings)
         {
-            if(firstCoupRow)
+            if (firstCoupRow)
                 firstCoupRow = false;
             else
                 xml.writeEmptyElement("text:line-break");
@@ -629,66 +629,66 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         }
         writeCellListEnd(xml);
 
-        //Description, Notes
+        // Description, Notes
         writeCellListStart(xml, "stationtable.L2", "P3");
         bool needsLineBreak = false;
-        if(isTransit)
+        if (isTransit)
         {
             xml.writeCharacters(Odt::text(Odt::jobStopIsTransit));
             needsLineBreak = true;
         }
-        if(stop.prevSt.isEmpty())
+        if (stop.prevSt.isEmpty())
         {
-            if(needsLineBreak)
+            if (needsLineBreak)
                 xml.writeEmptyElement("text:line-break");
 
-            //This is Origin (First stop), use Bold font
+            // This is Origin (First stop), use Bold font
             xml.writeStartElement("text:span");
             xml.writeAttribute("text:style-name", "T1");
             xml.writeCharacters(Odt::text(Odt::jobStopIsFirst));
-            xml.writeEndElement(); //test:span
+            xml.writeEndElement(); // test:span
             needsLineBreak = true;
         }
-        if(!stop.description.isEmpty())
+        if (!stop.description.isEmpty())
         {
-            if(needsLineBreak) //go to new line after 'Transit' word
+            if (needsLineBreak) // go to new line after 'Transit' word
                 xml.writeEmptyElement("text:line-break");
 
-            //Split in lines
+            // Split in lines
             int lastIdx = 0;
-            while(true)
+            while (true)
             {
-                int idx = stop.description.indexOf('\n', lastIdx);
+                int idx      = stop.description.indexOf('\n', lastIdx);
                 QString line = stop.description.mid(lastIdx, idx == -1 ? idx : idx - lastIdx);
                 xml.writeCharacters(line.simplified());
-                if(idx < 0)
-                    break; //Last line
+                if (idx < 0)
+                    break; // Last line
                 lastIdx = idx + 1;
                 xml.writeEmptyElement("text:line-break");
             }
         }
         writeCellListEnd(xml);
 
-        xml.writeEndElement(); //table-row
+        xml.writeEndElement(); // table-row
 
-        if(!isTransit && !stop.prevSt.isEmpty() && !stop.nextSt.isEmpty())
+        if (!isTransit && !stop.prevSt.isEmpty() && !stop.nextSt.isEmpty())
         {
-            //If it is a normal stop (not a transit and not first stop or last stop)
-            //insert two rows: one for arrival and another
-            //that reminds the station master (capostazione)
-            //the departure of that train
-            //In order to achieve this we put the stop in a list
-            //and write it again before another arrival (see above)
+            // If it is a normal stop (not a transit and not first stop or last stop)
+            // insert two rows: one for arrival and another
+            // that reminds the station master (capostazione)
+            // the departure of that train
+            // In order to achieve this we put the stop in a list
+            // and write it again before another arrival (see above)
             stops.insert(stop.departure, stop);
         }
     }
     q_getJobsByStation.reset();
 
-    for(const Stop& s : stops)
+    for (const Stop &s : stops)
     {
         insertStop(xml, s, false, false);
-        xml.writeEndElement(); //table-row
+        xml.writeEndElement(); // table-row
     }
 
-    xml.writeEndElement(); //stationtable end
+    xml.writeEndElement(); // stationtable end
 }

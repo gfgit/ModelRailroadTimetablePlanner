@@ -52,10 +52,13 @@ public:
     enum ModelState
     {
         ModelCleared = 0,
-        ModelLoaded = -1
+        ModelLoaded  = -1
     };
 
-    enum { ClearModelTimeout = 5000 }; // 5 seconds
+    enum
+    {
+        ClearModelTimeout = 5000
+    }; // 5 seconds
 
     explicit RollingStockManager(QWidget *parent = nullptr);
     ~RollingStockManager();
@@ -68,7 +71,7 @@ private slots:
     void updateModels();
     void visibilityChanged(int v);
 
-    void onModelError(const QString& msg);
+    void onModelError(const QString &msg);
 
     void onViewRSPlan();
     void onViewRSPlanSearch();
@@ -107,45 +110,44 @@ private:
     bool createRsModelWithDifferentSuffix(db_id sourceModelId, QString &errMsg, QWidget *w);
 
 private:
-    QTabWidget        *tabWidget;
+    QTabWidget *tabWidget;
 
-    QToolBar          *rsToolBar;
-    QToolBar          *modelToolBar;
-    QToolBar          *ownersToolBar;
+    QToolBar *rsToolBar;
+    QToolBar *modelToolBar;
+    QToolBar *ownersToolBar;
 
-    QActionGroup      *editActGroup;
+    QActionGroup *editActGroup;
 
-    QAction           *actNewRs;
-    QAction           *actDeleteRs;
-    QAction           *actDeleteAllRs;
+    QAction *actNewRs;
+    QAction *actDeleteRs;
+    QAction *actDeleteAllRs;
 
-    QAction           *actNewModel;
-    QAction           *actNewModelWithSuffix;
-    QAction           *actNewModelWithSuffixSearch;
-    QAction           *actDeleteModel;
-    QAction           *actDeleteAllRsModels;
+    QAction *actNewModel;
+    QAction *actNewModelWithSuffix;
+    QAction *actNewModelWithSuffixSearch;
+    QAction *actDeleteModel;
+    QAction *actDeleteAllRsModels;
 
-    QAction           *actNewOwner;
-    QAction           *actDeleteOwner;
-    QAction           *actDeleteAllRsOwners;
+    QAction *actNewOwner;
+    QAction *actDeleteOwner;
+    QAction *actDeleteAllRsOwners;
 
-    QAction           *actMergeModels;
-    QAction           *actMergeOwners;
+    QAction *actMergeModels;
+    QAction *actMergeOwners;
 
-    QAction           *actViewRSPlan;
-    QAction           *actViewRSPlanSearch;
+    QAction *actViewRSPlan;
+    QAction *actViewRSPlanSearch;
 
-    QTableView        *rsView;
-    QTableView        *rsModelsView;
-    QTableView        *ownersView;
+    QTableView *rsView;
+    QTableView *rsModelsView;
+    QTableView *ownersView;
 
     SpinBoxEditorFactory *speedSpinFactory;
     SpinBoxEditorFactory *axesSpinFactory;
 
     RollingstockSQLModel *rsSQLModel;
-    RSModelsSQLModel  *modelsSQLModel;
-    RSOwnersSQLModel  *ownersSQLModel;
-
+    RSModelsSQLModel *modelsSQLModel;
+    RSOwnersSQLModel *ownersSQLModel;
 
     int oldCurrentTab;
     int clearModelTimers[NTabs];

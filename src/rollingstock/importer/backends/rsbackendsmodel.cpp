@@ -22,7 +22,6 @@
 RSImportBackendsModel::RSImportBackendsModel(QObject *parent) :
     QAbstractListModel(parent)
 {
-
 }
 
 RSImportBackendsModel::~RSImportBackendsModel()
@@ -38,11 +37,11 @@ int RSImportBackendsModel::rowCount(const QModelIndex &parent) const
 
 QVariant RSImportBackendsModel::data(const QModelIndex &idx, int role) const
 {
-    if(role != Qt::DisplayRole || idx.column() != 0)
+    if (role != Qt::DisplayRole || idx.column() != 0)
         return QVariant();
 
     RSImportBackend *back = getBackend(idx.row());
-    if(!back)
+    if (!back)
         return QVariant();
 
     return back->getBackendName();
@@ -58,7 +57,7 @@ void RSImportBackendsModel::addBackend(RSImportBackend *backend)
 
 RSImportBackend *RSImportBackendsModel::getBackend(int idx) const
 {
-    if(idx < 0 || idx >= backends.size())
+    if (idx < 0 || idx >= backends.size())
         return nullptr;
     return backends.at(idx);
 }
