@@ -56,7 +56,7 @@ QTranslator *utils::language::loadAppTranslator(const QLocale &loc)
 bool utils::language::loadTranslationsFromSettings()
 {
     const QString localPath = qApp->applicationDirPath() + translationsFolder;
-    const QString qtLibPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+    const QString qtLibPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
     QLocale loc             = Session->getAppLanguage();
 
     // NOTE: If locale is English with default country we do not need translations
