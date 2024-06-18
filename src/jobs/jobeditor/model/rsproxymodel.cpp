@@ -191,7 +191,7 @@ Qt::ItemFlags RSProxyModel::flags(const QModelIndex &index) const
     return Qt::NoItemFlags;
 }
 
-void RSProxyModel::loadData(const QVector<RSProxyModel::RsItem> &items)
+void RSProxyModel::loadData(const QList<RSProxyModel::RsItem> &items)
 {
     beginResetModel();
     m_data = items;

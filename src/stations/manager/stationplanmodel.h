@@ -89,7 +89,7 @@ public:
     }
 
 private:
-    QVector<StPlanItem> m_data;
+    QList<StPlanItem> m_data;
 
     sqlite3pp::database &mDb;
     sqlite3pp::query q_countPlanItems;

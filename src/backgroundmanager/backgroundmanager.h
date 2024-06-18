@@ -23,7 +23,7 @@
 #ifdef ENABLE_BACKGROUND_MANAGER
 
 #    include <QObject>
-#    include <QVector>
+#    include <QList>
 
 class IBackgroundChecker;
 
@@ -64,7 +64,7 @@ signals:
 
 private:
     friend class BackgroundResultPanel;
-    QVector<IBackgroundChecker *> checkers;
+    QList<IBackgroundChecker *> checkers;
 };
 
 #endif // ENABLE_BACKGROUND_MANAGER

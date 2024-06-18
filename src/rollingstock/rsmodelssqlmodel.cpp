@@ -618,7 +618,7 @@ void RSModelsSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
 
     buildQuery(q, sortCol, offset, true);
 
-    QVector<RSModel> vec(BatchSize);
+    QList<RSModel> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();

@@ -55,7 +55,7 @@ struct JobCrossingErrorData
 struct JobCrossingErrorList
 {
     JobEntry job;
-    QVector<JobCrossingErrorData> errors;
+    QList<JobCrossingErrorData> errors;
 
     inline int childCount() const
     {

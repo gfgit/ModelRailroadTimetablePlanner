@@ -281,7 +281,7 @@ void LinesModel::internalFetch(int first, int sortCol, int valRow, const QVarian
     //        }
     //    }
 
-    QVector<LineItem> vec(BatchSize);
+    QList<LineItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();

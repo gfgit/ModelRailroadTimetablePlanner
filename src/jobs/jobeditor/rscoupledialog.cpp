@@ -104,7 +104,7 @@ RSCoupleDialog::RSCoupleDialog(RSCouplingInterface *mgr, RsOp o, QWidget *parent
 void RSCoupleDialog::loadProxyModels(sqlite3pp::database &db, db_id jobId, db_id stopId,
                                      db_id stationId, const QTime &arrival)
 {
-    QVector<RSProxyModel::RsItem> engines, freight, coaches;
+    QList<RSProxyModel::RsItem> engines, freight, coaches;
 
     sqlite3pp::query q(db);
 

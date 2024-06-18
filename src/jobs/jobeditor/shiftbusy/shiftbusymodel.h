@@ -22,7 +22,7 @@
 
 #include <QAbstractTableModel>
 
-#include <QVector>
+#include <QList>
 #include <QTime>
 #include "utils/types.h"
 
@@ -88,7 +88,7 @@ public:
 
 private:
     sqlite3pp::database &mDb;
-    QVector<JobInfo> m_data;
+    QList<JobInfo> m_data;
 
     db_id m_shiftId;
     db_id m_jobId;

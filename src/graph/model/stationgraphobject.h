@@ -20,7 +20,7 @@
 #ifndef STATIONGRAPHOBJECT_H
 #define STATIONGRAPHOBJECT_H
 
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 
@@ -68,10 +68,10 @@ public:
         QString platformName;
         QRgb color;
         QFlags<utils::StationTrackType> platformType;
-        QVector<JobStopGraph> jobStops;
+        QList<JobStopGraph> jobStops;
     };
 
-    QVector<PlatformGraph> platforms;
+    QList<PlatformGraph> platforms;
 
     double xPos;
 };

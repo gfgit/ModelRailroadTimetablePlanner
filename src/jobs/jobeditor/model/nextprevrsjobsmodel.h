@@ -21,7 +21,7 @@
 #define NEXTPREVRSJOBSMODEL_H
 
 #include <QAbstractTableModel>
-#include <QVector>
+#include <QList>
 #include <QTime>
 
 #include "utils/types.h"
@@ -97,7 +97,7 @@ private:
     sqlite3pp::database &mDb;
 
     db_id m_jobId = 0;
-    QVector<Item> m_data;
+    QList<Item> m_data;
 
     Mode m_mode = PrevJobs;
 };

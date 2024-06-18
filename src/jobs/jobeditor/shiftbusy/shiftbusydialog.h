@@ -22,7 +22,7 @@
 
 #include <QDialog>
 
-#include <QVector>
+#include <QList>
 
 class QLabel;
 class QTableView;

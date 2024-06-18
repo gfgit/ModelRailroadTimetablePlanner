@@ -22,7 +22,7 @@
 
 #include <QAbstractTableModel>
 
-#include <QVector>
+#include <QList>
 
 #include <QTime>
 
@@ -104,7 +104,7 @@ private:
     QTime m_time;
     int sortCol;
 
-    QVector<Item> m_data;
+    QList<Item> m_data;
 
     sqlite3pp::database &mDb;
 };

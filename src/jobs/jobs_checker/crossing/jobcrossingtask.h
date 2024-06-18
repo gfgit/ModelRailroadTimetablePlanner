@@ -20,7 +20,7 @@
 #ifndef JOBCROSSINGTASK_H
 #define JOBCROSSINGTASK_H
 
-#include <QVector>
+#include <QList>
 #include <QEvent>
 
 #include "utils/thread/iquittabletask.h"
@@ -50,7 +50,7 @@ public:
 class JobCrossingTask : public IQuittableTask
 {
 public:
-    JobCrossingTask(sqlite3pp::database &db, QObject *receiver, const QVector<db_id> &jobs);
+    JobCrossingTask(sqlite3pp::database &db, QObject *receiver, const QList<db_id> &jobs);
 
     void run() override;
 
@@ -59,7 +59,7 @@ public:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<db_id> jobsToCheck;
+    QList<db_id> jobsToCheck;
 };
 
 #endif // JOBCROSSINGTASK_H

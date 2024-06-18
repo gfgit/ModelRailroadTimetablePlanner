@@ -593,7 +593,7 @@ bool StationSVGHelper::importTrackConnFromSVG(sqlite3pp::database &db, db_id sta
       db, "INSERT INTO station_gate_connections(id, track_id, track_side, gate_id, gate_track)"
           " VALUES(NULL,?,?,?,?)");
 
-    QVector<ssplib::TrackConnectionInfo> existing;
+    QList<ssplib::TrackConnectionInfo> existing;
 
     for (const auto &conn : std::as_const(plan->trackConnections))
     {

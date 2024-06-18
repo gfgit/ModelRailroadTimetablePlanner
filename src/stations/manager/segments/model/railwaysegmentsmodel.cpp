@@ -342,7 +342,7 @@ void RailwaySegmentsModel::internalFetch(int first, int sortCol, int valRow, con
     //        }
     //    }
 
-    QVector<RailwaySegmentItem> vec(BatchSize);
+    QList<RailwaySegmentItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();

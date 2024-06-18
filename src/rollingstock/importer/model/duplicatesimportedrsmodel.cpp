@@ -34,7 +34,7 @@
 class DuplicatesImportedRSModelTask : public IQuittableTask
 {
 public:
-    QVector<DuplicatesImportedRSModel::DuplicatedItem> items;
+    QList<DuplicatesImportedRSModel::DuplicatedItem> items;
 
     inline DuplicatesImportedRSModelTask(int mode, sqlite3pp::database &db, QObject *receiver) :
         IQuittableTask(receiver),

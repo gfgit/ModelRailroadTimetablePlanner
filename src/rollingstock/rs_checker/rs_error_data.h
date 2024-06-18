@@ -25,7 +25,7 @@
 #    include "utils/types.h"
 
 #    include <QTime>
-#    include <QVector>
+#    include <QList>
 #    include <QMap>
 
 namespace RsErrors {
@@ -58,7 +58,7 @@ struct RSErrorList
 {
     db_id rsId;
     QString rsName;
-    QVector<RSErrorData> errors;
+    QList<RSErrorData> errors;
 
     inline int childCount() const
     {

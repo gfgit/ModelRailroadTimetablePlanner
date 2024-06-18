@@ -113,7 +113,7 @@ void RsErrorTreeModel::setErrors(const QMap<db_id, RsErrors::RSErrorList> &data)
 
 /* Description:
  * Merge new errors with pre-existing.
- * - If an RS is passed with no errors (i.e. empty QVector) it gets removed from the model
+ * - If an RS is passed with no errors (i.e. empty QList) it gets removed from the model
  * - If an new RS is passed it gets inserted in the model
  * - If an RS already in the model is passed then its current errors are cleared and the new errors
  * are inserted
@@ -157,7 +157,7 @@ void RsErrorTreeModel::mergeErrors(const QMap<db_id, RsErrors::RSErrorList> &dat
                 endRemoveRows();
 
                 beginInsertRows(parent, 0, it->errors.size() - 1);
-                iter.value() = it.value(); // Copy errors QVector
+                iter.value() = it.value(); // Copy errors QList
                 endInsertRows();
             }
         }

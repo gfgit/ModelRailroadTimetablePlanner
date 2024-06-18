@@ -24,7 +24,7 @@
 
 #include "utils/types.h"
 
-#include <QVector>
+#include <QList>
 
 struct RSListOnDemandModelItem
 {

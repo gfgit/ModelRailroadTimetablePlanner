@@ -24,7 +24,7 @@
 
 #    include <QEvent>
 
-#    include <QVector>
+#    include <QList>
 
 #    include "utils/worker_event_types.h"
 
@@ -36,12 +36,12 @@ class SearchResultEvent : public QEvent
 public:
     static const Type _Type = Type(CustomEvents::SearchBoxResults);
 
-    SearchResultEvent(SearchTask *ta, const QVector<SearchResultItem> &vec);
+    SearchResultEvent(SearchTask *ta, const QList<SearchResultItem> &vec);
     virtual ~SearchResultEvent();
 
 public:
     SearchTask *task;
-    QVector<SearchResultItem> results;
+    QList<SearchResultItem> results;
 };
 
 #endif // SEARCHBOX_MODE_ASYNC

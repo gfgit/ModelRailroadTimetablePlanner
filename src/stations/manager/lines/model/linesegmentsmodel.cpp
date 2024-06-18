@@ -42,7 +42,7 @@ public:
     {
     }
 
-    QVector<LineSegmentsModel::LineSegmentItem> items;
+    QList<LineSegmentsModel::LineSegmentItem> items;
 };
 
 LineSegmentsModel::LineSegmentsModel(sqlite3pp::database &db, QObject *parent) :
@@ -414,7 +414,7 @@ void LineSegmentsModel::fetchRows()
 
     // Reserve for 1 extra item (which will hold last station)
 
-    QVector<LineSegmentItem> vec;
+    QList<LineSegmentItem> vec;
     vec.reserve(curItemCount + 1);
 
     db_id lastStationId = 0;

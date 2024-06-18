@@ -22,7 +22,7 @@
 
 #include <QAbstractTableModel>
 
-#include <QVector>
+#include <QList>
 
 #include <QTime>
 
@@ -79,7 +79,7 @@ public:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<RsPlanItem> m_data;
+    QList<RsPlanItem> m_data;
 };
 
 #endif // RSPLANMODEL_H

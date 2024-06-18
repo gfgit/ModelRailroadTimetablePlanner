@@ -269,7 +269,7 @@ void ShiftsModel::internalFetch(int first, int /*sortColumn*/, int /*valRow*/,
         sqlite3_bind_text(q.stmt(), 3, nameFilter, nameFilter.size(), SQLITE_STATIC);
     }
 
-    QVector<ShiftItem> vec(BatchSize);
+    QList<ShiftItem> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();

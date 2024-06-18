@@ -410,7 +410,7 @@ void EditStopDialog::calcPassings()
     q.bind(3, curStop.arrival);
     q.bind(4, m_jobId);
 
-    QVector<JobPassingsModel::Entry> passings, crossings;
+    QList<JobPassingsModel::Entry> passings, crossings;
 
     for (auto r : q)
     {

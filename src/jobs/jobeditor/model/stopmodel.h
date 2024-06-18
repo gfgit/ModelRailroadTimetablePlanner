@@ -23,7 +23,7 @@
 #include <QAbstractListModel>
 #include <QTime>
 
-#include <QVector>
+#include <QList>
 #include <QSet>
 
 #include "stations/station_utils.h"
@@ -213,7 +213,7 @@ private:
 
     sqlite3pp::database &mDb;
 
-    QVector<StopItem> stops;
+    QList<StopItem> stops;
 
     QSet<db_id> rsToUpdate;
     QSet<db_id> stationsToUpdate;

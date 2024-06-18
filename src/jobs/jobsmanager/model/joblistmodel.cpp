@@ -329,7 +329,7 @@ void JobListModel::internalFetch(int first, int sortCol, int /*valRow*/, const Q
     qDebug() << "Fetching:" << first << "Offset:" << offset;
     buildQuery(q, sortCol, offset, true);
 
-    QVector<JobItem> vec(BatchSize);
+    QList<JobItem> vec(BatchSize);
 
     // QString are implicitly shared, use QHash to temporary store them instead
     // of creating new ones for each JobItem

@@ -53,7 +53,7 @@ public:
     virtual void clearCache() override;
 
 protected:
-    typedef QVector<ModelItemType> Cache;
+    typedef QList<ModelItemType> Cache;
 
     /*!
      * \brief The ResultEvent class

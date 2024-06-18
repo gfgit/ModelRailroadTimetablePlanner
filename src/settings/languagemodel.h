@@ -23,7 +23,7 @@
 #include <QAbstractListModel>
 
 #include <QLocale>
-#include <QVector>
+#include <QList>
 
 class LanguageModel : public QAbstractListModel
 {
@@ -47,7 +47,7 @@ public:
     int findMatchingRow(const QLocale &loc);
 
 private:
-    QVector<QLocale> m_data;
+    QList<QLocale> m_data;
 };
 
 #endif // LANGUAGEMODEL_H

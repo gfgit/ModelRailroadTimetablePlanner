@@ -578,7 +578,7 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
     //        }
     //    }
 
-    QVector<TrackItem> vec(BatchSize);
+    QList<TrackItem> vec(BatchSize);
 
     auto it               = q.begin();
     const auto end        = q.end();

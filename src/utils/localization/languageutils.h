@@ -23,7 +23,7 @@
 class QTranslator;
 class QLocale;
 
-template <typename T> class QVector;
+template <typename T> class QList;
 
 namespace utils {
 
@@ -33,7 +33,7 @@ QTranslator *loadAppTranslator(const QLocale &loc);
 
 bool loadTranslationsFromSettings();
 
-QVector<QLocale> getAvailableTranslations();
+QList<QLocale> getAvailableTranslations();
 
 } // namespace language
 

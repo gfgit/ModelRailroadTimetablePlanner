@@ -825,7 +825,7 @@ void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
 
         utils::Side myDir = dirHelper.getStopOutSide(stopId);
 
-        QVector<JobEntry> passings;
+        QList<JobEntry> passings;
 
         q_selectPassings.bind(1, stationId);
         q_selectPassings.bind(2, arr);

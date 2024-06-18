@@ -23,7 +23,7 @@
 
 #    include "searchresultitem.h"
 
-SearchResultEvent::SearchResultEvent(SearchTask *ta, const QVector<SearchResultItem> &vec) :
+SearchResultEvent::SearchResultEvent(SearchTask *ta, const QList<SearchResultItem> &vec) :
     QEvent(_Type),
     task(ta),
     results(vec)

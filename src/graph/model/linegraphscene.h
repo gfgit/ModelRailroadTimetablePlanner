@@ -22,7 +22,7 @@
 
 #include "utils/scene/igraphscene.h"
 
-#include <QVector>
+#include <QList>
 #include <QHash>
 
 #include <QPointF>
@@ -244,7 +244,7 @@ private:
         db_id segmentId;
         double xPos;
 
-        QVector<JobSegmentGraph> nextSegmentJobGraphs;
+        QList<JobSegmentGraph> nextSegmentJobGraphs;
         /*!<
          * Stores job graph of the next segment
          * Which means jobs departing from this staation and going to next one
@@ -353,7 +353,7 @@ private:
      */
     QString graphObjectName;
 
-    QVector<StationPosEntry> stationPositions;
+    QList<StationPosEntry> stationPositions;
     QHash<db_id, StationGraphObject> stations;
 
     /*!

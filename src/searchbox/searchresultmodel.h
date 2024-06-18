@@ -22,7 +22,7 @@
 
 #include "utils/delegates/sql/isqlfkmatchmodel.h"
 
-#include <QVector>
+#include <QList>
 
 #include <QFont>
 
@@ -78,7 +78,7 @@ private:
     sqlite3pp::database &mDb;
 
 #ifdef SEARCHBOX_MODE_ASYNC
-    QVector<SearchTask *> tasks;
+    QList<SearchTask *> tasks;
     SearchTask *reusableTask;
     int deleteReusableTaskTimerId;
 
@@ -87,7 +87,7 @@ private:
     void clearReusableTask();
 #endif
 
-    QVector<SearchResultItem> m_data;
+    QList<SearchResultItem> m_data;
 
     QFont m_font;
 

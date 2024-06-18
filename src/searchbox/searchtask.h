@@ -44,10 +44,10 @@ public:
     void setQuery(const QString &query);
 
 private:
-    void searchByCat(const QList<int> &categories, QVector<SearchResultItem> &jobs);
+    void searchByCat(const QList<int> &categories, QList<SearchResultItem> &jobs);
     void searchByCatAndNum(const QList<int> &categories, const QString &num,
-                           QVector<SearchResultItem> &jobs);
-    void searchByNum(const QString &num, QVector<SearchResultItem> &jobs);
+                           QList<SearchResultItem> &jobs);
+    void searchByNum(const QString &num, QList<SearchResultItem> &jobs);
 
 private:
     enum QueryType

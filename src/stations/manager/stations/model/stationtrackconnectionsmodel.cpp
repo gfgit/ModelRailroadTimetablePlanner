@@ -573,7 +573,7 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
     //        }
     //    }
 
-    QVector<TrackConnItem> vec(BatchSize);
+    QList<TrackConnItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();

@@ -77,7 +77,7 @@ void StopCouplingModel::internalFetch(int first, int /*sortCol*/, int /*valRow*/
     if (offset)
         q.bind(2, offset);
 
-    QVector<RSItem> vec(BatchSize);
+    QList<RSItem> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();

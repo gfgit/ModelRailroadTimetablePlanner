@@ -23,7 +23,7 @@
 #include <QEvent>
 #include "utils/worker_event_types.h"
 
-#include <QVector>
+#include <QList>
 #include "shiftitem.h"
 
 class ShiftResultEvent : public QEvent
@@ -33,7 +33,7 @@ public:
 
     ShiftResultEvent();
 
-    QVector<ShiftItem> items;
+    QList<ShiftItem> items;
     int firstRow;
 };
 

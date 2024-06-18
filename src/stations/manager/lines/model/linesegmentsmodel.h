@@ -22,7 +22,7 @@
 
 #include "utils/delegates/sql/pageditemmodel.h"
 
-#include <QVector>
+#include <QList>
 
 #include <QFlags>
 
@@ -161,7 +161,7 @@ private:
     void fetchRows();
 
 private:
-    QVector<LineSegmentItem> segments;
+    QList<LineSegmentItem> segments;
     db_id m_lineId;
     bool isFetching;
 };

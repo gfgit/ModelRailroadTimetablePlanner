@@ -53,7 +53,7 @@ SearchTask::~SearchTask()
 
 void SearchTask::run()
 {
-    QVector<SearchResultItem> results;
+    QList<SearchResultItem> results;
 
     if (!regExp)
         regExp = new QRegularExpression("(?<name>[^0-9\\s]*)\\s*(?<num>\\d*)");
@@ -126,7 +126,7 @@ void SearchTask::run()
     sendEvent(new SearchResultEvent(this, results), true);
 }
 
-void SearchTask::searchByCat(const QList<int> &categories, QVector<SearchResultItem> &jobs)
+void SearchTask::searchByCat(const QList<int> &categories, QList<SearchResultItem> &jobs)
 {
     if (queryType != ByCat)
     {
@@ -156,7 +156,7 @@ void SearchTask::searchByCat(const QList<int> &categories, QVector<SearchResultI
 }
 
 void SearchTask::searchByCatAndNum(const QList<int> &categories, const QString &num,
-                                   QVector<SearchResultItem> &jobs)
+                                   QList<SearchResultItem> &jobs)
 {
     if (queryType != ByCatAndNum)
     {
@@ -189,7 +189,7 @@ void SearchTask::searchByCatAndNum(const QList<int> &categories, const QString &
     }
 }
 
-void SearchTask::searchByNum(const QString &num, QVector<SearchResultItem> &jobs)
+void SearchTask::searchByNum(const QString &num, QList<SearchResultItem> &jobs)
 {
     if (queryType != ByNum)
     {

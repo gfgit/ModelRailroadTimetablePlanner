@@ -314,7 +314,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
     }
     painter->setFont(pageNumFont);
 
-    QVector<QLineF> marginsVec;
+    QList<QLineF> marginsVec;
 
     int nLinesVert  = lastPageVertBorder - firstPageVertBorder + 1;
     int nLinesHoriz = lastPageHorizBorder - firstPageHorizBorder + 1;
@@ -346,7 +346,7 @@ void PrintPreviewSceneProxy::drawPageBorders(QPainter *painter, const QRectF &sc
           QPen(Qt::magenta, borderPenWidth, Qt::DashLine, Qt::FlatCap),
           QPen(Qt::black, borderPenWidth, Qt::DashLine, Qt::FlatCap)};
 
-        QVector<QLineF> pageBordersVec[NPageColors];
+        QList<QLineF> pageBordersVec[NPageColors];
 
         // Try to allocate memory in advance
         int allocCount = 4 * nLinesHoriz * nLinesVert / NPageColors;

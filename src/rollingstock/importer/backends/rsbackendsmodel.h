@@ -22,7 +22,7 @@
 
 #include <QAbstractListModel>
 
-#include <QVector>
+#include <QList>
 #include "rsimportbackend.h"
 
 class RSImportBackendsModel : public QAbstractListModel
@@ -39,7 +39,7 @@ public:
     RSImportBackend *getBackend(int idx) const;
 
 private:
-    QVector<RSImportBackend *> backends;
+    QList<RSImportBackend *> backends;
 };
 
 #endif // OPTIONSMODEL_H

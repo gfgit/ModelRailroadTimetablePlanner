@@ -60,7 +60,7 @@ struct StationSVGJobStops
     };
 
     db_id stationId = 0;
-    QVector<Stop> stops;
+    QList<Stop> stops;
     QTime time;
 };
 

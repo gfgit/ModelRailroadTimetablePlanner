@@ -551,7 +551,7 @@ void StationGatesModel::internalFetch(int first, int sortCol, int valRow, const 
     //        }
     //    }
 
-    QVector<GateItem> vec(BatchSize);
+    QList<GateItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();
