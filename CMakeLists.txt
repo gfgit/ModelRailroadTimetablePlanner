@@ -98,7 +98,7 @@ set(MR_TIMETABLE_PLANNER_DEFINITIONS ${MR_TIMETABLE_PLANNER_DEFINITIONS} -DAPPVE
 # Include our custom FindXXX moudules in '/cmake' subdirectory
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-find_package(Qt5 REQUIRED
+find_package(Qt6 REQUIRED
     COMPONENTS
     Core
     Gui

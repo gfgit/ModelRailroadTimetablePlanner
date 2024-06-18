@@ -15,9 +15,9 @@ if (NOT TARGET windeployqt_exe)
         get_filename_component(WINDEPLOYQT_EXE_DIR ${QT_QMAKE_EXECUTABLE} DIRECTORY)
         set(WINDEPLOYQT_EXE_TMP "${WINDEPLOYQT_EXE_DIR}/${WINDEPLOYQT_EXE_NAME}")
     endif()
-    if((NOT EXISTS ${WINDEPLOYQT_EXE_TMP}) AND Qt5_DIR)
-        # If we have Qt5_DIR, go up and select 'bin' folder
-        get_filename_component(WINDEPLOYQT_EXE_DIR "${Qt5_DIR}/../../../bin" REALPATH)
+    if((NOT EXISTS ${WINDEPLOYQT_EXE_TMP}) AND Qt6_DIR)
+        # If we have Qt6_DIR, go up and select 'bin' folder
+        get_filename_component(WINDEPLOYQT_EXE_DIR "${Qt6_DIR}/../../../bin" REALPATH)
         set(WINDEPLOYQT_EXE_TMP "${WINDEPLOYQT_EXE_DIR}/${WINDEPLOYQT_EXE_NAME}")
     endif()
 
