@@ -452,7 +452,7 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
     case Qt::TextAlignmentRole:
     {
         if (idx.column() == Number || idx.column() == NewNumber)
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         break;
     }
     case Qt::BackgroundRole:

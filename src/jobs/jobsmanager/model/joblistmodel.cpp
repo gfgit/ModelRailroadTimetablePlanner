@@ -124,7 +124,7 @@ QVariant JobListModel::data(const QModelIndex &idx, int role) const
     {
         if (idx.column() == IdCol)
         {
-            return Qt::AlignVCenter + Qt::AlignRight;
+            return QVariant::fromValue(Qt::AlignVCenter | Qt::AlignRight);
         }
         break;
     }

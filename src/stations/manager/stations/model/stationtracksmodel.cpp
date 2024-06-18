@@ -175,7 +175,7 @@ QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
         case PassengerLegthCol:
         case FreightLengthCol:
         case MaxAxesCol:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }

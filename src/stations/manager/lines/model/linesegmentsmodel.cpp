@@ -172,7 +172,7 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
             switch (idx.column())
             {
             case KmPosCol:
-                return Qt::AlignRight + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
             }
             break;
         }
@@ -238,7 +238,7 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
             case StationOrSegmentNameCol:
             case MaxSpeedCol:
             case DistanceCol:
-                return Qt::AlignRight + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
             }
             break;
         }

@@ -117,7 +117,7 @@ QVariant LinesModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case StartKm:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }

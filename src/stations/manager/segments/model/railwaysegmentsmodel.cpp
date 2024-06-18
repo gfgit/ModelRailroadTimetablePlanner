@@ -144,7 +144,7 @@ QVariant RailwaySegmentsModel::data(const QModelIndex &idx, int role) const
             return Qt::AlignCenter;
         case MaxSpeedCol:
         case DistanceCol:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }

@@ -118,7 +118,7 @@ QVariant RollingstockSQLModel::data(const QModelIndex &idx, int role) const
     {
         if (idx.column() == Number)
         {
-            return Qt::AlignVCenter + Qt::AlignRight;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }

@@ -159,7 +159,7 @@ QVariant StationGatesModel::data(const QModelIndex &idx, int role) const
             return Qt::AlignCenter;
         case OutTrackCountCol:
         case DefaultInPlatfCol:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }
