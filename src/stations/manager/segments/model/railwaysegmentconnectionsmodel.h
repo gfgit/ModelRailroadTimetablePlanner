@@ -22,7 +22,7 @@
 
 #include <QAbstractTableModel>
 
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 
@@ -122,7 +122,7 @@ private:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<RailwayTrack> items;
+    QList<RailwayTrack> items;
 
     db_id m_segmentId;
     db_id m_fromGateId;

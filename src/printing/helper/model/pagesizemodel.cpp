@@ -28,7 +28,7 @@ PageSizeModel::PageSizeModel(QObject *parent) :
 
 int PageSizeModel::rowCount(const QModelIndex &parent) const
 {
-    return parent.isValid() ? 0 : QPageSize::NPageSize;
+    return parent.isValid() ? 0 : (QPageSize::LastPageSize + 1);
 }
 
 QVariant PageSizeModel::data(const QModelIndex &idx, int role) const

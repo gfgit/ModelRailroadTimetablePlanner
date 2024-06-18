@@ -41,7 +41,7 @@ public:
     {
     }
 
-    QVector<RSImportedRollingstockModel::RSItem> items;
+    QList<RSImportedRollingstockModel::RSItem> items;
     int firstRow;
 };
 
@@ -229,7 +229,7 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
         }
     }
 
-    QVector<RSItem> vec(BatchSize);
+    QList<RSItem> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();
@@ -318,7 +318,7 @@ void RSImportedRollingstockModel::internalFetch(int first, int sortCol, int valR
     qApp->postEvent(this, ev);
 }
 
-void RSImportedRollingstockModel::handleResult(const QVector<RSItem> &items, int firstRow)
+void RSImportedRollingstockModel::handleResult(const QList<RSItem> &items, int firstRow)
 {
     if (firstRow == cacheFirstRow + cache.size())
     {
@@ -339,7 +339,7 @@ void RSImportedRollingstockModel::handleResult(const QVector<RSItem> &items, int
         if (firstRow + items.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<RSItem> tmp = items;
+            QList<RSItem> tmp = items;
             tmp.append(cache);
             cache = tmp;
             if (cache.size() > ItemsPerPage)
@@ -452,7 +452,7 @@ QVariant RSImportedRollingstockModel::data(const QModelIndex &idx, int role) con
     case Qt::TextAlignmentRole:
     {
         if (idx.column() == Number || idx.column() == NewNumber)
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         break;
     }
     case Qt::BackgroundRole:

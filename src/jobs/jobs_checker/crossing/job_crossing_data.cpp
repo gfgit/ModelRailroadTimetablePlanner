@@ -30,7 +30,7 @@ void JobCrossingErrorMap::removeJob(db_id jobId)
         return; // Not contained in map
 
     // Remove all errors referencing to us
-    for (const JobCrossingErrorData &err : qAsConst(job->errors))
+    for (const JobCrossingErrorData &err : std::as_const(job->errors))
     {
         auto otherJob = map.find(err.otherJob.jobId);
         if (otherJob == map.end())
@@ -59,7 +59,7 @@ void JobCrossingErrorMap::renameJob(db_id newJobId, db_id oldJobId)
         return; // Not contained in map
 
     // Uodate all errors referencing to us
-    for (const JobCrossingErrorData &err : qAsConst(job->errors))
+    for (const JobCrossingErrorData &err : std::as_const(job->errors))
     {
         auto otherJob = map.find(err.otherJob.jobId);
         if (otherJob == map.end())

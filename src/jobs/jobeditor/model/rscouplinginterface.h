@@ -22,7 +22,7 @@
 
 #include <QObject>
 
-#include <QVector>
+#include <QList>
 
 #include "sqlite3pp/sqlite3pp.h"
 using namespace sqlite3pp;
@@ -55,8 +55,8 @@ public:
 private:
     StopModel *stopsModel;
 
-    QVector<db_id> coupled;
-    QVector<db_id> uncoupled;
+    QList<db_id> coupled;
+    QList<db_id> uncoupled;
 
     database &mDb;
     command q_deleteCoupling;

@@ -26,7 +26,7 @@
 #include "app/session.h"
 
 #include <QDirIterator>
-#include <QVector>
+#include <QList>
 
 #include <QDebug>
 
@@ -56,7 +56,7 @@ QTranslator *utils::language::loadAppTranslator(const QLocale &loc)
 bool utils::language::loadTranslationsFromSettings()
 {
     const QString localPath = qApp->applicationDirPath() + translationsFolder;
-    const QString qtLibPath = QLibraryInfo::location(QLibraryInfo::TranslationsPath);
+    const QString qtLibPath = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
     QLocale loc             = Session->getAppLanguage();
 
     // NOTE: If locale is English with default country we do not need translations
@@ -81,9 +81,9 @@ bool utils::language::loadTranslationsFromSettings()
     return false;
 }
 
-QVector<QLocale> utils::language::getAvailableTranslations()
+QList<QLocale> utils::language::getAvailableTranslations()
 {
-    QVector<QLocale> vec;
+    QList<QLocale> vec;
 
     // NOTE: First add default laguage embedded in executable strings
     vec.append(MeetingSession::embeddedLocale);

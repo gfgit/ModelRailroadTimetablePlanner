@@ -39,7 +39,7 @@ public:
     {
     }
 
-    QVector<RSImportedOwnersModel::OwnerItem> items;
+    QList<RSImportedOwnersModel::OwnerItem> items;
     int firstRow;
 };
 
@@ -212,7 +212,7 @@ void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, co
         }
     }
 
-    QVector<OwnerItem> vec(BatchSize);
+    QList<OwnerItem> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();
@@ -269,7 +269,7 @@ void RSImportedOwnersModel::internalFetch(int first, int sortCol, int valRow, co
     qApp->postEvent(this, ev);
 }
 
-void RSImportedOwnersModel::handleResult(const QVector<OwnerItem> &items, int firstRow)
+void RSImportedOwnersModel::handleResult(const QList<OwnerItem> &items, int firstRow)
 {
     if (firstRow == cacheFirstRow + cache.size())
     {
@@ -290,7 +290,7 @@ void RSImportedOwnersModel::handleResult(const QVector<OwnerItem> &items, int fi
         if (firstRow + items.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<OwnerItem> tmp = items;
+            QList<OwnerItem> tmp = items;
             tmp.append(cache);
             cache = tmp;
             if (cache.size() > ItemsPerPage)

@@ -22,7 +22,7 @@
 
 #include <QObject>
 
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 #include "graph/linegraphtypes.h"
@@ -186,7 +186,7 @@ private:
     void onStationPlanChanged_internal(const QSet<db_id> &stationIds, int flag);
 
 private:
-    QVector<LineGraphScene *> scenes;
+    QList<LineGraphScene *> scenes;
     LineGraphScene *activeScene;
     JobStopEntry lastSelectedJob;
     bool m_followJobOnGraphChange;

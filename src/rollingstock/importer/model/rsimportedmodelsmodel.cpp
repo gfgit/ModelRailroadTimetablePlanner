@@ -41,7 +41,7 @@ public:
     {
     }
 
-    QVector<RSImportedModelsModel::ModelItem> items;
+    QList<RSImportedModelsModel::ModelItem> items;
     int firstRow;
 };
 
@@ -211,7 +211,7 @@ void RSImportedModelsModel::internalFetch(int first, int sortCol, int valRow, co
         }
     }
 
-    QVector<ModelItem> vec(BatchSize);
+    QList<ModelItem> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();
@@ -276,7 +276,7 @@ void RSImportedModelsModel::internalFetch(int first, int sortCol, int valRow, co
     qApp->postEvent(this, ev);
 }
 
-void RSImportedModelsModel::handleResult(const QVector<ModelItem> &items, int firstRow)
+void RSImportedModelsModel::handleResult(const QList<ModelItem> &items, int firstRow)
 {
     if (firstRow == cacheFirstRow + cache.size())
     {
@@ -297,7 +297,7 @@ void RSImportedModelsModel::handleResult(const QVector<ModelItem> &items, int fi
         if (firstRow + items.size() == cacheFirstRow)
         {
             qDebug() << "RES: prepending First:" << cacheFirstRow;
-            QVector<ModelItem> tmp = items;
+            QList<ModelItem> tmp = items;
             tmp.append(cache);
             cache = tmp;
             if (cache.size() > ItemsPerPage)

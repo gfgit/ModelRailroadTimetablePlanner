@@ -156,7 +156,7 @@ QVariant RSModelsSQLModel::data(const QModelIndex &idx, int role) const
     case Qt::TextAlignmentRole:
     {
         if (idx.column() == MaxSpeed || idx.column() == Axes)
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         break;
     }
     case RS_TYPE_ROLE:
@@ -618,7 +618,7 @@ void RSModelsSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
 
     buildQuery(q, sortCol, offset, true);
 
-    QVector<RSModel> vec(BatchSize);
+    QList<RSModel> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();

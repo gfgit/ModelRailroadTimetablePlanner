@@ -52,7 +52,7 @@ signals:
 
 private:
     QStringList colNames;
-    QVector<QVariant> m_data;
+    QList<QVariant> m_data;
     int colCount;
     QColor backGround;
 };

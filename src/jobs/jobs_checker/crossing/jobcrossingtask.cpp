@@ -78,7 +78,7 @@ JobCrossingResultEvent::JobCrossingResultEvent(JobCrossingTask *worker,
 }
 
 JobCrossingTask::JobCrossingTask(sqlite3pp::database &db, QObject *receiver,
-                                 const QVector<db_id> &jobs) :
+                                 const QList<db_id> &jobs) :
     IQuittableTask(receiver),
     mDb(db),
     jobsToCheck(jobs)
@@ -129,7 +129,7 @@ void JobCrossingTask::run()
     //    else
     //    {
     //        query q_getCat(mDb, "SELECT category FROM jobs WHERE id=?");
-    //        for(const db_id jobId : qAsConst(jobsToCheck))
+    //        for(const db_id jobId : std::as_const(jobsToCheck))
     //        {
     //            JobErrorList list;
     //            list.jobId = jobId;

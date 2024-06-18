@@ -21,7 +21,7 @@
 #define RSIMPORTEDOWNERSMODEL_H
 
 #include "rollingstock/importer/intefaces/irsimportmodel.h"
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 #include "utils/delegates/sql/IFKField.h"
@@ -106,10 +106,10 @@ protected:
 private:
     void fetchRow(int row);
     Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant &val);
-    void handleResult(const QVector<OwnerItem> &items, int firstRow);
+    void handleResult(const QList<OwnerItem> &items, int firstRow);
 
 private:
-    QVector<OwnerItem> cache;
+    QList<OwnerItem> cache;
     int cacheFirstRow;
     int firstPendingRow;
 };

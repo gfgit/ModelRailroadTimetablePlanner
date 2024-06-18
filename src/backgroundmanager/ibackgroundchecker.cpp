@@ -116,7 +116,7 @@ void IBackgroundChecker::abortTasks()
         m_mainWorker->stop();
     }
 
-    for (IQuittableTask *task : qAsConst(m_workers))
+    for (IQuittableTask *task : std::as_const(m_workers))
     {
         task->stop();
     }

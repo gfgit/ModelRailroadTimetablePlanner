@@ -22,7 +22,7 @@
 
 #include <QAbstractTableModel>
 
-#include <QVector>
+#include <QList>
 
 #include <QTime>
 
@@ -78,7 +78,7 @@ public:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<ShiftJobItem> m_data;
+    QList<ShiftJobItem> m_data;
 };
 
 #endif // SHIFTJOBSMODEL_H

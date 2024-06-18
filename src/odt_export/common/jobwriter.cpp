@@ -568,7 +568,7 @@ void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
                            " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
                            " WHERE rs_list.id=?");
 
-    QList<QPair<QString, QList<db_id>>> stopsRS;
+    QList<std::pair<QString, QList<db_id>>> stopsRS;
 
     // Title
     xml.writeStartElement("text:p");
@@ -825,7 +825,7 @@ void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
 
         utils::Side myDir = dirHelper.getStopOutSide(stopId);
 
-        QVector<JobEntry> passings;
+        QList<JobEntry> passings;
 
         q_selectPassings.bind(1, stationId);
         q_selectPassings.bind(2, arr);
@@ -927,7 +927,7 @@ void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
     }
 
     bool firstRow = true;
-    for (auto &s : qAsConst(stopsRS))
+    for (auto &s : std::as_const(stopsRS))
     {
         xml.writeStartElement("table:table-row"); // start new row
 

@@ -26,7 +26,7 @@
 #    include "utils/thread/taskprogressevent.h"
 
 #    include <QMap>
-#    include <QVector>
+#    include <QList>
 
 #    include "rs_error_data.h"
 
@@ -38,7 +38,7 @@ class query;
 class RsErrWorker : public IQuittableTask
 {
 public:
-    RsErrWorker(sqlite3pp::database &db, QObject *receiver, const QVector<db_id> &vec);
+    RsErrWorker(sqlite3pp::database &db, QObject *receiver, const QList<db_id> &vec);
 
     void run() override;
 
@@ -49,7 +49,7 @@ private:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<db_id> rsToCheck;
+    QList<db_id> rsToCheck;
 };
 
 class RsWorkerResultEvent : public GenericTaskEvent

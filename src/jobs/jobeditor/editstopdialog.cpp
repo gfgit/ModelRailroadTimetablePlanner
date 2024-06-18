@@ -410,7 +410,7 @@ void EditStopDialog::calcPassings()
     q.bind(3, curStop.arrival);
     q.bind(4, m_jobId);
 
-    QVector<JobPassingsModel::Entry> passings, crossings;
+    QList<JobPassingsModel::Entry> passings, crossings;
 
     for (auto r : q)
     {
@@ -421,11 +421,10 @@ void EditStopDialog::calcPassings()
         e.category        = JobCategory(r.get<int>(2));
         e.arrival         = r.get<QTime>(3);
         e.departure       = r.get<QTime>(4);
-        e.platform        = r.get<int>(5);
 
-        e.platform        = r.get<QString>(6);
+        e.platform        = r.get<QString>(5);
         if (e.platform.isEmpty())
-            e.platform = r.get<QString>(7); // Use out gate to get track name
+            e.platform = r.get<QString>(6); // Use out gate to get track name
 
         utils::Side otherDir = dirHelper.getStopOutSide(otherStopId);
 

@@ -117,7 +117,7 @@ QVariant LinesModel::data(const QModelIndex &idx, int role) const
         switch (idx.column())
         {
         case StartKm:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }
@@ -281,7 +281,7 @@ void LinesModel::internalFetch(int first, int sortCol, int valRow, const QVarian
     //        }
     //    }
 
-    QVector<LineItem> vec(BatchSize);
+    QList<LineItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();

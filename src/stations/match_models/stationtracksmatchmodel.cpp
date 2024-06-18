@@ -87,7 +87,7 @@ QVariant StationTracksMatchModel::data(const QModelIndex &idx, int role) const
     case Qt::TextAlignmentRole:
     {
         if (!emptyRow && !ellipsesRow)
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);;
         break;
     }
     case Qt::BackgroundRole:

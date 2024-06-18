@@ -207,7 +207,7 @@ bool RailwaySegmentConnectionsModel::setData(const QModelIndex &idx, const QVari
             return false;
         }
 
-        for (const RailwayTrack &other : qAsConst(items))
+        for (const RailwayTrack &other : std::as_const(items))
         {
             if (other.state != ToRemove && other.state != AddedButNotComplete
                 && other.fromTrack == trackNum)
@@ -233,7 +233,7 @@ bool RailwaySegmentConnectionsModel::setData(const QModelIndex &idx, const QVari
             return false;
         }
 
-        for (const RailwayTrack &other : qAsConst(items))
+        for (const RailwayTrack &other : std::as_const(items))
         {
             if (other.state != ToRemove && other.state != AddedButNotComplete
                 && other.toTrack == trackNum)
@@ -474,7 +474,7 @@ bool RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
 
     // First remove all ToRemove
     command cmd(mDb, "DELETE FROM railway_connections WHERE id=?");
-    for (const RailwayTrack &item : qAsConst(items))
+    for (const RailwayTrack &item : std::as_const(items))
     {
         if (item.state == ToRemove)
         {
@@ -494,7 +494,7 @@ bool RailwaySegmentConnectionsModel::applyChanges(db_id overrideSegmentId)
     cmd.prepare("UPDATE railway_connections SET in_track=?, out_track=? WHERE id=?");
     const int fromTrackCol = m_reversed ? 2 : 1;
     const int toTrackCol   = m_reversed ? 1 : 2;
-    for (const RailwayTrack &item : qAsConst(items))
+    for (const RailwayTrack &item : std::as_const(items))
     {
         if (item.state == Edited)
         {
@@ -547,7 +547,7 @@ int RailwaySegmentConnectionsModel::insertOrReplace(
   const RailwaySegmentConnectionsModel::RailwayTrack &newTrack)
 {
     // Check if track is already connected
-    for (const RailwayTrack &other : qAsConst(items))
+    for (const RailwayTrack &other : std::as_const(items))
     {
         if (other.state == ToRemove || other.state == AddedButNotComplete)
             continue; // Ignore these items

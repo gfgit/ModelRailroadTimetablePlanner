@@ -178,7 +178,7 @@ void SearchResultModel::abortSearch()
 
 void SearchResultModel::stopAllTasks()
 {
-    for (SearchTask *task : qAsConst(tasks))
+    for (SearchTask *task : std::as_const(tasks))
     {
         task->stop();
         task->cleanup();

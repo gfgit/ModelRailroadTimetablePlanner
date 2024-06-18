@@ -579,7 +579,7 @@ void StationWriter::writeStation(QXmlStreamWriter &xml, db_id stationId, QString
         writeCellListEnd(xml);
 
         // Crossings, Passings
-        QVector<JobEntry> passings;
+        QList<JobEntry> passings;
         JobStopDirectionHelper dirHelper(mDb);
         utils::Side myDirection = dirHelper.getStopOutSide(stopId);
 

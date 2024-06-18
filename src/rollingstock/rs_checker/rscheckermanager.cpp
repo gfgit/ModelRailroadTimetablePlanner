@@ -47,7 +47,7 @@ void RsCheckerManager::checkRs(const QSet<db_id> &rsIds)
     if (rsIds.isEmpty() || !Session->m_Db.db())
         return;
 
-    QVector<db_id> vec(rsIds.size());
+    QList<db_id> vec(rsIds.size());
     for (db_id rsId : rsIds)
         vec.append(rsId);
 

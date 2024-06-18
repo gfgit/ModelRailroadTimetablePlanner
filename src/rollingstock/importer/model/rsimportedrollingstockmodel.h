@@ -21,7 +21,7 @@
 #define RSIMPORTEDROLLINGSTOCKMODEL_H
 
 #include "rollingstock/importer/intefaces/irsimportmodel.h"
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 
@@ -105,10 +105,10 @@ protected:
 private:
     void fetchRow(int row);
     Q_INVOKABLE void internalFetch(int first, int sortCol, int valRow, const QVariant &val);
-    void handleResult(const QVector<RSItem> &items, int firstRow);
+    void handleResult(const QList<RSItem> &items, int firstRow);
 
 private:
-    QVector<RSItem> cache;
+    QList<RSItem> cache;
     int cacheFirstRow;
     int firstPendingRow;
 };

@@ -269,7 +269,7 @@ void ImportStationModel::internalFetch(int first, int sortCol, int valRow, const
     //        }
     //    }
 
-    QVector<StationItem> vec(BatchSize);
+    QList<StationItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();

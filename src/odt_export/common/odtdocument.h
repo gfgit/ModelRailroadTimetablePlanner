@@ -61,7 +61,7 @@ private:
 private:
     QString documentTitle;
     // pair: fileName, mediaType
-    QList<QPair<QString, QString>> imageList;
+    QList<std::pair<QString, QString>> imageList;
 };
 
 #endif // ODTDOCUMENT_H

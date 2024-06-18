@@ -20,7 +20,7 @@
 #ifndef STATIONWRITER_H
 #define STATIONWRITER_H
 
-#include <QVector>
+#include <QList>
 #include "utils/types.h"
 
 #include <sqlite3pp/sqlite3pp.h>

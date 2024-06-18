@@ -21,7 +21,7 @@
 #define DUPLICATESIMPORTEDRSMODEL_H
 
 #include <QAbstractTableModel>
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 
@@ -85,7 +85,7 @@ protected:
 private:
     ICheckName *iface;
 
-    QVector<DuplicatedItem> items;
+    QList<DuplicatedItem> items;
 };
 
 #endif // DUPLICATESIMPORTEDRSMODEL_H

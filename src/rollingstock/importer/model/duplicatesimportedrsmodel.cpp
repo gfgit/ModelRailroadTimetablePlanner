@@ -34,7 +34,7 @@
 class DuplicatesImportedRSModelTask : public IQuittableTask
 {
 public:
-    QVector<DuplicatesImportedRSModel::DuplicatedItem> items;
+    QList<DuplicatesImportedRSModel::DuplicatedItem> items;
 
     inline DuplicatesImportedRSModelTask(int mode, sqlite3pp::database &db, QObject *receiver) :
         IQuittableTask(receiver),
@@ -354,7 +354,7 @@ QVariant DuplicatesImportedRSModel::data(const QModelIndex &idx, int role) const
     case Qt::TextAlignmentRole:
     {
         if (idx.column() == Number || idx.column() == NewNumber)
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         break;
     }
     case Qt::BackgroundRole:

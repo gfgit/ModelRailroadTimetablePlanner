@@ -21,7 +21,7 @@
 #define PRINTWIZARD_H
 
 #include <QWizard>
-#include <QVector>
+#include <QList>
 
 #include "printing/helper/model/printdefs.h"
 

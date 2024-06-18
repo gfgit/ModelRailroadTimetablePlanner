@@ -244,7 +244,7 @@ void StationFreeRSModel::reloadData()
             }
         };
 
-        for (const Item &it : qAsConst(tempLookup))
+        for (const Item &it : std::as_const(tempLookup))
         {
             insertSorted(m_data, it, NameLessThan());
         }
@@ -261,7 +261,7 @@ void StationFreeRSModel::reloadData()
             }
         };
 
-        for (const Item &it : qAsConst(tempLookup))
+        for (const Item &it : std::as_const(tempLookup))
         {
             insertSorted(m_data, it, FromTimeLessThan());
         }
@@ -278,7 +278,7 @@ void StationFreeRSModel::reloadData()
             }
         };
 
-        for (const Item &it : qAsConst(tempLookup))
+        for (const Item &it : std::as_const(tempLookup))
         {
             insertSorted(m_data, it, UpToTimeLessThan());
         }
@@ -296,7 +296,7 @@ void StationFreeRSModel::reloadData()
             }
         };
 
-        for (const Item &it : qAsConst(tempLookup))
+        for (const Item &it : std::as_const(tempLookup))
         {
             insertSorted(m_data, it, FromJobLessThan());
         }
@@ -313,7 +313,7 @@ void StationFreeRSModel::reloadData()
             }
         };
 
-        for (const Item &it : qAsConst(tempLookup))
+        for (const Item &it : std::as_const(tempLookup))
         {
             insertSorted(m_data, it, ToJobLessThan());
         }

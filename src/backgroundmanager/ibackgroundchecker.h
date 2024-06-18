@@ -23,7 +23,7 @@
 #ifdef ENABLE_BACKGROUND_MANAGER
 
 #    include <QObject>
-#    include <QVector>
+#    include <QList>
 
 class QAbstractItemModel;
 class QModelIndex;
@@ -81,7 +81,7 @@ protected:
 
 private:
     IQuittableTask *m_mainWorker = nullptr;
-    QVector<IQuittableTask *> m_workers;
+    QList<IQuittableTask *> m_workers;
 };
 
 #endif // ENABLE_BACKGROUND_MANAGER

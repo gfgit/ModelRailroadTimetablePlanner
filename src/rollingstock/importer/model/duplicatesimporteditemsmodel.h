@@ -21,7 +21,7 @@
 #define DUPLICATESIMPORTEDITEMSMODEL_H
 
 #include <QAbstractTableModel>
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 #include "utils/model_mode.h"
@@ -89,7 +89,7 @@ protected:
 private:
     ICheckName *iface;
 
-    QVector<DuplicatedItem> items;
+    QList<DuplicatedItem> items;
 
     ModelModes::Mode m_mode;
 };

@@ -22,7 +22,7 @@
 
 #include "utils/scene/igraphscene.h"
 
-#include <QVector>
+#include <QList>
 #include <QHash>
 #include <QTime>
 
@@ -61,7 +61,7 @@ public:
         db_id shiftId;
         QString shiftName;
 
-        QVector<JobItem> jobList;
+        QList<JobItem> jobList;
     };
 
     ShiftGraphScene(sqlite3pp::database &db, QObject *parent = nullptr);
@@ -127,7 +127,7 @@ private:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<ShiftGraph> m_shifts;
+    QList<ShiftGraph> m_shifts;
 
     struct StationCache
     {

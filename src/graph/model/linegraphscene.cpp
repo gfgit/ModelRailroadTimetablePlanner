@@ -414,7 +414,7 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
 
     const StationPosEntry *entry = nullptr;
 
-    for (const StationPosEntry &stPos : qAsConst(stationPositions))
+    for (const StationPosEntry &stPos : std::as_const(stationPositions))
     {
         if (stPos.xPos <= pos.x())
         {
@@ -448,7 +448,7 @@ JobStopEntry LineGraphScene::getJobAt(const QPointF &pos, const double tolerance
         return job; // Error, no match
 
     double prevSegDistance = -1;
-    for (const JobSegmentGraph &segment : qAsConst(entry->nextSegmentJobGraphs))
+    for (const JobSegmentGraph &segment : std::as_const(entry->nextSegmentJobGraphs))
     {
         // NOTE: in segments arrival comes AFTER departure
         const QRectF r = QRectF(segment.fromDeparture, segment.toArrival).normalized();
@@ -736,7 +736,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
 
         if (!isSegmentVisible && nextSegId)
         {
-            for (const StationPosEntry &stPos : qAsConst(stationPositions))
+            for (const StationPosEntry &stPos : std::as_const(stationPositions))
             {
                 if (stPos.segmentId == nextSegId)
                 {
@@ -756,7 +756,7 @@ bool LineGraphScene::loadStationJobStops(StationGraphObject &st)
             if (seg.column_type(0) != SQLITE_NULL)
             {
                 db_id prevSegId = seg.get<db_id>(0);
-                for (const StationPosEntry &stPos : qAsConst(stationPositions))
+                for (const StationPosEntry &stPos : std::as_const(stationPositions))
                 {
                     if (stPos.segmentId == prevSegId)
                     {
@@ -932,7 +932,7 @@ bool LineGraphScene::requestShowZone(db_id stationId, db_id segmentId, QTime fro
     // So the first station must set it's position regardless of left() value
     bool leftEdgeSet = false;
 
-    for (const StationPosEntry &entry : qAsConst(stationPositions))
+    for (const StationPosEntry &entry : std::as_const(stationPositions))
     {
         // Match the requested station or both station in the segment
         if (entry.stationId == stationId || entry.segmentId == segmentId)

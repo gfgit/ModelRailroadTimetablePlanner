@@ -93,11 +93,11 @@ target_include_directories(
 target_link_libraries(
     ${MR_TIMETABLE_PLANNER_TARGET}
     PRIVATE
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
-    Qt5::Svg
-    Qt5::PrintSupport
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Widgets
+    Qt6::Svg
+    Qt6::PrintSupport
     ${SQLite3_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ssplib::ssplib
@@ -129,7 +129,10 @@ else()
         PRIVATE
         ${LibZip_LIBRARIES}
         )
-    get_dll_library_from_import_library(${LibZip_LIBRARIES} LibZip_LIBRARY_TO_INSTALL)
+
+    if (WIN32)
+        get_dll_library_from_import_library(${LibZip_LIBRARIES} LibZip_LIBRARY_TO_INSTALL)
+    endif()
 endif()
 
 if (WIN32)
@@ -162,36 +165,20 @@ add_custom_target(RELEASE_TRANSLATIONS ALL
     COMMENT "Running translations it_IT...")
 
 if(UPDATE_TS)
+
     # Run 'lupdate' to parse C++ and UI files and extract translatable strings
     if(UPDATE_TS_KEEP_OBSOLETE)
-        add_custom_command(TARGET RELEASE_TRANSLATIONS
-            POST_BUILD
-            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ARGS ${CMAKE_SOURCE_DIR}/src -ts ${MR_TIMETABLE_PLANNER_TS_FILES}
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
-            COMMENT "Updating translations"
-            VERBATIM)
+        set(LUPDATE_OPTIONS_STR "")
     else()
-        add_custom_command(TARGET RELEASE_TRANSLATIONS
-            POST_BUILD
-            COMMAND ${Qt5_LUPDATE_EXECUTABLE} ARGS ${CMAKE_SOURCE_DIR}/src -ts ${MR_TIMETABLE_PLANNER_TS_FILES} -no-obsolete
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
-            COMMENT "Updating translations"
-            VERBATIM)
+        set(LUPDATE_OPTIONS_STR "-no-obsolete")
     endif()
 
+    qt_add_translations(
+        TS_FILES ${MR_TIMETABLE_PLANNER_TS_FILES}
+        SOURCES ${MR_TIMETABLE_PLANNER_SOURCES}
+        LUPDATE_OPTIONS ${LUPDATE_OPTIONS_STR}
+    )
 endif()
-
-# For each .ts file release a .qm file
-foreach(TS_FILE ${MR_TIMETABLE_PLANNER_TS_FILES})
-    get_filename_component(QM_FILE_NAME ${TS_FILE} NAME_WLE)
-    set(QM_FILE "${CMAKE_BINARY_DIR}/src/translations/${QM_FILE_NAME}.qm")
-    message("Generating translation: ${QM_FILE}")
-    add_custom_command(TARGET RELEASE_TRANSLATIONS
-        POST_BUILD
-        COMMAND ${Qt5_LRELEASE_EXECUTABLE} ARGS ${CMAKE_CURRENT_SOURCE_DIR}/${TS_FILE} -qm ${QM_FILE}
-        COMMENT "Translating ${QM_FILE_NAME}"
-        VERBATIM)
-endforeach()
 
 ## Update/Release translations end ##
 

@@ -26,12 +26,12 @@
 
 #    include <QDebug>
 
-#    include <QVector>
+#    include <QList>
 
 #    include <sqlite3pp/sqlite3pp.h>
 using namespace sqlite3pp;
 
-RsErrWorker::RsErrWorker(database &db, QObject *receiver, const QVector<db_id> &vec) :
+RsErrWorker::RsErrWorker(database &db, QObject *receiver, const QList<db_id> &vec) :
     IQuittableTask(receiver),
     mDb(db),
     rsToCheck(vec)
@@ -114,7 +114,7 @@ void RsErrWorker::run()
                                    " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
                                    " WHERE rs_list.id=?");
             int i = 0;
-            for (db_id rsId : qAsConst(rsToCheck))
+            for (db_id rsId : std::as_const(rsToCheck))
             {
                 if (++i % 4 == 0 && wasStopped()) // Check every 4 RS to keep overhead low.
                     break;

@@ -36,7 +36,7 @@ BackgroundManager::~BackgroundManager()
 
 void BackgroundManager::handleSessionLoaded()
 {
-    for (IBackgroundChecker *mgr : qAsConst(checkers))
+    for (IBackgroundChecker *mgr : std::as_const(checkers))
         mgr->startWorker();
 }
 
@@ -44,7 +44,7 @@ void BackgroundManager::abortAllTasks()
 {
     emit abortTrivialTasks();
 
-    for (IBackgroundChecker *mgr : qAsConst(checkers))
+    for (IBackgroundChecker *mgr : std::as_const(checkers))
         mgr->abortTasks();
 }
 
@@ -54,7 +54,7 @@ bool BackgroundManager::isRunning()
     if (running)
         return true;
 
-    for (IBackgroundChecker *mgr : qAsConst(checkers))
+    for (IBackgroundChecker *mgr : std::as_const(checkers))
     {
         if (mgr->isRunning())
             return true;
@@ -82,7 +82,7 @@ void BackgroundManager::removeChecker(IBackgroundChecker *mgr)
 
 void BackgroundManager::clearResults()
 {
-    for (IBackgroundChecker *mgr : qAsConst(checkers))
+    for (IBackgroundChecker *mgr : std::as_const(checkers))
     {
         mgr->clearModel();
     }

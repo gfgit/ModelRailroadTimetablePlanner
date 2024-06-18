@@ -22,7 +22,7 @@
 
 #include <QAbstractTableModel>
 
-#include <QVector>
+#include <QList>
 
 #include <QTime>
 
@@ -61,10 +61,10 @@ public:
 
     QVariant data(const QModelIndex &idx, int role = Qt::DisplayRole) const override;
 
-    void setJobs(const QVector<Entry> &vec);
+    void setJobs(const QList<Entry> &vec);
 
 private:
-    QVector<Entry> m_data;
+    QList<Entry> m_data;
 };
 
 #endif // JOBPASSINGSMODEL_H

@@ -55,7 +55,7 @@ struct JobCrossingErrorData
 struct JobCrossingErrorList
 {
     JobEntry job;
-    QVector<JobCrossingErrorData> errors;
+    QList<JobCrossingErrorData> errors;
 
     inline int childCount() const
     {
@@ -90,7 +90,7 @@ public:
     {
         if (row >= topLevelCount())
             return nullptr;
-        return &(map.constBegin() + row).value();
+        return &std::next(map.constBegin(), row).value();
     }
 
     inline const JobCrossingErrorList *getParent(JobCrossingErrorData *child) const

@@ -65,10 +65,10 @@ public:
         RsEngineSubType engineType;
     };
 
-    void loadData(const QVector<RsItem> &items);
+    void loadData(const QList<RsItem> &items);
 
 private:
-    QVector<RsItem> m_data;
+    QList<RsItem> m_data;
 
     RSCouplingInterface *couplingMgr;
     RsOp op;

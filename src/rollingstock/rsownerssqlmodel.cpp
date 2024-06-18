@@ -384,7 +384,7 @@ void RSOwnersSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
         q.bind(3, ownerFilter, sqlite3pp::copy);
     }
 
-    QVector<RSOwner> vec(BatchSize);
+    QList<RSOwner> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();

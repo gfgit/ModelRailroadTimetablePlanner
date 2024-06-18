@@ -22,7 +22,7 @@
 
 #include <QAbstractItemModel>
 
-#include <QVector>
+#include <QList>
 #include <QTime>
 
 #include "utils/types.h"
@@ -105,8 +105,8 @@ public:
 private:
     sqlite3pp::database &mDb;
 
-    QVector<ParentItem> parents;
-    QVector<RSItem> rsData;
+    QList<ParentItem> parents;
+    QList<RSItem> rsData;
 
     SessionRSMode m_mode;
     SessionRSOrder m_order;

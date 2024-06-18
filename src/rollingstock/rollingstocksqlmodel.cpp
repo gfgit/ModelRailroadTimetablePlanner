@@ -118,7 +118,7 @@ QVariant RollingstockSQLModel::data(const QModelIndex &idx, int role) const
     {
         if (idx.column() == Number)
         {
-            return Qt::AlignVCenter + Qt::AlignRight;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }
@@ -596,7 +596,7 @@ void RollingstockSQLModel::internalFetch(int first, int sortCol, int /*valRow*/,
 
     buildQuery(q, sortCol, offset, true);
 
-    QVector<RSItem> vec(BatchSize);
+    QList<RSItem> vec(BatchSize);
 
     auto it        = q.begin();
     const auto end = q.end();

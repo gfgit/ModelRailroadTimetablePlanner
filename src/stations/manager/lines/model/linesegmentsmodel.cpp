@@ -42,7 +42,7 @@ public:
     {
     }
 
-    QVector<LineSegmentsModel::LineSegmentItem> items;
+    QList<LineSegmentsModel::LineSegmentItem> items;
 };
 
 LineSegmentsModel::LineSegmentsModel(sqlite3pp::database &db, QObject *parent) :
@@ -172,7 +172,7 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
             switch (idx.column())
             {
             case KmPosCol:
-                return Qt::AlignRight + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
             }
             break;
         }
@@ -238,7 +238,7 @@ QVariant LineSegmentsModel::data(const QModelIndex &idx, int role) const
             case StationOrSegmentNameCol:
             case MaxSpeedCol:
             case DistanceCol:
-                return Qt::AlignRight + Qt::AlignVCenter;
+                return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
             }
             break;
         }
@@ -414,7 +414,7 @@ void LineSegmentsModel::fetchRows()
 
     // Reserve for 1 extra item (which will hold last station)
 
-    QVector<LineSegmentItem> vec;
+    QList<LineSegmentItem> vec;
     vec.reserve(curItemCount + 1);
 
     db_id lastStationId = 0;

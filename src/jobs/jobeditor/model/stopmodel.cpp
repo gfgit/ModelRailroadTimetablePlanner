@@ -378,7 +378,7 @@ bool StopModel::commitChanges()
     if (category != oldCategory || mJobId != oldJobId)
     {
         // When category or job number changes, inform all stations
-        for (const StopItem &item : qAsConst(stops))
+        for (const StopItem &item : std::as_const(stops))
         {
             if (item.stationId)
                 stationsToUpdate.insert(item.stationId);

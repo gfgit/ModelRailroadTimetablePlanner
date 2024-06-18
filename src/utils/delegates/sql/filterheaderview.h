@@ -21,7 +21,7 @@
 #define FILTERHEADERVIEW_H
 
 #include <QHeaderView>
-#include <QVector>
+#include <QList>
 
 class QTableView;
 class FilterHeaderLineEdit;
@@ -69,7 +69,7 @@ private slots:
     void showColumnTooltip(FilterHeaderLineEdit *w, const QPoint &globalPos);
 
 private:
-    QVector<FilterHeaderLineEdit *> filterWidgets;
+    QList<FilterHeaderLineEdit *> filterWidgets;
 };
 
 #endif // FILTERHEADERVIEW_H

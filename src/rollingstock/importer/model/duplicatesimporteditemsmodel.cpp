@@ -33,7 +33,7 @@
 class DuplicatesImportedItemsModelTask : public IQuittableTask
 {
 public:
-    QVector<DuplicatesImportedItemsModel::DuplicatedItem> items;
+    QList<DuplicatesImportedItemsModel::DuplicatedItem> items;
     ModelModes::Mode m_mode;
 
     inline DuplicatesImportedItemsModelTask(sqlite3pp::database &db, ModelModes::Mode mode,

@@ -23,7 +23,7 @@
 #include <QAbstractTableModel>
 #include "printing/helper/model/igraphscenecollection.h"
 
-#include <QVector>
+#include <QList>
 
 #include "utils/types.h"
 #include "graph/linegraphtypes.h"
@@ -104,7 +104,7 @@ private:
     sqlite3pp::database &mDb;
     sqlite3pp::query mQuery;
 
-    QVector<Entry> entries;
+    QList<Entry> entries;
     LineGraphType selectedType;
     SelectionMode selectionMode;
 

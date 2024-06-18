@@ -175,7 +175,7 @@ QVariant StationTracksModel::data(const QModelIndex &idx, int role) const
         case PassengerLegthCol:
         case FreightLengthCol:
         case MaxAxesCol:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         }
         break;
     }
@@ -578,7 +578,7 @@ void StationTracksModel::internalFetch(int first, int sortCol, int valRow, const
     //        }
     //    }
 
-    QVector<TrackItem> vec(BatchSize);
+    QList<TrackItem> vec(BatchSize);
 
     auto it               = q.begin();
     const auto end        = q.end();

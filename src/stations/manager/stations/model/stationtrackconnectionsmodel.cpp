@@ -141,7 +141,7 @@ QVariant StationTrackConnectionsModel::data(const QModelIndex &idx, int role) co
         {
         case TrackCol:
         case GateTrackCol:
-            return Qt::AlignRight + Qt::AlignVCenter;
+            return QVariant::fromValue(Qt::AlignRight | Qt::AlignVCenter);
         case GateCol:
             return Qt::AlignCenter;
         }
@@ -573,7 +573,7 @@ void StationTrackConnectionsModel::internalFetch(int first, int sortCol, int val
     //        }
     //    }
 
-    QVector<TrackConnItem> vec(BatchSize);
+    QList<TrackConnItem> vec(BatchSize);
 
     auto it             = q.begin();
     const auto end      = q.end();

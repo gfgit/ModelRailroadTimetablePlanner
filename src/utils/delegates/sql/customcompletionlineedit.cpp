@@ -68,8 +68,19 @@ CustomCompletionLineEdit::~CustomCompletionLineEdit()
     delete popup;
 }
 
-void CustomCompletionLineEdit::showPopup()
+void CustomCompletionLineEdit::showPopup(bool showAlsoIfTextEmpty)
 {
+    if(!showAlsoIfTextEmpty && text().isEmpty())
+    {
+        if(popup->isVisible())
+        {
+            popup->hide();
+            if (model)
+                model->clearCache();
+        }
+        return;
+    }
+
     if (isReadOnly() || popup->isVisible())
         return;
 

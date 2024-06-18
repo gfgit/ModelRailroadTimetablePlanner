@@ -21,7 +21,7 @@
 #define SHIFTCOMBOMODEL_H
 
 #include "utils/delegates/sql/isqlfkmatchmodel.h"
-#include <QVector>
+#include <QList>
 
 #include "shifts/shiftitem.h"
 

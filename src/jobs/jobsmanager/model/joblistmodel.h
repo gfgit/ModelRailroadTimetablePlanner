@@ -96,7 +96,7 @@ public:
         return item.jobId;
     }
 
-    inline QPair<db_id, JobCategory> getShiftAnCatAtRow(int row) const
+    inline std::pair<db_id, JobCategory> getShiftAnCatAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
             return {0, JobCategory::NCategories}; // Invalid
@@ -105,7 +105,7 @@ public:
         return {item.shiftId, item.category};
     }
 
-    inline QPair<QTime, QTime> getOrigAndDestTimeAtRow(int row) const
+    inline std::pair<QTime, QTime> getOrigAndDestTimeAtRow(int row) const
     {
         if (row < cacheFirstRow || row >= cacheFirstRow + cache.size())
             return {}; // Invalid

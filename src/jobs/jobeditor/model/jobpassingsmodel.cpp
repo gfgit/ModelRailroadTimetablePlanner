@@ -105,7 +105,7 @@ QVariant JobPassingsModel::data(const QModelIndex &idx, int role) const
     return QVariant();
 }
 
-void JobPassingsModel::setJobs(const QVector<JobPassingsModel::Entry> &vec)
+void JobPassingsModel::setJobs(const QList<JobPassingsModel::Entry> &vec)
 {
     beginResetModel();
     m_data = vec;

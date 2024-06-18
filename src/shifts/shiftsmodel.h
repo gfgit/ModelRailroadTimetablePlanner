@@ -24,7 +24,7 @@
 
 #include "utils/types.h"
 
-#include <QVector>
+#include <QList>
 
 struct ShiftsModelItem
 {
@@ -107,7 +107,7 @@ protected:
 private:
     friend BaseClass;
     Q_INVOKABLE void internalFetch(int first, int sortColumn, int valRow, const QVariant &val);
-    void handleResult(const QVector<ShiftItem> items, int firstRow);
+    void handleResult(const QList<ShiftItem> items, int firstRow);
 
 private:
     QString m_nameFilter;
