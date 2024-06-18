@@ -30,13 +30,14 @@ CMake Minimum Version: **3.5**
   >`sudo apt install build-essential cmake`
 
 - Install Qt 5:
-  >`sudo apt install qtbase5-dev libqt5svg5-dev qttools5-dev qttools5-dev-tools`
+  >`sudo apt install qt6-base-dev qt6-svg-dev qt6-base-tools qt6-base-dev-tools`
 
 - Install SQLite 3
   >`sudo apt install libsqlite3-dev`
 
 - Install libzip
   >`sudo apt install libzip-dev`
+  > NOTE: you might also need `zipcmp`, `zipmerge` and `ziptool` depending on package dependencies
 
 - Install zlib
   > NOTE: automatically installed if installing libzip
@@ -47,9 +48,9 @@ CMake Minimum Version: **3.5**
 ## Windows
 
 ### Setup Qt
-> Set `QT5_DIR` CMake variable:  
-> Set to the folder which contains `Qt5Config.cmake` file  
-> Example: `C:\Qt\5.15.2\mingw81_64\lib\cmake\Qt5`
+> Set `QT6_DIR` CMake variable:  
+> Set to the folder which contains `Qt6Config.cmake` file  
+> Example: `C:\Qt\6.2\mingw81_64\lib\cmake\Qt6`
 
 ### Setup libzip
 If compiled from source `libzip` should generate CMake config package files  
