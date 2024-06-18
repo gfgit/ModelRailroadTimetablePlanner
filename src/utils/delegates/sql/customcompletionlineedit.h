@@ -35,7 +35,7 @@ public:
     CustomCompletionLineEdit(ISqlFKMatchModel *m, QWidget *parent = nullptr);
     ~CustomCompletionLineEdit();
 
-    void showPopup();
+    void showPopup(bool showAlsoIfEmpty = false);
 
     bool getData(db_id &idOut, QString &nameOut) const;
 

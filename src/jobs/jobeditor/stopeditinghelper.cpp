@@ -185,7 +185,7 @@ void StopEditingHelper::popupSegmentCombo()
     }
 
     // We have multiple segments, let the user choose
-    mOutGateEdit->showPopup();
+    mOutGateEdit->showPopup(true);
 }
 
 QString StopEditingHelper::getGateString(db_id gateId, bool reversed)
