@@ -126,7 +126,7 @@ void LineGraphManager::unregisterScene(LineGraphScene *scene)
 
 void LineGraphManager::clearAllGraphs()
 {
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         scene->loadGraph(0, LineGraphType::NoGraph, true);
     }
@@ -134,7 +134,7 @@ void LineGraphManager::clearAllGraphs()
 
 void LineGraphManager::clearGraphsOfObject(db_id objectId, LineGraphType type)
 {
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->getGraphObjectId() == objectId && scene->getGraphType() == type)
             scene->loadGraph(0, LineGraphType::NoGraph);
@@ -170,7 +170,7 @@ void LineGraphManager::processPendingUpdates()
     QElapsedTimer timer;
     timer.start();
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (timer.elapsed() > MAX_UPDATE_TIME_MS)
         {
@@ -289,7 +289,7 @@ void LineGraphManager::onJobSelected(db_id jobId, int category, db_id stopId)
     if (AppSettings.getSyncSelectionOnAllGraphs())
     {
         // Sync selection among all registered scenes
-        for (LineGraphScene *scene : qAsConst(scenes))
+        for (LineGraphScene *scene : std::as_const(scenes))
         {
             scene->setSelectedJob(lastSelectedJob);
         }
@@ -310,7 +310,7 @@ void LineGraphManager::onStationNameChanged(db_id stationId)
 {
     bool found = false;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
             continue; // Already flagged
@@ -348,7 +348,7 @@ void LineGraphManager::onSegmentNameChanged(db_id segmentId)
 {
     QString segName;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
             continue; // Already flagged
@@ -380,14 +380,14 @@ void LineGraphManager::onSegmentStationsChanged(db_id segmentId)
 {
     bool found = false;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
             continue; // Already flagged
 
         if (scene->graphType == LineGraphType::RailwayLine)
         {
-            for (const auto &stPos : qAsConst(scene->stationPositions))
+            for (const auto &stPos : std::as_const(scene->stationPositions))
             {
                 if (stPos.segmentId == segmentId)
                 {
@@ -422,7 +422,7 @@ void LineGraphManager::onLineNameChanged(db_id lineId)
 {
     QString lineName;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
             continue; // Already flagged
@@ -454,7 +454,7 @@ void LineGraphManager::onLineSegmentsChanged(db_id lineId)
 {
     bool found = false;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload))
             continue; // Already flagged
@@ -505,7 +505,7 @@ void LineGraphManager::onJobChanged(db_id jobId, db_id oldJobId)
     else
     {
         // Manually update all scenes
-        for (LineGraphScene *scene : qAsConst(scenes))
+        for (LineGraphScene *scene : std::as_const(scenes))
         {
             JobStopEntry oldSelectedJob = scene->getSelectedJob();
             if (oldSelectedJob.jobId == oldJobId)
@@ -527,7 +527,7 @@ void LineGraphManager::onJobRemoved(db_id jobId)
 
     bool found = false;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload)
             || scene->pendingUpdate.testFlag(PendingUpdate(PendingUpdate::ReloadJobs)))
@@ -559,7 +559,7 @@ void LineGraphManager::updateGraphOptions()
     Session->jobLineWidth   = AppSettings.getJobLineWidth();
 
     // Reload all graphs
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         scene->reload();
     }
@@ -570,7 +570,7 @@ void LineGraphManager::updateGraphOptions()
     if (m_followJobOnGraphChange != oldVal)
     {
         // Update connections
-        for (LineGraphScene *scene : qAsConst(scenes))
+        for (LineGraphScene *scene : std::as_const(scenes))
         {
             if (m_followJobOnGraphChange)
                 connect(scene, &LineGraphScene::graphChanged, this,
@@ -586,7 +586,7 @@ void LineGraphManager::onStationPlanChanged_internal(const QSet<db_id> &stationI
 {
     bool found = false;
 
-    for (LineGraphScene *scene : qAsConst(scenes))
+    for (LineGraphScene *scene : std::as_const(scenes))
     {
         if (scene->pendingUpdate.testFlag(PendingUpdate::FullReload)
             || scene->pendingUpdate.testFlag(PendingUpdate(flag)))

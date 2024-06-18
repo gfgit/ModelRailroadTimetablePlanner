@@ -92,7 +92,7 @@ bool SceneSelectionModel::addEntry(const Entry &entry)
     if (selectionMode == AllOfTypeExceptSelected && entry.type != selectedType)
         return false; // Not the right type
 
-    for (const Entry &e : qAsConst(entries))
+    for (const Entry &e : std::as_const(entries))
     {
         if (e.objectId == entry.objectId && e.type == entry.type)
             return false; // Already added
@@ -301,7 +301,7 @@ SceneSelectionModel::Entry SceneSelectionModel::getNextEntry()
             entry.objectId = mQuery.getRows().get<db_id>(0);
 
             bool exclude   = false;
-            for (const Entry &e : qAsConst(entries))
+            for (const Entry &e : std::as_const(entries))
             {
                 if (e.objectId == entry.objectId)
                 {

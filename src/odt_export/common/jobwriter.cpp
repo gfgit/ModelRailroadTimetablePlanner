@@ -927,7 +927,7 @@ void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
     }
 
     bool firstRow = true;
-    for (auto &s : qAsConst(stopsRS))
+    for (auto &s : std::as_const(stopsRS))
     {
         xml.writeStartElement("table:table-row"); // start new row
 

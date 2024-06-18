@@ -747,7 +747,7 @@ bool MeetingSession::releaseAllSavepoints()
     if (!m_Db.db())
         return false;
 
-    for (const QString &point : qAsConst(savepointList))
+    for (const QString &point : std::as_const(savepointList))
     {
         if (!releaseSavepoint(point))
             return false;
@@ -762,7 +762,7 @@ bool MeetingSession::releaseAllSavepoints()
 
 bool MeetingSession::revertAll()
 {
-    for (const QString &point : qAsConst(savepointList))
+    for (const QString &point : std::as_const(savepointList))
     {
         if (!revertToSavepoint(point))
             return false;

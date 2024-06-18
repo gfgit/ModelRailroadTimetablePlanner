@@ -274,7 +274,7 @@ void ViewManager::onJobRemoved(db_id jobId)
     closeJobRelatedViewsHelper();
 
     // Reload station plans
-    for (auto st : qAsConst(stPlanHash))
+    for (auto st : std::as_const(stPlanHash))
     {
         st->clearJobs();
         st->update();

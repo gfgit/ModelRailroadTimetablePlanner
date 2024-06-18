@@ -404,7 +404,7 @@ void showTrackMsgBox(const StationSVGJobStops::Stop &stop, ssplib::StationPlan *
       StationSVGPlanDlg::tr("Job %1", "Message box title on double click").arg(jobName));
 
     QString platformName;
-    for (const ssplib::TrackItem &track : qAsConst(plan->platforms))
+    for (const ssplib::TrackItem &track : std::as_const(plan->platforms))
     {
         if (track.itemId == stop.in_gate.trackId || track.itemId == stop.out_gate.trackId)
         {
@@ -453,7 +453,7 @@ void showTrackMsgBox(const StationSVGJobStops::Stop &stop, ssplib::StationPlan *
 
 void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString & /*name*/)
 {
-    for (const StationSVGJobStops::Stop &stop : qAsConst(m_station->stops))
+    for (const StationSVGJobStops::Stop &stop : std::as_const(m_station->stops))
     {
         if (stop.in_gate.trackId == trackId || stop.out_gate.trackId == trackId)
         {
@@ -466,7 +466,7 @@ void StationSVGPlanDlg::onTrackClicked(qint64 trackId, const QString & /*name*/)
 void StationSVGPlanDlg::onTrackConnClicked(qint64 connId, qint64 /*trackId*/, qint64 /*gateId*/,
                                            int /*gateTrackPos*/, int /*trackSide*/)
 {
-    for (const StationSVGJobStops::Stop &stop : qAsConst(m_station->stops))
+    for (const StationSVGJobStops::Stop &stop : std::as_const(m_station->stops))
     {
         if (stop.in_gate.connId == connId || stop.out_gate.connId == connId)
         {

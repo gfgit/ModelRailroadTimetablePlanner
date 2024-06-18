@@ -142,7 +142,7 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
 
     QRectF r             = rect;
 
-    for (auto st : qAsConst(scene->stations))
+    for (auto st : std::as_const(scene->stations))
     {
         const double left  = st.xPos + leftOffset;
         const double right = left + st.platforms.count() * platformOffset + stationOffset;
@@ -166,7 +166,7 @@ void BackgroundHelper::drawStationHeader(QPainter *painter, LineGraphScene *scen
         // We need to compensate the half stationOffset used to center station label
         double xPos = left + stationOffset / 2;
         labelRect.setWidth(platformOffset);
-        for (const StationGraphObject::PlatformGraph &platf : qAsConst(st.platforms))
+        for (const StationGraphObject::PlatformGraph &platf : std::as_const(st.platforms))
         {
             if (platf.platformType.testFlag(utils::StationTrackType::Electrified))
                 painter->setPen(electricPlatfPen);
@@ -205,7 +205,7 @@ void BackgroundHelper::drawStations(QPainter *painter, LineGraphScene *scene, co
     QPointF top(0, vertOffset);
     QPointF bottom(0, lastY);
 
-    for (const StationGraphObject &st : qAsConst(scene->stations))
+    for (const StationGraphObject &st : std::as_const(scene->stations))
     {
         const double left  = st.xPos;
         const double right = left + st.platforms.count() * platfOffset;
@@ -267,7 +267,7 @@ void BackgroundHelper::drawJobStops(QPainter *painter, LineGraphScene *scene, co
     JobCategory lastJobCategory = JobCategory::NCategories;
     QTextOption textOption(Qt::AlignTop | Qt::AlignLeft);
 
-    for (const StationGraphObject &st : qAsConst(scene->stations))
+    for (const StationGraphObject &st : std::as_const(scene->stations))
     {
         const double left  = st.xPos;
         const double right = left + st.platforms.count() * platfOffset;

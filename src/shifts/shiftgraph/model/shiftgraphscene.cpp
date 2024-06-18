@@ -105,7 +105,7 @@ void ShiftGraphScene::drawShifts(QPainter *painter, const QRectF &sceneRect)
     QPen textPen(Qt::black, 2);
 
     qreal y = vertOffset + rowSpaceOffset / 2;
-    for (const ShiftGraph &shift : qAsConst(m_shifts))
+    for (const ShiftGraph &shift : std::as_const(m_shifts))
     {
         const qreal top = y;
         qreal jobY      = top + shiftRowHeight / 2;
@@ -251,7 +251,7 @@ void ShiftGraphScene::drawShiftHeader(QPainter *painter, const QRectF &rect)
     labelRect.setHeight(shiftRowHeight);
 
     qreal y = vertOffset + rowSpaceOffset / 2;
-    for (const ShiftGraph &shift : qAsConst(m_shifts))
+    for (const ShiftGraph &shift : std::as_const(m_shifts))
     {
         const qreal top = y;
         qreal bottomY   = top + shiftRowHeight;

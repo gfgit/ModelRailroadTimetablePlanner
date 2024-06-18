@@ -595,10 +595,10 @@ bool StationSVGHelper::importTrackConnFromSVG(sqlite3pp::database &db, db_id sta
 
     QVector<ssplib::TrackConnectionInfo> existing;
 
-    for (const auto &conn : qAsConst(plan->trackConnections))
+    for (const auto &conn : std::as_const(plan->trackConnections))
     {
         bool alreadyAdded = false;
-        for (const auto &info : qAsConst(existing))
+        for (const auto &info : std::as_const(existing))
         {
             if (info.matchNames(conn.info))
             {

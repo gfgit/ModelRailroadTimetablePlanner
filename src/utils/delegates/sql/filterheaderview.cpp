@@ -216,14 +216,14 @@ void FilterHeaderView::showColumnTooltip(FilterHeaderLineEdit *w, const QPoint &
 
 void FilterHeaderView::clearFilters()
 {
-    for (FilterHeaderLineEdit *filterLineEdit : qAsConst(filterWidgets))
+    for (FilterHeaderLineEdit *filterLineEdit : std::as_const(filterWidgets))
         filterLineEdit->clear();
 }
 
 void FilterHeaderView::setFilter(int column, const QString &value)
 {
     Q_UNUSED(value)
-    for (FilterHeaderLineEdit *filterLineEdit : qAsConst(filterWidgets))
+    for (FilterHeaderLineEdit *filterLineEdit : std::as_const(filterWidgets))
     {
         if (filterLineEdit->getColumn() == column)
         {
@@ -245,7 +245,7 @@ void FilterHeaderView::updateSoring(int col)
 
 QString FilterHeaderView::filterValue(int column) const
 {
-    for (FilterHeaderLineEdit *filterLineEdit : qAsConst(filterWidgets))
+    for (FilterHeaderLineEdit *filterLineEdit : std::as_const(filterWidgets))
     {
         if (filterLineEdit->getColumn() == column)
         {

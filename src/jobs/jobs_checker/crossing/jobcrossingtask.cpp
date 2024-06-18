@@ -129,7 +129,7 @@ void JobCrossingTask::run()
     //    else
     //    {
     //        query q_getCat(mDb, "SELECT category FROM jobs WHERE id=?");
-    //        for(const db_id jobId : qAsConst(jobsToCheck))
+    //        for(const db_id jobId : std::as_const(jobsToCheck))
     //        {
     //            JobErrorList list;
     //            list.jobId = jobId;
