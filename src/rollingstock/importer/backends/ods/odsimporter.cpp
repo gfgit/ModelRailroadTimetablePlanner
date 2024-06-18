@@ -372,11 +372,11 @@ void ODSImporter::readRow(QXmlStreamReader &xml, QByteArray &model, qint64 &numb
 
                         // Convert to QString immidiately because xml reader changes buffer contents
                         // when reading next token
-                        QStringRef val = xml.text();
+                        QStringView val = xml.text();
                         cellEmpty      = val.isEmpty();
                         // qDebug() << "CELL:" << row << col << val;
 
-                        // Avoid allocating a QString copy of QStringRef, directly convert to
+                        // Avoid allocating a QString copy of QStringView, directly convert to
                         // QByteArray
                         if (oldCol < tableRSNumberCol && col >= tableRSNumberCol && val.size())
                         {

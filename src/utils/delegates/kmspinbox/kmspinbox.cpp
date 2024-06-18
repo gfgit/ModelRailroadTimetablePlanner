@@ -224,7 +224,7 @@ void KmSpinBox::setCurrentSection(int section)
 
 QString KmSpinBox::stripped(const QString &t, int *pos) const
 {
-    QStringRef text(&t);
+    QStringView text(t);
     if (specialValueText().size() == 0 || text != specialValueText())
     {
         int from     = 0;
