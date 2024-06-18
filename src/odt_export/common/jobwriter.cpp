@@ -568,7 +568,7 @@ void JobWriter::writeJob(QXmlStreamWriter &xml, db_id jobId, JobCategory jobCat)
                            " LEFT JOIN rs_models ON rs_models.id=rs_list.model_id"
                            " WHERE rs_list.id=?");
 
-    QList<QPair<QString, QList<db_id>>> stopsRS;
+    QList<std::pair<QString, QList<db_id>>> stopsRS;
 
     // Title
     xml.writeStartElement("text:p");
