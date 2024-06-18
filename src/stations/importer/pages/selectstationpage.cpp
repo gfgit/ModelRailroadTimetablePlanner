@@ -20,6 +20,8 @@
 #include "selectstationpage.h"
 #include "../stationimportwizard.h"
 
+#include <QIODevice>
+
 #include <QVBoxLayout>
 #include <QToolBar>
 #include <QTableView>
