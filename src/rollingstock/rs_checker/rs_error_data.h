@@ -83,7 +83,7 @@ struct RSErrorMap
     {
         if (row >= topLevelCount())
             return nullptr;
-        return &(map.constBegin() + row).value();
+        return &std::next(map.constBegin(), row).value();
     }
 
     inline const RSErrorList *getParent(RSErrorData *child) const
