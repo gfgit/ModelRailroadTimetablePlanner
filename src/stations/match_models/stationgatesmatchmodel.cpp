@@ -178,7 +178,7 @@ void StationGatesMatchModel::refreshData()
         items[i].gateId        = track.get<db_id>(0);
         items[i].outTrackCount = track.get<int>(1);
         items[i].type          = utils::GateType(track.get<int>(2));
-        items[i].gateLetter    = sqlite3_column_text(q_getMatches.stmt(), 3)[0];
+        items[i].gateLetter    = QChar(sqlite3_column_text(q_getMatches.stmt(), 3)[0]);
         items[i].side          = utils::Side(track.get<int>(4));
 
         if (m_markConnectedGates)

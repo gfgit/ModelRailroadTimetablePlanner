@@ -364,11 +364,11 @@ void RailwaySegmentsModel::internalFetch(int first, int sortCol, int valRow, con
         item.toStationId         = r.get<db_id>(6);
 
         item.fromGateId          = r.get<db_id>(7);
-        item.fromGateLetter      = sqlite3_column_text(q.stmt(), 8)[0];
+        item.fromGateLetter      = QChar(sqlite3_column_text(q.stmt(), 8)[0]);
         item.fromStationName     = r.get<QString>(9);
 
         item.toGateId            = r.get<db_id>(10);
-        item.toGateLetter        = sqlite3_column_text(q.stmt(), 11)[0];
+        item.toGateLetter        = QChar(sqlite3_column_text(q.stmt(), 11)[0]);
         item.toStationName       = r.get<QString>(12);
         item.reversed            = false;
 
