@@ -109,8 +109,7 @@ void OpenFileInFolderDlg::setFilePath(const QString &newFilePath)
     QPixmap pix;
     if (!fileIcon.isNull())
     {
-        QWindow *window = nativeParentWidget() ? nativeParentWidget()->windowHandle() : nullptr;
-        pix             = fileIcon.pixmap(window, QSize(iconSize, iconSize));
+        pix = fileIcon.pixmap(QSize(iconSize, iconSize));
     }
 
     mIconLabel->setPixmap(pix);
