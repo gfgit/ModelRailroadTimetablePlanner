@@ -88,7 +88,7 @@ int LanguageModel::findMatchingRow(const QLocale &loc)
         {
             partialMatchIdx = i;
 
-            if (item.country() == loc.country())
+            if (item.territory() == loc.territory())
             {
                 exactMatchIdx = i;
                 break;
