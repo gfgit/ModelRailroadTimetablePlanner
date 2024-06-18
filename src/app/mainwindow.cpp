@@ -318,11 +318,11 @@ void MainWindow::onOpen()
 #ifdef ENABLE_BACKGROUND_MANAGER
     if (Session->getBackgroundManager()->isRunning())
     {
-        int ret = QMessageBox::warning(
-          this, tr("Backgroung Task"),
-          tr("Background task for checking rollingstock errors is still running.\n"
-             "Do you want to cancel it?"),
-          QMessageBox::Yes, QMessageBox::No, QMessageBox::Yes);
+        QMessageBox::StandardButton ret = QMessageBox::warning(
+                    this, tr("Backgroung Task"),
+                    tr("Background task for checking rollingstock errors is still running.\n"
+                       "Do you want to cancel it?"),
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
         if (ret == QMessageBox::Yes)
             Session->getBackgroundManager()->abortAllTasks();
         else
@@ -540,11 +540,11 @@ void MainWindow::onNew()
 #ifdef ENABLE_BACKGROUND_MANAGER
     if (Session->getBackgroundManager()->isRunning())
     {
-        int ret = QMessageBox::warning(
-          this, tr("Backgroung Task"),
-          tr("Background task for checking rollingstock errors is still running.\n"
-             "Do you want to cancel it?"),
-          QMessageBox::Yes, QMessageBox::No, QMessageBox::Yes);
+        QMessageBox::StandardButton ret = QMessageBox::warning(
+                    this, tr("Backgroung Task"),
+                    tr("Background task for checking rollingstock errors is still running.\n"
+                       "Do you want to cancel it?"),
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
         if (ret == QMessageBox::Yes)
             Session->getBackgroundManager()->abortAllTasks();
         else
